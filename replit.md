@@ -1,0 +1,111 @@
+# PIU Monitoring & Evaluation System
+
+## Overview
+
+This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluation System built using Flask. The system provides a web-based platform for tracking project progress, monitoring activities, managing performance indicators, and generating reports. It's designed to support organizational excellence through effective project management and evaluation.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: Bootstrap 5 with dark theme
+- **CSS Framework**: Custom CSS with Bootstrap overrides
+- **JavaScript**: Vanilla JavaScript with Chart.js for data visualization
+- **Template Engine**: Jinja2 templates with Flask
+- **UI Components**: Responsive design with cards, tables, forms, and charts
+
+### Backend Architecture
+- **Framework**: Flask (Python web framework)
+- **Database ORM**: SQLAlchemy with Flask-SQLAlchemy
+- **Forms**: Flask-WTF for form handling and validation
+- **File Handling**: Werkzeug for secure file uploads
+- **Session Management**: Flask session with configurable secret key
+
+### Data Storage
+- **Primary Database**: SQLite (development) with PostgreSQL support
+- **File Storage**: Local file system for document uploads
+- **Connection Pooling**: Configured with pool_recycle and pool_pre_ping
+
+## Key Components
+
+### Core Models
+1. **Project**: Main entity representing PIU projects
+2. **Activity**: Project activities with progress tracking
+3. **Indicator**: Performance indicators (Input, Output, Outcome, Impact)
+4. **Document**: File attachments and documentation
+
+### Main Features
+- **Dashboard**: Real-time analytics with charts and summary cards
+- **Project Management**: CRUD operations for projects with status tracking
+- **Activity Tracking**: Monitor project activities with progress and budget
+- **Performance Indicators**: Track KPIs across different categories
+- **Document Management**: Upload and organize project documents
+- **Reporting**: Generate project reports and analytics
+
+### Module Structure
+The PIUN directory contains specialized modules:
+- Issues & Actions Monitoring
+- NAWEC KPI Management
+- PIU Financial Management
+- Project Site Mapping
+- Project Documentation Tracking
+- Accounts Management
+- Social & Environmental Monitoring
+
+## Data Flow
+
+1. **User Access**: Users interact through web interface
+2. **Form Submission**: Data validated through Flask-WTF forms
+3. **Database Operations**: SQLAlchemy ORM handles data persistence
+4. **File Management**: Secure file uploads to designated folder
+5. **Data Visualization**: Chart.js renders dashboard analytics
+6. **Report Generation**: System generates PDF/Excel reports
+
+## External Dependencies
+
+### Python Packages
+- Flask: Web framework
+- SQLAlchemy: Database ORM
+- Flask-WTF: Form handling
+- Werkzeug: WSGI utilities
+- Chart.js: Client-side charting
+
+### Frontend Libraries
+- Bootstrap 5: UI framework
+- Font Awesome: Icons
+- Chart.js: Data visualization
+- Custom CSS: Theme customization
+
+### Infrastructure
+- SQLite/PostgreSQL: Database storage
+- File system: Document storage
+- Session management: User state
+
+## Deployment Strategy
+
+### Development Environment
+- Debug mode enabled
+- SQLite database for development
+- Local file uploads
+- Hot reload for development
+
+### Production Considerations
+- Environment variables for configuration
+- Database URL configuration
+- Secure session keys
+- Proxy fix for reverse proxy deployment
+- File upload size limits (16MB)
+- Connection pooling for database efficiency
+
+### Configuration
+- Database URI: Configurable via DATABASE_URL environment variable
+- Session Secret: Configurable via SESSION_SECRET environment variable
+- Upload folder: Configurable upload directory
+- Debug mode: Controlled via Flask debug setting
+
+## Changelog
+
+- July 07, 2025. Initial setup
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.

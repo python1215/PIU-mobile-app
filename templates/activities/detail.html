@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{{ activity.name }} - PIU M&E System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-tasks me-2"></i>{{ activity.name }}
+        <small class="text-muted">/ {{ activity.project.name }}</small>
+    </h1>
+    <div class="btn-group">
+        <a href="{{ url_for('edit_activity', id=activity.id) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i>Edit Activity
+        </a>
+        <a href="{{ url_for('project_detail', id=activity.project.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Project
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Activity Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> 
+                            <span class="badge bg-{{ 'success' if activity.status == 'Completed' else 'primary' if activity.status == 'In Progress' else 'warning' if activity.status == 'Not Started' else 'danger' }}">
+                                {{ activity.status }}
+                            </span>
+                        </p>
+                        <p><strong>Start Date:</strong> {{ activity.start_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>End Date:</strong> {{ activity.end_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Responsible Person:</strong> {{ activity.responsible_person or 'Not assigned' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Progress:</strong> {{ "%.1f"|format(activity.progress_percentage) }}%</p>
+                        <p><strong>Budget Allocated:</strong> 
+                            {% if activity.budget_allocated %}
+                                ${{ "{:,.2f}".format(activity.budget_allocated) }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </p>
+                        <p><strong>Budget Spent:</strong> 
+                            {% if activity.budget_spent %}
+                                ${{ "{:,.2f}".format(activity.budget_spent) }}
+                            {% else %}
+                                $0.00
+                            {% endif %}
+                        </p>
+                        <p><strong>Created:</strong> {{ activity.created_at.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                </div>
+                
+                {% if activity.description %}
+                <div class="mt-3">
+                    <h6>Description:</h6>
+                    <p class="text-muted">{{ activity.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Progress Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Activity Progress</label>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-{{ 'success' if activity.progress_percentage == 100 else 'primary' }}" 
+                             role="progressbar" style="width: {{ activity.progress_percentage }}%">
+                            {{ "%.1f"|format(activity.progress_percentage) }}%
+                        </div>
+                    </div>
+                </div>
+                
+                {% if activity.budget_allocated and activity.budget_allocated > 0 %}
+                <div class="mb-3">
+                    <label class="form-label">Budget Utilization</label>
+                    {% set budget_util = (activity.budget_spent / activity.budget_allocated) * 100 if activity.budget_spent and activity.budget_allocated > 0 else 0 %}
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-{{ 'danger' if budget_util > 100 else 'warning' if budget_util > 80 else 'success' }}" 
+                             role="progressbar" style="width: {{ budget_util }}%">
+                            {{ "%.1f"|format(budget_util) }}%
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row text-center mt-4">
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h6 class="text-muted mb-0">Days Remaining</h6>
+                            {% set days_remaining = (activity.end_date - activity.start_date).days %}
+                            <h4 class="text-{{ 'success' if days_remaining > 30 else 'warning' if days_remaining > 7 else 'danger' }}">
+                                {{ days_remaining }}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h6 class="text-muted mb-0">Project</h6>
+                            <h4 class="text-primary">
+                                <a href="{{ url_for('project_detail', id=activity.project.id) }}" class="text-decoration-none">
+                                    <i class="fas fa-folder"></i>
+                                </a>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}{% if activity %}Edit Activity{% else %}Create Activity{% endif %} - PIU M&E System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-{% if activity %}edit{% else %}plus{% endif %} me-2"></i>
+        {% if activity %}Edit Activity{% else %}Create New Activity{% endif %}
+        <small class="text-muted">/ {{ project.name }}</small>
+    </h1>
+    <div>
+        {% if activity %}
+            <a href="{{ url_for('activity_detail', id=activity.id) }}" class="btn btn-secondary me-2">
+                <i class="fas fa-eye me-2"></i>View Activity
+            </a>
+        {% endif %}
+        <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Project
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Activity Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.status.label(class="form-label") }}
+                        {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                        {% if form.status.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.status.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4") }}
+                {% if form.description.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.start_date.label(class="form-label") }}
+                        {{ form.start_date(class="form-control" + (" is-invalid" if form.start_date.errors else "")) }}
+                        {% if form.start_date.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.start_date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.end_date.label(class="form-label") }}
+                        {{ form.end_date(class="form-control" + (" is-invalid" if form.end_date.errors else "")) }}
+                        {% if form.end_date.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.end_date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.progress_percentage.label(class="form-label") }}
+                        <div class="input-group">
+                            {{ form.progress_percentage(class="form-control" + (" is-invalid" if form.progress_percentage.errors else "")) }}
+                            <span class="input-group-text">%</span>
+                        </div>
+                        {% if form.progress_percentage.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.progress_percentage.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.budget_allocated.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.budget_allocated(class="form-control" + (" is-invalid" if form.budget_allocated.errors else "")) }}
+                        </div>
+                        {% if form.budget_allocated.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.budget_allocated.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.budget_spent.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.budget_spent(class="form-control" + (" is-invalid" if form.budget_spent.errors else "")) }}
+                        </div>
+                        {% if form.budget_spent.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.budget_spent.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                {{ form.responsible_person.label(class="form-label") }}
+                {{ form.responsible_person(class="form-control" + (" is-invalid" if form.responsible_person.errors else "")) }}
+                {% if form.responsible_person.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.responsible_person.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-secondary me-md-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>{% if activity %}Update Activity{% else %}Create Activity{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
