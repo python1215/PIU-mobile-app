@@ -21,9 +21,9 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 - **Session Management**: Flask session with configurable secret key
 
 ### Data Storage
-- **Primary Database**: SQLite (development) with PostgreSQL support
+- **Primary Database**: SQLite (development and production)
 - **File Storage**: Local file system for document uploads
-- **Connection Pooling**: Configured with pool_recycle and pool_pre_ping
+- **Database Management**: Django ORM with SQLite for simplicity and portability
 
 ## Key Components
 
@@ -76,7 +76,7 @@ The PIUN directory contains specialized modules:
 - Custom CSS: Theme customization
 
 ### Infrastructure
-- SQLite/PostgreSQL: Database storage
+- SQLite: Database storage
 - File system: Document storage
 - Session management: User state
 
@@ -90,11 +90,11 @@ The PIUN directory contains specialized modules:
 
 ### Production Considerations
 - Environment variables for configuration
-- Database URL configuration
+- SQLite database for simplicity
 - Secure session keys
 - Proxy fix for reverse proxy deployment
 - File upload size limits (16MB)
-- Connection pooling for database efficiency
+- Django ORM optimization for performance
 
 ### Configuration
 - Database URI: Configurable via DATABASE_URL environment variable
@@ -105,6 +105,7 @@ The PIUN directory contains specialized modules:
 ## Changelog
 
 - July 07, 2025. Initial setup
+- July 07, 2025. Converted from PostgreSQL to SQLite database for better portability and simplified deployment
 
 ## User Preferences
 
