@@ -25,16 +25,16 @@ def main_dashboard(request):
     """
     context = {
         # Basic statistics - only count if models exist
-        'total_projects': Project.objects.count() if Project else 0,
-        'total_esia': ESIA.objects.count() if ESIA else 0,
-        'total_pap': PAP.objects.count() if PAP else 0,
-        'total_sites': projectMapping.objects.count() if projectMapping else 0,
+        'total_projects': Project.objects.count(),
+        'total_esia': ESIA.objects.count(),
+        'total_pap': PAP.objects.count(),
+        'total_sites': projectMapping.objects.count(),
         'total_grievances': GrievianceMonitoringLog.objects.count() if GrievianceMonitoringLog else 0,
         'total_ohs': OHS_Monitoring.objects.count() if OHS_Monitoring else 0,
         'total_community': CommunityConsult_Engagement.objects.count() if CommunityConsult_Engagement else 0,
         
         # Recent activity - using safe field references
-        'recent_projects': Project.objects.order_by('-date')[:5] if Project else [],
+        'recent_projects': Project.objects.order_by('-date')[:5],
         'recent_esia': ESIA.objects.order_by('-date_created')[:5] if ESIA else [],
         'recent_pap': PAP.objects.order_by('-date_created')[:5] if PAP else [],
         
