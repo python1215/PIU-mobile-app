@@ -6,39 +6,42 @@
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
-
-<div class="hero min-h-screen bg-gradient-to-br from-primary to-secondary">
-  <div class="hero-content flex-col lg:flex-row-reverse max-w-4xl">
-    
-    <!-- Right Side - Branding -->
-    <div class="text-center lg:text-left lg:ml-8">
-      <div class="avatar placeholder mb-6 lg:hidden">
-        <div class="bg-base-100 text-primary rounded-full w-20">
-          <i class="bi bi-building text-4xl"></i>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow">
+        <div class="card-header text-center">
+          <h3>{% trans "Sign In" %}</h3>
+        </div>
+        <div class="card-body">
+          <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="{{ form.login.id_for_label }}" class="form-label">{{ form.login.label }}</label>
+              {{ form.login|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+              {{ form.password|add_class:"form-control" }}
+            </div>
+            {% if form.remember %}
+            <div class="mb-3 form-check">
+              {{ form.remember|add_class:"form-check-input" }}
+              <label for="{{ form.remember.id_for_label }}" class="form-check-label">{{ form.remember.label }}</label>
+            </div>
+            {% endif %}
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+            </div>
+          </form>
+          <div class="text-center mt-3">
+            <p><a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></p>
+          </div>
         </div>
       </div>
-      
-      <h1 class="text-5xl font-bold text-white mb-4">NAWEC PIU</h1>
-      <p class="text-xl text-base-100 mb-6">Project Implementation Unit M&E System</p>
-    </br>
-      
-      <div class="hidden lg:block">
-        <div class="avatar placeholder mb-6">
-          <div class="bg-base-100 text-primary rounded-full w-32">
-            <i class="bi bi-building text-6xl"></i>
-          </div>
-        </div>
-        
-        <div class="stats stats-vertical shadow bg-base-100/10 backdrop-blur">
-          <div class="stat">
-            <div class="stat-figure text-primary">
-              <i class="bi bi-folder text-2xl"></i>
-            </div>
-       
-           
-          </div>
-          
-          <div class="stat">
+    </div>
+  </div>
+</div>
             <div class="stat-figure text-secondary">
               <i class="bi bi-geo-alt text-2xl"></i>
             </div>
