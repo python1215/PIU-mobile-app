@@ -197,6 +197,8 @@ class KPIPopupCore {
             resultDiv.style.display = 'none';
         }
         
+
+        
         // Clear stored result
         delete this.calculationResults[config.key];
     }

@@ -27,6 +27,33 @@ class ModularKPIPopupManager {
     }
 
     /**
+     * Initialize with configurations
+     */
+    initialize(configurations) {
+        this.configurations = configurations;
+        console.log('ModularKPIPopupManager initialized with configurations:', Object.keys(configurations));
+    }
+
+    /**
+     * Open popup by KPI type (simplified interface)
+     */
+    openPopup(kpiType) {
+        console.log('Opening popup for KPI type:', kpiType);
+        
+        if (!this.configurations) {
+            this.configurations = window.KPIConfigurations || {};
+        }
+        
+        const config = this.configurations[kpiType];
+        if (config) {
+            return this.showPopup(config);
+        } else {
+            console.error('No configuration found for KPI type:', kpiType);
+            throw new Error(`No configuration found for KPI type: ${kpiType}`);
+        }
+    }
+
+    /**
      * Show popup (main entry point)
      */
     showPopup(config) {

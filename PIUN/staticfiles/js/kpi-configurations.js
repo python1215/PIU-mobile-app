@@ -13,48 +13,20 @@ const KPIConfigurations = {
         unit: '%',
         fields: [
             {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
+                id: 'net_profit_after_tax',
                 name: 'net_profit_after_tax',
                 label: 'Net Profit After Tax',
                 placeholder: 'Enter net profit after tax',
                 step: '0.01',
-                unit: 'GMD'
+                required: true
             },
             {
+                id: 'total_assets',
                 name: 'total_assets',
                 label: 'Total Assets',
                 placeholder: 'Enter total assets value',
                 step: '0.01',
-                unit: 'GMD'
+                required: true
             },
             {
                 name: 'quarter',
@@ -69,7 +41,20 @@ const KPIConfigurations = {
             }
         ],
         calculateFunction: (values) => {
-            return (values.net_profit_after_tax / values.total_assets) * 100;
+            console.log('ROA calculation called with values:', values);
+            const netProfit = parseFloat(values.net_profit_after_tax);
+            const totalAssets = parseFloat(values.total_assets);
+            
+            console.log('Parsed values - netProfit:', netProfit, 'totalAssets:', totalAssets);
+            
+            if (isNaN(netProfit) || isNaN(totalAssets) || totalAssets === 0) {
+                console.error('Invalid values for ROA calculation');
+                return NaN;
+            }
+            
+            const result = (netProfit / totalAssets) * 100;
+            console.log('ROA calculation result:', result);
+            return result;
         }
     },
 
@@ -84,14 +69,12 @@ const KPIConfigurations = {
                 name: 'total_revenues_turnover',
                 label: 'Total Revenue/Turnover',
                 placeholder: 'Enter total revenue or turnover',
-                step: '0.01'
-            },
+                step: '0.01'},
             {
                 name: 'netprofit',
                 label: 'Net Profit',
                 placeholder: 'Enter net profit amount',
-                step: '0.01'
-            },
+                step: '0.01'},
             {
                 name: 'quarter',
                 label: 'Quarter',
@@ -121,49 +104,15 @@ const KPIConfigurations = {
         unit: 'ratio',
         fields: [
             {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
                 name: 'net_operating_income',
                 label: 'Net Operating Income',
                 placeholder: 'Enter net operating income',
-                step: '0.01',
-                unit: 'GMD'
-            },
+                step: '0.01'},
             {
                 name: 'total_debt_service',
                 label: 'Total Debt Service',
                 placeholder: 'Enter total debt service',
-                step: '0.01',
-                unit: 'GMD'
-            },
+                step: '0.01'},
             {
                 name: 'quarter',
                 label: 'Quarter',
@@ -189,36 +138,6 @@ const KPIConfigurations = {
         formula: 'E_total = Σ(Power × Time) for all sources',
         unit: 'MWh',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
             {
                 name: 'power_injected',
                 label: 'Power Injected',
@@ -266,36 +185,6 @@ const KPIConfigurations = {
         unit: '%',
         fields: [
             {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
                 name: 'total_available_hours',
                 label: 'Total Available Hours',
                 placeholder: 'Enter total available hours',
@@ -335,36 +224,6 @@ const KPIConfigurations = {
         unit: 'days/employee',
         fields: [
             {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
                 name: 'total_training_days_conducted',
                 label: 'Total Training Days Conducted',
                 placeholder: 'Enter total training days conducted',
@@ -403,36 +262,6 @@ const KPIConfigurations = {
         formula: 'ATC = (1 - (Billing Efficiency × Collection Efficiency))/100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'billing_efficiency',
@@ -477,36 +306,6 @@ const KPIConfigurations = {
         formula: 'NECD = Total Time (Days) ÷ Total New Connections',
         unit: 'days/connection',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'total_time_days',
@@ -547,36 +346,6 @@ const KPIConfigurations = {
         formula: 'NWCD = Total Time (Days) ÷ Total New Water Connections',
         unit: 'days/connection',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'total_time_days',
@@ -617,36 +386,6 @@ const KPIConfigurations = {
         formula: 'TPS = (On-time Payments ÷ Total Payments Due) × 100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'number_of_on_time_payments',
@@ -687,36 +426,6 @@ const KPIConfigurations = {
         formula: 'TTP = (Timely Tax Payments ÷ Total Tax Payments Due) × 100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'timely_tax_payments',
@@ -757,36 +466,6 @@ const KPIConfigurations = {
         formula: 'WQCC = (Compliant Samples ÷ Total Tested Samples) × 100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'number_of_compliant_water_samples',
@@ -827,36 +506,6 @@ const KPIConfigurations = {
         formula: 'WQCB = (Compliant Samples ÷ Total Tested Samples) × 100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'number_of_compliant_water_samples',
@@ -897,36 +546,6 @@ const KPIConfigurations = {
         formula: 'NRW = ((Water Entering System - Billed Consumption) ÷ Water Entering System) × 100',
         unit: '%',
         fields: [
-            {
-                name: 'baseline_value',
-                label: 'Baseline Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'End_Target_Value',
-                label: 'End Target Value',
-                placeholder: 'Auto-loaded from KPI indicator',
-                step: '0.01',
-                readonly: true
-            },
-            {
-                name: 'percentage_progress_from_baseline',
-                label: 'Progress from Baseline',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
-            {
-                name: 'percentage_progress_towards_end_target',
-                label: 'Progress to End Target',
-                placeholder: 'Auto-calculated progress %',
-                step: '0.01',
-                readonly: true,
-                unit: '%'
-            },
 
             {
                 name: 'water_entering_system',

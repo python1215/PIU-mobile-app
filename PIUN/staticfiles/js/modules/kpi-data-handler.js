@@ -12,26 +12,65 @@ class KPIDataHandler {
      * Use calculated result in the main form
      */
     async useResult(config) {
-        const result = this.popupCore.calculationResults[config.key];
+        console.log('KPI Data Handler - useResult called with config:', config);
         
-        if (result) {
-            // Save calculation to database
-            await this.saveCalculationToDatabase(config.key.toUpperCase(), result, config);
-            
-            const achievedField = document.getElementById('id_achieved_value');
-            if (achievedField) {
-                achievedField.value = result;
-                achievedField.style.backgroundColor = '#d4edda';
-                setTimeout(() => {
-                    achievedField.style.backgroundColor = '';
-                }, 2000);
+        // Check multiple sources for the calculated result
+        let result = null;
+        
+        if (this.popupCore && this.popupCore.calculationResults) {
+            result = this.popupCore.calculationResults[config.key];
+        }
+        
+        // Also check global result storage
+        if (!result && window.currentKPIResult) {
+            result = window.currentKPIResult.value;
+        }
+        
+        // Check for displayed result in the popup
+        if (!result) {
+            const resultElement = document.getElementById('resultValue');
+            if (resultElement && resultElement.textContent) {
+                result = parseFloat(resultElement.textContent);
+            }
+        }
+        
+        console.log('Found result:', result);
+        
+        if (result !== null && !isNaN(result)) {
+            try {
+                // Save calculation to database
+                await this.saveCalculationToDatabase(config.key.toUpperCase(), result, config);
                 
-                // Trigger automatic percentage calculation
-                if (typeof window.calculatePercentages === 'function') {
-                    window.calculatePercentages();
+                const achievedField = document.getElementById('id_achieved_value');
+                if (achievedField) {
+                    achievedField.value = result.toFixed(2);
+                    achievedField.style.backgroundColor = '#d4edda';
+                    achievedField.style.color = '#155724';
+                    
+                    setTimeout(() => {
+                        achievedField.style.backgroundColor = '';
+                        achievedField.style.color = '';
+                    }, 3000);
+                    
+                    // Set quarter if available
+                    const quarterField = document.getElementById('id_quarter');
+                    if (quarterField && window.currentKPIResult && window.currentKPIResult.quarter) {
+                        quarterField.value = window.currentKPIResult.quarter;
+                    }
+                    
+                    // Trigger automatic percentage calculation
+                    if (typeof window.calculatePercentages === 'function') {
+                        window.calculatePercentages();
+                    }
+                    
+                    this.popupCore.closePopup();
+                    
+                    // Show success message
+                    alert('KPI calculation result has been applied to the form!');
                 }
-                
-                this.popupCore.closePopup();
+            } catch (error) {
+                console.error('Error saving calculation:', error);
+                alert('Error saving calculation to database. Please try again.');
             }
         } else {
             alert(`Please calculate the ${config.resultName || 'value'} first.`);

@@ -87,7 +87,7 @@ INSTALLED_APPS = [
     'project_actions',
     'Project_Documentation_Tracking',
     'social_and_env',
-    'dashboard_recommendations',
+
     'NAWEC_KPI',
     'Issues_Actions_monitoring',
 ]
@@ -134,16 +134,16 @@ WSGI_APPLICATION = 'piu_project.wsgi.application'
 DATABASES = {
         'default': {
            
-            'ENGINE': 'mssql',
-            'NAME': 'piuprod',
-            'USER': 'nawec',
-            'PASSWORD': 'password',
-            'HOST': 'PGOMEZ\\PGOMEZ',
-            'PORT': '',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('PGDATABASE', 'piun_db'),
+            'USER': os.getenv('PGUSER', 'postgres'),
+            'PASSWORD': os.getenv('PGPASSWORD', ''),
+            'HOST': os.getenv('PGHOST', 'localhost'),
+            'PORT': os.getenv('PGPORT', '5432'),
 
             'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
-                #'sql_mode': 'STRICT_ALL_TABLES',
+                'sslmode': 'prefer',
+
             },
         },
     }

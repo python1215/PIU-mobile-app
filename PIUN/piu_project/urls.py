@@ -30,7 +30,7 @@ urlpatterns = [
     path('PIU_Financial_mgt/', include('PIU_Financial_mgt.urls', namespace='PIU_Financial_mgt')),
     path('project_actions/', include('project_actions.urls')),
     path('monitoring/', include('monitoring.urls')),
-    path('recommendations/', include('dashboard_recommendations.urls')),
+
     path('social_and_env/', include('social_and_env.urls')),
     path('PIU_Mapping_project_Sites/', include("PIU_Mapping_project_Sites.urls", namespace='PIU_Mapping_project_Sites')),
     path('Project_Documentation_Tracking/', include("Project_Documentation_Tracking.urls")),
