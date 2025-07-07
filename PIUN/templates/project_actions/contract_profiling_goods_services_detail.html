@@ -1,0 +1,236 @@
+{% extends 'project_actions/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background-color: #fdfdf5; min-height: 100vh; padding: 2rem 0;">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">{{ page_title }}</h4>
+                        <p class="text-muted mb-0">Contract Reference: {{ contract.contract_refNo }}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'main_dashboard' %}" class="btn btn-outline-info">
+                            <i class="bi bi-house-door me-1"></i>Dashboard
+                        </a>
+                        <a href="{% url 'project_actions:update-contract_profiling_goods_service' contract.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'project_actions:contract_profiling_goods_services_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Information -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contract Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Contract Reference No</label>
+                            <p class="fw-bold">{{ contract.contract_refNo|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Contract Value</label>
+                            <p class="fw-bold text-success">
+                                {{ contract.currency.currency_code|default:"USD" }} {{ contract.contract_value|floatformat:2|default:"0.00" }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Supplier Name</label>
+                            <p class="fw-bold">{{ contract.name_of_Supplier|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Consultant Name</label>
+                            <p class="fw-bold">{{ contract.name_of_consultant|default:"N/A" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Start Date</label>
+                            <p class="fw-bold">{{ contract.contract_start_date|date:"M d, Y"|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" style="color: #fff !important;">End Date</label>
+                            <p class="fw-bold">{{ contract.contract_end_date|date:"M d, Y"|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Duration</label>
+                            <p class="fw-bold">{{ contract.duration|default:"N/A" }} months</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label" style="color: #fff !important;">Remarks</label>
+                            <p>{{ contract.remarks|default:"No remarks" }}</p>
+                        </div>
+                    </div>
+
+                    {% if contract.amendments %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>This contract has amendments
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contract Status and Project Info -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Status & Project</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Contract Status</label>
+                        {% if contract_status == 'active' %}
+                            <span class="badge bg-success fs-6">Active</span>
+                        {% elif contract_status == 'completed' %}
+                            <span class="badge bg-secondary fs-6">Completed</span>
+                        {% elif contract_status == 'upcoming' %}
+                            <span class="badge bg-warning fs-6">Upcoming</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark fs-6">Unknown</span>
+                        {% endif %}
+                    </div>
+
+                    {% if contract.projectID %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Project</label>
+                        <p class="fw-bold">{{ contract.projectID.project|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if contract.compID %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Component</label>
+                        <p>{{ contract.compID.Project_Components|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if contract.subcompID %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Subcomponent</label>
+                        <p>{{ contract.subcompID.subcomponent|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if contract.activityID %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Activity</label>
+                        <p>{{ contract.activityID.activity|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if contract.project_Category %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Project Category</label>
+                        <p>{{ contract.project_Category.project_category|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if contract.funding_source %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Funding Source</label>
+                        <p>{{ contract.funding_source.donor|default:"N/A" }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if duration_days %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #fff !important;">Total Duration</label>
+                        <p>{{ duration_days }} days</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contract Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Monitoring Records</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h3 class="text-primary">{{ monitoring_count|default:0 }}</h3>
+                        <p class="text-muted">Monitoring Records</p>
+                        <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'project_actions:update-contract_profiling_goods_service' contract.pk %}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit Contract
+                        </a>
+                        <a href="{% url 'project_actions:contract_monitoring_create' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Add Monitoring Record
+                        </a>
+                        <a href="{% url 'project_actions:export_goods_services_contracts_excel' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-file-excel me-1"></i>Export Contract
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash me-1"></i>Delete Contract
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete contract <strong>{{ contract.contract_refNo }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'project_actions:delete-contract_profiling_goods_service' contract.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Contract</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

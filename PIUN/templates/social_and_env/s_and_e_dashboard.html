@@ -1,0 +1,251 @@
+{% extends 'social_and_env/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Dashboard - PIUN Social & Environmental{% endblock %}
+
+{% block social_env_content %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 mb-0">
+                    <i class="bi bi-speedometer2 me-3"></i>
+                    Social & Environmental Dashboard
+                </h1>
+                <p class="text-muted">Overview of all social and environmental activities</p>
+            </div>
+            <div>
+                <a href="{% url 'main_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-house me-2"></i>Back to Main Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-2">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-check display-4 mb-2"></i>
+                <h5 class="card-title">ESIA Records</h5>
+                <h2 class="mb-0">{{ esia_count }}</h2>
+            </div>
+            <div class="card-footer bg-primary-subtle">
+                <a href="{% url 'esia_list' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-2">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people display-4 mb-2"></i>
+                <h5 class="card-title">PAP Records</h5>
+                <h2 class="mb-0">{{ pap_count }}</h2>
+            </div>
+            <div class="card-footer bg-success-subtle">
+                <a href="{% url 'pap_list' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-2">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-triangle display-4 mb-2"></i>
+                <h5 class="card-title">Grievances</h5>
+                <h2 class="mb-0">{{ grievance_count }}</h2>
+            </div>
+            <div class="card-footer bg-warning-subtle">
+                <a href="{% url 'grievance_list' %}" class="btn btn-dark btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-2">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check display-4 mb-2"></i>
+                <h5 class="card-title">OHS Reports</h5>
+                <h2 class="mb-0">{{ ohs_count }}</h2>
+            </div>
+            <div class="card-footer bg-info-subtle">
+                <a href="{% url 'ohs_list' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-2">
+        <div class="card bg-secondary text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-chat-dots display-4 mb-2"></i>
+                <h5 class="card-title">Community</h5>
+                <h2 class="mb-0">{{ community_count }}</h2>
+            </div>
+            <div class="card-footer bg-secondary-subtle">
+                <a href="{% url 'community_list' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Compensation Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-success">${{ total_compensation|floatformat:2 }}</h4>
+                        <small class="text-muted">Total Compensation</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ compensated_pap }}</h4>
+                        <small class="text-muted">PAPs Compensated</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Pending Actions</h5>
+            </div>
+            <div class="card-body text-center">
+                <h4 class="text-warning">{{ pending_grievances }}</h4>
+                <small class="text-muted">Grievances Pending Resolution</small>
+                {% if pending_grievances > 0 %}
+                    <div class="mt-2">
+                        <a href="{% url 'grievance_list' %}?status=pending" class="btn btn-warning btn-sm">
+                            <i class="bi bi-eye me-1"></i>Review Pending
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'esia_add' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus me-1"></i>New ESIA Record
+                    </a>
+                    <a href="{% url 'pap_add' %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-plus me-1"></i>New PAP Record
+                    </a>
+                    <a href="{% url 'grievance_add' %}" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-plus me-1"></i>New Grievance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent ESIA Records</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_esia %}
+                    <div class="list-group list-group-flush">
+                        {% for esia in recent_esia %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ esia.project_name|truncatechars:30 }}</h6>
+                                        <small class="text-muted">Phase {{ esia.project_phase }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ esia.date_created|date:"M d" }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No ESIA records yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'esia_list' %}" class="btn btn-outline-primary btn-sm w-100">View All ESIA</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-people me-2"></i>Recent PAP Records</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_pap %}
+                    <div class="list-group list-group-flush">
+                        {% for pap in recent_pap %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ pap.pap_name }}</h6>
+                                        <small class="text-muted">{{ pap.project|truncatechars:25 }}</small>
+                                    </div>
+                                    <span class="badge bg-{{ pap.pap_compensated|yesno:'success,warning' }}">
+                                        {{ pap.pap_compensated|yesno:'Compensated,Pending' }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No PAP records yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'pap_list' %}" class="btn btn-outline-success btn-sm w-100">View All PAP</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Recent Grievances</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_grievances %}
+                    <div class="list-group list-group-flush">
+                        {% for grievance in recent_grievances %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ grievance.name_of_complainant }}</h6>
+                                        <small class="text-muted">Case: {{ grievance.case_no }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ grievance.date_claim_recieved|date:"M d" }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No grievance cases yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'grievance_list' %}" class="btn btn-outline-warning btn-sm w-100">View All Grievances</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

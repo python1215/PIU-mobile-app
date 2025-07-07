@@ -1,0 +1,258 @@
+{% extends 'social_and_env/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Dashboard - NAWEC PIU Project Mapping{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 mb-0">
+                    <i class="bi bi-geo-alt me-3"></i>
+                    Project Mapping Dashboard
+                </h1>
+                <p class="text-muted">Geographic management and site tracking for NAWEC PIU projects</p>
+            </div>
+            <div>
+                <a href="{% url 'main_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-house me-2"></i>Back to Main Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-geo-alt-fill display-4 mb-2"></i>
+                <h5 class="card-title">Project Sites</h5>
+                <h2 class="mb-0">{{ total_mappings }}</h2>
+            </div>
+            <div class="card-footer bg-primary-subtle">
+                <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-map-fill display-4 mb-2"></i>
+                <h5 class="card-title">Offline Map</h5>
+                <h2 class="mb-0">Available</h2>
+            </div>
+            <div class="card-footer bg-success-subtle">
+                <a href="{% url 'PIU_Mapping_project_Sites:offline-map' %}" class="btn btn-light btn-sm w-100">Open Offline Map</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-building display-4 mb-2"></i>
+                <h5 class="card-title">Settlements</h5>
+                <h2 class="mb-0">{{ total_settlements }}</h2>
+            </div>
+            <div class="card-footer bg-success-subtle">
+                <a href="{% url 'PIU_Mapping_project_Sites:togglecor' %}" class="btn btn-light btn-sm w-100">View All</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-house-door display-4 mb-2"></i>
+                <h5 class="card-title">Households</h5>
+                <h2 class="mb-0">{{ total_households }}</h2>
+            </div>
+            <div class="card-footer bg-warning-subtle">
+                <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-dark btn-sm w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-plug display-4 mb-2"></i>
+                <h5 class="card-title">Connections</h5>
+                <h2 class="mb-0">{{ total_connections }}</h2>
+            </div>
+            <div class="card-footer bg-info-subtle">
+                <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-light btn-sm w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-map me-2"></i>Geographic Coverage</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-success">{{ total_regions }}</h4>
+                        <small class="text-muted">Regions Covered</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ total_districts }}</h4>
+                        <small class="text-muted">Districts Covered</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Infrastructure Status</h5>
+            </div>
+            <div class="card-body text-center">
+                <h4 class="text-warning">{{ infrastructure_sites }}</h4>
+                <small class="text-muted">Infrastructure Sites Mapped</small>
+                {% if infrastructure_sites > 0 %}
+                    <div class="mt-2">
+                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-eye me-1"></i>View Infrastructure
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'PIU_Mapping_project_Sites:add-mapping' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus me-1"></i>New Project Site
+                    </a>
+                    <a href="{% url 'PIU_Mapping_project_Sites:sitemapping' %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-plus me-1"></i>Site Mapping
+                    </a>
+                    <a href="{% url 'PIU_Mapping_project_Sites:togglecor' %}" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-building me-1"></i>Settlements
+                    </a>
+                    <a href="{% url 'PIU_Mapping_project_Sites:index' %}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-map me-1"></i>Interactive Map
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Project Sites</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_mappings %}
+                    <div class="list-group list-group-flush">
+                        {% for mapping in recent_mappings %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ mapping.settlement.settlement_name|truncatechars:30 }}</h6>
+                                        <small class="text-muted">{{ mapping.district.district_name|default:"N/A" }}</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-house-door me-1"></i>{{ mapping.Total_No_of_Households|default:0 }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No project sites mapped yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-primary btn-sm w-100">View All Sites</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-building me-2"></i>Recent Settlements</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_settlements %}
+                    <div class="list-group list-group-flush">
+                        {% for settlement in recent_settlements %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ settlement.settlement_name }}</h6>
+                                        <small class="text-muted">{{ settlement.district.district_name|default:"N/A" }}</small>
+                                    </div>
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No settlements recorded yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'PIU_Mapping_project_Sites:togglecor' %}" class="btn btn-outline-success btn-sm w-100">View All Settlements</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-map me-2"></i>Geographic Coverage</h5>
+            </div>
+            <div class="card-body">
+                {% if regional_coverage %}
+                    <div class="list-group list-group-flush">
+                        {% for region in regional_coverage %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ region.region_name }}</h6>
+                                        <small class="text-muted">{{ region.site_count }} site{{ region.site_count|pluralize }}</small>
+                                    </div>
+                                    <span class="badge bg-{% if region.site_count > 0 %}primary{% else %}secondary{% endif %}">
+                                        {{ region.site_count }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No regional data available.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'PIU_Mapping_project_Sites:index' %}" class="btn btn-outline-info btn-sm w-100">View Map</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

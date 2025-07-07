@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}User Accounts - Comprehensive Integrated M&E Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">
+                <i class="bi bi-people me-2"></i>
+                User Account Management
+            </h1>
+            <p class="text-muted mb-0">Manage user accounts and access permissions</p>
+        </div>
+        <div>
+            <a href="{% url 'main_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Management Cards -->
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title">Create Account</h5>
+                    <p class="card-text">Register new users and set up account permissions for the M&E platform.</p>
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary">
+                        <i class="bi bi-plus me-1"></i>Register User
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-box-arrow-in-right text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title">Login</h5>
+                    <p class="card-text">Access your existing account and manage project information.</p>
+                    <a href="{% url 'account_login' %}" class="btn btn-success">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-gear-fill text-info" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title">Account Settings</h5>
+                    <p class="card-text">Update profile information, change passwords, and manage preferences.</p>
+                    {% if user.is_authenticated %}
+                        <button type="button" class="btn btn-info" disabled>
+                            <i class="bi bi-gear me-1"></i>Settings
+                        </button>
+                    {% else %}
+                        <span class="text-muted small">Login required</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>System Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Access Levels:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-shield-check text-success me-1"></i>Administrator - Full system access</li>
+                                <li><i class="bi bi-person-badge text-primary me-1"></i>Project Manager - Project management</li>
+                                <li><i class="bi bi-eye text-info me-1"></i>Viewer - Read-only access</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Current Status:</h6>
+                            {% if user.is_authenticated %}
+                                <p class="text-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Logged in as: <strong>{{ user.username }}</strong>
+                                </p>
+                                <a href="{% url 'account_logout' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                                </a>
+                            {% else %}
+                                <p class="text-warning">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Not authenticated
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

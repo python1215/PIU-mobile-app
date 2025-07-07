@@ -1,0 +1,4 @@
+<option value="">Select Settlement</option>
+{% for settlement in settlements %}
+    <option value="{{ settlement.pk }}">{{ settlement.settlement_name }}</option>
+{% endfor %}

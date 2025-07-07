@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}DD Calculation Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .performance-excellent { color: #28a745; }
+    .performance-good { color: #007bff; }
+    .performance-acceptable { color: #ffc107; }
+    .performance-poor { color: #dc3545; }
+    .performance-indicator {
+        border-radius: 50px;
+        padding: 8px 16px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .progress-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="text-warning mb-1">
+                        <i class="bi bi-calendar-date"></i> DD Calculation Details
+                    </h2>
+                    <p class="text-muted">Calculation ID: #{{ calculation.id }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'NAWEC_KPI:calculate_dd_list' %}" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                    <a href="{% url 'NAWEC_KPI:calculate_dd_edit' calculation.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Calculation Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calculator"></i> Calculation Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Trade Receivables</h6>
+                            <div class="fs-4 fw-bold text-primary">
+                                GMD {{ calculation.trade_receivables|floatformat:2 }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Total Credit Sales</h6>
+                            <div class="fs-4 fw-bold text-success">
+                                GMD {{ calculation.total_credit_sales|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="text-center mb-4">
+                        <h6 class="text-muted mb-2">Formula Applied</h6>
+                        <div class="alert alert-info">
+                            <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 365</strong>
+                        </div>
+                        <div class="fs-6">
+                            DD = ({{ calculation.trade_receivables|floatformat:2 }} ÷ {{ calculation.total_credit_sales|floatformat:2 }}) × 365
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <h6 class="text-muted mb-2">Result</h6>
+                        <div class="display-4 fw-bold 
+                            {% if calculation.achieved_value <= 30 %}performance-excellent
+                            {% elif calculation.achieved_value <= 45 %}performance-good
+                            {% elif calculation.achieved_value <= 60 %}performance-acceptable
+                            {% else %}performance-poor{% endif %}">
+                            {{ calculation.achieved_value|floatformat:2 }} days
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up"></i> Performance Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="mb-3">Collection Efficiency Assessment</h6>
+                            <div class="performance-indicator bg-{{ performance_color }} text-white mb-3">
+                                {{ performance_level }}
+                            </div>
+                            <p class="mb-3">{{ performance_description }}</p>
+                            
+                            <h6 class="mb-2">Industry Benchmarks:</h6>
+                            <ul class="list-unstyled">
+                                <li><span class="badge bg-success me-2">≤ 30 days</span> Excellent - Outstanding cash collection</li>
+                                <li><span class="badge bg-primary me-2">31-45 days</span> Good - Strong payment collection</li>
+                                <li><span class="badge bg-warning me-2">46-60 days</span> Acceptable - Standard collection timeframe</li>
+                                <li><span class="badge bg-danger me-2">> 60 days</span> Poor - Requires immediate attention</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="progress-circle bg-{{ performance_color }} mx-auto">
+                                {{ calculation.achieved_value|floatformat:0 }}<br>Days
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if calculation.achieved_value > 45 %}
+                        <div class="alert alert-warning mt-3">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Recommendations:</h6>
+                            <ul class="mb-0">
+                                <li>Review credit policies and payment terms</li>
+                                <li>Implement more aggressive collection procedures</li>
+                                <li>Consider offering early payment discounts</li>
+                                <li>Assess customer creditworthiness more thoroughly</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Information -->
+        <div class="col-md-4">
+            <!-- Time Period -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-calendar3"></i> Time Period
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Year:</small>
+                            <div class="fw-bold">
+                                {% if calculation.year %}{{ calculation.year.profile_year }}{% else %}Not specified{% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Quarter:</small>
+                            <div class="fw-bold">
+                                {% if calculation.quarter %}Q{{ calculation.quarter.quarter }}{% else %}Not specified{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Metadata
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Created by:</small>
+                        <div class="fw-bold">{{ calculation.loginUser.username }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Created on:</small>
+                        <div>{{ calculation.date_created|date:"F d, Y" }}</div>
+                        <small class="text-muted">{{ calculation.date_created|time:"H:i" }}</small>
+                    </div>
+                    <div>
+                        <small class="text-muted">Calculation ID:</small>
+                        <div class="fw-bold">#{{ calculation.id }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'NAWEC_KPI:calculate_dd_edit' calculation.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Calculation
+                        </a>
+                        <button type="button" class="btn btn-danger" onclick="deleteCalculation()">
+                            <i class="bi bi-trash"></i> Delete Calculation
+                        </button>
+                        <a href="{% url 'NAWEC_KPI:calculate_dd_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list"></i> View All DD Calculations
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:kpi_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-house-door"></i> KPI Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this DD calculation?</p>
+                <p class="text-muted mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'NAWEC_KPI:calculate_dd_delete' calculation.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteCalculation() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

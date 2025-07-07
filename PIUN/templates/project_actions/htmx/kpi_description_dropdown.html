@@ -1,0 +1,9 @@
+<div class="col-md-6 mb-3" id="kpi-description-container">
+    <label for="id_Kpi_description" class="form-label">KPI Description <span class="text-danger">*</span></label>
+    <select name="Kpi_description" class="form-select" id="id_Kpi_description">
+        <option value="">Select KPI</option>
+        {% for kpi in kpis %}
+            <option value="{{ kpi.id }}">{{ kpi.description }}</option>
+        {% endfor %}
+    </select>
+</div>

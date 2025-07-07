@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}{% block title %}NAWEC PIU Social & Environmental Management{% endblock %}{% endblock %}
+
+{% block content %}
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'social_env_dashboard' %}">
+                <i class="bi bi-tree-fill me-2"></i>
+                PIUN Social & Environmental
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main_dashboard' %}">
+                            <i class="bi bi-house me-1"></i>Main Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'social_env_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-earmark-check me-1"></i>ESIA
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'esia_list' %}">View All</a></li>
+                            <li><a class="dropdown-item" href="{% url 'esia_add' %}">Add New</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-people me-1"></i>PAP Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'pap_list' %}">View All</a></li>
+                            <li><a class="dropdown-item" href="{% url 'pap_add' %}">Add New</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Grievances
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'grievance_list' %}">View All</a></li>
+                            <li><a class="dropdown-item" href="{% url 'grievance_add' %}">Add New</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-shield-check me-1"></i>OHS Monitoring
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'ohs_list' %}">View All</a></li>
+                            <li><a class="dropdown-item" href="{% url 'ohs_add' %}">Add New</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-chat-dots me-1"></i>Community
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'community_list' %}">View All</a></li>
+                            <li><a class="dropdown-item" href="{% url 'community_add' %}">Add New</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                {% if user.is_authenticated %}
+                <div class="navbar-text">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ user.username }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="htmx-indicator position-fixed top-50 start-50 translate-middle">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        {% block social_env_content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; {% now "Y" %} PIUN Social & Environmental Management System</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="{% static 'js/vendor/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- HTMX Extensions -->
+    <script>
+        // Show loading indicator for HTMX requests
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            document.getElementById('loading-indicator').style.display = 'block';
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            document.getElementById('loading-indicator').style.display = 'none';
+        });
+        
+        // Auto-calculate total participants in community engagement forms
+        function calculateTotal() {
+            const male = parseInt(document.getElementById('id_male').value) || 0;
+            const female = parseInt(document.getElementById('id_female').value) || 0;
+            document.getElementById('id_total_participants').value = male + female;
+        }
+        
+        // Add event listeners if elements exist
+        document.addEventListener('DOMContentLoaded', function() {
+            const maleInput = document.getElementById('id_male');
+            const femaleInput = document.getElementById('id_female');
+            
+            if (maleInput) maleInput.addEventListener('input', calculateTotal);
+            if (femaleInput) femaleInput.addEventListener('input', calculateTotal);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+{% endblock %}

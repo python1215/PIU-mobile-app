@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Source - {{ source.issue_action_source }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Delete Source
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Warning!</h5>
+                        <p>You are about to permanently delete this issue/action source. This action cannot be undone.</p>
+                        <hr>
+                        <p class="mb-0">All issues/actions using this source will lose their source reference.</p>
+                    </div>
+
+                    <!-- Source Details -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Source Details to be Deleted</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" width="40%">Source Name:</th>
+                                    <td><strong>{{ source.issue_action_source }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Created By:</th>
+                                    <td>{{ source.loginuser.username|default:"Unknown" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Created Date:</th>
+                                    <td>{{ source.date_created|date:"F d, Y \a\t H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'Issues_Actions_monitoring:source_detail' source.pk %}" class="btn btn-secondary me-2">
+                                    <i class="bi bi-arrow-left"></i> Cancel
+                                </a>
+                                <a href="{% url 'Issues_Actions_monitoring:source_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-list-ul"></i> Back to List
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="bi bi-trash"></i> Confirm Delete
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

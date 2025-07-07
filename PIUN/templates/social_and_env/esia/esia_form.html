@@ -1,0 +1,177 @@
+{% extends 'social_and_env/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }} - PIUN Social & Environmental{% endblock %}
+
+{% block social_env_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-file-earmark-check me-2"></i>
+                    {{ title|default:"ESIA Form" }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="esia-form">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <!-- Project Selection -->
+                        <div class="col-md-6">
+                            <label for="{{ form.project_name.id_for_label }}" class="form-label required">Project</label>
+                            <div id="loading-investment" class="htmx-indicator">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                            </div>
+                            {% render_field form.project_name %}
+                            {% if form.project_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Investment Type -->
+                        <div class="col-md-6">
+                            <label for="{{ form.type_of_investment.id_for_label }}" class="form-label required">Investment Type</label>
+                            {% render_field form.type_of_investment %}
+                            {% if form.type_of_investment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.type_of_investment.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Project Duration -->
+                        <div class="col-md-4">
+                            <label for="{{ form.project_duration.id_for_label }}" class="form-label required">Project Duration (Months)</label>
+                            {% render_field form.project_duration %}
+                            {% if form.project_duration.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project_duration.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Duration in months (1-120)</div>
+                        </div>
+                        
+                        <!-- Project Phase -->
+                        <div class="col-md-4">
+                            <label for="{{ form.project_phase.id_for_label }}" class="form-label required">Project Phase</label>
+                            {% render_field form.project_phase %}
+                            {% if form.project_phase.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project_phase.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the current phase number</div>
+                        </div>
+                        
+                        <!-- Number of Communities -->
+                        <div class="col-md-4">
+                            <label for="{{ form.number_of_communities.id_for_label }}" class="form-label required">Number of Communities</label>
+                            {% render_field form.number_of_communities %}
+                            {% if form.number_of_communities.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.number_of_communities.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the number of affected communities</div>
+                        </div>
+                        
+                        <!-- Project Locations -->
+                        <div class="col-12">
+                            <label for="{{ form.project_locations.id_for_label }}" class="form-label required">Locations</label>
+                            {% render_field form.project_locations %}
+                            {% if form.project_locations.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project_locations.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the locations affected by the project</div>
+                        </div>
+                        
+                        <!-- ESIA Findings -->
+                        <div class="col-12">
+                            <label for="{{ form.esia_findings.id_for_label }}" class="form-label required">ESIA Findings</label>
+                            {% render_field form.esia_findings %}
+                            {% if form.esia_findings.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.esia_findings.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the detailed findings of the ESIA study</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-end">
+                        <a href="{% url 'esia_list' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            {% if esia %}Update{% else %}Create{% endif %} ESIA Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('esia-form');
+    
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        // Check required fields
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            event.preventDefault();
+            document.querySelector('.is-invalid').focus();
+        }
+    });
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

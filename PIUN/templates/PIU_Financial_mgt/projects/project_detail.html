@@ -1,0 +1,202 @@
+{% extends "PIU_Financial_mgt/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Project Details - PIU Financial Management{% endblock %}
+
+{% block financial_content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary mb-1">{{ project.project }}</h2>
+            <p class="text-muted mb-0">Project ID: {{ project.projectID }}</p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'PIU_Financial_mgt:project_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Projects
+            </a>
+            <a href="{% url 'PIU_Financial_mgt:edit_project' project.projectID %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i>Edit Project
+            </a>
+            <a href="{% url 'PIU_Financial_mgt:delete_project' project.projectID %}" class="btn btn-danger">
+                <i class="bi bi-trash me-1"></i>Delete Project
+            </a>
+        </div>
+    </div>
+
+    <!-- Project Information Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Project Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Project Details</h6>
+                            <p><strong>Project ID:</strong> {{ project.projectID }}</p>
+                            <p><strong>Project Name:</strong> {{ project.project }}</p>
+                            <p><strong>Currency:</strong> {{ project.currency.currency }}</p>
+                            <p><strong>Total Funding:</strong> ${{ project.funding|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Timeline</h6>
+                            <p><strong>Effectiveness Date:</strong> {{ project.effectiveness_Date|date:"M d, Y" }}</p>
+                            <p><strong>Closure Date:</strong> {{ project.closure_Date|date:"M d, Y" }}</p>
+                            <p><strong>Last Disbursement:</strong> {{ project.last_date_of_Disbursement|date:"M d, Y" }}</p>
+                            <p><strong>Created:</strong> {{ project.date|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Donors</h6>
+                            {% for donor in project.donors.all %}
+                                <span class="badge bg-info me-1">{{ donor.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">No donors assigned</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Contributors</h6>
+                            {% for contributor in project.contributors.all %}
+                                <span class="badge bg-success me-1">{{ contributor.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">No contributors assigned</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Project Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="text-primary">{{ components_count }}</h3>
+                            <small class="text-muted">Components</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-info">{{ subcomponents_count }}</h3>
+                            <small class="text-muted">Subcomponents</small>
+                        </div>
+                        <div class="col-6 mt-3">
+                            <h3 class="text-warning">{{ activities_count }}</h3>
+                            <small class="text-muted">Activities</small>
+                        </div>
+                        <div class="col-6 mt-3">
+                            <h3 class="text-success">${{ total_allocation|floatformat:0 }}</h3>
+                            <small class="text-muted">Total Allocation</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Components Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-layers me-2"></i>Project Components</h5>
+            <a href="{% url 'PIU_Financial_mgt:add_component' %}?project={{ project.projectID }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus me-1"></i>Add Component
+            </a>
+        </div>
+        <div class="card-body">
+            {% if components %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Component</th>
+                                <th>Description</th>
+                                <th>Currency</th>
+                                <th>Allocation</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for component in components %}
+                            <tr>
+                                <td>{{ component.Project_Components }}</td>
+                                <td>{{ component.component_Description|truncatechars:50 }}</td>
+                                <td><span class="badge bg-secondary">{{ component.currency.currency }}</span></td>
+                                <td class="text-success fw-bold">${{ component.allocation|floatformat:2 }}</td>
+                                <td>{{ component.date|date:"M d" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                       {% if component.id %}
+                                        <a href="{% url 'PIU_Financial_mgt:component_detail' component.id %}" class="btn btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'PIU_Financial_mgt:edit_component' component.id %}" class="btn btn-outline-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Invalid Component</span>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-layers text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No components added yet</p>
+                    <a href="{% url 'PIU_Financial_mgt:add_component' %}?project={{ project.projectID }}" class="btn btn-primary">
+                        <i class="bi bi-plus me-1"></i>Add First Component
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activities</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_activities %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Component</th>
+                                <th>Subcomponent</th>
+                                <th>Allocation</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in recent_activities %}
+                            <tr>
+                                <td>{{ activity.activity|truncatechars:40 }}</td>
+                                <td>{{ activity.compID.Project_Components|truncatechars:30 }}</td>
+                                <td>{{ activity.subcompID.subcomponent|truncatechars:30 }}</td>
+                                <td class="text-success">${{ activity.allocation|floatformat:2 }}</td>
+                                <td>{{ activity.year }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-3">No activities recorded yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

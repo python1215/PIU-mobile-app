@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Add Document - PIUN{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doc-form-header {
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-card {
+        border-left: 4px solid #20c997;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .btn-doc {
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+        border: none;
+        color: white;
+    }
+    .btn-doc:hover {
+        background: linear-gradient(135deg, #1ba085 0%, #138496 100%);
+        color: white;
+    }
+    .file-upload-area {
+        border: 2px dashed #20c997;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s;
+    }
+    .file-upload-area:hover {
+        border-color: #17a2b8;
+        background-color: rgba(32, 201, 151, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="doc-form-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">
+                    <i class="bi bi-file-earmark-plus me-2"></i>Add New Document
+                </h1>
+                <p class="mb-0 opacity-90">Upload and categorize project documentation</p>
+            </div>
+            <div>
+                <a href="{% url 'document-dashboard' %}" class="btn btn-light">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-form-text me-2" style="color: #20c997;"></i>Document Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.project.id_for_label }}" class="form-label fw-medium">
+                                        <i class="bi bi-folder me-1" style="color: #20c997;"></i>Project
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {% render_field form.project class="form-select" %}
+                                    {% if form.project.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.project.errors %}
+                                                <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.document_type.id_for_label }}" class="form-label fw-medium">
+                                        <i class="bi bi-tag me-1" style="color: #20c997;"></i>Document Type
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {% render_field form.document_type class="form-select" %}
+                                    {% if form.document_type.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.document_type.errors %}
+                                                <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.document_date.id_for_label }}" class="form-label fw-medium">
+                                <i class="bi bi-calendar me-1" style="color: #20c997;"></i>Document Date
+                                <span class="text-danger">*</span>
+                            </label>
+                            {% render_field form.document_date class="form-control" %}
+                            {% if form.document_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.document_date.errors %}
+                                        <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-medium">
+                                <i class="bi bi-text-paragraph me-1" style="color: #20c997;"></i>Description
+                            </label>
+                            {% render_field form.description class="form-control" rows="4" %}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}
+                                        <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.attachment.id_for_label }}" class="form-label fw-medium">
+                                <i class="bi bi-paperclip me-1" style="color: #20c997;"></i>Document File
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="file-upload-area">
+                                <i class="bi bi-cloud-upload fs-1 mb-3 d-block" style="color: #20c997;"></i>
+                                <p class="mb-2">Drop files here or click to browse</p>
+                                {% render_field form.attachment class="form-control" %}
+                                <p class="small text-muted mt-2">Supported formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG</p>
+                            </div>
+                            {% if form.attachment.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.attachment.errors %}
+                                        <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'document-dashboard' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-doc">
+                                    <i class="bi bi-upload me-1"></i>Upload Document
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Panel -->
+    <div class="row mt-4 justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="bi bi-info-circle me-2" style="color: #20c997;"></i>Upload Guidelines
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="small text-muted mb-2">FILE REQUIREMENTS</h6>
+                            <p class="small mb-3">Maximum file size: 50MB<br>Supported formats: PDF, Word, Excel, Images<br>Use descriptive filenames</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="small text-muted mb-2">ORGANIZATION</h6>
+                            <p class="small mb-3">Assign appropriate document types and projects for better organization and retrieval of documents.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const fileInput = document.getElementById('{{ form.attachment.id_for_label }}');
+    const uploadArea = document.querySelector('.file-upload-area');
+    
+    // File drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#17a2b8';
+        this.style.backgroundColor = 'rgba(32, 201, 151, 0.1)';
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#20c997';
+        this.style.backgroundColor = '';
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#20c997';
+        this.style.backgroundColor = '';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileDisplay();
+        }
+    });
+    
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', updateFileDisplay);
+    
+    function updateFileDisplay() {
+        const file = fileInput.files[0];
+        if (file) {
+            const fileName = file.name;
+            const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+            uploadArea.innerHTML = `
+                <i class="bi bi-file-check fs-1 mb-3 d-block" style="color: #20c997;"></i>
+                <p class="mb-1 fw-medium">${fileName}</p>
+                <p class="small text-muted">${fileSize} MB</p>
+                <p class="small">Click to change file</p>
+            `;
+        }
+    }
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const requiredFields = ['{{ form.document_name.id_for_label }}', '{{ form.document_type.id_for_label }}', '{{ form.attachment.id_for_label }}'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,679 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q, Count, Sum, Avg
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from datetime import datetime
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
+
+from .models import ESIA, PAP, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
+from .forms import (ESIAForm, ESIAUpdateForm, PAPForm, PAPUpdateForm,
+                    GrievianceMonitoringLogForm, GrievianceUpdateForm,
+                    OHSMonitoringForm, OHSUpdateForm, CommunityEngagementForm)
+from .filters import (ESIAFilter, PAPFilter, GrievianceMonitoringLogFilter,
+                      OHSMonitoringFilter, CommunityEngagementFilter)
+from setup.models import Districts, Settlement
+from PIU_Financial_mgt.models import KPI_For_Contract
+from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
+from monitoring.models import Indicator_Description
+
+
+# ======================== ESIA Views ========================
+@login_required
+def esia_list(request):
+    """Enhanced ESIA list view with filtering and pagination"""
+    esia_list = ESIA.objects.select_related('project_name',
+                                            'type_of_investment',
+                                            'loginUser').all()
+
+    # Apply filters
+    esia_filter = ESIAFilter(request.GET, queryset=esia_list)
+    filtered_esia = esia_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_esia, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_esia':
+        esia_list.count(),
+        'filtered_count':
+        filtered_esia.count(),
+        'avg_duration':
+        esia_list.aggregate(Avg('project_duration'))['project_duration__avg']
+        or 0,
+        'total_communities':
+        esia_list.aggregate(
+            Sum('number_of_communities'))['number_of_communities__sum'] or 0,
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': esia_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/esia/esia_list.html', context)
+
+
+@login_required
+def esia_detail(request, pk):
+    """ESIA detail view"""
+    esia = get_object_or_404(ESIA.objects.select_related(
+        'project_name', 'type_of_investment', 'loginUser'),
+                             pk=pk)
+
+    context = {'esia': esia}
+    return render(request, 'social_and_env/esia/esia_detail.html', context)
+
+
+@login_required
+def esia_add(request):
+    """Add new ESIA record"""
+    if request.method == 'POST':
+        form = ESIAForm(request.POST)
+        if form.is_valid():
+            esia = form.save(commit=False)
+            esia.loginUser = request.user
+            esia.save()
+            messages.success(request, 'ESIA record created successfully!')
+            return redirect('esia_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ESIAForm()
+
+    context = {'form': form, 'title': 'Add ESIA Record'}
+    return render(request, 'social_and_env/esia/esia_form.html', context)
+
+
+@login_required
+def esia_edit(request, pk):
+    """Edit ESIA record"""
+    esia = get_object_or_404(ESIA, pk=pk)
+
+    if request.method == 'POST':
+        form = ESIAUpdateForm(request.POST, instance=esia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'ESIA record updated successfully!')
+            return redirect('esia_detail', pk=esia.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ESIAUpdateForm(instance=esia)
+
+    context = {'form': form, 'esia': esia, 'title': 'Edit ESIA Record'}
+    return render(request, 'social_and_env/esia/esia_form.html', context)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def esia_delete(request, pk):
+    """Delete ESIA record"""
+    esia = get_object_or_404(ESIA, pk=pk)
+    esia.delete()
+    messages.success(request, 'ESIA record deleted successfully!')
+    return JsonResponse({'success': True})
+
+
+@login_required
+def esia_export_excel(request):
+    """Export ESIA data to Excel"""
+    # Apply same filters as list view
+    esia_list = ESIA.objects.select_related('project_name',
+                                            'type_of_investment',
+                                            'loginUser').all()
+
+    esia_filter = ESIAFilter(request.GET, queryset=esia_list)
+    filtered_esia = esia_filter.qs
+
+    # Create workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "ESIA Records"
+
+    # Define headers
+    headers = [
+        'ESIA ID', 'Project Name', 'Investment Type',
+        'Project Duration (Months)', 'Project Phase', 'Project Locations',
+        'Number of Communities', 'ESIA Findings', 'Date Created', 'Created By'
+    ]
+
+    # Style headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092",
+                              end_color="366092",
+                              fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+
+    # Add data
+    for row, esia in enumerate(filtered_esia, 2):
+        ws.cell(row=row, column=1, value=esia.esiaID)
+        ws.cell(row=row, column=2, value=str(esia.project_name))
+        ws.cell(row=row, column=3, value=str(esia.type_of_investment))
+        ws.cell(row=row, column=4, value=esia.project_duration)
+        ws.cell(row=row, column=5, value=esia.project_phase)
+        ws.cell(row=row, column=6, value=esia.project_locations)
+        ws.cell(row=row, column=7, value=esia.number_of_communities)
+        ws.cell(row=row, column=8, value=esia.esia_findings)
+        ws.cell(row=row,
+                column=9,
+                value=esia.date_created.strftime('%Y-%m-%d %H:%M'))
+        ws.cell(row=row, column=10, value=str(esia.loginUser))
+
+    # Auto-adjust column widths
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 15
+
+    # Create response
+    response = HttpResponse(
+        content_type=
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response[
+        'Content-Disposition'] = f'attachment; filename=esia_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+
+    wb.save(response)
+    return response
+
+
+# ======================== PAP Views ========================
+@login_required
+def pap_list(request):
+    """Enhanced PAP list view with filtering and pagination"""
+    pap_list = PAP.objects.select_related('project', 'type_of_investment',
+                                          'region', 'district',
+                                          'pap_Current_Address', 'type_of_pap',
+                                          'pap_category',
+                                          'vulnerability_category',
+                                          'type_of_impact', 'loginUser').all()
+
+    # Apply filters
+    pap_filter = PAPFilter(request.GET, queryset=pap_list)
+    filtered_pap = pap_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_pap, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_pap': pap_list.count(),
+        'filtered_count': filtered_pap.count(),
+        'compensated': pap_list.filter(pap_compensated='Y').count(),
+        'not_compensated': pap_list.filter(pap_compensated='N').count(),
+        'total_compensation': pap_list.aggregate(Sum('amount'))['amount__sum']
+        or 0,
+        'male_count': pap_list.filter(sex='M').count(),
+        'female_count': pap_list.filter(sex='F').count(),
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': pap_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/pap/pap_list.html', context)
+
+
+@login_required
+def pap_detail(request, pk):
+    """PAP detail view"""
+    pap = get_object_or_404(PAP.objects.select_related(
+        'project', 'type_of_investment', 'region', 'district',
+        'pap_Current_Address', 'type_of_pap', 'pap_category',
+        'vulnerability_category', 'type_of_impact', 'nature_of_compensation'),
+                            pk=pk)
+
+    context = {'pap': pap}
+    return render(request, 'social_and_env/pap/pap_detail.html', context)
+
+
+@login_required
+def pap_add(request):
+    """Add new PAP record"""
+    if request.method == 'POST':
+        form = PAPForm(request.POST)
+        if form.is_valid():
+            pap = form.save(commit=False)
+            pap.loginUser = request.user
+            pap.save()
+            messages.success(request, 'PAP record created successfully!')
+            return redirect('pap_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PAPForm()
+
+    context = {'form': form, 'title': 'Add PAP Record'}
+    return render(request, 'social_and_env/pap/pap_form.html', context)
+
+
+@login_required
+def pap_edit(request, pk):
+    """Edit PAP record"""
+    pap = get_object_or_404(PAP, pk=pk)
+
+    if request.method == 'POST':
+        form = PAPUpdateForm(request.POST, instance=pap)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'PAP record updated successfully!')
+            return redirect('pap_detail', pk=pap.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PAPUpdateForm(instance=pap)
+
+    context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record'}
+    return render(request, 'social_and_env/pap/pap_form.html', context)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def pap_delete(request, pk):
+    """Delete PAP record"""
+    pap = get_object_or_404(PAP, pk=pk)
+    pap.delete()
+    messages.success(request, 'PAP record deleted successfully!')
+    return JsonResponse({'success': True})
+
+
+# ======================== Grievance Views ========================
+@login_required
+def grievance_list(request):
+    """Enhanced Grievance list view with filtering and pagination"""
+    grievance_list = GrievianceMonitoringLog.objects.select_related(
+        'project', 'type_of_investment', 'decision_outcome',
+        'loginUser').all()
+
+    # Apply filters
+    grievance_filter = GrievianceMonitoringLogFilter(request.GET,
+                                                     queryset=grievance_list)
+    filtered_grievance = grievance_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_grievance, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_cases':
+        grievance_list.count(),
+        'filtered_count':
+        filtered_grievance.count(),
+        'satisfied':
+        grievance_list.filter(
+            was_complainant_satisfied_with_decision='Y').count(),
+        'not_satisfied':
+        grievance_list.filter(
+            was_complainant_satisfied_with_decision='N').count(),
+        'pending':
+        grievance_list.filter(
+            expected_decision_date__gt=timezone.now().date()).count(),
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': grievance_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/grievance/grievance_list.html',
+                  context)
+
+
+@login_required
+def grievance_detail(request, pk):
+    """Grievance detail view"""
+    grievance = get_object_or_404(
+        GrievianceMonitoringLog.objects.select_related('project',
+                                                       'type_of_investment',
+                                                       'decision_outcome',
+                                                       'loginUser'),
+        pk=pk)
+
+    context = {'grievance': grievance}
+    return render(request, 'social_and_env/grievance/grievance_detail.html',
+                  context)
+
+
+@login_required
+def grievance_add(request):
+    """Add new Grievance record"""
+    if request.method == 'POST':
+        form = GrievianceMonitoringLogForm(request.POST)
+        if form.is_valid():
+            grievance = form.save(commit=False)
+            grievance.loginUser = request.user
+            grievance.save()
+            messages.success(request, 'Grievance case created successfully!')
+            return redirect('grievance_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = GrievianceMonitoringLogForm()
+
+    context = {'form': form, 'title': 'Add Grievance Case'}
+    return render(request, 'social_and_env/grievance/grievance_form.html',
+                  context)
+
+
+@login_required
+def grievance_edit(request, pk):
+    """Edit Grievance record"""
+    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
+
+    if request.method == 'POST':
+        form = GrievianceUpdateForm(request.POST, instance=grievance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Grievance case updated successfully!')
+            return redirect('grievance_detail', pk=grievance.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = GrievianceUpdateForm(instance=grievance)
+
+    context = {
+        'form': form,
+        'grievance': grievance,
+        'title': 'Edit Grievance Case'
+    }
+    return render(request, 'social_and_env/grievance/grievance_form.html',
+                  context)
+
+
+# ======================== OHS Views ========================
+@login_required
+def ohs_list(request):
+    """Enhanced OHS list view with filtering and pagination"""
+    ohs_list = OHS_Monitoring.objects.select_related(
+        'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'region',
+        'district', 'settlement', 'loginUser').all()
+
+    # Apply filters
+    ohs_filter = OHSMonitoringFilter(request.GET, queryset=ohs_list)
+    filtered_ohs = ohs_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_ohs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_reports':
+        ohs_list.count(),
+        'filtered_count':
+        filtered_ohs.count(),
+        'total_workers':
+        ohs_list.aggregate(total=Sum('male') + Sum('female'))['total'] or 0,
+        'total_youth':
+        ohs_list.aggregate(total=Sum('youth_male') +
+                           Sum('youth_female'))['total'] or 0,
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': ohs_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/ohs/ohs_list.html', context)
+
+
+@login_required
+def ohs_add(request):
+    """Add new OHS record"""
+    if request.method == 'POST':
+        form = OHSMonitoringForm(request.POST, request.FILES)
+        if form.is_valid():
+            ohs = form.save(commit=False)
+            ohs.loginUser = request.user
+            ohs.save()
+            messages.success(request,
+                             'OHS monitoring record created successfully!')
+            return redirect('ohs_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = OHSMonitoringForm()
+
+    context = {'form': form, 'title': 'Add OHS Monitoring Record'}
+    return render(request, 'social_and_env/ohs/ohs_form.html', context)
+
+
+# ======================== Community Engagement Views ========================
+@login_required
+def community_list(request):
+    """Enhanced Community Engagement list view with filtering and pagination"""
+    community_list = CommunityConsult_Engagement.objects.select_related(
+        'project_name', 'year', 'stake_holder_engagement_Types',
+        'loginUser').all()
+
+    # Apply filters
+    community_filter = CommunityEngagementFilter(request.GET,
+                                                 queryset=community_list)
+    filtered_community = community_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_community, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_engagements':
+        community_list.count(),
+        'filtered_count':
+        filtered_community.count(),
+        'total_participants':
+        community_list.aggregate(
+            Sum('total_participants'))['total_participants__sum'] or 0,
+        'total_male':
+        community_list.aggregate(Sum('male'))['male__sum'] or 0,
+        'total_female':
+        community_list.aggregate(Sum('female'))['female__sum'] or 0,
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': community_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/community/community_list.html',
+                  context)
+
+
+@login_required
+def community_add(request):
+    """Add new Community Engagement record"""
+    if request.method == 'POST':
+        form = CommunityEngagementForm(request.POST, request.FILES)
+        if form.is_valid():
+            engagement = form.save(commit=False)
+            engagement.loginUser = request.user
+            engagement.save()
+            messages.success(
+                request, 'Community engagement record created successfully!')
+            return redirect('community_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CommunityEngagementForm()
+
+    context = {'form': form, 'title': 'Add Community Engagement Record'}
+    return render(request, 'social_and_env/community/community_form.html',
+                  context)
+
+
+# ======================== HTMX Dynamic Loading Views ========================
+@login_required
+def load_investment_types_esia(request):
+    """Load investment types for ESIA based on project selection"""
+    project_id = request.GET.get('project_name')
+    investment_types = KPI_For_Contract.objects.none()
+
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(
+            project_id=project_id, monitoring_type_id='ESS').distinct()
+
+    return render(request, 'social_and_env/partials/investment_types.html',
+                  {'investment_types': investment_types})
+
+
+@login_required
+def load_investment_types_pap(request):
+    """Load investment types for PAP based on project selection"""
+    project_id = request.GET.get('project')
+    investment_types = KPI_For_Contract.objects.none()
+
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(
+            project_id=project_id).distinct()
+
+    return render(request, 'social_and_env/partials/investment_types.html',
+                  {'investment_types': investment_types})
+
+
+@login_required
+def load_districts(request):
+    """Load districts based on region selection"""
+    region_id = request.GET.get('region')
+    districts = Districts.objects.none()
+
+    if region_id:
+        districts = Districts.objects.filter(region_id=region_id)
+
+    return render(request, 'social_and_env/partials/districts.html',
+                  {'districts': districts})
+
+
+@login_required
+def load_settlements(request):
+    """Load settlements based on district selection"""
+    district_id = request.GET.get('district')
+    settlements = Settlement.objects.none()
+
+    if district_id:
+        settlements = Settlement.objects.filter(district_id=district_id)
+
+    return render(request, 'social_and_env/partials/settlements.html',
+                  {'settlements': settlements})
+
+
+@login_required
+def load_investment_types_grievance(request):
+    """Load investment types for Grievance based on project selection"""
+    project_id = request.GET.get('project')
+    investment_types = KPI_For_Contract.objects.none()
+
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(
+            project_id=project_id).distinct()
+
+    return render(request, 'social_and_env/partials/investment_types.html',
+                  {'investment_types': investment_types})
+
+
+@login_required
+def load_investment_types_ohs(request):
+    """Load investment types for OHS based on project selection"""
+    project_id = request.GET.get('project')
+    investment_types = KPI_For_Contract.objects.none()
+
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(
+            project_id=project_id).distinct()
+
+    return render(request, 'social_and_env/partials/investment_types.html',
+                  {'investment_types': investment_types})
+
+
+@login_required
+def load_districts_ohs(request):
+    """Load districts for OHS based on region selection"""
+    region_id = request.GET.get('region')
+    districts = Districts.objects.none()
+
+    if region_id:
+        districts = Districts.objects.filter(region_id=region_id)
+
+    return render(request, 'social_and_env/partials/districts.html',
+                  {'districts': districts})
+
+
+@login_required
+def load_settlements_ohs(request):
+    """Load settlements for OHS based on district selection"""
+    district_id = request.GET.get('district')
+    settlements = Settlement.objects.none()
+
+    if district_id:
+        settlements = Settlement.objects.filter(district_id=district_id)
+
+    return render(request, 'social_and_env/partials/settlements.html',
+                  {'settlements': settlements})
+
+
+# ======================== Dashboard View ========================
+@login_required
+def social_env_dashboard(request):
+    """Dashboard with overview statistics"""
+    context = {
+        'esia_count':
+        ESIA.objects.count(),
+        'pap_count':
+        PAP.objects.count(),
+        'grievance_count':
+        GrievianceMonitoringLog.objects.count(),
+        'ohs_count':
+        OHS_Monitoring.objects.count(),
+        'community_count':
+        CommunityConsult_Engagement.objects.count(),
+
+        # Recent records
+        'recent_esia':
+        ESIA.objects.select_related('project_name').order_by('-date_created')
+        [:5],
+        'recent_pap':
+        PAP.objects.select_related('project').order_by('-date_created')[:5],
+        'recent_grievances':
+        GrievianceMonitoringLog.objects.select_related('project').order_by(
+            '-date_created')[:5],
+
+        # Statistics
+        'total_compensation':
+        PAP.objects.aggregate(Sum('amount'))['amount__sum'] or 0,
+        'compensated_pap':
+        PAP.objects.filter(pap_compensated='Y').count(),
+        'pending_grievances':
+        GrievianceMonitoringLog.objects.filter(
+            expected_decision_date__gt=timezone.now().date()).count(),
+    }
+
+    return render(request, 'social_and_env/s_and_e_dashboard.html', context)

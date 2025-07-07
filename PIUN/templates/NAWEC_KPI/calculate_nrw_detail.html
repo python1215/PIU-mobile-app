@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}NRW Calculation Details - NAWEC KPI{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi-water"></i> Non-Revenue Water (NRW) Calculation Details
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'NAWEC_KPI:calculate_nrw_edit' calculation.id %}" class="btn btn-light btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'NAWEC_KPI:calculate_nrw_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Calculation Summary -->
+                        <div class="col-lg-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-calculator"></i> Calculation Summary
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Water Entering System (M3)</th>
+                                        <td>{{ calculation.water_entering_system|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Billed Authorized Consumption (M3)</th>
+                                        <td>{{ calculation.billed_authorized_consumption|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr class="table-warning">
+                                        <th>NRW Percentage</th>
+                                        <td>
+                                            <strong class="text-warning fs-5">
+                                                {{ calculation.calculated_value|floatformat:2 }}%
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <th>Water Efficiency</th>
+                                        <td>
+                                            <strong class="text-info fs-5">
+                                                {{ efficiency_percentage|floatformat:2 }}%
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Analysis -->
+                        <div class="col-lg-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-graph-up-arrow"></i> Performance Analysis
+                            </h5>
+                            
+                            {% if calculation.calculated_value <= 15 %}
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3 class="card-title">{{ calculation.calculated_value|floatformat:1 }}%</h3>
+                                    <p class="card-text mb-0">
+                                        <i class="bi bi-check-circle-fill"></i> Excellent Performance
+                                    </p>
+                                </div>
+                            </div>
+                            {% elif calculation.calculated_value <= 25 %}
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h3 class="card-title">{{ calculation.calculated_value|floatformat:1 }}%</h3>
+                                    <p class="card-text mb-0">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Good Performance
+                                    </p>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h3 class="card-title">{{ calculation.calculated_value|floatformat:1 }}%</h3>
+                                    <p class="card-text mb-0">
+                                        <i class="bi bi-x-circle-fill"></i> Needs Improvement
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Progress Bar -->
+                            <div class="mt-3">
+                                <label class="form-label">NRW Level</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar {% if calculation.calculated_value <= 15 %}bg-success{% elif calculation.calculated_value <= 25 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {% if calculation.calculated_value > 50 %}100{% else %}{% widthratio calculation.calculated_value 1 2 %}{% endif %}%"
+                                         aria-valuenow="{{ calculation.calculated_value }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="50">
+                                        {{ calculation.calculated_value|floatformat:1 }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">NRW levels scale (0-50%+ range)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Formula Breakdown -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-calculator"></i> Formula Breakdown
+                            </h5>
+                            
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">NRW Calculation Formula</h6>
+                                    <p class="mb-2">
+                                        <strong>NRW% = (Water Entering System ÷ Billed Authorized Consumption) × 100</strong>
+                                    </p>
+                                    <div class="alert alert-warning mb-0">
+                                        <strong>Applied Formula:</strong><br>
+                                        NRW% = {{ calculation.water_entering_system|floatformat:2 }} ÷ {{ calculation.billed_authorized_consumption|floatformat:2 }} × 100 = {{ calculation.calculated_value|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Time Period & Audit Information -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-calendar"></i> Time Period
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Year</th>
+                                        <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}2025{% endif %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Quarter</th>
+                                        <td>{% if calculation.quarter %}Q{{ calculation.quarter.quarter }} ({{ calculation.quarter.quarter_name }}){% else %}Q1{% endif %}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-person-check"></i> Audit Information
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Created By</th>
+                                        <td>{{ calculation.loginUser.username|default:"System" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Date Created</th>
+                                        <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Interpretation -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-warning mb-3">
+                                <i class="bi bi-lightbulb"></i> Performance Interpretation
+                            </h5>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if calculation.calculated_value <= 15 %}
+                                        <div class="alert alert-success">
+                                            <h6><i class="bi bi-check-circle-fill"></i> Excellent Water Management</h6>
+                                            <p class="mb-0">Outstanding performance with {{ calculation.calculated_value|floatformat:1 }}% NRW. This indicates highly efficient water distribution and minimal losses. Continue maintaining current practices.</p>
+                                        </div>
+                                    {% elif calculation.calculated_value <= 25 %}
+                                        <div class="alert alert-warning">
+                                            <h6><i class="bi bi-exclamation-triangle-fill"></i> Good Water Management</h6>
+                                            <p class="mb-0">Good performance at {{ calculation.calculated_value|floatformat:1 }}% NRW. Consider implementing leak detection programs and infrastructure upgrades to achieve excellent performance (≤15%).</p>
+                                        </div>
+                                    {% elif calculation.calculated_value <= 35 %}
+                                        <div class="alert alert-primary">
+                                            <h6><i class="bi bi-info-circle-fill"></i> Moderate Water Efficiency</h6>
+                                            <p class="mb-0">Performance at {{ calculation.calculated_value|floatformat:1 }}% NRW requires attention. Implement comprehensive water loss reduction programs and systematic leak detection to improve efficiency.</p>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-danger">
+                                            <h6><i class="bi bi-x-circle-fill"></i> Water Loss Management Needs Immediate Attention</h6>
+                                            <p class="mb-0">Critical performance at {{ calculation.calculated_value|floatformat:1 }}% NRW. Immediate action required to address major water losses through infrastructure rehabilitation and comprehensive loss reduction strategies.</p>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3">
+                                        <h6>Performance Benchmarks (World Bank Standards):</h6>
+                                        <ul class="mb-0">
+                                            <li><strong>Excellent:</strong> ≤15% NRW (Best practice)</li>
+                                            <li><strong>Good:</strong> 16-25% NRW (Acceptable level)</li>
+                                            <li><strong>Moderate:</strong> 26-35% NRW (Needs improvement)</li>
+                                            <li><strong>Poor:</strong> >35% NRW (Critical action required)</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <h6>Improvement Strategies:</h6>
+                                        <ul class="mb-0">
+                                            <li>Implement systematic leak detection and repair programs</li>
+                                            <li>Upgrade aging water distribution infrastructure</li>
+                                            <li>Install pressure management systems</li>
+                                            <li>Improve water meter accuracy and billing systems</li>
+                                            <li>Conduct regular water audits and loss assessments</li>
+                                            <li>Train staff on water loss management best practices</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

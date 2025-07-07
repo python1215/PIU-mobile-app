@@ -1,0 +1,261 @@
+{% extends 'social_and_env/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }} - PIUN Social & Environmental{% endblock %}
+
+{% block social_env_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-chat-dots me-2"></i>
+                    {{ title|default:"Community Engagement Form" }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="community-form">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <!-- Project Information -->
+                        <div class="col-md-6">
+                            <label for="{{ form.project_name.id_for_label }}" class="form-label required">Project</label>
+                            {% render_field form.project_name %}
+                            {% if form.project_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.reference_number.id_for_label }}" class="form-label required">Reference Number</label>
+                            {% render_field form.reference_number %}
+                            {% if form.reference_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.reference_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.year.id_for_label }}" class="form-label required">Year</label>
+                            {% render_field form.year %}
+                            {% if form.year.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.year.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Event Details -->
+                        <div class="col-md-8">
+                            <label for="{{ form.place_of_event.id_for_label }}" class="form-label required">Event Location</label>
+                            {% render_field form.place_of_event %}
+                            {% if form.place_of_event.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.place_of_event.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.date_of_consultation.id_for_label }}" class="form-label required">Consultation Date</label>
+                            {% render_field form.date_of_consultation %}
+                            {% if form.date_of_consultation.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.date_of_consultation.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.stake_holder_engagement_Types.id_for_label }}" class="form-label required">Stakeholder Engagement Type</label>
+                            {% render_field form.stake_holder_engagement_Types %}
+                            {% if form.stake_holder_engagement_Types.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.stake_holder_engagement_Types.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Participant Information -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-people me-2"></i>Participant Information
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.male.id_for_label }}" class="form-label required">Male Participants</label>
+                            {% render_field form.male %}
+                            {% if form.male.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.male.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.female.id_for_label }}" class="form-label required">Female Participants</label>
+                            {% render_field form.female %}
+                            {% if form.female.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.female.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.total_participants.id_for_label }}" class="form-label required">Total Participants</label>
+                            {% render_field form.total_participants %}
+                            {% if form.total_participants.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.total_participants.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="bg-light p-3 rounded text-center">
+                                <h5 class="mb-0" id="female-percentage">0%</h5>
+                                <small class="text-muted">Female Participation</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Engagement Content -->
+                        <div class="col-12">
+                            <h6 class="text-success border-bottom pb-2 mb-3">
+                                <i class="bi bi-chat-text me-2"></i>Engagement Content
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.key_issues_discussed.id_for_label }}" class="form-label required">Key Issues Discussed</label>
+                            {% render_field form.key_issues_discussed %}
+                            {% if form.key_issues_discussed.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.key_issues_discussed.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.any_follow_up_actions.id_for_label }}" class="form-label">Follow-up Actions</label>
+                            {% render_field form.any_follow_up_actions %}
+                            {% if form.any_follow_up_actions.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.any_follow_up_actions.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Photo Upload -->
+                        <div class="col-12">
+                            <label for="{{ form.picture.id_for_label }}" class="form-label">Engagement Photo</label>
+                            {% render_field form.picture %}
+                            {% if form.picture.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.picture.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Upload photos from the community engagement activity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-end">
+                        <a href="{% url 'community_list' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            {% if engagement %}Update{% else %}Create{% endif %} Engagement Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const maleField = document.getElementById('id_male');
+    const femaleField = document.getElementById('id_female');
+    const totalField = document.getElementById('id_total_participants');
+    const femalePercentageDisplay = document.getElementById('female-percentage');
+    
+    function calculateTotals() {
+        const male = parseInt(maleField.value) || 0;
+        const female = parseInt(femaleField.value) || 0;
+        const total = male + female;
+        
+        // Update total automatically
+        totalField.value = total;
+        
+        // Calculate female percentage
+        if (total > 0) {
+            const femalePercentage = Math.round((female / total) * 100);
+            femalePercentageDisplay.textContent = femalePercentage + '%';
+            
+            // Update color based on participation rate
+            const parent = femalePercentageDisplay.parentElement;
+            parent.className = 'bg-light p-3 rounded text-center';
+            if (femalePercentage >= 40) {
+                parent.classList.add('bg-success', 'text-white');
+                parent.classList.remove('bg-light');
+            } else if (femalePercentage >= 25) {
+                parent.classList.add('bg-warning');
+                parent.classList.remove('bg-light');
+            }
+        } else {
+            femalePercentageDisplay.textContent = '0%';
+        }
+    }
+    
+    // Add event listeners
+    if (maleField && femaleField) {
+        maleField.addEventListener('input', calculateTotals);
+        femaleField.addEventListener('input', calculateTotals);
+        
+        // Initial calculation
+        calculateTotals();
+    }
+    
+    // Form validation
+    const form = document.getElementById('community-form');
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        // Validate participant numbers
+        const male = parseInt(maleField.value) || 0;
+        const female = parseInt(femaleField.value) || 0;
+        const total = parseInt(totalField.value) || 0;
+        
+        if (male + female !== total) {
+            event.preventDefault();
+            alert('Total participants must equal the sum of male and female participants.');
+            return;
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+            document.querySelector('.is-invalid').focus();
+        }
+    });
+});
+</script>
+{% endblock %}

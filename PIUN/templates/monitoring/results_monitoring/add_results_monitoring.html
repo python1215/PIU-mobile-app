@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Add Results Monitoring - Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-6">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-plus me-2 text-indigo-600"></i>Add Results Monitoring
+            </h1>
+            <p class="text-muted mb-0">Create a new results monitoring record</p>
+        </div>
+        <div>
+            <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-chart-line me-2"></i>Dashboard
+            </a>
+            <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header text-white position-relative" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-bar me-2"></i>Results Monitoring Form
+                    </h5>
+                    <p class="mb-0 opacity-75 small">Track and monitor project performance indicators</p>
+                    <div class="position-absolute top-0 end-0 me-3 mt-3">
+                        <i class="fas fa-analytics opacity-25" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 2.5rem 3rem;">
+                    <!-- Display form errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger mb-4">
+                            <h6 class="alert-heading mb-2">Please correct the following errors:</h6>
+                            {% for field, errors in form.errors.items %}
+                                <div class="mb-1">
+                                    <strong>{{ field|title }}:</strong>
+                                    {% for error in errors %}
+                                        {{ error }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post" hx-boost="true">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-primary rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-info text-white"></i>
+                                </div>
+                                <h6 class="text-primary mb-0 fw-bold fs-5">Basic Information</h6>
+                            </div>
+                            <div class="row g-4" style="flex-wrap: wrap; word-wrap: break-word;">
+                                <div class="col-lg-6 col-md-6 mb-3">
+                                    <label for="{{ form.year.id_for_label }}" class="form-label fw-semibold mb-2">
+                                        {{ form.year.label }}
+                                    </label>
+                                    {{ form.year|add_class:"form-select form-select-lg" }}
+                                    {% if form.year.errors %}
+                                        <div class="text-danger small mt-2">{{ form.year.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-lg-6 col-md-6 mb-3">
+                                    <label for="{{ form.quarter.id_for_label }}" class="form-label fw-semibold mb-2">
+                                        {{ form.quarter.label }}
+                                    </label>
+                                    {{ form.quarter|add_class:"form-select form-select-lg" }}
+                                    {% if form.quarter.errors %}
+                                        <div class="text-danger small mt-2">{{ form.quarter.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-lg-6 col-md-12 mb-3">
+                                    <label for="{{ form.project.id_for_label }}" class="form-label fw-semibold mb-2">
+                                        {{ form.project.label }}
+                                    </label>
+                                    {{ form.project|add_class:"form-select form-select-lg" }}
+                                    {% if form.project.errors %}
+                                        <div class="text-danger small mt-2">{{ form.project.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Details -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-success rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-project-diagram text-white"></i>
+                                </div>
+                                <h6 class="text-success mb-0 fw-bold fs-5">Project Details</h6>
+                            </div>
+                            <div class="row g-4">
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <label for="id_pdo" class="form-label fw-semibold mb-2">
+                                        PDO
+                                    </label>
+                                    <select name="pdo" 
+                                            id="id_pdo"
+                                            hx-get="{% url 'monitoring:load_project_Outcome' %}" 
+                                            hx-trigger="change" 
+                                            hx-target="#id_project_outcome"
+                                            class="form-select form-select-lg">
+                                        <option value="">---------</option>
+                                    </select>
+                                    {% if form.pdo.errors %}
+                                        <div class="text-danger small mt-2">{{ form.pdo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <label for="id_project_outcome" class="form-label fw-semibold mb-2">
+                                        Project Outcome
+                                    </label>
+                                    <select name="project_outcome" 
+                                            id="id_project_outcome" 
+                                            hx-get="{% url 'monitoring:load_project_Result' %}" 
+                                            hx-trigger="change" 
+                                            hx-target="#id_project_result"
+                                            hx-include="[name='project_outcome']"
+                                            class="form-select form-select-lg">
+                                        <option value="">---------</option>
+                                    </select>
+                                    {% if form.project_outcome.errors %}
+                                        <div class="text-danger small mt-2">{{ form.project_outcome.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 mb-4" style="white-space: normal;">
+                                    <label for="id_project_result" class="form-label fw-semibold mb-2">
+                                        Project Result
+                                    </label>
+                                    <select name="project_result" 
+                                            id="id_project_result" 
+                                            class="form-select form-select-lg">
+                                        <option value="">---------</option>
+                                    </select>
+                                    {% if form.project_result.errors %}
+                                        <div class="text-danger small mt-2">{{ form.project_result.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicator Information -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-chart-line text-white"></i>
+                                </div>
+                                <h6 class="text-warning mb-0 fw-bold">Indicator Information</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-lg-10 col-md-10 mb-3">
+                                    <label for="{{ form.indicator_type.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.indicator_type.label }}
+                                    </label>
+                                    {{ form.indicator_type|add_class:"form-select" }}
+                                    {% if form.indicator_type.errors %}
+                                        <div class="text-danger small mt-1">{{ form.indicator_type.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-lg-2 col-md-2 mb-3">
+                                    <label for="{{ form.measurement_unit.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.measurement_unit.label }}
+                                    </label>
+                                    {{ form.measurement_unit|add_class:"form-control" }}
+                                    {% if form.measurement_unit.errors %}
+                                        <div class="text-danger small mt-1">{{ form.measurement_unit.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 mb-3">
+                                    <label for="{{ form.indicator_description.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.indicator_description.label }}
+                                    </label>
+                                    {{ form.indicator_description|add_class:"form-control" }}
+                                    {% if form.indicator_description.errors %}
+                                        <div class="text-danger small mt-1">{{ form.indicator_description.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label for="{{ form.collection_frequency.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.collection_frequency.label }}
+                                    </label>
+                                    {{ form.collection_frequency|add_class:"form-select" }}
+                                    {% if form.collection_frequency.errors %}
+                                        <div class="text-danger small mt-1">{{ form.collection_frequency.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Values -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-calculator text-white"></i>
+                                </div>
+                                <h6 class="text-info mb-0 fw-bold">Performance Values</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="{{ form.baseline_value.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.baseline_value.label }}
+                                    </label>
+                                    {{ form.baseline_value|add_class:"form-control" }}
+                                    {% if form.baseline_value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.baseline_value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="{{ form.achieved_value.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.achieved_value.label }}
+                                    </label>
+                                    {{ form.achieved_value|add_class:"form-control" }}
+                                    {% if form.achieved_value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.achieved_value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.End_Target_Value.label }}
+                                    </label>
+                                    {{ form.End_Target_Value|add_class:"form-control" }}
+                                    {% if form.End_Target_Value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.End_Target_Value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.percentage_achieved_vs_baseline.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.percentage_achieved_vs_baseline.label }}
+                                        <span class="text-muted small">(Auto-calculated)</span>
+                                    </label>
+                                    {{ form.percentage_achieved_vs_baseline|add_class:"form-control bg-light" }}
+                                    {% if form.percentage_achieved_vs_baseline.errors %}
+                                        <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_baseline.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.percentage_achieved_vs_end_target.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.percentage_achieved_vs_end_target.label }}
+                                        <span class="text-muted small">(Auto-calculated)</span>
+                                    </label>
+                                    {{ form.percentage_achieved_vs_end_target|add_class:"form-control bg-light" }}
+                                    {% if form.percentage_achieved_vs_end_target.errors %}
+                                        <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_end_target.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-secondary rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-comments text-white"></i>
+                                </div>
+                                <h6 class="text-secondary mb-0 fw-bold">Additional Information</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="{{ form.remarks.id_for_label }}" class="form-label fw-semibold">
+                                        {{ form.remarks.label }}
+                                    </label>
+                                    {{ form.remarks|add_class:"form-control" }}
+                                    {% if form.remarks.errors %}
+                                        <div class="text-danger small mt-1">{{ form.remarks.errors.0 }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Additional notes or comments about this monitoring record</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4" style="border-top: 2px solid #f8f9fa;">
+                            <div class="text-muted small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                All percentage fields are automatically calculated
+                            </div>
+                            <div>
+                                <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-secondary me-3" style="border-radius: 25px; padding: 0.5rem 1.5rem;">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px; padding: 0.5rem 2rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                                    <i class="fas fa-save me-2"></i>Save Monitoring Record
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    background-color: #fefffe;
+    transform: translateY(-1px);
+}
+
+.form-control:hover, .form-select:hover {
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+}
+
+.form-label {
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.bg-indigo-600 {
+    background-color: #6366f1 !important;
+}
+
+.text-indigo-600 {
+    color: #6366f1 !important;
+}
+
+.text-primary {
+    color: #667eea !important;
+}
+
+.text-success {
+    color: #10b981 !important;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+.text-info {
+    color: #06b6d4 !important;
+}
+
+.text-secondary {
+    color: #6b7280 !important;
+}
+
+.card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.row.g-3 > * {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Beautiful input focus effects */
+.form-control:focus {
+    background: linear-gradient(135deg, #fefffe 0%, #f8fafc 100%);
+}
+
+.bg-light {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    border: 2px dashed #cbd5e0 !important;
+}
+
+/* Hover effects for sections */
+.mb-5:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Button hover effects */
+.btn:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Enhanced form sections for larger screens */
+.mb-6 {
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 3rem !important;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.mb-6:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+    .card-body {
+        padding: 3rem 4rem !important;
+    }
+    
+    .form-select-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+    
+    .form-control {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+    
+    .col-lg-6.mb-4 {
+        padding-right: 2rem;
+        padding-left: 2rem;
+    }
+}
+
+/* Enhanced field spacing */
+.form-label {
+    margin-bottom: 0.75rem !important;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Better visual hierarchy */
+.row.g-4 {
+    margin: 0 -1rem;
+}
+
+.row.g-4 > * {
+    padding: 0 1rem;
+}
+
+/* Progress indicator style */
+.container-fluid {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
+    min-height: 100vh;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Results Monitoring form ready with HTMX support');
+    
+    // Get form field elements
+    const baselineField = document.getElementById('id_baseline_value');
+    const achievedField = document.getElementById('id_achieved_value');
+    const endTargetField = document.getElementById('id_End_Target_Value');
+    const percentageBaselineField = document.getElementById('id_percentage_achieved_vs_baseline');
+    const percentageEndTargetField = document.getElementById('id_percentage_achieved_vs_end_target');
+    
+    // Make percentage fields readonly and styled as calculated fields
+    if (percentageBaselineField) {
+        percentageBaselineField.readOnly = true;
+        percentageBaselineField.style.backgroundColor = '#f8f9fa';
+        percentageBaselineField.style.cursor = 'not-allowed';
+    }
+    
+    if (percentageEndTargetField) {
+        percentageEndTargetField.readOnly = true;
+        percentageEndTargetField.style.backgroundColor = '#f8f9fa';
+        percentageEndTargetField.style.cursor = 'not-allowed';
+    }
+    
+    // Function to calculate percentages
+    function calculatePercentages() {
+        const baselineValue = parseFloat(baselineField.value) || 0;
+        const achievedValue = parseFloat(achievedField.value) || 0;
+        const endTargetValue = parseFloat(endTargetField.value) || 0;
+        
+        // Calculate percentage achieved vs baseline
+        // percentage_achieved_vs_baseline = ((achievedValue) / baseValue) * 100
+        if (baselineValue > 0) {
+            const percentageVsBaseline = (achievedValue / baselineValue) * 100;
+            percentageBaselineField.value = percentageVsBaseline.toFixed(2);
+        } else {
+            percentageBaselineField.value = '';
+        }
+        
+        // Calculate percentage achieved vs end target
+        // percentage_achieved_vs_end_target = ((achievedValue) / endTargetValue) * 100
+        if (endTargetValue > 0) {
+            const percentageVsEndTarget = (achievedValue / endTargetValue) * 100;
+            percentageEndTargetField.value = percentageVsEndTarget.toFixed(2);
+        } else {
+            percentageEndTargetField.value = '';
+        }
+    }
+    
+    // Add event listeners to trigger calculations
+    if (baselineField) {
+        baselineField.addEventListener('input', calculatePercentages);
+        baselineField.addEventListener('change', calculatePercentages);
+    }
+    
+    if (achievedField) {
+        achievedField.addEventListener('input', calculatePercentages);
+        achievedField.addEventListener('change', calculatePercentages);
+    }
+    
+    if (endTargetField) {
+        endTargetField.addEventListener('input', calculatePercentages);
+        endTargetField.addEventListener('change', calculatePercentages);
+    }
+    
+    // Calculate on page load if values exist
+    calculatePercentages();
+    
+    // Initialize project field with HTMX loading for PDO
+    const projectField = document.querySelector('#{{ form.project.id_for_label }}');
+    if (projectField) {
+        // Add HTMX attributes to the project field in the Basic Information section
+        projectField.setAttribute('hx-get', "{% url 'monitoring:load_project_PDO' %}");
+        projectField.setAttribute('hx-trigger', 'change');
+        projectField.setAttribute('hx-target', '#id_pdo');
+    }
+});
+</script>
+{% endblock %}

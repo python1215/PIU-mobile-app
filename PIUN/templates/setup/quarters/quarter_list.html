@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Quarters - PIUN Setup{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .quarter-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid #6f42c1;
+    }
+    .quarter-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .stat-badge {
+        background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+        color: white;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="setup-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-1">
+                    <i class="bi bi-calendar3 me-2"></i>Quarters
+                </h1>
+                <p class="mb-0 opacity-90">Manage quarterly reporting periods</p>
+            </div>
+            <div>
+                <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-light me-2">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Setup
+                </a>
+                <a href="{% url 'setup:quarter_create' %}" class="btn btn-warning">
+                    <i class="bi bi-plus-circle me-1"></i>Add New Quarter
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-2" style="color: #6f42c1;">{{ total_quarters }}</h3>
+                    <p class="mb-0 text-muted">Total Quarters</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-2" style="color: #6f42c1;">
+                        {% if quarters.paginator %}{{ quarters.paginator.count }}{% else %}0{% endif %}
+                    </h3>
+                    <p class="mb-0 text-muted">Active Periods</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-2" style="color: #6f42c1;">
+                        {% if quarters.paginator %}{{ quarters.paginator.num_pages }}{% else %}1{% endif %}
+                    </h3>
+                    <p class="mb-0 text-muted">Total Pages</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-2" style="color: #6f42c1;">
+                        {% if quarters %}{{ quarters.number }}{% else %}1{% endif %}
+                    </h3>
+                    <p class="mb-0 text-muted">Current Page</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quarters List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list me-2" style="color: #6f42c1;"></i>Quarters List
+                        </h5>
+                        <span class="badge stat-badge">{{ total_quarters }} records</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if quarters %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Quarter</th>
+                                    <th>Created By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quarter in quarters %}
+                                <tr>
+                                    <td><strong>#{{ quarter.pk }}</strong></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-calendar3 me-2" style="color: #6f42c1;"></i>
+                                            <strong>{{ quarter.quarter }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ quarter.loginUser.username|default:"System" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'setup:quarter_detail' quarter.pk %}" 
+                                               class="btn btn-outline-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'setup:quarter_update' quarter.pk %}" 
+                                               class="btn btn-outline-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'setup:quarter_delete' quarter.pk %}" 
+                                               class="btn btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="bi bi-inbox fs-1 mb-3 d-block"></i>
+                                            <p>No quarters found.</p>
+                                            <a href="{% url 'setup:quarter_create' %}" class="btn btn-primary">
+                                                <i class="bi bi-plus-circle me-1"></i>Add First Quarter
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox fs-1 mb-3 d-block text-muted"></i>
+                        <h5 class="text-muted">No quarters available</h5>
+                        <p class="text-muted">Start by adding your first quarter to the system.</p>
+                        <a href="{% url 'setup:quarter_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Add New Quarter
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+<div class="mt-8 mb-4">
+    <h1 class="text-2xl text-white">Delete Type of Document</h1>
+    
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-4">
+        <strong class="font-bold">Warning!</strong>
+        <span class="block sm:inline">Are you sure you want to delete this document type?</span>
+    </div>
+    
+    <div class="my-4">
+        <p class="text-white"><strong>ID:</strong> {{ document_type.document_type }}</p>
+    </div>
+
+    <div class="flex justify-end space-x-4 mt-6">
+        <form hx-post="{% url 'delete-document_type' pk=document_type.pk %}" 
+              hx-target="#document_type-block">
+            {% csrf_token %}
+            <button type="submit" class="px-6 py-2 bg-red-600 text-white hover:bg-red-700 rounded">
+                Confirm Delete
+            </button>
+        </form>
+        <button type="button" 
+                class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded"
+                hx-get="{% url 'document_type-list' %}"
+                hx-target="#document_type-block">
+            Cancel
+        </button>
+    </div>
+</div>

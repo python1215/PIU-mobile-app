@@ -1,0 +1,305 @@
+{% extends 'social_and_env/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }} - PIUN Social & Environmental{% endblock %}
+
+{% block social_env_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>
+                    {{ title|default:"OHS Monitoring Form" }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="ohs-form">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <!-- Project and Investment Type -->
+                        <div class="col-md-6">
+                            <label for="{{ form.project.id_for_label }}" class="form-label required">Project</label>
+                            {% render_field form.project %}
+                            {% if form.project.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.Type_of_Investment.id_for_label }}" class="form-label required">Investment Type</label>
+                            {% render_field form.Type_of_Investment %}
+                            {% if form.Type_of_Investment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.Type_of_Investment.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Time Period -->
+                        <div class="col-md-4">
+                            <label for="{{ form.year_of_report.id_for_label }}" class="form-label required">Report Year</label>
+                            {% render_field form.year_of_report %}
+                            {% if form.year_of_report.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.year_of_report.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.quarter.id_for_label }}" class="form-label required">Quarter</label>
+                            {% render_field form.quarter %}
+                            {% if form.quarter.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.quarter.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.date.id_for_label }}" class="form-label required">Monitoring Date</label>
+                            {% render_field form.date %}
+                            {% if form.date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.date.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Geographic Information -->
+                        <div class="col-md-4">
+                            <label for="{{ form.region.id_for_label }}" class="form-label required">Region</label>
+                            {% render_field form.region %}
+                            {% if form.region.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.region.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.district.id_for_label }}" class="form-label required">District</label>
+                            {% render_field form.district %}
+                            {% if form.district.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.district.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.settlement.id_for_label }}" class="form-label required">Settlement</label>
+                            {% render_field form.settlement %}
+                            {% if form.settlement.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.settlement.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Worker Demographics -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-people me-2"></i>Worker Demographics
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.male.id_for_label }}" class="form-label required">Male Workers</label>
+                            {% render_field form.male %}
+                            {% if form.male.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.male.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.female.id_for_label }}" class="form-label required">Female Workers</label>
+                            {% render_field form.female %}
+                            {% if form.female.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.female.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.youth_male.id_for_label }}" class="form-label required">Male Youth</label>
+                            {% render_field form.youth_male %}
+                            {% if form.youth_male.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.youth_male.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="{{ form.youth_female.id_for_label }}" class="form-label required">Female Youth</label>
+                            {% render_field form.youth_female %}
+                            {% if form.youth_female.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.youth_female.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Worker Totals Display -->
+                        <div class="col-12">
+                            <div class="bg-light p-3 rounded">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <h5 class="mb-0" id="total-workers">0</h5>
+                                        <small class="text-muted">Total Workers</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="mb-0" id="total-youth">0</h5>
+                                        <small class="text-muted">Total Youth</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="mb-0" id="total-male">0</h5>
+                                        <small class="text-muted">Total Male</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="mb-0" id="total-female">0</h5>
+                                        <small class="text-muted">Total Female</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- OHS Details -->
+                        <div class="col-12">
+                            <h6 class="text-success border-bottom pb-2 mb-3">
+                                <i class="bi bi-shield-check me-2"></i>OHS Information
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.quality_at_entry_requirement.id_for_label }}" class="form-label required">Quality at Entry Requirements</label>
+                            {% render_field form.quality_at_entry_requirement %}
+                            {% if form.quality_at_entry_requirement.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.quality_at_entry_requirement.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Include staffing, training, medicals, code of conduct, contracts</div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.working_environment.id_for_label }}" class="form-label required">Working Environment</label>
+                            {% render_field form.working_environment %}
+                            {% if form.working_environment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.working_environment.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.Kpi_description.id_for_label }}" class="form-label required">KPI Description</label>
+                            {% render_field form.Kpi_description %}
+                            {% if form.Kpi_description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.Kpi_description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.picture.id_for_label }}" class="form-label">Monitoring Photo</label>
+                            {% render_field form.picture %}
+                            {% if form.picture.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.picture.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Upload photos of the monitoring activity</div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.remarks.id_for_label }}" class="form-label">Issues or Remarks</label>
+                            {% render_field form.remarks %}
+                            {% if form.remarks.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.remarks.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-end">
+                        <a href="{% url 'ohs_list' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            {% if ohs %}Update{% else %}Create{% endif %} OHS Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate worker totals
+    function calculateTotals() {
+        const male = parseInt(document.getElementById('id_male').value) || 0;
+        const female = parseInt(document.getElementById('id_female').value) || 0;
+        const youthMale = parseInt(document.getElementById('id_youth_male').value) || 0;
+        const youthFemale = parseInt(document.getElementById('id_youth_female').value) || 0;
+        
+        const totalWorkers = male + female;
+        const totalYouth = youthMale + youthFemale;
+        const totalMale = male + youthMale;
+        const totalFemale = female + youthFemale;
+        
+        document.getElementById('total-workers').textContent = totalWorkers;
+        document.getElementById('total-youth').textContent = totalYouth;
+        document.getElementById('total-male').textContent = totalMale;
+        document.getElementById('total-female').textContent = totalFemale;
+    }
+    
+    // Add event listeners to worker count fields
+    ['id_male', 'id_female', 'id_youth_male', 'id_youth_female'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', calculateTotals);
+        }
+    });
+    
+    // Initial calculation
+    calculateTotals();
+    
+    // Form validation
+    const form = document.getElementById('ohs-form');
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            event.preventDefault();
+            document.querySelector('.is-invalid').focus();
+        }
+    });
+});
+</script>
+{% endblock %}

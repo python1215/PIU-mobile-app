@@ -1,0 +1,208 @@
+{% extends 'PIU_Mapping_project_Sites/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ action }} Project Mapping - PIU Mapping{% endblock %}
+
+{% block mapping_content %}
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2" style="color: white;">{{ action }} Project Mapping</h1>
+                    <p class="text-muted">{% if action == 'Add' %}Create new geographic project mapping entry{% else %}Update existing project mapping information{% endif %}</p>
+                </div>
+                <div>
+                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-{% if action == 'Add' %}plus-circle{% else %}pencil{% endif %} me-2"></i>
+                        Project Mapping Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" hx-boost="true">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Profile Year and Access -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.profile_year.id_for_label }}" class="form-label">Profile Year</label>
+                                {{ form.profile_year|add_class:"form-control" }}
+                                {% if form.profile_year.errors %}
+                                    <div class="text-danger small">{{ form.profile_year.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.access.id_for_label }}" class="form-label">Access Type</label>
+                                {{ form.access|add_class:"form-control" }}
+                                {% if form.access.errors %}
+                                    <div class="text-danger small">{{ form.access.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Geographic Location -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.region.id_for_label }}" class="form-label">Region</label>
+                                {{ form.region|add_class:"form-control" }}
+                                {% if form.region.errors %}
+                                    <div class="text-danger small">{{ form.region.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.district.id_for_label }}" class="form-label">District</label>
+                                {{ form.district|add_class:"form-control" }}
+                                {% if form.district.errors %}
+                                    <div class="text-danger small">{{ form.district.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.settlement.id_for_label }}" class="form-label">Settlement</label>
+                                {{ form.settlement|add_class:"form-control" }}
+                                {% if form.settlement.errors %}
+                                    <div class="text-danger small">{{ form.settlement.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Household Data -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.Total_No_of_Households.id_for_label }}" class="form-label">Total Households</label>
+                                {{ form.Total_No_of_Households|add_class:"form-control" }}
+                                {% if form.Total_No_of_Households.errors %}
+                                    <div class="text-danger small">{{ form.Total_No_of_Households.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.no_of_customer_connections.id_for_label }}" class="form-label">Customer Connections</label>
+                                {{ form.no_of_customer_connections|add_class:"form-control" }}
+                                {% if form.no_of_customer_connections.errors %}
+                                    <div class="text-danger small">{{ form.no_of_customer_connections.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.no_of_connected_household.id_for_label }}" class="form-label">Connected Households</label>
+                                {{ form.no_of_connected_household|add_class:"form-control" }}
+                                {% if form.no_of_connected_household.errors %}
+                                    <div class="text-danger small">{{ form.no_of_connected_household.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Coordinates -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude</label>
+                                {{ form.Latitude|add_class:"form-control" }}
+                                {% if form.Latitude.errors %}
+                                    <div class="text-danger small">{{ form.Latitude.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Decimal degrees format (e.g., 13.4567)</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Longitude.id_for_label }}" class="form-label">Longitude</label>
+                                {{ form.Longitude|add_class:"form-control" }}
+                                {% if form.Longitude.errors %}
+                                    <div class="text-danger small">{{ form.Longitude.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Decimal degrees format (e.g., -15.3101)</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Projects -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.project.id_for_label }}" class="form-label">Associated Projects</label>
+                                {{ form.project|add_class:"form-control" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small">{{ form.project.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple projects</div>
+                            </div>
+                            
+                            <!-- Donors -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.donor.id_for_label }}" class="form-label">Funding Donors</label>
+                                {{ form.donor|add_class:"form-control" }}
+                                {% if form.donor.errors %}
+                                    <div class="text-danger small">{{ form.donor.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple donors</div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-1"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-{% if action == 'Add' %}plus-circle{% else %}check-circle{% endif %} me-1"></i>
+                                        {{ action }} Mapping
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HTMX Integration for Dynamic Dropdowns -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle region change to load districts
+    document.getElementById('id_region').addEventListener('change', function() {
+        const regionId = this.value;
+        if (regionId) {
+            htmx.ajax('GET', `/PIU_Mapping_project_Sites/load_districts/?region_id=${regionId}`, {
+                target: '#id_district',
+                swap: 'innerHTML'
+            });
+        } else {
+            document.getElementById('id_district').innerHTML = '<option value="">---------</option>';
+            document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+        }
+    });
+
+    // Handle district change to load settlements
+    document.getElementById('id_district').addEventListener('change', function() {
+        const districtId = this.value;
+        if (districtId) {
+            htmx.ajax('GET', `/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`, {
+                target: '#id_settlement',
+                swap: 'innerHTML'
+            });
+        } else {
+            document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+        }
+    });
+});
+</script>
+{% endblock %}

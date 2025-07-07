@@ -1,0 +1,327 @@
+{% extends 'PIU_Financial_mgt/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Budget Summary - PIU Financial Management{% endblock %}
+
+{% block financial_content %}
+<div class="container-fluid" style="background-color: #f8f9fa; min-height: 100vh; padding-top: 20px; padding-bottom: 20px;">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">Budget Summary</h2>
+                    <p class="text-muted">Comprehensive financial overview and budget analysis</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'PIU_Financial_mgt:projects' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-folder me-1"></i>View Projects
+                    </a>
+                    <a href="{% url 'PIU_Financial_mgt:export-projects-excel' %}" class="btn btn-outline-success">
+                        <i class="bi bi-file-excel me-1"></i>Export
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Budget</h6>
+                            <h3 class="card-title mb-0">${{ summary.total_budget|floatformat:2|default:"0.00" }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-currency-dollar fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Projects</h6>
+                            <h3 class="card-title mb-0">{{ summary.total_projects|default:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-folder fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Components</h6>
+                            <h3 class="card-title mb-0">{{ summary.total_components|default:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-puzzle-piece fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Activities</h6>
+                            <h3 class="card-title mb-0">{{ summary.total_activities|default:0 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-list-task fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Breakdown by Project -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Budget Breakdown by Project</h5>
+                </div>
+                <div class="card-body">
+                    {% if project_budgets %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Project ID</th>
+                                        <th>Currency</th>
+                                        <th>Budget</th>
+                                        <th>Components</th>
+                                        <th>Activities</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in project_budgets %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-folder text-primary me-2"></i>
+                                                <div>
+                                                    <div class="fw-medium">{{ project.project|truncatechars:40 }}</div>
+                                                    <small class="text-muted">{{ project.loginUser.username|default:"N/A" }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ project.projectID }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ project.currency.currency_code|default:"N/A" }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success">${{ project.funding|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ project.component_count|default:0 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ project.activity_count|default:0 }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: {{ project.percentage|default:0 }}%"
+                                                     aria-valuenow="{{ project.percentage|default:0 }}" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    {{ project.percentage|floatformat:1|default:0 }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 mb-3"></i>
+                            <h5>No Budget Data Available</h5>
+                            <p>No project budget information found.</p>
+                            <a href="{% url 'PIU_Financial_mgt:add-project' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Your First Project
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget by Currency -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Budget by Currency</h5>
+                </div>
+                <div class="card-body">
+                    {% if currency_breakdown %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Currency</th>
+                                        <th>Total Amount</th>
+                                        <th>Projects</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in currency_breakdown %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">{{ item.currency__currency_code }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">${{ item.total_amount|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ item.project_count }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-3">
+                            <p>No currency data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Budget by Donor</h5>
+                </div>
+                <div class="card-body">
+                    {% if donor_breakdown %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Donor</th>
+                                        <th>Total Amount</th>
+                                        <th>Projects</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in donor_breakdown %}
+                                    <tr>
+                                        <td>
+                                            <span class="text-truncate" style="max-width: 150px;">{{ item.donor_name|truncatechars:20 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">${{ item.total_amount|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ item.project_count }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-3">
+                            <p>No donor data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Financial Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_projects %}
+                        <div class="list-group list-group-flush">
+                            {% for project in recent_projects %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ project.project|truncatechars:50 }}</h6>
+                                        <p class="mb-1 text-muted small">{{ project.projectID }} • ${{ project.funding|floatformat:2 }}</p>
+                                        <small class="text-muted">Added {{ project.date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-primary">{{ project.currency.currency_code|default:"N/A" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-3">
+                            <p>No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'PIU_Financial_mgt:add-project' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Project
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'PIU_Financial_mgt:components' %}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-puzzle-piece me-2"></i>Manage Components
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'PIU_Financial_mgt:activities' %}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-list-task me-2"></i>Manage Activities
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'PIU_Financial_mgt:export-projects-excel' %}" class="btn btn-outline-success w-100">
+                                <i class="bi bi-file-excel me-2"></i>Export Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

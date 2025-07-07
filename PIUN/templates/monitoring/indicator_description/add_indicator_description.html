@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Add Indicator Description - Monitoring{% endblock monitoring_content %}
+
+{% block monitoring_content %}
+<div class="container-fluid px-4 py-6">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-plus me-2 text-purple-600"></i>Add Indicator Description
+            </h1>
+            <p class="text-muted mb-0">Create a new indicator description for monitoring</p>
+        </div>
+        <div>
+            <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-chart-line me-2"></i>Dashboard
+            </a>
+            <a href="{% url 'monitoring:enhanced-indicator-description-list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-purple-600 text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-form me-2"></i>Indicator Description Form
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" hx-boost="true">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <!-- Project Selection -->
+                            <div class="col-md-6">
+                                <label for="{{ form.project.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.project.label }}
+                                </label>
+                                {{ form.project|add_class:"form-select" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small mt-1">{{ form.project.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- PDO Selection -->
+                            <div class="col-md-6">
+                                <label for="{{ form.pdo.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.pdo.label }}
+                                </label>
+                                {{ form.pdo|add_class:"form-select" }}
+                                {% if form.pdo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.pdo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Project Outcome -->
+                            <div class="col-md-6">
+                                <label for="{{ form.project_outcome.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.project_outcome.label }}
+                                </label>
+                                {{ form.project_outcome|add_class:"form-select" }}
+                                {% if form.project_outcome.errors %}
+                                    <div class="text-danger small mt-1">{{ form.project_outcome.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Project Result -->
+                            <div class="col-md-6">
+                                <label for="{{ form.project_result.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.project_result.label }}
+                                </label>
+                                {{ form.project_result|add_class:"form-select" }}
+                                {% if form.project_result.errors %}
+                                    <div class="text-danger small mt-1">{{ form.project_result.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Indicator Type -->
+                            <div class="col-md-6">
+                                <label for="{{ form.indicator_type.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.indicator_type.label }}
+                                </label>
+                                {{ form.indicator_type|add_class:"form-select" }}
+                                {% if form.indicator_type.errors %}
+                                    <div class="text-danger small mt-1">{{ form.indicator_type.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Indicator Description -->
+                            <div class="col-12">
+                                <label for="{{ form.indicator_description.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.indicator_description.label }}
+                                </label>
+                                {{ form.indicator_description|add_class:"form-control" }}
+                                {% if form.indicator_description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.indicator_description.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-text">Provide a detailed description of the indicator</div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                            <a href="{% url 'monitoring:enhanced-indicator-description-list' %}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Indicator Description
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.bg-purple-600 {
+    background-color: #667eea !important;
+}
+
+.text-purple-600 {
+    color: #667eea !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // HTMX is already included in base template
+    console.log('Form ready with HTMX support');
+});
+</script>
+{% endblock monitoring_content %}

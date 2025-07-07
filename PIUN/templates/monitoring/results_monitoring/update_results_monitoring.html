@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Update Results Monitoring - Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-6">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-edit me-2 text-indigo-600"></i>Update Results Monitoring
+            </h1>
+            <p class="text-muted mb-0">Edit monitoring record #{{ monitoring.id }}</p>
+        </div>
+        <div>
+            <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header text-white position-relative" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 2rem;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-bar me-2"></i>Update Results Monitoring Form
+                    </h5>
+                    <p class="mb-0 opacity-75 small">Edit project performance indicators and monitoring data</p>
+                    <div class="position-absolute top-0 end-0 me-3 mt-3">
+                        <i class="fas fa-edit opacity-25" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 2.5rem 3rem;">
+                    <form method="post" hx-boost="true">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-success rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-info text-white"></i>
+                                </div>
+                                <h6 class="text-success mb-0 fw-bold fs-5">Basic Information</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.year.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-calendar-alt me-1 text-muted"></i>Year
+                                    </label>
+                                    {{ form.year|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.year.errors %}
+                                        <div class="text-danger small mt-1">{{ form.year.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.quarter.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-calendar-check me-1 text-muted"></i>Quarter
+                                    </label>
+                                    {{ form.quarter|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.quarter.errors %}
+                                        <div class="text-danger small mt-1">{{ form.quarter.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Information -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-info rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-project-diagram text-white"></i>
+                                </div>
+                                <h6 class="text-info mb-0 fw-bold fs-5">Project Information</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.project.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-folder me-1 text-muted"></i>Project
+                                    </label>
+                                    {{ form.project|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.project.errors %}
+                                        <div class="text-danger small mt-1">{{ form.project.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.pdo.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-bullseye me-1 text-muted"></i>PDO
+                                    </label>
+                                    {{ form.pdo|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.pdo.errors %}
+                                        <div class="text-danger small mt-1">{{ form.pdo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.project_outcome.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-trophy me-1 text-muted"></i>Project Outcome
+                                    </label>
+                                    {{ form.project_outcome|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.project_outcome.errors %}
+                                        <div class="text-danger small mt-1">{{ form.project_outcome.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.project_result.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-flag-checkered me-1 text-muted"></i>Project Result
+                                    </label>
+                                    {{ form.project_result|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.project_result.errors %}
+                                        <div class="text-danger small mt-1">{{ form.project_result.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicator Information -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-warning rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-chart-line text-white"></i>
+                                </div>
+                                <h6 class="text-warning mb-0 fw-bold fs-5">Indicator Information</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.indicator_type.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-tags me-1 text-muted"></i>Indicator Type
+                                    </label>
+                                    {{ form.indicator_type|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.indicator_type.errors %}
+                                        <div class="text-danger small mt-1">{{ form.indicator_type.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.measurement_unit.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-ruler me-1 text-muted"></i>Measurement Unit
+                                    </label>
+                                    {{ form.measurement_unit|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.measurement_unit.errors %}
+                                        <div class="text-danger small mt-1">{{ form.measurement_unit.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="{{ form.indicator_description.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-align-left me-1 text-muted"></i>Indicator Description
+                                    </label>
+                                    {{ form.indicator_description|add_class:"form-control shadow-sm border-2"|attr:"rows:4" }}
+                                    {% if form.indicator_description.errors %}
+                                        <div class="text-danger small mt-1">{{ form.indicator_description.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.collection_frequency.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-clock me-1 text-muted"></i>Collection Frequency
+                                    </label>
+                                    {{ form.collection_frequency|add_class:"form-select shadow-sm border-2" }}
+                                    {% if form.collection_frequency.errors %}
+                                        <div class="text-danger small mt-1">{{ form.collection_frequency.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Values -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-danger rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-chart-area text-white"></i>
+                                </div>
+                                <h6 class="text-danger mb-0 fw-bold fs-5">Performance Values</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <label for="{{ form.baseline_value.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-chart-line me-1 text-muted"></i>Baseline Value
+                                    </label>
+                                    {{ form.baseline_value|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.baseline_value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.baseline_value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="{{ form.achieved_value.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-chart-bar me-1 text-muted"></i>Achieved Value
+                                    </label>
+                                    {{ form.achieved_value|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.achieved_value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.achieved_value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-bullseye me-1 text-muted"></i>Target Value
+                                    </label>
+                                    {{ form.End_Target_Value|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.End_Target_Value.errors %}
+                                        <div class="text-danger small mt-1">{{ form.End_Target_Value.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Percentages (Auto-calculated) -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-secondary rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-percentage text-white"></i>
+                                </div>
+                                <h6 class="text-secondary mb-0 fw-bold fs-5">Achievement Percentages</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.percentage_achieved_vs_baseline.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-percent me-1 text-muted"></i>Percentage progress from baseline
+                                    </label>
+                                    {{ form.percentage_achieved_vs_baseline|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.percentage_achieved_vs_baseline.errors %}
+                                        <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_baseline.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.percentage_achieved_vs_end_target.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-percent me-1 text-muted"></i>Percentage progress towards end target
+                                    </label>
+                                    {{ form.percentage_achieved_vs_end_target|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.percentage_achieved_vs_end_target.errors %}
+                                        <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_end_target.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="mb-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-dark rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-comment-dots text-white"></i>
+                                </div>
+                                <h6 class="text-dark mb-0 fw-bold fs-5">Additional Information</h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <label for="{{ form.remarks.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="fas fa-sticky-note me-1 text-muted"></i>Remarks
+                                    </label>
+                                    {{ form.remarks|add_class:"form-control shadow-sm border-2"|attr:"rows:3" }}
+                                    {% if form.remarks.errors %}
+                                        <div class="text-danger small mt-1">{{ form.remarks.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row g-3 mt-4">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" style="border-radius: 12px;">
+                                    <i class="fas fa-save me-2"></i>Update Monitoring Record
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-secondary btn-lg w-100" style="border-radius: 12px;">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enhanced Results Monitoring List - Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-6">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-chart-line me-2 text-success"></i>Enhanced Results Monitoring
+            </h1>
+            <p class="text-muted mb-0">Comprehensive monitoring records management</p>
+        </div>
+        <div>
+            <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Add New Record
+            </a>
+            <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Records Table -->
+    <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-header bg-gradient-success text-white py-3" style="border-radius: 15px 15px 0 0;">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Monitoring Records
+                <span class="badge bg-light text-dark ms-2">{{ monitoring_records.count }} total</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if monitoring_records %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Year/Quarter</th>
+                                <th>Project</th>
+                                <th>PDO</th>
+                                <th>Indicator Type</th>
+                                <th>Indicator Description</th>
+                                <th>Baseline</th>
+                                <th>Achieved</th>
+                                <th>Target</th>
+                                <th>% vs Baseline</th>
+                                <th>Date Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in monitoring_records %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ record.year|default:"N/A" }}</strong><br>
+                                        <small class="text-muted">{{ record.quarter|default:"N/A" }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ record.project.project|truncatechars:20 }}</strong><br>
+                                        <small class="text-muted">{{ record.project.projectID }}</small>
+                                    </td>
+                                    <td>{{ record.pdo.pdo_statement|truncatechars:30 }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ record.indicator_type }}</span>
+                                    </td>
+                                    <td>{{ record.indicator_description|truncatechars:40 }}</td>
+                                    <td>
+                                        <strong>{{ record.baseline_value|floatformat:1|default:"--" }}</strong><br>
+                                        <small class="text-muted">{{ record.measurement_unit }}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">{{ record.achieved_value|floatformat:1|default:"--" }}</strong>
+                                    </td>
+                                    <td>
+                                        <strong class="text-warning">{{ record.End_Target_Value|floatformat:1|default:"--" }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if record.percentage_achieved_vs_baseline %}
+                                            {% if record.percentage_achieved_vs_baseline >= 100 %}
+                                                <span class="badge bg-success">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
+                                            {% elif record.percentage_achieved_vs_baseline >= 75 %}
+                                                <span class="badge bg-warning">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ record.date_created|date:"M d, Y" }}</small><br>
+                                        <small class="text-muted">{{ record.loginUser.username }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" class="btn btn-outline-info btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No monitoring records found</h5>
+                    <p class="text-muted">Start by adding your first monitoring record.</p>
+                    <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add First Record
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+    
+    .card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: 1px solid #e3e6f0;
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,521 @@
+{% extends 'project_actions/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - NAWEC PIU{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-radius: 12px;
+    }
+    .info-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        color: #212529;
+        margin-bottom: 0;
+    }
+    .status-badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+    }
+    .coordinates-map {
+        height: 200px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .monitoring-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .monitoring-timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #0d6efd;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #0d6efd;
+    }
+    .contract-duration {
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block social_env_content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'project_actions:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'project_actions:contract_profiling_works_list' %}">Works Contracts</a></li>
+                    <li class="breadcrumb-item active">{{ contract.contract_refNo }}</li>
+                </ol>
+            </nav>
+            <h2 class="mb-2 fw-bold">{{ page_title }}</h2>
+            <div class="d-flex align-items-center gap-3">
+                {% now "Y-m-d" as today %}
+                {% if contract.contract_start_date and contract.contract_end_date %}
+                    {% if contract.contract_start_date|date:"Y-m-d" > today %}
+                        <span class="badge bg-secondary status-badge">
+                            <i class="bi bi-clock me-2"></i>Upcoming Contract
+                        </span>
+                    {% elif contract.contract_end_date|date:"Y-m-d" < today %}
+                        <span class="badge bg-success status-badge">
+                            <i class="bi bi-check-circle me-2"></i>Completed Contract
+                        </span>
+                    {% else %}
+                        <span class="badge bg-primary status-badge">
+                            <i class="bi bi-play-circle me-2"></i>Active Contract
+                        </span>
+                    {% endif %}
+                {% endif %}
+                
+                {% if contract.amendments %}
+                    <span class="badge bg-warning status-badge">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Has Amendments
+                    </span>
+                {% endif %}
+                
+                <span class="text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Created {{ contract.date|date:"M d, Y" }}
+                </span>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'project_actions:contract_profiling_works_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to List
+            </a>
+            <div class="dropdown">
+                <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots me-2"></i>Actions
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'project_actions:update-contract_profiling_works' contract.pk %}">
+                            <i class="bi bi-pencil me-2"></i>Edit Contract
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'project_actions:contract_monitoring_create' %}?contract_ref={{ contract.contract_refNo }}">
+                            <i class="bi bi-plus-circle me-2"></i>Add Monitoring Record
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button class="dropdown-item text-danger" type="button" onclick="confirmDelete()" disabled>
+                            <i class="bi bi-trash me-2"></i>Delete Contract
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <a href="{% url 'project_actions:update-contract_profiling_works' contract.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Edit Contract
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contract Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-file-text me-2"></i>Contract Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Contract Reference Number</div>
+                                <div class="info-value fw-bold fs-5">{{ contract.contract_refNo }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Project</div>
+                                <div class="info-value">
+                                    <strong>{{ contract.projectID.projectName|default:"Not specified" }}</strong>
+                                    {% if contract.projectID.projectCode %}
+                                        <small class="text-muted d-block">Code: {{ contract.projectID.projectCode }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Component</div>
+                                <div class="info-value">{{ contract.compID.compName|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Subcomponent</div>
+                                <div class="info-value">{{ contract.subcompID.subcompName|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Activity</div>
+                                <div class="info-value">{{ contract.activityID.activityName|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Project Category</div>
+                                <div class="info-value">{{ contract.project_Category.categoryName|default:"Not specified" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Contract Value</div>
+                                <div class="info-value">
+                                    <span class="fs-4 fw-bold text-success">{{ contract.contract_value|floatformat:2 }}</span>
+                                    {% if contract.currency %}
+                                        <small class="text-muted">{{ contract.currency.currencyName }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Funding Source</div>
+                                <div class="info-value">{{ contract.funding_source.donorName|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Contractor</div>
+                                <div class="info-value">{{ contract.name_of_contractor|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Consultant</div>
+                                <div class="info-value">{{ contract.name_of_consultant|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Duration</div>
+                                <div class="info-value">
+                                    {{ contract.duration|default:"Not specified" }}
+                                    {% if duration_days %}
+                                        <small class="text-muted d-block">({{ duration_days }} days)</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Created By</div>
+                                <div class="info-value">
+                                    {{ contract.loginUser.get_full_name|default:contract.loginUser.username }}
+                                    <small class="text-muted d-block">{{ contract.date|date:"M d, Y H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contract Timeline -->
+            <div class="card detail-card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-range me-2"></i>Contract Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="contract-duration">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center">
+                                <div class="fw-bold text-muted">Start Date</div>
+                                <div class="fs-5 fw-bold">{{ contract.contract_start_date|date:"M d, Y"|default:"TBD" }}</div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="fw-bold text-muted">Duration</div>
+                                <div class="fs-5 fw-bold">
+                                    {% if duration_days %}
+                                        {{ duration_days }} days
+                                    {% else %}
+                                        {{ contract.duration|default:"TBD" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="fw-bold text-muted">End Date</div>
+                                <div class="fs-5 fw-bold">{{ contract.contract_end_date|date:"M d, Y"|default:"TBD" }}</div>
+                            </div>
+                        </div>
+                        {% if contract.contract_start_date and contract.contract_end_date %}
+                        <div class="mt-3">
+                            <div class="progress" style="height: 8px;">
+                                {% now "Y-m-d" as today %}
+                                {% if contract.contract_end_date|date:"Y-m-d" < today %}
+                                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                                {% elif contract.contract_start_date|date:"Y-m-d" > today %}
+                                    <div class="progress-bar bg-secondary" style="width: 0%"></div>
+                                {% else %}
+                                    <!-- Calculate progress -->
+                                    <div class="progress-bar bg-primary" style="width: 45%"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Specifics -->
+            {% if contract.main_intervention_focus_result or contract.location_of_investment or contract.Latitude or contract.Longitude %}
+            <div class="card detail-card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-geo-alt me-2"></i>Project Specifics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if contract.main_intervention_focus_result %}
+                    <div class="info-item">
+                        <div class="info-label">Main Intervention Focus Result</div>
+                        <div class="info-value">{{ contract.main_intervention_focus_result }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if contract.location_of_investment %}
+                    <div class="info-item">
+                        <div class="info-label">Location of Investment</div>
+                        <div class="info-value">{{ contract.location_of_investment }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        {% if contract.target_number_of_beneficiary_settlements %}
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <div class="info-label">Beneficiary Settlements</div>
+                                <div class="info-value">{{ contract.target_number_of_beneficiary_settlements }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if contract.gross_floor_area_m2 %}
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <div class="info-label">Gross Floor Area</div>
+                                <div class="info-value">{{ contract.gross_floor_area_m2 }} m²</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if contract.Latitude and contract.Longitude %}
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <div class="info-label">Coordinates</div>
+                                <div class="info-value">
+                                    {{ contract.Latitude|floatformat:6 }}, {{ contract.Longitude|floatformat:6 }}
+                                    <a href="https://www.google.com/maps?q={{ contract.Latitude }},{{ contract.Longitude }}" 
+                                       target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                                        <i class="bi bi-map me-1"></i>View on Map
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if contract.Latitude and contract.Longitude %}
+                    <div class="mt-3">
+                        <div class="coordinates-map">
+                            <div class="text-center">
+                                <i class="bi bi-geo-alt-fill text-primary fs-2"></i>
+                                <div class="mt-2">
+                                    <small class="text-muted">Coordinates: {{ contract.Latitude|floatformat:6 }}, {{ contract.Longitude|floatformat:6 }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Remarks -->
+            {% if contract.remarks %}
+            <div class="card detail-card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-chat-text me-2"></i>Remarks & Notes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-value">{{ contract.remarks|linebreaks }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Contract Summary -->
+            <div class="card detail-card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-bar-chart me-2"></i>Contract Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="fs-4 fw-bold text-primary">{{ monitoring_count }}</div>
+                                <div class="small text-muted">Monitoring Records</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="fs-4 fw-bold text-success">{{ contract_status|title }}</div>
+                            <div class="small text-muted">Current Status</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card detail-card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'project_actions:contract_monitoring_create' %}?contract_ref={{ contract.contract_refNo }}" 
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add Monitoring Record
+                    </a>
+                    <a href="{% url 'project_actions:update-contract_profiling_works' contract.pk %}" 
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-pencil me-2"></i>Edit Contract
+                    </a>
+                    <a href="{% url 'project_actions:export_works_contracts_excel' %}?contract_refNo={{ contract.contract_refNo }}" 
+                       class="btn btn-outline-success">
+                        <i class="bi bi-download me-2"></i>Export Contract
+                    </a>
+                </div>
+            </div>
+
+            <!-- Monitoring Records -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="bi bi-journal-check me-2"></i>Monitoring Records
+                        </h6>
+                        {% if monitoring_records %}
+                        <a href="{% url 'project_actions:contract_monitoring_list' %}?search={{ contract.contract_refNo }}" 
+                           class="btn btn-sm btn-outline-primary">View All</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if monitoring_records %}
+                        <div class="monitoring-timeline">
+                            {% for record in monitoring_records|slice:":5" %}
+                            <div class="timeline-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ record.type_of_monitoring|default:"Monitoring" }}</h6>
+                                        <p class="mb-1 text-muted small">{{ record.Target|truncatechars:50 }}</p>
+                                        <small class="text-muted">{{ record.monitoring_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <a href="{% url 'project_actions:contract_monitoring_detail' record.pk %}" 
+                                       class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if monitoring_records.count > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'project_actions:contract_monitoring_list' %}?search={{ contract.contract_refNo }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                View All {{ monitoring_records.count }} Records
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-journal-x text-muted fs-3"></i>
+                            <p class="text-muted mt-2 mb-3">No monitoring records yet</p>
+                            <a href="{% url 'project_actions:contract_monitoring_create' %}?contract_ref={{ contract.contract_refNo }}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>Add First Record
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the works contract <strong>{{ contract.contract_refNo }}</strong>?</p>
+                <p class="text-danger small">This action cannot be undone and will also delete all associated monitoring records.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'project_actions:delete-contract_profiling_works' contract.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Contract</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+// Auto-refresh monitoring records every 2 minutes if page is active
+setInterval(function() {
+    if (document.visibilityState === 'visible') {
+        // Could implement AJAX refresh of monitoring records here
+    }
+}, 120000);
+</script>
+{% endblock %}

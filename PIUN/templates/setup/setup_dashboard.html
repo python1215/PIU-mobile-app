@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Setup Dashboard - PIUN{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .setup-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(111, 66, 193, 0.15);
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+        border: none;
+        color: white;
+    }
+    .setup-module-card {
+        border-left: 4px solid #6f42c1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-gear-fill me-2" style="color: #6f42c1;"></i>System Setup Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Configure system parameters, reference data, and master settings</p>
+                </div>
+                <div>
+                    <a href="{% url 'main_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Main
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_donors }}</h3>
+                            <p class="mb-0 small">Donors</p>
+                        </div>
+                        <i class="bi bi-people-fill fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_categories }}</h3>
+                            <p class="mb-0 small">Project Categories</p>
+                        </div>
+                        <i class="bi bi-tags-fill fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_quarters }}</h3>
+                            <p class="mb-0 small">Quarters</p>
+                        </div>
+                        <i class="bi bi-calendar-event fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_monitoring_types }}</h3>
+                            <p class="mb-0 small">Monitoring Types</p>
+                        </div>
+                        <i class="bi bi-bar-chart-fill fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Modules Grid -->
+    <div class="row">
+        <!-- Core Setup -->
+        <div class="col-lg-6 mb-4">
+            <div class="card setup-module-card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear me-2" style="color: #6f42c1;"></i>Core Setup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-people-fill fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Donors</h6>
+                                    <p class="card-text small text-muted">Manage funding organizations</p>
+                                    <a href="{% url 'setup:donor_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-tags-fill fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Project Categories</h6>
+                                    <p class="card-text small text-muted">Define project classifications</p>
+                                    <a href="{% url 'setup:project_category_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-calendar-event fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Quarters</h6>
+                                    <p class="card-text small text-muted">Configure reporting periods</p>
+                                    <a href="{% url 'setup:quarter_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-people fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Contributors</h6>
+                                    <p class="card-text small text-muted">Manage project contributors</p>
+                                    <a href="{% url 'setup:contributors_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Setup -->
+        <div class="col-lg-6 mb-4">
+            <div class="card setup-module-card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2" style="color: #6f42c1;"></i>Monitoring Setup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-graph-up fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Monitoring Types</h6>
+                                    <p class="card-text small text-muted">Configure monitoring categories</p>
+                                    <a href="{% url 'setup:type_of_monitoring_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-clipboard-check fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">KPI Contracts</h6>
+                                    <p class="card-text small text-muted">Manage performance indicators</p>
+                                    <a href="{% url 'setup:kpi_for_contract_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-rulers fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Measurement Units</h6>
+                                    <p class="card-text small text-muted">Define measurement standards</p>
+                                    <a href="{% url 'setup:measurement_unit_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-activity fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Activity Monitoring</h6>
+                                    <p class="card-text small text-muted">Configure activity types</p>
+                                    <a href="{% url 'setup:project_activity_monitoring_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Management Setup -->
+        <div class="col-lg-6 mb-4">
+            <div class="card setup-module-card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark me-2" style="color: #6f42c1;"></i>Document Setup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Document Types</h6>
+                                    <p class="card-text small text-muted">Configure document categories and types</p>
+                                    <a href="{% url 'setup:document_type_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-6 mb-4">
+            <div class="card setup-module-card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2" style="color: #6f42c1;"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_donors %}
+                    <h6 class="text-muted mb-2">Recent Donors</h6>
+                    <div class="list-group list-group-flush mb-3">
+                        {% for donor in recent_donors %}
+                        <div class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-medium">{{ donor.name }}</span>
+                                <small class="text-muted">{{ donor.date|date:"M d" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if recent_categories %}
+                    <h6 class="text-muted mb-2">Recent Categories</h6>
+                    <div class="list-group list-group-flush">
+                        {% for category in recent_categories %}
+                        <div class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-medium">{{ category.category }}</span>
+                                <small class="text-muted">{{ category.date|date:"M d" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="bi bi-lightning-fill me-2" style="color: #6f42c1;"></i>Quick Actions
+                    </h6>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'setup:donor_create' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Add New Donor
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'setup:project_category_create' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Add Category
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'setup:quarter_create' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Add Quarter
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'setup:measurement_unit_create' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Add Unit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add hover effects for setup cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const setupCards = document.querySelectorAll('.setup-card');
+        setupCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#6f42c1';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.borderColor = '#dee2e6';
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit NRW Calculation - NAWEC KPI{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi-water"></i> Edit Non-Revenue Water (NRW) Calculation
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'NAWEC_KPI:calculate_nrw_detail' calculation.id %}" class="btn btn-light btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a href="{% url 'NAWEC_KPI:calculate_nrw_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" id="nrwEditForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Input Fields -->
+                            <div class="col-lg-6">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-calculator"></i> Water System Data
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="water_entering_system" class="form-label">
+                                        Water Entering System (M3) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="water_entering_system" 
+                                           name="water_entering_system" 
+                                           value="{{ calculation.water_entering_system|floatformat:2 }}"
+                                           step="0.01" 
+                                           min="0" 
+                                           required
+                                           oninput="calculateNRW()">
+                                    <div class="form-text">Total volume of water entering the distribution system</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="billed_authorized_consumption" class="form-label">
+                                        Billed Authorized Consumption (M3) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="billed_authorized_consumption" 
+                                           name="billed_authorized_consumption" 
+                                           value="{{ calculation.billed_authorized_consumption|floatformat:2 }}"
+                                           step="0.01" 
+                                           min="0" 
+                                           required
+                                           oninput="calculateNRW()">
+                                    <div class="form-text">Volume of water billed to authorized customers</div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="year" class="form-label">Year <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="year" name="year" required>
+                                                <option value="">Select Year</option>
+                                                {% for year in years %}
+                                                <option value="{{ year.id }}" {% if calculation.year.id == year.id %}selected{% endif %}>
+                                                    {{ year.profile_year }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="quarter" class="form-label">Quarter <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="quarter" name="quarter" required>
+                                                <option value="">Select Quarter</option>
+                                                {% for quarter in quarters %}
+                                                <option value="{{ quarter.id }}" {% if calculation.quarter.id == quarter.id %}selected{% endif %}>
+                                                    Q{{ quarter.quarter }} ({{ quarter.quarter_name }})
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Calculation Preview -->
+                            <div class="col-lg-6">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-graph-up-arrow"></i> Live Calculation Preview
+                                </h5>
+                                
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">NRW Formula</h6>
+                                        <p class="mb-2">
+                                            <strong>NRW% = (Water Entering System ÷ Billed Authorized Consumption) × 100</strong>
+                                        </p>
+                                        
+                                        <div class="alert alert-warning" id="calculationPreview">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span><strong>Current NRW:</strong></span>
+                                                <span class="fs-4 fw-bold" id="nrwValue">{{ calculation.calculated_value|floatformat:2 }}%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" 
+                                                     id="nrwProgressBar"
+                                                     role="progressbar" 
+                                                     style="width: {% if calculation.calculated_value > 50 %}100{% else %}{% widthratio calculation.calculated_value 1 2 %}{% endif %}%"
+                                                     aria-valuenow="{{ calculation.calculated_value }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="50">
+                                                    <span id="nrwProgressText">{{ calculation.calculated_value|floatformat:1 }}%</span>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">Performance scale (0-50%+ range)</small>
+                                        </div>
+                                        
+                                        <div class="mt-3" id="performanceIndicator">
+                                            {% if calculation.calculated_value <= 15 %}
+                                            <div class="alert alert-success mb-0">
+                                                <i class="bi bi-check-circle-fill"></i> Excellent Performance
+                                            </div>
+                                            {% elif calculation.calculated_value <= 25 %}
+                                            <div class="alert alert-warning mb-0">
+                                                <i class="bi bi-exclamation-triangle-fill"></i> Good Performance
+                                            </div>
+                                            {% else %}
+                                            <div class="alert alert-danger mb-0">
+                                                <i class="bi bi-x-circle-fill"></i> Needs Improvement
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 mt-3">
+                                    <button type="button" class="btn btn-warning" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'NAWEC_KPI:calculate_nrw_list' %}" class="btn btn-secondary">
+                                        <i class="bi bi-x-lg"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-check-lg"></i> Update NRW Calculation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateNRW() {
+    const waterEntering = parseFloat(document.getElementById('water_entering_system').value) || 0;
+    const billedConsumption = parseFloat(document.getElementById('billed_authorized_consumption').value) || 0;
+    
+    let nrwValue = 0;
+    if (billedConsumption > 0) {
+        nrwValue = (waterEntering / billedConsumption) * 100;
+    }
+    
+    // Update display
+    document.getElementById('nrwValue').textContent = nrwValue.toFixed(2) + '%';
+    document.getElementById('nrwProgressText').textContent = nrwValue.toFixed(1) + '%';
+    
+    // Update progress bar
+    const progressBar = document.getElementById('nrwProgressBar');
+    const progressWidth = nrwValue > 50 ? 100 : (nrwValue * 2);
+    progressBar.style.width = progressWidth + '%';
+    progressBar.setAttribute('aria-valuenow', nrwValue);
+    
+    // Update progress bar color and performance indicator
+    const performanceDiv = document.getElementById('performanceIndicator');
+    if (nrwValue <= 15) {
+        progressBar.className = 'progress-bar bg-success';
+        performanceDiv.innerHTML = '<div class="alert alert-success mb-0"><i class="bi bi-check-circle-fill"></i> Excellent Performance</div>';
+    } else if (nrwValue <= 25) {
+        progressBar.className = 'progress-bar bg-warning';
+        performanceDiv.innerHTML = '<div class="alert alert-warning mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Good Performance</div>';
+    } else {
+        progressBar.className = 'progress-bar bg-danger';
+        performanceDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-x-circle-fill"></i> Needs Improvement</div>';
+    }
+}
+
+function resetForm() {
+    if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
+        document.getElementById('nrwEditForm').reset();
+        calculateNRW();
+    }
+}
+
+// Initialize calculation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    calculateNRW();
+});
+</script>
+{% endblock %}

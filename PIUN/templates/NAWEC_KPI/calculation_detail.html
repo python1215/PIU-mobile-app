@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ calc_type }} Calculation Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calculator"></i>
+                        {{ calc_type }} Calculation Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Calculation Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Calculation Type:</th>
+                                    <td>{{ calc_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Calculated Value:</th>
+                                    <td><strong>{{ calculation.calculated_value|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}{{ calculation.date_created|date:"Y" }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quarter:</th>
+                                    <td>{% if calculation.quarter %}Q{{ calculation.quarter.quarter }}{% else %}N/A{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th>Created Date:</th>
+                                    <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Created By:</th>
+                                    <td>{{ calculation.loginUser.username }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Input Values</h5>
+                            <table class="table table-bordered">
+                                {% if calc_type == 'ROA' %}
+                                    <tr>
+                                        <th>Net Profit After Tax:</th>
+                                        <td>{{ calculation.net_profit_after_tax|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Assets:</th>
+                                        <td>{{ calculation.total_assets|floatformat:2 }}</td>
+                                    </tr>
+                                {% elif calc_type == 'PAT' %}
+                                    <tr>
+                                        <th>Total Revenue:</th>
+                                        <td>{{ calculation.total_revenues_turnover|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Expenses:</th>
+                                        <td>{{ calculation.total_expenses|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tax Amount:</th>
+                                        <td>{{ calculation.tax_amount|floatformat:2 }}</td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% if calc_type == 'ROA' %}{% url 'NAWEC_KPI:calculate_roa_list' %}{% else %}{% url 'NAWEC_KPI:calculate_npm_list' %}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                        <a href="{% if calc_type == 'ROA' %}{% url 'NAWEC_KPI:calculate_roa_edit' calculation.id %}{% else %}{% url 'NAWEC_KPI:calculate_npm_edit' calculation.id %}{% endif %}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

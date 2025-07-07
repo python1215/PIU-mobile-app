@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }} - PIUN Setup{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-form-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-card {
+        border-left: 4px solid #6f42c1;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .btn-setup {
+        background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+        border: none;
+        color: white;
+    }
+    .btn-setup:hover {
+        background: linear-gradient(135deg, #5a2d9f 0%, #7548a3 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="setup-form-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">
+                    <i class="bi bi-person-badge me-2"></i>{{ title }}
+                </h1>
+                <p class="mb-0 opacity-90">
+                    {% if contributor %}
+                        Update contributor information
+                    {% else %}
+                        Add a new contributor to the system
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'setup:contributors_list' %}" class="btn btn-light">
+                    <i class="bi bi-arrow-left me-1"></i>Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-form-text me-2" style="color: #6f42c1;"></i>Contributor Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label fw-medium">
+                                        <i class="bi bi-person-badge me-1" style="color: #6f42c1;"></i>Contributor Name
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {% render_field form.name class="form-control" %}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.name.errors %}
+                                                <div><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Enter the contributor's name or organization
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <a href="{% url 'setup:contributors_list' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-setup">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            {% if contributor %}Update Contributor{% else %}Create Contributor{% endif %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Panel -->
+    <div class="row mt-4 justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="bi bi-info-circle me-2" style="color: #6f42c1;"></i>Contributor Guidelines
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="small text-muted mb-2">CONTRIBUTOR TYPES</h6>
+                            <p class="small mb-3">Organizations: Government agencies, NGOs, private companies<br>Individuals: Consultants, experts, technical advisors<br>Partners: Development partners, funding agencies</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="small text-muted mb-2">USAGE</h6>
+                            <p class="small mb-3">Contributors are tracked for project accountability, stakeholder management, and coordination of activities across different organizations and individuals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const nameField = document.getElementById('{{ form.name.id_for_label }}');
+    
+    // Safe auto-focus the name field
+    if (nameField) {
+        nameField.focus();
+        
+        // Form submission validation
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const name = nameField.value ? nameField.value.trim() : '';
+                if (!name) {
+                    e.preventDefault();
+                    alert('Please enter a contributor name before submitting.');
+                    nameField.focus();
+                    return false;
+                }
+            });
+        }
+        
+        // Real-time validation feedback
+        nameField.addEventListener('blur', function() {
+            const value = this.value ? this.value.trim() : '';
+            if (value.length < 2) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

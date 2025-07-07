@@ -1,0 +1,6 @@
+<option value="">Select a Component</option>
+{% for component in components %}
+<option value="{{ component.compID }}">{{ component.Project_Components }}</option>
+{% empty %}
+<option value="">No components available for this project</option>
+{% endfor %}

@@ -1,0 +1,9 @@
+<div class="col-md-6 mb-3" id="type-of-investment-container">
+    <label for="id_Type_of_Investment" class="form-label">Type of Investment <span class="text-danger">*</span></label>
+    <select name="Type_of_Investment" class="form-select" id="id_Type_of_Investment">
+        <option value="">Select Investment</option>
+        {% for inv in investments %}
+            <option value="{{ inv.id }}">{{ inv.name }}</option>
+        {% endfor %}
+    </select>
+</div>

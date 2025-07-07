@@ -1,0 +1,24 @@
+{% load widget_tweaks %}
+
+<h1 class="mt-8 mb-4 text-2xl text-white">Update project_activity_monitoring</h1>
+
+<form hx-post="{% url 'update-project_activity_monitoring' pk=activity_monitoring.pk %}" 
+      hx-target="#project_activity_monitoring-block"
+      class="space-y-4">
+    {% csrf_token %}
+   
+    {% include 'setup/project_activity_monitoring/project_activity_monitoring_form.html' %}
+
+    <!-- Buttons for Save and Cancel -->
+    <div class="flex justify-end space-x-4 mt-6">
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded">
+            Update
+        </button>
+        <button type="button" 
+                class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded"
+                hx-get="{% url 'project_activity_monitoring-list' %}"
+                hx-target="#project_activity_monitoring-block">
+            Cancel
+        </button>
+    </div>
+</form>

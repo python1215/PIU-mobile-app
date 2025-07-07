@@ -1,0 +1,24 @@
+{% load widget_tweaks %}
+
+<h1 class="mt-8 mb-4 text-2xl text-white">Update kpi_for_contract</h1>
+
+<form hx-post="{% url 'update-kpi_for_contract' pk=kpi_for_contract.pk %}" 
+      hx-target="#kpi_for_contract-block"
+      class="space-y-4">
+    {% csrf_token %}
+   
+    {% include 'setup/kpi_for_contract/kpi_for_contract_form.html' %}
+
+    <!-- Buttons for Save and Cancel -->
+    <div class="flex justify-end space-x-4 mt-6">
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded">
+            Update
+        </button>
+        <button type="button" 
+                class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded"
+                hx-get="{% url 'kpi_for_contract-list' %}"
+                hx-target="#kpi_for_contract-block">
+            Cancel
+        </button>
+    </div>
+</form>

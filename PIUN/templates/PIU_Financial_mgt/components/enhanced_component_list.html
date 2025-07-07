@@ -1,0 +1,192 @@
+{% extends 'PIU_Financial_mgt/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Components - PIU Financial Management{% endblock %}
+
+{% block financial_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-diagram-3 me-2"></i>
+            Component Management
+        </h1>
+        <p class="text-muted mb-0">Project component breakdown and allocation tracking</p>
+    </div>
+    <div>
+        <a href="{% url 'PIU_Financial_mgt:add_component' %}" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i>Add Component
+        </a>
+        <a href="{% url 'PIU_Financial_mgt:dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+{% if stats %}
+<div class="row g-2 mb-4">
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+        <div class="card bg-primary text-white border-0">
+            <div class="card-body text-center py-2 px-2">
+                <h5 class="mb-0 fw-bold">{{ stats.total_components }}</h5>
+                <small class="d-block">Total Components</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+        <div class="card bg-info text-white border-0">
+            <div class="card-body text-center py-2 px-2">
+                <h5 class="mb-0 fw-bold">{{ stats.filtered_count }}</h5>
+                <small class="d-block">Filtered Results</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+        <div class="card bg-success text-white border-0">
+            <div class="card-body text-center py-2 px-2">
+                <h5 class="mb-0 fw-bold">${{ stats.total_allocation|floatformat:0 }}</h5>
+                <small class="d-block">Total Allocation</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+        <div class="card bg-warning text-dark border-0">
+            <div class="card-body text-center py-2 px-2">
+                <h5 class="mb-0 fw-bold">{{ stats.unique_projects }}</h5>
+                <small class="d-block">Active Projects</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-funnel me-2"></i>Filters
+            {% if request.GET.project or request.GET.component or request.GET.currency or request.GET.allocation_min or request.GET.allocation_max %}
+                <span class="badge bg-primary ms-2">Active</span>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Project</label>
+                <select name="project" class="form-select">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.projectID }}" {% if request.GET.project == project.projectID %}selected{% endif %}>
+                            {{ project.projectID }} - {{ project.project|truncatechars:30 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Component Name</label>
+                <input type="text" name="component" value="{{ request.GET.component }}" class="form-control" placeholder="Search component">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Currency</label>
+                <select name="currency" class="form-select">
+                    <option value="">All Currencies</option>
+                    {% for currency in currencies %}
+                        <option value="{{ currency.currency }}" {% if request.GET.currency == currency.currency %}selected{% endif %}>
+                            {{ currency.currency }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Min Allocation</label>
+                <input type="number" name="allocation_min" value="{{ request.GET.allocation_min }}" class="form-control" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Max Allocation</label>
+                <input type="number" name="allocation_max" value="{{ request.GET.allocation_max }}" class="form-control" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-9 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Apply Filters
+                </button>
+                <a href="{% url 'PIU_Financial_mgt:components' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x me-1"></i>Clear All
+                </a>
+                <a href="{% url 'PIU_Financial_mgt:export-components-excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline-success">
+                    <i class="bi bi-download me-1"></i>Export Filtered
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Components Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-diagram-3 me-2"></i>Component Directory
+            </h5>
+            {% if components %}
+                <span class="badge bg-secondary">{{ components|length }} component{{ components|length|pluralize }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if components %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>projectID</th>
+                            <th>Project_Components</th>
+                            <th>component_Description</th>
+                            <th>currency</th>
+                            <th>allocation</th>
+                            <th>date</th>
+                            <th>loginUser</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for component in components %}
+                            <tr>
+                                <td>{{ component.projectID.projectID }}</td>
+                                <td>{{ component.Project_Components }}</td>
+                                <td>{{ component.component_Description }}</td>
+                                <td>{{ component.currency.currency }}</td>
+                                <td>{{ component.allocation }}</td>
+                                <td>{{ component.date|date:"Y-m-d H:i" }}</td>
+                                <td>{{ component.loginUser.username }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'PIU_Financial_mgt:component_detail' component.compID %}" class="btn btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'PIU_Financial_mgt:edit_component' component.compID %}" class="btn btn-outline-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'PIU_Financial_mgt:delete_component' component.compID %}" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this component?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-diagram-3 text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3">No Components Found</h5>
+                <p class="text-muted">No components match your current filters or none have been created yet.</p>
+                <a href="{% url 'PIU_Financial_mgt:add_component' %}" class="btn btn-primary">
+                    <i class="bi bi-plus me-1"></i>Create First Component
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

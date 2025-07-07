@@ -1,0 +1,230 @@
+{% extends 'monitoring/base.html' %}
+{% load static %}
+
+{% block title %}Monitoring Dashboard - PIUN{% endblock %}
+
+{% block monitoring_content %}
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-graph-up text-primary me-2"></i>
+                        Monitoring Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Project Performance & Results Tracking</p>
+                </div>
+                <div class="text-end">
+                    <p class="text-muted mb-0">Last Updated: {% now "F j, Y - g:i A" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_projects|default:"0" }}</h4>
+                            <p class="mb-0">Active Projects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-folder2 fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_indicators|default:"0" }}</h4>
+                            <p class="mb-0">Key Indicators</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-speedometer2 fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ quarterly_reports|default:"0" }}</h4>
+                            <p class="mb-0">Quarterly Reports</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-calendar3 fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ performance_avg|default:"0" }}%</h4>
+                            <p class="mb-0">Avg Performance</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-trophy fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add Monitoring Record
+                        </a>
+                        <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-success">
+                            <i class="bi bi-list-ul me-2"></i>Manage Monitoring Records
+                        </a>
+                        <a href="{% url 'monitoring:add-indicator-description' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-check me-2"></i>Add Indicators
+                        </a>
+                        <a href="{% url 'monitoring:export-results-monitoring' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-graph-up me-2"></i>Export Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-activity me-2"></i>Recent Monitoring Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_monitoring %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Indicator</th>
+                                        <th>Quarter</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in recent_monitoring %}
+                                    <tr>
+                                        <td>{{ record.projectID.project|truncatechars:30 }}</td>
+                                        <td>{{ record.indicator_Description.indicator|truncatechars:25 }}</td>
+                                        <td>{{ record.quarter.quarter }}</td>
+                                        <td>
+                                            <span class="badge bg-success">Active</span>
+                                        </td>
+                                        <td>{{ record.date|date:"M j, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No recent monitoring activity</p>
+                            <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-primary">
+                                Add First Record
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Overview -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>Performance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Project Status Distribution</h6>
+                            <div class="progress-stacked mb-3">
+                                <div class="progress" role="progressbar" style="width: 60%">
+                                    <div class="progress-bar bg-success">On Track (60%)</div>
+                                </div>
+                                <div class="progress" role="progressbar" style="width: 25%">
+                                    <div class="progress-bar bg-warning">At Risk (25%)</div>
+                                </div>
+                                <div class="progress" role="progressbar" style="width: 15%">
+                                    <div class="progress-bar bg-danger">Behind (15%)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Key Performance Indicators</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Infrastructure Delivery</span>
+                                    <span class="badge bg-success">85%</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Budget Utilization</span>
+                                    <span class="badge bg-primary">72%</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Quality Standards</span>
+                                    <span class="badge bg-success">92%</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dashboard auto-refresh functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any dashboard-specific JavaScript here
+    console.log('Monitoring Dashboard loaded');
+});
+</script>
+{% endblock %}

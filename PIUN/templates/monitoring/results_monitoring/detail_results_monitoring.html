@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-6">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-chart-line me-2 text-success"></i>Monitoring Record Details
+            </h1>
+            <p class="text-muted mb-0">{{ record.indicator_description|truncatechars:60 }}</p>
+        </div>
+        <div>
+            <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+            <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Edit Record
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Left Column - Record Information -->
+        <div class="col-xl-8">
+            <!-- Basic Information Card -->
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-primary text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Record Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PROJECT</label>
+                            <p class="mb-1 fw-bold">{{ record.project.project }}</p>
+                            <small class="text-muted">ID: {{ record.project.projectID }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PDO</label>
+                            <p class="mb-0">{{ record.pdo.pdo_statement|truncatechars:100 }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PROJECT OUTCOME</label>
+                            <p class="mb-0">{{ record.project_outcome.project_outcome_statement|default:"Not specified" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PROJECT RESULT</label>
+                            <p class="mb-0">{{ record.project_result.project_result_statement|default:"Not specified" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">INDICATOR TYPE</label>
+                            <span class="badge bg-primary fs-6">{{ record.indicator_type }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">MEASUREMENT UNIT</label>
+                            <p class="mb-0">{{ record.measurement_unit|default:"Not specified" }}</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small fw-bold">INDICATOR DESCRIPTION</label>
+                            <p class="mb-0">{{ record.indicator_description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Values Card -->
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-success text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Performance Values
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h6 class="text-muted small fw-bold">BASELINE VALUE</h6>
+                                <h4 class="text-primary mb-0">{{ record.baseline_value|floatformat:2|default:"--" }}</h4>
+                                <small class="text-muted">{{ record.measurement_unit|default:"" }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h6 class="text-muted small fw-bold">ACHIEVED VALUE</h6>
+                                <h4 class="text-success mb-0">{{ record.achieved_value|floatformat:2|default:"--" }}</h4>
+                                <small class="text-muted">{{ record.measurement_unit|default:"" }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h6 class="text-muted small fw-bold">TARGET VALUE</h6>
+                                <h4 class="text-warning mb-0">{{ record.End_Target_Value|floatformat:2|default:"--" }}</h4>
+                                <small class="text-muted">{{ record.measurement_unit|default:"" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis Card -->
+            {% if record.achieved_value and record.End_Target_Value %}
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-info text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-analytics me-2"></i>Performance Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PERFORMANCE VS TARGET</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-3" style="height: 25px;">
+                                    <div class="progress-bar bg-{{ status_color }}" role="progressbar" 
+                                         style="width: {% if performance_vs_target > 100 %}100{% else %}{{ performance_vs_target|floatformat:0 }}{% endif %}%" 
+                                         aria-valuenow="{{ performance_vs_target|floatformat:0 }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ performance_vs_target|floatformat:1 }}%
+                                    </div>
+                                </div>
+                                <span class="badge bg-{{ status_color }} fs-6">{{ status|title }}</span>
+                            </div>
+                        </div>
+                        {% if record.baseline_value %}
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">IMPROVEMENT FROM BASELINE</label>
+                            <div class="d-flex align-items-center">
+                                <h5 class="mb-0 {% if performance_vs_baseline > 0 %}text-success{% elif performance_vs_baseline < 0 %}text-danger{% else %}text-secondary{% endif %}">
+                                    {% if performance_vs_baseline > 0 %}+{% endif %}{{ performance_vs_baseline|floatformat:1 }}%
+                                </h5>
+                                <i class="fas fa-{% if performance_vs_baseline > 0 %}arrow-up text-success{% elif performance_vs_baseline < 0 %}arrow-down text-danger{% else %}minus text-secondary{% endif %} ms-2"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">VARIANCE FROM TARGET</label>
+                            <h5 class="mb-0 {% if variance_from_target > 0 %}text-success{% elif variance_from_target < 0 %}text-danger{% else %}text-secondary{% endif %}">
+                                {% if variance_from_target > 0 %}+{% endif %}{{ variance_from_target|floatformat:2 }} {{ record.measurement_unit|default:"" }}
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">PERCENTAGE FIELDS</label>
+                            <p class="mb-1">
+                                <strong>vs Baseline:</strong> 
+                                <span class="badge bg-info">{{ record.percentage_achieved_vs_baseline|floatformat:1|default:"--" }}%</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>vs Target:</strong> 
+                                <span class="badge bg-warning text-dark">{{ record.percentage_achieved_vs_end_target|floatformat:1|default:"--" }}%</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Information Card -->
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-secondary text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sticky-note me-2"></i>Additional Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">COLLECTION FREQUENCY</label>
+                            <p class="mb-0">{{ record.collection_frequency|default:"Not specified" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold">TIME PERIOD</label>
+                            <p class="mb-0">
+                                <strong>{{ record.year|default:"N/A" }}</strong> - 
+                                <span class="badge bg-primary">{{ record.quarter|default:"N/A" }}</span>
+                            </p>
+                        </div>
+                        {% if record.remarks %}
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small fw-bold">REMARKS</label>
+                            <div class="border rounded p-3 bg-light">
+                                <p class="mb-0">{{ record.remarks }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Summary and Actions -->
+        <div class="col-xl-4">
+            <!-- Quick Summary Card -->
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>Quick Summary
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if record.achieved_value and record.End_Target_Value %}
+                    <div class="mb-3">
+                        <h3 class="text-{{ status_color }} mb-1">{{ performance_vs_target|floatformat:1 }}%</h3>
+                        <p class="text-muted mb-0">Target Achievement</p>
+                    </div>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-{{ status_color }}" role="progressbar" 
+                             style="width: {% if performance_vs_target > 100 %}100{% else %}{{ performance_vs_target|floatformat:0 }}{% endif %}%">
+                        </div>
+                    </div>
+                    <span class="badge bg-{{ status_color }} fs-6 px-3 py-2">{{ status|title }} Performance</span>
+                    {% else %}
+                    <div class="text-muted">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <p>Performance calculation requires both achieved and target values</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Record Metadata Card -->
+            <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-warning text-dark py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info me-2"></i>Record Metadata
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small fw-bold">RECORD ID</label>
+                            <p class="mb-0 fw-bold">#{{ record.pk }}</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small fw-bold">CREATED BY</label>
+                            <p class="mb-0">
+                                <i class="fas fa-user me-1 text-primary"></i>
+                                {{ record.loginUser.username }}
+                            </p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small fw-bold">DATE CREATED</label>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar me-1 text-success"></i>
+                                {{ record.date_created|date:"F d, Y" }} at {{ record.date_created|time:"H:i" }}
+                            </p>
+                        </div>
+                        <div class="col-12 mb-0">
+                            <label class="text-muted small fw-bold">LAST UPDATED</label>
+                            <p class="mb-0">
+                                <i class="fas fa-clock me-1 text-warning"></i>
+                                {{ record.date_updated|date:"F d, Y" }} at {{ record.date_updated|time:"H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card shadow border-0" style="border-radius: 15px;">
+                <div class="card-header bg-gradient-danger text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Available Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Edit Record
+                        </a>
+                        <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Delete Record
+                        </a>
+                        <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>Back to List
+                        </a>
+                        <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

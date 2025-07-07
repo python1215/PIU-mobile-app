@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Document Management Dashboard - PIUN{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doc-header {
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .stats-card {
+        border-left: 4px solid #20c997;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .doc-card {
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s;
+    }
+    .doc-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-doc {
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+        border: none;
+        color: white;
+    }
+    .btn-doc:hover {
+        background: linear-gradient(135deg, #1ba085 0%, #138496 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background-color: #f8f9fa; min-height: 100vh; padding-top: 1rem;">
+    <!-- Header Section -->
+    <div class="doc-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-1">
+                    <i class="bi bi-folder2-open me-2"></i>Document Management
+                </h1>
+                <p class="mb-0 opacity-90">Track and manage project documentation</p>
+            </div>
+            <div>
+                <a href="/" class="btn btn-light me-2">
+                    <i class="bi bi-house me-1"></i>Dashboard
+                </a>
+                <a href="{% url 'add-document' %}" class="btn btn-warning">
+                    <i class="bi bi-plus-circle me-1"></i>Add Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-files fs-1 mb-3" style="color: #20c997;"></i>
+                    <h3 class="mb-2" style="color: #20c997;">{{ total_documents }}</h3>
+                    <p class="mb-0 text-muted">Total Documents</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text fs-1 mb-3" style="color: #17a2b8;"></i>
+                    <h3 class="mb-2" style="color: #17a2b8;">{{ doc_type_stats|length }}</h3>
+                    <p class="mb-0 text-muted">Document Types</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-diagram-3 fs-1 mb-3" style="color: #20c997;"></i>
+                    <h3 class="mb-2" style="color: #20c997;">{{ project_stats|length }}</h3>
+                    <p class="mb-0 text-muted">Active Projects</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history fs-1 mb-3" style="color: #17a2b8;"></i>
+                    <h3 class="mb-2" style="color: #17a2b8;">{{ recent_documents|length }}</h3>
+                    <p class="mb-0 text-muted">Recent Documents</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Documents -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2" style="color: #20c997;"></i>Recent Documents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_documents %}
+                        {% for doc in recent_documents %}
+                        <div class="doc-card p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ doc.description|truncatechars:50 }}</h6>
+                                    <p class="mb-1 text-muted small">
+                                        <i class="bi bi-folder me-1"></i>{{ doc.project.project|default:"No Project" }}
+                                    </p>
+                                    <p class="mb-0 text-muted small">
+                                        <i class="bi bi-tag me-1"></i>{{ doc.document_type.document_type|default:"No Type" }}
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">{{ doc.date|date:"M d, Y" }}</small>
+                                    <div class="mt-1">
+                                        <a href="{% url 'preview_document' doc.pk %}" class="btn btn-sm btn-outline-info" title="Preview">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center">
+                            <a href="{% url 'list_documents' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-list me-1"></i>View All Documents
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 mb-3 d-block text-muted"></i>
+                            <p class="text-muted">No documents uploaded yet</p>
+                            <a href="{% url 'add-document' %}" class="btn btn-doc">
+                                <i class="bi bi-plus-circle me-1"></i>Upload First Document
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Types -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart me-2" style="color: #17a2b8;"></i>Documents by Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if doc_type_stats %}
+                        {% for stat in doc_type_stats %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="fw-medium">{{ stat.document_type__document_type|default:"Unspecified" }}</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary">{{ stat.count }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-graph-up fs-1 mb-3 d-block text-muted"></i>
+                            <p class="text-muted">No document statistics available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="bi bi-lightning-fill me-2" style="color: #20c997;"></i>Quick Actions
+                    </h6>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'add-document' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Upload Document
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'list_documents' %}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="bi bi-list me-1"></i>View All Documents
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="{% url 'document-list' %}" class="btn btn-outline-info btn-sm w-100">
+                                <i class="bi bi-table me-1"></i>Document List
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <a href="/" class="btn btn-outline-dark btn-sm w-100">
+                                <i class="bi bi-arrow-left me-1"></i>Main Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth hover effects
+    const cards = document.querySelectorAll('.doc-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.borderColor = '#20c997';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.borderColor = '#e9ecef';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Issues & Actions Monitoring Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-primary text-white p-4 rounded shadow">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0">Issues & Actions Monitoring Dashboard</h1>
+                        <p class="mb-0 opacity-75">Monitor project issues, assign tasks, and track corrective actions across all NAWEC projects</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'main_dashboard' %}" class="btn btn-outline-light">
+                            <i class="bi bi-house-door"></i> Main Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Issues</h6>
+                            <h3 class="mb-0">{{ total_issues }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Open Issues</h6>
+                            <h3 class="mb-0">{{ open_issues }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-clock-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Resolved Issues</h6>
+                            <h3 class="mb-0">{{ resolved_issues }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Critical Issues</h6>
+                            <h3 class="mb-0">{{ critical_issues }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-exclamation-diamond-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="{% url 'Issues_Actions_monitoring:issues_create' %}" class="btn btn-success w-100">
+                                <i class="bi bi-plus-lg"></i><br>
+                                <small>Log Project Issue</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'Issues_Actions_monitoring:source_create' %}" class="btn btn-info w-100">
+                                <i class="bi bi-bookmark-plus"></i><br>
+                                <small>Add Source</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-secondary w-100">
+                                <i class="bi bi-list-ul"></i><br>
+                                <small>Project Issues</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'Issues_Actions_monitoring:source_list' %}" class="btn btn-warning w-100">
+                                <i class="bi bi-bookmarks"></i><br>
+                                <small>Manage Sources</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Priority Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="text-danger">
+                                <i class="bi bi-exclamation-diamond-fill fs-3"></i>
+                                <div><strong>{{ priority_stats.critical }}</strong></div>
+                                <small>Critical</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-warning">
+                                <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                                <div><strong>{{ priority_stats.high }}</strong></div>
+                                <small>High</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-info">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                                <div><strong>{{ priority_stats.medium }}</strong></div>
+                                <small>Medium</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-success">
+                                <i class="bi bi-check-circle-fill fs-3"></i>
+                                <div><strong>{{ priority_stats.low }}</strong></div>
+                                <small>Low</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Issues -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Issues</h5>
+                    <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-outline-light btn-sm">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_issues %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Issue Code</th>
+                                        <th>Project</th>
+                                        <th>Description</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Assigned To</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for issue in recent_issues %}
+                                    <tr>
+                                        <td><strong>{{ issue.issue_code }}</strong></td>
+                                        <td>{{ issue.project.project|default:"-" }}</td>
+                                        <td>{{ issue.description_of_issue_or_action|truncatechars:50 }}</td>
+                                        <td>
+                                            {% if issue.priority == 'critical' %}
+                                                <span class="badge bg-danger">{{ issue.get_priority_display }}</span>
+                                            {% elif issue.priority == 'high' %}
+                                                <span class="badge bg-warning">{{ issue.get_priority_display }}</span>
+                                            {% elif issue.priority == 'medium' %}
+                                                <span class="badge bg-info">{{ issue.get_priority_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-success">{{ issue.get_priority_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if issue.status == 'complete' %}
+                                                <span class="badge bg-success">{{ issue.get_status_display }}</span>
+                                            {% elif issue.status == 'incomplete' %}
+                                                <span class="badge bg-warning">{{ issue.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ issue.assigned_to.username|default:"Unassigned" }}</td>
+                                        <td>{{ issue.date_created|date:"M d, Y" }}</td>
+                                        <td>
+                                            <a href="{% url 'Issues_Actions_monitoring:issues_detail' issue.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <p class="text-muted mt-3">No issues recorded yet.</p>
+                            <a href="{% url 'Issues_Actions_monitoring:issues_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Create First Issue
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

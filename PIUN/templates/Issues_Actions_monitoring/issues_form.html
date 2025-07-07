@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Issue/Action{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-{% if action == 'Create' %}plus-circle{% else %}pencil-square{% endif %}"></i>
+                            {{ action }} Issue/Action
+                        </h4>
+                        <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-outline-light">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Project Information -->
+                            <div class="col-md-6">
+                                <div class="card border-info mb-4">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="bi bi-building"></i> Project Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            {{ form.project.label_tag }}
+                                            {{ form.project }}
+                                            {% if form.project.errors %}
+                                                <div class="text-danger small">{{ form.project.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    {{ form.year.label_tag }}
+                                                    {{ form.year }}
+                                                    {% if form.year.errors %}
+                                                        <div class="text-danger small">{{ form.year.errors.0 }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    {{ form.quarter.label_tag }}
+                                                    {{ form.quarter }}
+                                                    {% if form.quarter.errors %}
+                                                        <div class="text-danger small">{{ form.quarter.errors.0 }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Issue Details -->
+                            <div class="col-md-6">
+                                <div class="card border-warning mb-4">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Issue Details</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            {{ form.issue_code.label_tag }}
+                                            {{ form.issue_code }}
+                                            {% if form.issue_code.errors %}
+                                                <div class="text-danger small">{{ form.issue_code.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.issue_action_type.label_tag }}
+                                            {{ form.issue_action_type }}
+                                            {% if form.issue_action_type.errors %}
+                                                <div class="text-danger small">{{ form.issue_action_type.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.source_of_issue_or_action.label_tag }}
+                                            {{ form.source_of_issue_or_action }}
+                                            {% if form.source_of_issue_or_action.errors %}
+                                                <div class="text-danger small">{{ form.source_of_issue_or_action.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="card border-secondary mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="bi bi-chat-text"></i> Description</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.description_of_issue_or_action.label_tag }}
+                                    {{ form.description_of_issue_or_action }}
+                                    {% if form.description_of_issue_or_action.errors %}
+                                        <div class="text-danger small">{{ form.description_of_issue_or_action.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Status and Priority -->
+                            <div class="col-md-6">
+                                <div class="card border-success mb-4">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="bi bi-gear"></i> Status & Priority</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    {{ form.status.label_tag }}
+                                                    {{ form.status }}
+                                                    {% if form.status.errors %}
+                                                        <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    {{ form.priority.label_tag }}
+                                                    {{ form.priority }}
+                                                    {% if form.priority.errors %}
+                                                        <div class="text-danger small">{{ form.priority.errors.0 }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Assignment and Dates -->
+                            <div class="col-md-6">
+                                <div class="card border-danger mb-4">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="mb-0"><i class="bi bi-person-check"></i> Assignment & Dates</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            {{ form.assigned_to.label_tag }}
+                                            {{ form.assigned_to }}
+                                            {% if form.assigned_to.errors %}
+                                                <div class="text-danger small">{{ form.assigned_to.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.due_date.label_tag }}
+                                            {{ form.due_date }}
+                                            {% if form.due_date.errors %}
+                                                <div class="text-danger small">{{ form.due_date.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Notes -->
+                        <div class="card border-dark mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0"><i class="bi bi-journal-text"></i> Resolution Notes</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.resolution_notes.label_tag }}
+                                    {{ form.resolution_notes }}
+                                    {% if form.resolution_notes.errors %}
+                                        <div class="text-danger small">{{ form.resolution_notes.errors.0 }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Optional field for tracking resolution progress and notes.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-secondary">
+                                            <i class="bi bi-x-lg"></i> Cancel
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-{% if action == 'Create' %}success{% else %}warning{% endif %} btn-lg">
+                                            <i class="bi bi-{% if action == 'Create' %}check-lg{% else %}pencil{% endif %}"></i>
+                                            {{ action }} Issue/Action
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.card-header h6 {
+    font-weight: 600;
+}
+</style>
+{% endblock %}

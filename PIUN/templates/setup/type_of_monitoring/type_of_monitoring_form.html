@@ -1,0 +1,34 @@
+{% load widget_tweaks %}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Standard form fields with smaller table and font -->
+        {% for field in form %}
+            {% if field.name != 'document' %}
+            <div class="flex flex-col sm:flex-row gap-2">
+                <label class="text-black sm:text-right sm:w-1/3 text-xs font-small">
+                    {{ field.label }}
+                </label>
+                <div class="flex-1">
+                    <div class="relative">
+                        {% render_field field class="input input-sm w-full bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded text-xs" %}
+                        {% if field.errors %}
+                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
+                            <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if field.errors %}
+                    <p class="text-xs text-red-500">{{ field.errors|join:", " }}</p>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <p class="text-xs text-gray-400">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>

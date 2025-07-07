@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-plus-circle text-primary me-2"></i>
+                        {{ title }}
+                    </h2>
+                    <p class="text-muted">Define performance indicators for NAWEC project monitoring</p>
+                </div>
+                <div>
+                    <a href="{% url 'NAWEC_KPI:indicator_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Indicators
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Form Column -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-file-text me-2"></i>
+                                Indicator Information
+                            </h5>
+                        </div>
+                        <div class="card-body" style="background-color: #f8f9fa;">
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+                                
+                                <!-- Indicator Number -->
+                                <div class="mb-3">
+                                    <label for="{{ form.indicator_no.id_for_label }}" class="form-label fw-bold text-dark">
+                                        <i class="bi bi-hash me-1"></i>{{ form.indicator_no.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.indicator_no }}
+                                    {% if form.indicator_no.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.indicator_no.errors %}
+                                                <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Use a unique identifier like KPI001, IND001, etc.
+                                    </div>
+                                </div>
+
+                                <!-- Indicator Description -->
+                                <div class="mb-3">
+                                    <label for="{{ form.indicator_description.id_for_label }}" class="form-label fw-bold text-dark">
+                                        <i class="bi bi-file-text me-1"></i>{{ form.indicator_description.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.indicator_description }}
+                                    {% if form.indicator_description.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.indicator_description.errors %}
+                                                <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Provide a clear, detailed description of what this indicator measures.
+                                    </div>
+                                </div>
+
+                                <!-- Attributes -->
+                                <div class="mb-4">
+                                    <label for="{{ form.attributes.id_for_label }}" class="form-label fw-bold text-dark">
+                                        <i class="bi bi-tags me-1"></i>{{ form.attributes.label }}
+                                    </label>
+                                    {{ form.attributes }}
+                                    {% if form.attributes.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.attributes.errors %}
+                                                <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Optional: Add relevant attributes like measurement type, frequency, etc.
+                                    </div>
+                                </div>
+
+                                <!-- Performance Metrics Section -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="fw-bold text-primary mb-3">
+                                            <i class="bi bi-graph-up me-2"></i>Performance Metrics
+                                        </h6>
+                                    </div>
+                                    
+                                    <!-- Baseline Value -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.baseline_value.id_for_label }}" class="form-label fw-bold text-dark">
+                                            <i class="bi bi-bar-chart me-1"></i>{{ form.baseline_value.label }}
+                                        </label>
+                                        {{ form.baseline_value }}
+                                        {% if form.baseline_value.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.baseline_value.errors %}
+                                                    <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Starting baseline value for this indicator
+                                        </div>
+                                    </div>
+
+                                    <!-- End Target Value -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label fw-bold text-dark">
+                                            <i class="bi bi-bullseye me-1"></i>{{ form.End_Target_Value.label }}
+                                        </label>
+                                        {{ form.End_Target_Value }}
+                                        {% if form.End_Target_Value.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.End_Target_Value.errors %}
+                                                    <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Target value to achieve by project end
+                                        </div>
+                                    </div>
+
+                                    <!-- Target Weight Value -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.targeted_weight_value.id_for_label }}" class="form-label fw-bold text-dark">
+                                            <i class="bi bi-percent me-1"></i>{{ form.targeted_weight_value.label }}
+                                        </label>
+                                        {{ form.targeted_weight_value }}
+                                        {% if form.targeted_weight_value.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.targeted_weight_value.errors %}
+                                                    <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Weight percentage for this indicator (0-100%)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'NAWEC_KPI:indicator_list' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-1"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        {% if indicator %}Update Indicator{% else %}Create Indicator{% endif %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guidelines Column -->
+                <div class="col-lg-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>Indicator Guidelines
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold">Best Practices:</h6>
+                            <ul class="small mb-3">
+                                <li><strong>Unique Numbers:</strong> Use consistent numbering (KPI001, KPI002)</li>
+                                <li><strong>Clear Descriptions:</strong> Be specific about what is measured</li>
+                                <li><strong>Measurable:</strong> Ensure the indicator can be quantified</li>
+                                <li><strong>Relevant:</strong> Align with project objectives</li>
+                            </ul>
+
+                            <h6 class="fw-bold">Examples:</h6>
+                            <div class="small">
+                                <div class="border p-2 mb-2 rounded bg-light">
+                                    <strong>KPI001:</strong> Percentage of households with access to clean water
+                                    <br><em>Attributes: Percentage, Quarterly</em>
+                                </div>
+                                <div class="border p-2 mb-2 rounded bg-light">
+                                    <strong>EFF001:</strong> Energy efficiency improvement rate
+                                    <br><em>Attributes: Percentage, Annual</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-warning mt-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Important Notes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small mb-0">
+                                <li>Indicator numbers must be unique across the system</li>
+                                <li>Once created, indicators can be used in monitoring data entry</li>
+                                <li>Consider future reporting needs when defining indicators</li>
+                                <li>Coordinate with team members to avoid duplicates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-format indicator number to uppercase
+    document.addEventListener('DOMContentLoaded', function() {
+        const indicatorNoField = document.getElementById('{{ form.indicator_no.id_for_label }}');
+        if (indicatorNoField) {
+            indicatorNoField.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,4 @@
+<option value="">Select Project Outcome</option>
+{% for outcome in outcomes %}
+    <option value="{{ outcome.id }}">{{ outcome.project_outcome }}</option>
+{% endfor %}

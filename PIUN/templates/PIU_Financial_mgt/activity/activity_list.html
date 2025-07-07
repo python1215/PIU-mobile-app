@@ -1,0 +1,145 @@
+{% extends 'PIU_Financial_mgt/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Activities - PIU Financial Management{% endblock %}
+
+{% block financial_content %}
+<div class="container-fluid" style="background-color: #f8f9fa; min-height: 100vh; padding-top: 20px; padding-bottom: 20px;">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-primary mb-1">Activity Management</h2>
+                <p class="text-muted">Manage and monitor financial activities</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'PIU_Financial_mgt:add-activity' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add Activity
+                </a>
+                <a href="{% url 'PIU_Financial_mgt:export-activities-excel' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-file-excel me-1"></i>Export
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filter Activities</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="activity_search" class="form-label">Activity</label>
+                            <input type="text" class="form-control" id="activity_search" name="activity"
+                                   value="{{ request.GET.activity }}" placeholder="Search activity...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="project_filter" class="form-label">Project</label>
+                            <select class="form-select" id="project_filter" name="project">
+                                <option value="">All Projects</option>
+                                {% for project in projects %}
+                                    <option value="{{ project.id }}" {% if request.GET.project == project.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ project.project }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="year_filter" class="form-label">Year</label>
+                            <select class="form-select" id="year_filter" name="year">
+                                <option value="">All Years</option>
+                                {% for y in years %}
+                                    <option value="{{ y.id }}" {% if request.GET.year == y.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ y.profile_year }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Filter</button>
+                            <a href="{% url 'PIU_Financial_mgt:activities' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Activities ({{ activities|length }})</h5>
+                    <small class="text-muted">Showing {{ activities|length }} entries</small>
+                </div>
+                <div class="card-body">
+                    {% if activities %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Activity</th>
+                                        <th>Project</th>
+                                        <th>Component</th>
+                                        <th>Subcomponent</th>
+                                        <th>Year</th>
+                                        <th>Allocation</th>
+                                        <th>Currency</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for activity in activities %}
+                                        <tr>
+                                            <td>{{ activity.activityID }}</td>
+                                            <td>{{ activity.activity|truncatechars:50 }}</td>
+                                            <td>{{ activity.projectID.project }}</td>
+                                            <td>{{ activity.compID.Project_Components }}</td>
+                                            <td>{{ activity.subcompID.subcomponent }}</td>
+                                            <td>{{ activity.year.profile_year }}</td>
+                                            <td class="fw-bold text-success">${{ activity.allocation|floatformat:2 }}</td>
+                                            <td>{{ activity.currency.currency|default:"N/A" }}</td>
+                                            <td>{{ activity.date|date:"M d, Y" }}</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{% url 'PIU_Financial_mgt:view-activity' activity.activityID %}" class="btn btn-outline-primary" title="View">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'PIU_Financial_mgt:edit-activity' activity.activityID %}" class="btn btn-outline-secondary" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'PIU_Financial_mgt:delete-activity' activity.activityID %}" class="btn btn-outline-danger" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 mb-3"></i>
+                            <h5>No Activities Found</h5>
+                            <p>No activities match your current filters.</p>
+                            <a href="{% url 'PIU_Financial_mgt:add-activity' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Your First Activity
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit NWCD Calculation - NAWEC KPI{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi-pencil"></i> Edit New Water Connection Days (NWCD) Calculation
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'NAWEC_KPI:calculate_nwcd_detail' calculation.id %}" class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a href="{% url 'NAWEC_KPI:calculate_nwcd_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" id="nwcd-edit-form">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Input Fields -->
+                            <div class="col-lg-6">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-calculator"></i> Edit Calculation Values
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="id_total_time_days" class="form-label">Total Time (Days) <span class="text-danger">*</span></label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="id_total_time_days" 
+                                           name="total_time_days" 
+                                           value="{{ calculation.total_time_days|floatformat:2 }}"
+                                           step="0.01" 
+                                           min="0" 
+                                           required
+                                           oninput="calculateNWCD()">
+                                    <div class="form-text">Total time taken for all new water connections</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_total_number_of_new_connections" class="form-label">Total New Water Connections <span class="text-danger">*</span></label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="id_total_number_of_new_connections" 
+                                           name="total_number_of_new_connections" 
+                                           value="{{ calculation.total_number_of_new_connections|floatformat:0 }}"
+                                           step="1" 
+                                           min="1" 
+                                           required
+                                           oninput="calculateNWCD()">
+                                    <div class="form-text">Total number of new water connections made</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_year" class="form-label">Year</label>
+                                    <select class="form-select" id="id_year" name="year">
+                                        <option value="">Select Year</option>
+                                        {% for year in years %}
+                                            <option value="{{ year.id }}" {% if calculation.year and calculation.year.id == year.id %}selected{% endif %}>
+                                                {{ year.profile_year }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_quarter" class="form-label">Quarter</label>
+                                    <select class="form-select" id="id_quarter" name="quarter">
+                                        <option value="">Select Quarter</option>
+                                        {% for quarter in quarters %}
+                                            <option value="{{ quarter.id }}" {% if calculation.quarter and calculation.quarter.id == quarter.id %}selected{% endif %}>
+                                                Q{{ quarter.quarter }} ({{ quarter.quarter_name }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Live Calculation Preview -->
+                            <div class="col-lg-6">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-graph-up-arrow"></i> Live Calculation Preview
+                                </h5>
+                                
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">NWCD Formula</h6>
+                                        <p class="mb-2">
+                                            <strong>NWCD = Total Time (Days) ÷ Total New Water Connections</strong>
+                                        </p>
+                                        
+                                        <div class="alert alert-info" id="calculation-preview">
+                                            <strong>Current Calculation:</strong><br>
+                                            NWCD = <span id="preview-time">{{ calculation.total_time_days|floatformat:2 }}</span> ÷ <span id="preview-connections">{{ calculation.total_number_of_new_connections|floatformat:0 }}</span> = <span id="preview-result">{{ calculation.calculated_value|floatformat:2 }}</span> days
+                                        </div>
+                                        
+                                        <!-- Performance Indicator -->
+                                        <div class="card" id="performance-card">
+                                            <div class="card-body text-center p-3" id="performance-body">
+                                                <h5 class="card-title mb-2" id="performance-value">{{ calculation.calculated_value|floatformat:1 }} days</h5>
+                                                <p class="card-text mb-0" id="performance-status">
+                                                    {% if calculation.calculated_value <= 24 %}
+                                                        <i class="bi bi-check-circle-fill text-success"></i> Excellent Performance
+                                                    {% elif calculation.calculated_value <= 48 %}
+                                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i> Good Performance
+                                                    {% else %}
+                                                        <i class="bi bi-x-circle-fill text-danger"></i> Needs Improvement
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Performance Benchmarks -->
+                                        <div class="mt-3">
+                                            <h6>Performance Benchmarks:</h6>
+                                            <ul class="small mb-0">
+                                                <li><span class="text-success">Excellent:</span> ≤24 days per connection</li>
+                                                <li><span class="text-warning">Good:</span> 25-48 days per connection</li>
+                                                <li><span class="text-primary">Moderate:</span> 49-72 days per connection</li>
+                                                <li><span class="text-danger">Needs Improvement:</span> >72 days per connection</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Current Values Display -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-info-circle"></i> Current Stored Values
+                                </h5>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm">
+                                        <tr>
+                                            <th class="bg-light">Current Total Time (Days)</th>
+                                            <td>{{ calculation.total_time_days|floatformat:2 }}</td>
+                                            <th class="bg-light">Current Total New Water Connections</th>
+                                            <td>{{ calculation.total_number_of_new_connections|floatformat:0 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Current NWCD Value</th>
+                                            <td>{{ calculation.calculated_value|floatformat:2 }} days</td>
+                                            <th class="bg-light">Last Modified</th>
+                                            <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-check-circle"></i> Update Calculation
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                                    </button>
+                                    <a href="{% url 'NAWEC_KPI:calculate_nwcd_list' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateNWCD() {
+    const totalTime = parseFloat(document.getElementById('id_total_time_days').value) || 0;
+    const totalConnections = parseFloat(document.getElementById('id_total_number_of_new_connections').value) || 0;
+    
+    // Update preview values
+    document.getElementById('preview-time').textContent = totalTime.toFixed(2);
+    document.getElementById('preview-connections').textContent = totalConnections.toFixed(0);
+    
+    if (totalConnections > 0) {
+        const nwcd = totalTime / totalConnections;
+        document.getElementById('preview-result').textContent = nwcd.toFixed(2);
+        document.getElementById('performance-value').textContent = nwcd.toFixed(1) + ' days';
+        
+        // Update performance status and card styling
+        const performanceBody = document.getElementById('performance-body');
+        const performanceStatus = document.getElementById('performance-status');
+        
+        // Remove existing classes
+        performanceBody.classList.remove('text-white', 'bg-success', 'bg-warning', 'bg-danger', 'bg-primary');
+        
+        if (nwcd <= 24) {
+            performanceBody.classList.add('bg-success', 'text-white');
+            performanceStatus.innerHTML = '<i class="bi bi-check-circle-fill"></i> Excellent Performance';
+        } else if (nwcd <= 48) {
+            performanceBody.classList.add('bg-warning', 'text-white');
+            performanceStatus.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Good Performance';
+        } else if (nwcd <= 72) {
+            performanceBody.classList.add('bg-primary', 'text-white');
+            performanceStatus.innerHTML = '<i class="bi bi-info-circle-fill"></i> Moderate Performance';
+        } else {
+            performanceBody.classList.add('bg-danger', 'text-white');
+            performanceStatus.innerHTML = '<i class="bi bi-x-circle-fill"></i> Needs Improvement';
+        }
+    } else {
+        document.getElementById('preview-result').textContent = '0.00';
+        document.getElementById('performance-value').textContent = '0.0 days';
+        
+        // Reset performance styling
+        const performanceBody = document.getElementById('performance-body');
+        performanceBody.classList.remove('text-white', 'bg-success', 'bg-warning', 'bg-danger', 'bg-primary');
+        document.getElementById('performance-status').innerHTML = '<i class="bi bi-calculator"></i> Enter values to calculate';
+    }
+}
+
+function resetForm() {
+    if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
+        document.getElementById('nwcd-edit-form').reset();
+        // Restore original values
+        document.getElementById('id_total_time_days').value = '{{ calculation.total_time_days|floatformat:2 }}';
+        document.getElementById('id_total_number_of_new_connections').value = '{{ calculation.total_number_of_new_connections|floatformat:0 }}';
+        calculateNWCD();
+    }
+}
+
+// Initialize calculation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    calculateNWCD();
+});
+</script>
+{% endblock %}

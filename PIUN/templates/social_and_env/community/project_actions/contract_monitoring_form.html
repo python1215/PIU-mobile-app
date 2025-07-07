@@ -1,0 +1,567 @@
+{% extends 'project_actions/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - PIUN{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/vendor/tailwind.min.css' %}" rel="stylesheet">
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    .form-shadow {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .required-field::after {
+        content: " *";
+        color: #ef4444;
+    }
+    select, input, textarea {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
+{% block social_env_content %}
+<div class="min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="mb-8 text-center">
+            <nav class="text-sm mb-4">
+                <a href="{% url 'project_actions:dashboard' %}" class="text-blue-200 hover:text-white">Dashboard</a>
+                <span class="mx-2 text-gray-300">/</span>
+                <a href="{% url 'project_actions:contract_monitoring_list' %}" class="text-blue-200 hover:text-white">Monitoring</a>
+                <span class="mx-2 text-gray-300">/</span>
+                <span class="text-white">{{ form_action }}</span>
+            </nav>
+            <h1 class="text-4xl font-bold text-white mb-2">{{ page_title }}</h1>
+            <p class="text-blue-100">Fill in the monitoring details below. Fields marked with * are required.</p>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white rounded-2xl form-shadow p-8">
+            <form method="post" enctype="multipart/form-data" id="monitoringForm" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Monitoring Information Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                        </svg>
+                        Monitoring Information
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Project</label>
+                            {{ form.project }}
+                            {% if form.project.errors %}
+                                <p class="text-red-500 text-sm">{{ form.project.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Contract Reference Number</label>
+                            <div class="flex">
+                                {{ form.contract_refNo }}
+                                <button type="button" class="ml-2 px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            {% if form.contract_refNo.errors %}
+                                <p class="text-red-500 text-sm">{{ form.contract_refNo.errors|first }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">Enter contract reference or use lookup</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Monitoring Date</label>
+                            {{ form.monitoring_date }}
+                            {% if form.monitoring_date.errors %}
+                                <p class="text-red-500 text-sm">{{ form.monitoring_date.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Quarter</label>
+                            {{ form.quarter }}
+                            {% if form.quarter.errors %}
+                                <p class="text-red-500 text-sm">{{ form.quarter.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Monitoring Type</label>
+                            {{ form.type_of_monitoring }}
+                            {% if form.type_of_monitoring.errors %}
+                                <p class="text-red-500 text-sm">{{ form.type_of_monitoring.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Type of Investment</label>
+                            {{ form.Type_of_Investment }}
+                            {% if form.Type_of_Investment.errors %}
+                                <p class="text-red-500 text-sm">{{ form.Type_of_Investment.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">KPI Description</label>
+                            {{ form.Kpi_description }}
+                            {% if form.Kpi_description.errors %}
+                                <p class="text-red-500 text-sm">{{ form.Kpi_description.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Milestone Details Section -->
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Milestone Details
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Milestone Start Date</label>
+                            {{ form.milestone_start_date }}
+                            {% if form.milestone_start_date.errors %}
+                                <p class="text-red-500 text-sm">{{ form.milestone_start_date.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Milestone End Date</label>
+                            {{ form.milestone_end_date }}
+                            {% if form.milestone_end_date.errors %}
+                                <p class="text-red-500 text-sm">{{ form.milestone_end_date.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Target</label>
+                            {{ form.Target }}
+                            {% if form.Target.errors %}
+                                <p class="text-red-500 text-sm">{{ form.Target.errors|first }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">Describe the specific target for this milestone</p>
+                        </div>
+                        
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 required-field">Achieved Status</label>
+                            {{ form.Achieved_status }}
+                            {% if form.Achieved_status.errors %}
+                                <p class="text-red-500 text-sm">{{ form.Achieved_status.errors|first }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">Describe what has been achieved vs the target</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Implementation Status Section -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                        Implementation Status
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Contract Implementation Status</label>
+                            {{ form.Contract_implementation_Status }}
+                            {% if form.Contract_implementation_Status.errors %}
+                                <p class="text-red-500 text-sm">{{ form.Contract_implementation_Status.errors|first }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Picture of Status</label>
+                            {{ form.picture_of_status }}
+                            {% if form.picture_of_status.errors %}
+                                <p class="text-red-500 text-sm">{{ form.picture_of_status.errors|first }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">Upload image showing current status (max 5MB, JPG/PNG/GIF/WebP)</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Remarks</label>
+                            {{ form.remarks }}
+                            {% if form.remarks.errors %}
+                                <p class="text-red-500 text-sm">{{ form.remarks.errors|first }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">Add any additional notes or observations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6">
+                    <a href="{% url 'project_actions:contract_monitoring_list' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                        Cancel
+                    </a>
+                    <button type="button" class="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium">
+                        Validate
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 font-medium shadow-lg">
+                        {{ form_action }} Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Cancel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel? Any unsaved changes will be lost.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Editing</button>
+                <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-danger">
+                    Yes, Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default monitoring date to today if empty
+    const monitoringDateField = document.getElementById('id_monitoring_date');
+    if (monitoringDateField && !monitoringDateField.value) {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0];
+        monitoringDateField.value = dateString;
+    }
+
+    // Set default milestone start date to today if empty
+    const milestoneStartField = document.getElementById('id_milestone_start_date');
+    if (milestoneStartField && !milestoneStartField.value) {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0];
+        milestoneStartField.value = dateString;
+    }
+
+    // Setup form interactions
+    setupFormValidation();
+    setupDateCalculations();
+    setupImagePreview();
+    setupContractLookup();
+    
+    // Pre-fill contract reference if provided in URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const contractRef = urlParams.get('contract_ref');
+    if (contractRef) {
+        document.getElementById('id_contract_refNo').value = contractRef;
+        lookupContract();
+    }
+});
+
+function setupFormValidation() {
+    const form = document.getElementById('monitoringForm');
+    
+    // Real-time validation
+    form.addEventListener('input', function(e) {
+        if (e.target.matches('input, select, textarea')) {
+            validateField(e.target);
+        }
+    });
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+}
+
+function validateField(field) {
+    const value = field.value.trim();
+    let isValid = true;
+    let message = '';
+
+    // Remove existing validation classes
+    field.classList.remove('is-valid', 'is-invalid');
+
+    // Required field validation
+    if (field.hasAttribute('required') && !value) {
+        isValid = false;
+        message = 'This field is required';
+    }
+
+    // Specific field validations
+    switch (field.id) {
+        case 'id_monitoring_date':
+            if (value && new Date(value) > new Date()) {
+                isValid = false;
+                message = 'Monitoring date cannot be in the future';
+            }
+            break;
+        case 'id_milestone_end_date':
+            const startDate = document.getElementById('id_milestone_start_date').value;
+            if (value && startDate && new Date(value) <= new Date(startDate)) {
+                isValid = false;
+                message = 'End date must be after start date';
+            }
+            break;
+        case 'id_contract_refNo':
+            if (value && value.length < 3) {
+                isValid = false;
+                message = 'Contract reference must be at least 3 characters';
+            }
+            break;
+    }
+
+    // Apply validation styles
+    if (isValid && value) {
+        field.classList.add('is-valid');
+    } else if (!isValid) {
+        field.classList.add('is-invalid');
+        
+        // Update or create error message
+        let errorDiv = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            field.parentNode.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    }
+
+    return isValid;
+}
+
+function validateForm() {
+    const form = document.getElementById('monitoringForm');
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+
+    requiredFields.forEach(field => {
+        if (!validateField(field)) {
+            isValid = false;
+        }
+    });
+
+    if (!isValid) {
+        // Scroll to first invalid field
+        const firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    }
+
+    return isValid;
+}
+
+function setupDateCalculations() {
+    const startDateField = document.getElementById('id_milestone_start_date');
+    const endDateField = document.getElementById('id_milestone_end_date');
+    const durationDiv = document.getElementById('milestoneDuration');
+    const durationText = document.getElementById('durationText');
+
+    function calculateDuration() {
+        const startDate = startDateField.value;
+        const endDate = endDateField.value;
+
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (end > start) {
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                durationText.textContent = `${diffDays} days`;
+                durationDiv.style.display = 'block';
+            } else {
+                durationDiv.style.display = 'none';
+            }
+        } else {
+            durationDiv.style.display = 'none';
+        }
+    }
+
+    startDateField.addEventListener('change', calculateDuration);
+    endDateField.addEventListener('change', calculateDuration);
+    
+    // Calculate on page load if dates are present
+    calculateDuration();
+}
+
+function setupImagePreview() {
+    const imageField = document.getElementById('id_picture_of_status');
+    const previewDiv = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+
+    imageField.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size too large. Please select an image under 5MB.');
+                this.value = '';
+                previewDiv.style.display = 'none';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert('Invalid file type. Please select a JPG, PNG, GIF, or WebP image.');
+                this.value = '';
+                previewDiv.style.display = 'none';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewDiv.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewDiv.style.display = 'none';
+        }
+    });
+}
+
+function setupContractLookup() {
+    const contractField = document.getElementById('id_contract_refNo');
+    
+    // Auto-lookup on blur
+    contractField.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            lookupContract();
+        }
+    });
+}
+
+function lookupContract() {
+    const contractRef = document.getElementById('id_contract_refNo').value.trim();
+    const contractInfo = document.getElementById('contractInfo');
+    const contractDetails = document.getElementById('contractDetails');
+    
+    if (!contractRef) {
+        contractInfo.style.display = 'none';
+        return;
+    }
+
+    fetch(`{% url 'project_actions:get_contract_info' %}?contract_ref=${encodeURIComponent(contractRef)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.found) {
+                let detailsHtml = `
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <strong>Project:</strong> ${data.project_name || 'N/A'}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Type:</strong> ${data.type === 'works' ? 'Works Contract' : 'Goods & Services'}
+                        </div>
+                `;
+                
+                if (data.contractor) {
+                    detailsHtml += `
+                        <div class="col-md-6">
+                            <strong>Contractor:</strong> ${data.contractor}
+                        </div>
+                    `;
+                }
+                
+                if (data.supplier) {
+                    detailsHtml += `
+                        <div class="col-md-6">
+                            <strong>Supplier:</strong> ${data.supplier}
+                        </div>
+                    `;
+                }
+                
+                if (data.start_date && data.end_date) {
+                    detailsHtml += `
+                        <div class="col-12">
+                            <strong>Contract Period:</strong> ${new Date(data.start_date).toLocaleDateString()} - ${new Date(data.end_date).toLocaleDateString()}
+                        </div>
+                    `;
+                }
+                
+                detailsHtml += '</div>';
+                
+                contractDetails.innerHTML = detailsHtml;
+                contractInfo.style.display = 'block';
+                
+                // Auto-fill project if found
+                if (data.project_id) {
+                    const projectSelect = document.getElementById('id_project');
+                    if (projectSelect) {
+                        projectSelect.value = data.project_id;
+                    }
+                }
+                
+                // Auto-fill milestone dates from contract dates
+                if (data.start_date && data.end_date) {
+                    const milestoneStartField = document.getElementById('id_milestone_start_date');
+                    const milestoneEndField = document.getElementById('id_milestone_end_date');
+                    
+                    if (milestoneStartField && !milestoneStartField.value) {
+                        milestoneStartField.value = data.start_date;
+                    }
+                    if (milestoneEndField && !milestoneEndField.value) {
+                        milestoneEndField.value = data.end_date;
+                    }
+                }
+            } else {
+                contractInfo.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error looking up contract:', error);
+            contractInfo.style.display = 'none';
+        });
+}
+
+function confirmCancel() {
+    // Check if form has changes
+    const form = document.getElementById('monitoringForm');
+    const formData = new FormData(form);
+    let hasChanges = false;
+
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'csrfmiddlewaretoken' && value && value.toString().trim() !== '') {
+            hasChanges = true;
+            break;
+        }
+    }
+
+    if (hasChanges) {
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+    } else {
+        window.location.href = '{% url "project_actions:contract_monitoring_list" %}';
+    }
+}
+</script>
+{% endblock %}

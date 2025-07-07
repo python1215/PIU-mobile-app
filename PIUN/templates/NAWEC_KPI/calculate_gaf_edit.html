@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit GAF Calculation - NAWEC KPI{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-pencil"></i> Edit Generation Availability Factor (GAF) Calculation
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'NAWEC_KPI:calculate_gaf_detail' calculation.id %}" class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a href="{% url 'NAWEC_KPI:calculate_gaf_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" id="gafEditForm">
+                        {% csrf_token %}
+                        
+                        <!-- Formula Display -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6 class="fw-bold">
+                                        <i class="bi bi-calculator"></i> Generation Availability Factor Formula
+                                    </h6>
+                                    <p class="mb-2"><strong>GAF = (Total Available Hours ÷ Total Period Hours) × 100</strong></p>
+                                    <small class="text-muted">
+                                        Generation Availability Factor measures grid availability percentage
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Fields -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="total_available_hours" class="form-label fw-bold">Total Available Hours:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">⏰</span>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               class="form-control" 
+                                               id="total_available_hours" 
+                                               name="total_available_hours" 
+                                               value="{{ calculation.total_available_hours|floatformat:2 }}"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="total_period_hours" class="form-label fw-bold">Total Period Hours:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">📅</span>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               class="form-control" 
+                                               id="total_period_hours" 
+                                               name="total_period_hours" 
+                                               value="{{ calculation.total_period_hours|floatformat:2 }}"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time Period -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="year" class="form-label fw-bold">Year:</label>
+                                    <select class="form-select" id="year" name="year" required>
+                                        {% for year in years %}
+                                        <option value="{{ year.id }}" {% if calculation.year_id == year.id %}selected{% endif %}>
+                                            {{ year.profile_year }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="quarter" class="form-label fw-bold">Quarter:</label>
+                                    <select class="form-select" id="quarter" name="quarter" required>
+                                        {% for quarter in quarters %}
+                                        <option value="{{ quarter.id }}" {% if calculation.quarter_id == quarter.id %}selected{% endif %}>
+                                            Q{{ quarter.quarter }} ({{ quarter.get_quarter_display }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Calculation Preview -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-success">
+                                            <i class="bi bi-check-circle"></i> Live Calculation Preview
+                                        </h6>
+                                        <div id="calculationPreview">
+                                            <p class="mb-2">
+                                                <strong>GAF = (<span id="previewAvailable">{{ calculation.total_available_hours|floatformat:2 }}</span> hours ÷ <span id="previewPeriod">{{ calculation.total_period_hours|floatformat:2 }}</span> hours) × 100</strong>
+                                            </p>
+                                            <h5 class="text-success mb-0">
+                                                <strong>GAF = <span id="previewResult">{{ calculation.calculated_value|floatformat:2 }}</span>%</strong>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-lg"></i> Update Calculation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateCalculationPreview() {
+    const available = parseFloat(document.getElementById('total_available_hours').value) || 0;
+    const period = parseFloat(document.getElementById('total_period_hours').value) || 0;
+    
+    const result = period > 0 ? (available / period * 100) : 0;
+    
+    document.getElementById('previewAvailable').textContent = available.toFixed(2);
+    document.getElementById('previewPeriod').textContent = period.toFixed(2);
+    document.getElementById('previewResult').textContent = result.toFixed(2);
+}
+
+function resetForm() {
+    document.getElementById('total_available_hours').value = '{{ calculation.total_available_hours|floatformat:2 }}';
+    document.getElementById('total_period_hours').value = '{{ calculation.total_period_hours|floatformat:2 }}';
+    updateCalculationPreview();
+}
+
+// Add event listeners for real-time calculation
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = ['total_available_hours', 'total_period_hours'];
+    inputs.forEach(function(inputId) {
+        document.getElementById(inputId).addEventListener('input', updateCalculationPreview);
+    });
+    
+    // Initial calculation preview
+    updateCalculationPreview();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}NECD Calculation Details - NAWEC KPI{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi-lightning"></i> New Electricity Connection Days (NECD) Calculation Details
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'NAWEC_KPI:calculate_necd_edit' calculation.id %}" class="btn btn-light btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'NAWEC_KPI:calculate_necd_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Calculation Summary -->
+                        <div class="col-lg-6">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-calculator"></i> Calculation Summary
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Total Time (Days)</th>
+                                        <td>{{ calculation.total_time_days|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Total New Connections</th>
+                                        <td>{{ calculation.total_number_of_new_connections|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <th>NECD Value</th>
+                                        <td>
+                                            <strong class="text-primary fs-5">
+                                                {{ calculation.calculated_value|floatformat:2 }} days
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Analysis -->
+                        <div class="col-lg-6">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-graph-up-arrow"></i> Performance Analysis
+                            </h5>
+                            
+                            <div class="card {% if calculation.calculated_value <= 24 %}bg-success{% elif calculation.calculated_value <= 48 %}bg-warning{% else %}bg-danger{% endif %} text-white">
+                                <div class="card-body text-center">
+                                    <h3 class="card-title">{{ calculation.calculated_value|floatformat:1 }} days</h3>
+                                    <p class="card-text mb-0">
+                                        {% if calculation.calculated_value <= 24 %}
+                                            <i class="bi bi-check-circle-fill"></i> Excellent Performance
+                                        {% elif calculation.calculated_value <= 48 %}
+                                            <i class="bi bi-exclamation-triangle-fill"></i> Good Performance
+                                        {% else %}
+                                            <i class="bi bi-x-circle-fill"></i> Needs Improvement
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="mt-3">
+                                <label class="form-label">Connection Efficiency</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar {% if calculation.calculated_value <= 24 %}bg-success{% elif calculation.calculated_value <= 48 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ efficiency_percentage }}%"
+                                         aria-valuenow="{{ efficiency_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ efficiency_percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Formula Breakdown -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-calculator"></i> Formula Breakdown
+                            </h5>
+                            
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">NECD Calculation Formula</h6>
+                                    <p class="mb-2">
+                                        <strong>NECD = Total Time (Days) ÷ Total Number of New Connections</strong>
+                                    </p>
+                                    <div class="alert alert-info mb-0">
+                                        <strong>Applied Formula:</strong><br>
+                                        NECD = {{ calculation.total_time_days|floatformat:2 }} ÷ {{ calculation.total_number_of_new_connections|floatformat:0 }} = {{ calculation.calculated_value|floatformat:2 }} days
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Time Period & Audit Information -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-calendar"></i> Time Period
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Year</th>
+                                        <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}2025{% endif %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Quarter</th>
+                                        <td>{% if calculation.quarter %}Q{{ calculation.quarter.quarter }} ({{ calculation.quarter.quarter_name }}){% else %}Q1{% endif %}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-person-check"></i> Audit Information
+                            </h5>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th class="bg-light">Created By</th>
+                                        <td>{{ calculation.loginUser.username|default:"System" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Date Created</th>
+                                        <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Interpretation -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-lightbulb"></i> Performance Interpretation
+                            </h5>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if calculation.calculated_value <= 24 %}
+                                        <div class="alert alert-success">
+                                            <h6><i class="bi bi-check-circle-fill"></i> Excellent Connection Performance</h6>
+                                            <p class="mb-0">Outstanding performance with {{ calculation.calculated_value|floatformat:1 }} days per connection. This indicates highly efficient electricity connection processes that meet or exceed industry standards.</p>
+                                        </div>
+                                    {% elif calculation.calculated_value <= 48 %}
+                                        <div class="alert alert-warning">
+                                            <h6><i class="bi bi-exclamation-triangle-fill"></i> Good Connection Performance</h6>
+                                            <p class="mb-0">Good performance at {{ calculation.calculated_value|floatformat:1 }} days per connection. Consider process optimization to achieve excellent performance (≤24 days).</p>
+                                        </div>
+                                    {% elif calculation.calculated_value <= 72 %}
+                                        <div class="alert alert-primary">
+                                            <h6><i class="bi bi-info-circle-fill"></i> Moderate Connection Performance</h6>
+                                            <p class="mb-0">Performance at {{ calculation.calculated_value|floatformat:1 }} days per connection requires attention. Implement process improvements to reduce connection timeframes.</p>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-danger">
+                                            <h6><i class="bi bi-x-circle-fill"></i> Connection Performance Needs Immediate Attention</h6>
+                                            <p class="mb-0">Critical performance at {{ calculation.calculated_value|floatformat:1 }} days per connection. Immediate action required to streamline electricity connection processes and improve service delivery.</p>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3">
+                                        <h6>Performance Benchmarks:</h6>
+                                        <ul class="mb-0">
+                                            <li><strong>Excellent:</strong> ≤24 days per connection</li>
+                                            <li><strong>Good:</strong> 25-48 days per connection</li>
+                                            <li><strong>Moderate:</strong> 49-72 days per connection</li>
+                                            <li><strong>Needs Improvement:</strong> >72 days per connection</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

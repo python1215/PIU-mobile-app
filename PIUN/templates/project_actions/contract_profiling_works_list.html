@@ -1,0 +1,253 @@
+{% extends 'project_actions/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Contract Profiling Works - PIUN{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-contract me-2"></i>Contract Profiling Works
+                        </h5>
+                        <div>
+                            <a href="{% url 'main_dashboard' %}" class="btn btn-outline-light btn-sm me-2">
+                                <i class="bi bi-house-door me-1"></i>Dashboard
+                            </a>
+                            <a href="{% url 'project_actions:contract_profiling_works_create' %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-plus me-1"></i>Add Contract
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-primary text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Total Contracts</h6>
+                                            <h3 class="mb-0">{{ total_contracts|default:0 }}</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-file-contract fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-success text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Active Contracts</h6>
+                                            <h3 class="mb-0">{{ active_contracts|default:0 }}</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-info text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Total Value</h6>
+                                            <h3 class="mb-0">${{ total_value|default:0|floatformat:0 }}</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-warning text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Pending Reviews</h6>
+                                            <h3 class="mb-0">0</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <form method="GET" class="d-flex">
+                                <input type="text" name="search" class="form-control me-2" 
+                                       placeholder="Search contracts..." value="{{ search_query }}">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter me-1"></i>Filter
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="?status=active">Active</a></li>
+                                    <li><a class="dropdown-item" href="?status=completed">Completed</a></li>
+                                    <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="?">All Contracts</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contracts Table -->
+                    <div class="table-responsive">
+                        {% if contracts %}
+                        <table class="table table-striped table-hover">
+                            <thead class="table-gray">
+                                <tr>
+                                    
+                                    <th>project</th>
+                                    <th>component</th>
+                                    <th>subcomponent</th>
+                                    <th>activity</th>
+                                    <th>project_Category</th>
+                                    <th>funding_source</th>
+                                    <th>main_intervention_focus_result</th>
+                                    <th>target_number_of_beneficiary_settlements</th>
+                                    <th>location_of_investment</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>gross_floor_area_m2</th>
+                                    <th>currency</th>
+                                    <th>contract_value</th>
+                                    <th>amendments</th>
+                                    <th>contract_refNo</th>
+                                    <th>name_of_contractor</th>
+                                    <th>name_of_consultant</th>
+                                    <th>contract_start_date</th>
+                                    <th>contract_end_date</th>
+                                    <th>duration</th>
+                                    <th>remarks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contract in contracts %}
+                                <tr>
+                                    
+                                    <td>{{ contract.projectID|default:"N/A" }}</td>
+                                    <td>{{ contract.compID|default:"N/A" }}</td>
+                                    <td>{{ contract.subcompID|default:"N/A" }}</td>
+                                    <td>{{ contract.activityID|default:"N/A" }}</td>
+                                    <td>{{ contract.project_Category|default:"N/A" }}</td>
+                                    <td>{{ contract.funding_source|default:"N/A" }}</td>
+                                    <td>{{ contract.main_intervention_focus_result|default:"N/A"|truncatechars:30 }}</td>
+                                    <td>{{ contract.target_number_of_beneficiary_settlements|default:"-" }}</td>
+                                    <td>{{ contract.location_of_investment|default:"-"|truncatechars:30 }}</td>
+                                    <td>{{ contract.Latitude|default:"-" }}</td>
+                                    <td>{{ contract.Longitude|default:"-" }}</td>
+                                    <td>{{ contract.gross_floor_area_m2|default:"-" }}</td>
+                                    <td>{{ contract.currency|default:"N/A" }}</td>
+                                    <td>{{ contract.contract_value|floatformat:2|default:"N/A" }}</td>
+                                    <td>
+                                        {% if contract.amendments %}
+                                            <span class="badge bg-warning">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ contract.contract_refNo|default:"N/A" }}</td>
+                                    <td>{{ contract.name_of_contractor|default:"N/A"|truncatechars:25 }}</td>
+                                    <td>{{ contract.name_of_consultant|default:"N/A"|truncatechars:25 }}</td>
+                                    <td>{{ contract.contract_start_date|default:"N/A" }}</td>
+                                    <td>{{ contract.contract_end_date|default:"N/A" }}</td>
+                                    <td>{{ contract.duration|default:"N/A" }}</td>
+                                    <td>{{ contract.remarks|default:"N/A"|truncatechars:30 }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'project_actions:contract_profiling_works_detail' contract.pk %}" class="btn btn-outline-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'project_actions:update-contract_profiling_works' contract.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'project_actions:delete-contract_profiling_works' contract.pk %}" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this contract?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-file-contract fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">No contracts found</h5>
+                            <p class="text-muted">Start by adding your first contract profiling work.</p>
+                            <a href="{% url 'project_actions:contract_profiling_works_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add First Contract
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Contracts pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

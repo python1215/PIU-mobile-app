@@ -1,0 +1,321 @@
+th{% extends 'project_actions/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background-color: #fdfdf5; min-height: 100vh; padding: 2rem 0;">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">{{ page_title }}</h4>
+                        <p class="text-muted mb-0">Create new goods & services contract record</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'main_dashboard' %}" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-house-door me-1"></i>Dashboard
+                        </a>
+                        <a href="{% url 'project_actions:contract_profiling_goods_services_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contract Information</h5>
+                </div>
+                <div class="card-body">
+                    <style>
+                        .form-label {
+                            color: #fff !important;
+                            font-weight: 500;
+                        }
+                    </style>
+                    <form method="post" hx-post="" hx-swap="outerHTML">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Contract Reference -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contract_refNo.id_for_label }}" class="form-label">Contract Reference No <span class="text-danger">*</span></label>
+                                {{ form.contract_refNo|add_class:"form-control" }}
+                                {% if form.contract_refNo.errors %}
+                                    <div class="text-danger mt-1">{{ form.contract_refNo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Contract Value -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contract_value.id_for_label }}" class="form-label">Contract Value <span class="text-danger">*</span></label>
+                                {{ form.contract_value|add_class:"form-control" }}
+                                {% if form.contract_value.errors %}
+                                    <div class="text-danger mt-1">{{ form.contract_value.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Project -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.projectID.id_for_label }}" class="form-label">Project <span class="text-danger">*</span></label>
+                                <select name="{{ form.projectID.name }}" 
+                                        id="{{ form.projectID.id_for_label }}" 
+                                        class="form-select"
+                                        hx-get="{% url 'project_actions:load_project_components' %}"
+                                        hx-target="#id_compID"
+                                        hx-swap="innerHTML"
+                                        hx-trigger="change"
+                                        hx-include="this"
+                                        onchange="clearSubsequentDropdowns(['id_subcompID', 'id_activityID'])">
+                                    <option value="">---------</option>
+                                    {% for choice in form.projectID.field.choices %}
+                                        {% if choice.0 %}
+                                            <option value="{{ choice.0 }}" {% if form.projectID.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.projectID.errors %}
+                                    <div class="text-danger mt-1">{{ form.projectID.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Component -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.compID.id_for_label }}" class="form-label">Component <span class="text-danger">*</span></label>
+                                <select name="{{ form.compID.name }}" 
+                                        id="{{ form.compID.id_for_label }}" 
+                                        class="form-select"
+                                        hx-get="{% url 'project_actions:load_component_subcomponents' %}"
+                                        hx-target="#id_subcompID"
+                                        hx-swap="innerHTML"
+                                        hx-trigger="change"
+                                        hx-include="this"
+                                        onchange="clearSubsequentDropdowns(['id_activityID'])">
+                                    <option value="">---------</option>
+                                    {% for choice in form.compID.field.choices %}
+                                        {% if choice.0 %}
+                                            <option value="{{ choice.0 }}" {% if form.compID.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.compID.errors %}
+                                    <div class="text-danger mt-1">{{ form.compID.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Subcomponent -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.subcompID.id_for_label }}" class="form-label">Subcomponent <span class="text-danger">*</span></label>
+                                <select name="{{ form.subcompID.name }}" 
+                                        id="{{ form.subcompID.id_for_label }}" 
+                                        class="form-select"
+                                        hx-get="{% url 'project_actions:load_subcomponent_activities' %}"
+                                        hx-target="#id_activityID"
+                                        hx-swap="innerHTML"
+                                        hx-trigger="change"
+                                        hx-include="this">
+                                    <option value="">---------</option>
+                                    {% for choice in form.subcompID.field.choices %}
+                                        {% if choice.0 %}
+                                            <option value="{{ choice.0 }}" {% if form.subcompID.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.subcompID.errors %}
+                                    <div class="text-danger mt-1">{{ form.subcompID.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Activity -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.activityID.id_for_label }}" class="form-label">Activity <span class="text-danger">*</span></label>
+                                <select name="{{ form.activityID.name }}" 
+                                        id="{{ form.activityID.id_for_label }}" 
+                                        class="form-select">
+                                    <option value="">---------</option>
+                                    {% for choice in form.activityID.field.choices %}
+                                        {% if choice.0 %}
+                                            <option value="{{ choice.0 }}" {% if form.activityID.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.activityID.errors %}
+                                    <div class="text-danger mt-1">{{ form.activityID.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Project Category -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.project_Category.id_for_label }}" class="form-label">Project Category <span class="text-danger">*</span></label>
+                                {{ form.project_Category|add_class:"form-select" }}
+                                {% if form.project_Category.errors %}
+                                    <div class="text-danger mt-1">{{ form.project_Category.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Funding Source -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.funding_source.id_for_label }}" class="form-label">Funding Source <span class="text-danger">*</span></label>
+                                {{ form.funding_source|add_class:"form-select" }}
+                                {% if form.funding_source.errors %}
+                                    <div class="text-danger mt-1">{{ form.funding_source.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Supplier Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name_of_Supplier.id_for_label }}" class="form-label">Supplier Name</label>
+                                {{ form.name_of_Supplier|add_class:"form-control" }}
+                                {% if form.name_of_Supplier.errors %}
+                                    <div class="text-danger mt-1">{{ form.name_of_Supplier.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Consultant Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name_of_consultant.id_for_label }}" class="form-label">Consultant Name <span class="text-danger">*</span></label>
+                                {{ form.name_of_consultant|add_class:"form-control" }}
+                                {% if form.name_of_consultant.errors %}
+                                    <div class="text-danger mt-1">{{ form.name_of_consultant.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Currency -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
+                                {{ form.currency|add_class:"form-select" }}
+                                {% if form.currency.errors %}
+                                    <div class="text-danger mt-1">{{ form.currency.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Duration -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.duration.id_for_label }}" class="form-label">Duration (Months)</label>
+                                {{ form.duration|add_class:"form-control" }}
+                                {% if form.duration.errors %}
+                                    <div class="text-danger mt-1">{{ form.duration.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Amendments -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.amendments.id_for_label }}" class="form-label">Amendments</label>
+                                <div class="form-check">
+                                    {{ form.amendments|add_class:"form-check-input" }}
+                                    <label class="form-check-label" for="{{ form.amendments.id_for_label }}">
+                                        Contract has amendments
+                                    </label>
+                                </div>
+                                {% if form.amendments.errors %}
+                                    <div class="text-danger mt-1">{{ form.amendments.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Contract Start Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contract_start_date.id_for_label }}" class="form-label">Contract Start Date <span class="text-danger">*</span></label>
+                                {{ form.contract_start_date|add_class:"form-control" }}
+                                {% if form.contract_start_date.errors %}
+                                    <div class="text-danger mt-1">{{ form.contract_start_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Contract End Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contract_end_date.id_for_label }}" class="form-label">Contract End Date <span class="text-danger">*</span></label>
+                                {{ form.contract_end_date|add_class:"form-control" }}
+                                {% if form.contract_end_date.errors %}
+                                    <div class="text-danger mt-1">{{ form.contract_end_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Duration and Remarks -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.duration.id_for_label }}" class="form-label">Duration <span class="text-danger">*</span></label>
+                                {{ form.duration|add_class:"form-control" }}
+                                {% if form.duration.errors %}
+                                    <div class="text-danger mt-1">{{ form.duration.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="mb-3">
+                            <label for="{{ form.remarks.id_for_label }}" class="form-label">Remarks <span class="text-danger">*</span></label>
+                            {{ form.remarks|add_class:"form-control" }}
+                            {% if form.remarks.errors %}
+                                <div class="text-danger mt-1">{{ form.remarks.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'project_actions:contract_profiling_goods_services_list' %}" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-2"></i>{{ form_action }} Contract
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set date input type
+    const dateInputs = document.querySelectorAll('input[name="date"], input[name="contract_start_date"], input[name="contract_end_date"]');
+    dateInputs.forEach(input => {
+        input.type = 'date';
+    });
+    
+    // Set default date to today for date field
+    const dateField = document.querySelector('input[name="date"]');
+    if (dateField && !dateField.value) {
+        dateField.value = new Date().toISOString().split('T')[0];
+    }
+});
+
+// Function to clear subsequent dropdowns
+function clearSubsequentDropdowns(dropdownIds) {
+    dropdownIds.forEach(function(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown) {
+            // Clear the dropdown by keeping only the first option
+            dropdown.innerHTML = '<option value="">---------</option>';
+        }
+    });
+}
+</script>
+{% endblock %}

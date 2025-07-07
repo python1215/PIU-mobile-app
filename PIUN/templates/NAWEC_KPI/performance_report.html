@@ -1,0 +1,325 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAWEC KPI Performance Report</title>
+    <link href="{% static 'css/vendor/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/vendor/bootstrap-icons.css' %}" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            
+            /* A4 Portrait Optimizations */
+            body { font-size: 10px !important; }
+            .container-fluid { max-width: 100% !important; margin: 0 !important; padding: 0.5rem !important; }
+            .report-header { margin-bottom: 1rem !important; padding: 1rem !important; }
+            .performance-summary { margin: 1rem 0 !important; padding: 1rem !important; }
+            .kpi-table { font-size: 0.7rem !important; }
+            .kpi-table th, .kpi-table td { padding: 0.2rem 0.1rem !important; }
+            
+            /* Force table to fit page width */
+            .table-responsive { overflow: visible !important; }
+            .kpi-table { 
+                width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+            }
+            
+            /* Tighter column widths for print */
+            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 10% !important; }
+            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 7% !important; }
+            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 7% !important; }
+            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5% !important; }
+            .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 5% !important; }
+            .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6% !important; }
+            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 6% !important; }
+            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 5% !important; }
+            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 6% !important; }
+            .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 6% !important; }
+            .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 6% !important; }
+            .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 6% !important; }
+            .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 5% !important; }
+            .kpi-table th:nth-child(14), .kpi-table td:nth-child(14) { width: 5% !important; }
+        }
+        
+        .report-header {
+            background: linear-gradient(135deg, #1F4E79 0%, #2E86AB 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .gauge-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .performance-summary {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .kpi-table {
+            font-size: 0.75rem;
+            table-layout: fixed;
+            width: 100%;
+        }
+        
+        .kpi-table th {
+            background-color: #1F4E79;
+            color: white;
+            font-weight: 600;
+            padding: 0.4rem 0.2rem;
+            text-align: center;
+            word-wrap: break-word;
+        }
+        
+        .kpi-table td {
+            padding: 0.3rem 0.2rem;
+            border-bottom: 1px solid #dee2e6;
+            word-wrap: break-word;
+            text-align: center;
+        }
+        
+        /* Column width controls for A4 portrait */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 12%; } /* Indicator */
+        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8%; }  /* Project */
+        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8%; }  /* PDO */
+        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 6%; }  /* Baseline */
+        .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6%; }  /* Target */
+        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6%; }  /* Achieved */
+        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 7%; }  /* Performance */
+        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 6%; }  /* Variance */
+        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 7%; }  /* Target Weight */
+        .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 7%; } /* Achieved Weight */
+        .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 7%; } /* Target GIR */
+        .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 7%; } /* Actual GIR */
+        .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 6%; } /* Year */
+        .kpi-table th:nth-child(14), .kpi-table td:nth-child(14) { width: 6%; } /* Quarter */
+        
+        .performance-good { color: #28a745; font-weight: bold; }
+        .performance-warning { color: #ffc107; font-weight: bold; }
+        .performance-danger { color: #dc3545; font-weight: bold; }
+        
+        .gauge-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Report Header -->
+    <div class="report-header text-center">
+        <h1 class="mb-3">NAWEC KPI PERFORMANCE REPORT</h1>
+        <p class="mb-1">Generated: {{ report_date }}</p>
+        <p class="mb-0">
+            {% if filter_info %}{{ filter_info }}{% else %}All Data (No Filters Applied){% endif %}
+        </p>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Overall Performance Summary -->
+        <div class="performance-summary">
+            <h3 class="text-center mb-4">Overall Performance Summary</h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-center">
+                        <h5>Overall GIR Summary</h5>
+                        <p><strong>Target GIR:</strong> {{ overall_target_gir|floatformat:2 }}</p>
+                        <p><strong>Actual GIR:</strong> {{ overall_actual_gir|floatformat:2 }}</p>
+                        <p class="{% if overall_achievement_rate >= 75 %}performance-good{% elif overall_achievement_rate >= 50 %}performance-warning{% else %}performance-danger{% endif %}">
+                            <strong>Achievement Rate: {{ overall_achievement_rate|floatformat:2 }}%</strong>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <!-- Achievement Gauge -->
+                    <div class="gauge-container">
+                        <div style="position: relative; width: 240px; height: 140px;">
+                            <svg width="240" height="140" viewBox="0 0 240 140">
+                                <!-- Gauge Background -->
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#dc3545;stop-opacity:1" />
+                                        <stop offset="25%" style="stop-color:#ffc107;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#28a745;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#6f42c1;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Gauge Arc -->
+                                <path d="M 30 120 A 90 90 0 0 1 210 120" 
+                                      stroke="url(#gaugeGradient)" 
+                                      stroke-width="20" 
+                                      fill="none" 
+                                      stroke-linecap="round"/>
+                                
+                                <!-- Performance Segments -->
+                                <path d="M 30 120 A 90 90 0 0 1 75 51" stroke="#dc3545" stroke-width="20" fill="none" class="gauge-segment" data-band="weak"/>
+                                <path d="M 75 51 A 90 90 0 0 1 120 35" stroke="#ffc107" stroke-width="20" fill="none" class="gauge-segment" data-band="average"/>
+                                <path d="M 120 35 A 90 90 0 0 1 165 51" stroke="#28a745" stroke-width="20" fill="none" class="gauge-segment" data-band="good"/>
+                                <path d="M 165 51 A 90 90 0 0 1 210 120" stroke="#6f42c1" stroke-width="20" fill="none" class="gauge-segment" data-band="excellent"/>
+                                
+                                <!-- Center Circle -->
+                                <circle cx="120" cy="120" r="8" fill="#333"/>
+                                
+                                <!-- Needle -->
+                                <line x1="120" y1="120" x2="120" y2="40" 
+                                      stroke="#333" 
+                                      stroke-width="3" 
+                                      stroke-linecap="round"
+                                      style="transform-origin: 120px 120px; transform: rotate({{ needle_angle }}deg)"/>
+                                
+                                <!-- Performance Text -->
+                                <text x="120" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">
+                                    {{ overall_achievement_rate|floatformat:0 }}%
+                                </text>
+                                <text x="120" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+                                    Achievement Rate
+                                </text>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Gauge Legend -->
+                    <div class="gauge-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #dc3545;"></div>
+                            <span>Weak (0-40%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ffc107;"></div>
+                            <span>Average (41-55%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #28a745;"></div>
+                            <span>Good (56-74%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #6f42c1;"></div>
+                            <span>Excellent (75-100%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Break for Print -->
+        <div class="page-break"></div>
+
+        <!-- Detailed KPI Performance Table -->
+        <div class="mb-4">
+            <h3 class="mb-3">Detailed KPI Performance Data</h3>
+            
+            {% if report_entries %}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered kpi-table">
+                    <thead>
+                        <tr>
+                            <th>Indicator</th>
+                            <th>Project</th>
+                            <th>PDO</th>
+                            <th>Base</th>
+                            <th>Target</th>
+                            <th>Achieved</th>
+                            <th>Perf %</th>
+                            <th>Var</th>
+                            <th>T.Wgt</th>
+                            <th>A.Wgt</th>
+                            <th>T.GIR</th>
+                            <th>A.GIR</th>
+                            <th>Year</th>
+                            <th>Qtr</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in report_entries %}
+                        <tr>
+                            <td>
+                                <div title="{{ entry.indicator_description }}">{{ entry.indicator_description|truncatechars:20 }}</div>
+                                <small class="text-muted">{{ entry.indicator_type|truncatechars:8 }}</small>
+                            </td>
+                            <td title="{{ entry.project }}">{{ entry.project|truncatechars:10|default:"N/A" }}</td>
+                            <td title="{{ entry.pdo }}">{{ entry.pdo|truncatechars:10|default:"N/A" }}</td>
+                            <td>{{ entry.baseline_value|floatformat:1 }}</td>
+                            <td>{{ entry.End_Target_Value|floatformat:1 }}</td>
+                            <td class="fw-bold">{{ entry.achieved_value|floatformat:1 }}</td>
+                            <td class="{% if entry.performance_calculated >= 75 %}performance-good{% elif entry.performance_calculated >= 50 %}performance-warning{% else %}performance-danger{% endif %}">
+                                {% if entry.performance_calculated is not None %}
+                                    {{ entry.performance_calculated|floatformat:0 }}%
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="{% if entry.variance_calculated >= 0 %}performance-good{% else %}performance-danger{% endif %}">
+                                {% if entry.variance_calculated is not None %}
+                                    {{ entry.variance_calculated|floatformat:1 }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="text-primary fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
+                            <td class="text-success fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
+                            <td class="text-info fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
+                            <td class="text-warning fw-bold">
+                                {% if entry.actual_gir_calculated is not None %}
+                                    {{ entry.actual_gir_calculated|floatformat:1 }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.year.profile_year|default:"N/A" }}</td>
+                            <td>Q{{ entry.quarter.quarter|default:"N/A" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <h5>No Data Available</h5>
+                <p>No KPI monitoring entries found for the selected filters.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Report Actions -->
+        <div class="text-center no-print mb-4">
+            <button onclick="window.print()" class="btn btn-primary me-2">
+                <i class="bi bi-printer"></i> Print Report
+            </button>
+            <a href="{% url 'NAWEC_KPI:performance_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'js/vendor/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

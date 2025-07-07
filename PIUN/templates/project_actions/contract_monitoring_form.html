@@ -1,0 +1,278 @@
+{% extends 'project_actions/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select, .form-control:focus, .form-select:focus {
+        background-color: white !important;
+        border-color: #ced4da !important;
+        color: #333 !important;
+        font-weight: bold !important;
+    }
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background-color: #fdfdf5; min-height: 100vh; padding: 2rem 0;">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">{{ page_title }}</h4>
+                        <p class="text-muted mb-0">
+                            {% if form_action == 'Update' %}
+                                Update monitoring record for contract: {{ record.contract_refNo }}
+                            {% else %}
+                                Create a new contract monitoring record
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'main_dashboard' %}" class="btn btn-outline-info me-2">
+                            <i class="bi bi-house-door me-1"></i>Dashboard
+                        </a>
+                        <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-text me-2"></i>Contract Monitoring Details
+                    </h5>
+                </div>
+                <div class="card-body" style="background-color: #f8f9fa; color: #333;">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="section-divider mb-4">
+                            <h6 class="section-title" style="color: #2c3e50 !important;">
+                                <i class="bi bi-info-circle me-2"></i>Basic Information
+                            </h6>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.project.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Project <span class="text-danger">*</span></label>
+                                {{ form.project|add_class:"form-select" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small mt-1">{{ form.project.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contract_refNo.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Contract Reference <span class="text-danger">*</span></label>
+                                {{ form.contract_refNo|add_class:"form-control" }}
+                                {% if form.contract_refNo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.contract_refNo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.monitoring_date.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Monitoring Date <span class="text-danger">*</span></label>
+                                {{ form.monitoring_date|add_class:"form-control" }}
+                                {% if form.monitoring_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.monitoring_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.quarter.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Report Frequency <span class="text-danger">*</span></label>
+                                {{ form.quarter|add_class:"form-select" }}
+                                {% if form.quarter.errors %}
+                                    <div class="text-danger small mt-1">{{ form.quarter.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.type_of_monitoring.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Type of Monitoring <span class="text-danger">*</span></label>
+                                {{ form.type_of_monitoring|add_class:"form-select" }}
+                                {% if form.type_of_monitoring.errors %}
+                                    <div class="text-danger small mt-1">{{ form.type_of_monitoring.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                        </div>
+
+                        <!-- Investment and KPI Details -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h6 class="section-title" style="color: #2c3e50 !important;">
+                                <i class="bi bi-graph-up me-2"></i>Investment & KPI Details
+                            </h6>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Type_of_Investment.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Type of Investment <span class="text-danger">*</span></label>
+                                {{ form.Type_of_Investment|add_class:"form-select" }}
+                                {% if form.Type_of_Investment.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Type_of_Investment.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Kpi_description.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">KPI Description <span class="text-danger">*</span></label>
+                                {{ form.Kpi_description|add_class:"form-select" }}
+                                {% if form.Kpi_description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Kpi_description.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Milestone Information -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h6 class="section-title" style="color: #2c3e50 !important;">
+                                <i class="bi bi-flag me-2"></i>Milestone Information
+                            </h6>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.milestone_start_date.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Milestone Start Date <span class="text-danger">*</span></label>
+                                {{ form.milestone_start_date|add_class:"form-control" }}
+                                {% if form.milestone_start_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.milestone_start_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.milestone_end_date.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Milestone End Date <span class="text-danger">*</span></label>
+                                {{ form.milestone_end_date|add_class:"form-control" }}
+                                {% if form.milestone_end_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.milestone_end_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Target.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Target <span class="text-danger">*</span></label>
+                                {{ form.Target|add_class:"form-control" }}
+                                {% if form.Target.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Target.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Achieved_status.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Achieved Status <span class="text-danger">*</span></label>
+                                {{ form.Achieved_status|add_class:"form-control" }}
+                                {% if form.Achieved_status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Achieved_status.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Implementation Status -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h6 class="section-title" style="color: #2c3e50 !important;">
+                                <i class="bi bi-gear me-2"></i>Implementation Status
+                            </h6>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Contract_implementation_Status.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Contract Implementation Status <span class="text-danger">*</span></label>
+                                {{ form.Contract_implementation_Status|add_class:"form-select" }}
+                                {% if form.Contract_implementation_Status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Contract_implementation_Status.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.picture_of_status.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Picture of Status</label>
+                                {{ form.picture_of_status|add_class:"form-control" }}
+                                {% if form.picture_of_status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.picture_of_status.errors.0 }}</div>
+                                {% endif %}
+                                {% if record and record.picture_of_status %}
+                                    <small class="text-muted">Current file: {{ record.picture_of_status.name|default:"No file selected" }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.remarks.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Remarks <span class="text-danger">*</span></label>
+                                {{ form.remarks|add_class:"form-control" }}
+                                {% if form.remarks.errors %}
+                                    <div class="text-danger small mt-1">{{ form.remarks.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-between">
+                                    <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>Close & Return to List
+                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            {% if form_action == 'Update' %}Update{% else %}Create{% endif %} Record
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .section-divider {
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .form-control, .form-select {
+        background-color: white;
+        border: 1px solid #ced4da;
+        color: #333;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: white;
+        border-color: #3498db;
+        color: #333;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .form-control::placeholder {
+        color: #6c757d;
+    }
+    
+    .form-select option {
+        background-color: white;
+        color: #333;
+    }
+</style>
+{% endblock %}
