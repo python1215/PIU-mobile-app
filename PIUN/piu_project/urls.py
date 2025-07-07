@@ -26,6 +26,7 @@ urlpatterns = [
     path('dashboard/', views.main_dashboard, name='dashboard-alt'),  # Alternative dashboard route
     path('user-accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
+    path('accounts/profile/', views.main_dashboard, name='profile'),  # Add profile redirect
     path('setup/', include('setup.urls')),
     path('PIU_Financial_mgt/', include('PIU_Financial_mgt.urls', namespace='PIU_Financial_mgt')),
     path('project_actions/', include('project_actions.urls')),
