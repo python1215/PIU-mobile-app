@@ -163,8 +163,8 @@ def project_category_list(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'categories': page_obj,
-        'total_categories': ProjectCategory.objects.count(),
+        'project_categories': page_obj,
+        'total_project_categories': ProjectCategory.objects.count(),
     }
     return render(request, 'setup/project_categories/project_category_list.html', context)
 
