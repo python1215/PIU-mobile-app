@@ -118,7 +118,7 @@ def issues_list(request):
     """List all issues/actions with filtering"""
     issues = IssueActions.objects.select_related(
         'project', 'year', 'quarter', 'issue_action_type', 
-        'source_of_issue_or_action', 'assigned_to', 'loginUser'
+        'source_of_issue_or_action', 'loginUser'
     ).order_by('-date_created')
     
     # Apply filters
@@ -231,7 +231,7 @@ def dashboard(request):
     
     # Recent issues
     recent_issues = IssueActions.objects.select_related(
-        'project', 'assigned_to'
+        'project', 'year', 'quarter', 'issue_action_type', 'source_of_issue_or_action', 'loginUser'
     ).order_by('-date_created')[:5]
     
     # Issues by priority
@@ -263,7 +263,7 @@ def export_issues_excel(request):
     # Get filtered queryset
     issues = IssueActions.objects.select_related(
         'project', 'year', 'quarter', 'issue_action_type',
-        'source_of_issue_or_action', 'assigned_to', 'loginUser'
+        'source_of_issue_or_action', 'loginUser'
     ).order_by('-date_created')
     
     # Apply same filters as list view
@@ -323,11 +323,11 @@ def export_issues_excel(request):
             issue.source_of_issue_or_action.issue_action_source if issue.source_of_issue_or_action else '',
             issue.get_status_display(),
             issue.get_priority_display(),
-            issue.assigned_to.username if issue.assigned_to else 'Unassigned',
+            issue.assigned_to if issue.assigned_to else 'Unassigned',
             issue.due_date.strftime('%Y-%m-%d') if issue.due_date else '',
             issue.date_created.strftime('%Y-%m-%d %H:%M'),
             issue.date_updated.strftime('%Y-%m-%d %H:%M'),
-            issue.resolution_notes,
+            issue.remarks,
             issue.loginUser.username if issue.loginUser else ''
         ]
         
@@ -370,7 +370,7 @@ def export_issues_word(request):
     # Get filtered queryset (same logic as Excel export)
     issues = IssueActions.objects.select_related(
         'project', 'year', 'quarter', 'issue_action_type',
-        'source_of_issue_or_action', 'assigned_to', 'loginUser'
+        'source_of_issue_or_action', 'loginUser'
     ).order_by('-date_created')
     
     # Apply filters
@@ -440,11 +440,11 @@ def export_issues_word(request):
                 ('Source', issue.source_of_issue_or_action.issue_action_source if issue.source_of_issue_or_action else 'N/A'),
                 ('Status', issue.get_status_display()),
                 ('Priority', issue.get_priority_display()),
-                ('Assigned To', issue.assigned_to.username if issue.assigned_to else 'Unassigned'),
+                ('Assigned To', issue.assigned_to if issue.assigned_to else 'Unassigned'),
                 ('Due Date', issue.due_date.strftime('%Y-%m-%d') if issue.due_date else 'N/A'),
                 ('Created', issue.date_created.strftime('%Y-%m-%d %H:%M')),
                 ('Updated', issue.date_updated.strftime('%Y-%m-%d %H:%M')),
-                ('Resolution Notes', issue.resolution_notes if issue.resolution_notes else 'N/A'),
+                ('Remarks', issue.remarks if issue.remarks else 'N/A'),
                 ('Created By', issue.loginUser.username if issue.loginUser else 'N/A')
             ]
             
