@@ -155,6 +155,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Successfully inserted 5 Environmental and Social Impact Assessment (ESIA) records into social_and_env_esia table: processed 200 communities across 5 projects (GERMP Solar, GERMP BB1, GESREP ESIA, Soma Feeder.Add, ECO-TBT) with comprehensive ESIA findings text, covering WCR, KM, LRR, NBR, and CRR regions with proper data parsing and SQL insertion
 - July 08, 2025. Successfully inserted 246 grievance monitoring log records into social_and_env_grieviancemonitoringlog table: processed complaint tracking data covering GERMP Solar (39 cases) and GERMP T&D (207 cases) projects with comprehensive case management including complainant details, resolution status, and follow-up actions across gender breakdown (204 male, 42 female) and case status (84 open, 134 closed)
 - July 08, 2025. Added regional administrative structure with 6 regions into setup_regions table: Greater Banjul Area (GBA), West Coast Region (WCR), Lower River Region (LRR), North Bank Region (NBR), Central River Region (CRR), and Upper River Region (URR) with proper region codes (100-600) for geographic data organization
+- July 08, 2025. Inserted 8 Local Government Areas (LGAs) into setup_lga table: Banjul (1001), Kanifing (1002), Brikama (2001), Mansakonko (3001), Kerewan (4001), Kuntaur (5001), Janjanbureh (5002), and Basse (6001) with proper hierarchical coding linked to regional structure for comprehensive administrative geographic organization
 
 ## User Preferences
 
