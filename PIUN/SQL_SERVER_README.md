@@ -7,14 +7,24 @@ This document provides configuration steps to deploy the PIUN project with SQL S
 1. SQL Server database with the table `[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]`
 2. django-mssql-backend package installed
 3. ODBC Driver 17 for SQL Server
+4. Python 3.8+ with pip
 
 ## Installation Steps
 
 ### 1. Install Required Packages
 ```bash
+# In your virtual environment
 pip install django-mssql-backend
 pip install pyodbc
+
+# Add to requirements.txt
+echo "django-mssql-backend" >> requirements.txt
+echo "pyodbc" >> requirements.txt
 ```
+
+### 2. Install ODBC Driver (Windows)
+Download and install "ODBC Driver 17 for SQL Server" from Microsoft:
+https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server
 
 ### 2. Update Django Settings
 Update your `settings.py` file:
@@ -92,12 +102,39 @@ This typically means:
 1. No data in the KPI table for the selected project/monitoring type combination
 2. Database connection issues
 3. Table name or column name mismatches
+4. File encoding issues (null bytes in Python files)
 
 ### Resolution Steps:
-1. Check database connection
-2. Verify table exists: `[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]`
-3. Verify data exists for your project and monitoring type combinations
-4. Check column names match exactly
+1. **Test Database Connection**: Visit `/project_actions/test-sql-connection/` to verify connectivity
+2. **Check File Encoding**: Ensure no null bytes in Python files, especially `views.py` and `utils.py`
+3. **Verify Table Structure**: Confirm table exists: `[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]`
+4. **Validate Data**: Check data exists for your project and monitoring type combinations
+5. **Column Mapping**: Ensure column names match exactly (case-sensitive)
+
+### Common Issues and Fixes:
+
+#### 1. File Encoding Issues (SyntaxError: source code string cannot contain null bytes)
+```python
+# Check for null bytes in files
+with open('project_actions/views.py', 'rb') as f:
+    content = f.read()
+    if b'\x00' in content:
+        # Clean the file
+        cleaned = content.replace(b'\x00', b'')
+        with open('project_actions/views.py', 'wb') as clean_f:
+            clean_f.write(cleaned)
+```
+
+#### 2. Import Errors
+Ensure all required apps are in INSTALLED_APPS:
+```python
+INSTALLED_APPS = [
+    # ... existing apps ...
+    'project_actions',
+    'PIU_Financial_mgt',
+    'setup',
+]
+```
 
 ### SQL Server Specific Queries
 The system uses these optimized queries for SQL Server:

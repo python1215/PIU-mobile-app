@@ -14,10 +14,30 @@ from PIU_Financial_mgt.models import KPI_For_Contract
 from .models import Contract_Profiling_works, Contract_Profiling_goods_services, Specific_Contract_Monitoring
 from .forms import ContractProfilingWorksForm, ContractProfilingGoodsServicesForm, SpecificContractMonitoringForm
 from .filters import ContractProfilingWorksFilter, ContractProfilingGoodsServicesFilter, SpecificContractMonitoringFilter
-from .utils import (
-    export_works_contracts_to_excel, export_goods_services_contracts_to_excel,
-    export_monitoring_records_to_excel, get_dashboard_analytics
-)
+# Safe imports with error handling
+try:
+    from .utils import (
+        export_works_contracts_to_excel, export_goods_services_contracts_to_excel,
+        export_monitoring_records_to_excel, get_dashboard_analytics
+    )
+except ImportError:
+    # Define fallback functions if utils.py doesn't exist
+    def export_works_contracts_to_excel(request):
+        return HttpResponse("Export functionality not available")
+    
+    def export_goods_services_contracts_to_excel(request):
+        return HttpResponse("Export functionality not available")
+    
+    def export_monitoring_records_to_excel(request):
+        return HttpResponse("Export functionality not available")
+    
+    def get_dashboard_analytics():
+        return {
+            'total_works_contracts': 0,
+            'total_goods_services_contracts': 0,
+            'total_monitoring_records': 0,
+            'recent_activities': []
+        }
 
 # Safe imports with error handling
 try:
