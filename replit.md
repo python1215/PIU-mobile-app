@@ -117,6 +117,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Fixed Financial Management Dashboard Actions button functionality - converted from disabled to fully functional
 - July 08, 2025. Fixed NAWEC PIU Financial Dashboard Project Activities display by adding missing recent_activities context data
 - July 08, 2025. Updated contributor table with Government of The Gambia and NAWEC as key institutional contributors
+- July 08, 2025. Configured project-donor relationships mapping 7 major projects to their respective funding institutions
 
 ## User Preferences
 
