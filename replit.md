@@ -108,6 +108,7 @@ The PIUN directory contains specialized modules:
 - July 07, 2025. Converted from PostgreSQL to SQLite database for better portability and simplified deployment
 - July 08, 2025. Successfully inserted 171 KPI monitoring records into KPI_For_Contract table
 - July 08, 2025. Added comprehensive project data with 10 major projects including funding amounts, timelines, and currency information
+- July 08, 2025. Updated monitoring types with proper descriptions: Environmental and Social, procurement, Technical, and Financial
 
 ## User Preferences
 
