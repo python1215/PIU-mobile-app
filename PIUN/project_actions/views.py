@@ -252,16 +252,31 @@ def load_type_of_investments(request):
             if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
-                    query = """
-                        SELECT DISTINCT 
-                            type_of_investment as value,
-                            type_of_investment as text
-                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                        WHERE project_id = ? AND monitoring_type_id = ?
-                        ORDER BY type_of_investment
-                    """
-                    cursor.execute(query, [project_id, monitoring_type_id])
-                    results = cursor.fetchall()
+                    try:
+                        # Try with ? parameters first (standard SQL Server)
+                        query = """
+                            SELECT DISTINCT 
+                                type_of_investment as value,
+                                type_of_investment as text
+                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            WHERE project_id = ? AND monitoring_type_id = ?
+                            ORDER BY type_of_investment
+                        """
+                        cursor.execute(query, [project_id, monitoring_type_id])
+                        results = cursor.fetchall()
+                    except Exception as e:
+                        # If that fails, try with %s parameters (Django style)
+                        print(f"First attempt failed: {e}")
+                        query = """
+                            SELECT DISTINCT 
+                                type_of_investment as value,
+                                type_of_investment as text
+                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            WHERE project_id = %s AND monitoring_type_id = %s
+                            ORDER BY type_of_investment
+                        """
+                        cursor.execute(query, [project_id, monitoring_type_id])
+                        results = cursor.fetchall()
                     
                     options = []
                     for row in results:
@@ -317,16 +332,31 @@ def load_kpi_descriptions(request):
             if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
-                    query = """
-                        SELECT DISTINCT 
-                            monitoring_Type_Code as value,
-                            Kpi_description as text
-                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                        WHERE type_of_investment = ? AND project_id = ?
-                        ORDER BY Kpi_description
-                    """
-                    cursor.execute(query, [investment_code, project_id])
-                    results = cursor.fetchall()
+                    try:
+                        # Try with ? parameters first (standard SQL Server)
+                        query = """
+                            SELECT DISTINCT 
+                                monitoring_Type_Code as value,
+                                Kpi_description as text
+                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            WHERE type_of_investment = ? AND project_id = ?
+                            ORDER BY Kpi_description
+                        """
+                        cursor.execute(query, [investment_code, project_id])
+                        results = cursor.fetchall()
+                    except Exception as e:
+                        # If that fails, try with %s parameters (Django style)
+                        print(f"KPI query first attempt failed: {e}")
+                        query = """
+                            SELECT DISTINCT 
+                                monitoring_Type_Code as value,
+                                Kpi_description as text
+                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            WHERE type_of_investment = %s AND project_id = %s
+                            ORDER BY Kpi_description
+                        """
+                        cursor.execute(query, [investment_code, project_id])
+                        results = cursor.fetchall()
                     
                     options = []
                     for row in results:
