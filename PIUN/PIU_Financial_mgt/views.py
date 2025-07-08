@@ -988,6 +988,9 @@ def simple_financial_dashboard(request):
     # Recent components (last 5)
     recent_components = Component.objects.order_by('-date')[:5]
     
+    # Recent subcomponents (last 5) - needed for template
+    recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
+    
     context = {
         'stats': {
             'total_projects': total_projects,
@@ -1006,6 +1009,7 @@ def simple_financial_dashboard(request):
         'recent_projects': recent_projects,
         'top_funded': top_funded,
         'recent_components': recent_components,
+        'recent_subcomponents': recent_subcomponents,
     }
     
     return render(request, 'PIU_Financial_mgt/simple_dashboard.html', context)

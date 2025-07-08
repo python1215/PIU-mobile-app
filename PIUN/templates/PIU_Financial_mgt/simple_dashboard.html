@@ -124,9 +124,14 @@
                                         </td>
                                         <td>{{ project.date|date:"M d, Y" }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-outline-primary" disabled>
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'PIU_Financial_mgt:project_detail' project.projectID %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'PIU_Financial_mgt:edit_project' project.projectID %}" class="btn btn-sm btn-outline-secondary" title="Edit Project">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
