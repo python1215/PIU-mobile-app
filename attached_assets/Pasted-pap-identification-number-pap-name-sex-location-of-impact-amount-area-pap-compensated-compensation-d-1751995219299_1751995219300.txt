@@ -1,0 +1,233 @@
+pap_identification_number	pap_name	sex	location_of_impact	amount	area	pap_compensated	compensation_date	compensation_RefNo	pre_project_situation	remarks	date_created	district_id	loginUser_id	nature_of_compensation_id	pap_Current_Address_id	pap_category_id	project_id	region_id	type_of_impact_id	type_of_investment_id	type_of_pap_id	vulnerability_category_id
+G-DOKU-01	Galo Saidy	M	Kabafita	0.00	900	Y	2024-12-31	land-01	no land	none	2025-04-13 21:30:01.7284160 +00:00	101	4	8	304101	9	D309& D6530 -GM	200	1	G-DOKU-PAP	3	10
+FAR001	Yakub Al Amin Drammeh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1141	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+FAR002	Kemo Sanneh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1142	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM001	Hawa Jammeh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1144	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM002	Omar Huma	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1145	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM003	Abdoulie Ngum	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1146	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM004	Buba Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1147	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM005	Essa Njie	M	306341	1250330.00	NA	Y	2024-09-23	Plot N0. 1148	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	GERMP T&D	4	10
+JAM007	Karafa Tamba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1150	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM008	Jaharaie Kabba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1151	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM009	Madi Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1152	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM010	Alieu Bah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1153	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM011	Abdoulie Faal	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1154	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM012	Lamin Sonko	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1155	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 013	Omar Gassama	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1156	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM014	Sedia Ndow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1157	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM015	Talla Sisoho	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1158	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM018	Mariama Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1161	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM019	Lamin Jadama	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1162	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM020	Sarjo Singateh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1163	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM021	Salieu Willan	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1164	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM022	Mustapha Sillah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1165	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM024	Biran K Jobe	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1167	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM025	Demba Camara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1168	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM026	Adama Wurry Jallow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1169	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM027	Dawda Drammeh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1170	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM028	Ebrima Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1171	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM029	Buba Sabally	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1172	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM030	Buba Marong	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1173	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM034	Lamin Sabally	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1175	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM035	Musa Taal C/O Kaddijatou Taal	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1176	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM037	Sedia Ndow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1178	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM038	Kebba Sonko	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1179	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM041	Muhammed Konteh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1183	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM042	Momodou Mustapha Bah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1184	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM043	Lamin Sey	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1185	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM044	Saikou Leigh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1186	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM045	Alagie Mamadi Conteh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1187	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM046	Alagie Yaffa C/O Yahaya Juwara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1188	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM047	Malick Mendy	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1189	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM048	Momodou Kah Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1190	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM049	Wandifa Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1191	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM050	Assan Musa Camara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1192	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM051	Lamin Njie	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1193	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM053	Jakaria Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1194	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM055	Mohammed Camara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1195	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM056	Momodou Senghore	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1196	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM057	Muhammadou Kabba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1197	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM058	Lamin Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1198	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM059	Antouman Gaye C/O Robert Tijan Njie	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1199	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM060	Antouman Gaye C/O Robert Tijan Njie	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1200	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM061	Malick Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1201	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM062	Kemo Makang Sidibeh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1202	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM063	Momodou Sallah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1203	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM067	Kebba Saloum Manka	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1206	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 068	Jainaba Konateh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1207	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 069	Haruna Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1208	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 070	Fafa Jagne	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1209	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM071	Alpha Omar Barry	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1210	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM072	Bakary Jawneh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1211	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 073	Haruna Ann	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1212	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 075	Lamin M.A Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1214	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 078	Sankung Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1215	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 079	Bakary Babai Gibba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1216	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 082	Ebrima Barrow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1219	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 083	Dawda Darboe	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1220	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM084	Sambala Gakou	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1221	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 085	Momodou Worrie Jallow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1222	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM087	Alpha Bah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1224	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM088	Kebba M. Bojang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1225	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM089	Abdou Tambajang	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1226	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 091	Katim Touray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1227	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM092	Mahamadou Touray[1]	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1228	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM100	Mahamadou Touray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1229	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM094	Samba Sankareh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1231	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 095	Alh. Sulayman Danjo C/O Isatou Danjo & Banna Demba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1232	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM096	Lamin Jammeh C/O Umul Kura Quranic School	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1233	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM097	Foday Jarju	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1234	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM101	Muhamadou Dukuray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1237	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM103	Junkung Sawaneh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1239	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM105	Great Commision Movement Gambia	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1241	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM106	Ousainou Mahanera	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1242	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM107	Mustapha Sowe	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1243	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM109	Abdoulie Bah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1245	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM110	Modou Jammeh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1246	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM111	Bakary Barjo	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1247	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM113	Ebrima Jabbie	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1249	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM114	Muhamadou Camara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1250	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM115	Mamadou Lamarana Barry	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1251	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM116	Hagie Jorobo Trawally	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1252	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM117	Emmanual Mendy	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1253	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM118	Sasuni Touray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1254	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM119	Sulayman Jallow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1255	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM122	Ibrahim Jamal Berety	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1257	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM123	Amadou Touray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1258	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM124	Amadou Sowe	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1259	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM125	Alhagie Madi Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1260	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM127	Ousman Touray	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1262	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM131	Abdou S Camara	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1266	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM132	Dawda Jeng	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1267	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM134	Lamin Sillah	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1269	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK001	Edrissa Baldeh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1071	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK004	Malang Saidy	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1073	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK005	Sidia Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1074	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK006	Muhammed Dampha	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1075	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK008	Madi Suso	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1077	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK009	Ousman Bah/Kalilu Camara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1078	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK010	Borry Fatty	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1079	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK011	Modou Lamin Fatty	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1080	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK012	Abba Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1081	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK013	Abba Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1082	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK014	Alieu Jammeh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1083	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK015	Sheriffo Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1084	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK016	Ousman Joof	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1085	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK017	Buba Fadera	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1086	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK018	Alhagie Saidy	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1087	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK019	Lamin Jammeh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1088	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK020	Lamin E Bajo	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1089	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK022	Baboucarr Darboe	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1091	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK024	Ebrima Fatajo	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1093	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK025	Wurri Jallow	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1094	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK026	Yusupha Yaffa	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1095	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK027	Musa Bah	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1096	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK028	Lamin S. Ceesay	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1097	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK029	Bubacarr Dumbuya	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1098	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK030	Lamin Jawneh/Nyima Jawneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1099	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK031	Lamin J Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1100	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK032	Basiru Ceesay	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1101	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK032	Basiru Ceesay	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1102	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK033	Momodou Sissoho	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1103	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK034	Ebrima Jassey	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1104	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK035	Ba Arfang Touray	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1105	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK036	Omar Sarr	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1106	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK037	Muhammed Baba Kijera	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1107	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK038	Lamin Janneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1108	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK039	Lamin Janneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1109	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK040	Alieu T Dibba	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1110	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK041	Omar Tambedou	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1111	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK042	Omar Tambedou	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1112	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 043	Fabakary Kanteh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1113	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 044	Mamadou Kassama	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1114	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK046	Foday Jarju	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1116	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK047	Wally Camara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1117	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 048	Jarra Ak Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1118	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 049	Hadrammeh Hydara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1119	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK050	Abdou Ceesay	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1120	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK052	Saikou Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1122	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 053	Saikou Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1123	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK054	Saikou Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1124	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 055	Bakary K Trawally	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1125	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK056	Cemetry C/O Hamadi Jawara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1126	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 059	Lamin B Sanneh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1129	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK060	Abdoulie Jatta	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1130	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 063	Lamin M Jawara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1133	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 064	Kausu M Jawara	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1134	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 065	Alieu Samateh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1135	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 066	Sainey Jammeh	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1136	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK067	Babucarr Mbye Joof	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1137	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK068	Basirou Jallow	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1138	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK069	Saidou Ceesay	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1139	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK070	Lamin Dampha	M	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1140	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 002	Fatoumatta Sanneh	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1072	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK007	Binta Dibba	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1076	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK021	Kantending Kanteh	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1090	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK023	Aminata Darboe/ Baboucarr Darboe	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1092	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 045	Assiatou Baldeh	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1115	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK051	Aissata Cisse	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1121	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK057	Nhima Mane	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1127	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK 058	Sainabou Marong	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1128	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK061	Fatou Ndong	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1131	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+FBK062	Ida Janneh	F	304109	0.00	NULL	Yes	2024-09-23	 Plot N0. 1132	Empty plot	Compensation completed	NULL	101	NULL	7	304109	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM006	Abi Badjan	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1149	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM016	Awa Ngum	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1159	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM033	Binta Kassama	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1174	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM036	Haddy Conteh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1177	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+ JAM039	Jainaba Camara	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1180	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM040	Kaddy Drammeh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1181	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM040	Mr. Fatty	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1182	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM064	Kaddy Badjie	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1204	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM065	Ome Jarmaine	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1205	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+ JAM080	Kujay Ceesay	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1217	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 081	Fatoumatta Jaiteh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1218	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM086	Fatoumatta L Bah	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1223	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM099	Hawa Fatty	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1236	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM 104	Aminata Jammeh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1240	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM121	Khadja Baldeh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1256	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM126	Jainaba Jallow	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1261	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK015	Karim Touray	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 135	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK007	Bintou Dampha	F	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 136	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK008	Muhammed Bangura	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 137	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK 010	Ebrima Sanneh/Jalika Ceesay	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 139	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK012	Lamin Sanneh	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 105	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK014	Ibrahim J. S. Sanneh	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 1192	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK033	Ibrahima J. S. Sanneh	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 108	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK016	Kalifa Badjie	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 109	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK017	Sulayman Darboe	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 110	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK018	Lamin S. Marong	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 111	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK019	Kebba Trawally	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 112	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK021	Seedy Sanyang/Fatou Jabang	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 100	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK022	Kadijatou Leigh	F	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 101	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK023	Nfana Camara	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 102	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK024	Jerreh Bojang	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 103	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK026	Mamadou Barry	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 96	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK027	Sawo Sanneh	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 97	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK028	Naffisatou Kassama	F	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 98	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK029	Sarjo Jadama	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 990	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK030	Ebrima Jawara	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 1000	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK031	Foday Touray	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 1010	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK032	Ebrima Jobarteh	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 1020	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK034	Serendu Jawara	F	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 1030	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK035	Pa Dawda Jaiteh	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 1060	NA	Compensation completed	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM074	Musa Ndow	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1213	Empty plot	Compensation completed	NULL	109	NULL	7	306341	9	D309& D6530 -GM	200	2	NULL	4	10
+BRK005	Karim Touray	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 134	NA	Compensation completed	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK009	Almami Samateh	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 138	NA	Compensation completed	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK013	Nyimasata Sanneh	F	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 1190	NA	Compensation completed	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+FAR003	Modou Sarr	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1143	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM017	Ousman Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1160	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM023	Sheriff Koneh	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1166	Empty plot	Compensation completed	NULL	109	NULL	10	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM093	Matarr S. Badjan	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1230	Empty plot	Compensation completed	NULL	109	NULL	10	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM098	Lamin Darboe	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1235	Empty plot	Compensation completed	NULL	109	NULL	10	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM102	Siaka Dibba	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1238	Empty plot	Compensation completed	NULL	109	NULL	10	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM108	Amadou Camara	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1244	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM112	Saidou Ceesay	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1248	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM128	Musa Colley	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1263	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM129	Samba Njie	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1264	Empty plot	Compensation completed	NULL	109	NULL	9	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM130	Samba Marr	M	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1265	Empty plot	Compensation completed	NULL	109	NULL	9	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+JAM133	Fanta Janneh	F	306341	0.00	NULL	Yes	2024-09-23	 Plot N0. 1268	Empty plot	Compensation completed	NULL	109	NULL	8	306341	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK003	Karim Touray	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 133	Empty plot	Title deed under processing	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK 011	Hatab Saidy C/o Turrad Saidy	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 104	Empty plot	Title deed under processing	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK020	Moussa Diallo	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 99	Empty plot	Title deed under processing	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK025	Lamin Fabureh	M	304104	0.00	NULL	Yes	2024-09-23	Plot N0. 95	Empty plot	Title deed under processing	NULL	102	NULL	7	304104	9	D309& D6530 -GM	200	1	NULL	4	10
+BRK036 A,B&C	Omar Sanneh	M	304104	0.00	NULL	Yes	2024-09-23	 Plot N0. 1070	NA	Compensation completed	NULL	102	NULL	8	304104	9	D309& D6530 -GM	200	1	NULL	4	10
