@@ -116,6 +116,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Updated donor table with 7 major funding institutions including development banks, European institutions, and government entities
 - July 08, 2025. Fixed Financial Management Dashboard Actions button functionality - converted from disabled to fully functional
 - July 08, 2025. Fixed NAWEC PIU Financial Dashboard Project Activities display by adding missing recent_activities context data
+- July 08, 2025. Updated contributor table with Government of The Gambia and NAWEC as key institutional contributors
 
 ## User Preferences
 
