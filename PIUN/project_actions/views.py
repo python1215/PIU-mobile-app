@@ -350,7 +350,7 @@ def test_sql_server_connection(request):
         database_info = {
             'engine': engine,
             'is_sql_server': 'mssql' in engine.lower(),
-            'database': connection.settings_dict.get('NAME', 'Unknown')
+            'database': str(connection.settings_dict.get('NAME', 'Unknown'))
         }
         
         if 'mssql' in engine.lower():
@@ -398,8 +398,8 @@ def test_sql_server_connection(request):
             'connection': 'Database connection failed',
             'error': str(e),
             'database_info': {
-                'engine': connection.settings_dict.get('ENGINE', 'Unknown'),
-                'database': connection.settings_dict.get('NAME', 'Unknown')
+                'engine': str(connection.settings_dict.get('ENGINE', 'Unknown')),
+                'database': str(connection.settings_dict.get('NAME', 'Unknown'))
             }
         })
 
@@ -410,9 +410,9 @@ def sql_server_diagnostics(request):
         from django.db import connection
         
         diagnostics = {
-            'database_engine': connection.settings_dict.get('ENGINE', 'Unknown'),
-            'database_name': connection.settings_dict.get('NAME', 'Unknown'),
-            'server_host': connection.settings_dict.get('HOST', 'Unknown'),
+            'database_engine': str(connection.settings_dict.get('ENGINE', 'Unknown')),
+            'database_name': str(connection.settings_dict.get('NAME', 'Unknown')),
+            'server_host': str(connection.settings_dict.get('HOST', 'Unknown')),
             'tests': {}
         }
         
