@@ -460,6 +460,12 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                 self.fields['Kpi_description'].required = False
                 self.fields['Type_of_Investment'].help_text = 'No KPI data available. Please contact administrator to set up KPI records.'
                 self.fields['Kpi_description'].help_text = 'No KPI data available. Please contact administrator to set up KPI records.'
+            else:
+                # Make fields optional initially - they'll be populated via AJAX
+                self.fields['Type_of_Investment'].required = False
+                self.fields['Kpi_description'].required = False
+                self.fields['Type_of_Investment'].help_text = 'Will be populated based on project and monitoring type selection'
+                self.fields['Kpi_description'].help_text = 'Will be populated based on type of investment selection'
                 
         except ImportError:
             # Handle missing setup models gracefully
@@ -484,6 +490,9 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         if not self.instance.pk:
             self.fields['monitoring_date'].initial = timezone.now().date()
             self.fields['milestone_start_date'].initial = timezone.now().date()
+            # Set end date to tomorrow to avoid validation issues
+            from datetime import timedelta
+            self.fields['milestone_end_date'].initial = (timezone.now() + timedelta(days=1)).date()
         
         # Add help texts
         self.fields['contract_refNo'].help_text = 'Reference number of the contract being monitored'
@@ -535,8 +544,8 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         
         # Validate dates
         if start_date and end_date:
-            if start_date >= end_date:
-                raise ValidationError("Milestone end date must be after start date.")
+            if start_date > end_date:
+                raise ValidationError("Milestone end date must be after or equal to start date.")
         
         if monitoring_date:
             if monitoring_date > timezone.now().date():

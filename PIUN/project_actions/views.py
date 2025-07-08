@@ -878,7 +878,7 @@ def contract_monitoring_create(request):
                     request, 
                     f"Monitoring record for contract '{record.contract_refNo}' created successfully!"
                 )
-                return redirect('project_actions:contract_monitoring_detail', pk=record.pk)
+                return redirect('project_actions:contract_monitoring_list')
                 
             except Exception as e:
                 messages.error(request, f"Error creating monitoring record: {str(e)}")
