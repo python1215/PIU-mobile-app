@@ -119,6 +119,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Updated contributor table with Government of The Gambia and NAWEC as key institutional contributors
 - July 08, 2025. Configured project-donor relationships mapping 7 major projects to their respective funding institutions
 - July 08, 2025. Configured project-contributor relationships linking Government of The Gambia and NAWEC to specific projects
+- July 08, 2025. Added access type classifications for NAWEC utility services including electricity, water, and combined access options
 
 ## User Preferences
 
