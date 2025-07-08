@@ -123,6 +123,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Added data collection frequency classifications for monitoring schedules: Weekly, Monthly, Quarterly, and Annually
 - July 08, 2025. Added decision outcome classifications for tracking stakeholder agreements: No Agreement and Agreed
 - July 08, 2025. Added indicator type classifications for M&E framework: Output, Outcome, Impact, Process, and Project Development Objective
+- July 08, 2025. Added measurement unit classifications for KPI tracking: electrical units (KVA, KWh, GWh, MwP), physical units (KM, Tons), and qualitative measures
 
 ## User Preferences
 
