@@ -234,6 +234,17 @@ def load_type_of_investments(request):
     monitoring_type_id = request.GET.get('monitoring_type_id')
     project_id = request.GET.get('project_id')
     
+    # URL decode the project_id if needed
+    if project_id:
+        import urllib.parse
+        from .models import Project
+        project_id = urllib.parse.unquote(project_id)
+        # Handle common space variants (e.g., "GEAP 1" -> "GEAP1")
+        if ' ' in project_id and not Project.objects.filter(projectID=project_id).exists():
+            project_id_no_space = project_id.replace(' ', '')
+            if Project.objects.filter(projectID=project_id_no_space).exists():
+                project_id = project_id_no_space
+    
     if monitoring_type_id and project_id:
         try:
             # Check if we're using SQL Server (based on database engine)
@@ -277,7 +288,7 @@ def load_type_of_investments(request):
                 return JsonResponse({'options': options})
                 
         except Exception as e:
-            print(f"Error loading type of investments: {e}")
+            print("Error loading type of investments:", str(e))
             return JsonResponse({'options': [], 'error': str(e)})
     return JsonResponse({'options': []})
 
@@ -287,6 +298,17 @@ def load_kpi_descriptions(request):
     """Load KPI Description options based on selected project and type of investment"""
     investment_code = request.GET.get('investment_code')
     project_id = request.GET.get('project_id')
+    
+    # URL decode the project_id if needed
+    if project_id:
+        import urllib.parse
+        from .models import Project
+        project_id = urllib.parse.unquote(project_id)
+        # Handle common space variants (e.g., "GEAP 1" -> "GEAP1")
+        if ' ' in project_id and not Project.objects.filter(projectID=project_id).exists():
+            project_id_no_space = project_id.replace(' ', '')
+            if Project.objects.filter(projectID=project_id_no_space).exists():
+                project_id = project_id_no_space
     
     if investment_code and project_id:
         try:
@@ -331,7 +353,7 @@ def load_kpi_descriptions(request):
                 return JsonResponse({'options': options})
                 
         except Exception as e:
-            print(f"Error loading KPI descriptions: {e}")
+            print("Error loading KPI descriptions:", str(e))
             return JsonResponse({'options': [], 'error': str(e)})
     
     return JsonResponse({'options': []})

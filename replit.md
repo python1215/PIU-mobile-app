@@ -143,6 +143,10 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Created comprehensive SQL Server debugging endpoint (/project_actions/debug-cascading/) with table structure analysis and query testing capabilities
 - July 08, 2025. Fixed SQL Server KPI descriptions query to use monitoring_Type_Code instead of non-existent id column, matching actual table structure: [type_of_investment, Kpi_description, monitoring_Type_Code, date, loginUser_id, monitoring_type_id, project_id]
 - July 08, 2025. Enhanced debug endpoint to test both investment loading and KPI description queries with actual SQL Server column names
+- July 08, 2025. Fixed critical project ID mismatch issue: URL-encoded "GEAP%201" now properly decodes to "GEAP 1" and automatically maps to database value "GEAP1"
+- July 08, 2025. Added intelligent project ID handling to cascading dropdown endpoints with automatic space normalization for SQLite/SQL Server compatibility
+- July 08, 2025. Resolved "not all arguments converted during string formatting" error by fixing print statements and parameter handling
+- July 08, 2025. Verified cascading dropdown functionality: 21 investment types successfully loaded for GEAP1 project with Tec monitoring type
 
 ## User Preferences
 
