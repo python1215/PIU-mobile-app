@@ -109,6 +109,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Successfully inserted 171 KPI monitoring records into KPI_For_Contract table
 - July 08, 2025. Added comprehensive project data with 10 major projects including funding amounts, timelines, and currency information
 - July 08, 2025. Updated monitoring types with proper descriptions: Environmental and Social, procurement, Technical, and Financial
+- July 08, 2025. Inserted 15 project components with detailed allocations across 4 major projects totaling component value tracking
 
 ## User Preferences
 
