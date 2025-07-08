@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Debug Project ID Parsing{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Project ID Parsing Debug Results</h3>
+                </div>
+                <div class="card-body">
+                    <h5>Input Query String:</h5>
+                    <pre class="bg-light p-3">{{ results.original_query }}</pre>
+                    
+                    <h5>Standard GET Parameter:</h5>
+                    <pre class="bg-light p-3">{{ results.standard_get }}</pre>
+                    
+                    <h5>Enhanced Parsed (Raw):</h5>
+                    <pre class="bg-light p-3">{{ results.enhanced_parsed }}</pre>
+                    
+                    <h5>URL Decoded Result:</h5>
+                    <pre class="bg-light p-3">{{ results.url_decoded }}</pre>
+                    
+                    <h5>SQL Server Query Results:</h5>
+                    {% if results.sql_results %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Table</th>
+                                        <th>Project ID</th>
+                                        <th>Monitoring Type</th>
+                                        <th>Type of Investment</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results.sql_results %}
+                                    <tr>
+                                        <td>{{ result.table|default:"N/A" }}</td>
+                                        <td>{{ result.project_id|default:"N/A" }}</td>
+                                        <td>{{ result.monitoring_type_id|default:"N/A" }}</td>
+                                        <td>{{ result.type_of_investment|default:"N/A" }}</td>
+                                        <td class="text-danger">{{ result.error|default:"" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No SQL results available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

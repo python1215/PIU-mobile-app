@@ -233,40 +233,66 @@ def load_type_of_investments(request):
     """Load Type of Investment options based on selected project and monitoring type"""
     monitoring_type_id = request.GET.get('monitoring_type_id')
     
-    # Handle full URL parameter extraction properly
+    # Handle project_id with special characters properly
     full_query_string = request.META.get('QUERY_STRING', '')
     print(f"Full query string: {full_query_string}")
     
-    # Extract project_id from the full query string to handle special characters
+    # Advanced parsing to handle project_id with & characters
     project_id = None
-    if 'project_id=' in full_query_string:
-        # Find the project_id parameter and extract everything after it until next parameter
-        start_idx = full_query_string.find('project_id=') + len('project_id=')
-        # Look for the next parameter (starting with &) but not if it's part of the project_id
-        remaining = full_query_string[start_idx:]
-        
-        # Find the end of project_id (next parameter that starts with a known parameter name)
-        known_params = ['&monitoring_type_id=', '&type_of_investment=']
-        end_idx = len(remaining)
-        for param in known_params:
-            param_pos = remaining.find(param)
-            if param_pos != -1 and param_pos < end_idx:
-                end_idx = param_pos
-        
-        project_id = remaining[:end_idx]
-        
-        # URL decode
-        import urllib.parse
-        project_id = urllib.parse.unquote(project_id)
-        print(f"Extracted project_id: {project_id}")
     
-    # Fallback to standard GET parameter if extraction failed
+    # Method 1: Try to reconstruct from URL path and query
+    if 'project_id=' in full_query_string:
+        # Split by '&' and find all parts that might belong to project_id
+        parts = full_query_string.split('&')
+        project_parts = []
+        
+        collecting_project_id = False
+        for part in parts:
+            if part.startswith('project_id='):
+                # Start collecting project_id
+                collecting_project_id = True
+                project_parts.append(part[11:])  # Remove 'project_id=' prefix
+            elif collecting_project_id and not any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
+                # Continue collecting if this part doesn't start with a known parameter
+                project_parts.append(part)
+            elif collecting_project_id and any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
+                # Stop collecting when we hit a known parameter
+                break
+        
+        if project_parts:
+            # Reconstruct project_id with & characters
+            project_id = '&'.join(project_parts)
+            
+            # URL decode
+            import urllib.parse
+            project_id = urllib.parse.unquote(project_id)
+            print(f"Reconstructed project_id: {project_id}")
+    
+    # Method 2: Fallback to direct URL parsing
     if not project_id:
-        project_id = request.GET.get('project_id')
+        import urllib.parse
+        # Parse the full URL to get all parameters
+        request_url = request.build_absolute_uri()
+        parsed_url = urllib.parse.urlparse(request_url)
+        
+        # Manual extraction from raw query string
+        if 'project_id=' in parsed_url.query:
+            start_pos = parsed_url.query.find('project_id=') + len('project_id=')
+            end_pos = parsed_url.query.find('&monitoring_type_id=', start_pos)
+            if end_pos == -1:
+                end_pos = len(parsed_url.query)
+            
+            project_id = parsed_url.query[start_pos:end_pos]
+            project_id = urllib.parse.unquote(project_id)
+            print(f"URL parsed project_id: {project_id}")
+    
+    # Method 3: Final fallback
+    if not project_id:
+        project_id = request.GET.get('project_id', '')
         if project_id:
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Fallback project_id: {project_id}")
+            print(f"Standard GET project_id: {project_id}")
     
     if monitoring_type_id and project_id:
         try:
@@ -347,40 +373,66 @@ def load_kpi_descriptions(request):
     """Load KPI Description options based on selected project and type of investment"""
     investment_code = request.GET.get('investment_code')
     
-    # Handle full URL parameter extraction properly
+    # Handle project_id with special characters properly
     full_query_string = request.META.get('QUERY_STRING', '')
     print(f"Full query string: {full_query_string}")
     
-    # Extract project_id from the full query string to handle special characters
+    # Advanced parsing to handle project_id with & characters
     project_id = None
-    if 'project_id=' in full_query_string:
-        # Find the project_id parameter and extract everything after it until next parameter
-        start_idx = full_query_string.find('project_id=') + len('project_id=')
-        # Look for the next parameter (starting with &) but not if it's part of the project_id
-        remaining = full_query_string[start_idx:]
-        
-        # Find the end of project_id (next parameter that starts with a known parameter name)
-        known_params = ['&investment_code=', '&monitoring_type_id=']
-        end_idx = len(remaining)
-        for param in known_params:
-            param_pos = remaining.find(param)
-            if param_pos != -1 and param_pos < end_idx:
-                end_idx = param_pos
-        
-        project_id = remaining[:end_idx]
-        
-        # URL decode
-        import urllib.parse
-        project_id = urllib.parse.unquote(project_id)
-        print(f"Extracted project_id: {project_id}")
     
-    # Fallback to standard GET parameter if extraction failed
+    # Method 1: Try to reconstruct from URL path and query
+    if 'project_id=' in full_query_string:
+        # Split by '&' and find all parts that might belong to project_id
+        parts = full_query_string.split('&')
+        project_parts = []
+        
+        collecting_project_id = False
+        for part in parts:
+            if part.startswith('project_id='):
+                # Start collecting project_id
+                collecting_project_id = True
+                project_parts.append(part[11:])  # Remove 'project_id=' prefix
+            elif collecting_project_id and not any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
+                # Continue collecting if this part doesn't start with a known parameter
+                project_parts.append(part)
+            elif collecting_project_id and any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
+                # Stop collecting when we hit a known parameter
+                break
+        
+        if project_parts:
+            # Reconstruct project_id with & characters
+            project_id = '&'.join(project_parts)
+            
+            # URL decode
+            import urllib.parse
+            project_id = urllib.parse.unquote(project_id)
+            print(f"Reconstructed project_id: {project_id}")
+    
+    # Method 2: Fallback to direct URL parsing
     if not project_id:
-        project_id = request.GET.get('project_id')
+        import urllib.parse
+        # Parse the full URL to get all parameters
+        request_url = request.build_absolute_uri()
+        parsed_url = urllib.parse.urlparse(request_url)
+        
+        # Manual extraction from raw query string
+        if 'project_id=' in parsed_url.query:
+            start_pos = parsed_url.query.find('project_id=') + len('project_id=')
+            end_pos = parsed_url.query.find('&investment_code=', start_pos)
+            if end_pos == -1:
+                end_pos = len(parsed_url.query)
+            
+            project_id = parsed_url.query[start_pos:end_pos]
+            project_id = urllib.parse.unquote(project_id)
+            print(f"URL parsed project_id: {project_id}")
+    
+    # Method 3: Final fallback
+    if not project_id:
+        project_id = request.GET.get('project_id', '')
         if project_id:
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Fallback project_id: {project_id}")
+            print(f"Standard GET project_id: {project_id}")
     
     if investment_code and project_id:
         try:
