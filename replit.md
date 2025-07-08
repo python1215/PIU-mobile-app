@@ -165,6 +165,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Fixed Social & Environmental grievance detail template missing error: created comprehensive grievance_detail.html template with complete case information display, complainant details, complaint investigation timeline, and responsive design with Bootstrap styling for proper grievance case management
 - July 08, 2025. Fixed Social & Environmental grievance detail template URL namespace issue: corrected invalid namespace references from 'social_and_env:grievance_list' to 'grievance_list' since the app doesn't have a registered namespace
 - July 08, 2025. Enhanced pagination functionality across all list views: implemented comprehensive pagination with smart page number display, ellipsis for large page ranges, page size selector (10/25/50/100), and proper URL parameter preservation for filtering. Added reusable pagination template component at templates/includes/pagination.html and updated Issues Actions monitoring and Social & Environmental grievance list templates with enhanced pagination controls
+- July 08, 2025. Fixed Grievance Management and OHS Monitoring pagination problems: replaced faulty request.GET.urlencode with proper URL parameter loop construct, implemented smart page number display with ellipsis, added First/Previous/Next/Last navigation controls with Bootstrap icons, enhanced page information display, and added configurable page size support in views for both modules
 
 ## User Preferences
 

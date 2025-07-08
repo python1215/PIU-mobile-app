@@ -424,8 +424,16 @@ def ohs_list(request):
     ohs_filter = OHSMonitoringFilter(request.GET, queryset=ohs_list)
     filtered_ohs = ohs_filter.qs
 
-    # Pagination
-    paginator = Paginator(filtered_ohs, 10)
+    # Pagination with configurable page size
+    page_size = request.GET.get('page_size', 10)
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 15, 25, 50, 100]:
+            page_size = 10
+    except (ValueError, TypeError):
+        page_size = 10
+    
+    paginator = Paginator(filtered_ohs, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -486,8 +494,16 @@ def community_list(request):
                                                  queryset=community_list)
     filtered_community = community_filter.qs
 
-    # Pagination
-    paginator = Paginator(filtered_community, 10)
+    # Pagination with configurable page size
+    page_size = request.GET.get('page_size', 10)
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 15, 25, 50, 100]:
+            page_size = 10
+    except (ValueError, TypeError):
+        page_size = 10
+    
+    paginator = Paginator(filtered_community, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
