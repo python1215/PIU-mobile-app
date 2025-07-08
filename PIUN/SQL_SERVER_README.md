@@ -108,8 +108,17 @@ This typically means:
 1. **Test Database Connection**: Visit `/project_actions/test-sql-connection/` to verify connectivity
 2. **Check File Encoding**: Ensure no null bytes in Python files, especially `views.py` and `utils.py`
 3. **Verify Table Structure**: Confirm table exists: `[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]`
-4. **Validate Data**: Check data exists for your project and monitoring type combinations
-5. **Column Mapping**: Ensure column names match exactly (case-sensitive)
+4. **Test AJAX Endpoints**: Run `python test_sql_server_ajax.py` to verify cascading dropdown functionality
+5. **Validate Data**: Check data exists for your project and monitoring type combinations
+6. **Column Mapping**: Ensure column names match exactly (case-sensitive)
+
+### SQL Server Column Requirements:
+The system expects these columns in `[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]`:
+- `project_id` - Project identifier (e.g., 'D309D6530GM')
+- `monitoring_type_id` - Monitoring type code (e.g., 'proc', 'Tec', 'ESS')
+- `type_of_investment` - Investment description
+- `Kpi_description` - KPI description text
+- `id` - Primary key for records
 
 ### Common Issues and Fixes:
 
@@ -134,6 +143,27 @@ INSTALLED_APPS = [
     'PIU_Financial_mgt',
     'setup',
 ]
+```
+
+#### 3. Testing SQL Server Functionality
+Use the provided test script to verify AJAX endpoints:
+```bash
+python test_sql_server_ajax.py
+```
+
+Expected output for working system:
+- Type of Investments endpoint: Status 200 with options
+- KPI Descriptions endpoint: Status 200 with options  
+- Database verification: Shows available projects and monitoring types
+
+#### 4. SQL Server Parameter Binding
+Ensure your SQL Server queries use `?` parameters instead of `%s`:
+```sql
+-- Correct for SQL Server
+WHERE project_id = ? AND monitoring_type_id = ?
+
+-- Incorrect (PostgreSQL/MySQL style)
+WHERE project_id = %s AND monitoring_type_id = %s
 ```
 
 ### SQL Server Specific Queries

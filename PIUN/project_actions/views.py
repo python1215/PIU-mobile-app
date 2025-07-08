@@ -243,10 +243,10 @@ def load_type_of_investments(request):
                 with connection.cursor() as cursor:
                     query = """
                         SELECT DISTINCT 
-                            monitoring_Type_Code as value,
+                            type_of_investment as value,
                             type_of_investment as text
                         FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                        WHERE project_id = %s AND monitoring_type_id = %s
+                        WHERE project_id = ? AND monitoring_type_id = ?
                         ORDER BY type_of_investment
                     """
                     cursor.execute(query, [project_id, monitoring_type_id])
@@ -301,7 +301,7 @@ def load_kpi_descriptions(request):
                             id as value,
                             Kpi_description as text
                         FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                        WHERE monitoring_Type_Code = %s AND project_id = %s
+                        WHERE type_of_investment = ? AND project_id = ?
                         ORDER BY Kpi_description
                     """
                     cursor.execute(query, [investment_code, project_id])
