@@ -232,13 +232,41 @@ def dashboard(request):
 def load_type_of_investments(request):
     """Load Type of Investment options based on selected project and monitoring type"""
     monitoring_type_id = request.GET.get('monitoring_type_id')
-    project_id = request.GET.get('project_id')
     
-    # Simple URL decode only - keep project_id exactly as received
-    if project_id:
+    # Handle full URL parameter extraction properly
+    full_query_string = request.META.get('QUERY_STRING', '')
+    print(f"Full query string: {full_query_string}")
+    
+    # Extract project_id from the full query string to handle special characters
+    project_id = None
+    if 'project_id=' in full_query_string:
+        # Find the project_id parameter and extract everything after it until next parameter
+        start_idx = full_query_string.find('project_id=') + len('project_id=')
+        # Look for the next parameter (starting with &) but not if it's part of the project_id
+        remaining = full_query_string[start_idx:]
+        
+        # Find the end of project_id (next parameter that starts with a known parameter name)
+        known_params = ['&monitoring_type_id=', '&type_of_investment=']
+        end_idx = len(remaining)
+        for param in known_params:
+            param_pos = remaining.find(param)
+            if param_pos != -1 and param_pos < end_idx:
+                end_idx = param_pos
+        
+        project_id = remaining[:end_idx]
+        
+        # URL decode
         import urllib.parse
         project_id = urllib.parse.unquote(project_id)
-        print(f"Received project_id: {project_id}")
+        print(f"Extracted project_id: {project_id}")
+    
+    # Fallback to standard GET parameter if extraction failed
+    if not project_id:
+        project_id = request.GET.get('project_id')
+        if project_id:
+            import urllib.parse
+            project_id = urllib.parse.unquote(project_id)
+            print(f"Fallback project_id: {project_id}")
     
     if monitoring_type_id and project_id:
         try:
@@ -318,13 +346,41 @@ def load_type_of_investments(request):
 def load_kpi_descriptions(request):
     """Load KPI Description options based on selected project and type of investment"""
     investment_code = request.GET.get('investment_code')
-    project_id = request.GET.get('project_id')
     
-    # Simple URL decode only - keep project_id exactly as received
-    if project_id:
+    # Handle full URL parameter extraction properly
+    full_query_string = request.META.get('QUERY_STRING', '')
+    print(f"Full query string: {full_query_string}")
+    
+    # Extract project_id from the full query string to handle special characters
+    project_id = None
+    if 'project_id=' in full_query_string:
+        # Find the project_id parameter and extract everything after it until next parameter
+        start_idx = full_query_string.find('project_id=') + len('project_id=')
+        # Look for the next parameter (starting with &) but not if it's part of the project_id
+        remaining = full_query_string[start_idx:]
+        
+        # Find the end of project_id (next parameter that starts with a known parameter name)
+        known_params = ['&investment_code=', '&monitoring_type_id=']
+        end_idx = len(remaining)
+        for param in known_params:
+            param_pos = remaining.find(param)
+            if param_pos != -1 and param_pos < end_idx:
+                end_idx = param_pos
+        
+        project_id = remaining[:end_idx]
+        
+        # URL decode
         import urllib.parse
         project_id = urllib.parse.unquote(project_id)
-        print(f"Received project_id: {project_id}")
+        print(f"Extracted project_id: {project_id}")
+    
+    # Fallback to standard GET parameter if extraction failed
+    if not project_id:
+        project_id = request.GET.get('project_id')
+        if project_id:
+            import urllib.parse
+            project_id = urllib.parse.unquote(project_id)
+            print(f"Fallback project_id: {project_id}")
     
     if investment_code and project_id:
         try:

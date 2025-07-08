@@ -150,6 +150,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Implemented comprehensive SQL Server cascading dropdown fix: progressive table name fallback (schema-prefixed → simple), dual parameter binding (? and %s), and robust project ID cleaning for malformed URLs like "D309&%20D6530%20-GM" → "D309D6530GM"
 - July 08, 2025. Added multi-environment SQL Server support: automatically tries test environment table [piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract] and production environment table [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract] with fallback to simple table name
 - July 08, 2025. Fixed Project Activities display issue in SQL Server: updated both enhanced_project_dashboard and simple_financial_dashboard views to use raw SQL queries compatible with SQL Server, supporting [piuprod].[dbo].[PIU_Financial_mgt_activities] and [piuprod3].[dbo].[PIU_Financial_mgt_activities] tables with proper template compatibility
+- July 08, 2025. Fixed critical project ID parameter parsing issue in AJAX endpoints: project IDs containing special characters like '&' (e.g., 'D309& D6530 -GM') were being truncated due to URL parameter parsing - implemented enhanced query string extraction to preserve exact project_id format without modification
 
 ## User Preferences
 
