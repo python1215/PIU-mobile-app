@@ -23,11 +23,11 @@ from .utils import (
 try:
     from setup.models import (
         ProjectCategory, Donor, Type_of_Monitoring, 
-        Physicalprogress, Quarter, KPI_For_Contract
+        Physicalprogress, Quarter
     )
 except ImportError:
     ProjectCategory = Donor = Type_of_Monitoring = None
-    Physicalprogress = Quarter = KPI_For_Contract = None
+    Physicalprogress = Quarter = None
 
 try:
     from PIU_Financial_mgt.models import Project, Component, Subcomponent, Activities, Currency
