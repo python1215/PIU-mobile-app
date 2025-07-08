@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from PIU_Financial_mgt.models import KPI_For_Contract, Project
+from PIU_Financial_mgt.models import Project
 from setup.models import YEAR, Quarter, Type_of_Monitoring
 
 
