@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from .models import issue_action_source, IssueActions
-from PIU_Financial_mgt.models import Project, KPI_For_Contract
-from setup.models import YEAR, Quarter
+from PIU_Financial_mgt.models import Project
+from setup.models import YEAR, Quarter, Type_of_Monitoring
 
 User = get_user_model()
 
@@ -58,7 +58,10 @@ class IssueActionsForm(forms.ModelForm):
             'source_of_issue_or_action': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'priority': forms.Select(attrs={'class': 'form-select'}),
-            'assigned_to': forms.Select(attrs={'class': 'form-select'}),
+            'assigned_to': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter assignee name'
+            }),
             'due_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
@@ -78,9 +81,9 @@ class IssueActionsForm(forms.ModelForm):
         self.fields['project'].queryset = Project.objects.all()
         self.fields['year'].queryset = YEAR.objects.all()
         self.fields['quarter'].queryset = Quarter.objects.all()
-        self.fields['issue_action_type'].queryset = KPI_For_Contract.objects.all()
+        self.fields['issue_action_type'].queryset = Type_of_Monitoring.objects.all()
         self.fields['source_of_issue_or_action'].queryset = issue_action_source.objects.all()
-        self.fields['assigned_to'].queryset = User.objects.all()
+        # assigned_to is a CharField, not a ForeignKey
         self.fields['assigned_to'].required = False
         self.fields['remarks'].required = False
 
