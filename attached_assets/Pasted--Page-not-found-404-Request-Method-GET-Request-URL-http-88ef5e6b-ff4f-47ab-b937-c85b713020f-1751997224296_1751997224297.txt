@@ -1,0 +1,61 @@
+
+Page not found (404)
+Request Method:	GET
+Request URL:	http://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev/PIU_Financial_mgt/projects/enhanced_project_dashboard/D309D6530GM/
+Using the URLconf defined in piu_project.urls, Django tried these URL patterns, in this order:
+
+admin-panel/
+[name='main_dashboard']
+dashboard/ [name='dashboard-alt']
+user-accounts/
+accounts/
+accounts/profile/ [name='profile']
+setup/
+PIU_Financial_mgt/ [name='dashboard']
+PIU_Financial_mgt/ dashboard/ [name='simple-dashboard']
+PIU_Financial_mgt/ projects/ [name='projects']
+PIU_Financial_mgt/ project-list/ [name='project_list']
+PIU_Financial_mgt/ project/<str:project_id>/ [name='project_detail']
+PIU_Financial_mgt/ project/<str:project_id>/edit/ [name='edit_project']
+PIU_Financial_mgt/ project/<str:project_id>/delete/ [name='delete_project']
+PIU_Financial_mgt/ add-project/ [name='add-project']
+PIU_Financial_mgt/ export-projects-excel/ [name='export-projects-excel']
+PIU_Financial_mgt/ components/ [name='components']
+PIU_Financial_mgt/ add-component/ [name='add_component']
+PIU_Financial_mgt/ component/<int:component_id>/ [name='component_detail']
+PIU_Financial_mgt/ component/<int:component_id>/edit/ [name='edit_component']
+PIU_Financial_mgt/ component/<int:component_id>/delete/ [name='delete_component']
+PIU_Financial_mgt/ export-components-excel/ [name='export-components-excel']
+PIU_Financial_mgt/ subcomponents/ [name='subcomponents']
+PIU_Financial_mgt/ subcomponent-list/ [name='subcomponent_list']
+PIU_Financial_mgt/ subcomponent/<int:subcomponent_id>/ [name='subcomponent_detail']
+PIU_Financial_mgt/ subcomponent/<int:subcomponent_id>/edit/ [name='edit_subcomponent']
+PIU_Financial_mgt/ subcomponent/<int:subcomponent_id>/delete/ [name='delete_subcomponent']
+PIU_Financial_mgt/ add-subcomponent/ [name='add_subcomponent']
+PIU_Financial_mgt/ add-subcomponent-isolated/ [name='add-subcomponent-isolated']
+PIU_Financial_mgt/ load_project_components/ [name='load_project_components']
+PIU_Financial_mgt/ load_project_subcomponents/ [name='load_project_subcomponents']
+PIU_Financial_mgt/ activities/ [name='activities']
+PIU_Financial_mgt/ add-activity/ [name='add_activity']
+PIU_Financial_mgt/ activity/<int:activity_id>/ [name='activity_detail']
+PIU_Financial_mgt/ activity/<int:activity_id>/edit/ [name='edit_activity']
+PIU_Financial_mgt/ activity/<int:activity_id>/delete/ [name='delete_activity']
+PIU_Financial_mgt/ budget-summary/ [name='budget-summary']
+PIU_Financial_mgt/ api/validate-project-funding/ [name='validate-project-funding']
+PIU_Financial_mgt/ api/validate-component-allocation/ [name='validate-component-allocation']
+PIU_Financial_mgt/ api/validate-subcomponent-allocation/ [name='validate-subcomponent-allocation']
+PIU_Financial_mgt/ api/validate-activity-allocation/ [name='validate-activity-allocation']
+PIU_Financial_mgt/ enhanced_project_dashboard/ [name='enhanced_project_dashboard']
+PIU_Financial_mgt/ simple-financial-dashboard/ [name='simple-financial-dashboard']
+project_actions/
+monitoring/
+social_and_env/
+PIU_Mapping_project_Sites/
+Project_Documentation_Tracking/
+NAWEC_KPI/
+Issues_Actions_monitoring/
+^static/(?P<path>.*)$
+^media/(?P<path>.*)$
+The current path, PIU_Financial_mgt/projects/enhanced_project_dashboard/D309D6530GM/, didn’t match any of these.
+
+You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.

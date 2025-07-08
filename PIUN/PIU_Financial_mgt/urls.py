@@ -54,5 +54,6 @@ urlpatterns =[
     
     #legacy routes
     path("enhanced_project_dashboard/", views.enhanced_project_dashboard, name='enhanced_project_dashboard'),
+    path("enhanced_project_dashboard/<str:project_id>/", views.enhanced_project_dashboard, name='enhanced_project_dashboard_with_id'),
     path("simple-financial-dashboard/", views.simple_financial_dashboard, name='simple-financial-dashboard'),
 ]

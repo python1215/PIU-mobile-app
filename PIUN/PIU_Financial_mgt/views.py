@@ -99,21 +99,48 @@ def add_project_test(request):
     return render(request, 'PIU_Financial_mgt/projects/add-project.html', {'form': form})
 
 @login_required
-def enhanced_project_dashboard(request):
+def enhanced_project_dashboard(request, project_id=None):
     from django.db.models import Sum, Count, Avg
+    from social_and_env.models import ESIA, GrievianceMonitoringLog, OHS_Monitoring, PAP, CommunityconsultEngagement
     
-    # Calculate dashboard statistics
-    total_projects = Project.objects.count()
-    total_components = Component.objects.count()
-    total_subcomponents = Subcomponent.objects.count()
-    total_activities = Activities.objects.count()
-    
-    # Financial calculations
-    total_funding = Project.objects.aggregate(Sum('funding'))['funding__sum'] or 0
-    active_projects = Project.objects.filter(closure_Date__isnull=True).count()
-    
-    # Calculate total disbursed (sum of component allocations)
-    total_disbursed = Component.objects.aggregate(Sum('allocation'))['allocation__sum'] or 0
+    # Get specific project if project_id is provided
+    selected_project = None
+    if project_id:
+        selected_project = get_object_or_404(Project, projectID=project_id)
+        
+    # Calculate dashboard statistics (project-specific or overall)
+    if selected_project:
+        # Project-specific statistics
+        total_projects = 1
+        total_components = Component.objects.filter(projectID=selected_project).count()
+        total_subcomponents = Subcomponent.objects.filter(projectID=selected_project).count()
+        total_activities = Activities.objects.filter(projectID=selected_project).count()
+        total_funding = selected_project.funding or 0
+        active_projects = 1 if not selected_project.closure_Date else 0
+        total_disbursed = Component.objects.filter(projectID=selected_project).aggregate(Sum('allocation'))['allocation__sum'] or 0
+        
+        # Social and Environmental data for selected project
+        esia_records = ESIA.objects.filter(project=selected_project)
+        grievance_records = GrievianceMonitoringLog.objects.filter(project=selected_project)
+        ohs_records = OHS_Monitoring.objects.filter(project=selected_project)
+        pap_records = PAP.objects.filter(project=selected_project)
+        community_records = CommunityconsultEngagement.objects.filter(project=selected_project)
+    else:
+        # Overall statistics
+        total_projects = Project.objects.count()
+        total_components = Component.objects.count()
+        total_subcomponents = Subcomponent.objects.count()
+        total_activities = Activities.objects.count()
+        total_funding = Project.objects.aggregate(Sum('funding'))['funding__sum'] or 0
+        active_projects = Project.objects.filter(closure_Date__isnull=True).count()
+        total_disbursed = Component.objects.aggregate(Sum('allocation'))['allocation__sum'] or 0
+        
+        # Social and Environmental data for all projects
+        esia_records = ESIA.objects.all()
+        grievance_records = GrievianceMonitoringLog.objects.all()
+        ohs_records = OHS_Monitoring.objects.all()
+        pap_records = PAP.objects.all()
+        community_records = CommunityconsultEngagement.objects.all()
     
     # Recent data - SQL Server compatible
     try:
@@ -172,15 +199,21 @@ def enhanced_project_dashboard(request):
         print(f"Error loading recent activities: {e}")
         recent_activities = []
     
-    # Other recent data (keeping Django ORM for now)
-    recent_projects = Project.objects.order_by('-date')[:5]
-    recent_components = Component.objects.order_by('-date')[:5]
-    recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
+    # Other recent data (project-specific or overall)
+    if selected_project:
+        recent_projects = [selected_project]
+        recent_components = Component.objects.filter(projectID=selected_project).order_by('-date')[:5]
+        recent_subcomponents = Subcomponent.objects.filter(projectID=selected_project).order_by('-date')[:5]
+    else:
+        recent_projects = Project.objects.order_by('-date')[:5]
+        recent_components = Component.objects.order_by('-date')[:5]
+        recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
     
     # Budget utilization percentage
     budget_utilization = (total_disbursed / total_funding * 100) if total_funding > 0 else 0
     
     context = {
+        'selected_project': selected_project,
         'total_projects': total_projects,
         'total_components': total_components,
         'total_subcomponents': total_subcomponents,
@@ -194,6 +227,18 @@ def enhanced_project_dashboard(request):
         'recent_components': recent_components,
         'recent_subcomponents': recent_subcomponents,
         'recent_activities': recent_activities,
+        
+        # Social and Environmental data
+        'esia_records': esia_records,
+        'grievance_records': grievance_records,
+        'ohs_records': ohs_records,
+        'pap_records': pap_records,
+        'community_records': community_records,
+        'esia_count': esia_records.count(),
+        'grievance_count': grievance_records.count(),
+        'ohs_count': ohs_records.count(),
+        'pap_count': pap_records.count(),
+        'community_count': community_records.count(),
     }
     
     return render(request, 'PIU_Financial_mgt/projects/enhanced_project_dashboard.html', context)
