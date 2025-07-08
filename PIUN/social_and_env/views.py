@@ -197,6 +197,8 @@ def esia_export_excel(request):
 def pap_list(request):
     """Enhanced PAP list view with filtering and pagination - SQL Server compatible"""
     from django.db import connection
+    from django.core.paginator import Paginator
+    from django.db.models import Sum
     from .sql_server_pap_utils import get_pap_data_sql_server, convert_sql_results_to_pap_objects
     
     # Check if we're using SQL Server
@@ -250,7 +252,6 @@ def pap_list(request):
 
     # Statistics
     if not is_sql_server:
-        from django.db.models import Sum
         stats = {
             'total_pap': pap_list.count(),
             'filtered_count': filtered_pap.count(),
