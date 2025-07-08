@@ -121,6 +121,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Configured project-contributor relationships linking Government of The Gambia and NAWEC to specific projects
 - July 08, 2025. Added access type classifications for NAWEC utility services including electricity, water, and combined access options
 - July 08, 2025. Added data collection frequency classifications for monitoring schedules: Weekly, Monthly, Quarterly, and Annually
+- July 08, 2025. Added decision outcome classifications for tracking stakeholder agreements: No Agreement and Agreed
 
 ## User Preferences
 
