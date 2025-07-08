@@ -114,6 +114,8 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Inserted 39 subcomponents across 4 projects with detailed budget breakdown and multi-currency allocations
 - July 08, 2025. Added 79 project activities with detailed implementation tracking across multiple years (2023-2025)
 - July 08, 2025. Updated donor table with 7 major funding institutions including development banks, European institutions, and government entities
+- July 08, 2025. Fixed Financial Management Dashboard Actions button functionality - converted from disabled to fully functional
+- July 08, 2025. Fixed NAWEC PIU Financial Dashboard Project Activities display by adding missing recent_activities context data
 
 ## User Preferences
 

@@ -119,6 +119,7 @@ def enhanced_project_dashboard(request):
     recent_projects = Project.objects.order_by('-date')[:5]
     recent_components = Component.objects.order_by('-date')[:5]
     recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
+    recent_activities = Activities.objects.order_by('-date')[:5]
     
     # Budget utilization percentage
     budget_utilization = (total_disbursed / total_funding * 100) if total_funding > 0 else 0
@@ -136,6 +137,7 @@ def enhanced_project_dashboard(request):
         'recent_projects': recent_projects,
         'recent_components': recent_components,
         'recent_subcomponents': recent_subcomponents,
+        'recent_activities': recent_activities,
     }
     
     return render(request, 'PIU_Financial_mgt/projects/enhanced_project_dashboard.html', context)
