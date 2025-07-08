@@ -249,7 +249,11 @@ def load_type_of_investments(request):
         try:
             # Check if we're using SQL Server (based on database engine)
             from django.db import connection
-            if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+            engine = connection.settings_dict.get('ENGINE', '')
+            print(f"Database engine: {engine}")
+            print(f"Parameters received: project_id={project_id}, monitoring_type_id={monitoring_type_id}")
+            
+            if 'mssql' in engine.lower():
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     try:
@@ -278,6 +282,10 @@ def load_type_of_investments(request):
                         cursor.execute(query, [project_id, monitoring_type_id])
                         results = cursor.fetchall()
                     
+                    print(f"SQL Server query results: {len(results)} rows found")
+                    if results:
+                        print(f"Sample results: {results[:3]}")
+                    
                     options = []
                     for row in results:
                         options.append({
@@ -300,10 +308,13 @@ def load_type_of_investments(request):
                         'text': record['type_of_investment']
                     })
                 
+                print(f"SQLite query results: {len(options)} options found")
                 return JsonResponse({'options': options})
                 
         except Exception as e:
             print("Error loading type of investments:", str(e))
+            import traceback
+            print("Full traceback:", traceback.format_exc())
             return JsonResponse({'options': [], 'error': str(e)})
     return JsonResponse({'options': []})
 
