@@ -101,7 +101,7 @@ def add_project_test(request):
 @login_required
 def enhanced_project_dashboard(request, project_id=None):
     from django.db.models import Sum, Count, Avg
-    from social_and_env.models import ESIA, GrievianceMonitoringLog, OHS_Monitoring, PAP, CommunityconsultEngagement
+    from social_and_env.models import ESIA, GrievianceMonitoringLog, OHS_Monitoring, PAP, CommunityConsult_Engagement
     
     # Get specific project if project_id is provided
     selected_project = None
@@ -124,7 +124,7 @@ def enhanced_project_dashboard(request, project_id=None):
         grievance_records = GrievianceMonitoringLog.objects.filter(project=selected_project)
         ohs_records = OHS_Monitoring.objects.filter(project=selected_project)
         pap_records = PAP.objects.filter(project=selected_project)
-        community_records = CommunityconsultEngagement.objects.filter(project=selected_project)
+        community_records = CommunityConsult_Engagement.objects.filter(project=selected_project)
     else:
         # Overall statistics
         total_projects = Project.objects.count()
@@ -140,7 +140,7 @@ def enhanced_project_dashboard(request, project_id=None):
         grievance_records = GrievianceMonitoringLog.objects.all()
         ohs_records = OHS_Monitoring.objects.all()
         pap_records = PAP.objects.all()
-        community_records = CommunityconsultEngagement.objects.all()
+        community_records = CommunityConsult_Engagement.objects.all()
     
     # Recent data - SQL Server compatible
     try:
