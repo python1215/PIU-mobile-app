@@ -136,9 +136,19 @@
                             <th class="text-muted">Assigned To:</th>
                             <td>
                                 {% if issue.assigned_to %}
-                                    <i class="bi bi-person-circle"></i> {{ issue.assigned_to.username }}
+                                    <i class="bi bi-person-circle"></i> {{ issue.assigned_to }}
                                 {% else %}
                                     <span class="text-muted"><i class="bi bi-person-x"></i> Unassigned</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Assign Date:</th>
+                            <td>
+                                {% if issue.assign_date %}
+                                    {{ issue.assign_date|date:"M d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
                                 {% endif %}
                             </td>
                         </tr>

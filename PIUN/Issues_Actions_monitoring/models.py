@@ -56,6 +56,9 @@ class IssueActions(models.Model):
                                       verbose_name="Date Created")
   date_updated = models.DateTimeField(auto_now=True,
                                       verbose_name="Date Updated")
+  assign_date = models.DateField(null=True,
+                                 blank=True,
+                                 verbose_name="Assign Date")
   due_date = models.DateField(null=True, blank=True, verbose_name="Due Date")
   remarks = models.TextField(blank=True, verbose_name="Remarks")
   loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,

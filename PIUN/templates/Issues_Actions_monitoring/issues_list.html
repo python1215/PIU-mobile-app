@@ -110,6 +110,7 @@
                                         <th>Priority</th>
                                         <th>Status</th>
                                         <th>Assigned To</th>
+                                        <th>Assign Date</th>
                                         <th>Due Date</th>
                                         <th>Created</th>
                                         <th>Actions</th>
@@ -141,7 +142,8 @@
                                                 <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ issue.assigned_to.username|default:"Unassigned" }}</td>
+                                        <td>{{ issue.assigned_to|default:"Unassigned" }}</td>
+                                        <td>{{ issue.assign_date|date:"M d, Y"|default:"-" }}</td>
                                         <td>
                                             {% if issue.due_date %}
                                                 {{ issue.due_date|date:"M d, Y" }}

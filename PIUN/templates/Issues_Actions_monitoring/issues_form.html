@@ -160,6 +160,13 @@
                                             {% endif %}
                                         </div>
                                         <div class="mb-3">
+                                            {{ form.assign_date.label_tag }}
+                                            {{ form.assign_date }}
+                                            {% if form.assign_date.errors %}
+                                                <div class="text-danger small">{{ form.assign_date.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3">
                                             {{ form.due_date.label_tag }}
                                             {{ form.due_date }}
                                             {% if form.due_date.errors %}

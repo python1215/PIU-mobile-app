@@ -39,7 +39,7 @@ class IssueActionsForm(forms.ModelForm):
         fields = [
             'project', 'year', 'quarter', 'issue_code', 'issue_action_type',
             'description_of_issue_or_action', 'source_of_issue_or_action',
-            'status', 'priority', 'assigned_to', 'due_date', 'remarks'
+            'status', 'priority', 'assigned_to', 'assign_date', 'due_date', 'remarks'
         ]
         widgets = {
             'project': forms.Select(attrs={'class': 'form-select'}),
@@ -61,6 +61,10 @@ class IssueActionsForm(forms.ModelForm):
             'assigned_to': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter assignee name'
+            }),
+            'assign_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
             }),
             'due_date': forms.DateInput(attrs={
                 'class': 'form-control',
