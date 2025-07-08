@@ -339,6 +339,8 @@ class KPI_For_Contract(models.Model):
     class Meta:
         verbose_name = ("KPIs")
         verbose_name_plural= ("KPIs")
+        # SQL Server compatibility
+        db_table = 'PIU_Financial_mgt_kpi_for_contract'
     
     def __str__(self):
         return str(self.type_of_investment)

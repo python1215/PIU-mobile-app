@@ -132,6 +132,9 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Added vulnerability category classifications for social safeguards: Under Aged, Elderly, Differently Able, Women-headed Household
 - July 08, 2025. Updated physical progress scale classifications with new IDs: Ongoing (17), Complete (18), Stagnant (19), Delayed (20), Cancelled (21)
 - July 08, 2025. Implemented cascading dropdowns in contract monitoring form: Project → Type of Monitoring → Type of Investment → KPI Description with AJAX-based real-time filtering
+- July 08, 2025. Prepared system for SQL Server database migration with dual-mode support: auto-detects database engine and uses raw SQL queries for SQL Server ([piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]) while maintaining SQLite compatibility
+- July 08, 2025. Added SQL Server diagnostic endpoints (/test-sql-connection/, /sql-diagnostics/) and comprehensive migration documentation in SQL_SERVER_README.md
+- July 08, 2025. Enhanced cascading dropdown AJAX endpoints with SQL Server-specific raw queries for better performance and compatibility with [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract] table structure
 
 ## User Preferences
 

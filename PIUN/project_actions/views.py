@@ -216,24 +216,49 @@ def load_type_of_investments(request):
     
     if monitoring_type_id and project_id:
         try:
-            # Get KPI records filtered by both project and monitoring type
-            kpi_records = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                monitoring_type__monitoring_type_code=monitoring_type_id
-            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
-            
-            # Create options for the Type of Investment dropdown
-            options = []
-            for record in kpi_records:
-                options.append({
-                    'value': record['monitoring_Type_Code'],
-                    'text': record['type_of_investment']
-                })
-            
-            return JsonResponse({'options': options})
+            # Check if we're using SQL Server (based on database engine)
+            from django.db import connection
+            if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+                # Use raw SQL for SQL Server compatibility
+                with connection.cursor() as cursor:
+                    query = """
+                        SELECT DISTINCT 
+                            monitoring_Type_Code as value,
+                            type_of_investment as text
+                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                        WHERE project_id = %s AND monitoring_type_id = %s
+                        ORDER BY type_of_investment
+                    """
+                    cursor.execute(query, [project_id, monitoring_type_id])
+                    results = cursor.fetchall()
+                    
+                    options = []
+                    for row in results:
+                        options.append({
+                            'value': row[0],
+                            'text': row[1]
+                        })
+                    
+                    return JsonResponse({'options': options})
+            else:
+                # Use Django ORM for SQLite/other databases
+                kpi_records = KPI_For_Contract.objects.filter(
+                    project__projectID=project_id,
+                    monitoring_type__monitoring_type_code=monitoring_type_id
+                ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+                
+                options = []
+                for record in kpi_records:
+                    options.append({
+                        'value': record['monitoring_Type_Code'],
+                        'text': record['type_of_investment']
+                    })
+                
+                return JsonResponse({'options': options})
+                
         except Exception as e:
             print(f"Error loading type of investments: {e}")
-            return JsonResponse({'options': []})
+            return JsonResponse({'options': [], 'error': str(e)})
     
     return JsonResponse({'options': []})
 
@@ -246,26 +271,197 @@ def load_kpi_descriptions(request):
     
     if investment_code and project_id:
         try:
-            # Get KPI records filtered by both project and investment type
-            kpi_records = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                monitoring_Type_Code=investment_code
-            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
-            
-            # Create options for the KPI Description dropdown
-            options = []
-            for record in kpi_records:
-                options.append({
-                    'value': record['monitoring_Type_Code'],
-                    'text': record['Kpi_description']
-                })
-            
-            return JsonResponse({'options': options})
+            # Check if we're using SQL Server
+            from django.db import connection
+            if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+                # Use raw SQL for SQL Server compatibility
+                with connection.cursor() as cursor:
+                    query = """
+                        SELECT DISTINCT 
+                            id as value,
+                            Kpi_description as text
+                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                        WHERE monitoring_Type_Code = %s AND project_id = %s
+                        ORDER BY Kpi_description
+                    """
+                    cursor.execute(query, [investment_code, project_id])
+                    results = cursor.fetchall()
+                    
+                    options = []
+                    for row in results:
+                        options.append({
+                            'value': row[0],
+                            'text': row[1]
+                        })
+                    
+                    return JsonResponse({'options': options})
+            else:
+                # Use Django ORM for SQLite/other databases
+                kpi_records = KPI_For_Contract.objects.filter(
+                    project__projectID=project_id,
+                    monitoring_Type_Code=investment_code
+                ).values('monitoring_Type_Code', 'Kpi_description').distinct()
+                
+                options = []
+                for record in kpi_records:
+                    options.append({
+                        'value': record['monitoring_Type_Code'],
+                        'text': record['Kpi_description']
+                    })
+                
+                return JsonResponse({'options': options})
+                
         except Exception as e:
             print(f"Error loading KPI descriptions: {e}")
-            return JsonResponse({'options': []})
+            return JsonResponse({'options': [], 'error': str(e)})
     
     return JsonResponse({'options': []})
+
+
+# SQL Server Testing and Diagnostics
+@login_required
+def test_sql_server_connection(request):
+    """Test SQL Server connection and KPI data availability"""
+    try:
+        from django.db import connection
+        
+        # Check if using SQL Server
+        engine = connection.settings_dict.get('ENGINE', '')
+        database_info = {
+            'engine': engine,
+            'is_sql_server': 'mssql' in engine.lower(),
+            'database': connection.settings_dict.get('NAME', 'Unknown')
+        }
+        
+        if 'mssql' in engine.lower():
+            # Test SQL Server specific query
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT TOP 10 
+                        project_id,
+                        monitoring_type_id,
+                        type_of_investment,
+                        Kpi_description
+                    FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                """)
+                results = cursor.fetchall()
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'database_info': database_info,
+                    'connection': 'SQL Server connected successfully',
+                    'sample_data_count': len(results),
+                    'sample_data': results[:5] if results else [],
+                    'message': f'Found {len(results)} KPI records in SQL Server table'
+                })
+        else:
+            # Test with Django ORM for other databases
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            count = KPI_For_Contract.objects.count()
+            sample_data = list(KPI_For_Contract.objects.values(
+                'project__projectID', 'monitoring_type__monitoring_type_code',
+                'type_of_investment', 'Kpi_description'
+            )[:5])
+            
+            return JsonResponse({
+                'status': 'success',
+                'database_info': database_info,
+                'connection': 'Database connected successfully',
+                'sample_data_count': count,
+                'sample_data': sample_data,
+                'message': f'Found {count} KPI records in database'
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'connection': 'Database connection failed',
+            'error': str(e),
+            'database_info': {
+                'engine': connection.settings_dict.get('ENGINE', 'Unknown'),
+                'database': connection.settings_dict.get('NAME', 'Unknown')
+            }
+        })
+
+@login_required
+def sql_server_diagnostics(request):
+    """Comprehensive diagnostics for SQL Server setup"""
+    try:
+        from django.db import connection
+        
+        diagnostics = {
+            'database_engine': connection.settings_dict.get('ENGINE', 'Unknown'),
+            'database_name': connection.settings_dict.get('NAME', 'Unknown'),
+            'server_host': connection.settings_dict.get('HOST', 'Unknown'),
+            'tests': {}
+        }
+        
+        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+            # SQL Server specific tests
+            with connection.cursor() as cursor:
+                # Test 1: Check if KPI table exists
+                try:
+                    cursor.execute("""
+                        SELECT COUNT(*) 
+                        FROM INFORMATION_SCHEMA.TABLES 
+                        WHERE TABLE_SCHEMA = 'dbo' 
+                        AND TABLE_NAME = 'PIU_Financial_mgt_kpi_for_contract'
+                    """)
+                    table_exists = cursor.fetchone()[0] > 0
+                    diagnostics['tests']['kpi_table_exists'] = table_exists
+                except Exception as e:
+                    diagnostics['tests']['kpi_table_exists'] = f"Error: {e}"
+                
+                # Test 2: Count total KPI records
+                try:
+                    cursor.execute("SELECT COUNT(*) FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]")
+                    total_kpis = cursor.fetchone()[0]
+                    diagnostics['tests']['total_kpi_records'] = total_kpis
+                except Exception as e:
+                    diagnostics['tests']['total_kpi_records'] = f"Error: {e}"
+                
+                # Test 3: Check unique projects
+                try:
+                    cursor.execute("SELECT COUNT(DISTINCT project_id) FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]")
+                    unique_projects = cursor.fetchone()[0]
+                    diagnostics['tests']['unique_projects'] = unique_projects
+                except Exception as e:
+                    diagnostics['tests']['unique_projects'] = f"Error: {e}"
+                
+                # Test 4: Check unique monitoring types
+                try:
+                    cursor.execute("SELECT COUNT(DISTINCT monitoring_type_id) FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]")
+                    unique_monitoring_types = cursor.fetchone()[0]
+                    diagnostics['tests']['unique_monitoring_types'] = unique_monitoring_types
+                except Exception as e:
+                    diagnostics['tests']['unique_monitoring_types'] = f"Error: {e}"
+                
+                # Test 5: Sample project-monitoring combinations
+                try:
+                    cursor.execute("""
+                        SELECT TOP 5 project_id, monitoring_type_id, COUNT(*) as kpi_count
+                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                        GROUP BY project_id, monitoring_type_id
+                        ORDER BY COUNT(*) DESC
+                    """)
+                    combinations = cursor.fetchall()
+                    diagnostics['tests']['sample_combinations'] = [
+                        {'project': row[0], 'monitoring_type': row[1], 'kpi_count': row[2]}
+                        for row in combinations
+                    ]
+                except Exception as e:
+                    diagnostics['tests']['sample_combinations'] = f"Error: {e}"
+        
+        return JsonResponse({
+            'status': 'success',
+            'diagnostics': diagnostics
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        })
 
 
 # Contract Profiling Works Views

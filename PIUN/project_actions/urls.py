@@ -50,5 +50,9 @@ urlpatterns = [
 
     path("ajax/load-type-of-investments/", views.load_type_of_investments, name="load_type_of_investments"),
     path("ajax/load-kpi-descriptions/", views.load_kpi_descriptions, name="load_kpi_descriptions"),
+    
+    # SQL Server diagnostic endpoints
+    path('test-sql-connection/', views.test_sql_server_connection, name='test_sql_server_connection'),
+    path('sql-diagnostics/', views.sql_server_diagnostics, name='sql_server_diagnostics'),
 
 ]
