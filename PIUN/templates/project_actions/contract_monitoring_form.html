@@ -275,4 +275,91 @@
         color: #333;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const typeOfMonitoringSelect = document.getElementById('id_type_of_monitoring');
+    const typeOfInvestmentSelect = document.getElementById('id_Type_of_Investment');
+    const kpiDescriptionSelect = document.getElementById('id_Kpi_description');
+    
+    // Function to clear and populate dropdown options
+    function populateDropdown(selectElement, options, placeholder = '-- Please select --') {
+        selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            selectElement.appendChild(optionElement);
+        });
+    }
+    
+    // Function to clear dropdown
+    function clearDropdown(selectElement, placeholder = '-- Please select --') {
+        selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+    }
+    
+    // Handle Type of Monitoring change
+    typeOfMonitoringSelect.addEventListener('change', function() {
+        const monitoringTypeId = this.value;
+        
+        // Clear dependent dropdowns
+        clearDropdown(typeOfInvestmentSelect, '-- Select Type of Investment --');
+        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
+        
+        if (monitoringTypeId) {
+            // Show loading state
+            typeOfInvestmentSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            // Fetch Type of Investment options
+            fetch(`/project-actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.options && data.options.length > 0) {
+                        populateDropdown(typeOfInvestmentSelect, data.options, '-- Select Type of Investment --');
+                    } else {
+                        clearDropdown(typeOfInvestmentSelect, '-- No investments available --');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading type of investments:', error);
+                    clearDropdown(typeOfInvestmentSelect, '-- Error loading options --');
+                });
+        }
+    });
+    
+    // Handle Type of Investment change
+    typeOfInvestmentSelect.addEventListener('change', function() {
+        const investmentCode = this.value;
+        
+        // Clear dependent dropdown
+        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
+        
+        if (investmentCode) {
+            // Show loading state
+            kpiDescriptionSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            // Fetch KPI Description options
+            fetch(`/project-actions/ajax/load-kpi-descriptions/?investment_code=${investmentCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.options && data.options.length > 0) {
+                        populateDropdown(kpiDescriptionSelect, data.options, '-- Select KPI Description --');
+                    } else {
+                        clearDropdown(kpiDescriptionSelect, '-- No KPI descriptions available --');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading KPI descriptions:', error);
+                    clearDropdown(kpiDescriptionSelect, '-- Error loading options --');
+                });
+        }
+    });
+    
+    // Initialize dropdowns on page load if editing existing record
+    if (typeOfMonitoringSelect.value) {
+        typeOfMonitoringSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 {% endblock %}

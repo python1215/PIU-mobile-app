@@ -207,6 +207,63 @@ def dashboard(request):
     return render(request, 'project_actions/dashboard.html', context)
 
 
+# AJAX Views for Cascading Dropdowns
+@login_required
+def load_type_of_investments(request):
+    """Load Type of Investment options based on selected monitoring type"""
+    monitoring_type_id = request.GET.get('monitoring_type_id')
+    
+    if monitoring_type_id:
+        try:
+            # Get KPI records filtered by monitoring type
+            kpi_records = KPI_For_Contract.objects.filter(
+                monitoring_type__monitoring_type_code=monitoring_type_id
+            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+            
+            # Create options for the Type of Investment dropdown
+            options = []
+            for record in kpi_records:
+                options.append({
+                    'value': record['monitoring_Type_Code'],
+                    'text': record['type_of_investment']
+                })
+            
+            return JsonResponse({'options': options})
+        except Exception as e:
+            print(f"Error loading type of investments: {e}")
+            return JsonResponse({'options': []})
+    
+    return JsonResponse({'options': []})
+
+
+@login_required
+def load_kpi_descriptions(request):
+    """Load KPI Description options based on selected type of investment"""
+    investment_code = request.GET.get('investment_code')
+    
+    if investment_code:
+        try:
+            # Get KPI records filtered by investment type
+            kpi_records = KPI_For_Contract.objects.filter(
+                monitoring_Type_Code=investment_code
+            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
+            
+            # Create options for the KPI Description dropdown
+            options = []
+            for record in kpi_records:
+                options.append({
+                    'value': record['monitoring_Type_Code'],
+                    'text': record['Kpi_description']
+                })
+            
+            return JsonResponse({'options': options})
+        except Exception as e:
+            print(f"Error loading KPI descriptions: {e}")
+            return JsonResponse({'options': []})
+    
+    return JsonResponse({'options': []})
+
+
 # Contract Profiling Works Views
 @login_required
 def contract_profiling_works_list(request):
