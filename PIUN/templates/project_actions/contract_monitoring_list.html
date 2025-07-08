@@ -118,12 +118,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="status" class="form-label">Status</label>
+                            <label for="status" class="form-label">Implementation Status</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="">All Status</option>
-                                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
-                                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
-                                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                {% for status in physical_progress_options %}
+                                    <option value="{{ status.id }}" 
+                                        {% if request.GET.status == status.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ status.progress_scale }}
+                                    </option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
@@ -180,14 +183,22 @@
                                             <td>{{ record.milestone_start_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>{{ record.milestone_end_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>
-                                                {% if record.status == 'active' %}
-                                                    <span class="badge bg-success">Active</span>
-                                                {% elif record.status == 'completed' %}
-                                                    <span class="badge bg-primary">Completed</span>
-                                                {% elif record.status == 'pending' %}
-                                                    <span class="badge bg-warning">Pending</span>
+                                                {% if record.Contract_implementation_Status %}
+                                                    {% if record.Contract_implementation_Status.progress_scale == '1. Ongoing' %}
+                                                        <span class="badge bg-info">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% elif record.Contract_implementation_Status.progress_scale == '2. Complete' %}
+                                                        <span class="badge bg-success">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% elif record.Contract_implementation_Status.progress_scale == '3. Stagnant' %}
+                                                        <span class="badge bg-warning">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% elif record.Contract_implementation_Status.progress_scale == '4. Delayed' %}
+                                                        <span class="badge bg-danger">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% elif record.Contract_implementation_Status.progress_scale == '5. Cancelled' %}
+                                                        <span class="badge bg-dark">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">{{ record.Contract_implementation_Status.progress_scale }}</span>
+                                                    {% endif %}
                                                 {% else %}
-                                                    <span class="badge bg-secondary">{{ record.status|default:"Unknown" }}</span>
+                                                    <span class="badge bg-secondary">Not Set</span>
                                                 {% endif %}
                                             </td>
                                             <td>

@@ -753,6 +753,16 @@ def contract_monitoring_list(request):
         filter_form = SpecificContractMonitoringFilter(request.GET, queryset=queryset)
         queryset = filter_form.qs
         
+        # Additional filtering by project and status
+        project_filter = request.GET.get('project')
+        status_filter = request.GET.get('status')
+        
+        if project_filter:
+            queryset = queryset.filter(project__projectID=project_filter)
+        
+        if status_filter:
+            queryset = queryset.filter(Contract_implementation_Status__id=status_filter)
+        
         # Search functionality
         search_query = request.GET.get('search', '')
         if search_query:
@@ -782,6 +792,10 @@ def contract_monitoring_list(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
+        # Get data for filter dropdowns
+        projects = Project.objects.all()
+        physical_progress_options = Physicalprogress.objects.all()
+        
         context = {
             'page_title': 'Contract Monitoring',
             'monitoring_records': page_obj,
@@ -791,6 +805,8 @@ def contract_monitoring_list(request):
             'unique_contracts': unique_contracts,
             'overdue_milestones': overdue_milestones,
             'sort_by': sort_by,
+            'projects': projects,
+            'physical_progress_options': physical_progress_options,
         }
         
     except Exception as e:
@@ -803,6 +819,8 @@ def contract_monitoring_list(request):
             'total_records': 0,
             'unique_contracts': 0,
             'overdue_milestones': 0,
+            'projects': Project.objects.all() if 'Project' in globals() else [],
+            'physical_progress_options': Physicalprogress.objects.all() if 'Physicalprogress' in globals() else [],
         }
     
     return render(request, 'project_actions/contract_monitoring_list.html', context)
