@@ -935,7 +935,7 @@ def contract_monitoring_update(request, pk):
                         request, 
                         f"Monitoring record for contract '{record.contract_refNo}' updated successfully!"
                     )
-                    return redirect('project_actions:contract_monitoring_detail', pk=record.pk)
+                    return redirect('project_actions:contract_monitoring_list')
                     
                 except Exception as e:
                     messages.error(request, f"Error updating monitoring record: {str(e)}")
@@ -948,6 +948,7 @@ def contract_monitoring_update(request, pk):
             'page_title': f'Update Monitoring Record - {record.contract_refNo}',
             'form': form,
             'form_action': 'Update',
+            'record': record,
             'record': record,
         }
         

@@ -387,8 +387,55 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialize dropdowns on page load if editing existing record
+    function initializeEditMode() {
+        const projectId = projectSelect.value;
+        const monitoringTypeId = typeOfMonitoringSelect.value;
+        const currentInvestmentValue = typeOfInvestmentSelect.value;
+        const currentKpiValue = kpiDescriptionSelect.value;
+        
+        if (projectId && monitoringTypeId) {
+            // First populate Type of Investment options
+            fetch(`/project_actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}&project_id=${projectId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.options && data.options.length > 0) {
+                        populateDropdown(typeOfInvestmentSelect, data.options, '-- Select Type of Investment --');
+                        
+                        // Restore previously selected value if available
+                        if (currentInvestmentValue) {
+                            typeOfInvestmentSelect.value = currentInvestmentValue;
+                            
+                            // Then populate KPI descriptions for the selected investment
+                            fetch(`/project_actions/ajax/load-kpi-descriptions/?investment_code=${currentInvestmentValue}&project_id=${projectId}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.options && data.options.length > 0) {
+                                        populateDropdown(kpiDescriptionSelect, data.options, '-- Select KPI Description --');
+                                        
+                                        // Restore previously selected KPI value
+                                        if (currentKpiValue) {
+                                            kpiDescriptionSelect.value = currentKpiValue;
+                                        }
+                                    }
+                                })
+                                .catch(error => console.error('Error loading KPI descriptions:', error));
+                        }
+                    } else {
+                        clearDropdown(typeOfInvestmentSelect, '-- No investment types available --');
+                        clearDropdown(kpiDescriptionSelect, '-- Select investment type first --');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading investment types:', error);
+                    clearDropdown(typeOfInvestmentSelect, '-- Error loading options --');
+                    clearDropdown(kpiDescriptionSelect, '-- Error loading options --');
+                });
+        }
+    }
+    
+    // Check if we're in edit mode and initialize accordingly
     if (typeOfMonitoringSelect.value && projectSelect.value) {
-        typeOfMonitoringSelect.dispatchEvent(new Event('change'));
+        initializeEditMode();
     }
 });
 </script>
