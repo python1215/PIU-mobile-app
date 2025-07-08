@@ -34,7 +34,19 @@ if project_id and len(project_id) < 10:  # Likely truncated
 
 ## SQL Server Table Requirements
 
-Your SQL Server should have a table named exactly:
+The system now supports multiple environments:
+
+**Test Environment**:
+```
+[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+```
+
+**Production Environment**:
+```
+[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+```
+
+**Fallback** (if schema access fails):
 ```
 PIU_Financial_mgt_kpi_for_contract
 ```

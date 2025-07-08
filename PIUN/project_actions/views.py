@@ -270,46 +270,31 @@ def load_type_of_investments(request):
             if 'mssql' in engine.lower():
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
-                    try:
-                        # Try with correct SQL Server table name (no schema prefix)
-                        query = """
-                            SELECT DISTINCT 
-                                type_of_investment as value,
-                                type_of_investment as text
-                            FROM PIU_Financial_mgt_kpi_for_contract
-                            WHERE project_id = %s AND monitoring_type_id = %s
-                            ORDER BY type_of_investment
-                        """
-                        cursor.execute(query, (project_id, monitoring_type_id))
-                        results = cursor.fetchall()
-                    except Exception as e:
-                        # If that fails, try different table name
-                        print(f"First attempt failed: {e}")
+                    # Try different table names for test vs production environments
+                    table_names = [
+                        '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
+                        '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Production environment  
+                        'PIU_Financial_mgt_kpi_for_contract'  # Fallback without schema
+                    ]
+                    
+                    results = []
+                    for table_name in table_names:
                         try:
-                            # Try without schema prefix
-                            query = """
+                            query = f"""
                                 SELECT DISTINCT 
                                     type_of_investment as value,
                                     type_of_investment as text
-                                FROM PIU_Financial_mgt_kpi_for_contract
+                                FROM {table_name}
                                 WHERE project_id = %s AND monitoring_type_id = %s
                                 ORDER BY type_of_investment
                             """
                             cursor.execute(query, (project_id, monitoring_type_id))
                             results = cursor.fetchall()
-                        except Exception as e2:
-                            # Final fallback: try with literal substitution (NOT RECOMMENDED but for debugging)
-                            print(f"Second attempt failed: {e2}")
-                            query = f"""
-                                SELECT DISTINCT 
-                                    type_of_investment as value,
-                                    type_of_investment as text
-                                FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE project_id = '{project_id}' AND monitoring_type_id = '{monitoring_type_id}'
-                                ORDER BY type_of_investment
-                            """
-                            cursor.execute(query)
-                            results = cursor.fetchall()
+                            print(f"Successfully queried table: {table_name}")
+                            break
+                        except Exception as e:
+                            print(f"Failed to query {table_name}: {e}")
+                            continue
                     
                     print(f"SQL Server query results: {len(results)} rows found")
                     if results:
@@ -367,46 +352,31 @@ def load_kpi_descriptions(request):
             if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
-                    try:
-                        # Try with correct SQL Server table name (no schema prefix)
-                        query = """
-                            SELECT DISTINCT 
-                                monitoring_Type_Code as value,
-                                Kpi_description as text
-                            FROM PIU_Financial_mgt_kpi_for_contract
-                            WHERE type_of_investment = %s AND project_id = %s
-                            ORDER BY Kpi_description
-                        """
-                        cursor.execute(query, (investment_code, project_id))
-                        results = cursor.fetchall()
-                    except Exception as e:
-                        # If that fails, try different table name
-                        print(f"KPI query first attempt failed: {e}")
+                    # Try different table names for test vs production environments
+                    table_names = [
+                        '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
+                        '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Production environment  
+                        'PIU_Financial_mgt_kpi_for_contract'  # Fallback without schema
+                    ]
+                    
+                    results = []
+                    for table_name in table_names:
                         try:
-                            # Try without schema prefix
-                            query = """
+                            query = f"""
                                 SELECT DISTINCT 
                                     monitoring_Type_Code as value,
                                     Kpi_description as text
-                                FROM PIU_Financial_mgt_kpi_for_contract
+                                FROM {table_name}
                                 WHERE type_of_investment = %s AND project_id = %s
                                 ORDER BY Kpi_description
                             """
                             cursor.execute(query, (investment_code, project_id))
                             results = cursor.fetchall()
-                        except Exception as e2:
-                            # Final fallback: try with literal substitution (NOT RECOMMENDED but for debugging)
-                            print(f"KPI query second attempt failed: {e2}")
-                            query = f"""
-                                SELECT DISTINCT 
-                                    monitoring_Type_Code as value,
-                                    Kpi_description as text
-                                FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE type_of_investment = '{investment_code}' AND project_id = '{project_id}'
-                                ORDER BY Kpi_description
-                            """
-                            cursor.execute(query)
-                            results = cursor.fetchall()
+                            print(f"Successfully queried KPI table: {table_name}")
+                            break
+                        except Exception as e:
+                            print(f"Failed to query KPI {table_name}: {e}")
+                            continue
                     
                     options = []
                     for row in results:

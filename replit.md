@@ -148,6 +148,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Resolved "not all arguments converted during string formatting" error by fixing print statements and parameter handling
 - July 08, 2025. Verified cascading dropdown functionality: 21 investment types successfully loaded for GEAP1 project with Tec monitoring type
 - July 08, 2025. Implemented comprehensive SQL Server cascading dropdown fix: progressive table name fallback (schema-prefixed → simple), dual parameter binding (? and %s), and robust project ID cleaning for malformed URLs like "D309&%20D6530%20-GM" → "D309D6530GM"
+- July 08, 2025. Added multi-environment SQL Server support: automatically tries test environment table [piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract] and production environment table [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract] with fallback to simple table name
 
 ## User Preferences
 
