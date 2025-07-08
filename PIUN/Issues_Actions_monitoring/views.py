@@ -146,8 +146,16 @@ def issues_list(request):
             Q(project__project__icontains=search_query)
         )
     
-    # Pagination
-    paginator = Paginator(issues, 15)
+    # Pagination with configurable page size
+    page_size = request.GET.get('page_size', 15)
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 15, 25, 50, 100]:
+            page_size = 15
+    except (ValueError, TypeError):
+        page_size = 15
+    
+    paginator = Paginator(issues, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     

@@ -310,8 +310,16 @@ def grievance_list(request):
                                                      queryset=grievance_list)
     filtered_grievance = grievance_filter.qs
 
-    # Pagination
-    paginator = Paginator(filtered_grievance, 10)
+    # Pagination with configurable page size
+    page_size = request.GET.get('page_size', 10)
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 15, 25, 50, 100]:
+            page_size = 10
+    except (ValueError, TypeError):
+        page_size = 10
+    
+    paginator = Paginator(filtered_grievance, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
