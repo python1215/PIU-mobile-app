@@ -265,12 +265,12 @@ def load_type_of_investments(request):
                 kpi_records = KPI_For_Contract.objects.filter(
                     project__projectID=project_id,
                     monitoring_type__monitoring_type_code=monitoring_type_id
-                ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+                ).values('type_of_investment').distinct()
                 
                 options = []
                 for record in kpi_records:
                     options.append({
-                        'value': record['monitoring_Type_Code'],
+                        'value': record['type_of_investment'],
                         'text': record['type_of_investment']
                     })
                 
@@ -279,7 +279,6 @@ def load_type_of_investments(request):
         except Exception as e:
             print(f"Error loading type of investments: {e}")
             return JsonResponse({'options': [], 'error': str(e)})
-    
     return JsonResponse({'options': []})
 
 
@@ -319,7 +318,7 @@ def load_kpi_descriptions(request):
                 # Use Django ORM for SQLite/other databases
                 kpi_records = KPI_For_Contract.objects.filter(
                     project__projectID=project_id,
-                    monitoring_Type_Code=investment_code
+                    type_of_investment=investment_code
                 ).values('monitoring_Type_Code', 'Kpi_description').distinct()
                 
                 options = []

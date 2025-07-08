@@ -139,6 +139,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Resolved file encoding issues that caused "null bytes" syntax errors during SQL Server deployment
 - July 08, 2025. Verified diagnostic endpoints working correctly with 171 KPI records available across projects D309D6530GM and ECOREAPP164044
 - July 08, 2025. Completed SQL Server migration preparation with full dual-mode support, diagnostic tools, and comprehensive documentation
+- July 08, 2025. Fixed AJAX cascading dropdown endpoints for SQL Server compatibility: updated parameter binding (? instead of %s), corrected field mappings, and ensured proper data return format for both SQLite and SQL Server modes
 
 ## User Preferences
 
