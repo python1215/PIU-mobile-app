@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from PIU_Financial_mgt.models import KPI_For_Contract, Project
-from setup.models import YEAR, Quarter
+from setup.models import YEAR, Quarter, Type_of_Monitoring
 
 
 # Create your models here.
@@ -30,7 +30,7 @@ class IssueActions(models.Model):
   year = models.ForeignKey(YEAR, on_delete=models.CASCADE)
   quarter = models.ForeignKey(Quarter, on_delete=models.CASCADE)
   issue_code = models.CharField(max_length=100, verbose_name="Issue Code")
-  issue_action_type = models.ForeignKey(KPI_For_Contract,
+  issue_action_type = models.ForeignKey(Type_of_Monitoring,
                                         on_delete=models.CASCADE,
                                         verbose_name="Issue/Action Type")
   description_of_issue_or_action = models.TextField(
@@ -51,11 +51,7 @@ class IssueActions(models.Model):
                                        ('critical', 'Critical')],
                               default='medium',
                               verbose_name="Priority")
-  assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.SET_NULL,
-                                  null=True,
-                                  blank=True,
-                                  verbose_name="Assigned To")
+  assigned_to = models.CharField(max_length=100, verbose_name="Assigned To")
   date_created = models.DateTimeField(auto_now_add=True,
                                       verbose_name="Date Created")
   date_updated = models.DateTimeField(auto_now=True,
