@@ -234,34 +234,11 @@ def load_type_of_investments(request):
     monitoring_type_id = request.GET.get('monitoring_type_id')
     project_id = request.GET.get('project_id')
     
-    # URL decode the project_id if needed
+    # URL decode the project_id if needed - DO NOT MODIFY THE PROJECT_ID
     if project_id:
         import urllib.parse
-        from .models import Project
         project_id = urllib.parse.unquote(project_id)
-        # Handle common space variants (e.g., "GEAP 1" -> "GEAP1")
-        if ' ' in project_id and not Project.objects.filter(projectID=project_id).exists():
-            project_id_no_space = project_id.replace(' ', '')
-            if Project.objects.filter(projectID=project_id_no_space).exists():
-                project_id = project_id_no_space
-        
-        # Additional cleanup for malformed URLs like "D309&%20D6530%20-GM"
-        project_id = project_id.replace('&%20', '').replace('%20', '').replace(' ', '').replace('-GM', 'GM').replace('&', '')
-        print(f"Final cleaned project_id: {project_id}")
-        
-        # Try to find exact match first, then try variations
-        if not Project.objects.filter(projectID=project_id).exists():
-            # Try common project ID patterns for D309D6530GM
-            variations = [
-                project_id.replace('-', ''),
-                'D309D6530GM',  # Most common format
-                project_id.replace('D309D6530', 'D309D6530GM')
-            ]
-            for variation in variations:
-                if Project.objects.filter(projectID=variation).exists():
-                    project_id = variation
-                    print(f"Found project with variation: {variation}")
-                    break
+        print(f"Received project_id (after URL decode): {project_id}")
     
     if monitoring_type_id and project_id:
         try:
@@ -275,19 +252,19 @@ def load_type_of_investments(request):
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     try:
-                        # Try with ? parameters first (standard SQL Server)
+                        # Try with SQL Server parameterized query (proper syntax)
                         query = """
                             SELECT DISTINCT 
                                 type_of_investment as value,
                                 type_of_investment as text
                             FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                            WHERE project_id = ? AND monitoring_type_id = ?
+                            WHERE project_id = %s AND monitoring_type_id = %s
                             ORDER BY type_of_investment
                         """
-                        cursor.execute(query, [project_id, monitoring_type_id])
+                        cursor.execute(query, (project_id, monitoring_type_id))
                         results = cursor.fetchall()
                     except Exception as e:
-                        # If that fails, try different table name and parameter format
+                        # If that fails, try different table name
                         print(f"First attempt failed: {e}")
                         try:
                             # Try without schema prefix
@@ -296,23 +273,23 @@ def load_type_of_investments(request):
                                     type_of_investment as value,
                                     type_of_investment as text
                                 FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE project_id = ? AND monitoring_type_id = ?
+                                WHERE project_id = %s AND monitoring_type_id = %s
                                 ORDER BY type_of_investment
                             """
-                            cursor.execute(query, [project_id, monitoring_type_id])
+                            cursor.execute(query, (project_id, monitoring_type_id))
                             results = cursor.fetchall()
                         except Exception as e2:
-                            # Final fallback: try with %s and no schema
+                            # Final fallback: try with literal substitution (NOT RECOMMENDED but for debugging)
                             print(f"Second attempt failed: {e2}")
-                            query = """
+                            query = f"""
                                 SELECT DISTINCT 
                                     type_of_investment as value,
                                     type_of_investment as text
                                 FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE project_id = %s AND monitoring_type_id = %s
+                                WHERE project_id = '{project_id}' AND monitoring_type_id = '{monitoring_type_id}'
                                 ORDER BY type_of_investment
                             """
-                            cursor.execute(query, [project_id, monitoring_type_id])
+                            cursor.execute(query)
                             results = cursor.fetchall()
                     
                     print(f"SQL Server query results: {len(results)} rows found")
@@ -358,16 +335,11 @@ def load_kpi_descriptions(request):
     investment_code = request.GET.get('investment_code')
     project_id = request.GET.get('project_id')
     
-    # URL decode the project_id if needed
+    # URL decode the project_id if needed - DO NOT MODIFY THE PROJECT_ID
     if project_id:
         import urllib.parse
-        from .models import Project
         project_id = urllib.parse.unquote(project_id)
-        # Handle common space variants (e.g., "GEAP 1" -> "GEAP1")
-        if ' ' in project_id and not Project.objects.filter(projectID=project_id).exists():
-            project_id_no_space = project_id.replace(' ', '')
-            if Project.objects.filter(projectID=project_id_no_space).exists():
-                project_id = project_id_no_space
+        print(f"Received project_id (after URL decode): {project_id}")
     
     if investment_code and project_id:
         try:
@@ -377,19 +349,19 @@ def load_kpi_descriptions(request):
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     try:
-                        # Try with ? parameters first (standard SQL Server)
+                        # Try with SQL Server parameterized query (proper syntax)
                         query = """
                             SELECT DISTINCT 
                                 monitoring_Type_Code as value,
                                 Kpi_description as text
                             FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                            WHERE type_of_investment = ? AND project_id = ?
+                            WHERE type_of_investment = %s AND project_id = %s
                             ORDER BY Kpi_description
                         """
-                        cursor.execute(query, [investment_code, project_id])
+                        cursor.execute(query, (investment_code, project_id))
                         results = cursor.fetchall()
                     except Exception as e:
-                        # If that fails, try different table name and parameter format
+                        # If that fails, try different table name
                         print(f"KPI query first attempt failed: {e}")
                         try:
                             # Try without schema prefix
@@ -398,23 +370,23 @@ def load_kpi_descriptions(request):
                                     monitoring_Type_Code as value,
                                     Kpi_description as text
                                 FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE type_of_investment = ? AND project_id = ?
+                                WHERE type_of_investment = %s AND project_id = %s
                                 ORDER BY Kpi_description
                             """
-                            cursor.execute(query, [investment_code, project_id])
+                            cursor.execute(query, (investment_code, project_id))
                             results = cursor.fetchall()
                         except Exception as e2:
-                            # Final fallback: try with %s and no schema
+                            # Final fallback: try with literal substitution (NOT RECOMMENDED but for debugging)
                             print(f"KPI query second attempt failed: {e2}")
-                            query = """
+                            query = f"""
                                 SELECT DISTINCT 
                                     monitoring_Type_Code as value,
                                     Kpi_description as text
                                 FROM PIU_Financial_mgt_kpi_for_contract
-                                WHERE type_of_investment = %s AND project_id = %s
+                                WHERE type_of_investment = '{investment_code}' AND project_id = '{project_id}'
                                 ORDER BY Kpi_description
                             """
-                            cursor.execute(query, [investment_code, project_id])
+                            cursor.execute(query)
                             results = cursor.fetchall()
                     
                     options = []
