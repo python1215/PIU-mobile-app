@@ -112,6 +112,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Inserted 15 project components with detailed allocations across 4 major projects totaling component value tracking
 - July 08, 2025. Updated currency table with 4 standard currencies: EURO, GMD, UA (Unit of Account), and USD
 - July 08, 2025. Inserted 39 subcomponents across 4 projects with detailed budget breakdown and multi-currency allocations
+- July 08, 2025. Added 79 project activities with detailed implementation tracking across multiple years (2023-2025)
 
 ## User Preferences
 
