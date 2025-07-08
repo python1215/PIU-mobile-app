@@ -234,11 +234,30 @@ def load_type_of_investments(request):
     monitoring_type_id = request.GET.get('monitoring_type_id')
     project_id = request.GET.get('project_id')
     
-    # URL decode the project_id if needed - DO NOT MODIFY THE PROJECT_ID
+    # Handle malformed URL where project_id gets split into multiple parameters
+    # Example: project_id=D309&%20D6530%20-GM becomes project_id=D309 with additional params
+    if project_id and len(project_id) < 10:  # Likely truncated
+        # Try to reconstruct from all GET parameters
+        full_query = request.META.get('QUERY_STRING', '')
+        print(f"Full query string: {full_query}")
+        
+        # Look for the complete project ID in the query string
+        if 'D309' in full_query and 'D6530' in full_query:
+            # Extract the complete project ID from malformed URL
+            import re
+            match = re.search(r'project_id=([^&]+(?:&[^=]*)*)', full_query)
+            if match:
+                full_project_param = match.group(1)
+                # URL decode and clean
+                import urllib.parse
+                project_id = urllib.parse.unquote(full_project_param.replace('&', ''))
+                project_id = project_id.replace(' ', '').replace('-', '')
+                print(f"Reconstructed project_id: {project_id}")
+    
     if project_id:
         import urllib.parse
         project_id = urllib.parse.unquote(project_id)
-        print(f"Received project_id (after URL decode): {project_id}")
+        print(f"Final project_id: {project_id}")
     
     if monitoring_type_id and project_id:
         try:
@@ -252,12 +271,12 @@ def load_type_of_investments(request):
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     try:
-                        # Try with SQL Server parameterized query (proper syntax)
+                        # Try with correct SQL Server table name (no schema prefix)
                         query = """
                             SELECT DISTINCT 
                                 type_of_investment as value,
                                 type_of_investment as text
-                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            FROM PIU_Financial_mgt_kpi_for_contract
                             WHERE project_id = %s AND monitoring_type_id = %s
                             ORDER BY type_of_investment
                         """
@@ -349,12 +368,12 @@ def load_kpi_descriptions(request):
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     try:
-                        # Try with SQL Server parameterized query (proper syntax)
+                        # Try with correct SQL Server table name (no schema prefix)
                         query = """
                             SELECT DISTINCT 
                                 monitoring_Type_Code as value,
                                 Kpi_description as text
-                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                            FROM PIU_Financial_mgt_kpi_for_contract
                             WHERE type_of_investment = %s AND project_id = %s
                             ORDER BY Kpi_description
                         """
