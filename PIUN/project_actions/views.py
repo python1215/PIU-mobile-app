@@ -234,30 +234,11 @@ def load_type_of_investments(request):
     monitoring_type_id = request.GET.get('monitoring_type_id')
     project_id = request.GET.get('project_id')
     
-    # Handle malformed URL where project_id gets split into multiple parameters
-    # Example: project_id=D309&%20D6530%20-GM becomes project_id=D309 with additional params
-    if project_id and len(project_id) < 10:  # Likely truncated
-        # Try to reconstruct from all GET parameters
-        full_query = request.META.get('QUERY_STRING', '')
-        print(f"Full query string: {full_query}")
-        
-        # Look for the complete project ID in the query string
-        if 'D309' in full_query and 'D6530' in full_query:
-            # Extract the complete project ID from malformed URL
-            import re
-            match = re.search(r'project_id=([^&]+(?:&[^=]*)*)', full_query)
-            if match:
-                full_project_param = match.group(1)
-                # URL decode and clean
-                import urllib.parse
-                project_id = urllib.parse.unquote(full_project_param.replace('&', ''))
-                project_id = project_id.replace(' ', '').replace('-', '')
-                print(f"Reconstructed project_id: {project_id}")
-    
+    # Simple URL decode only - keep project_id exactly as received
     if project_id:
         import urllib.parse
         project_id = urllib.parse.unquote(project_id)
-        print(f"Final project_id: {project_id}")
+        print(f"Received project_id: {project_id}")
     
     if monitoring_type_id and project_id:
         try:
@@ -339,11 +320,11 @@ def load_kpi_descriptions(request):
     investment_code = request.GET.get('investment_code')
     project_id = request.GET.get('project_id')
     
-    # URL decode the project_id if needed - DO NOT MODIFY THE PROJECT_ID
+    # Simple URL decode only - keep project_id exactly as received
     if project_id:
         import urllib.parse
         project_id = urllib.parse.unquote(project_id)
-        print(f"Received project_id (after URL decode): {project_id}")
+        print(f"Received project_id: {project_id}")
     
     if investment_code and project_id:
         try:
