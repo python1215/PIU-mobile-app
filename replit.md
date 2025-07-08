@@ -140,6 +140,9 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Verified diagnostic endpoints working correctly with 171 KPI records available across projects D309D6530GM and ECOREAPP164044
 - July 08, 2025. Completed SQL Server migration preparation with full dual-mode support, diagnostic tools, and comprehensive documentation
 - July 08, 2025. Fixed AJAX cascading dropdown endpoints for SQL Server compatibility: updated parameter binding (? instead of %s), corrected field mappings, and ensured proper data return format for both SQLite and SQL Server modes
+- July 08, 2025. Created comprehensive SQL Server debugging endpoint (/project_actions/debug-cascading/) with table structure analysis and query testing capabilities
+- July 08, 2025. Fixed SQL Server KPI descriptions query to use monitoring_Type_Code instead of non-existent id column, matching actual table structure: [type_of_investment, Kpi_description, monitoring_Type_Code, date, loginUser_id, monitoring_type_id, project_id]
+- July 08, 2025. Enhanced debug endpoint to test both investment loading and KPI description queries with actual SQL Server column names
 
 ## User Preferences
 

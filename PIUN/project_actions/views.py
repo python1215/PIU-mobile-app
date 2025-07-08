@@ -297,7 +297,7 @@ def load_kpi_descriptions(request):
                 with connection.cursor() as cursor:
                     query = """
                         SELECT DISTINCT 
-                            id as value,
+                            monitoring_Type_Code as value,
                             Kpi_description as text
                         FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
                         WHERE type_of_investment = ? AND project_id = ?
@@ -1482,7 +1482,7 @@ def debug_cascading_dropdowns(request):
                 columns = dict(cursor.fetchall())
                 result["table_columns"] = columns
                 
-                # Test the actual query
+                # Test the actual investment query
                 query = """
                     SELECT DISTINCT 
                         type_of_investment,
@@ -1496,7 +1496,22 @@ def debug_cascading_dropdowns(request):
                 result["investments_found"] = len(investments)
                 result["sample_investments"] = investments[:3]
                 
-                # Also try without WHERE clause to see what data exists
+                # Test KPI descriptions query
+                if investments:
+                    investment_code = investments[0][0]  # First investment
+                    kpi_query = """
+                        SELECT DISTINCT 
+                            monitoring_Type_Code,
+                            Kpi_description
+                        FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                        WHERE type_of_investment = ? AND project_id = ?
+                    """
+                    cursor.execute(kpi_query, [investment_code, project_id])
+                    kpi_results = cursor.fetchall()
+                    result["kpi_descriptions_found"] = len(kpi_results)
+                    result["sample_kpi_descriptions"] = kpi_results[:3]
+                
+                # Check all available combinations
                 cursor.execute("""
                     SELECT DISTINCT project_id, monitoring_type_id 
                     FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
