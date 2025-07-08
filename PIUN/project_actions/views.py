@@ -210,13 +210,15 @@ def dashboard(request):
 # AJAX Views for Cascading Dropdowns
 @login_required
 def load_type_of_investments(request):
-    """Load Type of Investment options based on selected monitoring type"""
+    """Load Type of Investment options based on selected project and monitoring type"""
     monitoring_type_id = request.GET.get('monitoring_type_id')
+    project_id = request.GET.get('project_id')
     
-    if monitoring_type_id:
+    if monitoring_type_id and project_id:
         try:
-            # Get KPI records filtered by monitoring type
+            # Get KPI records filtered by both project and monitoring type
             kpi_records = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
                 monitoring_type__monitoring_type_code=monitoring_type_id
             ).values('monitoring_Type_Code', 'type_of_investment').distinct()
             
@@ -238,13 +240,15 @@ def load_type_of_investments(request):
 
 @login_required
 def load_kpi_descriptions(request):
-    """Load KPI Description options based on selected type of investment"""
+    """Load KPI Description options based on selected project and type of investment"""
     investment_code = request.GET.get('investment_code')
+    project_id = request.GET.get('project_id')
     
-    if investment_code:
+    if investment_code and project_id:
         try:
-            # Get KPI records filtered by investment type
+            # Get KPI records filtered by both project and investment type
             kpi_records = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
                 monitoring_Type_Code=investment_code
             ).values('monitoring_Type_Code', 'Kpi_description').distinct()
             

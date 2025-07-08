@@ -131,6 +131,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Inserted 177 specific contract monitoring records with detailed milestone tracking, targets, achievements, and progress monitoring
 - July 08, 2025. Added vulnerability category classifications for social safeguards: Under Aged, Elderly, Differently Able, Women-headed Household
 - July 08, 2025. Updated physical progress scale classifications with new IDs: Ongoing (17), Complete (18), Stagnant (19), Delayed (20), Cancelled (21)
+- July 08, 2025. Implemented cascading dropdowns in contract monitoring form: Project → Type of Monitoring → Type of Investment → KPI Description with AJAX-based real-time filtering
 
 ## User Preferences
 

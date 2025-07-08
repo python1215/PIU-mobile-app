@@ -311,8 +311,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show loading state
             typeOfInvestmentSelect.innerHTML = '<option value="">Loading...</option>';
             
+            // Get project ID
+            const projectSelect = document.getElementById('id_project');
+            const projectId = projectSelect.value;
+            
+            if (!projectId) {
+                clearDropdown(typeOfInvestmentSelect, '-- Please select a project first --');
+                return;
+            }
+            
             // Fetch Type of Investment options
-            fetch(`/project-actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}`)
+            fetch(`/project_actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}&project_id=${projectId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.options && data.options.length > 0) {
@@ -339,8 +348,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show loading state
             kpiDescriptionSelect.innerHTML = '<option value="">Loading...</option>';
             
+            // Get project ID
+            const projectSelect = document.getElementById('id_project');
+            const projectId = projectSelect.value;
+            
+            if (!projectId) {
+                clearDropdown(kpiDescriptionSelect, '-- Please select a project first --');
+                return;
+            }
+            
             // Fetch KPI Description options
-            fetch(`/project-actions/ajax/load-kpi-descriptions/?investment_code=${investmentCode}`)
+            fetch(`/project_actions/ajax/load-kpi-descriptions/?investment_code=${investmentCode}&project_id=${projectId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.options && data.options.length > 0) {
@@ -356,8 +374,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Handle Project change - reset dependent dropdowns
+    const projectSelect = document.getElementById('id_project');
+    projectSelect.addEventListener('change', function() {
+        clearDropdown(typeOfInvestmentSelect, '-- Select Type of Investment --');
+        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
+        
+        // Trigger monitoring type change if both project and monitoring type are selected
+        if (this.value && typeOfMonitoringSelect.value) {
+            typeOfMonitoringSelect.dispatchEvent(new Event('change'));
+        }
+    });
+    
     // Initialize dropdowns on page load if editing existing record
-    if (typeOfMonitoringSelect.value) {
+    if (typeOfMonitoringSelect.value && projectSelect.value) {
         typeOfMonitoringSelect.dispatchEvent(new Event('change'));
     }
 });
