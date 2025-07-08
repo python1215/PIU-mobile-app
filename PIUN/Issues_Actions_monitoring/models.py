@@ -60,7 +60,7 @@ class IssueActions(models.Model):
                                  blank=True,
                                  verbose_name="Assign Date")
   due_date = models.DateField(null=True, blank=True, verbose_name="Due Date")
-  remarks = models.TextField(blank=True, verbose_name="Remarks")
+  remarks = models.TextField(blank=False, verbose_name="Remarks")
   loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE,
                                 related_name='created_issues',

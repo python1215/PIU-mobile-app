@@ -73,7 +73,8 @@ class IssueActionsForm(forms.ModelForm):
             'remarks': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Project-specific notes or action progress updates'
+                'placeholder': 'Enter detailed progress notes and resolution updates (Required)',
+                'required': True
             })
         }
 
@@ -89,7 +90,8 @@ class IssueActionsForm(forms.ModelForm):
         self.fields['source_of_issue_or_action'].queryset = issue_action_source.objects.all()
         # assigned_to is a CharField, not a ForeignKey
         self.fields['assigned_to'].required = False
-        self.fields['remarks'].required = False
+        # Make remarks field required
+        self.fields['remarks'].required = True
 
     def save(self, commit=True):
         instance = super().save(commit=False)

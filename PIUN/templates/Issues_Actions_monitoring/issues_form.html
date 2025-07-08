@@ -178,19 +178,19 @@
                             </div>
                         </div>
 
-                        <!-- Resolution Notes -->
+                        <!-- Remarks -->
                         <div class="card border-dark mb-4">
                             <div class="card-header bg-dark text-white">
-                                <h6 class="mb-0"><i class="bi bi-journal-text"></i> Resolution Notes</h6>
+                                <h6 class="mb-0"><i class="bi bi-journal-text"></i> Remarks <span class="text-danger">*</span></h6>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    {{ form.resolution_notes.label_tag }}
-                                    {{ form.resolution_notes }}
-                                    {% if form.resolution_notes.errors %}
-                                        <div class="text-danger small">{{ form.resolution_notes.errors.0 }}</div>
+                                    {{ form.remarks.label_tag }}
+                                    {{ form.remarks }}
+                                    {% if form.remarks.errors %}
+                                        <div class="text-danger small">{{ form.remarks.errors.0 }}</div>
                                     {% endif %}
-                                    <div class="form-text">Optional field for tracking resolution progress and notes.</div>
+                                    <div class="form-text">Required field for tracking resolution progress and detailed notes.</div>
                                 </div>
                             </div>
                         </div>
