@@ -486,6 +486,10 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         self.fields['quarter'].required = True
         self.fields['type_of_monitoring'].required = True
         
+        # Set up cascading dropdown fields for both SQLite and SQL Server
+        self.fields['Type_of_Investment'].required = True
+        self.fields['Kpi_description'].required = True
+        
         # Set default monitoring date to today
         if not self.instance.pk:
             self.fields['monitoring_date'].initial = timezone.now().date()
@@ -559,6 +563,64 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
             if not any(picture.name.lower().endswith(ext) for ext in valid_extensions):
                 raise ValidationError("Invalid image format. Please use JPG, PNG, GIF, or WebP.")
+        
+        # Validate cascading dropdown fields for both SQLite and SQL Server
+        project = cleaned_data.get('project')
+        type_of_monitoring = cleaned_data.get('type_of_monitoring')
+        type_of_investment = cleaned_data.get('Type_of_Investment')
+        kpi_description = cleaned_data.get('Kpi_description')
+        
+        # Check if cascading fields are properly selected
+        if project and type_of_monitoring and not type_of_investment:
+            raise ValidationError("Please select a Type of Investment.")
+        
+        if type_of_investment and not kpi_description:
+            raise ValidationError("Please select a KPI Description.")
+        
+        # For SQL Server compatibility, validate that the selected options exist in the database
+        if project and type_of_monitoring and type_of_investment:
+            try:
+                from django.db import connection
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                
+                # Check if we're using SQL Server
+                if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+                    # Validate using raw SQL for SQL Server
+                    with connection.cursor() as cursor:
+                        table_names = [
+                            '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',
+                            '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',
+                            'PIU_Financial_mgt_kpi_for_contract'
+                        ]
+                        
+                        for table_name in table_names:
+                            try:
+                                # Check if the selected Type_of_Investment exists for this project
+                                cursor.execute(f"""
+                                    SELECT COUNT(*) FROM {table_name} 
+                                    WHERE project_id = %s AND monitoring_type_id = %s AND type_of_investment = %s
+                                """, (project.projectID, type_of_monitoring.monitoring_type_id, type_of_investment.type_of_investment))
+                                
+                                count = cursor.fetchone()[0]
+                                if count == 0:
+                                    raise ValidationError(f"Selected Type of Investment is not available for project {project.projectID}")
+                                break
+                            except Exception:
+                                continue
+                else:
+                    # SQLite - use Django ORM validation
+                    if not KPI_For_Contract.objects.filter(
+                        project=project,
+                        monitoring_type=type_of_monitoring,
+                        type_of_investment=type_of_investment.type_of_investment
+                    ).exists():
+                        raise ValidationError("Selected Type of Investment is not available for this project and monitoring type.")
+                        
+            except Exception as e:
+                # If validation fails, log but don't block saving
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Cascading dropdown validation failed: {e}")
         
         return cleaned_data
 

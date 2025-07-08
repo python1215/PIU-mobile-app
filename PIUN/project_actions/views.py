@@ -1266,6 +1266,25 @@ def contract_monitoring_create(request):
             try:
                 record = form.save(commit=False)
                 record.loginUser = request.user
+                
+                # Additional validation for cascading dropdown fields
+                if not record.Type_of_Investment:
+                    messages.error(request, "Please select a Type of Investment.")
+                    return render(request, 'project_actions/contract_monitoring_form.html', {
+                        'page_title': 'Create Monitoring Record',
+                        'form': form,
+                        'form_action': 'Create',
+                    })
+                
+                if not record.Kpi_description:
+                    messages.error(request, "Please select a KPI Description.")
+                    return render(request, 'project_actions/contract_monitoring_form.html', {
+                        'page_title': 'Create Monitoring Record',
+                        'form': form,
+                        'form_action': 'Create',
+                    })
+                
+                # Save the record with proper database compatibility
                 record.save()
                 
                 messages.success(
@@ -1275,9 +1294,25 @@ def contract_monitoring_create(request):
                 return redirect('project_actions:contract_monitoring_list')
                 
             except Exception as e:
-                messages.error(request, f"Error creating monitoring record: {str(e)}")
+                error_msg = str(e)
+                # Handle specific SQL Server constraints if needed
+                if 'FOREIGN KEY constraint' in error_msg:
+                    messages.error(request, "One or more selected options are not valid. Please refresh the page and try again.")
+                elif 'NOT NULL constraint' in error_msg:
+                    messages.error(request, "Please fill in all required fields.")
+                else:
+                    messages.error(request, f"Error creating monitoring record: {error_msg}")
+                    
+                # Log the error for debugging
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error saving monitoring record: {error_msg}")
         else:
             messages.error(request, "Please correct the errors below.")
+            # Log form errors for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Form validation errors: {form.errors}")
     else:
         form = SpecificContractMonitoringForm()
         

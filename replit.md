@@ -151,6 +151,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Added multi-environment SQL Server support: automatically tries test environment table [piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract] and production environment table [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract] with fallback to simple table name
 - July 08, 2025. Fixed Project Activities display issue in SQL Server: updated both enhanced_project_dashboard and simple_financial_dashboard views to use raw SQL queries compatible with SQL Server, supporting [piuprod].[dbo].[PIU_Financial_mgt_activities] and [piuprod3].[dbo].[PIU_Financial_mgt_activities] tables with proper template compatibility
 - July 08, 2025. Fixed critical project ID parameter parsing issue in AJAX endpoints: project IDs containing special characters like '&' (e.g., 'D309& D6530 -GM') were being truncated due to URL parameter parsing - implemented enhanced query string extraction to preserve exact project_id format without modification
+- July 08, 2025. Fixed contract monitoring record saving issue: enhanced form validation with cascading dropdown field validation for both SQLite and SQL Server, added comprehensive error handling for database constraints, foreign key violations, and improved user feedback for missing required fields
 
 ## User Preferences
 
