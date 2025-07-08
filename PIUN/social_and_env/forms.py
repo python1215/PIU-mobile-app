@@ -574,13 +574,13 @@ class PAPUpdateForm(PAPForm):
         if self.instance and self.instance.pk:
             # Pre-populate dependent fields
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project_id=self.instance.project.pk
+                project=self.instance.project
             )
             self.fields['district'].queryset = Districts.objects.filter(
-                region_id=self.instance.region.pk
+                region_code=self.instance.region
             )
             self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                district_id=self.instance.district.pk
+                district_code=self.instance.district
             )
 
 
