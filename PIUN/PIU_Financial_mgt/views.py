@@ -120,11 +120,11 @@ def enhanced_project_dashboard(request, project_id=None):
         total_disbursed = Component.objects.filter(projectID=selected_project).aggregate(Sum('allocation'))['allocation__sum'] or 0
         
         # Social and Environmental data for selected project
-        esia_records = ESIA.objects.filter(project=selected_project)
+        esia_records = ESIA.objects.filter(project_name=selected_project)
         grievance_records = GrievianceMonitoringLog.objects.filter(project=selected_project)
         ohs_records = OHS_Monitoring.objects.filter(project=selected_project)
         pap_records = PAP.objects.filter(project=selected_project)
-        community_records = CommunityConsult_Engagement.objects.filter(project=selected_project)
+        community_records = CommunityConsult_Engagement.objects.filter(project_name=selected_project)
     else:
         # Overall statistics
         total_projects = Project.objects.count()
