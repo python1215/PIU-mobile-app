@@ -244,6 +244,24 @@ def load_type_of_investments(request):
             project_id_no_space = project_id.replace(' ', '')
             if Project.objects.filter(projectID=project_id_no_space).exists():
                 project_id = project_id_no_space
+        
+        # Additional cleanup for malformed URLs like "D309&%20D6530%20-GM"
+        project_id = project_id.replace('&%20', '').replace('%20', '').replace(' ', '').replace('-GM', 'GM').replace('&', '')
+        print(f"Final cleaned project_id: {project_id}")
+        
+        # Try to find exact match first, then try variations
+        if not Project.objects.filter(projectID=project_id).exists():
+            # Try common project ID patterns for D309D6530GM
+            variations = [
+                project_id.replace('-', ''),
+                'D309D6530GM',  # Most common format
+                project_id.replace('D309D6530', 'D309D6530GM')
+            ]
+            for variation in variations:
+                if Project.objects.filter(projectID=variation).exists():
+                    project_id = variation
+                    print(f"Found project with variation: {variation}")
+                    break
     
     if monitoring_type_id and project_id:
         try:
@@ -269,18 +287,33 @@ def load_type_of_investments(request):
                         cursor.execute(query, [project_id, monitoring_type_id])
                         results = cursor.fetchall()
                     except Exception as e:
-                        # If that fails, try with %s parameters (Django style)
+                        # If that fails, try different table name and parameter format
                         print(f"First attempt failed: {e}")
-                        query = """
-                            SELECT DISTINCT 
-                                type_of_investment as value,
-                                type_of_investment as text
-                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                            WHERE project_id = %s AND monitoring_type_id = %s
-                            ORDER BY type_of_investment
-                        """
-                        cursor.execute(query, [project_id, monitoring_type_id])
-                        results = cursor.fetchall()
+                        try:
+                            # Try without schema prefix
+                            query = """
+                                SELECT DISTINCT 
+                                    type_of_investment as value,
+                                    type_of_investment as text
+                                FROM PIU_Financial_mgt_kpi_for_contract
+                                WHERE project_id = ? AND monitoring_type_id = ?
+                                ORDER BY type_of_investment
+                            """
+                            cursor.execute(query, [project_id, monitoring_type_id])
+                            results = cursor.fetchall()
+                        except Exception as e2:
+                            # Final fallback: try with %s and no schema
+                            print(f"Second attempt failed: {e2}")
+                            query = """
+                                SELECT DISTINCT 
+                                    type_of_investment as value,
+                                    type_of_investment as text
+                                FROM PIU_Financial_mgt_kpi_for_contract
+                                WHERE project_id = %s AND monitoring_type_id = %s
+                                ORDER BY type_of_investment
+                            """
+                            cursor.execute(query, [project_id, monitoring_type_id])
+                            results = cursor.fetchall()
                     
                     print(f"SQL Server query results: {len(results)} rows found")
                     if results:
@@ -356,18 +389,33 @@ def load_kpi_descriptions(request):
                         cursor.execute(query, [investment_code, project_id])
                         results = cursor.fetchall()
                     except Exception as e:
-                        # If that fails, try with %s parameters (Django style)
+                        # If that fails, try different table name and parameter format
                         print(f"KPI query first attempt failed: {e}")
-                        query = """
-                            SELECT DISTINCT 
-                                monitoring_Type_Code as value,
-                                Kpi_description as text
-                            FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
-                            WHERE type_of_investment = %s AND project_id = %s
-                            ORDER BY Kpi_description
-                        """
-                        cursor.execute(query, [investment_code, project_id])
-                        results = cursor.fetchall()
+                        try:
+                            # Try without schema prefix
+                            query = """
+                                SELECT DISTINCT 
+                                    monitoring_Type_Code as value,
+                                    Kpi_description as text
+                                FROM PIU_Financial_mgt_kpi_for_contract
+                                WHERE type_of_investment = ? AND project_id = ?
+                                ORDER BY Kpi_description
+                            """
+                            cursor.execute(query, [investment_code, project_id])
+                            results = cursor.fetchall()
+                        except Exception as e2:
+                            # Final fallback: try with %s and no schema
+                            print(f"KPI query second attempt failed: {e2}")
+                            query = """
+                                SELECT DISTINCT 
+                                    monitoring_Type_Code as value,
+                                    Kpi_description as text
+                                FROM PIU_Financial_mgt_kpi_for_contract
+                                WHERE type_of_investment = %s AND project_id = %s
+                                ORDER BY Kpi_description
+                            """
+                            cursor.execute(query, [investment_code, project_id])
+                            results = cursor.fetchall()
                     
                     options = []
                     for row in results:

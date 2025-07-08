@@ -147,6 +147,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Added intelligent project ID handling to cascading dropdown endpoints with automatic space normalization for SQLite/SQL Server compatibility
 - July 08, 2025. Resolved "not all arguments converted during string formatting" error by fixing print statements and parameter handling
 - July 08, 2025. Verified cascading dropdown functionality: 21 investment types successfully loaded for GEAP1 project with Tec monitoring type
+- July 08, 2025. Implemented comprehensive SQL Server cascading dropdown fix: progressive table name fallback (schema-prefixed → simple), dual parameter binding (? and %s), and robust project ID cleaning for malformed URLs like "D309&%20D6530%20-GM" → "D309D6530GM"
 
 ## User Preferences
 
