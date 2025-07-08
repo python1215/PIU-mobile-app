@@ -124,6 +124,7 @@ The PIUN directory contains specialized modules:
 - July 08, 2025. Added decision outcome classifications for tracking stakeholder agreements: No Agreement and Agreed
 - July 08, 2025. Added indicator type classifications for M&E framework: Output, Outcome, Impact, Process, and Project Development Objective
 - July 08, 2025. Added measurement unit classifications for KPI tracking: electrical units (KVA, KWh, GWh, MwP), physical units (KM, Tons), and qualitative measures
+- July 08, 2025. Added PAP (Project Affected People) category classifications for social safeguards: land take, livelihood loss, economic trees, and restrictive land use
 
 ## User Preferences
 
