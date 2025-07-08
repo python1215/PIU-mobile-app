@@ -54,5 +54,6 @@ urlpatterns = [
     # SQL Server diagnostic endpoints
     path('test-sql-connection/', views.test_sql_server_connection, name='test_sql_server_connection'),
     path('sql-diagnostics/', views.sql_server_diagnostics, name='sql_server_diagnostics'),
+    path('debug-cascading/', views.debug_cascading_dropdowns, name='debug_cascading_dropdowns'),
 
 ]

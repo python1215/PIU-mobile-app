@@ -1446,3 +1446,91 @@ def htmx_get_activities(request):
     return render(request, 'project_actions/htmx/activities_options.html', {
         'activities': activities
     })
+
+
+
+@login_required  
+def debug_cascading_dropdowns(request):
+    """Debug endpoint specifically for cascading dropdown issues"""
+    monitoring_type_id = request.GET.get("monitoring_type_id", "proc")
+    project_id = request.GET.get("project_id", "D309D6530GM")
+    
+    try:
+        from django.db import connection
+        engine = connection.settings_dict.get("ENGINE", "")
+        
+        result = {
+            "engine": engine,
+            "parameters": {
+                "monitoring_type_id": monitoring_type_id,
+                "project_id": project_id
+            },
+            "sql_server_mode": "mssql" in engine.lower()
+        }
+        
+        if "mssql" in engine.lower():
+            # SQL Server mode
+            with connection.cursor() as cursor:
+                # Check table structure
+                cursor.execute("""
+                    SELECT COLUMN_NAME, DATA_TYPE 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = 'dbo' 
+                    AND TABLE_NAME = 'PIU_Financial_mgt_kpi_for_contract'
+                    ORDER BY ORDINAL_POSITION
+                """)
+                columns = dict(cursor.fetchall())
+                result["table_columns"] = columns
+                
+                # Test the actual query
+                query = """
+                    SELECT DISTINCT 
+                        type_of_investment,
+                        monitoring_type_id,
+                        project_id
+                    FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                    WHERE project_id = ? AND monitoring_type_id = ?
+                """
+                cursor.execute(query, [project_id, monitoring_type_id])
+                investments = cursor.fetchall()
+                result["investments_found"] = len(investments)
+                result["sample_investments"] = investments[:3]
+                
+                # Also try without WHERE clause to see what data exists
+                cursor.execute("""
+                    SELECT DISTINCT project_id, monitoring_type_id 
+                    FROM [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]
+                """)
+                available_combinations = cursor.fetchall()
+                result["available_combinations"] = available_combinations[:10]
+                
+        else:
+            # SQLite mode
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            
+            investments = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type__monitoring_type_code=monitoring_type_id
+            ).values("type_of_investment").distinct()
+            
+            result["investments_found"] = len(investments)
+            result["sample_investments"] = list(investments[:3])
+            
+            # Show available combinations
+            available = KPI_For_Contract.objects.values(
+                "project__projectID", 
+                "monitoring_type__monitoring_type_code"
+            ).distinct()
+            result["available_combinations"] = list(available[:10])
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e),
+            "engine": engine,
+            "parameters": {
+                "monitoring_type_id": monitoring_type_id,
+                "project_id": project_id
+            }
+        })
