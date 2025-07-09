@@ -38,10 +38,9 @@ def get_pap_data_sql_server():
     for table_name, prefix in database_table_variations:
         try:
             with connection.cursor() as cursor:
-                # First, try a simple query to get basic PAP data without joins
-                # This will help us understand the actual table structure
-                simple_query = f"""
-                SELECT TOP 100
+                # Query using the exact column structure provided
+                sql_query = f"""
+                SELECT 
                     p.pap_identification_number,
                     ISNULL(p.pap_name, '') as pap_name,
                     ISNULL(p.sex, '') as sex,
@@ -54,28 +53,27 @@ def get_pap_data_sql_server():
                     ISNULL(p.pre_project_situation, '') as pre_project_situation,
                     ISNULL(p.remarks, '') as remarks,
                     p.date_created,
-                    ISNULL(CAST(p.project_id AS VARCHAR), 'Unknown') as project,
-                    'Unknown' as type_of_investment,
-                    'Unknown' as Kpi_description,
-                    'Unknown' as region,
-                    'Unknown' as district,
-                    'Unknown' as settlement,
-                    'Unknown' as type_of_pap,
-                    'Unknown' as pap_category,
-                    'Unknown' as vulnerability_category,
-                    'Unknown' as type_of_impact,
-                    'Unknown' as nature_of_compensation,
-                    'Unknown' as loginUser
+                    p.district_id,
+                    p.loginUser_id,
+                    p.nature_of_compensation_id,
+                    p.pap_Current_Address_id,
+                    p.pap_category_id,
+                    p.project_id,
+                    p.region_id,
+                    p.type_of_impact_id,
+                    p.type_of_investment_id,
+                    p.type_of_pap_id,
+                    p.vulnerability_category_id
                 FROM {table_name} p
                 WHERE p.pap_identification_number IS NOT NULL
                 ORDER BY p.date_created DESC
                 """
                 
-                cursor.execute(simple_query)
+                cursor.execute(sql_query)
                 results = cursor.fetchall()
                 
                 if results:
-                    print(f"Successfully loaded {len(results)} PAP records from {table_name} (simple query)")
+                    print(f"Successfully loaded {len(results)} PAP records from {table_name}")
                     return results
                     
         except Exception as e:
@@ -89,11 +87,13 @@ def get_pap_data_sql_server():
 def convert_sql_results_to_pap_objects(raw_results):
     """
     Convert raw SQL Server results to PAP objects for template compatibility
+    Using the exact column structure provided
     """
     pap_list = []
     
     for row in raw_results:
         pap = PAP()
+        # Map columns according to the exact structure provided
         pap.pap_identification_number = row[0] or ''
         pap.pap_name = row[1] or ''
         pap.sex = row[2] or ''
@@ -107,47 +107,76 @@ def convert_sql_results_to_pap_objects(raw_results):
         pap.remarks = row[10] or ''
         pap.date_created = row[11]
         
-        # Create mock objects for related fields
+        # Foreign key IDs from the actual table structure
+        pap.district_id = row[12]
+        pap.loginUser_id = row[13]
+        pap.nature_of_compensation_id = row[14]
+        pap.pap_Current_Address_id = row[15]
+        pap.pap_category_id = row[16]
+        pap.project_id = row[17]
+        pap.region_id = row[18]
+        pap.type_of_impact_id = row[19]
+        pap.type_of_investment_id = row[20]
+        pap.type_of_pap_id = row[21]
+        pap.vulnerability_category_id = row[22]
+        
+        # Create mock objects for related fields using the IDs
         class MockProject:
-            def __init__(self, project_name):
-                self.project = project_name or 'Unknown'
+            def __init__(self, project_id):
+                self.project = f'Project-{project_id}' if project_id else 'Unknown'
+                self.project_name = f'Project-{project_id}' if project_id else 'Unknown'
         
         class MockKPI:
-            def __init__(self, investment_type, description):
-                self.type_of_investment = investment_type or 'Unknown'
-                self.Kpi_description = description or 'Unknown'
+            def __init__(self, investment_id):
+                self.type_of_investment = f'Investment-{investment_id}' if investment_id else 'Unknown'
+                self.Kpi_description = f'KPI-{investment_id}' if investment_id else 'Unknown'
         
         class MockRegion:
-            def __init__(self, region_name):
-                self.region = region_name or 'Unknown'
+            def __init__(self, region_id):
+                self.region = f'Region-{region_id}' if region_id else 'Unknown'
+                self.region_name = f'Region-{region_id}' if region_id else 'Unknown'
         
         class MockDistrict:
-            def __init__(self, district_name):
-                self.district = district_name or 'Unknown'
+            def __init__(self, district_id):
+                self.district = f'District-{district_id}' if district_id else 'Unknown'
+                self.district_name = f'District-{district_id}' if district_id else 'Unknown'
         
         class MockSettlement:
-            def __init__(self, settlement_name):
-                self.settlement = settlement_name or 'Unknown'
+            def __init__(self, settlement_id):
+                self.settlement = f'Settlement-{settlement_id}' if settlement_id else 'Unknown'
+                self.settlement_name = f'Settlement-{settlement_id}' if settlement_id else 'Unknown'
         
         class MockCategory:
-            def __init__(self, category_name):
-                self.name = category_name or 'Unknown'
+            def __init__(self, category_id, category_type):
+                self.name = f'{category_type}-{category_id}' if category_id else 'Unknown'
+                # Add different attribute names based on category type
+                if category_type == 'PAP':
+                    self.type_of_pap = f'{category_type}-{category_id}' if category_id else 'Unknown'
+                elif category_type == 'Category':
+                    self.pap_category = f'{category_type}-{category_id}' if category_id else 'Unknown'
+                elif category_type == 'Vulnerability':
+                    self.vulnerability_category = f'{category_type}-{category_id}' if category_id else 'Unknown'
+                elif category_type == 'Impact':
+                    self.type_of_impact = f'{category_type}-{category_id}' if category_id else 'Unknown'
+                elif category_type == 'Nature':
+                    self.nature_of_compensation = f'{category_type}-{category_id}' if category_id else 'Unknown'
         
         class MockUser:
-            def __init__(self, username):
-                self.username = username or 'Unknown'
+            def __init__(self, user_id):
+                self.username = f'User-{user_id}' if user_id else 'Unknown'
         
-        pap.project = MockProject(row[12])
-        pap.type_of_investment = MockKPI(row[13], row[14])
-        pap.region = MockRegion(row[15])
-        pap.district = MockDistrict(row[16])
-        pap.pap_Current_Address = MockSettlement(row[17])
-        pap.type_of_pap = MockCategory(row[18])
-        pap.pap_category = MockCategory(row[19])
-        pap.vulnerability_category = MockCategory(row[20])
-        pap.type_of_impact = MockCategory(row[21])
-        pap.nature_of_compensation = MockCategory(row[22])
-        pap.loginUser = MockUser(row[23])
+        # Assign mock objects using the foreign key IDs
+        pap.project = MockProject(pap.project_id)
+        pap.type_of_investment = MockKPI(pap.type_of_investment_id)
+        pap.region = MockRegion(pap.region_id)
+        pap.district = MockDistrict(pap.district_id)
+        pap.pap_Current_Address = MockSettlement(pap.pap_Current_Address_id)
+        pap.type_of_pap = MockCategory(pap.type_of_pap_id, 'PAP')
+        pap.pap_category = MockCategory(pap.pap_category_id, 'Category')
+        pap.vulnerability_category = MockCategory(pap.vulnerability_category_id, 'Vulnerability')
+        pap.type_of_impact = MockCategory(pap.type_of_impact_id, 'Impact')
+        pap.nature_of_compensation = MockCategory(pap.nature_of_compensation_id, 'Nature')
+        pap.loginUser = MockUser(pap.loginUser_id)
         
         pap_list.append(pap)
     
