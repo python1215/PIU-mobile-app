@@ -261,7 +261,16 @@ def get_sql_server_ohs_data():
                             'settlement_id': row[15],
                             'date_created': row[16],
                             'loginUser_id': row[17],
-                            'pk': row[0],  # For template compatibility
+                            'pk': row[0],  # Use ohs_Id as pk for template compatibility
+                            'project': f'Project {row[9]}',  # Mock project name
+                            'settlement': f'Settlement {row[15]}',  # Mock settlement name
+                            'region': f'Region {row[13]}',  # Mock region name
+                            'district': f'District {row[14]}',  # Mock district name
+                            'year_of_report': f'Year {row[11]}',  # Mock year
+                            'quarter': f'Q{row[12]}',  # Mock quarter
+                            'total_workers': row[5] + row[6] if row[5] and row[6] else 0,
+                            'total_youth': row[7] + row[8] if row[7] and row[8] else 0,
+                            'picture': None,  # No picture support in SQL Server mode
                         }
                         for row in ohs_results
                     ]
