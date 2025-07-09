@@ -535,6 +535,41 @@ def ohs_add(request):
     return render(request, 'social_and_env/ohs/ohs_form.html', context)
 
 
+@login_required
+def ohs_detail(request, pk):
+    """Detail view for OHS monitoring record"""
+    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+    context = {
+        'ohs': ohs,
+        'title': f'OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+    }
+    return render(request, 'social_and_env/ohs/ohs_detail.html', context)
+
+
+@login_required
+def ohs_edit(request, pk):
+    """Edit OHS monitoring record"""
+    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+    
+    if request.method == 'POST':
+        form = OHSMonitoringForm(request.POST, request.FILES, instance=ohs)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'OHS monitoring record updated successfully!')
+            return redirect('ohs_detail', pk=ohs.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = OHSMonitoringForm(instance=ohs)
+
+    context = {
+        'form': form,
+        'ohs': ohs,
+        'title': f'Edit OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+    }
+    return render(request, 'social_and_env/ohs/ohs_form.html', context)
+
+
 # ======================== Community Engagement Views ========================
 @login_required
 def community_list(request):

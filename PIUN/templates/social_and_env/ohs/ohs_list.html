@@ -274,13 +274,13 @@
 {% block extra_js %}
 <script>
 function viewOHS(id) {
-    // Implementation for viewing OHS details
-    console.log('Viewing OHS ID:', id);
+    // Navigate to OHS detail page
+    window.location.href = "{% url 'ohs_detail' 0 %}".replace('0', id);
 }
 
 function editOHS(id) {
-    // Implementation for editing OHS
-    console.log('Editing OHS ID:', id);
+    // Navigate to OHS edit page
+    window.location.href = "{% url 'ohs_edit' 0 %}".replace('0', id);
 }
 
 function viewPhoto(photoUrl) {

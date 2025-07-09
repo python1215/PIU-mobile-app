@@ -29,6 +29,8 @@ urlpatterns = [
     # OHS URLs
     path('ohs/', views.ohs_list, name='ohs_list'),
     path('ohs/add/', views.ohs_add, name='ohs_add'),
+    path('ohs/<int:pk>/', views.ohs_detail, name='ohs_detail'),
+    path('ohs/<int:pk>/edit/', views.ohs_edit, name='ohs_edit'),
     
     # Community Engagement URLs
     path('community/', views.community_list, name='community_list'),
