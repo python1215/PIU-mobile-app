@@ -608,8 +608,8 @@ class OHSUpdateForm(OHSMonitoringForm):
                 project_id=self.instance.project.pk
             )
             self.fields['district'].queryset = Districts.objects.filter(
-                region_id=self.instance.region.pk
+                region_code=self.instance.region
             )
             self.fields['settlement'].queryset = Settlement.objects.filter(
-                district_id=self.instance.district.pk
+                district_code=self.instance.district
             )
