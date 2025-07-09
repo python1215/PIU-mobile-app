@@ -655,7 +655,7 @@ def ohs_detail(request, pk):
         ohs = get_object_or_404(OHS_Monitoring, pk=pk)
         context = {
             'ohs': ohs,
-            'title': f'OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+            'title': f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
         }
     
     return render(request, 'social_and_env/ohs/ohs_detail.html', context)
@@ -690,7 +690,7 @@ def ohs_edit(request, pk):
         context = {
             'form': form,
             'ohs': ohs,
-            'title': f'Edit OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+            'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
         }
         return render(request, 'social_and_env/ohs/ohs_form.html', context)
 
