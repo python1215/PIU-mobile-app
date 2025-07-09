@@ -280,6 +280,54 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial calculation
     calculateTotals();
     
+    // Cascading dropdown functionality
+    const regionField = document.getElementById('id_region');
+    const districtField = document.getElementById('id_district');
+    const settlementField = document.getElementById('id_settlement');
+    
+    // Handle region change
+    if (regionField) {
+        regionField.addEventListener('change', function() {
+            const regionId = this.value;
+            
+            // Clear district and settlement fields
+            districtField.innerHTML = '<option value="">Select District</option>';
+            settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            
+            if (regionId) {
+                fetch(`/social_and_env/load-districts-ohs/?region=${regionId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        districtField.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading districts:', error);
+                    });
+            }
+        });
+    }
+    
+    // Handle district change
+    if (districtField) {
+        districtField.addEventListener('change', function() {
+            const districtId = this.value;
+            
+            // Clear settlement field
+            settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            
+            if (districtId) {
+                fetch(`/social_and_env/load-settlements-ohs/?district=${districtId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        settlementField.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading settlements:', error);
+                    });
+            }
+        });
+    }
+    
     // Form validation
     const form = document.getElementById('ohs-form');
     form.addEventListener('submit', function(event) {
