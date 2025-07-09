@@ -34,7 +34,7 @@ urlpatterns = [
 
     path('social_and_env/', include('social_and_env.urls')),
     path('PIU_Mapping_project_Sites/', include("PIU_Mapping_project_Sites.urls", namespace='PIU_Mapping_project_Sites')),
-    path('Project_Documentation_Tracking/', include("Project_Documentation_Tracking.urls")),
+
     path('NAWEC_KPI/', include('NAWEC_KPI.urls', namespace='NAWEC_KPI')),
     path('Issues_Actions_monitoring/', include('Issues_Actions_monitoring.urls', namespace='Issues_Actions_monitoring')),
 ]

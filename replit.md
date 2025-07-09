@@ -28,10 +28,12 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 ## Key Components
 
 ### Core Models
-1. **Project**: Main entity representing PIU projects
-2. **Activity**: Project activities with progress tracking
-3. **Indicator**: Performance indicators (Input, Output, Outcome, Impact)
-4. **Document**: File attachments and documentation
+1. **Project**: Main entity representing PIU projects with donor and contributor relationships
+2. **Activity**: Project activities with progress tracking across components and subcomponents
+3. **KPI_For_Contract**: Performance indicators for contract monitoring and evaluation
+4. **Issues_Actions**: Issue tracking and action management with assignment workflows
+5. **Social_and_env**: Social and environmental monitoring including PAP, grievance, and ESIA tracking
+6. **Contract_Profiling**: Contract management for works and goods/services with monitoring records
 
 ### Main Features
 - **Dashboard**: Real-time analytics with charts and summary cards
@@ -176,6 +178,7 @@ The PIUN directory contains specialized modules:
 - July 09, 2025. Implemented comprehensive SQL Server database integration: configured dual-mode database support with USE_SQL_SERVER environment variable, created setup_sql_server.py script for database initialization, added enable_sql_server.py and activate_sql_server.py utilities for mode switching, installed django-mssql-backend and pyodbc packages, and provided complete SQL Server configuration with ODBC Driver 17 support, TrustServerCertificate=yes, and [piuprod].[dbo] schema compatibility
 - July 09, 2025. Updated SQL Server integration with comprehensive database script: processed enhanced database script containing 236 DROP CONSTRAINT statements, 90 DROP TABLE statements, 90 CREATE TABLE statements, and 11,468 INSERT statements providing complete data population, created update_sql_server.py utility for database schema updates, added COMPREHENSIVE_SQL_SERVER_GUIDE.md with detailed integration instructions, and verified all key tables including social_and_env_*, PIU_Financial_mgt_*, and setup_* tables for complete offline functionality
 - July 09, 2025. Forced SQL Server mode for all database queries: updated all views and forms to always use raw SQL queries instead of Django ORM, modified settings.py to set USE_SQL_SERVER=True, replaced all 'mssql' in engine.lower() detection with True conditions, updated social_and_env/views.py (OHS, PAP, Grievance), PIU_Financial_mgt/views.py (dashboard, activities), project_actions/views.py (cascading dropdowns), and project_actions/forms.py (validation) to ensure consistent SQL Server compatible query execution across all modules
+- July 09, 2025. Completed comprehensive project cleanup and optimization: removed unused Django apps (dashboard_recommendations, Project_Documentation_Tracking), deleted backup files (.py_backup, settings_old.py, forms_backup.py), cleaned up debug statements and print() calls throughout codebase, removed unnecessary SQL Server setup files, eliminated staticfiles and documents directories, updated Django settings and URLs to reflect removed components, and optimized project structure from 20,216 lines to 19,614 lines of Python code across 84 files, reducing project size to 18MB while maintaining full functionality
 
 ## User Preferences
 

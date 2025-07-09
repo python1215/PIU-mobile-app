@@ -64,9 +64,7 @@ INSTALLED_APPS = [
     'monitoring',
     'PIU_Mapping_project_Sites',
     'project_actions',
-    'Project_Documentation_Tracking',
     'social_and_env',
-
     'NAWEC_KPI',
     'Issues_Actions_monitoring',
 ]

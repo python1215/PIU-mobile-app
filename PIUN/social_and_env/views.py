@@ -212,7 +212,7 @@ def pap_list(request):
                 pap_list = convert_sql_results_to_pap_objects(raw_results)
             except Exception as e:
                 # If SQL Server utils fail, fall back to basic ORM
-                print(f"SQL Server utils failed: {e}")
+                
                 pap_list = PAP.objects.all()
         else:
             # Use Django ORM for SQLite with proper null handling

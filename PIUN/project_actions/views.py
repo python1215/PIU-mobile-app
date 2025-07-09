@@ -65,11 +65,11 @@ def load_project_components(request):
     if project_id and Component:
         try:
             components = Component.objects.filter(projectID=project_id).order_by('component_Description')
-            print(f"Loading components for project {project_id}: found {len(components)} components")
         except Exception as e:
-            print(f"Error loading components: {e}")
+            pass
     else:
-        print(f"No project_id provided or Component model not available. project_id: {project_id}")
+        pass
+
     
     return render(request, 'project_actions/htmx/component_dropdown_options.html', {
         'components': components
@@ -84,11 +84,11 @@ def load_component_subcomponents(request):
     if component_id and Subcomponent:
         try:
             subcomponents = Subcomponent.objects.filter(compID=component_id).order_by('subcomponent')
-            print(f"Loading subcomponents for component {component_id}: found {len(subcomponents)} subcomponents")
         except Exception as e:
-            print(f"Error loading subcomponents: {e}")
+            pass
     else:
-        print(f"No component_id provided or Subcomponent model not available. component_id: {component_id}")
+        pass
+
     
     return render(request, 'project_actions/htmx/subcomponent_dropdown_options.html', {
         'subcomponents': subcomponents
@@ -103,11 +103,11 @@ def load_subcomponent_activities(request):
     if subcomponent_id and Activities:
         try:
             activities = Activities.objects.filter(subcompID=subcomponent_id).order_by('activity')
-            print(f"Loading activities for subcomponent {subcomponent_id}: found {len(activities)} activities")
         except Exception as e:
-            print(f"Error loading activities: {e}")
+            pass
     else:
-        print(f"No subcomponent_id provided or Activities model not available. subcomponent_id: {subcomponent_id}")
+        pass
+
     
     return render(request, 'project_actions/htmx/activity_dropdown_options.html', {
         'activities': activities
@@ -235,7 +235,7 @@ def load_type_of_investments(request):
     
     # Handle project_id with special characters properly
     full_query_string = request.META.get('QUERY_STRING', '')
-    print(f"Full query string: {full_query_string}")
+    
     
     # Advanced parsing to handle project_id with & characters
     project_id = None
@@ -266,7 +266,7 @@ def load_type_of_investments(request):
             # URL decode
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Reconstructed project_id: {project_id}")
+            
     
     # Method 2: Fallback to direct URL parsing
     if not project_id:
@@ -284,7 +284,7 @@ def load_type_of_investments(request):
             
             project_id = parsed_url.query[start_pos:end_pos]
             project_id = urllib.parse.unquote(project_id)
-            print(f"URL parsed project_id: {project_id}")
+            
     
     # Method 3: Final fallback
     if not project_id:
@@ -292,15 +292,15 @@ def load_type_of_investments(request):
         if project_id:
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Standard GET project_id: {project_id}")
+            
     
     if monitoring_type_id and project_id:
         try:
             # Check if we're using SQL Server (based on database engine)
             from django.db import connection
             engine = connection.settings_dict.get('ENGINE', '')
-            print(f"Database engine: {engine}")
-            print(f"Parameters received: project_id={project_id}, monitoring_type_id={monitoring_type_id}")
+            
+            
             
             if True:  # Force SQL Server mode - always use raw SQL queries
                 # Use raw SQL for SQL Server compatibility
@@ -325,7 +325,7 @@ def load_type_of_investments(request):
                             """
                             cursor.execute(query, (project_id, monitoring_type_id))
                             results = cursor.fetchall()
-                            print(f"Successfully queried table: {table_name}")
+                            
                             break
                         except Exception as e:
                             print(f"Failed to query {table_name}: {e}")
@@ -375,7 +375,7 @@ def load_kpi_descriptions(request):
     
     # Handle project_id with special characters properly
     full_query_string = request.META.get('QUERY_STRING', '')
-    print(f"Full query string: {full_query_string}")
+    
     
     # Advanced parsing to handle project_id with & characters
     project_id = None
@@ -406,7 +406,7 @@ def load_kpi_descriptions(request):
             # URL decode
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Reconstructed project_id: {project_id}")
+            
     
     # Method 2: Fallback to direct URL parsing
     if not project_id:
@@ -424,7 +424,7 @@ def load_kpi_descriptions(request):
             
             project_id = parsed_url.query[start_pos:end_pos]
             project_id = urllib.parse.unquote(project_id)
-            print(f"URL parsed project_id: {project_id}")
+            
     
     # Method 3: Final fallback
     if not project_id:
@@ -432,7 +432,7 @@ def load_kpi_descriptions(request):
         if project_id:
             import urllib.parse
             project_id = urllib.parse.unquote(project_id)
-            print(f"Standard GET project_id: {project_id}")
+            
     
     if investment_code and project_id:
         try:

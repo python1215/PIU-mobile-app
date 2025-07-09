@@ -52,15 +52,15 @@ def project_detail(request, project_id):
 @login_required
 def add_project(request):
     if request.method == 'POST':
-        print("=== ADD PROJECT VIEW ===")
-        print("Method: POST")
-        print("POST data:", dict(request.POST))
+        
+        
+        
         
         form = addProjectForm(request.POST)
-        print("Form is bound:", form.is_bound)
+        
         
         is_valid = form.is_valid()
-        print("Form is valid:", is_valid)
+        
         print("Form errors:", dict(form.errors))
         
         if form.is_valid():
@@ -77,7 +77,7 @@ def add_project(request):
             for field, errors in form.errors.items():
                 print(f"Field {field}: {errors}")
     else:
-        print("=== ADD PROJECT VIEW ===")
+        
         print("Method: GET")
         print("GET request - creating new form")
         form = addProjectForm()
@@ -271,14 +271,14 @@ def enhanced_project_dashboard(request, project_id=None):
 def add_component(request):
     if request.method == 'POST':
         print("=== ADD COMPONENT VIEW ===")
-        print("Method: POST")
-        print("POST data:", dict(request.POST))
+        
+        
         
         form = addComponentForm(request.POST)
-        print("Form is bound:", form.is_bound)
+        
         
         is_valid = form.is_valid()
-        print("Form is valid:", is_valid)
+        
         print("Form errors:", dict(form.errors))
         
         if form.is_valid():
