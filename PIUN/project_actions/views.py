@@ -302,7 +302,7 @@ def load_type_of_investments(request):
             print(f"Database engine: {engine}")
             print(f"Parameters received: project_id={project_id}, monitoring_type_id={monitoring_type_id}")
             
-            if 'mssql' in engine.lower():
+            if True:  # Force SQL Server mode - always use raw SQL queries
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     # Try different table names for test vs production environments
@@ -438,7 +438,7 @@ def load_kpi_descriptions(request):
         try:
             # Check if we're using SQL Server
             from django.db import connection
-            if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+            if True:  # Force SQL Server mode - always use raw SQL queries
                 # Use raw SQL for SQL Server compatibility
                 with connection.cursor() as cursor:
                     # Try different table names for test vs production environments
@@ -509,11 +509,11 @@ def test_sql_server_connection(request):
         engine = connection.settings_dict.get('ENGINE', '')
         database_info = {
             'engine': engine,
-            'is_sql_server': 'mssql' in engine.lower(),
+            'is_sql_server': True,  # Force SQL Server mode
             'database': str(connection.settings_dict.get('NAME', 'Unknown'))
         }
         
-        if 'mssql' in engine.lower():
+        if True:  # Force SQL Server mode - always use raw SQL queries
             # Test SQL Server specific query
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -576,7 +576,7 @@ def sql_server_diagnostics(request):
             'tests': {}
         }
         
-        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        if True:  # Force SQL Server mode - always use raw SQL queries
             # SQL Server specific tests
             with connection.cursor() as cursor:
                 # Test 1: Check if KPI table exists
@@ -1661,10 +1661,10 @@ def debug_cascading_dropdowns(request):
                 "monitoring_type_id": monitoring_type_id,
                 "project_id": project_id
             },
-            "sql_server_mode": "mssql" in engine.lower()
+            "sql_server_mode": True  # Force SQL Server mode
         }
         
-        if "mssql" in engine.lower():
+        if True:  # Force SQL Server mode - always use raw SQL queries
             # SQL Server mode
             with connection.cursor() as cursor:
                 # Check table structure

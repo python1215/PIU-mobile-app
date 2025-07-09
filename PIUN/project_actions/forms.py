@@ -584,7 +584,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                 from PIU_Financial_mgt.models import KPI_For_Contract
                 
                 # Check if we're using SQL Server
-                if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+                if True:  # Force SQL Server mode - always use raw SQL queries
                     # Validate using raw SQL for SQL Server
                     with connection.cursor() as cursor:
                         table_names = [

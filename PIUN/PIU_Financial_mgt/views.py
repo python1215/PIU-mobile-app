@@ -136,8 +136,8 @@ def enhanced_project_dashboard(request, project_id=None):
         total_disbursed = Component.objects.aggregate(Sum('allocation'))['allocation__sum'] or 0
         
         # Social and Environmental data - SQL Server compatible
-        # Check if we're using SQL Server for monitoring data
-        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        # Force SQL Server mode - always use raw SQL queries
+        if True:  # Always use SQL Server compatible queries
             from social_and_env.sql_server_monitoring_utils import get_sql_server_monitoring_data
             monitoring_data = get_sql_server_monitoring_data()
             
@@ -168,9 +168,9 @@ def enhanced_project_dashboard(request, project_id=None):
     
     # Recent data - SQL Server compatible
     try:
-        # Check if we're using SQL Server
+        # Force SQL Server mode - always use raw SQL queries
         from django.db import connection
-        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        if True:  # Always use SQL Server compatible queries
             # Use raw SQL for SQL Server compatibility
             with connection.cursor() as cursor:
                 # Try different table names for test vs production environments
@@ -1120,9 +1120,9 @@ def simple_financial_dashboard(request):
     
     # Recent activities (last 5) - SQL Server compatible
     try:
-        # Check if we're using SQL Server
+        # Force SQL Server mode - always use raw SQL queries
         from django.db import connection
-        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        if True:  # Always use SQL Server compatible queries
             # Use raw SQL for SQL Server compatibility
             with connection.cursor() as cursor:
                 # Try different table names for test vs production environments

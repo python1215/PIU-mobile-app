@@ -201,7 +201,7 @@ def pap_list(request):
     from django.db.models import Sum
     
     # Check if we're using SQL Server
-    is_sql_server = 'mssql' in connection.settings_dict['ENGINE'].lower()
+    is_sql_server = True  # Force SQL Server mode for all queries
     
     try:
         if is_sql_server:
@@ -502,8 +502,8 @@ def ohs_list(request):
     """Enhanced OHS list view with filtering and pagination - SQL Server compatible"""
     from django.db import connection
     
-    # Check if we're using SQL Server for OHS data
-    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+    # Force SQL Server mode - always use raw SQL queries  
+    if True:  # Always use SQL Server compatible queries
         from .sql_server_pap_utils import get_sql_server_ohs_data
         ohs_data = get_sql_server_ohs_data()
         
@@ -627,8 +627,8 @@ def ohs_detail(request, pk):
     """Detail view for OHS monitoring record - SQL Server compatible"""
     from django.db import connection
     
-    # Check if we're using SQL Server for OHS data
-    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+    # Force SQL Server mode - always use raw SQL queries
+    if True:  # Always use SQL Server compatible queries
         from .sql_server_pap_utils import get_sql_server_ohs_record_by_id
         ohs_data = get_sql_server_ohs_record_by_id(pk)
         
@@ -666,8 +666,8 @@ def ohs_edit(request, pk):
     """Edit OHS monitoring record - SQL Server compatible"""
     from django.db import connection
     
-    # Check if we're using SQL Server
-    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+    # Force SQL Server mode - always use raw SQL queries
+    if True:  # Always use SQL Server compatible queries
         # For SQL Server, editing is complex since it would require raw SQL updates
         # For now, redirect to add new record with a message
         messages.warning(request, 'OHS record editing is not supported in offline SQL Server mode. Please add a new record.')
