@@ -133,9 +133,9 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Project</th>
-                                        <th>Indicator</th>
-                                        <th>Quarter</th>
+                                        <th>Contract Ref</th>
+                                        <th>Target</th>
+                                        <th>Achieved</th>
                                         <th>Status</th>
                                         <th>Date</th>
                                     </tr>
@@ -143,13 +143,13 @@
                                 <tbody>
                                     {% for record in recent_monitoring %}
                                     <tr>
-                                        <td>{{ record.projectID.project|truncatechars:30 }}</td>
-                                        <td>{{ record.indicator_Description.indicator|truncatechars:25 }}</td>
-                                        <td>{{ record.quarter.quarter }}</td>
+                                        <td>{{ record.contract_ref|default:"N/A"|truncatechars:30 }}</td>
+                                        <td>{{ record.target|default:"N/A"|truncatechars:25 }}</td>
+                                        <td>{{ record.achieved|default:"N/A" }}</td>
                                         <td>
                                             <span class="badge bg-success">Active</span>
                                         </td>
-                                        <td>{{ record.date|date:"M j, Y" }}</td>
+                                        <td>{{ record.monitoring_date|date:"M j, Y"|default:"N/A" }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
