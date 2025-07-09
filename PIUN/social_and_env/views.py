@@ -769,6 +769,41 @@ def community_add(request):
                   context)
 
 
+@login_required
+def community_detail(request, pk):
+    """Community Engagement detail view"""
+    engagement = get_object_or_404(CommunityConsult_Engagement.objects.select_related(
+        'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'),
+                                 pk=pk)
+    
+    context = {'engagement': engagement}
+    return render(request, 'social_and_env/community/community_detail.html', context)
+
+
+@login_required
+def community_edit(request, pk):
+    """Edit Community Engagement record"""
+    engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
+    
+    if request.method == 'POST':
+        form = CommunityEngagementForm(request.POST, request.FILES, instance=engagement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Community engagement record updated successfully!')
+            return redirect('community_detail', pk=pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CommunityEngagementForm(instance=engagement)
+    
+    context = {
+        'form': form,
+        'engagement': engagement,
+        'title': 'Edit Community Engagement Record'
+    }
+    return render(request, 'social_and_env/community/community_form.html', context)
+
+
 # ======================== HTMX Dynamic Loading Views ========================
 @login_required
 def load_investment_types_esia(request):

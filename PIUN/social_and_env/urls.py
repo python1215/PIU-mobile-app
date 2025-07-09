@@ -35,6 +35,8 @@ urlpatterns = [
     # Community Engagement URLs
     path('community/', views.community_list, name='community_list'),
     path('community/add/', views.community_add, name='community_add'),
+    path('community/<int:pk>/', views.community_detail, name='community_detail'),
+    path('community/<int:pk>/edit/', views.community_edit, name='community_edit'),
     
      path('load-investment-types-esia/', views.load_investment_types_esia, name='load_investment_types_esia'),
     path('load-investment-types-pap/', views.load_investment_types_pap, name='load_investment_types_pap'),
