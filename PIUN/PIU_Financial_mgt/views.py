@@ -135,12 +135,36 @@ def enhanced_project_dashboard(request, project_id=None):
         active_projects = Project.objects.filter(closure_Date__isnull=True).count()
         total_disbursed = Component.objects.aggregate(Sum('allocation'))['allocation__sum'] or 0
         
-        # Social and Environmental data for all projects
-        esia_records = ESIA.objects.all()
-        grievance_records = GrievianceMonitoringLog.objects.all()
-        ohs_records = OHS_Monitoring.objects.all()
-        pap_records = PAP.objects.all()
-        community_records = CommunityConsult_Engagement.objects.all()
+        # Social and Environmental data - SQL Server compatible
+        # Check if we're using SQL Server for monitoring data
+        if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+            from social_and_env.sql_server_monitoring_utils import get_sql_server_monitoring_data
+            monitoring_data = get_sql_server_monitoring_data()
+            
+            # Convert to queryset-like objects for template compatibility
+            class MockQuerySet:
+                def __init__(self, records, count):
+                    self.records = records
+                    self._count = count
+                
+                def count(self):
+                    return self._count
+                
+                def __iter__(self):
+                    return iter(self.records)
+            
+            esia_records = MockQuerySet(monitoring_data['esia_records'], monitoring_data['esia_count'])
+            grievance_records = MockQuerySet(monitoring_data['grievance_records'], monitoring_data['grievance_count'])
+            ohs_records = MockQuerySet(monitoring_data['ohs_records'], monitoring_data['ohs_count'])
+            pap_records = MockQuerySet(monitoring_data['pap_records'], monitoring_data['pap_count'])
+            community_records = MockQuerySet(monitoring_data['community_records'], monitoring_data['community_count'])
+        else:
+            # SQLite - use Django ORM
+            esia_records = ESIA.objects.all()
+            grievance_records = GrievianceMonitoringLog.objects.all()
+            ohs_records = OHS_Monitoring.objects.all()
+            pap_records = PAP.objects.all()
+            community_records = CommunityConsult_Engagement.objects.all()
     
     # Recent data - SQL Server compatible
     try:
