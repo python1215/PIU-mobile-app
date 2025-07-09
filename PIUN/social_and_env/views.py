@@ -499,47 +499,104 @@ def grievance_edit(request, pk):
 # ======================== OHS Views ========================
 @login_required
 def ohs_list(request):
-    """Enhanced OHS list view with filtering and pagination"""
-    ohs_list = OHS_Monitoring.objects.select_related(
-        'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'region',
-        'district', 'settlement', 'loginUser').all()
-
-    # Apply filters
-    ohs_filter = OHSMonitoringFilter(request.GET, queryset=ohs_list)
-    filtered_ohs = ohs_filter.qs
-
-    # Pagination with configurable page size
-    page_size = request.GET.get('page_size', 10)
-    try:
-        page_size = int(page_size)
-        if page_size not in [10, 15, 25, 50, 100]:
-            page_size = 10
-    except (ValueError, TypeError):
-        page_size = 10
+    """Enhanced OHS list view with filtering and pagination - SQL Server compatible"""
+    from django.db import connection
     
-    paginator = Paginator(filtered_ohs, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # Check if we're using SQL Server for OHS data
+    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        from .sql_server_pap_utils import get_sql_server_ohs_data
+        ohs_data = get_sql_server_ohs_data()
+        
+        # Create mock objects for pagination and filtering
+        class MockOHSQuerySet:
+            def __init__(self, records):
+                self.records = records
+                self._count = len(records)
+            
+            def count(self):
+                return self._count
+            
+            def __iter__(self):
+                return iter(self.records)
+            
+            def __getitem__(self, key):
+                return self.records[key]
+            
+            def __len__(self):
+                return len(self.records)
+        
+        ohs_list = MockOHSQuerySet(ohs_data['ohs_records'])
+        
+        # Pagination with configurable page size
+        page_size = request.GET.get('page_size', 10)
+        try:
+            page_size = int(page_size)
+            if page_size not in [10, 15, 25, 50, 100]:
+                page_size = 10
+        except (ValueError, TypeError):
+            page_size = 10
+        
+        paginator = Paginator(ohs_list.records, page_size)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-    # Statistics
-    stats = {
-        'total_reports':
-        ohs_list.count(),
-        'filtered_count':
-        filtered_ohs.count(),
-        'total_workers':
-        ohs_list.aggregate(total=Sum('male') + Sum('female'))['total'] or 0,
-        'total_youth':
-        ohs_list.aggregate(total=Sum('youth_male') +
-                           Sum('youth_female'))['total'] or 0,
-    }
+        # Statistics from SQL Server data
+        stats = {
+            'total_reports': ohs_data['ohs_count'],
+            'filtered_count': ohs_data['ohs_count'],
+            'total_workers': sum(record.get('male', 0) + record.get('female', 0) for record in ohs_data['ohs_records']),
+            'total_youth': sum(record.get('youth_male', 0) + record.get('youth_female', 0) for record in ohs_data['ohs_records']),
+        }
 
-    context = {
-        'page_obj': page_obj,
-        'filter': ohs_filter,
-        'stats': stats,
-        'is_filtered': bool(request.GET),
-    }
+        context = {
+            'page_obj': page_obj,
+            'filter': None,  # Filters not implemented for SQL Server mode yet
+            'stats': stats,
+            'is_filtered': False,
+        }
+        
+    else:
+        # SQLite - use Django ORM
+        ohs_list = OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'region',
+            'district', 'settlement', 'loginUser').all()
+
+        # Apply filters
+        ohs_filter = OHSMonitoringFilter(request.GET, queryset=ohs_list)
+        filtered_ohs = ohs_filter.qs
+
+        # Pagination with configurable page size
+        page_size = request.GET.get('page_size', 10)
+        try:
+            page_size = int(page_size)
+            if page_size not in [10, 15, 25, 50, 100]:
+                page_size = 10
+        except (ValueError, TypeError):
+            page_size = 10
+        
+        paginator = Paginator(filtered_ohs, page_size)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        # Statistics
+        stats = {
+            'total_reports':
+            ohs_list.count(),
+            'filtered_count':
+            filtered_ohs.count(),
+            'total_workers':
+            ohs_list.aggregate(total=Sum('male') + Sum('female'))['total'] or 0,
+            'total_youth':
+            ohs_list.aggregate(total=Sum('youth_male') +
+                               Sum('youth_female'))['total'] or 0,
+        }
+
+        context = {
+            'page_obj': page_obj,
+            'filter': ohs_filter,
+            'stats': stats,
+            'is_filtered': bool(request.GET),
+        }
 
     return render(request, 'social_and_env/ohs/ohs_list.html', context)
 
@@ -567,37 +624,75 @@ def ohs_add(request):
 
 @login_required
 def ohs_detail(request, pk):
-    """Detail view for OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
-    context = {
-        'ohs': ohs,
-        'title': f'OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
-    }
+    """Detail view for OHS monitoring record - SQL Server compatible"""
+    from django.db import connection
+    
+    # Check if we're using SQL Server for OHS data
+    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        from .sql_server_pap_utils import get_sql_server_ohs_record_by_id
+        ohs_data = get_sql_server_ohs_record_by_id(pk)
+        
+        if not ohs_data:
+            from django.http import Http404
+            raise Http404("OHS record not found")
+        
+        # Create mock object for template compatibility
+        class MockOHSRecord:
+            def __init__(self, data):
+                for key, value in data.items():
+                    setattr(self, key, value)
+                self.pk = data.get('ohs_Id', pk)
+        
+        ohs = MockOHSRecord(ohs_data)
+        
+        context = {
+            'ohs': ohs,
+            'title': f'OHS Monitoring - {ohs_data.get("project_name", "Unknown")}'
+        }
+        
+    else:
+        # SQLite - use Django ORM
+        ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+        context = {
+            'ohs': ohs,
+            'title': f'OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+        }
+    
     return render(request, 'social_and_env/ohs/ohs_detail.html', context)
 
 
 @login_required
 def ohs_edit(request, pk):
-    """Edit OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+    """Edit OHS monitoring record - SQL Server compatible"""
+    from django.db import connection
     
-    if request.method == 'POST':
-        form = OHSMonitoringForm(request.POST, request.FILES, instance=ohs)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'OHS monitoring record updated successfully!')
-            return redirect('ohs_detail', pk=ohs.pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    # Check if we're using SQL Server
+    if 'mssql' in connection.settings_dict.get('ENGINE', '').lower():
+        # For SQL Server, editing is complex since it would require raw SQL updates
+        # For now, redirect to add new record with a message
+        messages.warning(request, 'OHS record editing is not supported in offline SQL Server mode. Please add a new record.')
+        return redirect('ohs_add')
     else:
-        form = OHSMonitoringForm(instance=ohs)
+        # SQLite - use Django ORM
+        ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+        
+        if request.method == 'POST':
+            form = OHSMonitoringForm(request.POST, request.FILES, instance=ohs)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'OHS monitoring record updated successfully!')
+                return redirect('ohs_detail', pk=ohs.pk)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = OHSMonitoringForm(instance=ohs)
 
-    context = {
-        'form': form,
-        'ohs': ohs,
-        'title': f'Edit OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
-    }
-    return render(request, 'social_and_env/ohs/ohs_form.html', context)
+        context = {
+            'form': form,
+            'ohs': ohs,
+            'title': f'Edit OHS Monitoring - {ohs.project.project_name if ohs.project else "Unknown"}'
+        }
+        return render(request, 'social_and_env/ohs/ohs_form.html', context)
 
 
 # ======================== Community Engagement Views ========================

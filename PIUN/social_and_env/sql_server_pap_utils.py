@@ -181,3 +181,178 @@ def convert_sql_results_to_pap_objects(raw_results):
         pap_list.append(pap)
     
     return pap_list
+
+def get_sql_server_ohs_data():
+    """
+    Get OHS monitoring data from SQL Server using exact table structure
+    Returns comprehensive OHS data for list view
+    """
+    ohs_data = {
+        'ohs_records': [],
+        'ohs_count': 0,
+    }
+    
+    # Database table variations to try
+    database_variations = [
+        '[piuprod].[dbo]',
+        '[piuprod3].[dbo]',
+        '[dbo]',
+        ''
+    ]
+    
+    try:
+        with connection.cursor() as cursor:
+            # Try to get OHS data
+            for prefix in database_variations:
+                try:
+                    table_name = f"{prefix}.[social_and_env_ohs_monitoring]" if prefix else "social_and_env_ohs_monitoring"
+                    
+                    # Count OHS records
+                    count_query = f"SELECT COUNT(*) FROM {table_name}"
+                    cursor.execute(count_query)
+                    ohs_count = cursor.fetchone()[0]
+                    ohs_data['ohs_count'] = ohs_count
+                    
+                    # Get OHS records with all necessary fields
+                    ohs_query = f"""
+                    SELECT 
+                        ohs_Id,
+                        ISNULL(date, '') as date,
+                        ISNULL(quality_at_entry_requirement, '') as quality_at_entry_requirement,
+                        ISNULL(working_environment, '') as working_environment,
+                        ISNULL(remarks, '') as remarks,
+                        ISNULL(male, 0) as male,
+                        ISNULL(female, 0) as female,
+                        ISNULL(youth_male, 0) as youth_male,
+                        ISNULL(youth_female, 0) as youth_female,
+                        ISNULL(project_id, '') as project_id,
+                        ISNULL(Type_of_Investment_id, '') as Type_of_Investment_id,
+                        ISNULL(year_of_report_id, '') as year_of_report_id,
+                        ISNULL(quarter_id, '') as quarter_id,
+                        ISNULL(region_id, '') as region_id,
+                        ISNULL(district_id, '') as district_id,
+                        ISNULL(settlement_id, '') as settlement_id,
+                        date_created,
+                        ISNULL(loginUser_id, '') as loginUser_id
+                    FROM {table_name}
+                    ORDER BY date_created DESC
+                    """
+                    cursor.execute(ohs_query)
+                    ohs_results = cursor.fetchall()
+                    
+                    # Convert to dict format
+                    ohs_data['ohs_records'] = [
+                        {
+                            'ohs_Id': row[0],
+                            'date': row[1],
+                            'quality_at_entry_requirement': row[2],
+                            'working_environment': row[3],
+                            'remarks': row[4],
+                            'male': row[5],
+                            'female': row[6],
+                            'youth_male': row[7],
+                            'youth_female': row[8],
+                            'project_id': row[9],
+                            'Type_of_Investment_id': row[10],
+                            'year_of_report_id': row[11],
+                            'quarter_id': row[12],
+                            'region_id': row[13],
+                            'district_id': row[14],
+                            'settlement_id': row[15],
+                            'date_created': row[16],
+                            'loginUser_id': row[17],
+                            'pk': row[0],  # For template compatibility
+                        }
+                        for row in ohs_results
+                    ]
+                    
+                    print(f"Successfully loaded {ohs_count} OHS records from {table_name}")
+                    break
+                except Exception as e:
+                    print(f"Failed to query OHS table {table_name}: {e}")
+                    continue
+                    
+    except Exception as e:
+        print(f"Error in get_sql_server_ohs_data: {e}")
+    
+    return ohs_data
+
+def get_sql_server_ohs_record_by_id(ohs_id):
+    """
+    Get single OHS monitoring record by ID from SQL Server
+    """
+    # Database table variations to try
+    database_variations = [
+        '[piuprod].[dbo]',
+        '[piuprod3].[dbo]',
+        '[dbo]',
+        ''
+    ]
+    
+    try:
+        with connection.cursor() as cursor:
+            # Try to get OHS record
+            for prefix in database_variations:
+                try:
+                    table_name = f"{prefix}.[social_and_env_ohs_monitoring]" if prefix else "social_and_env_ohs_monitoring"
+                    
+                    # Get single OHS record
+                    ohs_query = f"""
+                    SELECT 
+                        ohs_Id,
+                        ISNULL(date, '') as date,
+                        ISNULL(quality_at_entry_requirement, '') as quality_at_entry_requirement,
+                        ISNULL(working_environment, '') as working_environment,
+                        ISNULL(remarks, '') as remarks,
+                        ISNULL(male, 0) as male,
+                        ISNULL(female, 0) as female,
+                        ISNULL(youth_male, 0) as youth_male,
+                        ISNULL(youth_female, 0) as youth_female,
+                        ISNULL(project_id, '') as project_id,
+                        ISNULL(Type_of_Investment_id, '') as Type_of_Investment_id,
+                        ISNULL(year_of_report_id, '') as year_of_report_id,
+                        ISNULL(quarter_id, '') as quarter_id,
+                        ISNULL(region_id, '') as region_id,
+                        ISNULL(district_id, '') as district_id,
+                        ISNULL(settlement_id, '') as settlement_id,
+                        date_created,
+                        ISNULL(loginUser_id, '') as loginUser_id
+                    FROM {table_name}
+                    WHERE ohs_Id = ?
+                    """
+                    cursor.execute(ohs_query, [ohs_id])
+                    ohs_result = cursor.fetchone()
+                    
+                    if ohs_result:
+                        return {
+                            'ohs_Id': ohs_result[0],
+                            'date': ohs_result[1],
+                            'quality_at_entry_requirement': ohs_result[2],
+                            'working_environment': ohs_result[3],
+                            'remarks': ohs_result[4],
+                            'male': ohs_result[5],
+                            'female': ohs_result[6],
+                            'youth_male': ohs_result[7],
+                            'youth_female': ohs_result[8],
+                            'project_id': ohs_result[9],
+                            'Type_of_Investment_id': ohs_result[10],
+                            'year_of_report_id': ohs_result[11],
+                            'quarter_id': ohs_result[12],
+                            'region_id': ohs_result[13],
+                            'district_id': ohs_result[14],
+                            'settlement_id': ohs_result[15],
+                            'date_created': ohs_result[16],
+                            'loginUser_id': ohs_result[17],
+                            'project_name': f'Project {ohs_result[9]}',  # Mock project name
+                        }
+                    
+                    print(f"Successfully queried OHS record {ohs_id} from {table_name}")
+                    break
+                except Exception as e:
+                    print(f"Failed to query OHS record {ohs_id} from {table_name}: {e}")
+                    continue
+                    
+    except Exception as e:
+        print(f"Error in get_sql_server_ohs_record_by_id: {e}")
+    
+    return None
