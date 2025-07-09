@@ -114,12 +114,35 @@ WSGI_APPLICATION = 'piu_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database Configuration - Dual Mode Support
+# Set USE_SQL_SERVER=True in environment for SQL Server, otherwise uses SQLite
+USE_SQL_SERVER = os.environ.get('USE_SQL_SERVER', 'False').lower() == 'true'
+
+if USE_SQL_SERVER:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_mssql_backend',
+            'NAME': 'piuprod',
+            'USER': os.environ.get('DB_USER', 'sa'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '1433'),
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+                'unicode_results': True,
+                'autocommit': True,
+                'MARS_Connection': True,
+                'extra_params': 'TrustServerCertificate=yes'
+            }
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
