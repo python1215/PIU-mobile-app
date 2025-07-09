@@ -5,6 +5,17 @@ Enhanced utilities for handling PAP data with SQL Server null values
 from django.db import connection
 from .models import PAP
 
+def get_table_columns(table_name):
+    """Get actual column names from a SQL Server table"""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name.split('.')[-1].strip('[]')}'")
+            columns = [row[0] for row in cursor.fetchall()]
+            return columns
+    except Exception as e:
+        print(f"Could not get columns for {table_name}: {e}")
+        return []
+
 def get_pap_data_sql_server():
     """
     Get all PAP data from SQL Server handling null values properly
@@ -27,34 +38,10 @@ def get_pap_data_sql_server():
     for table_name, prefix in database_table_variations:
         try:
             with connection.cursor() as cursor:
-                # Build dynamic references based on prefix
-                if prefix:
-                    project_table = f"{prefix}.[PIU_Financial_mgt_project]"
-                    kpi_table = f"{prefix}.[PIU_Financial_mgt_kpi_for_contract]"
-                    region_table = f"{prefix}.[setup_regions]"
-                    district_table = f"{prefix}.[setup_districts]"
-                    settlement_table = f"{prefix}.[setup_settlement]"
-                    typeofpap_table = f"{prefix}.[setup_typeofpap]"
-                    papcategory_table = f"{prefix}.[setup_papcategory]"
-                    vulnerability_table = f"{prefix}.[setup_vulnerabilitycategory]"
-                    typeofimpact_table = f"{prefix}.[setup_typeofimpact]"
-                    natureofsettlement_table = f"{prefix}.[setup_natureofsettlement]"
-                    user_table = f"{prefix}.[auth_user]"
-                else:
-                    project_table = "PIU_Financial_mgt_project"
-                    kpi_table = "PIU_Financial_mgt_kpi_for_contract"
-                    region_table = "setup_regions"
-                    district_table = "setup_districts"
-                    settlement_table = "setup_settlement"
-                    typeofpap_table = "setup_typeofpap"
-                    papcategory_table = "setup_papcategory"
-                    vulnerability_table = "setup_vulnerabilitycategory"
-                    typeofimpact_table = "setup_typeofimpact"
-                    natureofsettlement_table = "setup_natureofsettlement"
-                    user_table = "auth_user"
-                
-                sql_query = f"""
-                SELECT 
+                # First, try a simple query to get basic PAP data without joins
+                # This will help us understand the actual table structure
+                simple_query = f"""
+                SELECT TOP 100
                     p.pap_identification_number,
                     ISNULL(p.pap_name, '') as pap_name,
                     ISNULL(p.sex, '') as sex,
@@ -67,39 +54,28 @@ def get_pap_data_sql_server():
                     ISNULL(p.pre_project_situation, '') as pre_project_situation,
                     ISNULL(p.remarks, '') as remarks,
                     p.date_created,
-                    ISNULL(pr.project, 'Unknown') as project,
-                    ISNULL(kpi.type_of_investment, 'Unknown') as type_of_investment,
-                    ISNULL(kpi.Kpi_description, 'Unknown') as Kpi_description,
-                    ISNULL(r.region, 'Unknown') as region,
-                    ISNULL(d.district, 'Unknown') as district,
-                    ISNULL(s.settlement, 'Unknown') as settlement,
-                    ISNULL(tp.type_of_pap, 'Unknown') as type_of_pap,
-                    ISNULL(pc.pap_category, 'Unknown') as pap_category,
-                    ISNULL(vc.vulnerability_category, 'Unknown') as vulnerability_category,
-                    ISNULL(ti.type_of_impact, 'Unknown') as type_of_impact,
-                    ISNULL(ns.nature_of_compensation, 'Unknown') as nature_of_compensation,
-                    ISNULL(u.username, 'Unknown') as loginUser
+                    ISNULL(CAST(p.project_id AS VARCHAR), 'Unknown') as project,
+                    'Unknown' as type_of_investment,
+                    'Unknown' as Kpi_description,
+                    'Unknown' as region,
+                    'Unknown' as district,
+                    'Unknown' as settlement,
+                    'Unknown' as type_of_pap,
+                    'Unknown' as pap_category,
+                    'Unknown' as vulnerability_category,
+                    'Unknown' as type_of_impact,
+                    'Unknown' as nature_of_compensation,
+                    'Unknown' as loginUser
                 FROM {table_name} p
-                LEFT JOIN {project_table} pr ON p.project_id = pr.projectID
-                LEFT JOIN {kpi_table} kpi ON p.type_of_investment_id = kpi.id
-                LEFT JOIN {region_table} r ON p.region_id = r.regionID
-                LEFT JOIN {district_table} d ON p.district_id = d.districtID
-                LEFT JOIN {settlement_table} s ON p.pap_Current_Address_id = s.settlementID
-                LEFT JOIN {typeofpap_table} tp ON p.type_of_pap_id = tp.id
-                LEFT JOIN {papcategory_table} pc ON p.pap_category_id = pc.id
-                LEFT JOIN {vulnerability_table} vc ON p.vulnerability_category_id = vc.id
-                LEFT JOIN {typeofimpact_table} ti ON p.type_of_impact_id = ti.id
-                LEFT JOIN {natureofsettlement_table} ns ON p.nature_of_compensation_id = ns.id
-                LEFT JOIN {user_table} u ON p.loginUser_id = u.id
                 WHERE p.pap_identification_number IS NOT NULL
                 ORDER BY p.date_created DESC
                 """
                 
-                cursor.execute(sql_query)
+                cursor.execute(simple_query)
                 results = cursor.fetchall()
                 
                 if results:
-                    print(f"Successfully loaded {len(results)} PAP records from {table_name}")
+                    print(f"Successfully loaded {len(results)} PAP records from {table_name} (simple query)")
                     return results
                     
         except Exception as e:
