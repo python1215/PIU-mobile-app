@@ -199,93 +199,123 @@ def pap_list(request):
     from django.db import connection
     from django.core.paginator import Paginator
     from django.db.models import Sum
-    from .sql_server_pap_utils import get_pap_data_sql_server, convert_sql_results_to_pap_objects
     
     # Check if we're using SQL Server
     is_sql_server = 'mssql' in connection.settings_dict['ENGINE'].lower()
     
-    if is_sql_server:
-        # Use SQL Server utility function
-        raw_results = get_pap_data_sql_server()
-        pap_list = convert_sql_results_to_pap_objects(raw_results)
-    else:
-        # Use Django ORM for SQLite with proper null handling
-        pap_list = PAP.objects.select_related(
-            'project', 'type_of_investment', 'region', 'district',
-            'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'
-        ).all()
-
-    # Apply filters (only for SQLite, SQL Server uses raw query)
-    if not is_sql_server:
-        pap_filter = PAPFilter(request.GET, queryset=pap_list)
-        filtered_pap = pap_filter.qs
-    else:
-        # For SQL Server, we'll implement basic filtering manually
-        filtered_pap = pap_list
-        
-        # Apply basic filters if provided
-        project_filter = request.GET.get('project')
-        if project_filter:
-            filtered_pap = [pap for pap in filtered_pap if pap.project.project == project_filter]
-            
-        compensated_filter = request.GET.get('pap_compensated')
-        if compensated_filter:
-            filtered_pap = [pap for pap in filtered_pap if pap.pap_compensated == compensated_filter]
-            
-        sex_filter = request.GET.get('sex')
-        if sex_filter:
-            filtered_pap = [pap for pap in filtered_pap if pap.sex == sex_filter]
-
-    # Pagination with configurable page size
-    page_size = request.GET.get('page_size', 10)
     try:
-        page_size = int(page_size)
-        if page_size not in [10, 15, 25, 50, 100]:
+        if is_sql_server:
+            # Try to import and use SQL Server utility function
+            try:
+                from .sql_server_pap_utils import get_pap_data_sql_server, convert_sql_results_to_pap_objects
+                raw_results = get_pap_data_sql_server()
+                pap_list = convert_sql_results_to_pap_objects(raw_results)
+            except Exception as e:
+                # If SQL Server utils fail, fall back to basic ORM
+                print(f"SQL Server utils failed: {e}")
+                pap_list = PAP.objects.all()
+        else:
+            # Use Django ORM for SQLite with proper null handling
+            pap_list = PAP.objects.select_related(
+                'project', 'type_of_investment', 'region', 'district',
+                'pap_Current_Address', 'type_of_pap', 'pap_category',
+                'vulnerability_category', 'type_of_impact', 'loginUser'
+            ).all()
+
+        # Apply filters (only for SQLite, SQL Server uses raw query)
+        if not is_sql_server:
+            pap_filter = PAPFilter(request.GET, queryset=pap_list)
+            filtered_pap = pap_filter.qs
+        else:
+            # For SQL Server, we'll implement basic filtering manually
+            filtered_pap = pap_list
+            
+            # Apply basic filters if provided
+            project_filter = request.GET.get('project')
+            if project_filter:
+                filtered_pap = [pap for pap in filtered_pap if hasattr(pap, 'project') and hasattr(pap.project, 'project') and pap.project.project == project_filter]
+                
+            compensated_filter = request.GET.get('pap_compensated')
+            if compensated_filter:
+                filtered_pap = [pap for pap in filtered_pap if pap.pap_compensated == compensated_filter]
+                
+            sex_filter = request.GET.get('sex')
+            if sex_filter:
+                filtered_pap = [pap for pap in filtered_pap if pap.sex == sex_filter]
+
+        # Pagination with configurable page size
+        page_size = request.GET.get('page_size', 10)
+        try:
+            page_size = int(page_size)
+            if page_size not in [10, 15, 25, 50, 100]:
+                page_size = 10
+        except (ValueError, TypeError):
             page_size = 10
-    except (ValueError, TypeError):
-        page_size = 10
 
-    paginator = Paginator(filtered_pap, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        paginator = Paginator(filtered_pap, page_size)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-    # Statistics
-    if not is_sql_server:
-        stats = {
-            'total_pap': pap_list.count(),
-            'filtered_count': filtered_pap.count(),
-            'compensated': pap_list.filter(pap_compensated='Y').count(),
-            'not_compensated': pap_list.filter(pap_compensated='N').count(),
-            'total_compensation': pap_list.aggregate(Sum('amount'))['amount__sum'] or 0,
-            'male_count': pap_list.filter(sex='M').count(),
-            'female_count': pap_list.filter(sex='F').count(),
+        # Statistics
+        if not is_sql_server:
+            stats = {
+                'total_pap': pap_list.count(),
+                'filtered_count': filtered_pap.count(),
+                'compensated': pap_list.filter(pap_compensated='Y').count(),
+                'not_compensated': pap_list.filter(pap_compensated='N').count(),
+                'total_compensation': pap_list.aggregate(Sum('amount'))['amount__sum'] or 0,
+                'male_count': pap_list.filter(sex='M').count(),
+                'female_count': pap_list.filter(sex='F').count(),
+            }
+        else:
+            # Manual statistics for SQL Server
+            total_compensation = sum(getattr(pap, 'amount', 0) or 0 for pap in pap_list)
+            male_count = len([pap for pap in pap_list if getattr(pap, 'sex', '') == 'M'])
+            female_count = len([pap for pap in pap_list if getattr(pap, 'sex', '') == 'F'])
+            
+            stats = {
+                'total_pap': len(pap_list),
+                'filtered_count': len(filtered_pap),
+                'compensated': len([pap for pap in pap_list if getattr(pap, 'pap_compensated', '') == 'Y']),
+                'not_compensated': len([pap for pap in pap_list if getattr(pap, 'pap_compensated', '') == 'N']),
+                'total_compensation': total_compensation,
+                'male_count': male_count,
+                'female_count': female_count,
+            }
+
+        context = {
+            'page_obj': page_obj,
+            'filter': pap_filter if not is_sql_server else None,
+            'stats': stats,
+            'is_filtered': bool(request.GET),
+            'is_sql_server': is_sql_server,
         }
-    else:
-        # Manual statistics for SQL Server
-        total_compensation = sum(pap.amount for pap in pap_list if pap.amount)
-        male_count = len([pap for pap in pap_list if pap.sex == 'M'])
-        female_count = len([pap for pap in pap_list if pap.sex == 'F'])
+
+        return render(request, 'social_and_env/pap/pap_list.html', context)
         
-        stats = {
-            'total_pap': len(pap_list),
-            'filtered_count': len(filtered_pap),
-            'compensated': len([pap for pap in pap_list if pap.pap_compensated == 'Y']),
-            'not_compensated': len([pap for pap in pap_list if pap.pap_compensated == 'N']),
-            'total_compensation': total_compensation,
-            'male_count': male_count,
-            'female_count': female_count,
+    except Exception as e:
+        # Emergency fallback: Show empty list with error message
+        from django.contrib import messages
+        messages.error(request, f'Error loading PAP data: {str(e)}. Please check your database connection.')
+        
+        context = {
+            'page_obj': None,
+            'filter': None,
+            'stats': {
+                'total_pap': 0,
+                'filtered_count': 0,
+                'compensated': 0,
+                'not_compensated': 0,
+                'total_compensation': 0,
+                'male_count': 0,
+                'female_count': 0,
+            },
+            'is_filtered': False,
+            'is_sql_server': is_sql_server,
+            'error': str(e),
         }
-
-    context = {
-        'page_obj': page_obj,
-        'filter': pap_filter if not is_sql_server else None,
-        'stats': stats,
-        'is_filtered': bool(request.GET),
-        'is_sql_server': is_sql_server,
-    }
-
-    return render(request, 'social_and_env/pap/pap_list.html', context)
+        
+        return render(request, 'social_and_env/pap/pap_list.html', context)
 
 
 @login_required

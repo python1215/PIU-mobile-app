@@ -10,15 +10,49 @@ def get_pap_data_sql_server():
     Get all PAP data from SQL Server handling null values properly
     Uses multiple table name variations for different SQL Server environments
     """
-    table_variations = [
-        '[piuprod3].[dbo].[social_and_env_pap]',
-        '[piuprod].[dbo].[social_and_env_pap]',
-        'social_and_env_pap'
+    # Try multiple database/table combinations for offline SQL Server
+    database_table_variations = [
+        # Standard schema with different databases
+        ('[piuprod3].[dbo].[social_and_env_pap]', '[piuprod3].[dbo]'),
+        ('[piuprod].[dbo].[social_and_env_pap]', '[piuprod].[dbo]'),
+        
+        # Simple table names for offline deployments
+        ('social_and_env_pap', 'dbo'),
+        ('social_and_env_pap', ''),
+        
+        # Additional variations for different environments
+        ('[dbo].[social_and_env_pap]', '[dbo]'),
     ]
     
-    for table_name in table_variations:
+    for table_name, prefix in database_table_variations:
         try:
             with connection.cursor() as cursor:
+                # Build dynamic references based on prefix
+                if prefix:
+                    project_table = f"{prefix}.[PIU_Financial_mgt_project]"
+                    kpi_table = f"{prefix}.[PIU_Financial_mgt_kpi_for_contract]"
+                    region_table = f"{prefix}.[setup_regions]"
+                    district_table = f"{prefix}.[setup_districts]"
+                    settlement_table = f"{prefix}.[setup_settlement]"
+                    typeofpap_table = f"{prefix}.[setup_typeofpap]"
+                    papcategory_table = f"{prefix}.[setup_papcategory]"
+                    vulnerability_table = f"{prefix}.[setup_vulnerabilitycategory]"
+                    typeofimpact_table = f"{prefix}.[setup_typeofimpact]"
+                    natureofsettlement_table = f"{prefix}.[setup_natureofsettlement]"
+                    user_table = f"{prefix}.[auth_user]"
+                else:
+                    project_table = "PIU_Financial_mgt_project"
+                    kpi_table = "PIU_Financial_mgt_kpi_for_contract"
+                    region_table = "setup_regions"
+                    district_table = "setup_districts"
+                    settlement_table = "setup_settlement"
+                    typeofpap_table = "setup_typeofpap"
+                    papcategory_table = "setup_papcategory"
+                    vulnerability_table = "setup_vulnerabilitycategory"
+                    typeofimpact_table = "setup_typeofimpact"
+                    natureofsettlement_table = "setup_natureofsettlement"
+                    user_table = "auth_user"
+                
                 sql_query = f"""
                 SELECT 
                     p.pap_identification_number,
@@ -46,17 +80,17 @@ def get_pap_data_sql_server():
                     ISNULL(ns.nature_of_compensation, 'Unknown') as nature_of_compensation,
                     ISNULL(u.username, 'Unknown') as loginUser
                 FROM {table_name} p
-                LEFT JOIN [piuprod3].[dbo].[PIU_Financial_mgt_project] pr ON p.project_id = pr.projectID
-                LEFT JOIN [piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract] kpi ON p.type_of_investment_id = kpi.id
-                LEFT JOIN [piuprod3].[dbo].[setup_regions] r ON p.region_id = r.regionID
-                LEFT JOIN [piuprod3].[dbo].[setup_districts] d ON p.district_id = d.districtID
-                LEFT JOIN [piuprod3].[dbo].[setup_settlement] s ON p.pap_Current_Address_id = s.settlementID
-                LEFT JOIN [piuprod3].[dbo].[setup_typeofpap] tp ON p.type_of_pap_id = tp.id
-                LEFT JOIN [piuprod3].[dbo].[setup_papcategory] pc ON p.pap_category_id = pc.id
-                LEFT JOIN [piuprod3].[dbo].[setup_vulnerabilitycategory] vc ON p.vulnerability_category_id = vc.id
-                LEFT JOIN [piuprod3].[dbo].[setup_typeofimpact] ti ON p.type_of_impact_id = ti.id
-                LEFT JOIN [piuprod3].[dbo].[setup_natureofsettlement] ns ON p.nature_of_compensation_id = ns.id
-                LEFT JOIN [piuprod3].[dbo].[auth_user] u ON p.loginUser_id = u.id
+                LEFT JOIN {project_table} pr ON p.project_id = pr.projectID
+                LEFT JOIN {kpi_table} kpi ON p.type_of_investment_id = kpi.id
+                LEFT JOIN {region_table} r ON p.region_id = r.regionID
+                LEFT JOIN {district_table} d ON p.district_id = d.districtID
+                LEFT JOIN {settlement_table} s ON p.pap_Current_Address_id = s.settlementID
+                LEFT JOIN {typeofpap_table} tp ON p.type_of_pap_id = tp.id
+                LEFT JOIN {papcategory_table} pc ON p.pap_category_id = pc.id
+                LEFT JOIN {vulnerability_table} vc ON p.vulnerability_category_id = vc.id
+                LEFT JOIN {typeofimpact_table} ti ON p.type_of_impact_id = ti.id
+                LEFT JOIN {natureofsettlement_table} ns ON p.nature_of_compensation_id = ns.id
+                LEFT JOIN {user_table} u ON p.loginUser_id = u.id
                 WHERE p.pap_identification_number IS NOT NULL
                 ORDER BY p.date_created DESC
                 """
@@ -65,12 +99,15 @@ def get_pap_data_sql_server():
                 results = cursor.fetchall()
                 
                 if results:
+                    print(f"Successfully loaded {len(results)} PAP records from {table_name}")
                     return results
                     
         except Exception as e:
             print(f"Failed to query {table_name}: {str(e)}")
             continue
     
+    # If all attempts fail, return empty list
+    print("No PAP data found in any table variation")
     return []
 
 def convert_sql_results_to_pap_objects(raw_results):
