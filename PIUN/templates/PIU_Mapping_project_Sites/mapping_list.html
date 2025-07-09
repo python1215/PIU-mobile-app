@@ -188,8 +188,8 @@ function viewOnMap(lat, lng) {
 }
 
 function viewDetails(mappingId) {
-    // Show details in modal or redirect to detail view
-    alert('Mapping ID: ' + mappingId + '\nDetail view functionality can be implemented here.');
+    // Redirect to detail view
+    window.location.href = `{% url 'PIU_Mapping_project_Sites:mapping-detail' '0' %}`.replace('0', mappingId);
 }
 </script>
 {% endblock %}

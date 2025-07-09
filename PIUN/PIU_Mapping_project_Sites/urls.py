@@ -17,6 +17,7 @@ urlpatterns = [
 
     # Project Mapping CRUD
     path("mapping/", views.mapping_list, name='mapping-list'),
+    path("mapping/<str:pk>/", views.mapping_detail, name='mapping-detail'),
     path("add-mapping/", views.add_mapping, name='add-mapping'),
     path('update-mapping/<str:pk>/', views.update_mapping, name='update-mapping'),
     path('delete-mapping/<str:pk>/', views.delete_mapping, name='delete-mapping'),

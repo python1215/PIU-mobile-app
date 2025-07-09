@@ -427,6 +427,26 @@ def mapping_list(request):
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_list.html', context)
 
+def mapping_detail(request, pk):
+    """Detail view of a specific project mapping"""
+    mapping = get_object_or_404(projectMapping, pk=pk)
+    
+    # Calculate access rate
+    access_rate = (mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0
+    
+    # Get related projects and donors
+    projects = mapping.project.all()
+    donors = mapping.donor.all()
+    
+    context = {
+        'mapping': mapping,
+        'access_rate': access_rate,
+        'projects': projects,
+        'donors': donors,
+    }
+    
+    return render(request, 'PIU_Mapping_project_Sites/mapping_detail.html', context)
+
 # Keep existing functions for compatibility
 def indexl(request):
     """Leaflet map alternative"""

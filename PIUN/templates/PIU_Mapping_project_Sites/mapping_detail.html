@@ -1,0 +1,282 @@
+{% extends 'PIU_Mapping_project_Sites/base.html' %}
+{% load static %}
+
+{% block title %}{{ mapping.settlement.settlement_name }} - Project Mapping Detail{% endblock %}
+
+{% block mapping_content %}
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2" style="color: white;">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        {{ mapping.settlement.settlement_name }}
+                    </h1>
+                    <p class="text-muted">
+                        {{ mapping.district.district_name }}, {{ mapping.region.region_name }} - 
+                        Project Mapping Details
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                    <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-4">
+        <!-- Location Information -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-map me-2"></i>Location Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-primary ps-3">
+                                <h6 class="text-muted mb-1">Region</h6>
+                                <p class="fw-bold mb-0">{{ mapping.region.region_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-success ps-3">
+                                <h6 class="text-muted mb-1">District</h6>
+                                <p class="fw-bold mb-0">{{ mapping.district.district_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-warning ps-3">
+                                <h6 class="text-muted mb-1">Settlement</h6>
+                                <p class="fw-bold mb-0">{{ mapping.settlement.settlement_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-info ps-3">
+                                <h6 class="text-muted mb-1">Profile Year</h6>
+                                <p class="fw-bold mb-0">{{ mapping.profile_year.profile_year }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coordinates & Access -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-geo me-2"></i>Coordinates & Access
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt text-danger me-2"></i>
+                                <div>
+                                    <h6 class="text-muted mb-1">Latitude</h6>
+                                    <p class="fw-bold mb-0">{{ mapping.Latitude|floatformat:6 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt text-danger me-2"></i>
+                                <div>
+                                    <h6 class="text-muted mb-1">Longitude</h6>
+                                    <p class="fw-bold mb-0">{{ mapping.Longitude|floatformat:6 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-lightning-charge text-warning me-2"></i>
+                                <div>
+                                    <h6 class="text-muted mb-1">Access Type</h6>
+                                    <p class="fw-bold mb-0">{{ mapping.access.access_type }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-bar-chart text-success me-2"></i>
+                                <div>
+                                    <h6 class="text-muted mb-1">Access Rate</h6>
+                                    <p class="fw-bold mb-0">{{ access_rate|floatformat:1 }}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Button -->
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary" onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }})">
+                            <i class="bi bi-map me-2"></i>View on Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects & Donors -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-briefcase me-2"></i>Associated Projects & Donors
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Projects -->
+                        <div class="col-lg-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-folder me-2"></i>Projects
+                            </h6>
+                            {% if projects %}
+                                <div class="list-group list-group-flush">
+                                    {% for project in projects %}
+                                        <div class="list-group-item border-0 px-0 py-2">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-folder-fill text-primary me-2 mt-1"></i>
+                                                <div>
+                                                    <h6 class="mb-1">{{ project.project }}</h6>
+                                                    <small class="text-muted">Project ID: {{ project.id }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No projects assigned to this mapping.</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Donors -->
+                        <div class="col-lg-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-bank me-2"></i>Donors
+                            </h6>
+                            {% if donors %}
+                                <div class="list-group list-group-flush">
+                                    {% for donor in donors %}
+                                        <div class="list-group-item border-0 px-0 py-2">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-bank-fill text-success me-2 mt-1"></i>
+                                                <div>
+                                                    <h6 class="mb-1">{{ donor.name }}</h6>
+                                                    <small class="text-muted">Donor ID: {{ donor.id }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No donors assigned to this mapping.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-bar-chart me-2"></i>Household Statistics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Total Households -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted mb-0">Total Households</h6>
+                            <span class="badge bg-primary">{{ mapping.Total_No_of_Households }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Connected Households -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted mb-0">Connected Households</h6>
+                            <span class="badge bg-success">{{ mapping.no_of_connected_household|default:0 }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ access_rate }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Connections -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted mb-0">Customer Connections</h6>
+                            <span class="badge bg-info">{{ mapping.no_of_customer_connections|default:0 }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {% if mapping.Total_No_of_Households > 0 %}{{ mapping.no_of_customer_connections|default:0|mul:100|div:mapping.Total_No_of_Households }}{% else %}0{% endif %}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Access Rate -->
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <h2 class="fw-bold {% if access_rate >= 75 %}text-success{% elif access_rate >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ access_rate|floatformat:1 }}%
+                            </h2>
+                            <p class="text-muted mb-0">Access Rate</p>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div class="progress-bar {% if access_rate >= 75 %}bg-success{% elif access_rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                 role="progressbar" style="width: {{ access_rate }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-lightning me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-2"></i>Edit Mapping
+                        </a>
+                        <button class="btn btn-outline-success" onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }})">
+                            <i class="bi bi-map me-2"></i>View on Map
+                        </button>
+                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-house me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Interactive Features -->
+<script>
+function viewOnMap(lat, lng) {
+    // Open map view with coordinates
+    const url = `{% url 'PIU_Mapping_project_Sites:index' %}?lat=${lat}&lng=${lng}`;
+    window.open(url, '_blank', 'width=1200,height=800');
+}
+</script>
+{% endblock %}
