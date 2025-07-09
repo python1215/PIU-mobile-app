@@ -799,7 +799,7 @@ def load_districts(request):
     districts = Districts.objects.none()
 
     if region_id:
-        districts = Districts.objects.filter(region_id=region_id)
+        districts = Districts.objects.filter(region_code=region_id)
 
     return render(request, 'social_and_env/partials/districts.html',
                   {'districts': districts})
@@ -812,7 +812,7 @@ def load_settlements(request):
     settlements = Settlement.objects.none()
 
     if district_id:
-        settlements = Settlement.objects.filter(district_id=district_id)
+        settlements = Settlement.objects.filter(district_code=district_id)
 
     return render(request, 'social_and_env/partials/settlements.html',
                   {'settlements': settlements})
@@ -853,7 +853,7 @@ def load_districts_ohs(request):
     districts = Districts.objects.none()
 
     if region_id:
-        districts = Districts.objects.filter(region_id=region_id)
+        districts = Districts.objects.filter(region_code=region_id)
 
     return render(request, 'social_and_env/partials/districts.html',
                   {'districts': districts})
@@ -866,7 +866,7 @@ def load_settlements_ohs(request):
     settlements = Settlement.objects.none()
 
     if district_id:
-        settlements = Settlement.objects.filter(district_id=district_id)
+        settlements = Settlement.objects.filter(district_code=district_id)
 
     return render(request, 'social_and_env/partials/settlements.html',
                   {'settlements': settlements})
