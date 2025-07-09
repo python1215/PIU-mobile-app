@@ -103,15 +103,24 @@ class SQLServerSetup:
 
 def main():
     """Main setup function"""
-    if len(sys.argv) < 2:
-        print("Usage: python setup_sql_server.py <sql_file_path> [server] [username] [password]")
-        print("Example: python setup_sql_server.py database_script.sql localhost sa mypassword")
-        sys.exit(1)
+    # Use the latest SQL script by default
+    latest_sql_script = "../attached_assets/Pasted-USE-piuprod-GO-ALTER-TABLE-dbo-django-admin-log-DROP-CONSTRAINT-django-admin-log-action-fla-1752062311540_1752062311549.txt"
     
-    sql_file_path = sys.argv[1]
-    server = sys.argv[2] if len(sys.argv) > 2 else 'localhost'
-    username = sys.argv[3] if len(sys.argv) > 3 else 'sa'
-    password = sys.argv[4] if len(sys.argv) > 4 else ''
+    if len(sys.argv) < 2:
+        print("Usage: python setup_sql_server.py [sql_file_path] [server] [username] [password]")
+        print("Example: python setup_sql_server.py database_script.sql localhost sa mypassword")
+        print(f"Default: Will use {latest_sql_script}")
+        
+        # Use default script if no arguments provided
+        sql_file_path = latest_sql_script
+        server = 'localhost'
+        username = 'sa'
+        password = ''
+    else:
+        sql_file_path = sys.argv[1]
+        server = sys.argv[2] if len(sys.argv) > 2 else 'localhost'
+        username = sys.argv[3] if len(sys.argv) > 3 else 'sa'
+        password = sys.argv[4] if len(sys.argv) > 4 else ''
     
     if not os.path.exists(sql_file_path):
         print(f"✗ SQL file not found: {sql_file_path}")
@@ -124,6 +133,7 @@ def main():
         print("1. Restart the Django application")
         print("2. The system will automatically use SQL Server mode")
         print("3. All views will use raw SQL queries for compatibility")
+        print("4. Enhanced database schema with comprehensive table structure")
     else:
         print("\n✗ Database setup failed. Please check the configuration and try again.")
         sys.exit(1)
