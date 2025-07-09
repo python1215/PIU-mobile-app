@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.contrib import messages
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum, Avg
 from django.views.decorators.csrf import csrf_exempt
@@ -772,9 +773,55 @@ def community_add(request):
 @login_required
 def community_detail(request, pk):
     """Community Engagement detail view"""
-    engagement = get_object_or_404(CommunityConsult_Engagement.objects.select_related(
-        'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'),
-                                 pk=pk)
+    # Check if we're in SQL Server mode
+    if hasattr(settings, 'USE_SQL_SERVER') and settings.USE_SQL_SERVER:
+        # Use raw SQL for SQL Server compatibility
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            # Try different table name variations for SQL Server
+            tables_to_try = [
+                '[piuprod].[dbo].[social_and_env_communityconsult_engagement]',
+                '[piuprod3].[dbo].[social_and_env_communityconsult_engagement]',
+                'social_and_env_communityconsult_engagement'
+            ]
+            
+            engagement = None
+            for table_name in tables_to_try:
+                try:
+                    cursor.execute(f"""
+                        SELECT * FROM {table_name} 
+                        WHERE reference_number = %s
+                    """, [pk])
+                    
+                    row = cursor.fetchone()
+                    if row:
+                        columns = [col[0] for col in cursor.description]
+                        engagement_data = dict(zip(columns, row))
+                        
+                        # Create a mock object with the data
+                        class MockEngagement:
+                            def __init__(self, data):
+                                for key, value in data.items():
+                                    setattr(self, key, value)
+                                # Set default values for missing fields
+                                self.pk = pk
+                                self.project_name = getattr(self, 'project_name', 'Unknown')
+                                self.year = getattr(self, 'year', 'Unknown')
+                                self.stake_holder_engagement_Types = getattr(self, 'stake_holder_engagement_Types', 'Unknown')
+                        
+                        engagement = MockEngagement(engagement_data)
+                        break
+                except Exception as e:
+                    continue
+            
+            if not engagement:
+                raise Http404("Community engagement not found")
+    else:
+        # Use Django ORM for SQLite
+        engagement = get_object_or_404(CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'),
+                                     pk=pk)
     
     context = {'engagement': engagement}
     return render(request, 'social_and_env/community/community_detail.html', context)
@@ -783,25 +830,32 @@ def community_detail(request, pk):
 @login_required
 def community_edit(request, pk):
     """Edit Community Engagement record"""
-    engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
-    
-    if request.method == 'POST':
-        form = CommunityEngagementForm(request.POST, request.FILES, instance=engagement)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Community engagement record updated successfully!')
-            return redirect('community_detail', pk=pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    # Check if we're in SQL Server mode
+    if hasattr(settings, 'USE_SQL_SERVER') and settings.USE_SQL_SERVER:
+        # For SQL Server mode, show informational message
+        messages.info(request, 'Editing is not available in SQL Server mode. Please use the Django admin interface or switch to SQLite mode.')
+        return redirect('community_detail', pk=pk)
     else:
-        form = CommunityEngagementForm(instance=engagement)
-    
-    context = {
-        'form': form,
-        'engagement': engagement,
-        'title': 'Edit Community Engagement Record'
-    }
-    return render(request, 'social_and_env/community/community_form.html', context)
+        # Use Django ORM for SQLite
+        engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
+        
+        if request.method == 'POST':
+            form = CommunityEngagementForm(request.POST, request.FILES, instance=engagement)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Community engagement record updated successfully!')
+                return redirect('community_detail', pk=pk)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = CommunityEngagementForm(instance=engagement)
+        
+        context = {
+            'form': form,
+            'engagement': engagement,
+            'title': 'Edit Community Engagement Record'
+        }
+        return render(request, 'social_and_env/community/community_form.html', context)
 
 
 # ======================== HTMX Dynamic Loading Views ========================

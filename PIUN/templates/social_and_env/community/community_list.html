@@ -150,12 +150,12 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" title="View" onclick="viewEngagement({{ engagement.reference_number }})">
+                                    <a href="{% url 'community_detail' engagement.pk %}" class="btn btn-outline-primary" title="View">
                                         <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning" title="Edit" onclick="editEngagement({{ engagement.reference_number }})">
+                                    </a>
+                                    <a href="{% url 'community_edit' engagement.pk %}" class="btn btn-outline-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
-                                    </button>
+                                    </a>
                                     {% if engagement.picture %}
                                     <button class="btn btn-outline-info" title="View Photo" onclick="viewPhoto('{{ engagement.get_picture_url }}')">
                                         <i class="bi bi-camera"></i>
@@ -230,14 +230,6 @@
 
 {% block extra_js %}
 <script>
-function viewEngagement(refNo) {
-    console.log('Viewing engagement:', refNo);
-}
-
-function editEngagement(refNo) {
-    console.log('Editing engagement:', refNo);
-}
-
 function viewPhoto(photoUrl) {
     document.getElementById('modalPhoto').src = photoUrl;
     new bootstrap.Modal(document.getElementById('photoModal')).show();
