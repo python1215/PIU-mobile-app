@@ -226,7 +226,7 @@
                             <span class="badge bg-info">{{ mapping.no_of_customer_connections|default:0 }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: {% if mapping.Total_No_of_Households > 0 %}{{ mapping.no_of_customer_connections|default:0|mul:100|div:mapping.Total_No_of_Households }}{% else %}0{% endif %}%"></div>
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ customer_connection_rate }}%"></div>
                         </div>
                     </div>
 

@@ -434,6 +434,9 @@ def mapping_detail(request, pk):
     # Calculate access rate
     access_rate = (mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0
     
+    # Calculate customer connection rate
+    customer_connection_rate = (mapping.no_of_customer_connections / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0
+    
     # Get related projects and donors
     projects = mapping.project.all()
     donors = mapping.donor.all()
@@ -441,6 +444,7 @@ def mapping_detail(request, pk):
     context = {
         'mapping': mapping,
         'access_rate': access_rate,
+        'customer_connection_rate': customer_connection_rate,
         'projects': projects,
         'donors': donors,
     }
