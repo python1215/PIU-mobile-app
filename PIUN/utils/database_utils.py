@@ -11,7 +11,20 @@ logger = logging.getLogger(__name__)
 
 def is_sql_server_mode():
     """Check if system is running in SQL Server mode"""
-    return getattr(settings, 'USE_SQL_SERVER', True)  # Default to SQL Server for production
+    # Check the actual database backend being used
+    from django.db import connection
+    
+    # Only use SQL Server mode if we're actually connected to SQL Server
+    if connection.vendor == 'microsoft':
+        return True
+    
+    # Check environment variable and settings for forced SQL Server mode
+    import os
+    env_sql_server = os.environ.get('USE_SQL_SERVER', 'false').lower() == 'true'
+    settings_sql_server = getattr(settings, 'USE_SQL_SERVER', False)
+    
+    # Only return True if both environment/settings indicate SQL Server AND we have the capability
+    return (env_sql_server or settings_sql_server) and connection.vendor == 'microsoft'
 
 def get_database_mode():
     """Get current database mode"""
