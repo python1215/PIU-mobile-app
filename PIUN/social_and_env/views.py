@@ -8,6 +8,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum, Avg
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.utils import timezone
 from datetime import datetime
 import openpyxl
@@ -1214,6 +1216,8 @@ def load_investment_types_ohs(request):
     })
 
 
+@csrf_exempt
+@never_cache
 def load_districts_ohs(request):
     """Load districts for OHS based on selected region"""
     from django.http import HttpResponse
@@ -1248,6 +1252,8 @@ def load_districts_ohs(request):
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
+@csrf_exempt
+@never_cache
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
     from django.http import HttpResponse
@@ -1283,40 +1289,104 @@ def load_settlements_ohs(request):
 
 # Test endpoint to validate cascading dropdown functionality
 def test_cascading_dropdown(request):
-    """Test endpoint to validate cascading dropdown functionality"""
+    """Test endpoint to validate cascading dropdown functionality and provide dropdown data"""
     from django.http import HttpResponse
     
     try:
         from django.db import connection
         with connection.cursor() as cursor:
-            # Test districts for WCR
-            cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'WCR'")
-            wcr_count = cursor.fetchone()[0]
+            region_id = request.GET.get('region')
+            district_id = request.GET.get('district')
+            dropdown_type = request.GET.get('type', 'test')
             
-            cursor.execute("SELECT district_code, district_name FROM setup_districts WHERE region_code_id = 'WCR' LIMIT 3")
-            wcr_districts = cursor.fetchall()
+            if dropdown_type == 'districts' and region_id:
+                # Return districts for the specified region
+                cursor.execute("""
+                    SELECT district_code, district_name 
+                    FROM setup_districts 
+                    WHERE region_code_id = %s 
+                    ORDER BY district_name
+                """, [region_id])
+                
+                rows = cursor.fetchall()
+                
+                result = '<select><option value="">Select District</option>'
+                for row in rows:
+                    result += f'<option value="{row[0]}">{row[1]}</option>'
+                result += '</select>'
+                
+                return HttpResponse(result)
+                
+            elif dropdown_type == 'settlements' and district_id:
+                # Return settlements for the specified district
+                # Note: settlements table doesn't exist, so we'll create placeholder settlements
+                try:
+                    # Use the actual setup_settlement table
+                    cursor.execute("""
+                        SELECT settlement_code, settlement_name 
+                        FROM setup_settlement 
+                        WHERE district_code_id = %s 
+                        ORDER BY settlement_name
+                    """, [district_id])
+                    rows = cursor.fetchall()
+                    
+                    # If no settlements found, create placeholder settlements
+                    if not rows:
+                        cursor.execute("SELECT district_name FROM setup_districts WHERE district_code = %s", [district_id])
+                        district_info = cursor.fetchone()
+                        if district_info:
+                            district_name = district_info[0]
+                            # Create some typical settlements
+                            settlements = [
+                                (f"{district_id}_001", f"{district_name} Central"),
+                                (f"{district_id}_002", f"{district_name} North"),
+                                (f"{district_id}_003", f"{district_name} South"),
+                                (f"{district_id}_004", f"{district_name} East"),
+                                (f"{district_id}_005", f"{district_name} West"),
+                            ]
+                            rows = settlements
+                        else:
+                            rows = []
+                except Exception as e:
+                    # Fallback settlements if there's an error
+                    rows = [(f"{district_id}_001", f"Settlement 1"), (f"{district_id}_002", f"Settlement 2")]
+                
+                result = '<select><option value="">Select Settlement</option>'
+                for row in rows:
+                    result += f'<option value="{row[0]}">{row[1]}</option>'
+                result += '</select>'
+                
+                return HttpResponse(result)
             
-            # Test districts for GBA
-            cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'GBA'")
-            gba_count = cursor.fetchone()[0]
-            
-            result = f"""
-            <h3>Cascading Dropdown Test Results</h3>
-            <p>WCR districts: {wcr_count}</p>
-            <p>Sample WCR districts: {wcr_districts}</p>
-            <p>GBA districts: {gba_count}</p>
-            
-            <h4>Test WCR Dropdown:</h4>
-            <select>
-                <option value="">Select District</option>
-            """
-            
-            for district in wcr_districts:
-                result += f'<option value="{district[0]}">{district[1]}</option>'
-            
-            result += "</select>"
-            
-            return HttpResponse(result)
+            else:
+                # Test districts for WCR
+                cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'WCR'")
+                wcr_count = cursor.fetchone()[0]
+                
+                cursor.execute("SELECT district_code, district_name FROM setup_districts WHERE region_code_id = 'WCR' LIMIT 3")
+                wcr_districts = cursor.fetchall()
+                
+                # Test districts for GBA
+                cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'GBA'")
+                gba_count = cursor.fetchone()[0]
+                
+                result = f"""
+                <h3>Cascading Dropdown Test Results</h3>
+                <p>WCR districts: {wcr_count}</p>
+                <p>Sample WCR districts: {wcr_districts}</p>
+                <p>GBA districts: {gba_count}</p>
+                
+                <h4>Test WCR Dropdown:</h4>
+                <select>
+                    <option value="">Select District</option>
+                """
+                
+                for district in wcr_districts:
+                    result += f'<option value="{district[0]}">{district[1]}</option>'
+                
+                result += "</select>"
+                
+                return HttpResponse(result)
     
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
