@@ -1,0 +1,7 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#fff3cd"/>
+  <polygon points="200,50 250,150 150,150" fill="#dc3545"/>
+  <text x="200" y="130" text-anchor="middle" font-family="Arial" font-size="20" fill="white">!</text>
+  <text x="200" y="200" text-anchor="middle" font-family="Arial" font-size="16" fill="#721c24">Safety Violation</text>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial" font-size="14" fill="#721c24">Documentation Photo</text>
+</svg>
