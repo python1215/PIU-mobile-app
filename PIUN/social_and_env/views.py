@@ -1303,6 +1303,17 @@ def community_detail(request, pk):
                                 self.project_name = getattr(self, 'project_name', 'Unknown')
                                 self.year = getattr(self, 'year', 'Unknown')
                                 self.stake_holder_engagement_Types = getattr(self, 'stake_holder_engagement_Types', 'Unknown')
+                                # Handle picture URL for SQL Server mode
+                                self.picture = getattr(self, 'picture', None)
+                            
+                            def get_picture_url(self):
+                                if self.picture:
+                                    # For SQL Server mode, construct the URL path
+                                    if hasattr(settings, 'MEDIA_URL'):
+                                        return f"{settings.MEDIA_URL}{self.picture}"
+                                    else:
+                                        return f"/media/{self.picture}"
+                                return None
                         
                         engagement = MockEngagement(engagement_data)
                         break

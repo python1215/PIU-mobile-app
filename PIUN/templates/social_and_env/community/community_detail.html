@@ -133,8 +133,8 @@
         </div>
         
         <div class="row g-3 mt-3">
-            <div class="col-12">
-                <div class="card">
+            <div class="col-md-6">
+                <div class="card h-100">
                     <div class="card-header bg-secondary text-white">
                         <h6 class="mb-0">
                             <i class="bi bi-info-circle me-2"></i>
@@ -143,15 +143,41 @@
                     </div>
                     <div class="card-body">
                         <dl class="row">
-                            <dt class="col-sm-3">Created By:</dt>
-                            <dd class="col-sm-3">{{ engagement.loginUser.username|default:"-" }}</dd>
+                            <dt class="col-sm-6">Created By:</dt>
+                            <dd class="col-sm-6">{{ engagement.loginUser.username|default:"-" }}</dd>
                             
-                            <dt class="col-sm-3">Date Created:</dt>
-                            <dd class="col-sm-3">{{ engagement.date_created|date:"F j, Y g:i A"|default:"-" }}</dd>
+                            <dt class="col-sm-6">Date Created:</dt>
+                            <dd class="col-sm-6">{{ engagement.date_created|date:"F j, Y g:i A"|default:"-" }}</dd>
                             
-                            <dt class="col-sm-3">Date Updated:</dt>
-                            <dd class="col-sm-3">{{ engagement.date_updated|date:"F j, Y g:i A"|default:"-" }}</dd>
+                            <dt class="col-sm-6">Date Updated:</dt>
+                            <dd class="col-sm-6">{{ engagement.date_updated|date:"F j, Y g:i A"|default:"-" }}</dd>
                         </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-camera me-2"></i>
+                            Engagement Photo
+                        </h6>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if engagement.picture %}
+                            <img src="{{ engagement.get_picture_url }}" class="img-fluid mb-3" alt="Engagement Photo" style="max-height: 200px;">
+                            <div>
+                                <button class="btn btn-primary btn-sm" onclick="viewPhoto('{{ engagement.get_picture_url }}')">
+                                    <i class="bi bi-eye me-1"></i>View Full Size
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="text-muted">
+                                <i class="bi bi-image display-1"></i>
+                                <p class="mt-2">No photo available</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -192,4 +218,30 @@
         </div>
     </div>
 </div>
+
+<!-- Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Community Engagement Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalPhoto" src="" class="img-fluid" alt="Engagement Photo">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewPhoto(photoUrl) {
+    if (photoUrl) {
+        document.getElementById('modalPhoto').src = photoUrl;
+        new bootstrap.Modal(document.getElementById('photoModal')).show();
+    }
+}
+</script>
 {% endblock %}
