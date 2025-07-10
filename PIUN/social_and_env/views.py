@@ -238,25 +238,79 @@ def pap_list(request):
             
             offset = (page_number - 1) * page_size
             
-            # Main query with pagination
+            # Build WHERE clause based on filters
+            where_conditions = []
+            params = []
+            
+            # Apply filters
+            if request.GET.get('project'):
+                where_conditions.append("project_id = ?")
+                params.append(request.GET.get('project'))
+            
+            if request.GET.get('region'):
+                where_conditions.append("region_code_id = ?")
+                params.append(request.GET.get('region'))
+            
+            if request.GET.get('sex'):
+                where_conditions.append("sex = ?")
+                params.append(request.GET.get('sex'))
+            
+            if request.GET.get('pap_compensated'):
+                where_conditions.append("pap_compensated = ?")
+                params.append(request.GET.get('pap_compensated'))
+            
+            if request.GET.get('pap_name'):
+                where_conditions.append("name LIKE ?")
+                params.append(f"%{request.GET.get('pap_name')}%")
+            
+            if request.GET.get('location_of_impact'):
+                where_conditions.append("location_of_impact LIKE ?")
+                params.append(f"%{request.GET.get('location_of_impact')}%")
+            
+            if request.GET.get('amount_min'):
+                where_conditions.append("amount >= ?")
+                params.append(float(request.GET.get('amount_min')))
+            
+            if request.GET.get('amount_max'):
+                where_conditions.append("amount <= ?")
+                params.append(float(request.GET.get('amount_max')))
+            
+            # Build WHERE clause
+            where_clause = ""
+            if where_conditions:
+                where_clause = "WHERE " + " AND ".join(where_conditions)
+            
+            # Update count query with filters
+            count_query = f"SELECT COUNT(*) FROM {table_name} {where_clause}"
+            with connection.cursor() as cursor:
+                cursor.execute(count_query, params)
+                total_count = cursor.fetchone()[0]
+            
+            # Main query with pagination and filtering
             pap_query = f"""
                 SELECT 
                     ISNULL([pap_identification_number], '') as pap_identification_number,
-                    ISNULL([pap_name], '') as pap_name,
+                    ISNULL([name], '') as pap_name,
                     ISNULL([sex], '') as sex,
                     ISNULL([amount], 0) as amount,
                     ISNULL([pap_compensated], 'N') as pap_compensated,
-                    ISNULL([project_id], '') as project_id,
-                    ISNULL([type_of_investment_id], '') as type_of_investment_id,
-                    ISNULL([region_code_id], '') as region_code_id,
-                    ISNULL([district_code_id], '') as district_code_id
+                    ISNULL([project_id], '') as project,
+                    ISNULL([type_of_investment_id], '') as type_of_investment,
+                    ISNULL([region_code_id], '') as region,
+                    ISNULL([district_code_id], '') as district,
+                    ISNULL([type_of_impact], '') as type_of_impact,
+                    ISNULL([compensation_status], 'Pending') as compensation_status
                 FROM {table_name}
+                {where_clause}
                 ORDER BY [pap_identification_number]
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
             """
             
+            # Add pagination parameters
+            params.extend([offset, page_size])
+            
             with connection.cursor() as cursor:
-                cursor.execute(pap_query, [offset, page_size])
+                cursor.execute(pap_query, params)
                 pap_records = cursor.fetchall()
             
             # Create mock objects for template compatibility
@@ -267,10 +321,12 @@ def pap_list(request):
                     self.sex = row[2] or ''
                     self.amount = row[3] or 0
                     self.pap_compensated = row[4] or 'N'
-                    self.project_id = row[5] or ''
-                    self.type_of_investment_id = row[6] or ''
-                    self.region_code_id = row[7] or ''
-                    self.district_code_id = row[8] or ''
+                    self.project = row[5] or ''
+                    self.type_of_investment = row[6] or ''
+                    self.region = row[7] or ''
+                    self.district = row[8] or ''
+                    self.type_of_impact = row[9] or ''
+                    self.compensation_status = row[10] or 'Pending'
                     # Add pk for URL compatibility
                     self.pk = self.pap_identification_number
             
@@ -328,11 +384,36 @@ def pap_list(request):
             
             page_obj = MockPaginator(total_count, page_size).get_page(page_number)
             
+            # Create a simple filter form for SQL Server mode
+            class SQLServerPAPFilter:
+                def __init__(self, request_get):
+                    self.form = type('Form', (), {
+                        'project': request_get.get('project', ''),
+                        'region': request_get.get('region', ''),
+                        'sex': request_get.get('sex', ''),
+                        'pap_compensated': request_get.get('pap_compensated', ''),
+                        'pap_name': request_get.get('pap_name', ''),
+                        'location_of_impact': request_get.get('location_of_impact', ''),
+                        'amount': [request_get.get('amount_min', ''), request_get.get('amount_max', '')],
+                    })()
+            
+            filter_obj = SQLServerPAPFilter(request.GET)
+            is_filtered = any([
+                request.GET.get('project'),
+                request.GET.get('region'),
+                request.GET.get('sex'),
+                request.GET.get('pap_compensated'),
+                request.GET.get('pap_name'),
+                request.GET.get('location_of_impact'),
+                request.GET.get('amount_min'),
+                request.GET.get('amount_max'),
+            ])
+            
             context = {
                 'page_obj': page_obj,
-                'filter': None,  # No filter for SQL Server mode
+                'filter': filter_obj,
                 'stats': stats,
-                'is_filtered': False,
+                'is_filtered': is_filtered,
                 'is_sql_server': True,
             }
             
@@ -424,22 +505,71 @@ def pap_detail(request, pk):
 
 @login_required
 def pap_add(request):
-    """Add new PAP record"""
-    if request.method == 'POST':
-        form = PAPForm(request.POST)
-        if form.is_valid():
-            pap = form.save(commit=False)
-            pap.loginUser = request.user
-            pap.save()
-            messages.success(request, 'PAP record created successfully!')
-            return redirect('pap_list')
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    """Add new PAP record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    from django.db import connection
+    import uuid
+    
+    if is_sql_server_mode():
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                # Generate unique PAP ID
+                pap_id = f"PAP-{uuid.uuid4().hex[:8].upper()}"
+                
+                with connection.cursor() as cursor:
+                    # Insert PAP record into SQL Server
+                    cursor.execute("""
+                        INSERT INTO [piuprod3].[dbo].[social_and_env_pap]
+                        ([pap_identification_number], [name], [sex], [amount], 
+                         [pap_compensated], [project_id], [region_code_id], 
+                         [district_code_id], [type_of_impact], [location_of_impact],
+                         [compensation_status], [date_created], [loginUser_id])
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)
+                    """, [
+                        pap_id,
+                        request.POST.get('name'),
+                        request.POST.get('sex'),
+                        float(request.POST.get('amount', 0)),
+                        request.POST.get('pap_compensated', 'N'),
+                        request.POST.get('project'),
+                        request.POST.get('region'),
+                        request.POST.get('district'),
+                        request.POST.get('type_of_impact'),
+                        request.POST.get('location_of_impact'),
+                        request.POST.get('compensation_status', 'Pending'),
+                        request.user.id
+                    ])
+                    
+                messages.success(request, 'PAP record added successfully!')
+                return redirect('pap_detail', pk=pap_id)
+                
+            except Exception as e:
+                messages.error(request, f'Error adding record: {str(e)}')
+        
+        # Render SQL Server compatible form
+        context = {
+            'sql_server_mode': True,
+            'title': 'Add PAP Record'
+        }
+        return render(request, 'social_and_env/pap/pap_sql_form.html', context)
     else:
-        form = PAPForm()
+        # SQLite mode using Django ORM
+        if request.method == 'POST':
+            form = PAPForm(request.POST)
+            if form.is_valid():
+                pap = form.save(commit=False)
+                pap.loginUser = request.user
+                pap.save()
+                messages.success(request, 'PAP record created successfully!')
+                return redirect('pap_list')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = PAPForm()
 
-    context = {'form': form, 'title': 'Add PAP Record'}
-    return render(request, 'social_and_env/pap/pap_form.html', context)
+        context = {'form': form, 'title': 'Add PAP Record', 'sql_server_mode': False}
+        return render(request, 'social_and_env/pap/pap_form.html', context)
 
 
 

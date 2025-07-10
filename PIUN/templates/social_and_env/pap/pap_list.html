@@ -16,9 +16,9 @@
         <a href="{% url 'pap_add' %}" class="btn btn-primary">
             <i class="bi bi-plus me-1"></i>Add PAP Record
         </a>
-        <button type="button" class="btn btn-success" disabled>
+        <a href="{% url 'export_pap_excel' %}" class="btn btn-success">
             <i class="bi bi-file-excel me-1"></i>Export Excel
-        </button>
+        </a>
     </div>
 </div>
 
@@ -72,6 +72,70 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
+            {% if is_sql_server %}
+            <!-- SQL Server Mode Filter Form -->
+            <div class="col-md-3">
+                <label class="form-label">Project</label>
+                <select name="project" class="form-select">
+                    <option value="">All Projects</option>
+                    <option value="D309& D6530 -GM" {% if filter.form.project == "D309& D6530 -GM" %}selected{% endif %}>D309& D6530 -GM</option>
+                    <option value="GEAP 1" {% if filter.form.project == "GEAP 1" %}selected{% endif %}>GEAP 1</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Region</label>
+                <select name="region" class="form-select">
+                    <option value="">All Regions</option>
+                    <option value="200" {% if filter.form.region == "200" %}selected{% endif %}>WCR</option>
+                    <option value="100" {% if filter.form.region == "100" %}selected{% endif %}>GBA</option>
+                    <option value="300" {% if filter.form.region == "300" %}selected{% endif %}>LRR</option>
+                    <option value="400" {% if filter.form.region == "400" %}selected{% endif %}>NBR</option>
+                    <option value="500" {% if filter.form.region == "500" %}selected{% endif %}>CRR</option>
+                    <option value="600" {% if filter.form.region == "600" %}selected{% endif %}>URR</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Gender</label>
+                <select name="sex" class="form-select">
+                    <option value="">All Genders</option>
+                    <option value="M" {% if filter.form.sex == "M" %}selected{% endif %}>Male</option>
+                    <option value="F" {% if filter.form.sex == "F" %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Compensated</label>
+                <select name="pap_compensated" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="Y" {% if filter.form.pap_compensated == "Y" %}selected{% endif %}>Yes</option>
+                    <option value="N" {% if filter.form.pap_compensated == "N" %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="{% url 'pap_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x me-1"></i>Clear
+                </a>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">PAP Name</label>
+                <input type="text" name="pap_name" class="form-control" value="{{ filter.form.pap_name }}" placeholder="Search by PAP name">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Location of Impact</label>
+                <input type="text" name="location_of_impact" class="form-control" value="{{ filter.form.location_of_impact }}" placeholder="Search by location">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Amount From</label>
+                <input type="number" name="amount_min" class="form-control" value="{{ filter.form.amount.0 }}" placeholder="Min amount">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Amount To</label>
+                <input type="number" name="amount_max" class="form-control" value="{{ filter.form.amount.1 }}" placeholder="Max amount">
+            </div>
+            {% else %}
+            <!-- Django ORM Mode Filter Form -->
             <div class="col-md-3">
                 <label class="form-label">Project</label>
                 {% render_field filter.form.project class="form-select" %}
@@ -112,6 +176,7 @@
                 <label class="form-label">Amount To</label>
                 {% render_field filter.form.amount.1 class="form-control" %}
             </div>
+            {% endif %}
         </form>
     </div>
 </div>

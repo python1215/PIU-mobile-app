@@ -1,96 +1,192 @@
 {% extends 'social_and_env/base.html' %}
-{% load widget_tweaks %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} - PIUN Social & Environmental{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>{{ title }}
-                        {% if sql_server_mode %}
-                            <span class="badge bg-warning text-dark ms-2">SQL Server Mode</span>
-                        {% endif %}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <!-- Basic Information -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">
-                                        Name <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="name" 
-                                           name="name" required
-                                           value="{% if pap_data %}{{ pap_data.name|default:'' }}{% endif %}">
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="location" class="form-label">Location</label>
-                                    <input type="text" class="form-control" id="location" 
-                                           name="location"
-                                           value="{% if pap_data %}{{ pap_data.location|default:'' }}{% endif %}">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="compensation_amount" class="form-label">Compensation Amount</label>
-                                    <input type="number" class="form-control" id="compensation_amount" 
-                                           name="compensation_amount" step="0.01"
-                                           value="{% if pap_data %}{{ pap_data.compensation_amount|default:'' }}{% endif %}">
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="completion_status" class="form-label">Completion Status</label>
-                                    <select class="form-select" id="completion_status" name="completion_status">
-                                        <option value="">Select Status</option>
-                                        <option value="Pending" {% if pap_data.completion_status == 'Pending' %}selected{% endif %}>Pending</option>
-                                        <option value="In Progress" {% if pap_data.completion_status == 'In Progress' %}selected{% endif %}>In Progress</option>
-                                        <option value="Completed" {% if pap_data.completion_status == 'Completed' %}selected{% endif %}>Completed</option>
-                                        <option value="Cancelled" {% if pap_data.completion_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {% if pap_data %}
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="alert alert-info">
-                                    <strong>PAP ID:</strong> {{ pap_data.pap_identification_number }}<br>
-                                    <strong>Plot Reference:</strong> {{ pap_data.plot_reference|default:'N/A' }}<br>
-                                    <strong>Date Created:</strong> {{ pap_data.date_created|date:'F d, Y' }}
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'pap_list' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-1"></i>Save PAP Record
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+{% block social_env_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-person-plus me-2"></i>
+            {{ title }}
+        </h1>
+        <p class="text-muted mb-0">Project Affected People record management</p>
+    </div>
+    <div>
+        <a href="{% url 'pap_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to List
+        </a>
     </div>
 </div>
+
+<!-- PAP Form -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-person-badge me-2"></i>PAP Information
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <!-- Basic Information -->
+                <div class="col-md-6">
+                    <label for="name" class="form-label">PAP Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="sex" class="form-label">Gender <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sex" name="sex" required>
+                        <option value="">Select Gender</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                
+                <!-- Project Information -->
+                <div class="col-md-6">
+                    <label for="project" class="form-label">Project <span class="text-danger">*</span></label>
+                    <select class="form-select" id="project" name="project" required>
+                        <option value="">Select Project</option>
+                        <option value="D309& D6530 -GM">D309& D6530 -GM</option>
+                        <option value="GEAP 1">GEAP 1</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="region" class="form-label">Region <span class="text-danger">*</span></label>
+                    <select class="form-select" id="region" name="region" required>
+                        <option value="">Select Region</option>
+                        <option value="100">GBA</option>
+                        <option value="200">WCR</option>
+                        <option value="300">LRR</option>
+                        <option value="400">NBR</option>
+                        <option value="500">CRR</option>
+                        <option value="600">URR</option>
+                    </select>
+                </div>
+                
+                <!-- District -->
+                <div class="col-md-6">
+                    <label for="district" class="form-label">District <span class="text-danger">*</span></label>
+                    <select class="form-select" id="district" name="district" required>
+                        <option value="">Select District</option>
+                        <option value="101">Banjul</option>
+                        <option value="102">Brikama</option>
+                        <option value="103">Kerewan</option>
+                        <option value="104">Mansakonko</option>
+                        <option value="105">Kuntaur</option>
+                        <option value="106">Janjanbureh</option>
+                        <option value="107">Basse</option>
+                    </select>
+                </div>
+                
+                <!-- Impact and Compensation -->
+                <div class="col-md-6">
+                    <label for="type_of_impact" class="form-label">Type of Impact</label>
+                    <input type="text" class="form-control" id="type_of_impact" name="type_of_impact" placeholder="e.g., Land acquisition, Livelihood loss">
+                </div>
+                <div class="col-md-6">
+                    <label for="location_of_impact" class="form-label">Location of Impact</label>
+                    <input type="text" class="form-control" id="location_of_impact" name="location_of_impact" placeholder="Describe the impact location">
+                </div>
+                <div class="col-md-6">
+                    <label for="amount" class="form-label">Compensation Amount ($)</label>
+                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" placeholder="0.00">
+                </div>
+                
+                <!-- Compensation Status -->
+                <div class="col-md-6">
+                    <label for="pap_compensated" class="form-label">Compensation Status</label>
+                    <select class="form-select" id="pap_compensated" name="pap_compensated">
+                        <option value="N">Not Compensated</option>
+                        <option value="Y">Compensated</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="compensation_status" class="form-label">Compensation Details</label>
+                    <input type="text" class="form-control" id="compensation_status" name="compensation_status" placeholder="e.g., Pending, Completed, In Progress">
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Save PAP Record
+                    </button>
+                    <a href="{% url 'pap_list' %}" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Simple cascading dropdown for Region -> District
+document.getElementById('region').addEventListener('change', function() {
+    const regionId = this.value;
+    const districtSelect = document.getElementById('district');
+    
+    // Clear existing options
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+    
+    // Add districts based on region
+    const districts = {
+        '100': [
+            {value: '101', text: 'Banjul'},
+            {value: '102', text: 'Kanifing'},
+            {value: '103', text: 'Brikama West'},
+            {value: '104', text: 'Brikama North'},
+            {value: '105', text: 'Brikama East'}
+        ],
+        '200': [
+            {value: '201', text: 'Brikama'},
+            {value: '202', text: 'Kombo Central'},
+            {value: '203', text: 'Kombo East'},
+            {value: '204', text: 'Kombo North'},
+            {value: '205', text: 'Kombo South'}
+        ],
+        '300': [
+            {value: '301', text: 'Kiang Central'},
+            {value: '302', text: 'Kiang East'},
+            {value: '303', text: 'Kiang West'},
+            {value: '304', text: 'Jarra Central'},
+            {value: '305', text: 'Jarra East'},
+            {value: '306', text: 'Jarra West'}
+        ],
+        '400': [
+            {value: '401', text: 'Lower Baddibu'},
+            {value: '402', text: 'Upper Baddibu'},
+            {value: '403', text: 'Jokadu'},
+            {value: '404', text: 'Lower Niumi'},
+            {value: '405', text: 'Upper Niumi'}
+        ],
+        '500': [
+            {value: '501', text: 'Nianija'},
+            {value: '502', text: 'Niani'},
+            {value: '503', text: 'Saloum'},
+            {value: '504', text: 'Lower Saloum'},
+            {value: '505', text: 'Upper Saloum'}
+        ],
+        '600': [
+            {value: '601', text: 'Fulladu East'},
+            {value: '602', text: 'Fulladu West'},
+            {value: '603', text: 'Kantora'},
+            {value: '604', text: 'Wuli East'},
+            {value: '605', text: 'Wuli West'}
+        ]
+    };
+    
+    if (districts[regionId]) {
+        districts[regionId].forEach(district => {
+            const option = document.createElement('option');
+            option.value = district.value;
+            option.textContent = district.text;
+            districtSelect.appendChild(option);
+        });
+    }
+});
+</script>
 {% endblock %}
