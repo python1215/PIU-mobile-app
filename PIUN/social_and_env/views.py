@@ -242,7 +242,7 @@ def pap_list(request):
             pap_query = f"""
                 SELECT 
                     ISNULL([pap_identification_number], '') as pap_identification_number,
-                    ISNULL([name], '') as name,
+                    ISNULL([pap_name], '') as pap_name,
                     ISNULL([sex], '') as sex,
                     ISNULL([amount], 0) as amount,
                     ISNULL([pap_compensated], 'N') as pap_compensated,
@@ -263,7 +263,7 @@ def pap_list(request):
             class MockPAP:
                 def __init__(self, row):
                     self.pap_identification_number = row[0] or ''
-                    self.name = row[1] or ''
+                    self.pap_name = row[1] or ''
                     self.sex = row[2] or ''
                     self.amount = row[3] or 0
                     self.pap_compensated = row[4] or 'N'
@@ -271,6 +271,8 @@ def pap_list(request):
                     self.type_of_investment_id = row[6] or ''
                     self.region_code_id = row[7] or ''
                     self.district_code_id = row[8] or ''
+                    # Add pk for URL compatibility
+                    self.pk = self.pap_identification_number
             
             # Convert to mock objects
             pap_list = [MockPAP(row) for row in pap_records]
@@ -440,43 +442,7 @@ def pap_add(request):
     return render(request, 'social_and_env/pap/pap_form.html', context)
 
 
-@login_required
-def pap_edit(request, pk):
-    """Edit PAP record"""
-    pap = get_object_or_404(PAP, pap_identification_number=pk)
-    
-    if request.method == 'POST':
-        form = PAPUpdateForm(request.POST, instance=pap)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'PAP record updated successfully!')
-            return redirect('pap_detail', pk=pap.pap_identification_number)
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = PAPUpdateForm(instance=pap)
-    
-    context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record'}
-    return render(request, 'social_and_env/pap/pap_form.html', context)
 
-
-@login_required
-def pap_delete(request, pk):
-    """Delete PAP record"""
-    pap = get_object_or_404(PAP, pap_identification_number=pk)
-    
-    if request.method == 'POST':
-        pap.delete()
-        messages.success(request, 'PAP record deleted successfully!')
-        return redirect('pap_list')
-    
-    context = {
-        'object': pap,
-        'object_name': f'PAP Record - {pap.pap_name}',
-        'cancel_url': 'pap_detail',
-        'cancel_pk': pk,
-    }
-    return render(request, 'social_and_env/confirm_delete.html', context)
 
 
 @login_required
@@ -617,7 +583,7 @@ def pap_edit(request, pk):
             return redirect('pap_list')
     else:
         # SQLite mode using Django ORM
-        pap = get_object_or_404(PAP, pk=pk)
+        pap = get_object_or_404(PAP, pap_identification_number=pk)
 
         if request.method == 'POST':
             form = PAPUpdateForm(request.POST, instance=pap)
@@ -685,15 +651,15 @@ def pap_delete(request, pk):
     else:
         # SQLite mode using Django ORM
         if request.method == 'POST':
-            pap = get_object_or_404(PAP, pk=pk)
+            pap = get_object_or_404(PAP, pap_identification_number=pk)
             pap.delete()
             messages.success(request, 'PAP record deleted successfully!')
             return redirect('pap_list')
         else:
-            pap = get_object_or_404(PAP, pk=pk)
+            pap = get_object_or_404(PAP, pap_identification_number=pk)
             context = {
                 'object': pap,
-                'object_name': f'PAP Record - {pap.pap_identification_number} ({pap.name})',
+                'object_name': f'PAP Record - {pap.pap_identification_number} ({pap.pap_name})',
                 'cancel_url': 'pap_detail',
                 'cancel_pk': pk,
                 'sql_server_mode': False
