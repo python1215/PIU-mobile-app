@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Edit OHS Monitoring
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Record ID: OHS-{{ pk }} | SQL Server Mode
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'ohs_detail' pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Detail
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-shield-check me-2"></i>OHS Monitoring Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Worker Statistics -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-3">Worker Statistics</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Male Workers</label>
+                                <input type="number" class="form-control" name="male" value="{{ initial_data.male }}" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Female Workers</label>
+                                <input type="number" class="form-control" name="female" value="{{ initial_data.female }}" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Youth Statistics -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-3">Youth Worker Statistics</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Male Youth</label>
+                                <input type="number" class="form-control" name="youth_male" value="{{ initial_data.youth_male }}" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Female Youth</label>
+                                <input type="number" class="form-control" name="youth_female" value="{{ initial_data.youth_female }}" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Safety Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-3">Safety Assessment</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Quality at Entry Requirement</label>
+                                <textarea class="form-control" name="quality_at_entry_requirement" rows="3">{{ initial_data.quality_at_entry_requirement }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Working Environment</label>
+                                <textarea class="form-control" name="working_environment" rows="3">{{ initial_data.working_environment }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Remarks</label>
+                                <textarea class="form-control" name="remarks" rows="4">{{ initial_data.remarks }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="bi bi-check-circle me-1"></i>Update Record
+                                </button>
+                                <a href="{% url 'ohs_detail' pk %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel - Read-only Information -->
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="bi bi-info-circle me-2"></i>Record Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Project</h6>
+                        <p class="fw-bold">{{ ohs_data.project_id }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Date</h6>
+                        <p class="fw-bold">{{ ohs_data.date }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Location</h6>
+                        <p class="fw-bold">
+                            Region: {{ ohs_data.region_id }}<br>
+                            District: {{ ohs_data.district_id }}<br>
+                            Settlement: {{ ohs_data.settlement_id }}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Current Totals</h6>
+                        <p class="fw-bold">
+                            Workers: {{ ohs_data.male|add:ohs_data.female }}<br>
+                            Youth: {{ ohs_data.youth_male|add:ohs_data.youth_female }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Information -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="bi bi-question-circle me-2"></i>SQL Server Mode
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        <strong>Note:</strong> You are editing in SQL Server mode. 
+                        Only key fields are editable to maintain data integrity in your offline deployment.
+                    </p>
+                    <p class="text-muted small">
+                        <strong>Editable Fields:</strong>
+                        <ul class="small">
+                            <li>Worker statistics</li>
+                            <li>Youth statistics</li>
+                            <li>Safety assessments</li>
+                            <li>Remarks</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

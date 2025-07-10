@@ -358,6 +358,121 @@ def pap_add(request):
 def pap_edit(request, pk):
     """Edit PAP record"""
     pap = get_object_or_404(PAP, pk=pk)
+    
+    if request.method == 'POST':
+        form = PAPUpdateForm(request.POST, instance=pap)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'PAP record updated successfully!')
+            return redirect('pap_detail', pk=pap.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PAPUpdateForm(instance=pap)
+    
+    context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record'}
+    return render(request, 'social_and_env/pap/pap_form.html', context)
+
+
+@login_required
+def pap_delete(request, pk):
+    """Delete PAP record"""
+    pap = get_object_or_404(PAP, pk=pk)
+    
+    if request.method == 'POST':
+        pap.delete()
+        messages.success(request, 'PAP record deleted successfully!')
+        return redirect('pap_list')
+    
+    context = {
+        'object': pap,
+        'object_name': f'PAP Record - {pap.name}',
+        'cancel_url': 'pap_detail',
+        'cancel_pk': pk,
+    }
+    return render(request, 'social_and_env/confirm_delete.html', context)
+
+
+@login_required
+def export_pap_excel(request):
+    """Export PAP data to Excel format"""
+    import openpyxl
+    from django.http import HttpResponse
+    from openpyxl.styles import Font, Alignment
+    
+    # Create workbook and worksheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "PAP Data Export"
+    
+    # Headers
+    headers = [
+        'PAP ID', 'Project', 'Year', 'Quarter', 'Region', 'District', 'Settlement',
+        'Name', 'Location', 'Compensation Amount', 'Plot Reference', 'Completion Status',
+        'Date Created', 'Created By'
+    ]
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal='center')
+    
+    # Get PAP data
+    if is_sql_server_mode():
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT * FROM [piuprod3].[dbo].[social_and_env_pap]
+                ORDER BY date_created DESC
+            """)
+            pap_data = cursor.fetchall()
+            
+            for row_num, pap in enumerate(pap_data, 2):
+                ws.cell(row=row_num, column=1, value=pap[0])  # pap_Id
+                ws.cell(row=row_num, column=2, value=pap[1])  # project_id
+                ws.cell(row=row_num, column=3, value=pap[2])  # year_id
+                ws.cell(row=row_num, column=4, value=pap[3])  # quarter_id
+                ws.cell(row=row_num, column=5, value=pap[4])  # region_id
+                ws.cell(row=row_num, column=6, value=pap[5])  # district_id
+                ws.cell(row=row_num, column=7, value=pap[6])  # settlement_id
+                ws.cell(row=row_num, column=8, value=pap[7])  # name
+                ws.cell(row=row_num, column=9, value=pap[8])  # location
+                ws.cell(row=row_num, column=10, value=pap[9])  # compensation_amount
+                ws.cell(row=row_num, column=11, value=pap[10])  # plot_reference
+                ws.cell(row=row_num, column=12, value=pap[11])  # completion_status
+                ws.cell(row=row_num, column=13, value=pap[12])  # date_created
+                ws.cell(row=row_num, column=14, value=pap[13])  # loginUser_id
+    else:
+        pap_list = PAP.objects.select_related('project', 'year', 'quarter', 'region', 'district', 'settlement').all()
+        
+        for row_num, pap in enumerate(pap_list, 2):
+            ws.cell(row=row_num, column=1, value=pap.pap_Id)
+            ws.cell(row=row_num, column=2, value=str(pap.project) if pap.project else '')
+            ws.cell(row=row_num, column=3, value=str(pap.year) if pap.year else '')
+            ws.cell(row=row_num, column=4, value=str(pap.quarter) if pap.quarter else '')
+            ws.cell(row=row_num, column=5, value=str(pap.region) if pap.region else '')
+            ws.cell(row=row_num, column=6, value=str(pap.district) if pap.district else '')
+            ws.cell(row=row_num, column=7, value=str(pap.settlement) if pap.settlement else '')
+            ws.cell(row=row_num, column=8, value=pap.name or '')
+            ws.cell(row=row_num, column=9, value=pap.location or '')
+            ws.cell(row=row_num, column=10, value=pap.compensation_amount or '')
+            ws.cell(row=row_num, column=11, value=pap.plot_reference or '')
+            ws.cell(row=row_num, column=12, value=pap.completion_status or '')
+            ws.cell(row=row_num, column=13, value=pap.date_created.strftime('%Y-%m-%d') if pap.date_created else '')
+            ws.cell(row=row_num, column=14, value=str(pap.loginUser) if pap.loginUser else '')
+    
+    # Create response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="pap_data_export.xlsx"'
+    
+    wb.save(response)
+    return response
+
+
+@login_required
+def pap_edit(request, pk):
+    """Edit PAP record"""
+    pap = get_object_or_404(PAP, pk=pk)
 
     if request.method == 'POST':
         form = PAPUpdateForm(request.POST, instance=pap)
@@ -574,32 +689,177 @@ def ohs_add(request):
 
 @login_required
 def ohs_detail(request, pk):
-    """Detail view for OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
-        'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'region',
-        'district', 'settlement', 'loginUser'), pk=pk)
-    
-    context = {
-        'ohs': ohs,
-        'title': f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
-    }
-    
-    return render(request, 'social_and_env/ohs/ohs_detail.html', context)
+    """Detail view for OHS monitoring record - Dual Mode Support"""
+    if is_sql_server_mode():
+        # Use SQL Server compatible approach
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            # Try different table name variations for SQL Server
+            tables_to_try = [
+                '[piuprod3].[dbo].[social_and_env_ohs_monitoring]',
+                'social_and_env_ohs_monitoring'
+            ]
+            
+            ohs_data = None
+            for table_name in tables_to_try:
+                try:
+                    cursor.execute(f"""
+                        SELECT * FROM {table_name} 
+                        WHERE ohs_Id = %s
+                    """, [pk])
+                    
+                    row = cursor.fetchone()
+                    if row:
+                        columns = [col[0] for col in cursor.description]
+                        ohs_data = dict(zip(columns, row))
+                        break
+                except Exception as e:
+                    continue
+            
+            if not ohs_data:
+                messages.error(request, 'OHS record not found.')
+                return redirect('ohs_list')
+            
+            # Create a mock object with the data for template compatibility
+            class MockOHS:
+                def __init__(self, data):
+                    for key, value in data.items():
+                        setattr(self, key, value)
+                    
+                    # Add calculated properties
+                    self.pk = data.get('ohs_Id')
+                    self.total_workers = (data.get('male') or 0) + (data.get('female') or 0)
+                    self.total_youth = (data.get('youth_male') or 0) + (data.get('youth_female') or 0)
+                    
+                    # Mock related objects for template compatibility
+                    self.project = type('Project', (), {
+                        'project': data.get('project_id', 'Unknown'),
+                        'project_name': data.get('project_id', 'Unknown')
+                    })()
+                    
+                    self.region = type('Region', (), {
+                        'region_name': data.get('region_id', 'Unknown')
+                    })()
+                    
+                    self.district = type('District', (), {
+                        'district_name': data.get('district_id', 'Unknown')
+                    })()
+                    
+                    self.settlement = type('Settlement', (), {
+                        'settlement_name': data.get('settlement_id', 'Unknown')
+                    })()
+                    
+                    self.Type_of_Investment = type('Investment', (), {
+                        'type_of_investment': data.get('Type_of_Investment_id', 'Unknown')
+                    })()
+                    
+                    self.year_of_report = type('Year', (), {
+                        'year_name': data.get('year_of_report_id', 'Unknown')
+                    })()
+                    
+                    self.quarter = type('Quarter', (), {
+                        'quarter_name': data.get('quarter_id', 'Unknown')
+                    })()
+            
+            ohs = MockOHS(ohs_data)
+            
+            context = {
+                'ohs': ohs,
+                'title': f'OHS Monitoring - {ohs.project.project}',
+                'sql_server_mode': True
+            }
+            
+            return render(request, 'social_and_env/ohs/ohs_detail.html', context)
+    else:
+        # Use Django ORM for SQLite
+        ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'region',
+            'district', 'settlement', 'loginUser'), pk=pk)
+        
+        context = {
+            'ohs': ohs,
+            'title': f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
+            'sql_server_mode': False
+        }
+        
+        return render(request, 'social_and_env/ohs/ohs_detail.html', context)
 
 
 @login_required
 def ohs_edit(request, pk):
     """Edit OHS monitoring record - Dual Mode Support"""
     if is_sql_server_mode():
-        # Use SQL Server compatible approach
-        ohs_data = get_model_data(OHS_Monitoring, pk=pk)
-        if not ohs_data:
-            messages.error(request, 'OHS record not found.')
-            return redirect('ohs_list')
+        # For SQL Server mode, provide read-only view with edit capability
+        from django.db import connection
         
-        # Note: In SQL Server mode, editing is limited to prevent data corruption
-        messages.info(request, 'Editing is available in SQLite mode. Please use Django admin interface for SQL Server mode.')
-        return redirect('ohs_detail', pk=pk)
+        with connection.cursor() as cursor:
+            # Get the OHS record
+            try:
+                cursor.execute("""
+                    SELECT * FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
+                    WHERE ohs_Id = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'OHS record not found.')
+                    return redirect('ohs_list')
+                
+                columns = [col[0] for col in cursor.description]
+                ohs_data = dict(zip(columns, row))
+                
+                if request.method == 'POST':
+                    # Handle SQL Server update
+                    try:
+                        # Get form data
+                        male = request.POST.get('male', 0)
+                        female = request.POST.get('female', 0)
+                        youth_male = request.POST.get('youth_male', 0)
+                        youth_female = request.POST.get('youth_female', 0)
+                        quality_at_entry_requirement = request.POST.get('quality_at_entry_requirement', '')
+                        working_environment = request.POST.get('working_environment', '')
+                        remarks = request.POST.get('remarks', '')
+                        
+                        # Update the record
+                        cursor.execute("""
+                            UPDATE [piuprod3].[dbo].[social_and_env_ohs_monitoring]
+                            SET male = %s, female = %s, youth_male = %s, youth_female = %s,
+                                quality_at_entry_requirement = %s, working_environment = %s,
+                                remarks = %s
+                            WHERE ohs_Id = %s
+                        """, [male, female, youth_male, youth_female, 
+                              quality_at_entry_requirement, working_environment, remarks, pk])
+                        
+                        messages.success(request, 'OHS monitoring record updated successfully!')
+                        return redirect('ohs_detail', pk=pk)
+                    except Exception as e:
+                        messages.error(request, f'Error updating record: {str(e)}')
+                
+                # Create initial form data
+                initial_data = {
+                    'male': ohs_data.get('male', 0),
+                    'female': ohs_data.get('female', 0),
+                    'youth_male': ohs_data.get('youth_male', 0),
+                    'youth_female': ohs_data.get('youth_female', 0),
+                    'quality_at_entry_requirement': ohs_data.get('quality_at_entry_requirement', ''),
+                    'working_environment': ohs_data.get('working_environment', ''),
+                    'remarks': ohs_data.get('remarks', ''),
+                }
+                
+                context = {
+                    'ohs_data': ohs_data,
+                    'initial_data': initial_data,
+                    'pk': pk,
+                    'title': f'Edit OHS Monitoring - {ohs_data.get("project_id", "Unknown")}',
+                    'sql_server_mode': True
+                }
+                
+                return render(request, 'social_and_env/ohs/ohs_edit_sql.html', context)
+                
+            except Exception as e:
+                messages.error(request, f'Error accessing SQL Server: {str(e)}')
+                return redirect('ohs_list')
     else:
         # Use Django ORM for SQLite
         ohs = get_object_or_404(OHS_Monitoring, pk=pk)
@@ -618,9 +878,72 @@ def ohs_edit(request, pk):
         context = {
             'form': form,
             'ohs': ohs,
-            'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
+            'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
+            'sql_server_mode': False
         }
         return render(request, 'social_and_env/ohs/ohs_form.html', context)
+
+
+@login_required
+def ohs_delete(request, pk):
+    """Delete OHS monitoring record - Dual Mode Support"""
+    if is_sql_server_mode():
+        # Handle SQL Server deletion
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            try:
+                # Check if record exists
+                cursor.execute("""
+                    SELECT COUNT(*) FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
+                    WHERE ohs_Id = %s
+                """, [pk])
+                
+                if cursor.fetchone()[0] == 0:
+                    messages.error(request, 'OHS record not found.')
+                    return redirect('ohs_list')
+                
+                if request.method == 'POST':
+                    # Delete the record
+                    cursor.execute("""
+                        DELETE FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
+                        WHERE ohs_Id = %s
+                    """, [pk])
+                    
+                    messages.success(request, 'OHS monitoring record deleted successfully!')
+                    return redirect('ohs_list')
+                
+                # Show confirmation page
+                context = {
+                    'object_name': f'OHS Monitoring Record #{pk}',
+                    'cancel_url': 'ohs_detail',
+                    'cancel_pk': pk,
+                    'delete_url': 'ohs_delete',
+                    'delete_pk': pk,
+                    'sql_server_mode': True
+                }
+                return render(request, 'social_and_env/confirm_delete.html', context)
+                
+            except Exception as e:
+                messages.error(request, f'Error deleting record: {str(e)}')
+                return redirect('ohs_list')
+    else:
+        # Use Django ORM for SQLite
+        ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+        
+        if request.method == 'POST':
+            ohs.delete()
+            messages.success(request, 'OHS monitoring record deleted successfully!')
+            return redirect('ohs_list')
+        
+        context = {
+            'object': ohs,
+            'object_name': f'OHS Monitoring Record - {ohs.project.project if ohs.project else "Unknown"}',
+            'cancel_url': 'ohs_detail',
+            'cancel_pk': pk,
+            'sql_server_mode': False
+        }
+        return render(request, 'social_and_env/confirm_delete.html', context)
 
 
 # ======================== Community Engagement Views ========================
@@ -673,6 +996,208 @@ def community_list(request):
 
     return render(request, 'social_and_env/community/community_list.html',
                   context)
+
+
+@login_required
+def community_add(request):
+    """Add new Community Engagement record"""
+    if request.method == 'POST':
+        form = CommunityEngagementForm(request.POST)
+        if form.is_valid():
+            community = form.save(commit=False)
+            community.loginUser = request.user
+            community.save()
+            messages.success(request, 'Community engagement record created successfully!')
+            return redirect('community_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CommunityEngagementForm()
+    
+    context = {'form': form, 'title': 'Add Community Engagement Record'}
+    return render(request, 'social_and_env/community/community_form.html', context)
+
+
+@login_required
+def community_edit(request, pk):
+    """Edit Community Engagement record"""
+    community = get_object_or_404(CommunityConsult_Engagement, pk=pk)
+    
+    if request.method == 'POST':
+        form = CommunityEngagementUpdateForm(request.POST, instance=community)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Community engagement record updated successfully!')
+            return redirect('community_detail', pk=community.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CommunityEngagementUpdateForm(instance=community)
+    
+    context = {'form': form, 'community': community, 'title': 'Edit Community Engagement Record'}
+    return render(request, 'social_and_env/community/community_form.html', context)
+
+
+@login_required
+def community_delete(request, pk):
+    """Delete Community Engagement record"""
+    community = get_object_or_404(CommunityConsult_Engagement, pk=pk)
+    
+    if request.method == 'POST':
+        community.delete()
+        messages.success(request, 'Community engagement record deleted successfully!')
+        return redirect('community_list')
+    
+    context = {
+        'object': community,
+        'object_name': f'Community Engagement - {community.project_name}',
+        'cancel_url': 'community_detail',
+        'cancel_pk': pk,
+    }
+    return render(request, 'social_and_env/confirm_delete.html', context)
+
+
+@login_required
+def esia_add(request):
+    """Add new ESIA record"""
+    if request.method == 'POST':
+        form = ESIAForm(request.POST)
+        if form.is_valid():
+            esia = form.save(commit=False)
+            esia.loginUser = request.user
+            esia.save()
+            messages.success(request, 'ESIA record created successfully!')
+            return redirect('esia_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ESIAForm()
+    
+    context = {'form': form, 'title': 'Add ESIA Record'}
+    return render(request, 'social_and_env/esia/esia_form.html', context)
+
+
+@login_required
+def esia_edit(request, pk):
+    """Edit ESIA record"""
+    esia = get_object_or_404(ESIA, pk=pk)
+    
+    if request.method == 'POST':
+        form = ESIAUpdateForm(request.POST, instance=esia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'ESIA record updated successfully!')
+            return redirect('esia_detail', pk=esia.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ESIAUpdateForm(instance=esia)
+    
+    context = {'form': form, 'esia': esia, 'title': 'Edit ESIA Record'}
+    return render(request, 'social_and_env/esia/esia_form.html', context)
+
+
+@login_required
+def esia_delete(request, pk):
+    """Delete ESIA record"""
+    esia = get_object_or_404(ESIA, pk=pk)
+    
+    if request.method == 'POST':
+        esia.delete()
+        messages.success(request, 'ESIA record deleted successfully!')
+        return redirect('esia_list')
+    
+    context = {
+        'object': esia,
+        'object_name': f'ESIA - {esia.project_name}',
+        'cancel_url': 'esia_detail',
+        'cancel_pk': pk,
+    }
+    return render(request, 'social_and_env/confirm_delete.html', context)
+
+
+@login_required
+def grievance_add(request):
+    """Add new Grievance record"""
+    if request.method == 'POST':
+        form = GrievianceMonitoringLogForm(request.POST)
+        if form.is_valid():
+            grievance = form.save(commit=False)
+            grievance.loginUser = request.user
+            grievance.save()
+            messages.success(request, 'Grievance record created successfully!')
+            return redirect('grievance_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = GrievianceMonitoringLogForm()
+    
+    context = {'form': form, 'title': 'Add Grievance Record'}
+    return render(request, 'social_and_env/grievance/grievance_form.html', context)
+
+
+@login_required
+def grievance_edit(request, pk):
+    """Edit Grievance record"""
+    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
+    
+    if request.method == 'POST':
+        form = GrievianceMonitoringLogUpdateForm(request.POST, instance=grievance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Grievance record updated successfully!')
+            return redirect('grievance_detail', pk=grievance.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = GrievianceMonitoringLogUpdateForm(instance=grievance)
+    
+    context = {'form': form, 'grievance': grievance, 'title': 'Edit Grievance Record'}
+    return render(request, 'social_and_env/grievance/grievance_form.html', context)
+
+
+@login_required
+def grievance_delete(request, pk):
+    """Delete Grievance record"""
+    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
+    
+    if request.method == 'POST':
+        grievance.delete()
+        messages.success(request, 'Grievance record deleted successfully!')
+        return redirect('grievance_list')
+    
+    context = {
+        'object': grievance,
+        'object_name': f'Grievance - {grievance.project}',
+        'cancel_url': 'grievance_detail',
+        'cancel_pk': pk,
+    }
+    return render(request, 'social_and_env/confirm_delete.html', context)
+
+
+# ======================== AJAX Views ========================
+@login_required
+def load_districts(request):
+    """Load districts based on selected region"""
+    region_id = request.GET.get('region_id')
+    districts = Districts.objects.filter(region_code=region_id).order_by('district_name')
+    return JsonResponse({'districts': [{'id': d.district_code, 'name': d.district_name} for d in districts]})
+
+
+@login_required
+def load_settlements(request):
+    """Load settlements based on selected district"""
+    district_id = request.GET.get('district_id')
+    settlements = Settlements.objects.filter(district_code=district_id).order_by('settlement_name')
+    return JsonResponse({'settlements': [{'id': s.settlement_code, 'name': s.settlement_name} for s in settlements]})
+
+
+@login_required
+def load_investment_types(request):
+    """Load investment types based on selected project"""
+    project_id = request.GET.get('project_id')
+    investment_types = Type_of_Investment.objects.filter(project=project_id).order_by('type_of_investment')
+    return JsonResponse({'investment_types': [{'id': t.pk, 'name': t.type_of_investment} for t in investment_types]})
 
 
 @login_required

@@ -150,14 +150,17 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" title="View" onclick="viewOHS({{ ohs.pk }})">
+                                    <a href="{% url 'ohs_detail' ohs.pk %}" class="btn btn-outline-primary" title="View">
                                         <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning" title="Edit" onclick="editOHS({{ ohs.pk }})">
+                                    </a>
+                                    <a href="{% url 'ohs_edit' ohs.pk %}" class="btn btn-outline-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
-                                    </button>
+                                    </a>
+                                    <a href="{% url 'ohs_delete' ohs.pk %}" class="btn btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
                                     {% if ohs.picture %}
-                                    <button class="btn btn-outline-info" title="View Photo" onclick="viewPhoto('{{ ohs.get_picture_url }}')">
+                                    <button class="btn btn-outline-info" title="View Photo" onclick="viewPhoto('{{ ohs.picture.url }}')">
                                         <i class="bi bi-camera"></i>
                                     </button>
                                     {% endif %}
