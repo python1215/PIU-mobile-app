@@ -1698,24 +1698,7 @@ def grievance_add(request):
         return render(request, 'social_and_env/grievance/grievance_form.html', context)
 
 
-@login_required
-def grievance_edit(request, pk):
-    """Edit Grievance record"""
-    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
-    
-    if request.method == 'POST':
-        form = GrievianceUpdateForm(request.POST, instance=grievance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Grievance record updated successfully!')
-            return redirect('grievance_detail', pk=grievance.pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = GrievianceUpdateForm(instance=grievance)
-    
-    context = {'form': form, 'grievance': grievance, 'title': 'Edit Grievance Record'}
-    return render(request, 'social_and_env/grievance/grievance_form.html', context)
+# This function has been replaced by the dual-mode grievance_edit function above
 
 
 @login_required
