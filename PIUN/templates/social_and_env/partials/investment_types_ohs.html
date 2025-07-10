@@ -1,0 +1,4 @@
+<option value="">Select Investment Type</option>
+{% for investment_type in investment_types %}
+    <option value="{{ investment_type.pk }}">{{ investment_type.type_of_investment }}</option>
+{% endfor %}

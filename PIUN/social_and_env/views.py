@@ -1201,6 +1201,48 @@ def load_investment_types(request):
 
 
 @login_required
+def load_investment_types_ohs(request):
+    """Load investment types for OHS based on selected project"""
+    project_id = request.GET.get('project')
+    investment_types = KPI_For_Contract.objects.none()
+    
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+    
+    return render(request, 'social_and_env/partials/investment_types_ohs.html', {
+        'investment_types': investment_types
+    })
+
+
+@login_required
+def load_districts_ohs(request):
+    """Load districts for OHS based on selected region"""
+    region_id = request.GET.get('region')
+    districts = Districts.objects.none()
+    
+    if region_id:
+        districts = Districts.objects.filter(region_code=region_id).order_by('district_name')
+    
+    return render(request, 'social_and_env/partials/districts_ohs.html', {
+        'districts': districts
+    })
+
+
+@login_required
+def load_settlements_ohs(request):
+    """Load settlements for OHS based on selected district"""
+    district_id = request.GET.get('district')
+    settlements = Settlements.objects.none()
+    
+    if district_id:
+        settlements = Settlements.objects.filter(district_code=district_id).order_by('settlement_name')
+    
+    return render(request, 'social_and_env/partials/settlements_ohs.html', {
+        'settlements': settlements
+    })
+
+
+@login_required
 def community_add(request):
     """Add new Community Engagement record"""
     if request.method == 'POST':
