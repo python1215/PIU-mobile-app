@@ -1200,7 +1200,6 @@ def load_investment_types(request):
     return JsonResponse({'investment_types': [{'id': t.pk, 'name': t.type_of_investment} for t in investment_types]})
 
 
-@login_required
 def load_investment_types_ohs(request):
     """Load investment types for OHS based on selected project"""
     project_id = request.GET.get('project')
@@ -1214,32 +1213,60 @@ def load_investment_types_ohs(request):
     })
 
 
-@login_required
 def load_districts_ohs(request):
     """Load districts for OHS based on selected region"""
-    region_id = request.GET.get('region')
-    districts = Districts.objects.none()
-    
-    if region_id:
-        districts = Districts.objects.filter(region_code=region_id).order_by('district_name')
-    
-    return render(request, 'social_and_env/partials/districts_ohs.html', {
-        'districts': districts
-    })
+    try:
+        region_id = request.GET.get('region')
+        districts = Districts.objects.none()
+        
+        if region_id:
+            # Map region codes to region names
+            region_mapping = {
+                'WCR': 'West Coast Region',
+                'LRR': 'Lower River Region', 
+                'NBR': 'North Bank Region',
+                'CRR': 'Central River Region',
+                'URR': 'Upper River Region',
+                'GBA': 'GBA'
+            }
+            
+            # Get the full region name from the code
+            region_name = region_mapping.get(region_id, region_id)
+            
+            # Try to find districts by region name
+            districts = Districts.objects.filter(region_code=region_name).order_by('district_name')
+            
+            # If no results, try containing the region identifier
+            if not districts.exists():
+                districts = Districts.objects.filter(region_code__icontains=region_id).order_by('district_name')
+        
+        return render(request, 'social_and_env/partials/districts_ohs.html', {
+            'districts': districts
+        })
+    except Exception as e:
+        # Return empty options if there's an error
+        return render(request, 'social_and_env/partials/districts_ohs.html', {
+            'districts': Districts.objects.none()
+        })
 
 
-@login_required
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
-    district_id = request.GET.get('district')
-    settlements = Settlements.objects.none()
-    
-    if district_id:
-        settlements = Settlements.objects.filter(district_code=district_id).order_by('settlement_name')
-    
-    return render(request, 'social_and_env/partials/settlements_ohs.html', {
-        'settlements': settlements
-    })
+    try:
+        district_id = request.GET.get('district')
+        settlements = Settlements.objects.none()
+        
+        if district_id:
+            settlements = Settlements.objects.filter(district_code=district_id).order_by('settlement_name')
+        
+        return render(request, 'social_and_env/partials/settlements_ohs.html', {
+            'settlements': settlements
+        })
+    except Exception as e:
+        # Return empty options if there's an error
+        return render(request, 'social_and_env/partials/settlements_ohs.html', {
+            'settlements': Settlements.objects.none()
+        })
 
 
 @login_required
