@@ -17,6 +17,11 @@ from datetime import datetime
 
 from .models import issue_action_source, IssueActions
 from .forms import IssueActionSourceForm, IssueActionsForm, IssueActionsFilterForm
+from utils.database_utils import (
+    is_sql_server_mode, get_model_data, safe_model_save, 
+    safe_model_update, safe_model_delete, get_paginated_data,
+    execute_raw_sql, get_sql_server_table_name
+)
 
 
 # ============ Issue Action Source CRUD Views ============
@@ -24,26 +29,83 @@ from .forms import IssueActionSourceForm, IssueActionsForm, IssueActionsFilterFo
 @login_required
 def source_list(request):
     """List all issue action sources"""
-    sources = issue_action_source.objects.all().order_by('-date_created')
+    if is_sql_server_mode():
+        # Use SQL Server backend for source list
+        search_query = request.GET.get('search', '')
+        page = int(request.GET.get('page', 1))
+        page_size = 10
+        
+        # Build filters for search
+        filters = {}
+        if search_query:
+            # For SQL Server, we need to use raw SQL for search
+            table_name = get_sql_server_table_name('Issues_Actions_monitoring_issue_action_source')
+            query = f"""
+                SELECT * FROM {table_name}
+                WHERE issue_action_source LIKE %s
+                ORDER BY date_created DESC
+            """
+            sources_data = execute_raw_sql(query, [f'%{search_query}%'])
+        else:
+            sources_data = get_model_data(issue_action_source)
+        
+        # Create mock objects for template compatibility
+        sources = []
+        for source_row in sources_data:
+            class MockSource:
+                def __init__(self, data):
+                    if isinstance(data, tuple):
+                        self.sourceID = data[0]
+                        self.issue_action_source = data[1]
+                        self.date_created = data[2]
+                        self.loginuser_id = data[3]
+                    else:
+                        self.sourceID = data.get('sourceID')
+                        self.issue_action_source = data.get('issue_action_source')
+                        self.date_created = data.get('date_created')
+                        self.loginuser_id = data.get('loginuser_id')
+            
+            sources.append(MockSource(source_row))
+        
+        # Manual pagination for SQL Server
+        total_sources = len(sources)
+        start = (page - 1) * page_size
+        end = start + page_size
+        sources_page = sources[start:end]
+        
+        context = {
+            'sources': sources_page,
+            'search_query': search_query,
+            'total_sources': total_sources,
+            'page': page,
+            'has_previous': page > 1,
+            'has_next': end < total_sources,
+            'previous_page_number': page - 1,
+            'next_page_number': page + 1,
+        }
+    else:
+        # Use Django ORM for SQLite
+        sources = issue_action_source.objects.all().order_by('-date_created')
+        
+        # Search functionality
+        search_query = request.GET.get('search', '')
+        if search_query:
+            sources = sources.filter(
+                Q(issue_action_source__icontains=search_query) |
+                Q(loginuser__username__icontains=search_query)
+            )
+        
+        # Pagination
+        paginator = Paginator(sources, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'page_obj': page_obj,
+            'search_query': search_query,
+            'total_sources': sources.count()
+        }
     
-    # Search functionality
-    search_query = request.GET.get('search', '')
-    if search_query:
-        sources = sources.filter(
-            Q(issue_action_source__icontains=search_query) |
-            Q(loginuser__username__icontains=search_query)
-        )
-    
-    # Pagination
-    paginator = Paginator(sources, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'page_obj': page_obj,
-        'search_query': search_query,
-        'total_sources': sources.count()
-    }
     return render(request, 'Issues_Actions_monitoring/source_list.html', context)
 
 

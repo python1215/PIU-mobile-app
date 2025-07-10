@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 def is_sql_server_mode():
     """Check if system is running in SQL Server mode"""
-    return getattr(settings, 'USE_SQL_SERVER', False)
+    return getattr(settings, 'USE_SQL_SERVER', True)  # Default to SQL Server for production
 
 def get_database_mode():
     """Get current database mode"""
-    return getattr(settings, 'DATABASE_MODE', 'sqlite')
+    return getattr(settings, 'DATABASE_MODE', 'sql_server')
 
 def get_sql_server_table_name(base_table_name):
     """Get SQL Server table name with proper schema"""
@@ -168,3 +168,134 @@ def get_model_data(model_class, pk=None, filters=None):
             return model_class.objects.filter(**filters)
         else:
             return model_class.objects.all()
+
+def safe_model_delete(model_class, pk):
+    """Delete model instance with proper mode handling"""
+    if is_sql_server_mode():
+        # Handle SQL Server deletion with raw SQL
+        table_name = get_sql_server_table_name(model_class._meta.db_table)
+        
+        query = f"DELETE FROM {table_name} WHERE {model_class._meta.pk.name} = %s"
+        
+        try:
+            execute_database_query(query, [pk], fetch_all=False)
+            return True
+        except Exception as e:
+            logger.error(f"SQL Server delete error: {e}")
+            return False
+    else:
+        # Use Django ORM for SQLite
+        try:
+            model_class.objects.filter(pk=pk).delete()
+            return True
+        except Exception as e:
+            logger.error(f"SQLite delete error: {e}")
+            return False
+
+def get_model_count(model_class, filters=None):
+    """Get model count with proper mode handling"""
+    if is_sql_server_mode():
+        # Handle SQL Server count with raw SQL
+        table_name = get_sql_server_table_name(model_class._meta.db_table)
+        
+        if filters:
+            where_clauses = []
+            values = []
+            for field, value in filters.items():
+                where_clauses.append(f"{field} = %s")
+                values.append(value)
+            
+            query = f"SELECT COUNT(*) FROM {table_name} WHERE {' AND '.join(where_clauses)}"
+            result = execute_database_query(query, values, fetch_all=False)
+        else:
+            query = f"SELECT COUNT(*) FROM {table_name}"
+            result = execute_database_query(query, fetch_all=False)
+        
+        return result[0] if result else 0
+    else:
+        # Use Django ORM for SQLite
+        if filters:
+            return model_class.objects.filter(**filters).count()
+        else:
+            return model_class.objects.count()
+
+def get_paginated_data(model_class, page=1, page_size=10, filters=None, order_by=None):
+    """Get paginated data with proper mode handling"""
+    if is_sql_server_mode():
+        # Handle SQL Server pagination with raw SQL
+        table_name = get_sql_server_table_name(model_class._meta.db_table)
+        
+        # Build WHERE clause
+        where_clause = ""
+        values = []
+        if filters:
+            where_clauses = []
+            for field, value in filters.items():
+                where_clauses.append(f"{field} = %s")
+                values.append(value)
+            where_clause = f"WHERE {' AND '.join(where_clauses)}"
+        
+        # Build ORDER BY clause
+        order_clause = ""
+        if order_by:
+            order_clause = f"ORDER BY {order_by}"
+        elif hasattr(model_class._meta, 'ordering') and model_class._meta.ordering:
+            order_clause = f"ORDER BY {', '.join(model_class._meta.ordering)}"
+        else:
+            order_clause = f"ORDER BY {model_class._meta.pk.name}"
+        
+        # Calculate offset
+        offset = (page - 1) * page_size
+        
+        # Get total count
+        count_query = f"SELECT COUNT(*) FROM {table_name} {where_clause}"
+        total_count = execute_database_query(count_query, values, fetch_all=False)[0]
+        
+        # Get paginated data
+        query = f"""
+            SELECT * FROM {table_name}
+            {where_clause}
+            {order_clause}
+            OFFSET {offset} ROWS
+            FETCH NEXT {page_size} ROWS ONLY
+        """
+        
+        data = execute_database_query(query, values)
+        
+        return {
+            'data': data,
+            'total_count': total_count,
+            'page': page,
+            'page_size': page_size,
+            'total_pages': (total_count + page_size - 1) // page_size
+        }
+    else:
+        # Use Django ORM for SQLite
+        queryset = model_class.objects.all()
+        
+        if filters:
+            queryset = queryset.filter(**filters)
+        
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        
+        from django.core.paginator import Paginator
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+        
+        return {
+            'data': page_obj.object_list,
+            'total_count': paginator.count,
+            'page': page,
+            'page_size': page_size,
+            'total_pages': paginator.num_pages,
+            'page_obj': page_obj
+        }
+
+def execute_raw_sql(query, params=None):
+    """Execute raw SQL query with proper parameter handling"""
+    if is_sql_server_mode():
+        # SQL Server specific parameter handling
+        query = query.replace('?', '%s')
+    
+    return execute_database_query(query, params)

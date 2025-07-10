@@ -9,12 +9,36 @@ from decimal import Decimal
 import json
 from .models import *
 from .forms import *
+from utils.database_utils import (
+    is_sql_server_mode, get_model_data, safe_model_save, 
+    safe_model_update, safe_model_delete, get_paginated_data,
+    execute_raw_sql, get_sql_server_table_name
+)
 # Import only available forms that exist
 
 # Create your views here.
 @login_required
 def project_list(request):
-    projects = Project.objects.all()
+    if is_sql_server_mode():
+        # Use SQL Server backend for project list
+        projects_data = get_model_data(Project)
+        projects = []
+        for project_row in projects_data:
+            # Create mock project objects for template compatibility
+            class MockProject:
+                def __init__(self, data):
+                    self.projectID = data[0] if isinstance(data, tuple) else data.get('projectID')
+                    self.project = data[1] if isinstance(data, tuple) else data.get('project')
+                    self.amount = data[2] if isinstance(data, tuple) else data.get('amount')
+                    self.currency = data[3] if isinstance(data, tuple) else data.get('currency')
+                    self.starting_date = data[4] if isinstance(data, tuple) else data.get('starting_date')
+                    self.ending_date = data[5] if isinstance(data, tuple) else data.get('ending_date')
+                    self.status = data[6] if isinstance(data, tuple) else data.get('status')
+            
+            projects.append(MockProject(project_row))
+    else:
+        projects = Project.objects.all()
+    
     return render(request, 'PIU_Financial_mgt/projects/enhanced_project_list.html', {'projects': projects})
 
 @login_required
