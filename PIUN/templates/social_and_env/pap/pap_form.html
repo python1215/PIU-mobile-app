@@ -264,20 +264,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show/hide compensation fields based on status
     function toggleCompensationFields() {
-        const isCompensated = compensatedField.value === 'Y';
-        const dateGroup = compensationDateField.closest('.col-md-4');
-        const refGroup = refNoField.closest('.col-md-4');
+        const isCompensated = compensatedField && compensatedField.value === 'Y';
+        const dateGroup = compensationDateField ? compensationDateField.closest('.col-md-4') : null;
+        const refGroup = refNoField ? refNoField.closest('.col-md-4') : null;
         
         if (isCompensated) {
-            dateGroup.style.display = 'block';
-            refGroup.style.display = 'block';
-            compensationDateField.setAttribute('required', 'required');
+            if (dateGroup) dateGroup.style.display = 'block';
+            if (refGroup) refGroup.style.display = 'block';
+            if (compensationDateField) compensationDateField.setAttribute('required', 'required');
         } else {
-            dateGroup.style.display = 'none';
-            refGroup.style.display = 'none';
-            compensationDateField.removeAttribute('required');
-            compensationDateField.value = '';
-            refNoField.value = '';
+            if (dateGroup) dateGroup.style.display = 'none';
+            if (refGroup) refGroup.style.display = 'none';
+            if (compensationDateField) {
+                compensationDateField.removeAttribute('required');
+                compensationDateField.value = '';
+            }
+            if (refNoField) refNoField.value = '';
         }
     }
     
@@ -286,25 +288,110 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleCompensationFields(); // Initial call
     }
     
-    // Form validation
-    form.addEventListener('submit', function(event) {
-        let isValid = true;
-        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                isValid = false;
-                field.classList.add('is-invalid');
-            } else {
-                field.classList.remove('is-invalid');
+    // Cascading dropdown functionality
+    const regionField = document.getElementById('id_region');
+    const districtField = document.getElementById('id_district');
+    const settlementField = document.getElementById('id_pap_Current_Address');
+    
+    // Handle region change
+    if (regionField) {
+        regionField.addEventListener('change', function() {
+            const regionId = this.value;
+            
+            // Clear district and settlement fields
+            if (districtField) districtField.innerHTML = '<option value="">Select District</option>';
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            
+            if (regionId) {
+                console.log('Loading districts for region:', regionId);
+                
+                fetch(`/social_and_env/test-cascading/?region=${regionId}&type=districts`)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.text();
+                    })
+                    .then(html => {
+                        console.log('Response HTML:', html.substring(0, 200));
+                        
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const select = doc.querySelector('select');
+                        if (select && districtField) {
+                            districtField.innerHTML = select.innerHTML;
+                            console.log('Districts loaded successfully');
+                        } else if (districtField) {
+                            console.log('No select element found, using raw HTML');
+                            districtField.innerHTML = html;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading districts:', error);
+                        if (districtField) districtField.innerHTML = '<option value="">Error loading districts</option>';
+                    });
             }
         });
-        
-        if (!isValid) {
-            event.preventDefault();
-            document.querySelector('.is-invalid').focus();
-        }
-    });
+    }
+    
+    // Handle district change
+    if (districtField) {
+        districtField.addEventListener('change', function() {
+            const districtId = this.value;
+            
+            // Clear settlement field
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            
+            if (districtId) {
+                console.log('Loading settlements for district:', districtId);
+                
+                fetch(`/social_and_env/test-cascading/?district=${districtId}&type=settlements`)
+                    .then(response => {
+                        console.log('Settlement response status:', response.status);
+                        return response.text();
+                    })
+                    .then(html => {
+                        console.log('Settlement response HTML:', html.substring(0, 200));
+                        
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const select = doc.querySelector('select');
+                        if (select && settlementField) {
+                            settlementField.innerHTML = select.innerHTML;
+                            console.log('Settlements loaded successfully');
+                        } else if (settlementField) {
+                            console.log('No select element found, using raw HTML');
+                            settlementField.innerHTML = html;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading settlements:', error);
+                        if (settlementField) settlementField.innerHTML = '<option value="">Error loading settlements</option>';
+                    });
+            }
+        });
+    }
+    
+    // Form validation
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                event.preventDefault();
+                const firstInvalidField = document.querySelector('.is-invalid');
+                if (firstInvalidField) firstInvalidField.focus();
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

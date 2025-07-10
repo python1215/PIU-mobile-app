@@ -231,25 +231,25 @@ class PAPForm(forms.ModelForm):
         if 'region' in self.data:
             try:
                 region_code = self.data.get('region')
-                self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
+                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_code)
             except (ValueError, TypeError):
                 pass
         elif self.instance and self.instance.pk and self.instance.region:
             # For editing existing records, load districts for the selected region
-            self.fields['district'].queryset = Districts.objects.filter(region_code=self.instance.region)
+            self.fields['district'].queryset = Districts.objects.filter(region_code_id=self.instance.region_id)
 
         if 'district' in self.data:
             try:
                 district_code = self.data.get('district')
                 self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                    district_code=district_code
+                    district_code_id=district_code
                 )
             except (ValueError, TypeError):
                 pass
         elif self.instance and self.instance.pk and self.instance.district:
             # For editing existing records, load settlements for the selected district
             self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                district_code=self.instance.district
+                district_code_id=self.instance.district_id
             )
 
 
@@ -465,7 +465,7 @@ class OHSMonitoringForm(forms.ModelForm):
         if 'region' in self.data:
             try:
                 region_id = int(self.data.get('region'))
-                self.fields['district'].queryset = Districts.objects.filter(region_id=region_id)
+                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_id)
             except (ValueError, TypeError):
                 pass
 
@@ -473,7 +473,7 @@ class OHSMonitoringForm(forms.ModelForm):
             try:
                 district_id = int(self.data.get('district'))
                 self.fields['settlement'].queryset = Settlement.objects.filter(
-                    district_id=district_id
+                    district_code_id=district_id
                 )
             except (ValueError, TypeError):
                 pass
@@ -577,10 +577,10 @@ class PAPUpdateForm(PAPForm):
                 project=self.instance.project
             )
             self.fields['district'].queryset = Districts.objects.filter(
-                region_code=self.instance.region
+                region_code_id=self.instance.region_id
             )
             self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                district_code=self.instance.district
+                district_code_id=self.instance.district_id
             )
 
 
