@@ -594,13 +594,51 @@ class OHSUpdateForm(OHSMonitoringForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
-            # Pre-populate dependent fields
-            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
-                project_id=self.instance.project.pk
-            )
-            self.fields['district'].queryset = Districts.objects.filter(
-                region_code=self.instance.region
-            )
-            self.fields['settlement'].queryset = Settlement.objects.filter(
-                district_code=self.instance.district
-            )
+            # Pre-populate dependent fields with correct field references
+            if self.instance.project:
+                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
+                    project=self.instance.project
+                )
+            
+            if self.instance.region:
+                self.fields['district'].queryset = Districts.objects.filter(
+                    region_code=self.instance.region
+                )
+            
+            if self.instance.district:
+                self.fields['settlement'].queryset = Settlement.objects.filter(
+                    district_code=self.instance.district
+                )
+                
+            # Pre-populate KPI description based on investment type
+            if self.instance.Type_of_Investment:
+                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(
+                    project=self.instance.project,
+                    type_of_investment=self.instance.Type_of_Investment.type_of_investment
+                )
+        
+        # Ensure all dependent fields have proper cascading setup
+        elif 'project' in self.data:
+            try:
+                project_id = int(self.data.get('project'))
+                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
+                    project_id=project_id
+                )
+            except (ValueError, TypeError):
+                pass
+
+        if 'region' in self.data:
+            try:
+                region_id = int(self.data.get('region'))
+                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_id)
+            except (ValueError, TypeError):
+                pass
+
+        if 'district' in self.data:
+            try:
+                district_id = int(self.data.get('district'))
+                self.fields['settlement'].queryset = Settlement.objects.filter(
+                    district_code_id=district_id
+                )
+            except (ValueError, TypeError):
+                pass
