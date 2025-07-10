@@ -23,6 +23,8 @@ from setup.models import Districts, Settlement
 from PIU_Financial_mgt.models import KPI_For_Contract
 from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
 from monitoring.models import Indicator_Description
+from utils.database_utils import (is_sql_server_mode, get_cascading_dropdown_data, 
+                                 safe_model_save, safe_model_update, get_model_data)
 
 
 # ======================== ESIA Views ========================
@@ -543,16 +545,24 @@ def ohs_list(request):
 
 @login_required
 def ohs_add(request):
-    """Add new OHS record"""
+    """Add new OHS record - Dual Mode Support"""
     if request.method == 'POST':
         form = OHSMonitoringForm(request.POST, request.FILES)
         if form.is_valid():
             ohs = form.save(commit=False)
             ohs.loginUser = request.user
-            ohs.save()
-            messages.success(request,
-                             'OHS monitoring record created successfully!')
-            return redirect('ohs_list')
+            
+            # Use dual-mode save
+            if is_sql_server_mode():
+                if safe_model_save(ohs, using_raw_sql=True):
+                    messages.success(request, 'OHS monitoring record created successfully!')
+                    return redirect('ohs_list')
+                else:
+                    messages.error(request, 'Error saving to SQL Server database.')
+            else:
+                ohs.save()
+                messages.success(request, 'OHS monitoring record created successfully!')
+                return redirect('ohs_list')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -579,26 +589,38 @@ def ohs_detail(request, pk):
 
 @login_required
 def ohs_edit(request, pk):
-    """Edit OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
-    
-    if request.method == 'POST':
-        form = OHSUpdateForm(request.POST, request.FILES, instance=ohs)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'OHS monitoring record updated successfully!')
-            return redirect('ohs_detail', pk=ohs.pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    """Edit OHS monitoring record - Dual Mode Support"""
+    if is_sql_server_mode():
+        # Use SQL Server compatible approach
+        ohs_data = get_model_data(OHS_Monitoring, pk=pk)
+        if not ohs_data:
+            messages.error(request, 'OHS record not found.')
+            return redirect('ohs_list')
+        
+        # Note: In SQL Server mode, editing is limited to prevent data corruption
+        messages.info(request, 'Editing is available in SQLite mode. Please use Django admin interface for SQL Server mode.')
+        return redirect('ohs_detail', pk=pk)
     else:
-        form = OHSUpdateForm(instance=ohs)
+        # Use Django ORM for SQLite
+        ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+        
+        if request.method == 'POST':
+            form = OHSUpdateForm(request.POST, request.FILES, instance=ohs)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'OHS monitoring record updated successfully!')
+                return redirect('ohs_detail', pk=ohs.pk)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = OHSUpdateForm(instance=ohs)
 
-    context = {
-        'form': form,
-        'ohs': ohs,
-        'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
-    }
-    return render(request, 'social_and_env/ohs/ohs_form.html', context)
+        context = {
+            'form': form,
+            'ohs': ohs,
+            'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}'
+        }
+        return render(request, 'social_and_env/ohs/ohs_form.html', context)
 
 
 # ======================== Community Engagement Views ========================
@@ -794,12 +816,21 @@ def load_investment_types_pap(request):
 
 @login_required
 def load_districts(request):
-    """Load districts based on region selection"""
+    """Load districts based on region selection - Dual Mode Support"""
     region_id = request.GET.get('region')
-    districts = Districts.objects.none()
+    districts = []
 
     if region_id:
-        districts = Districts.objects.filter(region_code=region_id)
+        if is_sql_server_mode():
+            # Use raw SQL for SQL Server
+            districts_data = get_cascading_dropdown_data(
+                Districts, 'region_code_id', region_id
+            )
+            # Convert to template-friendly format
+            districts = [{'pk': row[2], 'district_name': row[3]} for row in districts_data] if districts_data else []
+        else:
+            # Use Django ORM for SQLite
+            districts = Districts.objects.filter(region_code=region_id)
 
     return render(request, 'social_and_env/partials/districts.html',
                   {'districts': districts})
@@ -807,12 +838,21 @@ def load_districts(request):
 
 @login_required
 def load_settlements(request):
-    """Load settlements based on district selection"""
+    """Load settlements based on district selection - Dual Mode Support"""
     district_id = request.GET.get('district')
-    settlements = Settlement.objects.none()
+    settlements = []
 
     if district_id:
-        settlements = Settlement.objects.filter(district_code=district_id)
+        if is_sql_server_mode():
+            # Use raw SQL for SQL Server
+            settlements_data = get_cascading_dropdown_data(
+                Settlement, 'district_code_id', district_id
+            )
+            # Convert to template-friendly format
+            settlements = [{'pk': row[1], 'settlement_name': row[2]} for row in settlements_data] if settlements_data else []
+        else:
+            # Use Django ORM for SQLite
+            settlements = Settlement.objects.filter(district_code=district_id)
 
     return render(request, 'social_and_env/partials/settlements.html',
                   {'settlements': settlements})
