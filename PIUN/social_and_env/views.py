@@ -430,32 +430,148 @@ def export_pap_excel(request):
 
 @login_required
 def pap_edit(request, pk):
-    """Edit PAP record"""
-    pap = get_object_or_404(PAP, pk=pk)
-
-    if request.method == 'POST':
-        form = PAPUpdateForm(request.POST, instance=pap)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'PAP record updated successfully!')
-            return redirect('pap_detail', pk=pap.pap_identification_number)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    """Edit PAP record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    from django.db import connection
+    
+    if is_sql_server_mode():
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Update PAP record in SQL Server
+                    cursor.execute("""
+                        UPDATE [piuprod3].[dbo].[social_and_env_pap]
+                        SET name = %s,
+                            location = %s,
+                            compensation_amount = %s,
+                            completion_status = %s,
+                            date_updated = GETDATE()
+                        WHERE pap_identification_number = %s
+                    """, [
+                        request.POST.get('name'),
+                        request.POST.get('location'),
+                        request.POST.get('compensation_amount'),
+                        request.POST.get('completion_status'),
+                        pk
+                    ])
+                    
+                messages.success(request, 'PAP record updated successfully!')
+                return redirect('pap_detail', pk=pk)
+                
+            except Exception as e:
+                messages.error(request, f'Error updating record: {str(e)}')
+        
+        # Get current record for form display
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT * FROM [piuprod3].[dbo].[social_and_env_pap]
+                    WHERE pap_identification_number = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'PAP record not found.')
+                    return redirect('pap_list')
+                
+                columns = [col[0] for col in cursor.description]
+                pap_data = dict(zip(columns, row))
+                
+                context = {
+                    'pap_data': pap_data,
+                    'sql_server_mode': True,
+                    'title': 'Edit PAP Record'
+                }
+                return render(request, 'social_and_env/pap/pap_sql_form.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing data: {str(e)}')
+            return redirect('pap_list')
     else:
-        form = PAPUpdateForm(instance=pap)
+        # SQLite mode using Django ORM
+        pap = get_object_or_404(PAP, pk=pk)
 
-    context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record'}
-    return render(request, 'social_and_env/pap/pap_form.html', context)
+        if request.method == 'POST':
+            form = PAPUpdateForm(request.POST, instance=pap)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'PAP record updated successfully!')
+                return redirect('pap_detail', pk=pap.pap_identification_number)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = PAPUpdateForm(instance=pap)
+
+        context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record', 'sql_server_mode': False}
+        return render(request, 'social_and_env/pap/pap_form.html', context)
 
 
 @login_required
-@require_http_methods(["DELETE"])
 def pap_delete(request, pk):
-    """Delete PAP record"""
-    pap = get_object_or_404(PAP, pk=pk)
-    pap.delete()
-    messages.success(request, 'PAP record deleted successfully!')
-    return JsonResponse({'success': True})
+    """Delete PAP record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    from django.db import connection
+    
+    if is_sql_server_mode():
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Delete PAP record from SQL Server
+                    cursor.execute("""
+                        DELETE FROM [piuprod3].[dbo].[social_and_env_pap]
+                        WHERE pap_identification_number = %s
+                    """, [pk])
+                    
+                messages.success(request, 'PAP record deleted successfully!')
+                return redirect('pap_list')
+                
+            except Exception as e:
+                messages.error(request, f'Error deleting record: {str(e)}')
+                return redirect('pap_detail', pk=pk)
+        
+        # Get record for confirmation display
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT pap_identification_number, name FROM [piuprod3].[dbo].[social_and_env_pap]
+                    WHERE pap_identification_number = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'PAP record not found.')
+                    return redirect('pap_list')
+                
+                context = {
+                    'object_name': f'PAP Record - {row[0]} ({row[1]})',
+                    'cancel_url': 'pap_detail',
+                    'cancel_pk': pk,
+                    'sql_server_mode': True
+                }
+                return render(request, 'social_and_env/confirm_delete.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing data: {str(e)}')
+            return redirect('pap_list')
+    else:
+        # SQLite mode using Django ORM
+        if request.method == 'POST':
+            pap = get_object_or_404(PAP, pk=pk)
+            pap.delete()
+            messages.success(request, 'PAP record deleted successfully!')
+            return redirect('pap_list')
+        else:
+            pap = get_object_or_404(PAP, pk=pk)
+            context = {
+                'object': pap,
+                'object_name': f'PAP Record - {pap.pap_identification_number} ({pap.name})',
+                'cancel_url': 'pap_detail',
+                'cancel_pk': pk,
+                'sql_server_mode': False
+            }
+            return render(request, 'social_and_env/confirm_delete.html', context)
 
 
 # ======================== Grievance Views ========================
@@ -647,34 +763,145 @@ def grievance_detail(request, pk):
 
 @login_required
 def grievance_add(request):
-    """Add new Grievance record"""
-    if request.method == 'POST':
-        form = GrievianceMonitoringLogForm(request.POST)
-        if form.is_valid():
-            grievance = form.save(commit=False)
-            grievance.loginUser = request.user
-            grievance.save()
-            messages.success(request, 'Grievance case created successfully!')
-            return redirect('grievance_list')
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    """Add new Grievance record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    from django.db import connection
+    import uuid
+    
+    if is_sql_server_mode():
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Generate unique case number
+                    case_no = f"GR-{uuid.uuid4().hex[:8].upper()}"
+                    
+                    # Insert new grievance record into SQL Server
+                    cursor.execute("""
+                        INSERT INTO [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                        (case_no, name_of_complainant, sex, phone_number, location,
+                         complaint_category, description_of_complaint, responsible_unit_or_department,
+                         date_claim_recieved, expected_decision_date, was_complainant_satisfied_with_decision,
+                         outcome_of_grievance, date_created, loginUser_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GETDATE(), %s)
+                    """, [
+                        case_no,
+                        request.POST.get('name_of_complainant'),
+                        request.POST.get('sex'),
+                        request.POST.get('phone_number'),
+                        request.POST.get('location'),
+                        request.POST.get('complaint_category'),
+                        request.POST.get('description_of_complaint'),
+                        request.POST.get('responsible_unit_or_department'),
+                        request.POST.get('date_claim_recieved'),
+                        request.POST.get('expected_decision_date'),
+                        request.POST.get('was_complainant_satisfied_with_decision'),
+                        request.POST.get('outcome_of_grievance'),
+                        request.user.id
+                    ])
+                    
+                messages.success(request, f'Grievance case {case_no} created successfully!')
+                return redirect('grievance_list')
+                
+            except Exception as e:
+                messages.error(request, f'Error creating record: {str(e)}')
+        
+        context = {
+            'sql_server_mode': True,
+            'title': 'Add Grievance Case'
+        }
+        return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
     else:
-        form = GrievianceMonitoringLogForm()
+        # SQLite mode using Django ORM
+        if request.method == 'POST':
+            form = GrievianceMonitoringLogForm(request.POST)
+            if form.is_valid():
+                grievance = form.save(commit=False)
+                grievance.loginUser = request.user
+                grievance.save()
+                messages.success(request, 'Grievance case created successfully!')
+                return redirect('grievance_list')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = GrievianceMonitoringLogForm()
 
-    context = {'form': form, 'title': 'Add Grievance Case'}
-    return render(request, 'social_and_env/grievance/grievance_form.html',
-                  context)
+        context = {'form': form, 'title': 'Add Grievance Case', 'sql_server_mode': False}
+        return render(request, 'social_and_env/grievance/grievance_form.html', context)
 
 
 @login_required
 def grievance_edit(request, pk):
     """Edit Grievance record - Dual Mode Support"""
     from utils.database_utils import is_sql_server_mode
+    from django.db import connection
     
     if is_sql_server_mode():
-        # For SQL Server mode, provide read-only view with edit message
-        messages.info(request, 'Grievance editing is not supported in SQL Server mode. Please use the original system for editing.')
-        return redirect('grievance_detail', pk=pk)
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Update grievance record in SQL Server
+                    cursor.execute("""
+                        UPDATE [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                        SET name_of_complainant = %s,
+                            sex = %s,
+                            phone_number = %s,
+                            location = %s,
+                            complaint_category = %s,
+                            description_of_complaint = %s,
+                            responsible_unit_or_department = %s,
+                            expected_decision_date = %s,
+                            was_complainant_satisfied_with_decision = %s,
+                            outcome_of_grievance = %s,
+                            date_updated = GETDATE()
+                        WHERE case_no = %s
+                    """, [
+                        request.POST.get('name_of_complainant'),
+                        request.POST.get('sex'),
+                        request.POST.get('phone_number'),
+                        request.POST.get('location'),
+                        request.POST.get('complaint_category'),
+                        request.POST.get('description_of_complaint'),
+                        request.POST.get('responsible_unit_or_department'),
+                        request.POST.get('expected_decision_date'),
+                        request.POST.get('was_complainant_satisfied_with_decision'),
+                        request.POST.get('outcome_of_grievance'),
+                        pk
+                    ])
+                    
+                messages.success(request, 'Grievance case updated successfully!')
+                return redirect('grievance_detail', pk=pk)
+                
+            except Exception as e:
+                messages.error(request, f'Error updating record: {str(e)}')
+        
+        # Get current record for form display
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT * FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                    WHERE case_no = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'Grievance case not found.')
+                    return redirect('grievance_list')
+                
+                columns = [col[0] for col in cursor.description]
+                grievance_data = dict(zip(columns, row))
+                
+                context = {
+                    'grievance_data': grievance_data,
+                    'sql_server_mode': True,
+                    'title': 'Edit Grievance Case'
+                }
+                return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing data: {str(e)}')
+            return redirect('grievance_list')
     else:
         # Use Django ORM for SQLite mode
         grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
@@ -703,11 +930,50 @@ def grievance_edit(request, pk):
 def grievance_delete(request, pk):
     """Delete Grievance record - Dual Mode Support"""
     from utils.database_utils import is_sql_server_mode
+    from django.db import connection
     
     if is_sql_server_mode():
-        # For SQL Server mode, provide read-only view with delete message
-        messages.info(request, 'Grievance deletion is not supported in SQL Server mode. Please use the original system for deletion.')
-        return redirect('grievance_detail', pk=pk)
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Delete grievance record from SQL Server
+                    cursor.execute("""
+                        DELETE FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                        WHERE case_no = %s
+                    """, [pk])
+                    
+                messages.success(request, 'Grievance case deleted successfully!')
+                return redirect('grievance_list')
+                
+            except Exception as e:
+                messages.error(request, f'Error deleting record: {str(e)}')
+                return redirect('grievance_detail', pk=pk)
+        
+        # Get record for confirmation display
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT case_no, name_of_complainant FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                    WHERE case_no = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'Grievance case not found.')
+                    return redirect('grievance_list')
+                
+                context = {
+                    'object_name': f'Grievance Case - {row[0]} ({row[1]})',
+                    'cancel_url': 'grievance_detail',
+                    'cancel_pk': pk,
+                    'sql_server_mode': True
+                }
+                return render(request, 'social_and_env/confirm_delete.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing data: {str(e)}')
+            return redirect('grievance_list')
     else:
         # Use Django ORM for SQLite mode
         grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
