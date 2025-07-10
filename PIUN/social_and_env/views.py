@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, Http404
 from django.contrib import messages
 from django.conf import settings
@@ -1215,58 +1216,110 @@ def load_investment_types_ohs(request):
 
 def load_districts_ohs(request):
     """Load districts for OHS based on selected region"""
+    from django.http import HttpResponse
+    
+    region_id = request.GET.get('region')
+    
+    if not region_id:
+        return HttpResponse('<option value="">Select District</option>')
+    
     try:
-        region_id = request.GET.get('region')
-        districts = Districts.objects.none()
-        
-        if region_id:
-            # Map region codes to region names
-            region_mapping = {
-                'WCR': 'West Coast Region',
-                'LRR': 'Lower River Region', 
-                'NBR': 'North Bank Region',
-                'CRR': 'Central River Region',
-                'URR': 'Upper River Region',
-                'GBA': 'GBA'
-            }
+        # Use raw SQL to get districts from the actual database
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Query using the actual string region codes (not numeric mapping)
+            cursor.execute("""
+                SELECT district_code, district_name 
+                FROM setup_districts 
+                WHERE region_code_id = %s 
+                ORDER BY district_name
+            """, [region_id])
             
-            # Get the full region name from the code
-            region_name = region_mapping.get(region_id, region_id)
+            rows = cursor.fetchall()
             
-            # Try to find districts by region name
-            districts = Districts.objects.filter(region_code=region_name).order_by('district_name')
+            # Build HTML response
+            html = '<option value="">Select District</option>'
+            for row in rows:
+                html += f'<option value="{row[0]}">{row[1]}</option>'
             
-            # If no results, try containing the region identifier
-            if not districts.exists():
-                districts = Districts.objects.filter(region_code__icontains=region_id).order_by('district_name')
-        
-        return render(request, 'social_and_env/partials/districts_ohs.html', {
-            'districts': districts
-        })
+            return HttpResponse(html)
+    
     except Exception as e:
-        # Return empty options if there's an error
-        return render(request, 'social_and_env/partials/districts_ohs.html', {
-            'districts': Districts.objects.none()
-        })
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
+    from django.http import HttpResponse
+    
+    district_id = request.GET.get('district')
+    
+    if not district_id:
+        return HttpResponse('<option value="">Select Settlement</option>')
+    
     try:
-        district_id = request.GET.get('district')
-        settlements = Settlements.objects.none()
-        
-        if district_id:
-            settlements = Settlements.objects.filter(district_code=district_id).order_by('settlement_name')
-        
-        return render(request, 'social_and_env/partials/settlements_ohs.html', {
-            'settlements': settlements
-        })
+        # Use raw SQL to get settlements from the actual database
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT settlement_code, settlement_name 
+                FROM setup_settlements 
+                WHERE district_code = %s 
+                ORDER BY settlement_name
+            """, [district_id])
+            
+            rows = cursor.fetchall()
+            
+            # Build HTML response
+            html = '<option value="">Select Settlement</option>'
+            for row in rows:
+                html += f'<option value="{row[0]}">{row[1]}</option>'
+            
+            return HttpResponse(html)
+    
     except Exception as e:
-        # Return empty options if there's an error
-        return render(request, 'social_and_env/partials/settlements_ohs.html', {
-            'settlements': Settlements.objects.none()
-        })
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+
+
+# Test endpoint to validate cascading dropdown functionality
+def test_cascading_dropdown(request):
+    """Test endpoint to validate cascading dropdown functionality"""
+    from django.http import HttpResponse
+    
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Test districts for WCR
+            cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'WCR'")
+            wcr_count = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT district_code, district_name FROM setup_districts WHERE region_code_id = 'WCR' LIMIT 3")
+            wcr_districts = cursor.fetchall()
+            
+            # Test districts for GBA
+            cursor.execute("SELECT COUNT(*) FROM setup_districts WHERE region_code_id = 'GBA'")
+            gba_count = cursor.fetchone()[0]
+            
+            result = f"""
+            <h3>Cascading Dropdown Test Results</h3>
+            <p>WCR districts: {wcr_count}</p>
+            <p>Sample WCR districts: {wcr_districts}</p>
+            <p>GBA districts: {gba_count}</p>
+            
+            <h4>Test WCR Dropdown:</h4>
+            <select>
+                <option value="">Select District</option>
+            """
+            
+            for district in wcr_districts:
+                result += f'<option value="{district[0]}">{district[1]}</option>'
+            
+            result += "</select>"
+            
+            return HttpResponse(result)
+    
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
 
 @login_required
