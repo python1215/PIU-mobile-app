@@ -1504,22 +1504,71 @@ def esia_delete(request, pk):
 
 @login_required
 def grievance_add(request):
-    """Add new Grievance record"""
-    if request.method == 'POST':
-        form = GrievianceMonitoringLogForm(request.POST)
-        if form.is_valid():
-            grievance = form.save(commit=False)
-            grievance.loginUser = request.user
-            grievance.save()
-            messages.success(request, 'Grievance record created successfully!')
-            return redirect('grievance_list')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = GrievianceMonitoringLogForm()
+    """Add new Grievance record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    from django.db import connection
+    import uuid
     
-    context = {'form': form, 'title': 'Add Grievance Record'}
-    return render(request, 'social_and_env/grievance/grievance_form.html', context)
+    if is_sql_server_mode():
+        # SQL Server mode with full CRUD support
+        if request.method == 'POST':
+            try:
+                with connection.cursor() as cursor:
+                    # Generate unique case number
+                    case_no = f"GR-{uuid.uuid4().hex[:8].upper()}"
+                    
+                    # Insert new grievance record into SQL Server
+                    cursor.execute("""
+                        INSERT INTO [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                        (case_no, name_of_complainant, sex, phone_number, location,
+                         complaint_category, description_of_complaint, responsible_unit_or_department,
+                         date_claim_recieved, expected_decision_date, was_complainant_satisfied_with_decision,
+                         outcome_of_grievance, date_created, loginUser_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GETDATE(), %s)
+                    """, [
+                        case_no,
+                        request.POST.get('name_of_complainant'),
+                        request.POST.get('sex'),
+                        request.POST.get('phone_number'),
+                        request.POST.get('location'),
+                        request.POST.get('complaint_category'),
+                        request.POST.get('description_of_complaint'),
+                        request.POST.get('responsible_unit_or_department'),
+                        request.POST.get('date_claim_recieved'),
+                        request.POST.get('expected_decision_date'),
+                        request.POST.get('was_complainant_satisfied_with_decision'),
+                        request.POST.get('outcome_of_grievance'),
+                        request.user.id
+                    ])
+                    
+                messages.success(request, f'Grievance case {case_no} created successfully!')
+                return redirect('grievance_list')
+                
+            except Exception as e:
+                messages.error(request, f'Error creating record: {str(e)}')
+        
+        context = {
+            'sql_server_mode': True,
+            'title': 'Add Grievance Case'
+        }
+        return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
+    else:
+        # SQLite mode using Django ORM
+        if request.method == 'POST':
+            form = GrievianceMonitoringLogForm(request.POST)
+            if form.is_valid():
+                grievance = form.save(commit=False)
+                grievance.loginUser = request.user
+                grievance.save()
+                messages.success(request, 'Grievance case created successfully!')
+                return redirect('grievance_list')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = GrievianceMonitoringLogForm()
+
+        context = {'form': form, 'title': 'Add Grievance Case', 'sql_server_mode': False}
+        return render(request, 'social_and_env/grievance/grievance_form.html', context)
 
 
 @login_required
@@ -1584,6 +1633,28 @@ def load_investment_types(request):
     project_id = request.GET.get('project_id')
     investment_types = Type_of_Investment.objects.filter(project=project_id).order_by('type_of_investment')
     return JsonResponse({'investment_types': [{'id': t.pk, 'name': t.type_of_investment} for t in investment_types]})
+
+
+@csrf_exempt
+def load_investment_types_grievance(request):
+    """Load investment types for Grievance based on project selection"""
+    project_id = request.GET.get('project_id')
+    
+    if project_id:
+        try:
+            investment_types = KPI_For_Contract.objects.filter(
+                project=project_id
+            ).values('type_of_investment', 'Kpi_description').distinct()
+            
+            options = '<option value="">Select Investment Type</option>'
+            for item in investment_types:
+                options += f'<option value="{item["type_of_investment"]}">{item["type_of_investment"]} - {item["Kpi_description"]}</option>'
+            
+            return HttpResponse(options)
+        except Exception as e:
+            return HttpResponse('<option value="">Error loading investment types</option>')
+    
+    return HttpResponse('<option value="">Select Investment Type</option>')
 
 
 def load_investment_types_ohs(request):
