@@ -826,10 +826,17 @@ def ohs_edit(request, pk):
         if request.method == 'POST':
             form = OHSUpdateForm(request.POST, request.FILES, instance=ohs)
             if form.is_valid():
-                form.save()
+                # Set the login user before saving
+                ohs_instance = form.save(commit=False)
+                ohs_instance.loginUser = request.user
+                ohs_instance.save()
                 messages.success(request, 'OHS monitoring record updated successfully!')
                 return redirect('ohs_detail', pk=ohs.pk)
             else:
+                # Debug form errors
+                print("Form errors:", form.errors)
+                for field, errors in form.errors.items():
+                    print(f"Field '{field}': {errors}")
                 messages.error(request, 'Please correct the errors below.')
         else:
             form = OHSUpdateForm(instance=ohs)

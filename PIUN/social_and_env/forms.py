@@ -602,12 +602,12 @@ class OHSUpdateForm(OHSMonitoringForm):
             
             if self.instance.region:
                 self.fields['district'].queryset = Districts.objects.filter(
-                    region_code=self.instance.region
+                    region_code_id=self.instance.region.region_code
                 )
             
             if self.instance.district:
                 self.fields['settlement'].queryset = Settlement.objects.filter(
-                    district_code=self.instance.district
+                    district_code_id=self.instance.district.district_code
                 )
                 
             # Pre-populate KPI description based on investment type
