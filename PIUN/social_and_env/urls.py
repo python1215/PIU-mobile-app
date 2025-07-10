@@ -15,9 +15,9 @@ urlpatterns = [
     # PAP Management
     path('pap/', views.pap_list, name='pap_list'),
     path('pap/add/', views.pap_add, name='pap_add'),
-    path('pap/<int:pk>/', views.pap_detail, name='pap_detail'),
-    path('pap/<int:pk>/edit/', views.pap_edit, name='pap_edit'),
-    path('pap/<int:pk>/delete/', views.pap_delete, name='pap_delete'),
+    path('pap/<str:pk>/', views.pap_detail, name='pap_detail'),
+    path('pap/<str:pk>/edit/', views.pap_edit, name='pap_edit'),
+    path('pap/<str:pk>/delete/', views.pap_delete, name='pap_delete'),
     path('pap/export/excel/', views.export_pap_excel, name='export_pap_excel'),
     
     # Grievance Management

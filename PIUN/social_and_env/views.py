@@ -287,7 +287,7 @@ def pap_detail(request, pk):
         'project', 'type_of_investment', 'region', 'district',
         'pap_Current_Address', 'type_of_pap', 'pap_category',
         'vulnerability_category', 'type_of_impact', 'nature_of_compensation'),
-                            pk=pk)
+                            pap_identification_number=pk)
 
     context = {'pap': pap}
     return render(request, 'social_and_env/pap/pap_detail.html', context)
@@ -316,14 +316,14 @@ def pap_add(request):
 @login_required
 def pap_edit(request, pk):
     """Edit PAP record"""
-    pap = get_object_or_404(PAP, pk=pk)
+    pap = get_object_or_404(PAP, pap_identification_number=pk)
     
     if request.method == 'POST':
         form = PAPUpdateForm(request.POST, instance=pap)
         if form.is_valid():
             form.save()
             messages.success(request, 'PAP record updated successfully!')
-            return redirect('pap_detail', pk=pap.pk)
+            return redirect('pap_detail', pk=pap.pap_identification_number)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -336,7 +336,7 @@ def pap_edit(request, pk):
 @login_required
 def pap_delete(request, pk):
     """Delete PAP record"""
-    pap = get_object_or_404(PAP, pk=pk)
+    pap = get_object_or_404(PAP, pap_identification_number=pk)
     
     if request.method == 'POST':
         pap.delete()
@@ -345,7 +345,7 @@ def pap_delete(request, pk):
     
     context = {
         'object': pap,
-        'object_name': f'PAP Record - {pap.name}',
+        'object_name': f'PAP Record - {pap.pap_name}',
         'cancel_url': 'pap_detail',
         'cancel_pk': pk,
     }
@@ -438,7 +438,7 @@ def pap_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'PAP record updated successfully!')
-            return redirect('pap_detail', pk=pap.pk)
+            return redirect('pap_detail', pk=pap.pap_identification_number)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
