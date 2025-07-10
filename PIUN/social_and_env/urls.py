@@ -8,9 +8,9 @@ urlpatterns = [
     # ESIA Management
     path('esia/', views.esia_list, name='esia_list'),
     path('esia/add/', views.esia_add, name='esia_add'),
-    path('esia/<int:pk>/', views.esia_detail, name='esia_detail'),
-    path('esia/<int:pk>/edit/', views.esia_edit, name='esia_edit'),
-    path('esia/<int:pk>/delete/', views.esia_delete, name='esia_delete'),
+    path('esia/<str:pk>/', views.esia_detail, name='esia_detail'),
+    path('esia/<str:pk>/edit/', views.esia_edit, name='esia_edit'),
+    path('esia/<str:pk>/delete/', views.esia_delete, name='esia_delete'),
     
     # PAP Management
     path('pap/', views.pap_list, name='pap_list'),
@@ -23,23 +23,23 @@ urlpatterns = [
     # Grievance Management
     path('grievance/', views.grievance_list, name='grievance_list'),
     path('grievance/add/', views.grievance_add, name='grievance_add'),
-    path('grievance/<int:pk>/', views.grievance_detail, name='grievance_detail'),
-    path('grievance/<int:pk>/edit/', views.grievance_edit, name='grievance_edit'),
-    path('grievance/<int:pk>/delete/', views.grievance_delete, name='grievance_delete'),
+    path('grievance/<str:pk>/', views.grievance_detail, name='grievance_detail'),
+    path('grievance/<str:pk>/edit/', views.grievance_edit, name='grievance_edit'),
+    path('grievance/<str:pk>/delete/', views.grievance_delete, name='grievance_delete'),
     
     # OHS Monitoring
     path('ohs/', views.ohs_list, name='ohs_list'),
     path('ohs/add/', views.ohs_add, name='ohs_add'),
-    path('ohs/<int:pk>/', views.ohs_detail, name='ohs_detail'),
-    path('ohs/<int:pk>/edit/', views.ohs_edit, name='ohs_edit'),
-    path('ohs/<int:pk>/delete/', views.ohs_delete, name='ohs_delete'),
+    path('ohs/<str:pk>/', views.ohs_detail, name='ohs_detail'),
+    path('ohs/<str:pk>/edit/', views.ohs_edit, name='ohs_edit'),
+    path('ohs/<str:pk>/delete/', views.ohs_delete, name='ohs_delete'),
     
     # Community Engagement
     path('community/', views.community_list, name='community_list'),
     path('community/add/', views.community_add, name='community_add'),
-    path('community/<int:pk>/', views.community_detail, name='community_detail'),
-    path('community/<int:pk>/edit/', views.community_edit, name='community_edit'),
-    path('community/<int:pk>/delete/', views.community_delete, name='community_delete'),
+    path('community/<str:pk>/', views.community_detail, name='community_detail'),
+    path('community/<str:pk>/edit/', views.community_edit, name='community_edit'),
+    path('community/<str:pk>/delete/', views.community_delete, name='community_delete'),
     
     # AJAX Cascading Dropdowns (no authentication required)
     path('ajax/load-districts/', views.load_districts, name='load_districts'),

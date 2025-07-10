@@ -461,70 +461,188 @@ def pap_delete(request, pk):
 # ======================== Grievance Views ========================
 @login_required
 def grievance_list(request):
-    """Enhanced Grievance list view with filtering and pagination"""
-    grievance_list = GrievianceMonitoringLog.objects.select_related(
-        'project', 'type_of_investment', 'decision_outcome',
-        'loginUser').all()
-
-    # Apply filters
-    grievance_filter = GrievianceMonitoringLogFilter(request.GET,
-                                                     queryset=grievance_list)
-    filtered_grievance = grievance_filter.qs
-
-    # Pagination with configurable page size
-    page_size = request.GET.get('page_size', 10)
-    try:
-        page_size = int(page_size)
-        if page_size not in [10, 15, 25, 50, 100]:
-            page_size = 10
-    except (ValueError, TypeError):
-        page_size = 10
+    """Enhanced Grievance list view with filtering and pagination - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
     
-    paginator = Paginator(filtered_grievance, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server mode
+        from django.db import connection
+        
+        try:
+            with connection.cursor() as cursor:
+                # Get all grievance records from SQL Server
+                cursor.execute("""
+                    SELECT * FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                    ORDER BY date_claim_recieved DESC
+                """)
+                
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+                
+                # Create mock objects for template compatibility
+                class MockGrievance:
+                    def __init__(self, data_dict):
+                        for key, value in data_dict.items():
+                            setattr(self, key, value)
+                        # Set pk to case_no for URL generation
+                        self.pk = self.case_no if hasattr(self, 'case_no') else str(data_dict.get('case_no', ''))
+                
+                grievance_list = []
+                for row in rows:
+                    data_dict = dict(zip(columns, row))
+                    grievance_list.append(MockGrievance(data_dict))
+                
+                # Basic pagination for SQL Server mode
+                page_size = request.GET.get('page_size', 10)
+                try:
+                    page_size = int(page_size)
+                    if page_size not in [10, 15, 25, 50, 100]:
+                        page_size = 10
+                except (ValueError, TypeError):
+                    page_size = 10
+                
+                paginator = Paginator(grievance_list, page_size)
+                page_number = request.GET.get('page')
+                page_obj = paginator.get_page(page_number)
+                
+                # Basic statistics for SQL Server mode
+                stats = {
+                    'total_cases': len(grievance_list),
+                    'filtered_count': len(grievance_list),
+                    'satisfied': len([g for g in grievance_list if getattr(g, 'was_complainant_satisfied_with_decision', '') == 'Y']),
+                    'not_satisfied': len([g for g in grievance_list if getattr(g, 'was_complainant_satisfied_with_decision', '') == 'N']),
+                    'pending': 0,  # Simplified for SQL Server mode
+                }
+                
+                context = {
+                    'page_obj': page_obj,
+                    'stats': stats,
+                    'is_filtered': False,
+                    'sql_server_mode': True,
+                }
+                
+                return render(request, 'social_and_env/grievance/grievance_list.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing SQL Server data: {str(e)}')
+            # Fall back to empty list
+            context = {
+                'page_obj': Paginator([], 10).get_page(1),
+                'stats': {'total_cases': 0, 'filtered_count': 0, 'satisfied': 0, 'not_satisfied': 0, 'pending': 0},
+                'is_filtered': False,
+                'sql_server_mode': True,
+            }
+            return render(request, 'social_and_env/grievance/grievance_list.html', context)
+    else:
+        # Use Django ORM for SQLite mode
+        grievance_list = GrievianceMonitoringLog.objects.select_related(
+            'project', 'type_of_investment', 'decision_outcome',
+            'loginUser').all()
 
-    # Statistics
-    stats = {
-        'total_cases':
-        grievance_list.count(),
-        'filtered_count':
-        filtered_grievance.count(),
-        'satisfied':
-        grievance_list.filter(
-            was_complainant_satisfied_with_decision='Y').count(),
-        'not_satisfied':
-        grievance_list.filter(
-            was_complainant_satisfied_with_decision='N').count(),
-        'pending':
-        grievance_list.filter(
-            expected_decision_date__gt=timezone.now().date()).count(),
-    }
+        # Apply filters
+        grievance_filter = GrievianceMonitoringLogFilter(request.GET,
+                                                         queryset=grievance_list)
+        filtered_grievance = grievance_filter.qs
 
-    context = {
-        'page_obj': page_obj,
-        'filter': grievance_filter,
-        'stats': stats,
-        'is_filtered': bool(request.GET),
-    }
+        # Pagination with configurable page size
+        page_size = request.GET.get('page_size', 10)
+        try:
+            page_size = int(page_size)
+            if page_size not in [10, 15, 25, 50, 100]:
+                page_size = 10
+        except (ValueError, TypeError):
+            page_size = 10
+        
+        paginator = Paginator(filtered_grievance, page_size)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-    return render(request, 'social_and_env/grievance/grievance_list.html',
-                  context)
+        # Statistics
+        stats = {
+            'total_cases':
+            grievance_list.count(),
+            'filtered_count':
+            filtered_grievance.count(),
+            'satisfied':
+            grievance_list.filter(
+                was_complainant_satisfied_with_decision='Y').count(),
+            'not_satisfied':
+            grievance_list.filter(
+                was_complainant_satisfied_with_decision='N').count(),
+            'pending':
+            grievance_list.filter(
+                expected_decision_date__gt=timezone.now().date()).count(),
+        }
+
+        context = {
+            'page_obj': page_obj,
+            'filter': grievance_filter,
+            'stats': stats,
+            'is_filtered': bool(request.GET),
+            'sql_server_mode': False,
+        }
+
+        return render(request, 'social_and_env/grievance/grievance_list.html',
+                      context)
 
 
 @login_required
 def grievance_detail(request, pk):
-    """Grievance detail view"""
-    grievance = get_object_or_404(
-        GrievianceMonitoringLog.objects.select_related('project',
-                                                       'type_of_investment',
-                                                       'decision_outcome',
-                                                       'loginUser'),
-        pk=pk)
+    """Grievance detail view - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server mode
+        from django.db import connection
+        
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT * FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
+                    WHERE case_no = %s
+                """, [pk])
+                
+                row = cursor.fetchone()
+                if not row:
+                    messages.error(request, 'Grievance case not found.')
+                    return redirect('grievance_list')
+                
+                columns = [col[0] for col in cursor.description]
+                grievance_data = dict(zip(columns, row))
+                
+                # Create mock object for template compatibility
+                class MockGrievance:
+                    def __init__(self, data_dict):
+                        for key, value in data_dict.items():
+                            setattr(self, key, value)
+                        self.pk = self.case_no if hasattr(self, 'case_no') else pk
+                
+                grievance = MockGrievance(grievance_data)
+                
+                context = {
+                    'grievance': grievance,
+                    'sql_server_mode': True
+                }
+                return render(request, 'social_and_env/grievance/grievance_detail.html', context)
+                
+        except Exception as e:
+            messages.error(request, f'Error accessing SQL Server data: {str(e)}')
+            return redirect('grievance_list')
+    else:
+        # Use Django ORM for SQLite mode
+        grievance = get_object_or_404(
+            GrievianceMonitoringLog.objects.select_related('project',
+                                                           'type_of_investment',
+                                                           'decision_outcome',
+                                                           'loginUser'),
+            pk=pk)
 
-    context = {'grievance': grievance}
-    return render(request, 'social_and_env/grievance/grievance_detail.html',
-                  context)
+        context = {
+            'grievance': grievance,
+            'sql_server_mode': False
+        }
+        return render(request, 'social_and_env/grievance/grievance_detail.html',
+                      context)
 
 
 @login_required
@@ -550,27 +668,63 @@ def grievance_add(request):
 
 @login_required
 def grievance_edit(request, pk):
-    """Edit Grievance record"""
-    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
-
-    if request.method == 'POST':
-        form = GrievianceUpdateForm(request.POST, instance=grievance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Grievance case updated successfully!')
-            return redirect('grievance_detail', pk=grievance.pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    """Edit Grievance record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    
+    if is_sql_server_mode():
+        # For SQL Server mode, provide read-only view with edit message
+        messages.info(request, 'Grievance editing is not supported in SQL Server mode. Please use the original system for editing.')
+        return redirect('grievance_detail', pk=pk)
     else:
-        form = GrievianceUpdateForm(instance=grievance)
+        # Use Django ORM for SQLite mode
+        grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
 
-    context = {
-        'form': form,
-        'grievance': grievance,
-        'title': 'Edit Grievance Case'
-    }
-    return render(request, 'social_and_env/grievance/grievance_form.html',
-                  context)
+        if request.method == 'POST':
+            form = GrievianceUpdateForm(request.POST, instance=grievance)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Grievance case updated successfully!')
+                return redirect('grievance_detail', pk=grievance.pk)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = GrievianceUpdateForm(instance=grievance)
+
+        context = {
+            'form': form,
+            'grievance': grievance,
+            'title': 'Edit Grievance Case',
+            'sql_server_mode': False
+        }
+        return render(request, 'social_and_env/grievance/grievance_form.html', context)
+
+
+@login_required
+def grievance_delete(request, pk):
+    """Delete Grievance record - Dual Mode Support"""
+    from utils.database_utils import is_sql_server_mode
+    
+    if is_sql_server_mode():
+        # For SQL Server mode, provide read-only view with delete message
+        messages.info(request, 'Grievance deletion is not supported in SQL Server mode. Please use the original system for deletion.')
+        return redirect('grievance_detail', pk=pk)
+    else:
+        # Use Django ORM for SQLite mode
+        grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
+        
+        if request.method == 'POST':
+            grievance.delete()
+            messages.success(request, 'Grievance case deleted successfully!')
+            return redirect('grievance_list')
+        
+        context = {
+            'object': grievance,
+            'object_name': f'Grievance Case - {grievance.case_no}',
+            'cancel_url': 'grievance_detail',
+            'cancel_pk': pk,
+            'sql_server_mode': False
+        }
+        return render(request, 'social_and_env/confirm_delete.html', context)
 
 
 # ======================== OHS Views ========================
