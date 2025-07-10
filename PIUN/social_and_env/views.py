@@ -1704,7 +1704,7 @@ def grievance_edit(request, pk):
     grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
     
     if request.method == 'POST':
-        form = GrievianceMonitoringLogUpdateForm(request.POST, instance=grievance)
+        form = GrievianceUpdateForm(request.POST, instance=grievance)
         if form.is_valid():
             form.save()
             messages.success(request, 'Grievance record updated successfully!')
@@ -1712,7 +1712,7 @@ def grievance_edit(request, pk):
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        form = GrievianceMonitoringLogUpdateForm(instance=grievance)
+        form = GrievianceUpdateForm(instance=grievance)
     
     context = {'form': form, 'grievance': grievance, 'title': 'Edit Grievance Record'}
     return render(request, 'social_and_env/grievance/grievance_form.html', context)
