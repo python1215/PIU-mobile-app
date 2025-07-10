@@ -588,7 +588,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                     # Validate using raw SQL for SQL Server
                     with connection.cursor() as cursor:
                         table_names = [
-                            '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',
+                            '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',
                             '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',
                             'PIU_Financial_mgt_kpi_for_contract'
                         ]

@@ -307,7 +307,7 @@ def load_type_of_investments(request):
                 with connection.cursor() as cursor:
                     # Try different table names for test vs production environments
                     table_names = [
-                        '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
+                        '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
                         '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Production environment  
                         'PIU_Financial_mgt_kpi_for_contract'  # Fallback without schema
                     ]
@@ -443,7 +443,7 @@ def load_kpi_descriptions(request):
                 with connection.cursor() as cursor:
                     # Try different table names for test vs production environments
                     table_names = [
-                        '[piuprod].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
+                        '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Test environment
                         '[piuprod3].[dbo].[PIU_Financial_mgt_kpi_for_contract]',  # Production environment  
                         'PIU_Financial_mgt_kpi_for_contract'  # Fallback without schema
                     ]

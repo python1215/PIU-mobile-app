@@ -708,7 +708,7 @@ def community_detail(request, pk):
         with connection.cursor() as cursor:
             # Try different table name variations for SQL Server
             tables_to_try = [
-                '[piuprod].[dbo].[social_and_env_communityconsult_engagement]',
+                '[piuprod3].[dbo].[social_and_env_communityconsult_engagement]',
                 '[piuprod3].[dbo].[social_and_env_communityconsult_engagement]',
                 'social_and_env_communityconsult_engagement'
             ]

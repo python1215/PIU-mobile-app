@@ -36,7 +36,7 @@ python deploy_sql_server.py sqlserver
 
 1. **Create Database:**
    ```sql
-   CREATE DATABASE piuprod;
+   CREATE DATABASE piuprod3;
    ```
 
 2. **Configure Authentication:**
@@ -48,7 +48,7 @@ python deploy_sql_server.py sqlserver
 
 3. **Create Schema:**
    ```sql
-   USE piuprod;
+   USE piuprod3;
    -- Run the comprehensive database script
    -- (Contains 90 tables with 11,468 records)
    ```
@@ -58,7 +58,7 @@ python deploy_sql_server.py sqlserver
 Create `.env` file with:
 ```env
 USE_SQL_SERVER=true
-SQL_SERVER_DB=piuprod
+SQL_SERVER_DB=piuprod3
 SQL_SERVER_USER=sa
 SQL_SERVER_PASSWORD=YourStrongPassword
 SQL_SERVER_HOST=localhost
@@ -224,7 +224,7 @@ def check_sql_server_health():
 ### Backup Strategy
 ```sql
 -- Regular database backups
-BACKUP DATABASE piuprod TO DISK = 'C:\Backups\piuprod.bak'
+BACKUP DATABASE piuprod3 TO DISK = 'C:\Backups\piuprod3.bak'
 ```
 
 ## Support & Contact

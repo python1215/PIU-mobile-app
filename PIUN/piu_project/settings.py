@@ -130,7 +130,7 @@ if USE_SQL_SERVER:
     DATABASES = {
         'default': {
             'ENGINE': 'mssql',
-            'NAME': os.environ.get('SQL_SERVER_DB', 'piuprod'),
+            'NAME': os.environ.get('SQL_SERVER_DB', 'piuprod3'),
             'USER': os.environ.get('SQL_SERVER_USER', 'sa'),
             'PASSWORD': os.environ.get('SQL_SERVER_PASSWORD', ''),
             'HOST': os.environ.get('SQL_SERVER_HOST', 'localhost'),

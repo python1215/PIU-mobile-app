@@ -16,7 +16,7 @@ def setup_sql_server_environment():
     # Set environment variables for SQL Server
     env_vars = {
         'USE_SQL_SERVER': 'true',
-        'SQL_SERVER_DB': 'piuprod',
+        'SQL_SERVER_DB': 'piuprod3',
         'SQL_SERVER_USER': 'sa',
         'SQL_SERVER_HOST': 'localhost',
         'SQL_SERVER_PORT': '1433',
@@ -42,7 +42,7 @@ def setup_sql_server_environment():
     print("   - django-mssql-backend package")
     
     print("\n📊 Database Setup:")
-    print("   1. Create database 'piuprod' in SQL Server")
+    print("   1. Create database 'piuprod3' in SQL Server")
     print("   2. Configure SQL Server Authentication")
     print("   3. Run Django migrations: python manage.py migrate")
     print("   4. Import data using provided SQL scripts")

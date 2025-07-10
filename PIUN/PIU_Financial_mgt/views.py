@@ -175,7 +175,7 @@ def enhanced_project_dashboard(request, project_id=None):
             with connection.cursor() as cursor:
                 # Try different table names for test vs production environments
                 table_names = [
-                    '[piuprod].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
+                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
                     '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Production environment  
                     'PIU_Financial_mgt_activities'  # Fallback without schema
                 ]
@@ -1127,7 +1127,7 @@ def simple_financial_dashboard(request):
             with connection.cursor() as cursor:
                 # Try different table names for test vs production environments
                 table_names = [
-                    '[piuprod].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
+                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
                     '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Production environment  
                     'PIU_Financial_mgt_activities'  # Fallback without schema
                 ]

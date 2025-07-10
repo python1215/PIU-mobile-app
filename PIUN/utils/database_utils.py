@@ -20,9 +20,8 @@ def get_database_mode():
 def get_sql_server_table_name(base_table_name):
     """Get SQL Server table name with proper schema"""
     if is_sql_server_mode():
-        # Try different schema variations for SQL Server
-        schemas = ['[piuprod].[dbo]', '[piuprod3].[dbo]', 'dbo']
-        return f"{schemas[0]}.{base_table_name}"
+        # Use piuprod3 schema for SQL Server
+        return f"[piuprod3].[dbo].{base_table_name}"
     return base_table_name
 
 def execute_database_query(query, params=None, fetch_all=True):
