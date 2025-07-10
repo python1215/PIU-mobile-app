@@ -253,20 +253,30 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-calculate worker totals
     function calculateTotals() {
-        const male = parseInt(document.getElementById('id_male').value) || 0;
-        const female = parseInt(document.getElementById('id_female').value) || 0;
-        const youthMale = parseInt(document.getElementById('id_youth_male').value) || 0;
-        const youthFemale = parseInt(document.getElementById('id_youth_female').value) || 0;
+        const maleField = document.getElementById('id_male');
+        const femaleField = document.getElementById('id_female');
+        const youthMaleField = document.getElementById('id_youth_male');
+        const youthFemaleField = document.getElementById('id_youth_female');
+        
+        const male = maleField ? parseInt(maleField.value) || 0 : 0;
+        const female = femaleField ? parseInt(femaleField.value) || 0 : 0;
+        const youthMale = youthMaleField ? parseInt(youthMaleField.value) || 0 : 0;
+        const youthFemale = youthFemaleField ? parseInt(youthFemaleField.value) || 0 : 0;
         
         const totalWorkers = male + female;
         const totalYouth = youthMale + youthFemale;
         const totalMale = male + youthMale;
         const totalFemale = female + youthFemale;
         
-        document.getElementById('total-workers').textContent = totalWorkers;
-        document.getElementById('total-youth').textContent = totalYouth;
-        document.getElementById('total-male').textContent = totalMale;
-        document.getElementById('total-female').textContent = totalFemale;
+        const totalWorkersEl = document.getElementById('total-workers');
+        const totalYouthEl = document.getElementById('total-youth');
+        const totalMaleEl = document.getElementById('total-male');
+        const totalFemaleEl = document.getElementById('total-female');
+        
+        if (totalWorkersEl) totalWorkersEl.textContent = totalWorkers;
+        if (totalYouthEl) totalYouthEl.textContent = totalYouth;
+        if (totalMaleEl) totalMaleEl.textContent = totalMale;
+        if (totalFemaleEl) totalFemaleEl.textContent = totalFemale;
     }
     
     // Add event listeners to worker count fields
@@ -291,8 +301,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const regionId = this.value;
             
             // Clear district and settlement fields
-            districtField.innerHTML = '<option value="">Select District</option>';
-            settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            if (districtField) districtField.innerHTML = '<option value="">Select District</option>';
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (regionId) {
                 console.log('Loading districts for region:', regionId);
@@ -310,17 +320,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         const select = doc.querySelector('select');
-                        if (select) {
+                        if (select && districtField) {
                             districtField.innerHTML = select.innerHTML;
                             console.log('Districts loaded successfully');
-                        } else {
+                        } else if (districtField) {
                             console.log('No select element found, using raw HTML');
                             districtField.innerHTML = html;
                         }
                     })
                     .catch(error => {
                         console.error('Error loading districts:', error);
-                        districtField.innerHTML = '<option value="">Error loading districts</option>';
+                        if (districtField) districtField.innerHTML = '<option value="">Error loading districts</option>';
                     });
             }
         });
@@ -332,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const districtId = this.value;
             
             // Clear settlement field
-            settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (districtId) {
                 console.log('Loading settlements for district:', districtId);
@@ -349,17 +359,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         const select = doc.querySelector('select');
-                        if (select) {
+                        if (select && settlementField) {
                             settlementField.innerHTML = select.innerHTML;
                             console.log('Settlements loaded successfully');
-                        } else {
+                        } else if (settlementField) {
                             console.log('No select element found, using raw HTML');
                             settlementField.innerHTML = html;
                         }
                     })
                     .catch(error => {
                         console.error('Error loading settlements:', error);
-                        settlementField.innerHTML = '<option value="">Error loading settlements</option>';
+                        if (settlementField) settlementField.innerHTML = '<option value="">Error loading settlements</option>';
                     });
             }
         });
