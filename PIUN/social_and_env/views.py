@@ -1763,6 +1763,29 @@ def load_investment_types(request):
 
 
 @csrf_exempt
+def load_investment_types_esia(request):
+    """Load investment types for ESIA based on project selection"""
+    project_id = request.GET.get('project_name')
+    
+    if project_id:
+        try:
+            investment_types = KPI_For_Contract.objects.filter(
+                project=project_id,
+                monitoring_type_id='ESS'
+            ).values('type_of_investment', 'Kpi_description').distinct()
+            
+            options = '<option value="">Select Investment Type</option>'
+            for item in investment_types:
+                options += f'<option value="{item["type_of_investment"]}">{item["type_of_investment"]} - {item["Kpi_description"]}</option>'
+            
+            return HttpResponse(options)
+        except Exception as e:
+            return HttpResponse('<option value="">Error loading investment types</option>')
+    
+    return HttpResponse('<option value="">Select Investment Type</option>')
+
+
+@csrf_exempt
 def load_investment_types_grievance(request):
     """Load investment types for Grievance based on project selection"""
     project_id = request.GET.get('project_id')
