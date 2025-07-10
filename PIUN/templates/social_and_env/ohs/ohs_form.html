@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
             settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (regionId) {
-                fetch(`/social_and_env/load-districts-ohs/?region=${regionId}`)
+                fetch(`/social_and_env/ajax/load-districts-ohs/?region=${regionId}`)
                     .then(response => response.text())
                     .then(html => {
                         districtField.innerHTML = html;
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (districtId) {
-                fetch(`/social_and_env/load-settlements-ohs/?district=${districtId}`)
+                fetch(`/social_and_env/ajax/load-settlements-ohs/?district=${districtId}`)
                     .then(response => response.text())
                     .then(html => {
                         settlementField.innerHTML = html;
