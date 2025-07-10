@@ -1216,8 +1216,6 @@ def load_investment_types_ohs(request):
     })
 
 
-@csrf_exempt
-@never_cache
 def load_districts_ohs(request):
     """Load districts for OHS based on selected region"""
     from django.http import HttpResponse
@@ -1252,8 +1250,6 @@ def load_districts_ohs(request):
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
-@csrf_exempt
-@never_cache
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
     from django.http import HttpResponse

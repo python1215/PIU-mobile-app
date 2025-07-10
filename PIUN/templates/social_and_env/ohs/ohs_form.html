@@ -295,23 +295,27 @@ document.addEventListener('DOMContentLoaded', function() {
             settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (regionId) {
-                // Use a direct SQL query approach to bypass authentication issues
+                console.log('Loading districts for region:', regionId);
+                
+                // Try the test endpoint first
                 fetch(`/social_and_env/test-cascading/?region=${regionId}&type=districts`)
-                    .then(response => response.text())
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.text();
+                    })
                     .then(html => {
+                        console.log('Response HTML:', html.substring(0, 200));
+                        
                         // Extract just the select options from the test response
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         const select = doc.querySelector('select');
                         if (select) {
                             districtField.innerHTML = select.innerHTML;
+                            console.log('Districts loaded successfully');
                         } else {
-                            // Fallback to direct API call
-                            return fetch(`/social_and_env/ajax/load-districts-ohs/?region=${regionId}`)
-                                .then(response => response.text())
-                                .then(html => {
-                                    districtField.innerHTML = html;
-                                });
+                            console.log('No select element found, using raw HTML');
+                            districtField.innerHTML = html;
                         }
                     })
                     .catch(error => {
@@ -331,23 +335,26 @@ document.addEventListener('DOMContentLoaded', function() {
             settlementField.innerHTML = '<option value="">Select Settlement</option>';
             
             if (districtId) {
-                // Use the working test endpoint approach
+                console.log('Loading settlements for district:', districtId);
+                
                 fetch(`/social_and_env/test-cascading/?district=${districtId}&type=settlements`)
-                    .then(response => response.text())
+                    .then(response => {
+                        console.log('Settlement response status:', response.status);
+                        return response.text();
+                    })
                     .then(html => {
+                        console.log('Settlement response HTML:', html.substring(0, 200));
+                        
                         // Extract just the select options from the test response
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         const select = doc.querySelector('select');
                         if (select) {
                             settlementField.innerHTML = select.innerHTML;
+                            console.log('Settlements loaded successfully');
                         } else {
-                            // Fallback to direct API call
-                            return fetch(`/social_and_env/ajax/load-settlements-ohs/?district=${districtId}`)
-                                .then(response => response.text())
-                                .then(html => {
-                                    settlementField.innerHTML = html;
-                                });
+                            console.log('No select element found, using raw HTML');
+                            settlementField.innerHTML = html;
                         }
                     })
                     .catch(error => {
