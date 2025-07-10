@@ -1527,59 +1527,100 @@ def load_investment_types_esia(request):
 @login_required
 def load_investment_types_pap(request):
     """Load investment types for PAP based on project selection"""
+    from django.http import HttpResponse
+    
     project_id = request.GET.get('project')
-    investment_types = KPI_For_Contract.objects.none()
-
-    if project_id:
-        investment_types = KPI_For_Contract.objects.filter(
-            project_id=project_id).distinct()
-
-    return render(request, 'social_and_env/partials/investment_types.html',
-                  {'investment_types': investment_types})
+    if not project_id:
+        return HttpResponse('<option value="">Select Investment Type</option>')
+    
+    try:
+        from django.db import connection
+        
+        # Use raw SQL to ensure compatibility
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT DISTINCT type_of_investment 
+                FROM PIU_Financial_mgt_kpi_for_contract 
+                WHERE project_id = %s 
+                ORDER BY type_of_investment
+            """, [project_id])
+            
+            rows = cursor.fetchall()
+            
+            options = '<option value="">Select Investment Type</option>'
+            for row in rows:
+                options += f'<option value="{row[0]}">{row[0]}</option>'
+            
+            return HttpResponse(options)
+    
+    except Exception as e:
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 @login_required
 def load_districts(request):
     """Load districts based on region selection - Dual Mode Support"""
+    from django.http import HttpResponse
+    
     region_id = request.GET.get('region')
-    districts = []
-
-    if region_id:
-        if is_sql_server_mode():
-            # Use raw SQL for SQL Server
-            districts_data = get_cascading_dropdown_data(
-                Districts, 'region_code_id', region_id
-            )
-            # Convert to template-friendly format
-            districts = [{'pk': row[2], 'district_name': row[3]} for row in districts_data] if districts_data else []
-        else:
-            # Use Django ORM for SQLite
-            districts = Districts.objects.filter(region_code=region_id)
-
-    return render(request, 'social_and_env/partials/districts.html',
-                  {'districts': districts})
+    if not region_id:
+        return HttpResponse('<option value="">Select District</option>')
+    
+    try:
+        from django.db import connection
+        
+        # Use raw SQL to ensure compatibility
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT district_code, district_name 
+                FROM setup_districts 
+                WHERE region_code_id = %s 
+                ORDER BY district_name
+            """, [region_id])
+            
+            rows = cursor.fetchall()
+            
+            options = '<option value="">Select District</option>'
+            for row in rows:
+                options += f'<option value="{row[0]}">{row[1]}</option>'
+            
+            return HttpResponse(options)
+    
+    except Exception as e:
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 @login_required
 def load_settlements(request):
     """Load settlements based on district selection - Dual Mode Support"""
+    from django.http import HttpResponse
+    
     district_id = request.GET.get('district')
-    settlements = []
-
-    if district_id:
-        if is_sql_server_mode():
-            # Use raw SQL for SQL Server
-            settlements_data = get_cascading_dropdown_data(
-                Settlement, 'district_code_id', district_id
-            )
-            # Convert to template-friendly format
-            settlements = [{'pk': row[1], 'settlement_name': row[2]} for row in settlements_data] if settlements_data else []
-        else:
-            # Use Django ORM for SQLite
-            settlements = Settlement.objects.filter(district_code=district_id)
-
-    return render(request, 'social_and_env/partials/settlements.html',
-                  {'settlements': settlements})
+    if not district_id:
+        return HttpResponse('<option value="">Select Settlement</option>')
+    
+    try:
+        from django.db import connection
+        
+        # Use raw SQL to ensure compatibility
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT settlement_code, settlement_name 
+                FROM setup_settlement 
+                WHERE district_code_id = %s 
+                ORDER BY settlement_name
+            """, [district_id])
+            
+            rows = cursor.fetchall()
+            
+            options = '<option value="">Select Settlement</option>'
+            for row in rows:
+                options += f'<option value="{row[0]}">{row[1]}</option>'
+            
+            return HttpResponse(options)
+    
+    except Exception as e:
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 @login_required

@@ -289,9 +289,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Cascading dropdown functionality
+    const projectField = document.getElementById('id_project');
+    const investmentField = document.getElementById('id_type_of_investment');
     const regionField = document.getElementById('id_region');
     const districtField = document.getElementById('id_district');
     const settlementField = document.getElementById('id_pap_Current_Address');
+    
+    // Handle project change to load investment types
+    if (projectField) {
+        projectField.addEventListener('change', function() {
+            const projectId = this.value;
+            
+            // Clear investment type field
+            if (investmentField) investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            
+            if (projectId) {
+                console.log('Loading investment types for project:', projectId);
+                
+                fetch(`/social_and_env/ajax/load-investment-types-pap/?project=${projectId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        if (investmentField) {
+                            investmentField.innerHTML = html;
+                            console.log('Investment types loaded successfully');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading investment types:', error);
+                        if (investmentField) investmentField.innerHTML = '<option value="">Error loading investment types</option>';
+                    });
+            }
+        });
+    }
     
     // Handle region change
     if (regionField) {
@@ -305,23 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (regionId) {
                 console.log('Loading districts for region:', regionId);
                 
-                fetch(`/social_and_env/test-cascading/?region=${regionId}&type=districts`)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        return response.text();
-                    })
+                fetch(`/social_and_env/ajax/load-districts/?region=${regionId}`)
+                    .then(response => response.text())
                     .then(html => {
-                        console.log('Response HTML:', html.substring(0, 200));
-                        
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const select = doc.querySelector('select');
-                        if (select && districtField) {
-                            districtField.innerHTML = select.innerHTML;
-                            console.log('Districts loaded successfully');
-                        } else if (districtField) {
-                            console.log('No select element found, using raw HTML');
+                        if (districtField) {
                             districtField.innerHTML = html;
+                            console.log('Districts loaded successfully');
                         }
                     })
                     .catch(error => {
@@ -343,23 +361,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (districtId) {
                 console.log('Loading settlements for district:', districtId);
                 
-                fetch(`/social_and_env/test-cascading/?district=${districtId}&type=settlements`)
-                    .then(response => {
-                        console.log('Settlement response status:', response.status);
-                        return response.text();
-                    })
+                fetch(`/social_and_env/ajax/load-settlements/?district=${districtId}`)
+                    .then(response => response.text())
                     .then(html => {
-                        console.log('Settlement response HTML:', html.substring(0, 200));
-                        
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const select = doc.querySelector('select');
-                        if (select && settlementField) {
-                            settlementField.innerHTML = select.innerHTML;
-                            console.log('Settlements loaded successfully');
-                        } else if (settlementField) {
-                            console.log('No select element found, using raw HTML');
+                        if (settlementField) {
                             settlementField.innerHTML = html;
+                            console.log('Settlements loaded successfully');
                         }
                     })
                     .catch(error => {

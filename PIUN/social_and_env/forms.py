@@ -109,10 +109,7 @@ class PAPForm(forms.ModelForm):
         queryset=Project.objects.all(),
         empty_label="Select Project",
         widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_investment_types_pap"),
-            "hx-target": "#id_type_of_investment",
-            "hx-trigger": "change"
+            "class": "form-select"
         })
     )
 
@@ -126,10 +123,7 @@ class PAPForm(forms.ModelForm):
         queryset=Regions.objects.all(),
         empty_label="Select Region",
         widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_districts"),
-            "hx-target": "#id_district",
-            "hx-trigger": "change"
+            "class": "form-select"
         })
     )
 
@@ -137,10 +131,7 @@ class PAPForm(forms.ModelForm):
         queryset=Districts.objects.none(),
         empty_label="Select District",
         widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_settlements"),
-            "hx-target": "#id_pap_Current_Address",
-            "hx-trigger": "change"
+            "class": "form-select"
         })
     )
 
