@@ -9,12 +9,12 @@ Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
         <!-- First Page -->
         {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" title="First page">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="First page">
                     <i class="bi bi-chevron-double-left"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" title="Previous page">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="Previous page">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
@@ -30,12 +30,12 @@ Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <!-- Pages within 3 of current -->
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
                 </li>
             {% elif num == 1 %}
                 <!-- Always show first page -->
                 <li class="page-item">
-                    <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">1</a>
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">1</a>
                 </li>
                 {% if page_obj.number > 4 %}
                     <li class="page-item disabled">
@@ -50,7 +50,7 @@ Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
                     </li>
                 {% endif %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ page_obj.paginator.num_pages }}</a>
                 </li>
             {% endif %}
         {% endfor %}
@@ -58,12 +58,12 @@ Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
         <!-- Next/Last Page -->
         {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" title="Next page">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="Next page">
                     <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" title="Last page">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="Last page">
                     <i class="bi bi-chevron-double-right"></i>
                 </a>
             </li>
