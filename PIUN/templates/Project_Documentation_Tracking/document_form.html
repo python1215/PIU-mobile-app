@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Document Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .sql-server-form .form-control {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if is_sql_server_mode %}
+                        <!-- SQL Server Mode Form -->
+                        <form method="post" enctype="multipart/form-data" class="sql-server-form">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="title" class="form-label">Document Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ document.title|default:'' }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="3">{{ document.description|default:'' }}</textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="project" class="form-label">Project *</label>
+                                        <select class="form-select" id="project" name="project" required>
+                                            <option value="">Select Project</option>
+                                            {% for project in projects %}
+                                                <option value="{{ project.projectID }}" 
+                                                    {% if document.project_id == project.projectID %}selected{% endif %}>
+                                                    {{ project.project }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="document_type" class="form-label">Document Type *</label>
+                                        <select class="form-select" id="document_type" name="document_type" required>
+                                            <option value="">Select Document Type</option>
+                                            {% for doc_type in document_types %}
+                                                <option value="{{ doc_type.id }}" 
+                                                    {% if document.document_type_id == doc_type.id %}selected{% endif %}>
+                                                    {{ doc_type.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select class="form-select" id="status" name="status">
+                                            <option value="draft" {% if document.status == 'draft' %}selected{% endif %}>Draft</option>
+                                            <option value="under_review" {% if document.status == 'under_review' %}selected{% endif %}>Under Review</option>
+                                            <option value="approved" {% if document.status == 'approved' %}selected{% endif %}>Approved</option>
+                                            <option value="rejected" {% if document.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="priority" class="form-label">Priority</label>
+                                        <select class="form-select" id="priority" name="priority">
+                                            <option value="low" {% if document.priority == 'low' %}selected{% endif %}>Low</option>
+                                            <option value="medium" {% if document.priority == 'medium' %}selected{% endif %}>Medium</option>
+                                            <option value="high" {% if document.priority == 'high' %}selected{% endif %}>High</option>
+                                            <option value="critical" {% if document.priority == 'critical' %}selected{% endif %}>Critical</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="due_date" name="due_date" 
+                                       value="{{ document.due_date|date:'Y-m-d'|default:'' }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="keywords" class="form-label">Keywords</label>
+                                <input type="text" class="form-control" id="keywords" name="keywords" 
+                                       value="{{ document.keywords|default:'' }}" 
+                                       placeholder="Comma-separated keywords">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="notes" name="notes" 
+                                          rows="3">{{ document.notes|default:'' }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Document
+                                </button>
+                                <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <!-- SQLite Mode Form -->
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <p>{{ field }}: {{ error }}</p>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-group">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    {{ form.title.label }}
+                                    {% if form.title.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                    <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    {{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.project.id_for_label }}" class="form-label">
+                                            {{ form.project.label }}
+                                            {% if form.project.field.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        {{ form.project }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.document_type.id_for_label }}" class="form-label">
+                                            {{ form.document_type.label }}
+                                            {% if form.document_type.field.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        {{ form.document_type }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label">
+                                            {{ form.status.label }}
+                                        </label>
+                                        {{ form.status }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                            {{ form.priority.label }}
+                                        </label>
+                                        {{ form.priority }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                    {{ form.due_date.label }}
+                                </label>
+                                {{ form.due_date }}
+                            </div>
+
+                            {% if form.document_file %}
+                                <div class="form-group">
+                                    <label for="{{ form.document_file.id_for_label }}" class="form-label">
+                                        {{ form.document_file.label }}
+                                    </label>
+                                    {{ form.document_file }}
+                                    {% if document.document_file %}
+                                        <small class="form-text text-muted">
+                                            Current file: <a href="{{ document.document_file.url }}" target="_blank">{{ document.document_file.name }}</a>
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Document
+                                </button>
+                                <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const requiredFields = form.querySelectorAll('input[required], select[required]');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+    });
+</script>
+{% endblock %}

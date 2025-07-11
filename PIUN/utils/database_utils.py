@@ -63,7 +63,7 @@ def get_cascading_dropdown_data(model_class, filter_field=None, filter_value=Non
         table_name = get_sql_server_table_name(model_class._meta.db_table)
         
         if filter_field and filter_value:
-            query = f"SELECT * FROM {table_name} WHERE {filter_field} = %s ORDER BY {model_class._meta.pk.name}"
+            query = f"SELECT * FROM {table_name} WHERE {filter_field} = ? ORDER BY {model_class._meta.pk.name}"
             return execute_database_query(query, [filter_value])
         else:
             query = f"SELECT * FROM {table_name} ORDER BY {model_class._meta.pk.name}"
@@ -75,6 +75,67 @@ def get_cascading_dropdown_data(model_class, filter_field=None, filter_value=Non
             return model_class.objects.filter(**filter_kwargs).values()
         else:
             return model_class.objects.all().values()
+
+def get_document_management_data(table_name, document_id=None):
+    """Get document management data with dual-mode support"""
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server
+        sql_table_name = get_sql_server_table_name(table_name)
+        
+        if document_id:
+            query = f"SELECT * FROM {sql_table_name} WHERE document_id = ?"
+            return execute_database_query(query, [document_id], fetch_all=False)
+        else:
+            query = f"SELECT * FROM {sql_table_name} ORDER BY created_date DESC"
+            return execute_database_query(query)
+    else:
+        # For SQLite, return None to use Django ORM
+        return None
+
+def insert_document_data(table_name, data_dict):
+    """Insert document data with dual-mode support"""
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server
+        sql_table_name = get_sql_server_table_name(table_name)
+        
+        # Build insert query
+        columns = ', '.join(data_dict.keys())
+        placeholders = ', '.join(['?' for _ in data_dict.keys()])
+        values = list(data_dict.values())
+        
+        query = f"INSERT INTO {sql_table_name} ({columns}) VALUES ({placeholders})"
+        return execute_database_query(query, values, fetch_all=False)
+    else:
+        # For SQLite, return None to use Django ORM
+        return None
+
+def update_document_data(table_name, document_id, data_dict):
+    """Update document data with dual-mode support"""
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server
+        sql_table_name = get_sql_server_table_name(table_name)
+        
+        # Build update query
+        set_clauses = ', '.join([f"{key} = ?" for key in data_dict.keys()])
+        values = list(data_dict.values()) + [document_id]
+        
+        query = f"UPDATE {sql_table_name} SET {set_clauses} WHERE document_id = ?"
+        return execute_database_query(query, values, fetch_all=False)
+    else:
+        # For SQLite, return None to use Django ORM
+        return None
+
+def delete_document_data(table_name, document_id):
+    """Delete document data with dual-mode support"""
+    if is_sql_server_mode():
+        # Use raw SQL for SQL Server
+        sql_table_name = get_sql_server_table_name(table_name)
+        
+        query = f"DELETE FROM {sql_table_name} WHERE document_id = ?"
+        return execute_database_query(query, [document_id], fetch_all=False)
+    else:
+        # For SQLite, return None to use Django ORM
+        return None
 
 def safe_model_save(model_instance, using_raw_sql=False):
     """Save model instance with proper mode handling"""

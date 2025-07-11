@@ -40,8 +40,8 @@
                             <select name="project" class="form-select">
                                 <option value="">All Projects</option>
                                 {% for project in projects %}
-                                <option value="{{ project.project_id }}" {% if current_filters.project == project.project_id|stringformat:"s" %}selected{% endif %}>
-                                    {{ project.project_name }}
+                                <option value="{{ project.projectID }}" {% if current_filters.project == project.projectID|stringformat:"s" %}selected{% endif %}>
+                                    {{ project.project }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -51,8 +51,8 @@
                             <select name="document_type" class="form-select">
                                 <option value="">All Types</option>
                                 {% for doc_type in document_types %}
-                                <option value="{{ doc_type.document_type_id }}" {% if current_filters.document_type == doc_type.document_type_id|stringformat:"s" %}selected{% endif %}>
-                                    {{ doc_type.document_type }}
+                                <option value="{{ doc_type.id }}" {% if current_filters.document_type == doc_type.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ doc_type.name }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -126,8 +126,8 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ document.project.project_name }}</td>
-                                        <td>{{ document.document_type.document_type }}</td>
+                                        <td>{{ document.project.project|default:"N/A" }}</td>
+                                        <td>{{ document.document_type.name|default:"N/A" }}</td>
                                         <td>
                                             {% if document.status == 'approved' %}
                                                 <span class="badge bg-success">Approved</span>
@@ -152,10 +152,10 @@
                                                 <span class="badge bg-secondary">Low</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ document.version }}</td>
+                                        <td>{{ document.version|default:"1.0" }}</td>
                                         <td>
                                             <small>{{ document.created_date|date:"M d, Y" }}</small>
-                                            <small class="text-muted d-block">{{ document.created_by.username }}</small>
+                                            <small class="text-muted d-block">{{ document.created_by.username|default:"System" }}</small>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
