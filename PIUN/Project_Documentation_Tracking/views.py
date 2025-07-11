@@ -243,7 +243,7 @@ def document_list(request):
         # SQLite mode using Django ORM with actual model fields
         documents = ProjectDocument.objects.select_related(
             'project', 'document_type', 'loginUser'
-        ).all()
+        ).order_by('-id')
         
         # Filter by project
         project_id = request.GET.get('project')
@@ -278,7 +278,6 @@ def document_list(request):
         'current_filters': {
             'project': request.GET.get('project'),
             'document_type': request.GET.get('document_type'),
-            'status': request.GET.get('status'),
             'search': request.GET.get('search'),
         }
     }
