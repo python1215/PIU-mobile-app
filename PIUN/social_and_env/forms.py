@@ -91,11 +91,27 @@ class ESIAForm(forms.ModelForm):
             # For new forms, include all investment types to prevent validation errors
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
 
+
+
     def clean(self):
+        """Override clean method to handle cascading validation"""
         cleaned_data = super().clean()
+        project_name = cleaned_data.get('project_name')
+        type_of_investment = cleaned_data.get('type_of_investment')
         project_duration = cleaned_data.get('project_duration')
         project_phase = cleaned_data.get('project_phase')
         
+        # Handle cascading dropdown validation
+        if project_name and type_of_investment:
+            # Temporarily update the queryset to include the selected value
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(project=project_name)
+            
+            # Validate that the selected investment type belongs to the selected project
+            valid_investments = KPI_For_Contract.objects.filter(project=project_name)
+            if type_of_investment not in valid_investments:
+                self.add_error('type_of_investment', "Please select a valid investment type for the chosen project.")
+        
+        # Existing validation logic
         if project_duration and (project_duration < 1 or project_duration > 120):
             self.add_error('project_duration', 'Project duration must be between 1 and 120 months.')
             
@@ -103,22 +119,6 @@ class ESIAForm(forms.ModelForm):
             self.add_error('project_phase', 'Project phase must be between 1 and 10.')
             
         return cleaned_data
-
-    def clean_type_of_investment(self):
-        """Custom validation for type_of_investment field"""
-        type_of_investment = self.cleaned_data.get('type_of_investment')
-        project_name = self.cleaned_data.get('project_name')
-        
-        if project_name and type_of_investment:
-            # Ensure the queryset includes the selected investment type
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(project=project_name)
-            
-            # Validate that the selected investment type belongs to the selected project
-            valid_investments = KPI_For_Contract.objects.filter(project=project_name)
-            if type_of_investment not in valid_investments:
-                raise forms.ValidationError("Please select a valid investment type for the chosen project.")
-        
-        return type_of_investment
 
 
 class PAPForm(forms.ModelForm):
@@ -268,6 +268,45 @@ class PAPForm(forms.ModelForm):
         else:
             # For new forms, include all settlements to prevent validation errors
             self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
+
+    def clean(self):
+        """Override clean method to handle cascading validation"""
+        cleaned_data = super().clean()
+        project = cleaned_data.get('project')
+        type_of_investment = cleaned_data.get('type_of_investment')
+        region = cleaned_data.get('region')
+        district = cleaned_data.get('district')
+        pap_Current_Address = cleaned_data.get('pap_Current_Address')
+        
+        # Handle cascading dropdown validation
+        if project and type_of_investment:
+            # Temporarily update the queryset to include the selected value
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(project=project)
+            
+            # Validate that the selected investment type belongs to the selected project
+            valid_investments = KPI_For_Contract.objects.filter(project=project)
+            if type_of_investment not in valid_investments:
+                self.add_error('type_of_investment', "Please select a valid investment type for the chosen project.")
+        
+        if region and district:
+            # Temporarily update the queryset to include the selected value
+            self.fields['district'].queryset = Districts.objects.filter(region_code=region)
+            
+            # Validate that the selected district belongs to the selected region
+            valid_districts = Districts.objects.filter(region_code=region)
+            if district not in valid_districts:
+                self.add_error('district', "Please select a valid district for the chosen region.")
+        
+        if district and pap_Current_Address:
+            # Temporarily update the queryset to include the selected value
+            self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(district_code=district)
+            
+            # Validate that the selected settlement belongs to the selected district
+            valid_settlements = Settlement.objects.filter(district_code=district)
+            if pap_Current_Address not in valid_settlements:
+                self.add_error('pap_Current_Address', "Please select a valid settlement for the chosen district.")
+        
+        return cleaned_data
 
 
 class GrievianceMonitoringLogForm(forms.ModelForm):

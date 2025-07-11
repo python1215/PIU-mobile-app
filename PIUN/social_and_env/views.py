@@ -89,13 +89,19 @@ def esia_add(request):
     if request.method == 'POST':
         form = ESIAForm(request.POST)
         if form.is_valid():
-            esia = form.save(commit=False)
-            esia.loginUser = request.user
-            esia.save()
-            messages.success(request, 'ESIA record created successfully!')
-            return redirect('esia_list')
+            try:
+                esia = form.save(commit=False)
+                esia.loginUser = request.user
+                esia.save()
+                messages.success(request, 'ESIA record created successfully!')
+                return redirect('esia_list')
+            except Exception as e:
+                messages.error(request, f'Error saving ESIA record: {str(e)}')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            # Print form errors for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ESIAForm()
 
@@ -432,6 +438,11 @@ def pap_add(request):
                 return redirect('pap_list')
             except Exception as e:
                 messages.error(request, f'Error saving PAP record: {str(e)}')
+        else:
+            # Print form errors for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = PAPForm()
     
