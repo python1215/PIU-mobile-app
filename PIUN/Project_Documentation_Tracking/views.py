@@ -128,26 +128,23 @@ def document_dashboard(request):
         project_counts = []
         
     else:
-        # SQLite mode using Django ORM
+        # SQLite mode using Django ORM with actual model fields
         total_documents = ProjectDocument.objects.count()
-        pending_review = ProjectDocument.objects.filter(status='under_review').count()
-        approved_documents = ProjectDocument.objects.filter(status='approved').count()
-        overdue_documents = ProjectDocument.objects.filter(
-            due_date__lt=timezone.now().date(),
-            status__in=['draft', 'under_review']
-        ).count()
+        pending_review = 0  # No status field in current model
+        approved_documents = 0  # No status field in current model
+        overdue_documents = 0  # No due_date field in current model
         
-        # Recent documents
+        # Recent documents using actual fields
         recent_documents = ProjectDocument.objects.select_related(
-            'project', 'document_type', 'created_by'
-        ).order_by('-created_date')[:5]
+            'project', 'document_type', 'loginUser'
+        ).order_by('-date')[:5]
         
-        # Documents by status
-        status_counts = ProjectDocument.objects.values('status').annotate(count=Count('status'))
+        # Documents by document type (since no status field)
+        status_counts = ProjectDocument.objects.values('document_type__document_type').annotate(count=Count('id'))
         
         # Documents by project
         project_counts = ProjectDocument.objects.values('project__project').annotate(
-            count=Count('document_id')
+            count=Count('id')
         ).order_by('-count')[:5]
     
     context = {
@@ -243,9 +240,9 @@ def document_list(request):
         document_types = DocumentType.objects.all() if not is_sql_server_mode() else []
         
     else:
-        # SQLite mode using Django ORM
+        # SQLite mode using Django ORM with actual model fields
         documents = ProjectDocument.objects.select_related(
-            'project', 'document_type', 'created_by'
+            'project', 'document_type', 'loginUser'
         ).all()
         
         # Filter by project
@@ -258,16 +255,10 @@ def document_list(request):
         if doc_type_id:
             documents = documents.filter(document_type_id=doc_type_id)
         
-        # Filter by status
-        status = request.GET.get('status')
-        if status:
-            documents = documents.filter(status=status)
-        
-        # Search by title or description
+        # Search by description (no title field in current model)
         search_query = request.GET.get('search')
         if search_query:
             documents = documents.filter(
-                Q(title__icontains=search_query) | 
                 Q(description__icontains=search_query)
             )
         
@@ -363,28 +354,23 @@ def document_create(request):
         if is_sql_server_mode():
             # SQL Server mode - direct SQL insertion
             try:
-                table_name = get_sql_server_table_name("Project_Documentation_Tracking_projectdocument")
+                table_name = get_sql_server_table_name("Project_Documentation_Tracking_project_documentation_tracking")
                 
-                # Extract form data
-                title = request.POST.get('title')
+                # Extract form data using actual model fields
                 description = request.POST.get('description', '')
                 project_id = request.POST.get('project')
                 document_type_id = request.POST.get('document_type')
-                status = request.POST.get('status', 'draft')
-                priority = request.POST.get('priority', 'medium')
-                due_date = request.POST.get('due_date')
-                version = request.POST.get('version', '1.0')
+                document_date = request.POST.get('document_date')
                 
                 # Insert document into SQL Server
                 insert_query = f"""
                     INSERT INTO {table_name} 
-                    (title, description, project_id, document_type_id, status, priority, due_date, version, created_by_id, created_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
+                    (description, project_id, document_type_id, document_date, loginUser_id, date)
+                    VALUES (?, ?, ?, ?, ?, GETDATE())
                 """
                 
                 params = [
-                    title, description, project_id, document_type_id, 
-                    status, priority, due_date, version, request.user.id
+                    description, project_id, document_type_id, document_date, request.user.id
                 ]
                 
                 execute_database_query(insert_query, params, fetch_all=False)
@@ -398,12 +384,7 @@ def document_create(request):
             form = ProjectDocumentForm(request.POST, request.FILES)
             if form.is_valid():
                 document = form.save(commit=False)
-                document.created_by = request.user
-                
-                # Set file metadata
-                if document.document_file:
-                    document.file_size = document.document_file.size
-                
+                document.loginUser = request.user
                 document.save()
                 messages.success(request, 'Document created successfully!')
                 return redirect('Project_Documentation_Tracking:document_detail', pk=document.pk)
@@ -573,49 +554,7 @@ def document_delete(request, pk):
 
 
 @login_required
-def document_approve(request, pk):
-    """Approve document"""
-    document = get_object_or_404(ProjectDocument, pk=pk)
-    
-    if request.method == 'POST':
-        document.status = 'approved'
-        document.reviewed_by = request.user
-        document.review_date = timezone.now()
-        document.review_comments = request.POST.get('review_comments', '')
-        document.save()
-        
-        messages.success(request, 'Document approved successfully!')
-        return redirect('Project_Documentation_Tracking:document_detail', pk=pk)
-    
-    context = {
-        'document': document,
-        'title': 'Approve Document'
-    }
-    
-    return render(request, 'Project_Documentation_Tracking/document_approve.html', context)
-
-
-@login_required
-def document_reject(request, pk):
-    """Reject document"""
-    document = get_object_or_404(ProjectDocument, pk=pk)
-    
-    if request.method == 'POST':
-        document.status = 'rejected'
-        document.reviewed_by = request.user
-        document.review_date = timezone.now()
-        document.review_comments = request.POST.get('review_comments', '')
-        document.save()
-        
-        messages.success(request, 'Document rejected!')
-        return redirect('Project_Documentation_Tracking:document_detail', pk=pk)
-    
-    context = {
-        'document': document,
-        'title': 'Reject Document'
-    }
-    
-    return render(request, 'Project_Documentation_Tracking/document_reject.html', context)
+# Document approve/reject functions removed as status field doesn't exist in current model
 
 
 @login_required
@@ -679,22 +618,7 @@ def tag_management(request):
     return render(request, 'Project_Documentation_Tracking/tag_management.html', context)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def ajax_update_document_status(request):
-    """AJAX endpoint to update document status"""
-    try:
-        data = json.loads(request.body)
-        document_id = data.get('document_id')
-        new_status = data.get('status')
-        
-        document = get_object_or_404(ProjectDocument, pk=document_id)
-        document.status = new_status
-        document.save()
-        
-        return JsonResponse({'success': True, 'message': 'Status updated successfully'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+# AJAX status update removed as status field doesn't exist in current model
 
 
 # Add timezone import
