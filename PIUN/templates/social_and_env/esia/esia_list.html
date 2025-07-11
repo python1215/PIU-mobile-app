@@ -74,35 +74,45 @@
         <form method="get" class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Project</label>
-                {% render_field filter.form.project_name class="form-select" %}
+                <select name="project" class="form-select">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.project }}" {% if request.GET.project == project.project %}selected{% endif %}>
+                            {{ project.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Investment Type</label>
-                {% render_field filter.form.type_of_investment class="form-select" %}
+                <label class="form-label">Region</label>
+                <select name="region" class="form-select">
+                    <option value="">All Regions</option>
+                    {% for region in regions %}
+                        <option value="{{ region.region_code }}" {% if request.GET.region == region.region_code %}selected{% endif %}>
+                            {{ region.region_name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Phase</label>
-                {% render_field filter.form.project_phase class="form-control" %}
+                <label class="form-label">Year</label>
+                <select name="year" class="form-select">
+                    <option value="">All Years</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {% if request.GET.year == year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Duration (From)</label>
-                {% render_field filter.form.project_duration.0 class="form-control" %}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Duration (To)</label>
-                {% render_field filter.form.project_duration.1 class="form-control" %}
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Locations</label>
-                {% render_field filter.form.project_locations class="form-control" %}
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Date From</label>
-                {% render_field filter.form.date_created_after class="form-control" type="date" %}
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Date To</label>
-                {% render_field filter.form.date_created_before class="form-control" type="date" %}
+                <label class="form-label">Page Size</label>
+                <select name="page_size" class="form-select">
+                    <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10</option>
+                    <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25</option>
+                    <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50</option>
+                    <option value="100" {% if request.GET.page_size == "100" %}selected{% endif %}>100</option>
+                </select>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary me-2">

@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.contrib import messages
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.db import models
 from django.db.models import Q, Count, Sum, Avg
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -1004,12 +1005,21 @@ def esia_list(request):
         stats = {
             'total_esia': ESIA.objects.count(),
             'filtered_count': esias.count(),
-            'total_communities': esias.aggregate(total=models.Sum('number_of_communities'))['total'] or 0,
+            'total_communities': esias.aggregate(total=Sum('number_of_communities'))['total'] or 0,
         }
+        
+        # Get filter data
+        from PIU_Financial_mgt.models import Project
+        projects = Project.objects.all()
+        regions = Regions.objects.all()
+        years = ESIA.objects.values_list('year_of_report__profile_year', flat=True).distinct().order_by('year_of_report__profile_year')
         
         context = {
             'page_obj': page_obj,
             'stats': stats,
+            'projects': projects,
+            'regions': regions,
+            'years': years,
             'title': 'ESIA Management'
         }
         
@@ -1017,9 +1027,18 @@ def esia_list(request):
     
     except Exception as e:
         messages.error(request, f'Error loading ESIA records: {str(e)}')
+        # Get filter data for error case
+        from PIU_Financial_mgt.models import Project
+        projects = Project.objects.all()
+        regions = Regions.objects.all()
+        years = []
+        
         return render(request, 'social_and_env/esia/esia_list.html', {
             'page_obj': None,
             'stats': {},
+            'projects': projects,
+            'regions': regions,
+            'years': years,
             'title': 'ESIA Management'
         })
 
