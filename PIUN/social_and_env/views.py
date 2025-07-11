@@ -201,59 +201,295 @@ def esia_export_excel(request):
 # ======================== PAP Views ========================
 @login_required
 def pap_list(request):
-    """Enhanced PAP list view with filtering and pagination - SQLite optimized"""
+    """Enhanced PAP list view with filtering and pagination - Dual Mode Support"""
+    from django.db import connection
     from django.core.paginator import Paginator
     from django.db.models import Sum
-    from utils.database_utils import is_sql_server_mode
+    from utils.database_utils import is_sql_server_mode, get_sql_server_table_name
     
     # Check if we're in SQL Server mode
     is_sql_server = is_sql_server_mode()
     
     try:
-        # Always use Django ORM for SQLite (current system configuration)
-        pap_list = PAP.objects.select_related(
-            'project', 'type_of_investment', 'region', 'district',
-            'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'
-        ).all()
-
-        # Apply filters using Django ORM
-        pap_filter = PAPFilter(request.GET, queryset=pap_list)
-        filtered_pap = pap_filter.qs
-
-        # Pagination with configurable page size
-        page_size = request.GET.get('page_size', 10)
-        try:
-            page_size = int(page_size)
-            if page_size not in [10, 15, 25, 50, 100]:
+        if is_sql_server:
+            # Use SQL Server with raw queries - Fixed parameter binding
+            table_name = get_sql_server_table_name('[social_and_env_pap]')
+            
+            # Get total count
+            count_query = f"SELECT COUNT(*) FROM {table_name}"
+            with connection.cursor() as cursor:
+                cursor.execute(count_query)
+                total_count = cursor.fetchone()[0]
+            
+            # Get PAP data with pagination
+            page_size = request.GET.get('page_size', 10)
+            try:
+                page_size = int(page_size)
+                if page_size not in [10, 15, 25, 50, 100]:
+                    page_size = 10
+            except (ValueError, TypeError):
                 page_size = 10
-        except (ValueError, TypeError):
-            page_size = 10
+            
+            page_number = request.GET.get('page', 1)
+            try:
+                page_number = int(page_number)
+            except (ValueError, TypeError):
+                page_number = 1
+            
+            offset = (page_number - 1) * page_size
+            
+            # Build WHERE clause based on filters
+            where_conditions = []
+            params = []
+            
+            # Apply filters using exact SQL Server field names
+            if request.GET.get('project'):
+                where_conditions.append("project_id = ?")
+                params.append(request.GET.get('project'))
+            
+            if request.GET.get('region'):
+                where_conditions.append("region_id = ?")
+                params.append(request.GET.get('region'))
+            
+            if request.GET.get('sex'):
+                where_conditions.append("sex = ?")
+                params.append(request.GET.get('sex'))
+            
+            if request.GET.get('pap_compensated'):
+                where_conditions.append("pap_compensated = ?")
+                params.append(request.GET.get('pap_compensated'))
+            
+            if request.GET.get('pap_name'):
+                where_conditions.append("pap_name LIKE ?")
+                params.append(f"%{request.GET.get('pap_name')}%")
+            
+            if request.GET.get('location_of_impact'):
+                where_conditions.append("location_of_impact LIKE ?")
+                params.append(f"%{request.GET.get('location_of_impact')}%")
+            
+            if request.GET.get('amount_min'):
+                where_conditions.append("amount >= ?")
+                params.append(float(request.GET.get('amount_min')))
+            
+            if request.GET.get('amount_max'):
+                where_conditions.append("amount <= ?")
+                params.append(float(request.GET.get('amount_max')))
+            
+            # Build WHERE clause
+            where_clause = ""
+            if where_conditions:
+                where_clause = "WHERE " + " AND ".join(where_conditions)
+            
+            # Update count query with filters
+            if where_conditions:
+                count_query = f"SELECT COUNT(*) FROM {table_name} {where_clause}"
+                with connection.cursor() as cursor:
+                    cursor.execute(count_query, params)
+                    total_count = cursor.fetchone()[0]
+            
+            # Main query with pagination and filtering using exact SQL Server field names
+            pap_query = f"""
+                SELECT 
+                    ISNULL([pap_identification_number], '') as pap_identification_number,
+                    ISNULL([pap_name], '') as pap_name,
+                    ISNULL([sex], '') as sex,
+                    ISNULL([location_of_impact], '') as location_of_impact,
+                    ISNULL([amount], 0) as amount,
+                    ISNULL([area], 0) as area,
+                    ISNULL([pap_compensated], 'N') as pap_compensated,
+                    ISNULL([compensation_date], '') as compensation_date,
+                    ISNULL([compensation_RefNo], '') as compensation_RefNo,
+                    ISNULL([pre_project_situation], '') as pre_project_situation,
+                    ISNULL([remarks], '') as remarks,
+                    ISNULL([date_created], '') as date_created,
+                    ISNULL([district_id], '') as district_id,
+                    ISNULL([loginUser_id], '') as loginUser_id,
+                    ISNULL([nature_of_compensation_id], '') as nature_of_compensation_id,
+                    ISNULL([pap_Current_Address_id], '') as pap_Current_Address_id,
+                    ISNULL([pap_category_id], '') as pap_category_id,
+                    ISNULL([project_id], '') as project_id,
+                    ISNULL([region_id], '') as region_id,
+                    ISNULL([type_of_impact_id], '') as type_of_impact_id,
+                    ISNULL([type_of_investment_id], '') as type_of_investment_id,
+                    ISNULL([type_of_pap_id], '') as type_of_pap_id,
+                    ISNULL([vulnerability_category_id], '') as vulnerability_category_id
+                FROM {table_name}
+                {where_clause}
+                ORDER BY [pap_identification_number]
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+            """
+            
+            # Add pagination parameters - Fixed: separate params for main query
+            main_params = params.copy()
+            main_params.extend([offset, page_size])
+            
+            with connection.cursor() as cursor:
+                cursor.execute(pap_query, main_params)
+                pap_records = cursor.fetchall()
+            
+            # Create mock objects for template compatibility
+            class MockPAP:
+                def __init__(self, row):
+                    self.pap_identification_number = row[0] or ''
+                    self.pap_name = row[1] or ''
+                    self.sex = row[2] or ''
+                    self.location_of_impact = row[3] or ''
+                    self.amount = row[4] or 0
+                    self.area = row[5] or 0
+                    self.pap_compensated = row[6] or 'N'
+                    self.compensation_date = row[7] or ''
+                    self.compensation_RefNo = row[8] or ''
+                    self.pre_project_situation = row[9] or ''
+                    self.remarks = row[10] or ''
+                    self.date_created = row[11] or ''
+                    self.district_id = row[12] or ''
+                    self.loginUser_id = row[13] or ''
+                    self.nature_of_compensation_id = row[14] or ''
+                    self.pap_Current_Address_id = row[15] or ''
+                    self.pap_category_id = row[16] or ''
+                    self.project_id = row[17] or ''
+                    self.region_id = row[18] or ''
+                    self.type_of_impact_id = row[19] or ''
+                    self.type_of_investment_id = row[20] or ''
+                    self.type_of_pap_id = row[21] or ''
+                    self.vulnerability_category_id = row[22] or ''
+                    # Add pk for URL compatibility
+                    self.pk = self.pap_identification_number
+            
+            # Convert to mock objects
+            pap_list = [MockPAP(row) for row in pap_records]
+            
+            # Calculate statistics
+            stats_query = f"""
+                SELECT 
+                    COUNT(*) as total_pap,
+                    SUM(CASE WHEN [pap_compensated] = 'Y' THEN 1 ELSE 0 END) as compensated,
+                    SUM(CASE WHEN [pap_compensated] = 'N' THEN 1 ELSE 0 END) as not_compensated,
+                    SUM(ISNULL([amount], 0)) as total_compensation,
+                    SUM(CASE WHEN [sex] = 'M' THEN 1 ELSE 0 END) as male_count,
+                    SUM(CASE WHEN [sex] = 'F' THEN 1 ELSE 0 END) as female_count
+                FROM {table_name}
+            """
+            
+            with connection.cursor() as cursor:
+                cursor.execute(stats_query)
+                stats_row = cursor.fetchone()
+                
+                stats = {
+                    'total_pap': stats_row[0] or 0,
+                    'filtered_count': total_count,
+                    'compensated': stats_row[1] or 0,
+                    'not_compensated': stats_row[2] or 0,
+                    'total_compensation': stats_row[3] or 0,
+                    'male_count': stats_row[4] or 0,
+                    'female_count': stats_row[5] or 0,
+                }
+            
+            # Create mock paginator
+            from math import ceil
+            total_pages = ceil(total_count / page_size)
+            
+            class MockPaginator:
+                def __init__(self, count, per_page):
+                    self.count = count
+                    self.per_page = per_page
+                    self.num_pages = ceil(count / per_page)
+                
+                def get_page(self, page_number):
+                    return MockPage(page_number, self, pap_list)
+            
+            class MockPage:
+                def __init__(self, number, paginator, object_list):
+                    self.number = number
+                    self.paginator = paginator
+                    self.object_list = object_list
+                    self.has_previous = number > 1
+                    self.has_next = number < paginator.num_pages
+                    self.previous_page_number = number - 1 if self.has_previous else None
+                    self.next_page_number = number + 1 if self.has_next else None
+            
+            page_obj = MockPaginator(total_count, page_size).get_page(page_number)
+            
+            # Create a simple filter form for SQL Server mode
+            class SQLServerPAPFilter:
+                def __init__(self, request_get):
+                    self.form = type('Form', (), {
+                        'project': request_get.get('project', ''),
+                        'region': request_get.get('region', ''),
+                        'sex': request_get.get('sex', ''),
+                        'pap_compensated': request_get.get('pap_compensated', ''),
+                        'pap_name': request_get.get('pap_name', ''),
+                        'location_of_impact': request_get.get('location_of_impact', ''),
+                        'amount': [request_get.get('amount_min', ''), request_get.get('amount_max', '')],
+                    })()
+            
+            filter_obj = SQLServerPAPFilter(request.GET)
+            is_filtered = any([
+                request.GET.get('project'),
+                request.GET.get('region'),
+                request.GET.get('sex'),
+                request.GET.get('pap_compensated'),
+                request.GET.get('pap_name'),
+                request.GET.get('location_of_impact'),
+                request.GET.get('amount_min'),
+                request.GET.get('amount_max'),
+            ])
+            
+            context = {
+                'page_obj': page_obj,
+                'filter': filter_obj,
+                'stats': stats,
+                'is_filtered': is_filtered,
+                'is_sql_server': True,
+            }
+            
+            return render(request, 'social_and_env/pap/pap_list.html', context)
+        
+        else:
+            # Use Django ORM for SQLite
+            pap_list = PAP.objects.select_related(
+                'project', 'type_of_investment', 'region', 'district',
+                'pap_Current_Address', 'type_of_pap', 'pap_category',
+                'vulnerability_category', 'type_of_impact', 'loginUser'
+            ).all()
 
-        paginator = Paginator(filtered_pap, page_size)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+            # Apply filters using Django ORM
+            pap_filter = PAPFilter(request.GET, queryset=pap_list)
+            filtered_pap = pap_filter.qs
 
-        # Statistics using Django ORM
-        stats = {
-            'total_pap': pap_list.count(),
-            'filtered_count': filtered_pap.count(),
-            'compensated': pap_list.filter(pap_compensated='Y').count(),
-            'not_compensated': pap_list.filter(pap_compensated='N').count(),
-            'total_compensation': pap_list.aggregate(Sum('amount'))['amount__sum'] or 0,
-            'male_count': pap_list.filter(sex='M').count(),
-            'female_count': pap_list.filter(sex='F').count(),
-        }
+            # Pagination with configurable page size
+            page_size = request.GET.get('page_size', 10)
+            try:
+                page_size = int(page_size)
+                if page_size not in [10, 15, 25, 50, 100]:
+                    page_size = 10
+            except (ValueError, TypeError):
+                page_size = 10
 
-        context = {
-            'page_obj': page_obj,
-            'filter': pap_filter,
-            'stats': stats,
-            'is_filtered': bool(request.GET),
-            'is_sql_server': is_sql_server,
-        }
+            paginator = Paginator(filtered_pap, page_size)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
 
-        return render(request, 'social_and_env/pap/pap_list.html', context)
+            # Statistics using Django ORM
+            stats = {
+                'total_pap': pap_list.count(),
+                'filtered_count': filtered_pap.count(),
+                'compensated': pap_list.filter(pap_compensated='Y').count(),
+                'not_compensated': pap_list.filter(pap_compensated='N').count(),
+                'total_compensation': pap_list.aggregate(Sum('amount'))['amount__sum'] or 0,
+                'male_count': pap_list.filter(sex='M').count(),
+                'female_count': pap_list.filter(sex='F').count(),
+            }
+
+            context = {
+                'page_obj': page_obj,
+                'filter': pap_filter,
+                'stats': stats,
+                'is_filtered': bool(request.GET),
+                'is_sql_server': False,
+            }
+
+            return render(request, 'social_and_env/pap/pap_list.html', context)
         
     except Exception as e:
         # Emergency fallback: Show empty list with error message

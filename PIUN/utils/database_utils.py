@@ -14,7 +14,7 @@ def is_sql_server_mode():
     # Check the actual database backend being used
     from django.db import connection
     
-    # Only use SQL Server mode if we're actually connected to SQL Server
+    # Check if we're actually connected to SQL Server
     if connection.vendor == 'microsoft':
         return True
     
@@ -23,8 +23,15 @@ def is_sql_server_mode():
     env_sql_server = os.environ.get('USE_SQL_SERVER', 'false').lower() == 'true'
     settings_sql_server = getattr(settings, 'USE_SQL_SERVER', False)
     
-    # Only return True if both environment/settings indicate SQL Server AND we have the capability
-    return (env_sql_server or settings_sql_server) and connection.vendor == 'microsoft'
+    # For development: allow forced SQL Server mode even with SQLite if explicitly set
+    if env_sql_server or settings_sql_server:
+        # Check if we have mssql engine configured but currently using SQLite
+        engine = connection.settings_dict.get('ENGINE', '')
+        if 'mssql' in engine or 'microsoft' in engine:
+            return True
+    
+    # Default to False for SQLite development
+    return False
 
 def get_database_mode():
     """Get current database mode"""
@@ -42,7 +49,9 @@ def execute_database_query(query, params=None, fetch_all=True):
     try:
         with connection.cursor() as cursor:
             if is_sql_server_mode():
-                # Use parameterized queries for SQL Server
+                # Use parameterized queries for SQL Server - convert %s to ? for mssql
+                if params and '%s' in query:
+                    query = query.replace('%s', '?')
                 cursor.execute(query, params or [])
             else:
                 # Use Django ORM style for SQLite
