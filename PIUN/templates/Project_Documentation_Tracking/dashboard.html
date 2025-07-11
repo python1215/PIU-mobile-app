@@ -81,67 +81,7 @@
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row">
-        <div class="col-md-3">
-            <div class="stats-card text-center">
-                <div class="stats-number text-primary">{{ total_documents }}</div>
-                <div class="stats-label">Total Documents</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card text-center">
-                <div class="stats-number text-warning">{{ pending_review }}</div>
-                <div class="stats-label">Pending Review</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card text-center">
-                <div class="stats-number text-success">{{ approved_documents }}</div>
-                <div class="stats-label">Approved</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card text-center">
-                <div class="stats-number text-danger">{{ overdue_documents }}</div>
-                <div class="stats-label">Overdue</div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <!-- Documents by Status Chart -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>Documents by Status
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="statusChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Documents by Project Chart -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Documents by Project
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="projectChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="row">
         <!-- Recent Documents -->
@@ -224,111 +164,11 @@
                 </div>
             </div>
 
-            <!-- Document Statistics -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Document Statistics
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <div class="border-end">
-                                <div class="h4 mb-1">{{ total_documents }}</div>
-                                <div class="text-muted small">Total</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="h4 mb-1">{{ approved_documents }}</div>
-                            <div class="text-muted small">Approved</div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <div class="border-end">
-                                <div class="h4 mb-1">{{ pending_review }}</div>
-                                <div class="text-muted small">Pending</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="h4 mb-1">{{ overdue_documents }}</div>
-                            <div class="text-muted small">Overdue</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Status Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusLabels = [{% for status in status_counts %}'{{ status.status|title }}'{% if not forloop.last %},{% endif %}{% endfor %}];
-        const statusData = [{% for status in status_counts %}{{ status.count }}{% if not forloop.last %},{% endif %}{% endfor %}];
-        
-        new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    data: statusData,
-                    backgroundColor: [
-                        '#28a745',  // approved
-                        '#ffc107',  // under_review
-                        '#dc3545',  // rejected
-                        '#6c757d',  // draft
-                        '#17a2b8'   // archived
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-
-        // Project Chart
-        const projectCtx = document.getElementById('projectChart').getContext('2d');
-        const projectLabels = [{% for project in project_counts %}'{{ project.project__project|default:"Unknown" }}'{% if not forloop.last %},{% endif %}{% endfor %}];
-        const projectData = [{% for project in project_counts %}{{ project.count }}{% if not forloop.last %},{% endif %}{% endfor %}];
-        
-        new Chart(projectCtx, {
-            type: 'bar',
-            data: {
-                labels: projectLabels,
-                datasets: [{
-                    label: 'Documents',
-                    data: projectData,
-                    backgroundColor: '#007bff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-</script>
 {% endblock %}

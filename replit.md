@@ -213,6 +213,7 @@ The PIUN directory contains specialized modules:
 - July 11, 2025. Fixed all SQL Server parameter binding issues: replaced all `%s` placeholders with `?` in SQL Server queries throughout social_and_env/views.py, removed duplicate grievance_add function causing conflicts, eliminated all sql_server_mode context variables from templates for cleaner user interface, fixed PAP management, OHS monitoring, and grievance handling SQL Server queries for proper parameter binding and error-free production deployment
 - July 11, 2025. Enhanced Document Management navigation: added "Back to Dashboard" links to all document management pages (dashboard, list, form, detail views) for improved user experience and easier navigation between modules
 - July 11, 2025. Fixed Document Management field mapping issues: removed non-existent status and priority fields from templates and views, updated table headers to match actual model fields (description, document_date, loginUser), simplified document detail view to use correct field references, fixed pagination warning by adding ordering to QuerySet, aligned all templates with actual ProjectDocument model structure
+- July 11, 2025. Removed Document Statistics section from dashboard: eliminated statistics cards, charts, and JavaScript code that referenced non-existent fields (status, priority, due_date), simplified dashboard to show only recent documents list, removed Chart.js dependency and associated statistical calculations from views
 
 ## User Preferences
 

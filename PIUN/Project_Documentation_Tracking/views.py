@@ -90,23 +90,7 @@ def document_dashboard(request):
         # SQL Server mode using raw queries
         table_name = get_sql_server_table_name("Project_Documentation_Tracking_projectdocument")
         
-        # Get document statistics
-        total_documents = execute_database_query(
-            f"SELECT COUNT(*) FROM {table_name}", fetch_all=False
-        )[0] if execute_database_query(f"SELECT COUNT(*) FROM {table_name}", fetch_all=False) else 0
-        
-        pending_review = execute_database_query(
-            f"SELECT COUNT(*) FROM {table_name} WHERE status = ?", ['under_review'], fetch_all=False
-        )[0] if execute_database_query(f"SELECT COUNT(*) FROM {table_name} WHERE status = ?", ['under_review'], fetch_all=False) else 0
-        
-        approved_documents = execute_database_query(
-            f"SELECT COUNT(*) FROM {table_name} WHERE status = ?", ['approved'], fetch_all=False
-        )[0] if execute_database_query(f"SELECT COUNT(*) FROM {table_name} WHERE status = ?", ['approved'], fetch_all=False) else 0
-        
-        overdue_documents = execute_database_query(
-            f"SELECT COUNT(*) FROM {table_name} WHERE due_date < GETDATE() AND status IN ('draft', 'under_review')", 
-            fetch_all=False
-        )[0] if execute_database_query(f"SELECT COUNT(*) FROM {table_name} WHERE due_date < GETDATE() AND status IN ('draft', 'under_review')", fetch_all=False) else 0
+
         
         # Recent documents (simplified for SQL Server)
         recent_documents_data = execute_database_query(
@@ -118,43 +102,14 @@ def document_dashboard(request):
         for doc_data in recent_documents_data or []:
             recent_documents.append(create_mock_document(doc_data))
         
-        # Status counts
-        status_counts_data = execute_database_query(
-            f"SELECT status, COUNT(*) as count FROM {table_name} GROUP BY status"
-        )
-        status_counts = [{'status': row[0], 'count': row[1]} for row in status_counts_data or []]
-        
-        # Project counts (simplified)
-        project_counts = []
-        
     else:
         # SQLite mode using Django ORM with actual model fields
-        total_documents = ProjectDocument.objects.count()
-        pending_review = 0  # No status field in current model
-        approved_documents = 0  # No status field in current model
-        overdue_documents = 0  # No due_date field in current model
-        
-        # Recent documents using actual fields
         recent_documents = ProjectDocument.objects.select_related(
             'project', 'document_type', 'loginUser'
         ).order_by('-date')[:5]
-        
-        # Documents by document type (since no status field)
-        status_counts = ProjectDocument.objects.values('document_type__document_type').annotate(count=Count('id'))
-        
-        # Documents by project
-        project_counts = ProjectDocument.objects.values('project__project').annotate(
-            count=Count('id')
-        ).order_by('-count')[:5]
     
     context = {
-        'total_documents': total_documents,
-        'pending_review': pending_review,
-        'approved_documents': approved_documents,
-        'overdue_documents': overdue_documents,
         'recent_documents': recent_documents,
-        'status_counts': status_counts,
-        'project_counts': project_counts,
     }
     
     return render(request, 'Project_Documentation_Tracking/dashboard.html', context)
