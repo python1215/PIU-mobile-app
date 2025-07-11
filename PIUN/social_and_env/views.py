@@ -209,8 +209,8 @@ def pap_list(request):
         # Use Django ORM exclusively - No raw SQL queries
         pap_queryset = PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
-            'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'
+            'type_of_pap', 'pap_category', 'vulnerability_category', 
+            'type_of_impact', 'loginUser'
         ).all()
         
         # Apply filters using Django ORM
@@ -218,7 +218,7 @@ def pap_list(request):
             pap_queryset = pap_queryset.filter(project=request.GET.get('project'))
         
         if request.GET.get('gender'):
-            pap_queryset = pap_queryset.filter(gender=request.GET.get('gender'))
+            pap_queryset = pap_queryset.filter(sex=request.GET.get('gender'))
         
         if request.GET.get('pap_compensated'):
             pap_queryset = pap_queryset.filter(pap_compensated=request.GET.get('pap_compensated'))
@@ -242,8 +242,8 @@ def pap_list(request):
             'compensated': pap_queryset.filter(pap_compensated='Y').count(),
             'not_compensated': pap_queryset.filter(pap_compensated='N').count(),
             'total_compensation': pap_queryset.aggregate(Sum('amount'))['amount__sum'] or 0,
-            'male_count': pap_queryset.filter(gender='M').count(),
-            'female_count': pap_queryset.filter(gender='F').count(),
+            'male_count': pap_queryset.filter(sex='M').count(),
+            'female_count': pap_queryset.filter(sex='F').count(),
         }
         
         # Pagination
@@ -1459,13 +1459,13 @@ def pap_detail(request, pk):
     """PAP detail view"""
     try:
         pap = get_object_or_404(PAP.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 
-            'district_code', 'settlement_code', 'pap_category', 'loginUser'
+            'project', 'type_of_investment', 'region', 'district', 
+            'pap_category', 'loginUser'
         ), pk=pk)
         
         context = {
             'pap': pap,
-            'title': f'PAP Details - {pap.name}',
+            'title': f'PAP Details - {pap.pap_name}',
         }
         
         return render(request, 'social_and_env/pap/pap_detail.html', context)
