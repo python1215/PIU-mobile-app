@@ -87,6 +87,9 @@ class ESIAForm(forms.ModelForm):
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
                 project=self.instance.project_name
             )
+        else:
+            # For new forms, include all investment types to prevent validation errors
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -107,6 +110,9 @@ class ESIAForm(forms.ModelForm):
         project_name = self.cleaned_data.get('project_name')
         
         if project_name and type_of_investment:
+            # Ensure the queryset includes the selected investment type
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(project=project_name)
+            
             # Validate that the selected investment type belongs to the selected project
             valid_investments = KPI_For_Contract.objects.filter(project=project_name)
             if type_of_investment not in valid_investments:
@@ -229,6 +235,9 @@ class PAPForm(forms.ModelForm):
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
                 project=self.instance.project
             )
+        else:
+            # For new forms, include all investment types to prevent validation errors
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
 
         if 'region' in self.data:
             try:
@@ -239,6 +248,9 @@ class PAPForm(forms.ModelForm):
         elif self.instance and self.instance.pk and self.instance.region:
             # For editing existing records, load districts for the selected region
             self.fields['district'].queryset = Districts.objects.filter(region_code=self.instance.region)
+        else:
+            # For new forms, include all districts to prevent validation errors
+            self.fields['district'].queryset = Districts.objects.all()
 
         if 'district' in self.data:
             try:
@@ -253,6 +265,9 @@ class PAPForm(forms.ModelForm):
             self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
                 district_code=self.instance.district
             )
+        else:
+            # For new forms, include all settlements to prevent validation errors
+            self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
 
 
 class GrievianceMonitoringLogForm(forms.ModelForm):
@@ -345,6 +360,14 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
+        elif self.instance and self.instance.pk and self.instance.project:
+            # For editing existing records, load investment types for the selected project
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                project=self.instance.project
+            )
+        else:
+            # For new forms, include all investment types to prevent validation errors
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
 
 
 class OHSMonitoringForm(forms.ModelForm):
@@ -463,6 +486,9 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
+        else:
+            # For new forms, include all investment types to prevent validation errors
+            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
 
         if 'region' in self.data:
             try:
@@ -470,6 +496,9 @@ class OHSMonitoringForm(forms.ModelForm):
                 self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
             except (ValueError, TypeError):
                 pass
+        else:
+            # For new forms, include all districts to prevent validation errors
+            self.fields['district'].queryset = Districts.objects.all()
 
         if 'district' in self.data:
             try:
@@ -479,6 +508,9 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
+        else:
+            # For new forms, include all settlements to prevent validation errors
+            self.fields['settlement'].queryset = Settlement.objects.all()
 
 
 class CommunityEngagementForm(forms.ModelForm):
