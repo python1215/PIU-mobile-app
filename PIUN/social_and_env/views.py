@@ -753,7 +753,7 @@ def ohs_list(request):
 def ohs_add(request):
     """Add new OHS record"""
     if request.method == 'POST':
-        form = OHS_MonitoringForm(request.POST)
+        form = OHSMonitoringForm(request.POST)
         if form.is_valid():
             try:
                 ohs = form.save(commit=False)
@@ -764,7 +764,7 @@ def ohs_add(request):
             except Exception as e:
                 messages.error(request, f'Error saving OHS record: {str(e)}')
     else:
-        form = OHS_MonitoringForm()
+        form = OHSMonitoringForm()
     
     return render(request, 'social_and_env/ohs/ohs_form.html', {
         'form': form,
@@ -799,7 +799,7 @@ def ohs_edit(request, pk):
     ohs = get_object_or_404(OHS_Monitoring, pk=pk)
     
     if request.method == 'POST':
-        form = OHS_MonitoringForm(request.POST, instance=ohs)
+        form = OHSMonitoringForm(request.POST, instance=ohs)
         if form.is_valid():
             try:
                 ohs = form.save(commit=False)
@@ -810,7 +810,7 @@ def ohs_edit(request, pk):
             except Exception as e:
                 messages.error(request, f'Error updating OHS record: {str(e)}')
     else:
-        form = OHS_MonitoringForm(instance=ohs)
+        form = OHSMonitoringForm(instance=ohs)
     
     return render(request, 'social_and_env/ohs/ohs_form.html', {
         'form': form,
