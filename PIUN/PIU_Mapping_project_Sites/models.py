@@ -5,18 +5,18 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class projectMapping(models.Model):
-    profile_year = models.ForeignKey(YEAR, on_delete=models.CASCADE)
-    region = models.ForeignKey(Regions, on_delete=models.CASCADE)
-    district = models.ForeignKey(Districts, on_delete=models.CASCADE)
-    settlement = models.ForeignKey(Settlement, on_delete=models.CASCADE, verbose_name= 'settlement_name')
+    profile_year = models.ForeignKey(YEAR, on_delete=models.CASCADE, related_name='site_mappings')
+    region = models.ForeignKey(Regions, on_delete=models.CASCADE, related_name='site_mappings')
+    district = models.ForeignKey(Districts, on_delete=models.CASCADE, related_name='site_mappings')
+    settlement = models.ForeignKey(Settlement, on_delete=models.CASCADE, verbose_name= 'settlement_name', related_name='site_mappings')
     Total_No_of_Households = models.IntegerField()
     no_of_connected_household = models.IntegerField(null=True)
     no_of_customer_connections = models.IntegerField(null=True)
     Latitude = models.FloatField()
     Longitude = models.FloatField()
-    access = models.ForeignKey(Access, on_delete=models.CASCADE)
-    project = models.ManyToManyField(Project)
-    donor = models.ManyToManyField(Donor)
+    access = models.ForeignKey(Access, on_delete=models.CASCADE, related_name='site_mappings')
+    project = models.ManyToManyField(Project, related_name='site_mappings')
+    donor = models.ManyToManyField(Donor, related_name='site_mappings')
    
     #Note if access to electricity and water is True load another form to regist NAWEC infrastructure in the village
     def __str__(self):
