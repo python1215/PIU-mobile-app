@@ -10,8 +10,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import ProjectDocument, DocumentVersion, DocumentComment, DocumentTag
-from .forms import ProjectDocumentForm, DocumentCommentForm, DocumentTagForm
+from .models import ProjectDocument
+from .forms import ProjectDocumentForm
 from PIU_Financial_mgt.models import Project
 from setup.models import DocumentType
 from utils.database_utils import is_sql_server_mode, get_sql_server_table_name, execute_database_query
@@ -313,29 +313,15 @@ def document_detail(request, pk):
         # SQLite mode - Django ORM
         document = get_object_or_404(
             ProjectDocument.objects.select_related(
-                'project', 'document_type', 'created_by', 'reviewed_by'
+                'project', 'document_type', 'loginUser'
             ),
             pk=pk
         )
         
-        # Get document versions
-        versions = DocumentVersion.objects.filter(document=document).order_by('-created_date')
-        
-        # Get comments
-        comments = DocumentComment.objects.filter(document=document).select_related('author')
-        
-        # Handle comment form
-        if request.method == 'POST':
-            comment_form = DocumentCommentForm(request.POST)
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.document = document
-                comment.author = request.user
-                comment.save()
-                messages.success(request, 'Comment added successfully!')
-                return redirect('Project_Documentation_Tracking:document_detail', pk=pk)
-        else:
-            comment_form = DocumentCommentForm()
+        # For SQLite mode, simplified versions and comments (matching actual model)
+        versions = []
+        comments = []
+        comment_form = None
     
     context = {
         'document': document,
@@ -559,63 +545,17 @@ def document_delete(request, pk):
 
 @login_required
 def upload_version(request, pk):
-    """Upload new version of document"""
+    """Upload new version of document - simplified for current model"""
     document = get_object_or_404(ProjectDocument, pk=pk)
-    
-    if request.method == 'POST':
-        version_number = request.POST.get('version_number')
-        version_notes = request.POST.get('version_notes', '')
-        version_file = request.FILES.get('version_file')
-        
-        if version_file and version_number:
-            # Create new version
-            version = DocumentVersion.objects.create(
-                document=document,
-                version_number=version_number,
-                document_file=version_file,
-                version_notes=version_notes,
-                created_by=request.user,
-                file_size=version_file.size
-            )
-            
-            # Update main document version
-            document.version = version_number
-            document.save()
-            
-            messages.success(request, f'Version {version_number} uploaded successfully!')
-        else:
-            messages.error(request, 'Please provide version number and file!')
-        
-        return redirect('Project_Documentation_Tracking:document_detail', pk=pk)
-    
-    context = {
-        'document': document,
-        'title': 'Upload New Version'
-    }
-    
-    return render(request, 'Project_Documentation_Tracking/upload_version.html', context)
+    messages.info(request, 'Version upload feature is not available in current implementation.')
+    return redirect('Project_Documentation_Tracking:document_detail', pk=pk)
 
 
 @login_required
 def tag_management(request):
-    """Manage document tags"""
-    tags = DocumentTag.objects.all()
-    
-    if request.method == 'POST':
-        form = DocumentTagForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Tag created successfully!')
-            return redirect('Project_Documentation_Tracking:tag_management')
-    else:
-        form = DocumentTagForm()
-    
-    context = {
-        'tags': tags,
-        'form': form,
-    }
-    
-    return render(request, 'Project_Documentation_Tracking/tag_management.html', context)
+    """Manage document tags - simplified for current model"""
+    messages.info(request, 'Tag management feature is not available in current implementation.')
+    return redirect('Project_Documentation_Tracking:document_list')
 
 
 # AJAX status update removed as status field doesn't exist in current model
