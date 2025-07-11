@@ -194,8 +194,9 @@
                             <th>Project</th>
                             <th>Region/District</th>
                             <th>Gender</th>
-                            <th>Impact Type</th>
+                            <th>Location of Impact</th>
                             <th>Amount</th>
+                            <th>Area</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -209,18 +210,19 @@
                                     {{ pap.pap_name }}
                                 </a>
                             </td>
-                            <td>{{ pap.project|truncatechars:25 }}</td>
-                            <td>{{ pap.region }}<br><small class="text-muted">{{ pap.district }}</small></td>
+                            <td>{{ pap.project_id|truncatechars:25 }}</td>
+                            <td>{{ pap.region_id }}<br><small class="text-muted">{{ pap.district_id }}</small></td>
                             <td>
                                 <span class="badge bg-{% if pap.sex == 'M' %}primary{% else %}info{% endif %}">
                                     {% if pap.sex == 'M' %}Male{% else %}Female{% endif %}
                                 </span>
                             </td>
-                            <td>{{ pap.type_of_impact|truncatechars:20 }}</td>
+                            <td>{{ pap.location_of_impact|truncatechars:20 }}</td>
                             <td>${{ pap.amount|floatformat:2 }}</td>
+                            <td>{{ pap.area|floatformat:2 }}</td>
                             <td>
                                 <span class="badge bg-{% if pap.pap_compensated == 'Y' %}success{% else %}warning{% endif %}">
-                                    {{ pap.compensation_status }}
+                                    {% if pap.pap_compensated == 'Y' %}Compensated{% else %}Not Compensated{% endif %}
                                 </span>
                             </td>
                             <td>

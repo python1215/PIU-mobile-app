@@ -242,13 +242,13 @@ def pap_list(request):
             where_conditions = []
             params = []
             
-            # Apply filters
+            # Apply filters using exact SQL Server field names
             if request.GET.get('project'):
                 where_conditions.append("project_id = ?")
                 params.append(request.GET.get('project'))
             
             if request.GET.get('region'):
-                where_conditions.append("region_code_id = ?")
+                where_conditions.append("region_id = ?")
                 params.append(request.GET.get('region'))
             
             if request.GET.get('sex'):
@@ -260,7 +260,7 @@ def pap_list(request):
                 params.append(request.GET.get('pap_compensated'))
             
             if request.GET.get('pap_name'):
-                where_conditions.append("name LIKE ?")
+                where_conditions.append("pap_name LIKE ?")
                 params.append(f"%{request.GET.get('pap_name')}%")
             
             if request.GET.get('location_of_impact'):
@@ -286,20 +286,32 @@ def pap_list(request):
                 cursor.execute(count_query, params)
                 total_count = cursor.fetchone()[0]
             
-            # Main query with pagination and filtering
+            # Main query with pagination and filtering using exact SQL Server field names
             pap_query = f"""
                 SELECT 
                     ISNULL([pap_identification_number], '') as pap_identification_number,
-                    ISNULL([name], '') as pap_name,
+                    ISNULL([pap_name], '') as pap_name,
                     ISNULL([sex], '') as sex,
+                    ISNULL([location_of_impact], '') as location_of_impact,
                     ISNULL([amount], 0) as amount,
+                    ISNULL([area], 0) as area,
                     ISNULL([pap_compensated], 'N') as pap_compensated,
-                    ISNULL([project_id], '') as project,
-                    ISNULL([type_of_investment_id], '') as type_of_investment,
-                    ISNULL([region_code_id], '') as region,
-                    ISNULL([district_code_id], '') as district,
-                    ISNULL([type_of_impact], '') as type_of_impact,
-                    ISNULL([compensation_status], 'Pending') as compensation_status
+                    ISNULL([compensation_date], '') as compensation_date,
+                    ISNULL([compensation_RefNo], '') as compensation_RefNo,
+                    ISNULL([pre_project_situation], '') as pre_project_situation,
+                    ISNULL([remarks], '') as remarks,
+                    ISNULL([date_created], '') as date_created,
+                    ISNULL([district_id], '') as district_id,
+                    ISNULL([loginUser_id], '') as loginUser_id,
+                    ISNULL([nature_of_compensation_id], '') as nature_of_compensation_id,
+                    ISNULL([pap_Current_Address_id], '') as pap_Current_Address_id,
+                    ISNULL([pap_category_id], '') as pap_category_id,
+                    ISNULL([project_id], '') as project_id,
+                    ISNULL([region_id], '') as region_id,
+                    ISNULL([type_of_impact_id], '') as type_of_impact_id,
+                    ISNULL([type_of_investment_id], '') as type_of_investment_id,
+                    ISNULL([type_of_pap_id], '') as type_of_pap_id,
+                    ISNULL([vulnerability_category_id], '') as vulnerability_category_id
                 FROM {table_name}
                 {where_clause}
                 ORDER BY [pap_identification_number]
@@ -319,14 +331,26 @@ def pap_list(request):
                     self.pap_identification_number = row[0] or ''
                     self.pap_name = row[1] or ''
                     self.sex = row[2] or ''
-                    self.amount = row[3] or 0
-                    self.pap_compensated = row[4] or 'N'
-                    self.project = row[5] or ''
-                    self.type_of_investment = row[6] or ''
-                    self.region = row[7] or ''
-                    self.district = row[8] or ''
-                    self.type_of_impact = row[9] or ''
-                    self.compensation_status = row[10] or 'Pending'
+                    self.location_of_impact = row[3] or ''
+                    self.amount = row[4] or 0
+                    self.area = row[5] or 0
+                    self.pap_compensated = row[6] or 'N'
+                    self.compensation_date = row[7] or ''
+                    self.compensation_RefNo = row[8] or ''
+                    self.pre_project_situation = row[9] or ''
+                    self.remarks = row[10] or ''
+                    self.date_created = row[11] or ''
+                    self.district_id = row[12] or ''
+                    self.loginUser_id = row[13] or ''
+                    self.nature_of_compensation_id = row[14] or ''
+                    self.pap_Current_Address_id = row[15] or ''
+                    self.pap_category_id = row[16] or ''
+                    self.project_id = row[17] or ''
+                    self.region_id = row[18] or ''
+                    self.type_of_impact_id = row[19] or ''
+                    self.type_of_investment_id = row[20] or ''
+                    self.type_of_pap_id = row[21] or ''
+                    self.vulnerability_category_id = row[22] or ''
                     # Add pk for URL compatibility
                     self.pk = self.pap_identification_number
             
@@ -518,26 +542,27 @@ def pap_add(request):
                 pap_id = f"PAP-{uuid.uuid4().hex[:8].upper()}"
                 
                 with connection.cursor() as cursor:
-                    # Insert PAP record into SQL Server
+                    # Insert PAP record into SQL Server with exact field names
                     cursor.execute("""
                         INSERT INTO [piuprod3].[dbo].[social_and_env_pap]
-                        ([pap_identification_number], [name], [sex], [amount], 
-                         [pap_compensated], [project_id], [region_code_id], 
-                         [district_code_id], [type_of_impact], [location_of_impact],
-                         [compensation_status], [date_created], [loginUser_id])
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)
+                        ([pap_identification_number], [pap_name], [sex], [amount], 
+                         [area], [pap_compensated], [project_id], [region_id], 
+                         [district_id], [location_of_impact], [pre_project_situation],
+                         [remarks], [date_created], [loginUser_id])
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)
                     """, [
                         pap_id,
-                        request.POST.get('name'),
+                        request.POST.get('pap_name'),
                         request.POST.get('sex'),
                         float(request.POST.get('amount', 0)),
+                        float(request.POST.get('area', 0)),
                         request.POST.get('pap_compensated', 'N'),
                         request.POST.get('project'),
                         request.POST.get('region'),
                         request.POST.get('district'),
-                        request.POST.get('type_of_impact'),
                         request.POST.get('location_of_impact'),
-                        request.POST.get('compensation_status', 'Pending'),
+                        request.POST.get('pre_project_situation', ''),
+                        request.POST.get('remarks', ''),
                         request.user.id
                     ])
                     

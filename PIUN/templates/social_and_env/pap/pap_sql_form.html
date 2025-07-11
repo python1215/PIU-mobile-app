@@ -31,8 +31,8 @@
             <div class="row g-3">
                 <!-- Basic Information -->
                 <div class="col-md-6">
-                    <label for="name" class="form-label">PAP Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <label for="pap_name" class="form-label">PAP Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="pap_name" name="pap_name" required>
                 </div>
                 <div class="col-md-6">
                     <label for="sex" class="form-label">Gender <span class="text-danger">*</span></label>
@@ -93,6 +93,10 @@
                     <label for="amount" class="form-label">Compensation Amount ($)</label>
                     <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" placeholder="0.00">
                 </div>
+                <div class="col-md-6">
+                    <label for="area" class="form-label">Area (sqm)</label>
+                    <input type="number" class="form-control" id="area" name="area" step="0.01" min="0" placeholder="0.00">
+                </div>
                 
                 <!-- Compensation Status -->
                 <div class="col-md-6">
@@ -103,8 +107,12 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label for="compensation_status" class="form-label">Compensation Details</label>
-                    <input type="text" class="form-control" id="compensation_status" name="compensation_status" placeholder="e.g., Pending, Completed, In Progress">
+                    <label for="pre_project_situation" class="form-label">Pre-Project Situation</label>
+                    <textarea class="form-control" id="pre_project_situation" name="pre_project_situation" rows="3" placeholder="Describe the situation before the project"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="remarks" class="form-label">Remarks</label>
+                    <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Additional comments or notes"></textarea>
                 </div>
             </div>
             
