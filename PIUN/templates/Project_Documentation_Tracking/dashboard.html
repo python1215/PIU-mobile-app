@@ -5,99 +5,114 @@
 
 {% block extra_css %}
 <style>
-    .dashboard-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease;
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.375rem;
+        margin-bottom: 2rem;
     }
-    .dashboard-card:hover {
-        transform: translateY(-5px);
+    .stats-card {
+        background: white;
+        border-radius: 0.375rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        transition: transform 0.2s;
     }
-    .stat-icon {
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+    .stats-number {
         font-size: 2.5rem;
-        margin-right: 1rem;
+        font-weight: bold;
+        color: #333;
+    }
+    .stats-label {
+        color: #666;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .chart-container {
-        position: relative;
         height: 300px;
+        margin-bottom: 2rem;
     }
+    .recent-item {
+        padding: 1rem;
+        border-left: 4px solid #007bff;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+    }
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    .status-approved { background-color: #28a745; }
+    .status-under_review { background-color: #ffc107; }
+    .status-rejected { background-color: #dc3545; }
+    .status-draft { background-color: #6c757d; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="bg-primary text-white rounded-lg p-4 shadow">
-                <h1 class="h2 mb-1">
-                    <i class="bi bi-file-earmark-text me-2"></i>Document Management Dashboard
-                </h1>
-                <p class="mb-0">Project document tracking and management system</p>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-1">Document Management Dashboard</h1>
+                <p class="mb-0">Track and manage project documents efficiently</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'Project_Documentation_Tracking:document_create' %}" class="btn btn-light">
+                    <i class="fas fa-plus me-1"></i>New Document
+                </a>
+                <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-outline-light ms-2">
+                    <i class="fas fa-list me-1"></i>View All
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card bg-primary text-white">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-files stat-icon"></i>
-                    <div>
-                        <h3 class="mb-1">{{ total_documents }}</h3>
-                        <p class="mb-0">Total Documents</p>
-                    </div>
-                </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-primary">{{ total_documents }}</div>
+                <div class="stats-label">Total Documents</div>
             </div>
         </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card bg-warning text-white">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-clock-history stat-icon"></i>
-                    <div>
-                        <h3 class="mb-1">{{ pending_review }}</h3>
-                        <p class="mb-0">Pending Review</p>
-                    </div>
-                </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-warning">{{ pending_review }}</div>
+                <div class="stats-label">Pending Review</div>
             </div>
         </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card bg-success text-white">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-check-circle stat-icon"></i>
-                    <div>
-                        <h3 class="mb-1">{{ approved_documents }}</h3>
-                        <p class="mb-0">Approved</p>
-                    </div>
-                </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-success">{{ approved_documents }}</div>
+                <div class="stats-label">Approved</div>
             </div>
         </div>
-        
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card bg-danger text-white">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle stat-icon"></i>
-                    <div>
-                        <h3 class="mb-1">{{ overdue_documents }}</h3>
-                        <p class="mb-0">Overdue</p>
-                    </div>
-                </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-danger">{{ overdue_documents }}</div>
+                <div class="stats-label">Overdue</div>
             </div>
         </div>
     </div>
 
-    <!-- Charts and Recent Activity -->
     <div class="row">
-        <!-- Status Distribution Chart -->
-        <div class="col-lg-6 mb-4">
-            <div class="card dashboard-card">
+        <!-- Documents by Status Chart -->
+        <div class="col-md-6">
+            <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-pie-chart me-2"></i>Document Status Distribution
+                        <i class="fas fa-chart-pie me-2"></i>Documents by Status
                     </h5>
                 </div>
                 <div class="card-body">
@@ -108,12 +123,12 @@
             </div>
         </div>
 
-        <!-- Project Distribution Chart -->
-        <div class="col-lg-6 mb-4">
-            <div class="card dashboard-card">
+        <!-- Documents by Project Chart -->
+        <div class="col-md-6">
+            <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-bar-chart me-2"></i>Documents by Project
+                        <i class="fas fa-chart-bar me-2"></i>Documents by Project
                     </h5>
                 </div>
                 <div class="card-body">
@@ -125,106 +140,118 @@
         </div>
     </div>
 
-    <!-- Recent Documents -->
     <div class="row">
-        <div class="col-12">
-            <div class="card dashboard-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+        <!-- Recent Documents -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-clock-history me-2"></i>Recent Documents
+                        <i class="fas fa-clock me-2"></i>Recent Documents
                     </h5>
-                    <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-sm btn-outline-primary">
-                        View All
-                    </a>
                 </div>
                 <div class="card-body">
                     {% if recent_documents %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Document Title</th>
-                                        <th>Project</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
-                                        <th>Created By</th>
-                                        <th>Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for document in recent_documents %}
-                                    <tr>
-                                        <td>
+                        {% for document in recent_documents %}
+                            <div class="recent-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
                                             <a href="{% url 'Project_Documentation_Tracking:document_detail' document.pk %}" class="text-decoration-none">
                                                 {{ document.title }}
                                             </a>
-                                        </td>
-                                        <td>{{ document.project.project_name }}</td>
-                                        <td>{{ document.document_type.document_type }}</td>
-                                        <td>
-                                            {% if document.status == 'approved' %}
-                                                <span class="badge bg-success">Approved</span>
-                                            {% elif document.status == 'under_review' %}
-                                                <span class="badge bg-warning">Under Review</span>
-                                            {% elif document.status == 'rejected' %}
-                                                <span class="badge bg-danger">Rejected</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ document.get_status_display }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ document.created_by.username }}</td>
-                                        <td>{{ document.created_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            <a href="{% url 'Project_Documentation_Tracking:document_detail' document.pk %}" class="btn btn-sm btn-outline-info">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                        </h6>
+                                        <small class="text-muted">
+                                            {{ document.project.project|default:"No Project" }} • 
+                                            {{ document.document_type.document_type|default:"Unknown Type" }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="status-indicator status-{{ document.status }}"></span>
+                                        {% if document.status == 'approved' %}
+                                            <span class="badge bg-success">{{ document.get_status_display }}</span>
+                                        {% elif document.status == 'under_review' %}
+                                            <span class="badge bg-warning">{{ document.get_status_display }}</span>
+                                        {% elif document.status == 'rejected' %}
+                                            <span class="badge bg-danger">{{ document.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ document.get_status_display }}</span>
+                                        {% endif %}
+                                        <div class="text-muted small">{{ document.created_date|date:"M d, Y" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     {% else %}
                         <div class="text-center py-4">
-                            <i class="bi bi-file-earmark display-4 text-muted"></i>
-                            <p class="mt-2 text-muted">No documents found</p>
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No documents yet</h5>
+                            <p class="text-muted">Start by creating your first document</p>
                             <a href="{% url 'Project_Documentation_Tracking:document_create' %}" class="btn btn-primary">
-                                <i class="bi bi-plus"></i> Add First Document
+                                <i class="fas fa-plus me-1"></i>Create Document
                             </a>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card dashboard-card bg-light">
+        <!-- Quick Actions -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="mb-3">Quick Actions</h5>
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'Project_Documentation_Tracking:document_create' %}" class="btn btn-primary w-100">
-                                <i class="bi bi-plus-circle me-2"></i>New Document
-                            </a>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'Project_Documentation_Tracking:document_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Create Document
+                        </a>
+                        <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>View All Documents
+                        </a>
+                        <a href="{% url 'Project_Documentation_Tracking:document_list' %}?status=under_review" class="btn btn-outline-warning">
+                            <i class="fas fa-eye me-1"></i>Review Pending
+                        </a>
+                        <a href="{% url 'Project_Documentation_Tracking:document_list' %}?status=overdue" class="btn btn-outline-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>View Overdue
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Statistics -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Document Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="h4 mb-1">{{ total_documents }}</div>
+                                <div class="text-muted small">Total</div>
+                            </div>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-outline-primary w-100">
-                                <i class="bi bi-list me-2"></i>View All Documents
-                            </a>
+                        <div class="col-6">
+                            <div class="h4 mb-1">{{ approved_documents }}</div>
+                            <div class="text-muted small">Approved</div>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'Project_Documentation_Tracking:tag_management' %}" class="btn btn-outline-secondary w-100">
-                                <i class="bi bi-tags me-2"></i>Manage Tags
-                            </a>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="h4 mb-1">{{ pending_review }}</div>
+                                <div class="text-muted small">Pending</div>
+                            </div>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'setup:document_type_list' %}" class="btn btn-outline-info w-100">
-                                <i class="bi bi-gear me-2"></i>Document Types
-                            </a>
+                        <div class="col-6">
+                            <div class="h4 mb-1">{{ overdue_documents }}</div>
+                            <div class="text-muted small">Overdue</div>
                         </div>
                     </div>
                 </div>
@@ -237,76 +264,68 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Status Distribution Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusChart = new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: [
-                {% for status in status_counts %}
-                    '{{ status.status|title }}',
-                {% endfor %}
-            ],
-            datasets: [{
-                data: [
-                    {% for status in status_counts %}
-                        {{ status.count }},
-                    {% endfor %}
-                ],
-                backgroundColor: [
-                    '#007bff',
-                    '#ffc107',
-                    '#28a745',
-                    '#dc3545',
-                    '#6c757d'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Project Distribution Chart
-    const projectCtx = document.getElementById('projectChart').getContext('2d');
-    const projectChart = new Chart(projectCtx, {
-        type: 'bar',
-        data: {
-            labels: [
-                {% for project in project_counts %}
-                    '{{ project.project__project|truncatechars:20 }}',
-                {% endfor %}
-            ],
-            datasets: [{
-                label: 'Documents',
-                data: [
-                    {% for project in project_counts %}
-                        {{ project.count }},
-                    {% endfor %}
-                ],
-                backgroundColor: '#007bff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Status Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusLabels = [{% for status in status_counts %}'{{ status.status|title }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+        const statusData = [{% for status in status_counts %}{{ status.count }}{% if not forloop.last %},{% endif %}{% endfor %}];
+        
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: [
+                        '#28a745',  // approved
+                        '#ffc107',  // under_review
+                        '#dc3545',  // rejected
+                        '#6c757d',  // draft
+                        '#17a2b8'   // archived
+                    ]
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
             }
-        }
+        });
+
+        // Project Chart
+        const projectCtx = document.getElementById('projectChart').getContext('2d');
+        const projectLabels = [{% for project in project_counts %}'{{ project.project__project|default:"Unknown" }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+        const projectData = [{% for project in project_counts %}{{ project.count }}{% if not forloop.last %},{% endif %}{% endfor %}];
+        
+        new Chart(projectCtx, {
+            type: 'bar',
+            data: {
+                labels: projectLabels,
+                datasets: [{
+                    label: 'Documents',
+                    data: projectData,
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
     });
 </script>
 {% endblock %}
