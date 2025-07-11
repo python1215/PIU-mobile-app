@@ -63,6 +63,7 @@ class ProjectDocumentForm(forms.ModelForm):
         self.fields['document_type'].required = True
         self.fields['title'].required = True
         self.fields['document_file'].required = False  # Make file optional for testing
+        self.fields['version'].required = False  # Make version optional with default
         
         # Add help text
         self.fields['version'].help_text = 'Version number (e.g., 1.0, 2.1)'
@@ -85,7 +86,9 @@ class ProjectDocumentForm(forms.ModelForm):
     
     def clean_version(self):
         version = self.cleaned_data.get('version')
-        if version:
+        if not version:
+            version = '1.0'  # Default version if not provided
+        else:
             # Simple version validation
             if not version.replace('.', '').replace('-', '').isalnum():
                 raise ValidationError('Version must contain only letters, numbers, dots, and hyphens.')

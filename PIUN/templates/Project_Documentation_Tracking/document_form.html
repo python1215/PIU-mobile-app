@@ -105,10 +105,23 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="due_date" class="form-label">Due Date</label>
-                                <input type="date" class="form-control" id="due_date" name="due_date" 
-                                       value="{{ document.due_date|date:'Y-m-d'|default:'' }}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="version" class="form-label">Version</label>
+                                        <input type="text" class="form-control" id="version" name="version" 
+                                               value="{{ document.version|default:'1.0' }}" 
+                                               placeholder="e.g., 1.0, 2.1">
+                                        <small class="form-text text-muted">Version number (e.g., 1.0, 2.1)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="due_date" class="form-label">Due Date</label>
+                                        <input type="date" class="form-control" id="due_date" name="due_date" 
+                                               value="{{ document.due_date|date:'Y-m-d'|default:'' }}">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -206,11 +219,26 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="{{ form.due_date.id_for_label }}" class="form-label">
-                                    {{ form.due_date.label }}
-                                </label>
-                                {{ form.due_date }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.version.id_for_label }}" class="form-label">
+                                            {{ form.version.label }}
+                                        </label>
+                                        {{ form.version }}
+                                        {% if form.version.help_text %}
+                                            <small class="form-text text-muted">{{ form.version.help_text }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                            {{ form.due_date.label }}
+                                        </label>
+                                        {{ form.due_date }}
+                                    </div>
+                                </div>
                             </div>
 
                             {% if form.document_file %}

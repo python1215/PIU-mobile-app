@@ -373,17 +373,18 @@ def document_create(request):
                 status = request.POST.get('status', 'draft')
                 priority = request.POST.get('priority', 'medium')
                 due_date = request.POST.get('due_date')
+                version = request.POST.get('version', '1.0')
                 
                 # Insert document into SQL Server
                 insert_query = f"""
                     INSERT INTO {table_name} 
-                    (title, description, project_id, document_type_id, status, priority, due_date, created_by_id, created_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
+                    (title, description, project_id, document_type_id, status, priority, due_date, version, created_by_id, created_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
                 """
                 
                 params = [
                     title, description, project_id, document_type_id, 
-                    status, priority, due_date, request.user.id
+                    status, priority, due_date, version, request.user.id
                 ]
                 
                 execute_database_query(insert_query, params, fetch_all=False)
