@@ -1043,25 +1043,34 @@ def grievance_add(request):
                     # Insert new grievance record into SQL Server
                     cursor.execute("""
                         INSERT INTO [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                        (case_no, name_of_complainant, sex, phone_number, location,
-                         complaint_category, description_of_complaint, responsible_unit_or_department,
-                         date_claim_recieved, expected_decision_date, was_complainant_satisfied_with_decision,
-                         outcome_of_grievance, date_created, loginUser_id)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)
+                        (case_no, name_of_complainant, sex, tell_no, 
+                         complaint_content, name_of_person_receiving_complaint,
+                         how_complaint_was_received, date_claim_recieved, 
+                         expected_decision_date, was_complainant_satisfied_with_decision,
+                         any_follow_up_action, date_created, loginUser_id, project_id, type_of_investment_id,
+                         decision_outcome_id, was_recieved_of_complaint_ack, communication_method,
+                         was_decison_communicated_to_complainant, brief_note_for_NO_answer)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?, ?, ?, ?, ?, ?, ?, ?)
                     """, [
                         case_no,
                         request.POST.get('name_of_complainant'),
                         request.POST.get('sex'),
-                        request.POST.get('phone_number'),
-                        request.POST.get('location'),
-                        request.POST.get('complaint_category'),
-                        request.POST.get('description_of_complaint'),
-                        request.POST.get('responsible_unit_or_department'),
+                        request.POST.get('tell_no'),
+                        request.POST.get('complaint_content'),
+                        request.POST.get('name_of_person_receiving_complaint'),
+                        request.POST.get('how_complaint_was_received'),
                         request.POST.get('date_claim_recieved'),
                         request.POST.get('expected_decision_date'),
                         request.POST.get('was_complainant_satisfied_with_decision'),
-                        request.POST.get('outcome_of_grievance'),
-                        request.user.id
+                        request.POST.get('any_follow_up_action'),
+                        request.user.id,
+                        request.POST.get('project'),
+                        request.POST.get('type_of_investment'),
+                        request.POST.get('decision_outcome'),
+                        request.POST.get('was_recieved_of_complaint_ack'),
+                        request.POST.get('communication_method'),
+                        request.POST.get('was_decison_communicated_to_complainant'),
+                        request.POST.get('brief_note_for_NO_answer')
                     ])
                     
                 messages.success(request, f'Grievance case {case_no} created successfully!')
@@ -1109,27 +1118,38 @@ def grievance_edit(request, pk):
                         UPDATE [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
                         SET name_of_complainant = ?,
                             sex = ?,
-                            phone_number = ?,
-                            location = ?,
-                            complaint_category = ?,
-                            description_of_complaint = ?,
-                            responsible_unit_or_department = ?,
+                            tell_no = ?,
+                            complaint_content = ?,
+                            name_of_person_receiving_complaint = ?,
+                            how_complaint_was_received = ?,
                             expected_decision_date = ?,
                             was_complainant_satisfied_with_decision = ?,
-                            outcome_of_grievance = ?,
-                            date_updated = GETDATE()
+                            any_follow_up_action = ?,
+                            project_id = ?,
+                            type_of_investment_id = ?,
+                            decision_outcome_id = ?,
+                            was_recieved_of_complaint_ack = ?,
+                            communication_method = ?,
+                            was_decison_communicated_to_complainant = ?,
+                            brief_note_for_NO_answer = ?
                         WHERE case_no = ?
                     """, [
                         request.POST.get('name_of_complainant'),
                         request.POST.get('sex'),
-                        request.POST.get('phone_number'),
-                        request.POST.get('location'),
-                        request.POST.get('complaint_category'),
-                        request.POST.get('description_of_complaint'),
-                        request.POST.get('responsible_unit_or_department'),
+                        request.POST.get('tell_no'),
+                        request.POST.get('complaint_content'),
+                        request.POST.get('name_of_person_receiving_complaint'),
+                        request.POST.get('how_complaint_was_received'),
                         request.POST.get('expected_decision_date'),
                         request.POST.get('was_complainant_satisfied_with_decision'),
-                        request.POST.get('outcome_of_grievance'),
+                        request.POST.get('any_follow_up_action'),
+                        request.POST.get('project'),
+                        request.POST.get('type_of_investment'),
+                        request.POST.get('decision_outcome'),
+                        request.POST.get('was_recieved_of_complaint_ack'),
+                        request.POST.get('communication_method'),
+                        request.POST.get('was_decison_communicated_to_complainant'),
+                        request.POST.get('brief_note_for_NO_answer'),
                         pk
                     ])
                     

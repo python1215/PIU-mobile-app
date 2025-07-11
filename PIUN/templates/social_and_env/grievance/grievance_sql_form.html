@@ -45,44 +45,85 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="phone_number" class="form-label">Phone Number</label>
-                                    <input type="text" class="form-control" id="phone_number" 
-                                           name="phone_number"
-                                           value="{% if grievance_data %}{{ grievance_data.phone_number|default:'' }}{% endif %}">
+                                    <label for="tell_no" class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" id="tell_no" 
+                                           name="tell_no"
+                                           value="{% if grievance_data %}{{ grievance_data.tell_no|default:'' }}{% endif %}">
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="location" class="form-label">Location</label>
-                                    <input type="text" class="form-control" id="location" 
-                                           name="location"
-                                           value="{% if grievance_data %}{{ grievance_data.location|default:'' }}{% endif %}">
+                                    <label for="name_of_person_receiving_complaint" class="form-label">Person Receiving Complaint</label>
+                                    <input type="text" class="form-control" id="name_of_person_receiving_complaint" 
+                                           name="name_of_person_receiving_complaint"
+                                           value="{% if grievance_data %}{{ grievance_data.name_of_person_receiving_complaint|default:'' }}{% endif %}">
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Complaint Details -->
-                        <div class="mb-3">
-                            <label for="complaint_category" class="form-label">Complaint Category</label>
-                            <input type="text" class="form-control" id="complaint_category" 
-                                   name="complaint_category"
-                                   value="{% if grievance_data %}{{ grievance_data.complaint_category|default:'' }}{% endif %}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="how_complaint_was_received" class="form-label">How Complaint was Received</label>
+                                    <select class="form-select" id="how_complaint_was_received" name="how_complaint_was_received">
+                                        <option value="">Select Method</option>
+                                        <option value="Call" {% if grievance_data.how_complaint_was_received == 'Call' %}selected{% endif %}>Phone Call</option>
+                                        <option value="Email" {% if grievance_data.how_complaint_was_received == 'Email' %}selected{% endif %}>Email</option>
+                                        <option value="Letter" {% if grievance_data.how_complaint_was_received == 'Letter' %}selected{% endif %}>Letter</option>
+                                        <option value="In Person" {% if grievance_data.how_complaint_was_received == 'In Person' %}selected{% endif %}>In Person</option>
+                                        <option value="SMS" {% if grievance_data.how_complaint_was_received == 'SMS' %}selected{% endif %}>SMS</option>
+                                        <option value="WhatsApp" {% if grievance_data.how_complaint_was_received == 'WhatsApp' %}selected{% endif %}>WhatsApp</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="project" class="form-label">Project <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="project" 
+                                           name="project" required
+                                           value="{% if grievance_data %}{{ grievance_data.project_id|default:'' }}{% endif %}"
+                                           placeholder="Enter project ID">
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="description_of_complaint" class="form-label">
-                                Description of Complaint <span class="text-danger">*</span>
+                            <label for="complaint_content" class="form-label">
+                                Complaint Content <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="description_of_complaint" 
-                                      name="description_of_complaint" rows="4" required>{% if grievance_data %}{{ grievance_data.description_of_complaint|default:'' }}{% endif %}</textarea>
+                            <textarea class="form-control" id="complaint_content" 
+                                      name="complaint_content" rows="4" required>{% if grievance_data %}{{ grievance_data.complaint_content|default:'' }}{% endif %}</textarea>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="responsible_unit_or_department" class="form-label">Responsible Unit/Department</label>
-                            <input type="text" class="form-control" id="responsible_unit_or_department" 
-                                   name="responsible_unit_or_department"
-                                   value="{% if grievance_data %}{{ grievance_data.responsible_unit_or_department|default:'' }}{% endif %}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="was_recieved_of_complaint_ack" class="form-label">Complaint Acknowledgment Received</label>
+                                    <select class="form-select" id="was_recieved_of_complaint_ack" name="was_recieved_of_complaint_ack">
+                                        <option value="">Select</option>
+                                        <option value="Y" {% if grievance_data.was_recieved_of_complaint_ack == 'Y' %}selected{% endif %}>Yes</option>
+                                        <option value="N" {% if grievance_data.was_recieved_of_complaint_ack == 'N' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="communication_method" class="form-label">Communication Method</label>
+                                    <select class="form-select" id="communication_method" name="communication_method">
+                                        <option value="">Select Method</option>
+                                        <option value="Call" {% if grievance_data.communication_method == 'Call' %}selected{% endif %}>Phone Call</option>
+                                        <option value="Email" {% if grievance_data.communication_method == 'Email' %}selected{% endif %}>Email</option>
+                                        <option value="Letter" {% if grievance_data.communication_method == 'Letter' %}selected{% endif %}>Letter</option>
+                                        <option value="In Person" {% if grievance_data.communication_method == 'In Person' %}selected{% endif %}>In Person</option>
+                                        <option value="SMS" {% if grievance_data.communication_method == 'SMS' %}selected{% endif %}>SMS</option>
+                                        <option value="WhatsApp" {% if grievance_data.communication_method == 'WhatsApp' %}selected{% endif %}>WhatsApp</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="row">
@@ -105,21 +146,64 @@
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="was_complainant_satisfied_with_decision" class="form-label">Complainant Satisfied with Decision</label>
-                            <select class="form-select" id="was_complainant_satisfied_with_decision" 
-                                    name="was_complainant_satisfied_with_decision">
-                                <option value="">Select Satisfaction Level</option>
-                                <option value="Y" {% if grievance_data.was_complainant_satisfied_with_decision == 'Y' %}selected{% endif %}>Yes</option>
-                                <option value="N" {% if grievance_data.was_complainant_satisfied_with_decision == 'N' %}selected{% endif %}>No</option>
-                                <option value="Pending" {% if grievance_data.was_complainant_satisfied_with_decision == 'Pending' %}selected{% endif %}>Pending</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="was_complainant_satisfied_with_decision" class="form-label">Complainant Satisfied with Decision</label>
+                                    <select class="form-select" id="was_complainant_satisfied_with_decision" 
+                                            name="was_complainant_satisfied_with_decision">
+                                        <option value="">Select Satisfaction Level</option>
+                                        <option value="Y" {% if grievance_data.was_complainant_satisfied_with_decision == 'Y' %}selected{% endif %}>Yes</option>
+                                        <option value="N" {% if grievance_data.was_complainant_satisfied_with_decision == 'N' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="was_decison_communicated_to_complainant" class="form-label">Decision Communicated to Complainant</label>
+                                    <select class="form-select" id="was_decison_communicated_to_complainant" 
+                                            name="was_decison_communicated_to_complainant">
+                                        <option value="">Select</option>
+                                        <option value="Y" {% if grievance_data.was_decison_communicated_to_complainant == 'Y' %}selected{% endif %}>Yes</option>
+                                        <option value="N" {% if grievance_data.was_decison_communicated_to_complainant == 'N' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="outcome_of_grievance" class="form-label">Outcome of Grievance</label>
-                            <textarea class="form-control" id="outcome_of_grievance" 
-                                      name="outcome_of_grievance" rows="3">{% if grievance_data %}{{ grievance_data.outcome_of_grievance|default:'' }}{% endif %}</textarea>
+                            <label for="any_follow_up_action" class="form-label">Follow-up Actions</label>
+                            <textarea class="form-control" id="any_follow_up_action" 
+                                      name="any_follow_up_action" rows="3">{% if grievance_data %}{{ grievance_data.any_follow_up_action|default:'' }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="brief_note_for_NO_answer" class="form-label">Explanation if Not Satisfied</label>
+                            <textarea class="form-control" id="brief_note_for_NO_answer" 
+                                      name="brief_note_for_NO_answer" rows="3">{% if grievance_data %}{{ grievance_data.brief_note_for_NO_answer|default:'' }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="type_of_investment" class="form-label">Type of Investment</label>
+                                    <input type="text" class="form-control" id="type_of_investment" 
+                                           name="type_of_investment" 
+                                           value="{% if grievance_data %}{{ grievance_data.type_of_investment_id|default:'' }}{% endif %}"
+                                           placeholder="Enter investment type ID">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="decision_outcome" class="form-label">Decision Outcome</label>
+                                    <input type="text" class="form-control" id="decision_outcome" 
+                                           name="decision_outcome" 
+                                           value="{% if grievance_data %}{{ grievance_data.decision_outcome_id|default:'' }}{% endif %}"
+                                           placeholder="Enter outcome ID">
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="d-flex justify-content-between">
