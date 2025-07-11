@@ -539,18 +539,18 @@ def grievance_list(request):
     
     try:
         grievances = GrievianceMonitoringLog.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
         ).all()
         
         # Apply filters
         if request.GET.get('project'):
             grievances = grievances.filter(project=request.GET.get('project'))
         
-        if request.GET.get('complaint_status'):
-            grievances = grievances.filter(complaint_status=request.GET.get('complaint_status'))
+        if request.GET.get('satisfaction_status'):
+            grievances = grievances.filter(was_complainant_satisfied_with_decision=request.GET.get('satisfaction_status'))
         
         if request.GET.get('complainant_name'):
-            grievances = grievances.filter(complainant_name__icontains=request.GET.get('complainant_name'))
+            grievances = grievances.filter(name_of_complainant__icontains=request.GET.get('complainant_name'))
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -569,10 +569,10 @@ def grievance_list(request):
         stats = {
             'total_grievances': GrievianceMonitoringLog.objects.count(),
             'filtered_count': grievances.count(),
-            'open_grievances': grievances.filter(complaint_status='Open').count(),
-            'closed_grievances': grievances.filter(complaint_status='Closed').count(),
-            'male_complainants': grievances.filter(complainant_gender='Male').count(),
-            'female_complainants': grievances.filter(complainant_gender='Female').count(),
+            'satisfied_grievances': grievances.filter(was_complainant_satisfied_with_decision='Y').count(),
+            'unsatisfied_grievances': grievances.filter(was_complainant_satisfied_with_decision='N').count(),
+            'male_complainants': grievances.filter(sex='M').count(),
+            'female_complainants': grievances.filter(sex='F').count(),
         }
         
         context = {
@@ -597,12 +597,12 @@ def grievance_detail(request, pk):
     """Grievance detail view"""
     try:
         grievance = get_object_or_404(GrievianceMonitoringLog.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
         ), pk=pk)
         
         context = {
             'grievance': grievance,
-            'title': f'Grievance Details - {grievance.case_number}',
+            'title': f'Grievance Details - {grievance.case_no}',
         }
         
         return render(request, 'social_and_env/grievance/grievance_detail.html', context)
