@@ -133,49 +133,6 @@
                 <label class="form-label">Amount To</label>
                 <input type="number" name="amount_max" class="form-control" value="{{ filter.form.amount.1 }}" placeholder="Max amount">
             </div>
-            {% else %}
-            <!-- Django ORM Mode Filter Form -->
-            <div class="col-md-3">
-                <label class="form-label">Project</label>
-                {% render_field filter.form.project class="form-select" %}
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Region</label>
-                {% render_field filter.form.region class="form-select" %}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Gender</label>
-                {% render_field filter.form.sex class="form-select" %}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Compensated</label>
-                {% render_field filter.form.pap_compensated class="form-select" %}
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filter
-                </button>
-                <a href="{% url 'pap_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x me-1"></i>Clear
-                </a>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">PAP Name</label>
-                {% render_field filter.form.pap_name class="form-control" %}
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Location of Impact</label>
-                {% render_field filter.form.location_of_impact class="form-control" %}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Amount From</label>
-                {% render_field filter.form.amount.0 class="form-control" %}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Amount To</label>
-                {% render_field filter.form.amount.1 class="form-control" %}
-            </div>
-            {% endif %}
         </form>
     </div>
 </div>
