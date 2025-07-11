@@ -565,14 +565,12 @@ def test_sql_server_connection(request):
 
 @login_required
 def sql_server_diagnostics(request):
-    """Comprehensive diagnostics for SQL Server setup"""
+    """System diagnostics for internal use only"""
     try:
         from django.db import connection
         
         diagnostics = {
-            'database_engine': str(connection.settings_dict.get('ENGINE', 'Unknown')),
-            'database_name': str(connection.settings_dict.get('NAME', 'Unknown')),
-            'server_host': str(connection.settings_dict.get('HOST', 'Unknown')),
+            'system_status': 'operational',
             'tests': {}
         }
         
@@ -1653,15 +1651,13 @@ def debug_cascading_dropdowns(request):
     
     try:
         from django.db import connection
-        engine = connection.settings_dict.get("ENGINE", "")
         
         result = {
-            "engine": engine,
             "parameters": {
                 "monitoring_type_id": monitoring_type_id,
                 "project_id": project_id
             },
-            "sql_server_mode": True  # Force SQL Server mode
+            "status": "debug_mode"
         }
         
         if True:  # Force SQL Server mode - always use raw SQL queries

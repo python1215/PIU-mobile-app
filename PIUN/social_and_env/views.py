@@ -463,7 +463,6 @@ def pap_list(request):
                 'filter': filter_obj,
                 'stats': stats,
                 'is_filtered': is_filtered,
-                'is_sql_server': True,
             }
             
             return render(request, 'social_and_env/pap/pap_list.html', context)
@@ -509,7 +508,6 @@ def pap_list(request):
                 'filter': pap_filter,
                 'stats': stats,
                 'is_filtered': bool(request.GET),
-                'is_sql_server': False,
             }
 
             return render(request, 'social_and_env/pap/pap_list.html', context)
@@ -517,7 +515,7 @@ def pap_list(request):
     except Exception as e:
         # Emergency fallback: Show empty list with error message
         from django.contrib import messages
-        messages.error(request, f'Error loading PAP data: {str(e)}. Please check your database connection.')
+        messages.error(request, 'Error loading PAP data. Please check your database connection.')
         
         context = {
             'page_obj': None,
@@ -532,7 +530,6 @@ def pap_list(request):
                 'female_count': 0,
             },
             'is_filtered': False,
-            'is_sql_server': is_sql_server,
             'error': str(e),
         }
         
@@ -597,9 +594,8 @@ def pap_add(request):
             except Exception as e:
                 messages.error(request, f'Error adding record: {str(e)}')
         
-        # Render SQL Server compatible form
+        # Render form
         context = {
-            'sql_server_mode': True,
             'title': 'Add PAP Record'
         }
         return render(request, 'social_and_env/pap/pap_sql_form.html', context)
@@ -618,7 +614,7 @@ def pap_add(request):
         else:
             form = PAPForm()
 
-        context = {'form': form, 'title': 'Add PAP Record', 'sql_server_mode': False}
+        context = {'form': form, 'title': 'Add PAP Record'}
         return render(request, 'social_and_env/pap/pap_form.html', context)
 
 
@@ -715,12 +711,12 @@ def pap_edit(request, pk):
                     # Update PAP record in SQL Server
                     cursor.execute("""
                         UPDATE [piuprod3].[dbo].[social_and_env_pap]
-                        SET name = %s,
-                            location = %s,
-                            compensation_amount = %s,
-                            completion_status = %s,
+                        SET name = ?,
+                            location = ?,
+                            compensation_amount = ?,
+                            completion_status = ?,
                             date_updated = GETDATE()
-                        WHERE pap_identification_number = %s
+                        WHERE pap_identification_number = ?
                     """, [
                         request.POST.get('name'),
                         request.POST.get('location'),
@@ -740,7 +736,7 @@ def pap_edit(request, pk):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT * FROM [piuprod3].[dbo].[social_and_env_pap]
-                    WHERE pap_identification_number = %s
+                    WHERE pap_identification_number = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -753,7 +749,6 @@ def pap_edit(request, pk):
                 
                 context = {
                     'pap_data': pap_data,
-                    'sql_server_mode': True,
                     'title': 'Edit PAP Record'
                 }
                 return render(request, 'social_and_env/pap/pap_sql_form.html', context)
@@ -776,7 +771,7 @@ def pap_edit(request, pk):
         else:
             form = PAPUpdateForm(instance=pap)
 
-        context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record', 'sql_server_mode': False}
+        context = {'form': form, 'pap': pap, 'title': 'Edit PAP Record'}
         return render(request, 'social_and_env/pap/pap_form.html', context)
 
 
@@ -794,7 +789,7 @@ def pap_delete(request, pk):
                     # Delete PAP record from SQL Server
                     cursor.execute("""
                         DELETE FROM [piuprod3].[dbo].[social_and_env_pap]
-                        WHERE pap_identification_number = %s
+                        WHERE pap_identification_number = ?
                     """, [pk])
                     
                 messages.success(request, 'PAP record deleted successfully!')
@@ -809,7 +804,7 @@ def pap_delete(request, pk):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT pap_identification_number, name FROM [piuprod3].[dbo].[social_and_env_pap]
-                    WHERE pap_identification_number = %s
+                    WHERE pap_identification_number = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -820,8 +815,7 @@ def pap_delete(request, pk):
                 context = {
                     'object_name': f'PAP Record - {row[0]} ({row[1]})',
                     'cancel_url': 'pap_detail',
-                    'cancel_pk': pk,
-                    'sql_server_mode': True
+                    'cancel_pk': pk
                 }
                 return render(request, 'social_and_env/confirm_delete.html', context)
                 
@@ -842,7 +836,7 @@ def pap_delete(request, pk):
                 'object_name': f'PAP Record - {pap.pap_identification_number} ({pap.pap_name})',
                 'cancel_url': 'pap_detail',
                 'cancel_pk': pk,
-                'sql_server_mode': False
+
             }
             return render(request, 'social_and_env/confirm_delete.html', context)
 
@@ -907,7 +901,6 @@ def grievance_list(request):
                     'page_obj': page_obj,
                     'stats': stats,
                     'is_filtered': False,
-                    'sql_server_mode': True,
                 }
                 
                 return render(request, 'social_and_env/grievance/grievance_list.html', context)
@@ -919,7 +912,6 @@ def grievance_list(request):
                 'page_obj': Paginator([], 10).get_page(1),
                 'stats': {'total_cases': 0, 'filtered_count': 0, 'satisfied': 0, 'not_satisfied': 0, 'pending': 0},
                 'is_filtered': False,
-                'sql_server_mode': True,
             }
             return render(request, 'social_and_env/grievance/grievance_list.html', context)
     else:
@@ -968,7 +960,7 @@ def grievance_list(request):
             'filter': grievance_filter,
             'stats': stats,
             'is_filtered': bool(request.GET),
-            'sql_server_mode': False,
+
         }
 
         return render(request, 'social_and_env/grievance/grievance_list.html',
@@ -988,7 +980,7 @@ def grievance_detail(request, pk):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT * FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                    WHERE case_no = %s
+                    WHERE case_no = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -1010,7 +1002,6 @@ def grievance_detail(request, pk):
                 
                 context = {
                     'grievance': grievance,
-                    'sql_server_mode': True
                 }
                 return render(request, 'social_and_env/grievance/grievance_detail.html', context)
                 
@@ -1028,7 +1019,7 @@ def grievance_detail(request, pk):
 
         context = {
             'grievance': grievance,
-            'sql_server_mode': False
+            
         }
         return render(request, 'social_and_env/grievance/grievance_detail.html',
                       context)
@@ -1056,7 +1047,7 @@ def grievance_add(request):
                          complaint_category, description_of_complaint, responsible_unit_or_department,
                          date_claim_recieved, expected_decision_date, was_complainant_satisfied_with_decision,
                          outcome_of_grievance, date_created, loginUser_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GETDATE(), %s)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)
                     """, [
                         case_no,
                         request.POST.get('name_of_complainant'),
@@ -1080,7 +1071,6 @@ def grievance_add(request):
                 messages.error(request, f'Error creating record: {str(e)}')
         
         context = {
-            'sql_server_mode': True,
             'title': 'Add Grievance Case'
         }
         return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
@@ -1099,7 +1089,7 @@ def grievance_add(request):
         else:
             form = GrievianceMonitoringLogForm()
 
-        context = {'form': form, 'title': 'Add Grievance Case', 'sql_server_mode': False}
+        context = {'form': form, 'title': 'Add Grievance Case'}
         return render(request, 'social_and_env/grievance/grievance_form.html', context)
 
 
@@ -1117,18 +1107,18 @@ def grievance_edit(request, pk):
                     # Update grievance record in SQL Server
                     cursor.execute("""
                         UPDATE [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                        SET name_of_complainant = %s,
-                            sex = %s,
-                            phone_number = %s,
-                            location = %s,
-                            complaint_category = %s,
-                            description_of_complaint = %s,
-                            responsible_unit_or_department = %s,
-                            expected_decision_date = %s,
-                            was_complainant_satisfied_with_decision = %s,
-                            outcome_of_grievance = %s,
+                        SET name_of_complainant = ?,
+                            sex = ?,
+                            phone_number = ?,
+                            location = ?,
+                            complaint_category = ?,
+                            description_of_complaint = ?,
+                            responsible_unit_or_department = ?,
+                            expected_decision_date = ?,
+                            was_complainant_satisfied_with_decision = ?,
+                            outcome_of_grievance = ?,
                             date_updated = GETDATE()
-                        WHERE case_no = %s
+                        WHERE case_no = ?
                     """, [
                         request.POST.get('name_of_complainant'),
                         request.POST.get('sex'),
@@ -1154,7 +1144,7 @@ def grievance_edit(request, pk):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT * FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                    WHERE case_no = %s
+                    WHERE case_no = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -1167,7 +1157,6 @@ def grievance_edit(request, pk):
                 
                 context = {
                     'grievance_data': grievance_data,
-                    'sql_server_mode': True,
                     'title': 'Edit Grievance Case'
                 }
                 return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
@@ -1194,7 +1183,7 @@ def grievance_edit(request, pk):
             'form': form,
             'grievance': grievance,
             'title': 'Edit Grievance Case',
-            'sql_server_mode': False
+            
         }
         return render(request, 'social_and_env/grievance/grievance_form.html', context)
 
@@ -1213,7 +1202,7 @@ def grievance_delete(request, pk):
                     # Delete grievance record from SQL Server
                     cursor.execute("""
                         DELETE FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                        WHERE case_no = %s
+                        WHERE case_no = ?
                     """, [pk])
                     
                 messages.success(request, 'Grievance case deleted successfully!')
@@ -1228,7 +1217,7 @@ def grievance_delete(request, pk):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT case_no, name_of_complainant FROM [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                    WHERE case_no = %s
+                    WHERE case_no = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -1240,7 +1229,7 @@ def grievance_delete(request, pk):
                     'object_name': f'Grievance Case - {row[0]} ({row[1]})',
                     'cancel_url': 'grievance_detail',
                     'cancel_pk': pk,
-                    'sql_server_mode': True
+                    
                 }
                 return render(request, 'social_and_env/confirm_delete.html', context)
                 
@@ -1261,7 +1250,7 @@ def grievance_delete(request, pk):
             'object_name': f'Grievance Case - {grievance.case_no}',
             'cancel_url': 'grievance_detail',
             'cancel_pk': pk,
-            'sql_server_mode': False
+            
         }
         return render(request, 'social_and_env/confirm_delete.html', context)
 
@@ -1358,7 +1347,7 @@ def ohs_detail(request, pk):
                 try:
                     cursor.execute(f"""
                         SELECT * FROM {table_name} 
-                        WHERE ohs_Id = %s
+                        WHERE ohs_Id = ?
                     """, [pk])
                     
                     row = cursor.fetchone()
@@ -1419,7 +1408,7 @@ def ohs_detail(request, pk):
             context = {
                 'ohs': ohs,
                 'title': f'OHS Monitoring - {ohs.project.project}',
-                'sql_server_mode': True
+                
             }
             
             return render(request, 'social_and_env/ohs/ohs_detail.html', context)
@@ -1432,7 +1421,7 @@ def ohs_detail(request, pk):
         context = {
             'ohs': ohs,
             'title': f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
-            'sql_server_mode': False
+            
         }
         
         return render(request, 'social_and_env/ohs/ohs_detail.html', context)
@@ -1450,7 +1439,7 @@ def ohs_edit(request, pk):
             try:
                 cursor.execute("""
                     SELECT * FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
-                    WHERE ohs_Id = %s
+                    WHERE ohs_Id = ?
                 """, [pk])
                 
                 row = cursor.fetchone()
@@ -1476,10 +1465,10 @@ def ohs_edit(request, pk):
                         # Update the record
                         cursor.execute("""
                             UPDATE [piuprod3].[dbo].[social_and_env_ohs_monitoring]
-                            SET male = %s, female = %s, youth_male = %s, youth_female = %s,
-                                quality_at_entry_requirement = %s, working_environment = %s,
-                                remarks = %s
-                            WHERE ohs_Id = %s
+                            SET male = ?, female = ?, youth_male = ?, youth_female = ?,
+                                quality_at_entry_requirement = ?, working_environment = ?,
+                                remarks = ?
+                            WHERE ohs_Id = ?
                         """, [male, female, youth_male, youth_female, 
                               quality_at_entry_requirement, working_environment, remarks, pk])
                         
@@ -1504,7 +1493,7 @@ def ohs_edit(request, pk):
                     'initial_data': initial_data,
                     'pk': pk,
                     'title': f'Edit OHS Monitoring - {ohs_data.get("project_id", "Unknown")}',
-                    'sql_server_mode': True
+                    
                 }
                 
                 return render(request, 'social_and_env/ohs/ohs_edit_sql.html', context)
@@ -1538,7 +1527,7 @@ def ohs_edit(request, pk):
             'form': form,
             'ohs': ohs,
             'title': f'Edit OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
-            'sql_server_mode': False
+            
         }
         return render(request, 'social_and_env/ohs/ohs_form.html', context)
 
@@ -1555,7 +1544,7 @@ def ohs_delete(request, pk):
                 # Check if record exists
                 cursor.execute("""
                     SELECT COUNT(*) FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
-                    WHERE ohs_Id = %s
+                    WHERE ohs_Id = ?
                 """, [pk])
                 
                 if cursor.fetchone()[0] == 0:
@@ -1566,7 +1555,7 @@ def ohs_delete(request, pk):
                     # Delete the record
                     cursor.execute("""
                         DELETE FROM [piuprod3].[dbo].[social_and_env_ohs_monitoring] 
-                        WHERE ohs_Id = %s
+                        WHERE ohs_Id = ?
                     """, [pk])
                     
                     messages.success(request, 'OHS monitoring record deleted successfully!')
@@ -1579,7 +1568,7 @@ def ohs_delete(request, pk):
                     'cancel_pk': pk,
                     'delete_url': 'ohs_delete',
                     'delete_pk': pk,
-                    'sql_server_mode': True
+                    
                 }
                 return render(request, 'social_and_env/confirm_delete.html', context)
                 
@@ -1600,7 +1589,7 @@ def ohs_delete(request, pk):
             'object_name': f'OHS Monitoring Record - {ohs.project.project if ohs.project else "Unknown"}',
             'cancel_url': 'ohs_detail',
             'cancel_pk': pk,
-            'sql_server_mode': False
+            
         }
         return render(request, 'social_and_env/confirm_delete.html', context)
 
@@ -1775,95 +1764,7 @@ def esia_delete(request, pk):
     return render(request, 'social_and_env/confirm_delete.html', context)
 
 
-@login_required
-def grievance_add(request):
-    """Add new Grievance record - Dual Mode Support"""
-    from utils.database_utils import is_sql_server_mode
-    from django.db import connection
-    import uuid
-    
-    if is_sql_server_mode():
-        # SQL Server mode with full CRUD support
-        if request.method == 'POST':
-            try:
-                with connection.cursor() as cursor:
-                    # Generate unique case number
-                    case_no = f"GR-{uuid.uuid4().hex[:8].upper()}"
-                    
-                    # Insert new grievance record into SQL Server
-                    cursor.execute("""
-                        INSERT INTO [piuprod3].[dbo].[social_and_env_grieviancemonitoringlog]
-                        (case_no, name_of_complainant, sex, phone_number, location,
-                         complaint_category, description_of_complaint, responsible_unit_or_department,
-                         date_claim_recieved, expected_decision_date, was_complainant_satisfied_with_decision,
-                         outcome_of_grievance, date_created, loginUser_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GETDATE(), %s)
-                    """, [
-                        case_no,
-                        request.POST.get('name_of_complainant'),
-                        request.POST.get('sex'),
-                        request.POST.get('phone_number'),
-                        request.POST.get('location'),
-                        request.POST.get('complaint_category'),
-                        request.POST.get('description_of_complaint'),
-                        request.POST.get('responsible_unit_or_department'),
-                        request.POST.get('date_claim_recieved'),
-                        request.POST.get('expected_decision_date'),
-                        request.POST.get('was_complainant_satisfied_with_decision'),
-                        request.POST.get('outcome_of_grievance'),
-                        request.user.id
-                    ])
-                    
-                messages.success(request, f'Grievance case {case_no} created successfully!')
-                return redirect('grievance_list')
-                
-            except Exception as e:
-                messages.error(request, f'Error creating record: {str(e)}')
-        
-        context = {
-            'sql_server_mode': True,
-            'title': 'Add Grievance Case'
-        }
-        return render(request, 'social_and_env/grievance/grievance_sql_form.html', context)
-    else:
-        # SQLite mode using Django ORM
-        if request.method == 'POST':
-            form = GrievianceMonitoringLogForm(request.POST)
-            if form.is_valid():
-                grievance = form.save(commit=False)
-                grievance.loginUser = request.user
-                grievance.save()
-                messages.success(request, 'Grievance case created successfully!')
-                return redirect('grievance_list')
-            else:
-                messages.error(request, 'Please correct the errors below.')
-        else:
-            form = GrievianceMonitoringLogForm()
-
-        context = {'form': form, 'title': 'Add Grievance Case', 'sql_server_mode': False}
-        return render(request, 'social_and_env/grievance/grievance_form.html', context)
-
-
 # This function has been replaced by the dual-mode grievance_edit function above
-
-
-@login_required
-def grievance_delete(request, pk):
-    """Delete Grievance record"""
-    grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
-    
-    if request.method == 'POST':
-        grievance.delete()
-        messages.success(request, 'Grievance record deleted successfully!')
-        return redirect('grievance_list')
-    
-    context = {
-        'object': grievance,
-        'object_name': f'Grievance - {grievance.project}',
-        'cancel_url': 'grievance_detail',
-        'cancel_pk': pk,
-    }
-    return render(request, 'social_and_env/confirm_delete.html', context)
 
 
 # ======================== AJAX Views ========================
@@ -1966,7 +1867,7 @@ def load_districts_ohs(request):
             cursor.execute("""
                 SELECT district_code, district_name 
                 FROM setup_districts 
-                WHERE region_code_id = %s 
+                WHERE region_code_id = ? 
                 ORDER BY district_name
             """, [region_id])
             
@@ -1999,7 +1900,7 @@ def load_settlements_ohs(request):
             cursor.execute("""
                 SELECT settlement_code, settlement_name 
                 FROM setup_settlements 
-                WHERE district_code = %s 
+                WHERE district_code = ? 
                 ORDER BY settlement_name
             """, [district_id])
             
@@ -2033,7 +1934,7 @@ def test_cascading_dropdown(request):
                 cursor.execute("""
                     SELECT district_code, district_name 
                     FROM setup_districts 
-                    WHERE region_code_id = %s 
+                    WHERE region_code_id = ? 
                     ORDER BY district_name
                 """, [region_id])
                 
@@ -2054,14 +1955,14 @@ def test_cascading_dropdown(request):
                     cursor.execute("""
                         SELECT settlement_code, settlement_name 
                         FROM setup_settlement 
-                        WHERE district_code_id = %s 
+                        WHERE district_code_id = ? 
                         ORDER BY settlement_name
                     """, [district_id])
                     rows = cursor.fetchall()
                     
                     # If no settlements found, create placeholder settlements
                     if not rows:
-                        cursor.execute("SELECT district_name FROM setup_districts WHERE district_code = %s", [district_id])
+                        cursor.execute("SELECT district_name FROM setup_districts WHERE district_code = ?", [district_id])
                         district_info = cursor.fetchone()
                         if district_info:
                             district_name = district_info[0]
@@ -2164,7 +2065,7 @@ def community_detail(request, pk):
                 try:
                     cursor.execute(f"""
                         SELECT * FROM {table_name} 
-                        WHERE reference_number = %s
+                        WHERE reference_number = ?
                     """, [pk])
                     
                     row = cursor.fetchone()
@@ -2274,7 +2175,7 @@ def load_investment_types_pap(request):
             cursor.execute("""
                 SELECT DISTINCT type_of_investment 
                 FROM PIU_Financial_mgt_kpi_for_contract 
-                WHERE project_id = %s 
+                WHERE project_id = ? 
                 ORDER BY type_of_investment
             """, [project_id])
             
@@ -2307,7 +2208,7 @@ def load_districts(request):
             cursor.execute("""
                 SELECT district_code, district_name 
                 FROM setup_districts 
-                WHERE region_code_id = %s 
+                WHERE region_code_id = ? 
                 ORDER BY district_name
             """, [region_id])
             
@@ -2340,7 +2241,7 @@ def load_settlements(request):
             cursor.execute("""
                 SELECT settlement_code, settlement_name 
                 FROM setup_settlement 
-                WHERE district_code_id = %s 
+                WHERE district_code_id = ? 
                 ORDER BY settlement_name
             """, [district_id])
             

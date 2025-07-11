@@ -82,7 +82,7 @@ def load_kpi_descriptions_sql(request):
         return JsonResponse({'options': [], 'error': str(e)})
 
 def test_sql_server_connection(request):
-    """Test SQL Server connection and KPI data availability"""
+    """Test database connection and KPI data availability"""
     try:
         with connection.cursor() as cursor:
             # Test query to check KPI table
@@ -98,7 +98,7 @@ def test_sql_server_connection(request):
             
             return JsonResponse({
                 'status': 'success',
-                'connection': 'SQL Server connected',
+                'connection': 'Database connected',
                 'sample_data': len(results),
                 'data': results[:5] if results else []
             })
@@ -106,7 +106,7 @@ def test_sql_server_connection(request):
     except Exception as e:
         return JsonResponse({
             'status': 'error',
-            'connection': 'SQL Server connection failed',
+            'connection': 'Database connection failed',
             'error': str(e)
         })
 
