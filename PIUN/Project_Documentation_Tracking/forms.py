@@ -9,51 +9,31 @@ class ProjectDocumentForm(forms.ModelForm):
     class Meta:
         model = ProjectDocument
         fields = [
-            'project', 'document_type', 'title', 'description', 'document_file',
-            'version', 'status', 'priority', 'due_date', 'submission_date'
+            'project', 'document_type', 'description', 'document_date', 'attachment'
         ]
         widgets = {
             'project': forms.Select(attrs={'class': 'form-select'}),
             'document_type': forms.Select(attrs={'class': 'form-select'}),
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter document title'
-            }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
                 'placeholder': 'Enter document description'
             }),
-            'document_file': forms.ClearableFileInput(attrs={
+            'document_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'attachment': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
                 'accept': '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png'
-            }),
-            'version': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'e.g., 1.0, 2.1'
-            }),
-            'status': forms.Select(attrs={'class': 'form-select'}),
-            'priority': forms.Select(attrs={'class': 'form-select'}),
-            'due_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'submission_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
             }),
         }
         labels = {
             'project': 'Project',
             'document_type': 'Document Type',
-            'title': 'Document Title',
             'description': 'Description',
-            'document_file': 'Document File',
-            'version': 'Version',
-            'status': 'Status',
-            'priority': 'Priority',
-            'due_date': 'Due Date',
-            'submission_date': 'Submission Date',
+            'document_date': 'Document Date',
+            'attachment': 'Document File',
         }
     
     def __init__(self, *args, **kwargs):
@@ -61,16 +41,15 @@ class ProjectDocumentForm(forms.ModelForm):
         # Set required fields
         self.fields['project'].required = True
         self.fields['document_type'].required = True
-        self.fields['title'].required = True
-        self.fields['document_file'].required = False  # Make file optional for testing
-        self.fields['version'].required = False  # Make version optional with default
+        self.fields['description'].required = True
+        self.fields['document_date'].required = True
+        self.fields['attachment'].required = False  # Make file optional for testing
         
         # Add help text
-        self.fields['version'].help_text = 'Version number (e.g., 1.0, 2.1)'
-        self.fields['document_file'].help_text = 'Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG'
+        self.fields['attachment'].help_text = 'Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG'
     
-    def clean_document_file(self):
-        file = self.cleaned_data.get('document_file')
+    def clean_attachment(self):
+        file = self.cleaned_data.get('attachment')
         if file:
             # Check file size (max 16MB)
             if file.size > 16 * 1024 * 1024:
@@ -83,63 +62,52 @@ class ProjectDocumentForm(forms.ModelForm):
                 raise ValidationError('File type not supported. Please upload PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, or PNG files.')
         
         return file
-    
-    def clean_version(self):
-        version = self.cleaned_data.get('version')
-        if not version:
-            version = '1.0'  # Default version if not provided
-        else:
-            # Simple version validation
-            if not version.replace('.', '').replace('-', '').isalnum():
-                raise ValidationError('Version must contain only letters, numbers, dots, and hyphens.')
-        return version
 
 
 class DocumentCommentForm(forms.ModelForm):
     class Meta:
         model = DocumentComment
-        fields = ['comment_text', 'parent_comment']
+        fields = ['comment']
         widgets = {
-            'comment_text': forms.Textarea(attrs={
+            'comment': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Enter your comment...'
             }),
-            'parent_comment': forms.HiddenInput(),
         }
         labels = {
-            'comment_text': 'Comment',
+            'comment': 'Comment',
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['comment_text'].required = True
+        self.fields['comment'].required = True
 
 
 class DocumentTagForm(forms.ModelForm):
     class Meta:
         model = DocumentTag
-        fields = ['name', 'color']
+        fields = ['name', 'description']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter tag name'
             }),
-            'color': forms.TextInput(attrs={
+            'description': forms.Textarea(attrs={
                 'class': 'form-control',
-                'type': 'color',
-                'value': '#007bff'
+                'rows': 3,
+                'placeholder': 'Enter tag description'
             }),
         }
         labels = {
             'name': 'Tag Name',
-            'color': 'Tag Color',
+            'description': 'Description',
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['name'].required = True
-        self.fields['color'].required = True
+        self.fields['description'].required = False
     
     def clean_name(self):
         name = self.cleaned_data.get('name')
@@ -165,17 +133,7 @@ class DocumentFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    status = forms.ChoiceField(
-        choices=[('', 'All Status')] + ProjectDocument.DOCUMENT_STATUS_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-    
-    priority = forms.ChoiceField(
-        choices=[('', 'All Priorities')] + ProjectDocument.PRIORITY_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
+    # Removed status and priority fields as they don't exist in the current model
     
     search = forms.CharField(
         required=False,

@@ -38,15 +38,9 @@
                             {% csrf_token %}
                             
                             <div class="form-group">
-                                <label for="title" class="form-label">Document Title *</label>
-                                <input type="text" class="form-control" id="title" name="title" 
-                                       value="{{ document.title|default:'' }}" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label">Description *</label>
                                 <textarea class="form-control" id="description" name="description" 
-                                          rows="3">{{ document.description|default:'' }}</textarea>
+                                          rows="3" required>{{ document.description|default:'' }}</textarea>
                             </div>
 
                             <div class="row">
@@ -80,61 +74,17 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="status" class="form-label">Status</label>
-                                        <select class="form-select" id="status" name="status">
-                                            <option value="draft" {% if document.status == 'draft' %}selected{% endif %}>Draft</option>
-                                            <option value="under_review" {% if document.status == 'under_review' %}selected{% endif %}>Under Review</option>
-                                            <option value="approved" {% if document.status == 'approved' %}selected{% endif %}>Approved</option>
-                                            <option value="rejected" {% if document.status == 'rejected' %}selected{% endif %}>Rejected</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="priority" class="form-label">Priority</label>
-                                        <select class="form-select" id="priority" name="priority">
-                                            <option value="low" {% if document.priority == 'low' %}selected{% endif %}>Low</option>
-                                            <option value="medium" {% if document.priority == 'medium' %}selected{% endif %}>Medium</option>
-                                            <option value="high" {% if document.priority == 'high' %}selected{% endif %}>High</option>
-                                            <option value="critical" {% if document.priority == 'critical' %}selected{% endif %}>Critical</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="version" class="form-label">Version</label>
-                                        <input type="text" class="form-control" id="version" name="version" 
-                                               value="{{ document.version|default:'1.0' }}" 
-                                               placeholder="e.g., 1.0, 2.1">
-                                        <small class="form-text text-muted">Version number (e.g., 1.0, 2.1)</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="due_date" class="form-label">Due Date</label>
-                                        <input type="date" class="form-control" id="due_date" name="due_date" 
-                                               value="{{ document.due_date|date:'Y-m-d'|default:'' }}">
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label for="document_date" class="form-label">Document Date *</label>
+                                <input type="date" class="form-control" id="document_date" name="document_date" 
+                                       value="{{ document.document_date|date:'Y-m-d'|default:'' }}" required>
                             </div>
 
                             <div class="form-group">
-                                <label for="keywords" class="form-label">Keywords</label>
-                                <input type="text" class="form-control" id="keywords" name="keywords" 
-                                       value="{{ document.keywords|default:'' }}" 
-                                       placeholder="Comma-separated keywords">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="notes" class="form-label">Notes</label>
-                                <textarea class="form-control" id="notes" name="notes" 
-                                          rows="3">{{ document.notes|default:'' }}</textarea>
+                                <label for="attachment" class="form-label">Document File</label>
+                                <input type="file" class="form-control" id="attachment" name="attachment" 
+                                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG</small>
                             </div>
 
                             <div class="form-group">
@@ -162,19 +112,9 @@
                             {% endif %}
 
                             <div class="form-group">
-                                <label for="{{ form.title.id_for_label }}" class="form-label">
-                                    {{ form.title.label }}
-                                    {% if form.title.field.required %}<span class="text-danger">*</span>{% endif %}
-                                </label>
-                                {{ form.title }}
-                                {% if form.title.help_text %}
-                                    <small class="form-text text-muted">{{ form.title.help_text }}</small>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group">
                                 <label for="{{ form.description.id_for_label }}" class="form-label">
                                     {{ form.description.label }}
+                                    {% if form.description.field.required %}<span class="text-danger">*</span>{% endif %}
                                 </label>
                                 {{ form.description }}
                             </div>
@@ -200,56 +140,26 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.status.id_for_label }}" class="form-label">
-                                            {{ form.status.label }}
-                                        </label>
-                                        {{ form.status }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.priority.id_for_label }}" class="form-label">
-                                            {{ form.priority.label }}
-                                        </label>
-                                        {{ form.priority }}
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.document_date.id_for_label }}" class="form-label">
+                                    {{ form.document_date.label }}
+                                    {% if form.document_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.document_date }}
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.version.id_for_label }}" class="form-label">
-                                            {{ form.version.label }}
-                                        </label>
-                                        {{ form.version }}
-                                        {% if form.version.help_text %}
-                                            <small class="form-text text-muted">{{ form.version.help_text }}</small>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.due_date.id_for_label }}" class="form-label">
-                                            {{ form.due_date.label }}
-                                        </label>
-                                        {{ form.due_date }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if form.document_file %}
+                            {% if form.attachment %}
                                 <div class="form-group">
-                                    <label for="{{ form.document_file.id_for_label }}" class="form-label">
-                                        {{ form.document_file.label }}
+                                    <label for="{{ form.attachment.id_for_label }}" class="form-label">
+                                        {{ form.attachment.label }}
                                     </label>
-                                    {{ form.document_file }}
-                                    {% if document.document_file %}
+                                    {{ form.attachment }}
+                                    {% if form.attachment.help_text %}
+                                        <small class="form-text text-muted">{{ form.attachment.help_text }}</small>
+                                    {% endif %}
+                                    {% if document.attachment %}
                                         <small class="form-text text-muted">
-                                            Current file: <a href="{{ document.document_file.url }}" target="_blank">{{ document.document_file.name }}</a>
+                                            Current file: <a href="{{ document.attachment.url }}" target="_blank">{{ document.attachment.name }}</a>
                                         </small>
                                     {% endif %}
                                 </div>
