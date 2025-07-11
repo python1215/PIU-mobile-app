@@ -113,7 +113,7 @@ def esia_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'ESIA record updated successfully!')
-            return redirect('esia_detail', pk=esia.pk)
+            return redirect('esia_list')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
