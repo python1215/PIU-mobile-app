@@ -107,7 +107,8 @@ class PAPForm(forms.ModelForm):
         queryset=KPI_For_Contract.objects.all(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False
+        required=False,
+        to_field_name='monitoring_Type_Code'
     )
 
     region = forms.ModelChoiceField(
