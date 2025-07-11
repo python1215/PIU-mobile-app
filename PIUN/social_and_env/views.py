@@ -302,9 +302,14 @@ def pap_list(request):
         return render(request, 'social_and_env/pap/pap_list.html', context)
         
     except Exception as e:
-        # Handle any errors gracefully
+        # Handle any errors gracefully with detailed logging
         from django.contrib import messages
-        messages.error(request, 'Error loading PAP data. Please try again.')
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'PAP List View Error: {str(e)}', exc_info=True)
+        
+        # More specific error message for debugging
+        messages.error(request, f'Error loading PAP data: {str(e)}')
         
         # Return empty context
         context = {
