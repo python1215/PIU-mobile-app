@@ -500,8 +500,8 @@ def social_env_dashboard(request):
             'compensated_pap': PAP.objects.filter(pap_compensated='Y').count(),
             'male_pap': PAP.objects.filter(sex='M').count(),
             'female_pap': PAP.objects.filter(sex='F').count(),
-            'open_grievances': GrievianceMonitoringLog.objects.filter(complaint_status='Open').count(),
-            'closed_grievances': GrievianceMonitoringLog.objects.filter(complaint_status='Closed').count(),
+            'open_grievances': GrievianceMonitoringLog.objects.filter(was_complainant_satisfied_with_decision='N').count(),
+            'closed_grievances': GrievianceMonitoringLog.objects.filter(was_complainant_satisfied_with_decision='Y').count(),
         }
         
         # Get recent activities
