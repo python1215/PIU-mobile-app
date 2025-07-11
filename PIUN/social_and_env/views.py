@@ -22,7 +22,7 @@ from .forms import (ESIAForm, ESIAUpdateForm, PAPForm, PAPUpdateForm,
                     OHSMonitoringForm, OHSUpdateForm, CommunityEngagementForm)
 from .filters import (ESIAFilter, PAPFilter, GrievianceMonitoringLogFilter,
                       OHSMonitoringFilter, CommunityEngagementFilter)
-from setup.models import Districts, Settlement
+from setup.models import Districts, Settlement, Regions
 from PIU_Financial_mgt.models import KPI_For_Contract
 from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
 from monitoring.models import Indicator_Description
@@ -1218,7 +1218,7 @@ def load_settlements_ohs(request):
         return HttpResponse('<option value="">Select Settlement</option>')
     
     try:
-        settlements = Settlements.objects.filter(
+        settlements = Settlement.objects.filter(
             district_code=district_id
         ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
         
@@ -1244,7 +1244,7 @@ def test_cascading_dropdown(request):
             'message': 'Cascading dropdown test endpoint working',
             'regions': list(Regions.objects.values('region_code', 'region_name')),
             'districts': list(Districts.objects.values('district_code', 'district_name', 'region_code')),
-            'settlements': list(Settlements.objects.values('settlement_code', 'settlement_name', 'district_code')),
+            'settlements': list(Settlement.objects.values('settlement_code', 'settlement_name', 'district_code')),
             'projects': list(Project.objects.values('project', 'project_name')),
         }
         
@@ -1292,7 +1292,7 @@ def load_settlements(request):
         return HttpResponse('<option value="">Select Settlement</option>')
     
     try:
-        settlements = Settlements.objects.filter(
+        settlements = Settlement.objects.filter(
             district_code=district_id
         ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
         
@@ -1340,7 +1340,7 @@ def load_settlements_pap(request):
         return HttpResponse('<option value="">Select Settlement</option>')
     
     try:
-        settlements = Settlements.objects.filter(
+        settlements = Settlement.objects.filter(
             district_code=district_id
         ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
         
