@@ -186,6 +186,17 @@ def document_list(request):
                 self.has_next = page_num < paginator.num_pages
                 self.previous_page_number = page_num - 1 if self.has_previous else None
                 self.next_page_number = page_num + 1 if self.has_next else None
+                self.has_other_pages = paginator.num_pages > 1
+                self.start_index = lambda: (page_num - 1) * paginator.per_page + 1
+                self.end_index = lambda: min(page_num * paginator.per_page, paginator.count)
+                
+            def __iter__(self):
+                """Make MockPage iterable for Django templates"""
+                return iter(self.object_list)
+                
+            def __len__(self):
+                """Return length of current page items"""
+                return len(self.object_list)
         
         paginator = MockPaginator(documents, per_page)
         page_obj = MockPage(documents[start_index:end_index], page_number, paginator)
