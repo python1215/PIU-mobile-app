@@ -280,7 +280,7 @@
         data: {
             labels: [
                 {% for project in project_counts %}
-                    '{{ project.project__project_name|truncatechars:20 }}',
+                    '{{ project.project__project|truncatechars:20 }}',
                 {% endfor %}
             ],
             datasets: [{

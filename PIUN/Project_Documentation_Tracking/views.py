@@ -39,7 +39,7 @@ def document_dashboard(request):
     status_counts = ProjectDocument.objects.values('status').annotate(count=Count('status'))
     
     # Documents by project
-    project_counts = ProjectDocument.objects.values('project__project_name').annotate(
+    project_counts = ProjectDocument.objects.values('project__project').annotate(
         count=Count('document_id')
     ).order_by('-count')[:5]
     
