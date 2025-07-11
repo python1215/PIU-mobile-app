@@ -49,16 +49,11 @@
                 <p class="mb-0">{{ document.description|default:"No description available" }}</p>
             </div>
             <div class="col-md-4 text-end">
-                <span class="version-badge">Version {{ document.version }}</span>
-                {% if document.status == 'approved' %}
-                    <span class="badge bg-success ms-2">{{ document.get_status_display }}</span>
-                {% elif document.status == 'under_review' %}
-                    <span class="badge bg-warning ms-2">{{ document.get_status_display }}</span>
-                {% elif document.status == 'rejected' %}
-                    <span class="badge bg-danger ms-2">{{ document.get_status_display }}</span>
-                {% else %}
-                    <span class="badge bg-secondary ms-2">{{ document.get_status_display }}</span>
-                {% endif %}
+                <a href="{% url 'main_dashboard' %}" class="btn btn-outline-light me-2">
+                    <i class="fas fa-home me-1"></i>Back to Dashboard
+                </a>
+                <span class="version-badge">Version {{ document.version|default:'1.0' }}</span>
+                <span class="badge bg-secondary ms-2">Active</span>
             </div>
         </div>
     </div>
