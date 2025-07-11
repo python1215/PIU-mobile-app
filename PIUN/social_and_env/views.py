@@ -978,15 +978,16 @@ def esia_list(request):
     
     try:
         esias = ESIA.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+            'project_name', 'type_of_investment', 'loginUser'
         ).all()
         
         # Apply filters
         if request.GET.get('project'):
-            esias = esias.filter(project=request.GET.get('project'))
+            esias = esias.filter(project_name=request.GET.get('project'))
         
         if request.GET.get('region'):
-            esias = esias.filter(region=request.GET.get('region'))
+            # Since ESIA doesn't have region field, we'll skip this filter
+            pass
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -1012,7 +1013,8 @@ def esia_list(request):
         from PIU_Financial_mgt.models import Project
         projects = Project.objects.all()
         regions = Regions.objects.all()
-        years = ESIA.objects.values_list('year_of_report__profile_year', flat=True).distinct().order_by('year_of_report__profile_year')
+        years = [record.date_created.year for record in ESIA.objects.all()]
+        years = sorted(list(set(years)))
         
         context = {
             'page_obj': page_obj,
@@ -1071,12 +1073,12 @@ def esia_detail(request, pk):
     """ESIA detail view"""
     try:
         esia = get_object_or_404(ESIA.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+            'project_name', 'type_of_investment', 'loginUser'
         ), pk=pk)
         
         context = {
             'esia': esia,
-            'title': f'ESIA Details - {esia.project.project if esia.project else "Unknown"}',
+            'title': f'ESIA Details - {esia.project_name.project if esia.project_name else "Unknown"}',
         }
         
         return render(request, 'social_and_env/esia/esia_detail.html', context)
