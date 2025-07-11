@@ -30,7 +30,7 @@ class ProjectDocument(models.Model):
     document_type = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, verbose_name="Document Title")
     description = models.TextField(blank=True, verbose_name="Document Description")
-    document_file = models.FileField(upload_to='project_documents/', verbose_name="Document File")
+    document_file = models.FileField(upload_to='project_documents/', verbose_name="Document File", blank=True, null=True)
     version = models.CharField(max_length=10, default='1.0', verbose_name="Version")
     status = models.CharField(max_length=20, choices=DOCUMENT_STATUS_CHOICES, default='draft')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')

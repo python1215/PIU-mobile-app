@@ -52,7 +52,7 @@
                                 <option value="">All Types</option>
                                 {% for doc_type in document_types %}
                                 <option value="{{ doc_type.id }}" {% if current_filters.document_type == doc_type.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ doc_type.name }}
+                                    {{ doc_type.document_type }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -127,7 +127,7 @@
                                             </div>
                                         </td>
                                         <td>{{ document.project.project|default:"N/A" }}</td>
-                                        <td>{{ document.document_type.name|default:"N/A" }}</td>
+                                        <td>{{ document.document_type.document_type|default:"N/A" }}</td>
                                         <td>
                                             {% if document.status == 'approved' %}
                                                 <span class="badge bg-success">Approved</span>

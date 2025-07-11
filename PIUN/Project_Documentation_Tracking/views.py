@@ -73,7 +73,7 @@ def create_mock_document(doc_data):
     class MockDocumentType:
         def __init__(self, type_id):
             self.id = type_id
-            self.name = f"Document Type {type_id}" if type_id else "Unknown Type"
+            self.document_type = f"Document Type {type_id}" if type_id else "Unknown Type"
     
     class MockUser:
         def __init__(self, user_id):
@@ -406,12 +406,23 @@ def document_create(request):
                 document.save()
                 messages.success(request, 'Document created successfully!')
                 return redirect('Project_Documentation_Tracking:document_detail', pk=document.pk)
+            else:
+                # Add form errors to messages
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
     else:
         form = ProjectDocumentForm() if not is_sql_server_mode() else None
     
-    # Get filter options
-    projects = Project.objects.all() if not is_sql_server_mode() else []
-    document_types = DocumentType.objects.all() if not is_sql_server_mode() else []
+    # Get filter options for forms
+    if is_sql_server_mode():
+        # For SQL Server mode, get basic project and document type data
+        projects = Project.objects.all()[:10]  # Limit to first 10 for performance
+        document_types = DocumentType.objects.all()[:10]
+    else:
+        # For SQLite mode, use all records
+        projects = Project.objects.all()
+        document_types = DocumentType.objects.all()
     
     context = {
         'form': form,
