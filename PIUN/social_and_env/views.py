@@ -385,7 +385,7 @@ def pap_list(request):
                     'female_count': stats_row[5] or 0,
                 }
             
-            # Create mock paginator
+            # Create mock paginator with all required attributes
             from math import ceil
             total_pages = ceil(total_count / page_size)
             
@@ -393,10 +393,15 @@ def pap_list(request):
                 def __init__(self, count, per_page):
                     self.count = count
                     self.per_page = per_page
-                    self.num_pages = ceil(count / per_page)
+                    self.num_pages = ceil(count / per_page) if count > 0 else 1
+                    self.page_range = range(1, self.num_pages + 1)
                 
                 def get_page(self, page_number):
                     return MockPage(page_number, self, pap_list)
+                
+                @property
+                def has_other_pages(self):
+                    return self.num_pages > 1
             
             class MockPage:
                 def __init__(self, number, paginator, object_list):
@@ -407,6 +412,22 @@ def pap_list(request):
                     self.has_next = number < paginator.num_pages
                     self.previous_page_number = number - 1 if self.has_previous else None
                     self.next_page_number = number + 1 if self.has_next else None
+                
+                @property
+                def has_other_pages(self):
+                    return self.paginator.num_pages > 1
+                
+                def start_index(self):
+                    """Return the 1-based index of the first object on this page"""
+                    if self.paginator.count == 0:
+                        return 0
+                    return (self.number - 1) * self.paginator.per_page + 1
+                
+                def end_index(self):
+                    """Return the 1-based index of the last object on this page"""
+                    if self.number == self.paginator.num_pages:
+                        return self.paginator.count
+                    return self.number * self.paginator.per_page
             
             page_obj = MockPaginator(total_count, page_size).get_page(page_number)
             
