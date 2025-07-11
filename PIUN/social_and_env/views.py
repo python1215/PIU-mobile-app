@@ -1365,10 +1365,8 @@ def ohs_detail(request, pk):
             ohs_data = None
             for table_name in tables_to_try:
                 try:
-                    cursor.execute(f"""
-                        SELECT * FROM {table_name} 
-                        WHERE ohs_Id = ?
-                    """, [pk])
+                    query = "SELECT * FROM " + table_name + " WHERE ohs_Id = ?"
+                    cursor.execute(query, [pk])
                     
                     row = cursor.fetchone()
                     if row:
@@ -2083,10 +2081,8 @@ def community_detail(request, pk):
             engagement = None
             for table_name in tables_to_try:
                 try:
-                    cursor.execute(f"""
-                        SELECT * FROM {table_name} 
-                        WHERE reference_number = ?
-                    """, [pk])
+                    query = "SELECT * FROM " + table_name + " WHERE reference_number = ?"
+                    cursor.execute(query, [pk])
                     
                     row = cursor.fetchone()
                     if row:

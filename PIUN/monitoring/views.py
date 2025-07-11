@@ -52,7 +52,8 @@ def monitoring_dashboard(request):
                 
                 for table_name in tables_to_try:
                     try:
-                        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                        query = "SELECT COUNT(*) FROM " + table_name
+                        cursor.execute(query)
                         stats['total_projects'] = cursor.fetchone()[0]
                         break
                     except:
@@ -67,7 +68,8 @@ def monitoring_dashboard(request):
                 
                 for table_name in monitoring_tables:
                     try:
-                        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                        query = "SELECT COUNT(*) FROM " + table_name
+                        cursor.execute(query)
                         stats['quarterly_reports'] = cursor.fetchone()[0]
                         break
                     except:
@@ -82,7 +84,8 @@ def monitoring_dashboard(request):
                 
                 for table_name in indicator_tables:
                     try:
-                        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                        query = "SELECT COUNT(*) FROM " + table_name
+                        cursor.execute(query)
                         stats['total_indicators'] = cursor.fetchone()[0]
                         break
                     except:
@@ -91,15 +94,16 @@ def monitoring_dashboard(request):
                 # Try to get recent monitoring records
                 for table_name in monitoring_tables:
                     try:
-                        cursor.execute(f"""
+                        query = """
                             SELECT TOP 5 
                                 ISNULL(contract_refNo, 'N/A') as contract_ref,
                                 ISNULL(Target, 'N/A') as target,
                                 ISNULL(Achieved_status, 'N/A') as achieved,
                                 ISNULL(monitoring_date, GETDATE()) as monitoring_date
-                            FROM {table_name}
+                            FROM """ + table_name + """
                             ORDER BY monitoring_date DESC
-                        """)
+                        """
+                        cursor.execute(query)
                         
                         rows = cursor.fetchall()
                         if rows:

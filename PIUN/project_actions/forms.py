@@ -596,10 +596,8 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                         for table_name in table_names:
                             try:
                                 # Check if the selected Type_of_Investment exists for this project
-                                cursor.execute(f"""
-                                    SELECT COUNT(*) FROM {table_name} 
-                                    WHERE project_id = %s AND monitoring_type_id = %s AND type_of_investment = %s
-                                """, (project.projectID, type_of_monitoring.monitoring_type_id, type_of_investment.type_of_investment))
+                                query = "SELECT COUNT(*) FROM " + table_name + " WHERE project_id = ? AND monitoring_type_id = ? AND type_of_investment = ?"
+                                cursor.execute(query, (project.projectID, type_of_monitoring.monitoring_type_id, type_of_investment.type_of_investment))
                                 
                                 count = cursor.fetchone()[0]
                                 if count == 0:

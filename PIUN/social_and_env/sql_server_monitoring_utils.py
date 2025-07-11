@@ -281,36 +281,36 @@ def get_sql_server_monitoring_statistics():
             for prefix in database_variations:
                 try:
                     # Get PAP compensation statistics
-                    pap_table = f"{prefix}.[social_and_env_pap]" if prefix else "social_and_env_pap"
+                    pap_table = prefix + ".[social_and_env_pap]" if prefix else "social_and_env_pap"
                     
                     # Total PAP records
-                    cursor.execute(f"SELECT COUNT(*) FROM {pap_table}")
+                    cursor.execute("SELECT COUNT(*) FROM " + pap_table)
                     stats['total_monitoring_records'] += cursor.fetchone()[0]
                     
                     # Compensation paid
-                    cursor.execute(f"SELECT ISNULL(SUM(amount), 0) FROM {pap_table} WHERE pap_compensated = 'Y'")
+                    cursor.execute("SELECT ISNULL(SUM(amount), 0) FROM " + pap_table + " WHERE pap_compensated = 'Y'")
                     stats['compensation_paid'] = cursor.fetchone()[0]
                     
                     # Get Grievance statistics
-                    grievance_table = f"{prefix}.[social_and_env_grieviancemonitoringlog]" if prefix else "social_and_env_grieviancemonitoringlog"
+                    grievance_table = prefix + ".[social_and_env_grieviancemonitoringlog]" if prefix else "social_and_env_grieviancemonitoringlog"
                     
                     # Total grievance records
-                    cursor.execute(f"SELECT COUNT(*) FROM {grievance_table}")
+                    cursor.execute("SELECT COUNT(*) FROM " + grievance_table)
                     stats['total_monitoring_records'] += cursor.fetchone()[0]
                     
                     # Active cases (not closed)
-                    cursor.execute(f"SELECT COUNT(*) FROM {grievance_table} WHERE complaint_investigation_outcome != 'Closed'")
+                    cursor.execute("SELECT COUNT(*) FROM " + grievance_table + " WHERE complaint_investigation_outcome != 'Closed'")
                     stats['active_cases'] = cursor.fetchone()[0]
                     
                     # Resolved cases
-                    cursor.execute(f"SELECT COUNT(*) FROM {grievance_table} WHERE complaint_investigation_outcome = 'Closed'")
+                    cursor.execute("SELECT COUNT(*) FROM " + grievance_table + " WHERE complaint_investigation_outcome = 'Closed'")
                     stats['resolved_cases'] = cursor.fetchone()[0]
                     
                     # Get Community Engagement statistics
-                    community_table = f"{prefix}.[social_and_env_communityconsult_engagement]" if prefix else "social_and_env_communityconsult_engagement"
+                    community_table = prefix + ".[social_and_env_communityconsult_engagement]" if prefix else "social_and_env_communityconsult_engagement"
                     
                     # Total beneficiaries
-                    cursor.execute(f"SELECT ISNULL(SUM(male), 0) + ISNULL(SUM(female), 0) FROM {community_table}")
+                    cursor.execute("SELECT ISNULL(SUM(male), 0) + ISNULL(SUM(female), 0) FROM " + community_table)
                     stats['total_beneficiaries'] = cursor.fetchone()[0]
                     
                     print(f"Successfully loaded monitoring statistics from {prefix}")

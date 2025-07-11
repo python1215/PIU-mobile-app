@@ -9,7 +9,8 @@ def get_table_columns(table_name):
     """Get actual column names from a SQL Server table"""
     try:
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name.split('.')[-1].strip('[]')}'")
+            table_simple_name = table_name.split('.')[-1].strip('[]')
+            cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ?", [table_simple_name])
             columns = [row[0] for row in cursor.fetchall()]
             return columns
     except Exception as e:
