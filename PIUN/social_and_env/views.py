@@ -439,7 +439,7 @@ def pap_add(request):
             except Exception as e:
                 messages.error(request, f'Error saving PAP record: {str(e)}')
         else:
-            # Print form errors for debugging
+            # Display form errors to user
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{field}: {error}')

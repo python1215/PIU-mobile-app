@@ -197,10 +197,56 @@ class PAPForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Make required fields (except cascading dropdowns)
+        # Make optional fields explicitly not required
+        self.fields['area'].required = False
+        self.fields['compensation_RefNo'].required = False
+        self.fields['compensation_date'].required = False
+        self.fields['type_of_investment'].required = False
+        self.fields['district'].required = False
+        self.fields['pap_Current_Address'].required = False
+        
+        # Make required fields (except cascading dropdowns and optional fields)
         for field_name, field in self.fields.items():
-            if field_name not in ['type_of_investment', 'district', 'pap_Current_Address']:
+            if field_name not in ['type_of_investment', 'district', 'pap_Current_Address', 'area', 'compensation_RefNo', 'compensation_date']:
                 field.required = True
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Provide default value for area if not provided
+        if not cleaned_data.get('area'):
+            cleaned_data['area'] = '0.0'
+        
+        # Provide default value for compensation_RefNo if not provided
+        if not cleaned_data.get('compensation_RefNo'):
+            cleaned_data['compensation_RefNo'] = 'N/A'
+        
+        # Handle cascading dropdowns - provide defaults if not selected
+        if not cleaned_data.get('type_of_investment') and cleaned_data.get('project'):
+            # Get the first investment type for the selected project
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            project = cleaned_data.get('project')
+            first_investment = KPI_For_Contract.objects.filter(project=project).first()
+            if first_investment:
+                cleaned_data['type_of_investment'] = first_investment
+        
+        if not cleaned_data.get('district') and cleaned_data.get('region'):
+            # Get the first district for the selected region
+            from setup.models import Districts
+            region = cleaned_data.get('region')
+            first_district = Districts.objects.filter(region_code=region).first()
+            if first_district:
+                cleaned_data['district'] = first_district
+        
+        if not cleaned_data.get('pap_Current_Address') and cleaned_data.get('district'):
+            # Get the first settlement for the selected district
+            from setup.models import Settlement
+            district = cleaned_data.get('district')
+            first_settlement = Settlement.objects.filter(district_code=district).first()
+            if first_settlement:
+                cleaned_data['pap_Current_Address'] = first_settlement
+        
+        return cleaned_data
 
 
 
