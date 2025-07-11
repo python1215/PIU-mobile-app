@@ -496,10 +496,10 @@ def social_env_dashboard(request):
             'total_grievances': GrievianceMonitoringLog.objects.count(),
             'total_esia': ESIA.objects.count(),
             'total_ohs': OHS_Monitoring.objects.count(),
-            'total_community': CommunityConsult_engagement.objects.count(),
+            'total_community': CommunityConsult_Engagement.objects.count(),
             'compensated_pap': PAP.objects.filter(pap_compensated='Y').count(),
-            'male_pap': PAP.objects.filter(gender='M').count(),
-            'female_pap': PAP.objects.filter(gender='F').count(),
+            'male_pap': PAP.objects.filter(sex='M').count(),
+            'female_pap': PAP.objects.filter(sex='F').count(),
             'open_grievances': GrievianceMonitoringLog.objects.filter(complaint_status='Open').count(),
             'closed_grievances': GrievianceMonitoringLog.objects.filter(complaint_status='Closed').count(),
         }
