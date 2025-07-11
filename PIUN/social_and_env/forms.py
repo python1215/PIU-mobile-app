@@ -210,6 +210,21 @@ class PAPForm(forms.ModelForm):
             if field_name not in ['type_of_investment', 'district', 'pap_Current_Address', 'area', 'compensation_RefNo', 'compensation_date']:
                 field.required = True
     
+    def clean_type_of_investment(self):
+        """Custom validation for type_of_investment field"""
+        type_of_investment = self.cleaned_data.get('type_of_investment')
+        
+        # If no investment type selected, try to find a default
+        if not type_of_investment:
+            project = self.cleaned_data.get('project')
+            if project:
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                first_investment = KPI_For_Contract.objects.filter(project=project).first()
+                if first_investment:
+                    return first_investment
+        
+        return type_of_investment
+    
     def clean(self):
         cleaned_data = super().clean()
         
@@ -222,14 +237,6 @@ class PAPForm(forms.ModelForm):
             cleaned_data['compensation_RefNo'] = 'N/A'
         
         # Handle cascading dropdowns - provide defaults if not selected
-        if not cleaned_data.get('type_of_investment') and cleaned_data.get('project'):
-            # Get the first investment type for the selected project
-            from PIU_Financial_mgt.models import KPI_For_Contract
-            project = cleaned_data.get('project')
-            first_investment = KPI_For_Contract.objects.filter(project=project).first()
-            if first_investment:
-                cleaned_data['type_of_investment'] = first_investment
-        
         if not cleaned_data.get('district') and cleaned_data.get('region'):
             # Get the first district for the selected region
             from setup.models import Districts
