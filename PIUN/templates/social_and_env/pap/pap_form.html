@@ -377,17 +377,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Form validation
+    // Form validation - only validate truly required fields
     if (form) {
         form.addEventListener('submit', function(event) {
             let isValid = true;
-            const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
             
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
+            // Define essential required fields (excluding cascading dropdowns)
+            const essentialFields = [
+                'id_project',
+                'id_pap_identification_number',
+                'id_pap_name',
+                'id_sex',
+                'id_region',
+                'id_location_of_impact',
+                'id_amount'
+            ];
+            
+            essentialFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !field.value.trim()) {
                     isValid = false;
                     field.classList.add('is-invalid');
-                } else {
+                } else if (field) {
                     field.classList.remove('is-invalid');
                 }
             });

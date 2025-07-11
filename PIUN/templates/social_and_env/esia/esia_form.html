@@ -143,21 +143,30 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(event) {
         let isValid = true;
         
-        // Check required fields
-        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        // Define essential required fields (excluding cascading dropdowns)
+        const essentialFields = [
+            'id_project_name',
+            'id_project_duration',
+            'id_project_phase',
+            'id_project_locations',
+            'id_number_of_communities',
+            'id_esia_findings'
+        ];
         
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
+        essentialFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !field.value.trim()) {
                 isValid = false;
                 field.classList.add('is-invalid');
-            } else {
+            } else if (field) {
                 field.classList.remove('is-invalid');
             }
         });
         
         if (!isValid) {
             event.preventDefault();
-            document.querySelector('.is-invalid').focus();
+            const firstInvalidField = document.querySelector('.is-invalid');
+            if (firstInvalidField) firstInvalidField.focus();
         }
     });
     
