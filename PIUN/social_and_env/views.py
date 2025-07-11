@@ -1824,7 +1824,7 @@ def load_investment_types_esia(request):
             
             options = '<option value="">Select Investment Type</option>'
             for item in investment_types:
-                options += f'<option value="{item["type_of_investment"]}">{item["type_of_investment"]} - {item["Kpi_description"]}</option>'
+                options += '<option value="' + str(item["type_of_investment"]) + '">' + str(item["type_of_investment"]) + ' - ' + str(item["Kpi_description"]) + '</option>'
             
             return HttpResponse(options)
         except Exception as e:
@@ -1846,7 +1846,7 @@ def load_investment_types_grievance(request):
             
             options = '<option value="">Select Investment Type</option>'
             for item in investment_types:
-                options += f'<option value="{item["type_of_investment"]}">{item["type_of_investment"]} - {item["Kpi_description"]}</option>'
+                options += '<option value="' + str(item["type_of_investment"]) + '">' + str(item["type_of_investment"]) + ' - ' + str(item["Kpi_description"]) + '</option>'
             
             return HttpResponse(options)
         except Exception as e:
@@ -1894,12 +1894,12 @@ def load_districts_ohs(request):
             # Build HTML response
             html = '<option value="">Select District</option>'
             for row in rows:
-                html += f'<option value="{row[0]}">{row[1]}</option>'
+                html += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
             
             return HttpResponse(html)
     
     except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return HttpResponse('<option value="">Error: ' + str(e) + '</option>')
 
 
 def load_settlements_ohs(request):
@@ -1927,12 +1927,12 @@ def load_settlements_ohs(request):
             # Build HTML response
             html = '<option value="">Select Settlement</option>'
             for row in rows:
-                html += f'<option value="{row[0]}">{row[1]}</option>'
+                html += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
             
             return HttpResponse(html)
     
     except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return HttpResponse('<option value="">Error: ' + str(e) + '</option>')
 
 
 # Test endpoint to validate cascading dropdown functionality
@@ -1960,7 +1960,7 @@ def test_cascading_dropdown(request):
                 
                 result = '<select><option value="">Select District</option>'
                 for row in rows:
-                    result += f'<option value="{row[0]}">{row[1]}</option>'
+                    result += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
                 result += '</select>'
                 
                 return HttpResponse(result)
@@ -2001,7 +2001,7 @@ def test_cascading_dropdown(request):
                 
                 result = '<select><option value="">Select Settlement</option>'
                 for row in rows:
-                    result += f'<option value="{row[0]}">{row[1]}</option>'
+                    result += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
                 result += '</select>'
                 
                 return HttpResponse(result)
@@ -2030,7 +2030,7 @@ def test_cascading_dropdown(request):
                 """
                 
                 for district in wcr_districts:
-                    result += f'<option value="{district[0]}">{district[1]}</option>'
+                    result += '<option value="' + str(district[0]) + '">' + str(district[1]) + '</option>'
                 
                 result += "</select>"
                 
@@ -2199,12 +2199,12 @@ def load_investment_types_pap(request):
             
             options = '<option value="">Select Investment Type</option>'
             for row in rows:
-                options += f'<option value="{row[0]}">{row[0]}</option>'
+                options += '<option value="' + str(row[0]) + '">' + str(row[0]) + '</option>'
             
             return HttpResponse(options)
     
     except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return HttpResponse('<option value="">Error: ' + str(e) + '</option>')
 
 
 @login_required
@@ -2232,12 +2232,12 @@ def load_districts(request):
             
             options = '<option value="">Select District</option>'
             for row in rows:
-                options += f'<option value="{row[0]}">{row[1]}</option>'
+                options += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
             
             return HttpResponse(options)
     
     except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return HttpResponse('<option value="">Error: ' + str(e) + '</option>')
 
 
 @login_required
@@ -2265,12 +2265,12 @@ def load_settlements(request):
             
             options = '<option value="">Select Settlement</option>'
             for row in rows:
-                options += f'<option value="{row[0]}">{row[1]}</option>'
+                options += '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
             
             return HttpResponse(options)
     
     except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return HttpResponse('<option value="">Error: ' + str(e) + '</option>')
 
 
 @login_required
