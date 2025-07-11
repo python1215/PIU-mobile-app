@@ -29,7 +29,8 @@ class ESIAForm(forms.ModelForm):
         widget=forms.Select(attrs={
             "class": "form-select"
         }),
-        required=False
+        required=False,
+        to_field_name='monitoring_Type_Code'
     )
 
     class Meta:
@@ -77,6 +78,21 @@ class ESIAForm(forms.ModelForm):
                 field.required = True
 
 
+
+    def clean_type_of_investment(self):
+        """Custom validation for type_of_investment field"""
+        type_of_investment = self.cleaned_data.get('type_of_investment')
+        
+        # If no investment type selected, try to find a default
+        if not type_of_investment:
+            project_name = self.cleaned_data.get('project_name')
+            if project_name:
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                first_investment = KPI_For_Contract.objects.filter(project=project_name).first()
+                if first_investment:
+                    return first_investment
+        
+        return type_of_investment
 
     def clean(self):
         """Override clean method to handle validation"""
@@ -275,7 +291,8 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
         queryset=KPI_For_Contract.objects.all(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False
+        required=False,
+        to_field_name='monitoring_Type_Code'
     )
 
     class Meta:
@@ -358,6 +375,36 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
         else:
             # For new forms, include all investment types to prevent validation errors
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+    
+    def clean_type_of_investment(self):
+        """Custom validation for type_of_investment field"""
+        type_of_investment = self.cleaned_data.get('type_of_investment')
+        
+        # If no investment type selected, try to find a default
+        if not type_of_investment:
+            project = self.cleaned_data.get('project')
+            if project:
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                first_investment = KPI_For_Contract.objects.filter(project=project).first()
+                if first_investment:
+                    return first_investment
+        
+        return type_of_investment
+    
+    def clean_type_of_investment(self):
+        """Custom validation for type_of_investment field"""
+        type_of_investment = self.cleaned_data.get('type_of_investment')
+        
+        # If no investment type selected, try to find a default
+        if not type_of_investment:
+            project = self.cleaned_data.get('project')
+            if project:
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                first_investment = KPI_For_Contract.objects.filter(project=project).first()
+                if first_investment:
+                    return first_investment
+        
+        return type_of_investment
 
 
 class OHSMonitoringForm(forms.ModelForm):
@@ -375,7 +422,8 @@ class OHSMonitoringForm(forms.ModelForm):
     Type_of_Investment = forms.ModelChoiceField(
         queryset=KPI_For_Contract.objects.none(),
         empty_label="Select Investment Type",
-        widget=forms.Select(attrs={"class": "form-select"})
+        widget=forms.Select(attrs={"class": "form-select"}),
+        to_field_name='monitoring_Type_Code'
     )
 
     region = forms.ModelChoiceField(
