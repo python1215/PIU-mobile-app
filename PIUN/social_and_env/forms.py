@@ -79,15 +79,13 @@ class ESIAForm(forms.ModelForm):
             try:
                 project_id = int(self.data.get('project_name'))
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id,
-                    monitoring_type_id='ESS'
+                    project=project_id
                 )
             except (ValueError, TypeError):
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.none()
-        elif self.instance.pk:
+        elif self.instance.pk and self.instance.project_name:
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project_id=self.instance.project_name.pk,
-                monitoring_type_id='ESS'
+                project=self.instance.project_name
             )
 
     def clean(self):
@@ -102,6 +100,19 @@ class ESIAForm(forms.ModelForm):
             self.add_error('project_phase', 'Project phase must be between 1 and 10.')
             
         return cleaned_data
+
+    def clean_type_of_investment(self):
+        """Custom validation for type_of_investment field"""
+        type_of_investment = self.cleaned_data.get('type_of_investment')
+        project_name = self.cleaned_data.get('project_name')
+        
+        if project_name and type_of_investment:
+            # Validate that the selected investment type belongs to the selected project
+            valid_investments = KPI_For_Contract.objects.filter(project=project_name)
+            if type_of_investment not in valid_investments:
+                raise forms.ValidationError("Please select a valid investment type for the chosen project.")
+        
+        return type_of_investment
 
 
 class PAPForm(forms.ModelForm):
@@ -209,7 +220,7 @@ class PAPForm(forms.ModelForm):
             try:
                 project_id = int(self.data.get('project'))
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
+                    project=project_id
                 )
             except (ValueError, TypeError):
                 pass
@@ -222,25 +233,25 @@ class PAPForm(forms.ModelForm):
         if 'region' in self.data:
             try:
                 region_code = self.data.get('region')
-                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_code)
+                self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
             except (ValueError, TypeError):
                 pass
         elif self.instance and self.instance.pk and self.instance.region:
             # For editing existing records, load districts for the selected region
-            self.fields['district'].queryset = Districts.objects.filter(region_code_id=self.instance.region_id)
+            self.fields['district'].queryset = Districts.objects.filter(region_code=self.instance.region)
 
         if 'district' in self.data:
             try:
                 district_code = self.data.get('district')
                 self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                    district_code_id=district_code
+                    district_code=district_code
                 )
             except (ValueError, TypeError):
                 pass
         elif self.instance and self.instance.pk and self.instance.district:
             # For editing existing records, load settlements for the selected district
             self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                district_code_id=self.instance.district_id
+                district_code=self.instance.district
             )
 
 
@@ -330,7 +341,7 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
             try:
                 project_id = int(self.data.get('project'))
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
+                    project=project_id
                 )
             except (ValueError, TypeError):
                 pass
@@ -448,23 +459,23 @@ class OHSMonitoringForm(forms.ModelForm):
             try:
                 project_id = int(self.data.get('project'))
                 self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
+                    project=project_id
                 )
             except (ValueError, TypeError):
                 pass
 
         if 'region' in self.data:
             try:
-                region_id = int(self.data.get('region'))
-                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_id)
+                region_code = self.data.get('region')
+                self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
             except (ValueError, TypeError):
                 pass
 
         if 'district' in self.data:
             try:
-                district_id = int(self.data.get('district'))
+                district_code = self.data.get('district')
                 self.fields['settlement'].queryset = Settlement.objects.filter(
-                    district_code_id=district_id
+                    district_code=district_code
                 )
             except (ValueError, TypeError):
                 pass
