@@ -3,7 +3,7 @@ Enhanced Pagination Template Component
 Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
 {% endcomment %}
 
-{% if page_obj.has_other_pages %}
+{% if page_obj and page_obj.has_other_pages %}
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
         <!-- First Page -->
@@ -73,8 +73,12 @@ Usage: {% include 'includes/pagination.html' with page_obj=page_obj %}
     <!-- Page Info -->
     <div class="text-center mt-2">
         <small class="text-muted">
-            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
-            (Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }})
+            {% if page_obj and page_obj.has_other_pages %}
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
+                (Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }})
+            {% elif page_obj %}
+                Showing {{ page_obj.paginator.count }} entries
+            {% endif %}
         </small>
     </div>
 </nav>

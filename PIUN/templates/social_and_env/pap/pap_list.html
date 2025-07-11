@@ -202,7 +202,9 @@
             </div>
 
             <!-- Enhanced Pagination -->
-            {% include 'includes/pagination.html' with page_obj=page_obj %}
+            {% if page_obj %}
+                {% include 'includes/pagination.html' with page_obj=page_obj %}
+            {% endif %}
         {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-people display-1 text-muted"></i>
