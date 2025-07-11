@@ -192,20 +192,20 @@
             </div>
         </div>
 
-        <!-- Documentation module removed during cleanup -->
+        <!-- Documentation module re-enabled -->
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-gray text-white">
-                    <h5 class="mb-0 text-white">
-                        <i class="bi bi-file-earmark-text me-2 text-white"></i>Documentation
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>Documentation
                     </h5>
                 </div>
                 <div class="card-body">
                     <p class="card-text">Document management, file tracking, and comprehensive project documentation system.</p>
                     <div class="d-grid">
-                        <button class="btn btn-dark" disabled>
-                            <i class="bi bi-exclamation-triangle me-1"></i>Module Disabled
-                        </button>
+                        <a href="{% url 'Project_Documentation_Tracking:document_dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-right me-1"></i>Access Module
+                        </a>
                     </div>
                 </div>
             </div>

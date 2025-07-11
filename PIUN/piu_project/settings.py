@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'social_and_env',
     'NAWEC_KPI',
     'Issues_Actions_monitoring',
+    'Project_Documentation_Tracking',
 ]
 
 MIDDLEWARE = [
