@@ -216,7 +216,7 @@ def pap_list(request):
             table_name = get_sql_server_table_name('[social_and_env_pap]')
             
             # Get total count
-            count_query = f"SELECT COUNT(*) FROM {table_name}"
+            count_query = "SELECT COUNT(*) FROM " + table_name
             with connection.cursor() as cursor:
                 cursor.execute(count_query)
                 total_count = cursor.fetchone()[0]
@@ -282,13 +282,14 @@ def pap_list(request):
             
             # Update count query with filters
             if where_conditions:
-                count_query = f"SELECT COUNT(*) FROM {table_name} {where_clause}"
+                count_query = "SELECT COUNT(*) FROM " + table_name + " " + where_clause
                 with connection.cursor() as cursor:
                     cursor.execute(count_query, params)
                     total_count = cursor.fetchone()[0]
             
             # Main query with pagination and filtering using exact SQL Server field names
-            pap_query = f"""
+            # Build the query step by step to avoid f-string conflicts with SQL parameters
+            base_query = """
                 SELECT 
                     ISNULL([pap_identification_number], '') as pap_identification_number,
                     ISNULL([pap_name], '') as pap_name,
@@ -313,11 +314,13 @@ def pap_list(request):
                     ISNULL([type_of_investment_id], '') as type_of_investment_id,
                     ISNULL([type_of_pap_id], '') as type_of_pap_id,
                     ISNULL([vulnerability_category_id], '') as vulnerability_category_id
-                FROM {table_name}
-                {where_clause}
+                FROM """ + table_name + """
+                """ + where_clause + """
                 ORDER BY [pap_identification_number]
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
             """
+            
+            pap_query = base_query
             
             # Add pagination parameters - Fixed: separate params for main query
             main_params = params.copy()
@@ -360,7 +363,7 @@ def pap_list(request):
             pap_list = [MockPAP(row) for row in pap_records]
             
             # Calculate statistics
-            stats_query = f"""
+            stats_query = """
                 SELECT 
                     COUNT(*) as total_pap,
                     SUM(CASE WHEN [pap_compensated] = 'Y' THEN 1 ELSE 0 END) as compensated,
@@ -368,8 +371,7 @@ def pap_list(request):
                     SUM(ISNULL([amount], 0)) as total_compensation,
                     SUM(CASE WHEN [sex] = 'M' THEN 1 ELSE 0 END) as male_count,
                     SUM(CASE WHEN [sex] = 'F' THEN 1 ELSE 0 END) as female_count
-                FROM {table_name}
-            """
+                FROM """ + table_name
             
             with connection.cursor() as cursor:
                 cursor.execute(stats_query)
