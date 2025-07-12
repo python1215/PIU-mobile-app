@@ -950,6 +950,12 @@ function triggerKPICalculationPopup() {
         kpiType = 'WQCB';
     } else if (selectedText.includes('nrw') || selectedText.includes('non-revenue water') || selectedText.includes('revenue water') || selectedText.includes('kpi-14') || selectedText.includes('kpi 14') || selectedText.includes('14')) {
         kpiType = 'NRW';
+    } else if (selectedText.includes('audit opinion') || selectedText.includes('ao') || selectedText.includes('kpi-17') || selectedText.includes('kpi 17') || selectedText.includes('17')) {
+        kpiType = 'AO';
+    } else if (selectedText.includes('debt to equity') || selectedText.includes('der') || selectedText.includes('debt equity ratio') || selectedText.includes('kpi-18') || selectedText.includes('kpi 18') || selectedText.includes('18')) {
+        kpiType = 'DER';
+    } else if (selectedText.includes('current ratio') || selectedText.includes('cr') || selectedText.includes('kpi-19') || selectedText.includes('kpi 19') || selectedText.includes('19')) {
+        kpiType = 'CR';
     }
     
     console.log('Detected KPI type:', kpiType);
@@ -1001,6 +1007,18 @@ function triggerKPICalculationPopup() {
         case 'DD':
             console.log('✅ Triggering DD (Debtor Days) popup for KPI-15');
             showDDPopup();
+            break;
+        case 'AO':
+            console.log('✅ Triggering AO (Audit Opinion) popup for KPI-17');
+            showAOPopup();
+            break;
+        case 'DER':
+            console.log('✅ Triggering DER (Debt to Equity Ratio) popup for KPI-18');
+            showDERPopup();
+            break;
+        case 'CR':
+            console.log('✅ Triggering CR (Current Ratio) popup for KPI-19');
+            showCRPopup();
             break;
         default:
             showROAPopup(); // fallback
@@ -4874,6 +4892,622 @@ function testPercentageFieldUpdate() {
         console.log('✅ Test: Set target percentage to 75.25%');
     }
 }
+
+// === NEW KPI POPUP FUNCTIONS ===
+
+function showAOPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create AO popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #17a2b8; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #17a2b8; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-check-circle"></i> AO - Audit Opinion
+                </h5>
+                <span style="color: #b8daff; font-size: 0.9rem;">KPI-17</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #17a2b8; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Select Audit Opinion Status
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Audit Opinion:</label>
+                    <select id="aoAuditOpinion" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Select Audit Opinion</option>
+                        <option value="0">Qualified</option>
+                        <option value="1">Unqualified</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="aoQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1 (January - March)</option>
+                        <option value="Q2">Q2 (April - June)</option>
+                        <option value="Q3">Q3 (July - September)</option>
+                        <option value="Q4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div id="aoResult" style="display: none; margin-top: 15px; padding: 10px; 
+                                           background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                    <h6 style="color: #155724; margin-bottom: 10px;">Selected Opinion:</h6>
+                    <h5 style="color: #155724; margin: 0;">Status: <span id="aoFinalResult"></span></h5>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; 
+                        padding: 15px 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="resetAOForm()" style="background: #ffc107; color: #212529; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeAOPopup()" style="background: #6c757d; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <button onclick="setAO()" style="background: #007bff; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Set Opinion
+                </button>
+                <button onclick="useAOResult()" style="background: #28a745; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Use Result
+                </button>
+            </div>
+        </div>
+        
+        <!-- Backdrop -->
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 9999;" onclick="closeAOPopup()"></div>
+    `;
+    
+    document.body.appendChild(popup);
+    document.getElementById('aoAuditOpinion').focus();
+}
+
+function setAO() {
+    const quarter = document.getElementById('aoQuarter').value;
+    const auditOpinion = document.getElementById('aoAuditOpinion').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before setting the opinion.');
+        document.getElementById('aoQuarter').focus();
+        return;
+    }
+    
+    if (auditOpinion === '') {
+        alert('Please select an audit opinion.');
+        document.getElementById('aoAuditOpinion').focus();
+        return;
+    }
+    
+    const opinionText = auditOpinion === '1' ? 'Unqualified' : 'Qualified';
+    
+    // Show result
+    const resultDiv = document.getElementById('aoResult');
+    const finalResultSpan = document.getElementById('aoFinalResult');
+    
+    finalResultSpan.textContent = opinionText;
+    resultDiv.style.display = 'block';
+    
+    // Store the result
+    window.simpleAOResult = auditOpinion;
+}
+
+async function useAOResult() {
+    const quarter = document.getElementById('aoQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result.');
+        document.getElementById('aoQuarter').focus();
+        return;
+    }
+    
+    if (window.simpleAOResult === undefined) {
+        alert('Please set audit opinion first');
+        return;
+    }
+    
+    const data = {
+        kpi_type: 'AO',
+        input_values: {
+            audit_opinion: parseInt(window.simpleAOResult),
+            quarter: quarter,
+            achieved_value: parseInt(window.simpleAOResult)
+        }
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleAOResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                calculatePercentages();
+            }
+            
+            closeAOPopup();
+            alert('AO calculation saved and value applied successfully!');
+        } else {
+            throw new Error(result.error || 'Failed to save AO calculation');
+        }
+    } catch (error) {
+        console.error('Error saving AO calculation:', error);
+        alert('Error saving AO calculation: ' + error.message);
+    }
+}
+
+function resetAOForm() {
+    document.getElementById('aoAuditOpinion').value = '';
+    document.getElementById('aoQuarter').value = '';
+    
+    const resultDiv = document.getElementById('aoResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    window.simpleAOResult = null;
+    document.getElementById('aoAuditOpinion').focus();
+}
+
+function closeAOPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+function showDERPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create DER popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #fd7e14; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #fd7e14; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-graph-up"></i> DER - Debt to Equity Ratio
+                </h5>
+                <span style="color: #ffddcc; font-size: 0.9rem;">KPI-18</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #fd7e14; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: DER = Total Debt ÷ Total Equity
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Debt (GMD):</label>
+                    <input type="number" id="derTotalDebt" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter total debt amount">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Equity (GMD):</label>
+                    <input type="number" id="derTotalEquity" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter total equity amount">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="derQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1 (January - March)</option>
+                        <option value="Q2">Q2 (April - June)</option>
+                        <option value="Q3">Q3 (July - September)</option>
+                        <option value="Q4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div id="derResult" style="display: none; margin-top: 15px; padding: 10px; 
+                                           background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                    <h6 style="color: #155724; margin-bottom: 10px;">Calculation Result:</h6>
+                    <p id="derCalculationDetails" style="margin-bottom: 10px; color: #155724;"></p>
+                    <h5 style="color: #155724; margin: 0;">Debt to Equity Ratio: <span id="derFinalResult"></span></h5>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; 
+                        padding: 15px 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="resetDERForm()" style="background: #ffc107; color: #212529; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeDERPopup()" style="background: #6c757d; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <button onclick="calculateDER()" style="background: #007bff; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-calculator"></i> Calculate DER
+                </button>
+                <button onclick="useDERResult()" style="background: #28a745; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Use Result
+                </button>
+            </div>
+        </div>
+        
+        <!-- Backdrop -->
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 9999;" onclick="closeDERPopup()"></div>
+    `;
+    
+    document.body.appendChild(popup);
+    document.getElementById('derTotalDebt').focus();
+}
+
+function calculateDER() {
+    const quarter = document.getElementById('derQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before calculating.');
+        document.getElementById('derQuarter').focus();
+        return;
+    }
+    
+    const totalDebt = parseFloat(document.getElementById('derTotalDebt').value) || 0;
+    const totalEquity = parseFloat(document.getElementById('derTotalEquity').value) || 0;
+    
+    if (totalDebt <= 0 || totalEquity <= 0) {
+        alert('Please enter valid positive values for both Total Debt and Total Equity.');
+        return;
+    }
+    
+    const der = totalDebt / totalEquity;
+    
+    // Show result
+    const resultDiv = document.getElementById('derResult');
+    const detailsP = document.getElementById('derCalculationDetails');
+    const finalResultSpan = document.getElementById('derFinalResult');
+    
+    detailsP.innerHTML = `
+        Total Debt: GMD ${totalDebt.toLocaleString()}<br>
+        Total Equity: GMD ${totalEquity.toLocaleString()}<br>
+        Calculation: ${totalDebt.toLocaleString()} ÷ ${totalEquity.toLocaleString()}
+    `;
+    finalResultSpan.textContent = der.toFixed(2);
+    resultDiv.style.display = 'block';
+    
+    window.simpleDERResult = der.toFixed(2);
+}
+
+async function useDERResult() {
+    const quarter = document.getElementById('derQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result.');
+        document.getElementById('derQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleDERResult) {
+        alert('Please calculate DER first');
+        return;
+    }
+    
+    const totalDebt = parseFloat(document.getElementById('derTotalDebt').value) || 0;
+    const totalEquity = parseFloat(document.getElementById('derTotalEquity').value) || 0;
+    
+    const data = {
+        kpi_type: 'DER',
+        input_values: {
+            total_debt: totalDebt,
+            total_equity: totalEquity,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleDERResult)
+        }
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleDERResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                calculatePercentages();
+            }
+            
+            closeDERPopup();
+            alert('DER calculation saved and value applied successfully!');
+        } else {
+            throw new Error(result.error || 'Failed to save DER calculation');
+        }
+    } catch (error) {
+        console.error('Error saving DER calculation:', error);
+        alert('Error saving DER calculation: ' + error.message);
+    }
+}
+
+function resetDERForm() {
+    document.getElementById('derTotalDebt').value = '';
+    document.getElementById('derTotalEquity').value = '';
+    document.getElementById('derQuarter').value = '';
+    
+    const resultDiv = document.getElementById('derResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    window.simpleDERResult = null;
+    document.getElementById('derTotalDebt').focus();
+}
+
+function closeDERPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+function showCRPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create CR popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #20c997; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #20c997; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-bar-chart"></i> CR - Current Ratio
+                </h5>
+                <span style="color: #ccf2e8; font-size: 0.9rem;">KPI-19</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #20c997; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: CR = Current Assets ÷ Current Liabilities
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Current Assets (GMD):</label>
+                    <input type="number" id="crCurrentAssets" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter current assets amount">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Current Liabilities (GMD):</label>
+                    <input type="number" id="crCurrentLiabilities" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter current liabilities amount">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="crQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1 (January - March)</option>
+                        <option value="Q2">Q2 (April - June)</option>
+                        <option value="Q3">Q3 (July - September)</option>
+                        <option value="Q4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div id="crResult" style="display: none; margin-top: 15px; padding: 10px; 
+                                           background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                    <h6 style="color: #155724; margin-bottom: 10px;">Calculation Result:</h6>
+                    <p id="crCalculationDetails" style="margin-bottom: 10px; color: #155724;"></p>
+                    <h5 style="color: #155724; margin: 0;">Current Ratio: <span id="crFinalResult"></span></h5>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; 
+                        padding: 15px 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="resetCRForm()" style="background: #ffc107; color: #212529; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeCRPopup()" style="background: #6c757d; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <button onclick="calculateCR()" style="background: #007bff; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-calculator"></i> Calculate CR
+                </button>
+                <button onclick="useCRResult()" style="background: #28a745; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Use Result
+                </button>
+            </div>
+        </div>
+        
+        <!-- Backdrop -->
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 9999;" onclick="closeCRPopup()"></div>
+    `;
+    
+    document.body.appendChild(popup);
+    document.getElementById('crCurrentAssets').focus();
+}
+
+function calculateCR() {
+    const quarter = document.getElementById('crQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before calculating.');
+        document.getElementById('crQuarter').focus();
+        return;
+    }
+    
+    const currentAssets = parseFloat(document.getElementById('crCurrentAssets').value) || 0;
+    const currentLiabilities = parseFloat(document.getElementById('crCurrentLiabilities').value) || 0;
+    
+    if (currentAssets <= 0 || currentLiabilities <= 0) {
+        alert('Please enter valid positive values for both Current Assets and Current Liabilities.');
+        return;
+    }
+    
+    const cr = currentAssets / currentLiabilities;
+    
+    // Show result
+    const resultDiv = document.getElementById('crResult');
+    const detailsP = document.getElementById('crCalculationDetails');
+    const finalResultSpan = document.getElementById('crFinalResult');
+    
+    detailsP.innerHTML = `
+        Current Assets: GMD ${currentAssets.toLocaleString()}<br>
+        Current Liabilities: GMD ${currentLiabilities.toLocaleString()}<br>
+        Calculation: ${currentAssets.toLocaleString()} ÷ ${currentLiabilities.toLocaleString()}
+    `;
+    finalResultSpan.textContent = cr.toFixed(2);
+    resultDiv.style.display = 'block';
+    
+    window.simpleCRResult = cr.toFixed(2);
+}
+
+async function useCRResult() {
+    const quarter = document.getElementById('crQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result.');
+        document.getElementById('crQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleCRResult) {
+        alert('Please calculate CR first');
+        return;
+    }
+    
+    const currentAssets = parseFloat(document.getElementById('crCurrentAssets').value) || 0;
+    const currentLiabilities = parseFloat(document.getElementById('crCurrentLiabilities').value) || 0;
+    
+    const data = {
+        kpi_type: 'CR',
+        input_values: {
+            current_assets: currentAssets,
+            current_liabilities: currentLiabilities,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleCRResult)
+        }
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleCRResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                calculatePercentages();
+            }
+            
+            closeCRPopup();
+            alert('CR calculation saved and value applied successfully!');
+        } else {
+            throw new Error(result.error || 'Failed to save CR calculation');
+        }
+    } catch (error) {
+        console.error('Error saving CR calculation:', error);
+        alert('Error saving CR calculation: ' + error.message);
+    }
+}
+
+function resetCRForm() {
+    document.getElementById('crCurrentAssets').value = '';
+    document.getElementById('crCurrentLiabilities').value = '';
+    document.getElementById('crQuarter').value = '';
+    
+    const resultDiv = document.getElementById('crResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    window.simpleCRResult = null;
+    document.getElementById('crCurrentAssets').focus();
+}
+
+function closeCRPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
 </script>
 
 {% endblock %}

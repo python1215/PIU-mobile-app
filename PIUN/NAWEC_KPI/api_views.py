@@ -13,7 +13,8 @@ from .models import (
     CalculateROA, CalculateNPM, CalculateDSCR, CalculateMWh,
     CalculateGAF, CalculateTDE, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC,
-    CalculateWQCB, CalculateNRW, CalculateDD
+    CalculateWQCB, CalculateNRW, CalculateDD,
+    CalculateAO, CalculateDER, CalculateCR
 )
 from setup.models import Quarter, YEAR
 
@@ -39,6 +40,9 @@ class SaveKPICalculationView(View):
         'WQCB': CalculateWQCB,
         'NRW': CalculateNRW,
         'DD': CalculateDD,
+        'AO': CalculateAO,
+        'DER': CalculateDER,
+        'CR': CalculateCR,
     }
     
     def post(self, request):
