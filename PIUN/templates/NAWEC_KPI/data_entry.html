@@ -494,6 +494,9 @@
                                             <button type="button" class="btn btn-warning btn-sm join-item btn-hover" onclick="triggerKPICalculationPopup();" title="Open KPI Calculator">
                                                 <i class="bi bi-calculator"></i>
                                             </button>
+                                            <button type="button" class="btn btn-info btn-sm join-item btn-hover" onclick="testProgressCalculation();" title="Test Progress Calculation">
+                                                <i class="bi bi-gear"></i>
+                                            </button>
                                         </div>
                                         <label class="label py-1">
                                             <span class="label-text-alt text-xs opacity-70">Use calculator popup to set value</span>
@@ -843,6 +846,9 @@ function populateFieldsFromIndicator(indicatorId) {
             
             // Calculate and populate progress values automatically
             calculateAndPopulateProgressValues();
+            
+            // Also call the existing calculatePercentages function
+            setTimeout(calculatePercentages, 100);
         }
     })
     .catch(error => {
@@ -5098,13 +5104,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (indicatorField) {
         indicatorField.addEventListener('change', function() {
             // Load indicator details first, then calculate percentages
-            loadIndicatorDetails();
+            populateFieldsFromIndicator(this.value);
             setTimeout(calculatePercentages, 500); // Allow time for data loading
         });
     }
     
     console.log('✅ Event listeners initialized for automatic percentage calculations');
 });
+
+// Test function to debug progress calculation
+function testProgressCalculation() {
+    console.log('🧪 Testing progress calculation...');
+    
+    // Get all relevant fields
+    const baselineField = document.getElementById('id_baseline_value');
+    const achievedField = document.getElementById('id_achieved_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    const progressFromBaselineField = document.getElementById('id_Percentage_progress_from_baseline');
+    const progressToTargetField = document.getElementById('id_Percentage_progress_towards_end_target');
+    const indicatorField = document.getElementById('id_indicator_description');
+    
+    console.log('Field Detection:', {
+        baseline: baselineField ? `Found: ${baselineField.value}` : 'NOT FOUND',
+        achieved: achievedField ? `Found: ${achievedField.value}` : 'NOT FOUND',
+        target: targetField ? `Found: ${targetField.value}` : 'NOT FOUND',
+        progressFromBaseline: progressFromBaselineField ? `Found: ${progressFromBaselineField.value}` : 'NOT FOUND',
+        progressToTarget: progressToTargetField ? `Found: ${progressToTargetField.value}` : 'NOT FOUND',
+        indicator: indicatorField ? `Found: ${indicatorField.value}` : 'NOT FOUND'
+    });
+    
+    // Call both calculation functions
+    calculateAndPopulateProgressValues();
+    calculatePercentages();
+    
+    alert('Progress calculation test completed. Check console for details.');
+}
 
 // Simple test function to check if percentage fields can be updated
 function simplePercentageTest() {
