@@ -470,13 +470,17 @@ def tsqr_update(request, pk):
 @login_required
 def tsqr_delete(request, pk):
     """Delete TSQR calculation"""
-    calculation = get_object_or_404(CalculateTSQR, pk=pk)
-    if request.method == 'POST':
-        calculation.delete()
-        messages.success(request, 'TSQR calculation deleted successfully!')
+    try:
+        calculation = get_object_or_404(CalculateTSQR, pk=pk)
+        if request.method == 'POST':
+            calculation.delete()
+            messages.success(request, 'TSQR calculation deleted successfully!')
+            return redirect('NAWEC_KPI:tsqr_list')
+        
+        return render(request, 'NAWEC_KPI/crud/tsqr_confirm_delete.html', {
+            'calculation': calculation,
+            'title': 'Delete TSQR Calculation'
+        })
+    except CalculateTSQR.DoesNotExist:
+        messages.error(request, f'TSQR calculation with ID {pk} does not exist or has already been deleted.')
         return redirect('NAWEC_KPI:tsqr_list')
-    
-    return render(request, 'NAWEC_KPI/crud/tsqr_confirm_delete.html', {
-        'calculation': calculation,
-        'title': 'Delete TSQR Calculation'
-    })
