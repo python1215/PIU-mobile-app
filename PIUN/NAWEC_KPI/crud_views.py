@@ -49,7 +49,7 @@ def ao_create(request):
             calculation.loginUser = request.user
             calculation.save()
             messages.success(request, 'AO calculation created successfully!')
-            return redirect('ao_list')
+            return redirect('NAWEC_KPI:ao_list')
     else:
         form = CalculateAOForm()
     
@@ -79,7 +79,7 @@ def ao_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'AO calculation updated successfully!')
-            return redirect('ao_detail', pk=pk)
+            return redirect('NAWEC_KPI:ao_detail', pk=pk)
     else:
         form = CalculateAOForm(instance=calculation)
     
@@ -98,7 +98,7 @@ def ao_delete(request, pk):
     if request.method == 'POST':
         calculation.delete()
         messages.success(request, 'AO calculation deleted successfully!')
-        return redirect('ao_list')
+        return redirect('NAWEC_KPI:ao_list')
     
     return render(request, 'NAWEC_KPI/crud/ao_confirm_delete.html', {
         'calculation': calculation,
@@ -143,7 +143,7 @@ def der_create(request):
             calculation.loginUser = request.user
             calculation.save()
             messages.success(request, 'DER calculation created successfully!')
-            return redirect('der_list')
+            return redirect('NAWEC_KPI:der_list')
     else:
         form = CalculateDERForm()
     
@@ -173,7 +173,7 @@ def der_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'DER calculation updated successfully!')
-            return redirect('der_detail', pk=pk)
+            return redirect('NAWEC_KPI:der_detail', pk=pk)
     else:
         form = CalculateDERForm(instance=calculation)
     
@@ -192,7 +192,7 @@ def der_delete(request, pk):
     if request.method == 'POST':
         calculation.delete()
         messages.success(request, 'DER calculation deleted successfully!')
-        return redirect('der_list')
+        return redirect('NAWEC_KPI:der_list')
     
     return render(request, 'NAWEC_KPI/crud/der_confirm_delete.html', {
         'calculation': calculation,
@@ -237,7 +237,7 @@ def cr_create(request):
             calculation.loginUser = request.user
             calculation.save()
             messages.success(request, 'CR calculation created successfully!')
-            return redirect('cr_list')
+            return redirect('NAWEC_KPI:cr_list')
     else:
         form = CalculateCRForm()
     
@@ -267,7 +267,7 @@ def cr_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'CR calculation updated successfully!')
-            return redirect('cr_detail', pk=pk)
+            return redirect('NAWEC_KPI:cr_detail', pk=pk)
     else:
         form = CalculateCRForm(instance=calculation)
     
@@ -286,7 +286,7 @@ def cr_delete(request, pk):
     if request.method == 'POST':
         calculation.delete()
         messages.success(request, 'CR calculation deleted successfully!')
-        return redirect('cr_list')
+        return redirect('NAWEC_KPI:cr_list')
     
     return render(request, 'NAWEC_KPI/crud/cr_confirm_delete.html', {
         'calculation': calculation,
@@ -331,7 +331,7 @@ def pari_create(request):
             calculation.loginUser = request.user
             calculation.save()
             messages.success(request, 'PARI calculation created successfully!')
-            return redirect('pari_list')
+            return redirect('NAWEC_KPI:pari_list')
     else:
         form = CalculatePARIForm()
     
@@ -361,7 +361,7 @@ def pari_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'PARI calculation updated successfully!')
-            return redirect('pari_detail', pk=pk)
+            return redirect('NAWEC_KPI:pari_detail', pk=pk)
     else:
         form = CalculatePARIForm(instance=calculation)
     
@@ -380,7 +380,7 @@ def pari_delete(request, pk):
     if request.method == 'POST':
         calculation.delete()
         messages.success(request, 'PARI calculation deleted successfully!')
-        return redirect('pari_list')
+        return redirect('NAWEC_KPI:pari_list')
     
     return render(request, 'NAWEC_KPI/crud/pari_confirm_delete.html', {
         'calculation': calculation,

@@ -241,6 +241,7 @@ The PIUN directory contains specialized modules:
 - July 12, 2025. Fixed automatic progress calculation system: added missing Percentage_progress_from_baseline field to KPIMonitoringDataForm, enhanced calculation function with flexible field checking, added debug test buttons (gear and lightning icons), created comprehensive field detection and force calculation capabilities for Progress from Baseline (%) and Progress to Target (%) fields
 - July 12, 2025. Fixed TSQR CRUD URL routing error: resolved NoReverseMatch exception by updating tsqr_create, tsqr_update, and tsqr_delete redirect functions to use proper namespace ('NAWEC_KPI:tsqr_list' instead of 'tsqr_list'), ensured all TSQR operations redirect correctly after creation, update, and deletion
 - July 12, 2025. Enhanced TSQR error handling for non-existent records: replaced get_object_or_404 with try-except blocks in tsqr_detail, tsqr_update, and tsqr_delete views to catch DoesNotExist exceptions, added user-friendly error messages instead of 404 errors when attempting to access non-existent TSQR calculations (only IDs 1-4 exist), improved user experience with proper redirects to list view
+- July 12, 2025. Fixed all NAWEC KPI CRUD URL routing errors: resolved NoReverseMatch exceptions across all calculation models (AO, DER, CR, PARI, TSQR) by updating all redirect statements to use proper namespace ('NAWEC_KPI:' prefix), fixed create, update, and delete operations for all KPI calculation modules, ensured consistent URL routing throughout the NAWEC KPI management system
 
 ## User Preferences
 
