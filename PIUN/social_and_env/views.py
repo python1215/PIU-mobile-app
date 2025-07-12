@@ -109,6 +109,34 @@ def esia_add(request):
     return render(request, 'social_and_env/esia/esia_form.html', context)
 
 
+@login_required
+def esia_edit(request, pk):
+    """Edit ESIA record"""
+    esia = get_object_or_404(ESIA, pk=pk)
+
+    if request.method == 'POST':
+        form = ESIAForm(request.POST, instance=esia)
+        if form.is_valid():
+            try:
+                esia = form.save(commit=False)
+                esia.loginUser = request.user
+                esia.save()
+                messages.success(request, 'ESIA record updated successfully!')
+                return redirect('esia_list')
+            except Exception as e:
+                messages.error(request, f'Error updating ESIA record: {str(e)}')
+        else:
+            # Print form errors for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = ESIAForm(instance=esia)
+
+    context = {'form': form, 'esia': esia, 'title': 'Edit ESIA Record'}
+    return render(request, 'social_and_env/esia/esia_form.html', context)
+
+
 
 
 
@@ -1087,29 +1115,7 @@ def esia_detail(request, pk):
         return redirect('esia_list')
 
 
-@login_required
-def esia_edit(request, pk):
-    """Edit ESIA record"""
-    esia = get_object_or_404(ESIA, pk=pk)
-    
-    if request.method == 'POST':
-        form = ESIAForm(request.POST, instance=esia)
-        if form.is_valid():
-            try:
-                esia = form.save(commit=False)
-                esia.loginUser = request.user
-                esia.save()
-                messages.success(request, 'ESIA record updated successfully.')
-                return redirect('esia_list')
-            except Exception as e:
-                messages.error(request, f'Error updating ESIA record: {str(e)}')
-    else:
-        form = ESIAForm(instance=esia)
-    
-    return render(request, 'social_and_env/esia/esia_form.html', {
-        'form': form,
-        'title': 'Edit ESIA Record'
-    })
+
 
 
 @login_required
