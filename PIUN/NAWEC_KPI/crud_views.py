@@ -63,47 +63,59 @@ def ao_create(request):
 @login_required
 def ao_detail(request, pk):
     """View AO calculation details"""
-    calculation = get_object_or_404(CalculateAO, pk=pk)
-    return render(request, 'NAWEC_KPI/crud/ao_detail.html', {
-        'calculation': calculation,
-        'title': 'AO Calculation Details'
-    })
+    try:
+        calculation = CalculateAO.objects.get(pk=pk)
+        return render(request, 'NAWEC_KPI/crud/ao_detail.html', {
+            'calculation': calculation,
+            'title': 'AO Calculation Details'
+        })
+    except CalculateAO.DoesNotExist:
+        messages.error(request, f'AO calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:ao_list')
 
 
 @login_required
 def ao_update(request, pk):
     """Update AO calculation"""
-    calculation = get_object_or_404(CalculateAO, pk=pk)
-    if request.method == 'POST':
-        form = CalculateAOForm(request.POST, instance=calculation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'AO calculation updated successfully!')
-            return redirect('NAWEC_KPI:ao_detail', pk=pk)
-    else:
-        form = CalculateAOForm(instance=calculation)
-    
-    return render(request, 'NAWEC_KPI/crud/ao_form.html', {
-        'form': form,
-        'calculation': calculation,
-        'title': 'Update AO Calculation',
-        'action': 'Update'
-    })
+    try:
+        calculation = CalculateAO.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = CalculateAOForm(request.POST, instance=calculation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'AO calculation updated successfully!')
+                return redirect('NAWEC_KPI:ao_detail', pk=pk)
+        else:
+            form = CalculateAOForm(instance=calculation)
+        
+        return render(request, 'NAWEC_KPI/crud/ao_form.html', {
+            'form': form,
+            'calculation': calculation,
+            'title': 'Update AO Calculation',
+            'action': 'Update'
+        })
+    except CalculateAO.DoesNotExist:
+        messages.error(request, f'AO calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:ao_list')
 
 
 @login_required
 def ao_delete(request, pk):
     """Delete AO calculation"""
-    calculation = get_object_or_404(CalculateAO, pk=pk)
-    if request.method == 'POST':
-        calculation.delete()
-        messages.success(request, 'AO calculation deleted successfully!')
+    try:
+        calculation = CalculateAO.objects.get(pk=pk)
+        if request.method == 'POST':
+            calculation.delete()
+            messages.success(request, 'AO calculation deleted successfully!')
+            return redirect('NAWEC_KPI:ao_list')
+        
+        return render(request, 'NAWEC_KPI/crud/ao_confirm_delete.html', {
+            'calculation': calculation,
+            'title': 'Delete AO Calculation'
+        })
+    except CalculateAO.DoesNotExist:
+        messages.error(request, f'AO calculation with ID {pk} does not exist or has already been deleted.')
         return redirect('NAWEC_KPI:ao_list')
-    
-    return render(request, 'NAWEC_KPI/crud/ao_confirm_delete.html', {
-        'calculation': calculation,
-        'title': 'Delete AO Calculation'
-    })
 
 
 # CalculateDER CRUD Views
@@ -157,47 +169,59 @@ def der_create(request):
 @login_required
 def der_detail(request, pk):
     """View DER calculation details"""
-    calculation = get_object_or_404(CalculateDER, pk=pk)
-    return render(request, 'NAWEC_KPI/crud/der_detail.html', {
-        'calculation': calculation,
-        'title': 'DER Calculation Details'
-    })
+    try:
+        calculation = CalculateDER.objects.get(pk=pk)
+        return render(request, 'NAWEC_KPI/crud/der_detail.html', {
+            'calculation': calculation,
+            'title': 'DER Calculation Details'
+        })
+    except CalculateDER.DoesNotExist:
+        messages.error(request, f'DER calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:der_list')
 
 
 @login_required
 def der_update(request, pk):
     """Update DER calculation"""
-    calculation = get_object_or_404(CalculateDER, pk=pk)
-    if request.method == 'POST':
-        form = CalculateDERForm(request.POST, instance=calculation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'DER calculation updated successfully!')
-            return redirect('NAWEC_KPI:der_detail', pk=pk)
-    else:
-        form = CalculateDERForm(instance=calculation)
-    
-    return render(request, 'NAWEC_KPI/crud/der_form.html', {
-        'form': form,
-        'calculation': calculation,
-        'title': 'Update DER Calculation',
-        'action': 'Update'
-    })
+    try:
+        calculation = CalculateDER.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = CalculateDERForm(request.POST, instance=calculation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'DER calculation updated successfully!')
+                return redirect('NAWEC_KPI:der_detail', pk=pk)
+        else:
+            form = CalculateDERForm(instance=calculation)
+        
+        return render(request, 'NAWEC_KPI/crud/der_form.html', {
+            'form': form,
+            'calculation': calculation,
+            'title': 'Update DER Calculation',
+            'action': 'Update'
+        })
+    except CalculateDER.DoesNotExist:
+        messages.error(request, f'DER calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:der_list')
 
 
 @login_required
 def der_delete(request, pk):
     """Delete DER calculation"""
-    calculation = get_object_or_404(CalculateDER, pk=pk)
-    if request.method == 'POST':
-        calculation.delete()
-        messages.success(request, 'DER calculation deleted successfully!')
+    try:
+        calculation = CalculateDER.objects.get(pk=pk)
+        if request.method == 'POST':
+            calculation.delete()
+            messages.success(request, 'DER calculation deleted successfully!')
+            return redirect('NAWEC_KPI:der_list')
+        
+        return render(request, 'NAWEC_KPI/crud/der_confirm_delete.html', {
+            'calculation': calculation,
+            'title': 'Delete DER Calculation'
+        })
+    except CalculateDER.DoesNotExist:
+        messages.error(request, f'DER calculation with ID {pk} does not exist or has already been deleted.')
         return redirect('NAWEC_KPI:der_list')
-    
-    return render(request, 'NAWEC_KPI/crud/der_confirm_delete.html', {
-        'calculation': calculation,
-        'title': 'Delete DER Calculation'
-    })
 
 
 # CalculateCR CRUD Views
@@ -251,47 +275,59 @@ def cr_create(request):
 @login_required
 def cr_detail(request, pk):
     """View CR calculation details"""
-    calculation = get_object_or_404(CalculateCR, pk=pk)
-    return render(request, 'NAWEC_KPI/crud/cr_detail.html', {
-        'calculation': calculation,
-        'title': 'CR Calculation Details'
-    })
+    try:
+        calculation = CalculateCR.objects.get(pk=pk)
+        return render(request, 'NAWEC_KPI/crud/cr_detail.html', {
+            'calculation': calculation,
+            'title': 'CR Calculation Details'
+        })
+    except CalculateCR.DoesNotExist:
+        messages.error(request, f'CR calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:cr_list')
 
 
 @login_required
 def cr_update(request, pk):
     """Update CR calculation"""
-    calculation = get_object_or_404(CalculateCR, pk=pk)
-    if request.method == 'POST':
-        form = CalculateCRForm(request.POST, instance=calculation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'CR calculation updated successfully!')
-            return redirect('NAWEC_KPI:cr_detail', pk=pk)
-    else:
-        form = CalculateCRForm(instance=calculation)
-    
-    return render(request, 'NAWEC_KPI/crud/cr_form.html', {
-        'form': form,
-        'calculation': calculation,
-        'title': 'Update CR Calculation',
-        'action': 'Update'
-    })
+    try:
+        calculation = CalculateCR.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = CalculateCRForm(request.POST, instance=calculation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'CR calculation updated successfully!')
+                return redirect('NAWEC_KPI:cr_detail', pk=pk)
+        else:
+            form = CalculateCRForm(instance=calculation)
+        
+        return render(request, 'NAWEC_KPI/crud/cr_form.html', {
+            'form': form,
+            'calculation': calculation,
+            'title': 'Update CR Calculation',
+            'action': 'Update'
+        })
+    except CalculateCR.DoesNotExist:
+        messages.error(request, f'CR calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:cr_list')
 
 
 @login_required
 def cr_delete(request, pk):
     """Delete CR calculation"""
-    calculation = get_object_or_404(CalculateCR, pk=pk)
-    if request.method == 'POST':
-        calculation.delete()
-        messages.success(request, 'CR calculation deleted successfully!')
+    try:
+        calculation = CalculateCR.objects.get(pk=pk)
+        if request.method == 'POST':
+            calculation.delete()
+            messages.success(request, 'CR calculation deleted successfully!')
+            return redirect('NAWEC_KPI:cr_list')
+        
+        return render(request, 'NAWEC_KPI/crud/cr_confirm_delete.html', {
+            'calculation': calculation,
+            'title': 'Delete CR Calculation'
+        })
+    except CalculateCR.DoesNotExist:
+        messages.error(request, f'CR calculation with ID {pk} does not exist or has already been deleted.')
         return redirect('NAWEC_KPI:cr_list')
-    
-    return render(request, 'NAWEC_KPI/crud/cr_confirm_delete.html', {
-        'calculation': calculation,
-        'title': 'Delete CR Calculation'
-    })
 
 
 # CalculatePARI CRUD Views
@@ -345,47 +381,59 @@ def pari_create(request):
 @login_required
 def pari_detail(request, pk):
     """View PARI calculation details"""
-    calculation = get_object_or_404(CalculatePARI, pk=pk)
-    return render(request, 'NAWEC_KPI/crud/pari_detail.html', {
-        'calculation': calculation,
-        'title': 'PARI Calculation Details'
-    })
+    try:
+        calculation = CalculatePARI.objects.get(pk=pk)
+        return render(request, 'NAWEC_KPI/crud/pari_detail.html', {
+            'calculation': calculation,
+            'title': 'PARI Calculation Details'
+        })
+    except CalculatePARI.DoesNotExist:
+        messages.error(request, f'PARI calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:pari_list')
 
 
 @login_required
 def pari_update(request, pk):
     """Update PARI calculation"""
-    calculation = get_object_or_404(CalculatePARI, pk=pk)
-    if request.method == 'POST':
-        form = CalculatePARIForm(request.POST, instance=calculation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'PARI calculation updated successfully!')
-            return redirect('NAWEC_KPI:pari_detail', pk=pk)
-    else:
-        form = CalculatePARIForm(instance=calculation)
-    
-    return render(request, 'NAWEC_KPI/crud/pari_form.html', {
-        'form': form,
-        'calculation': calculation,
-        'title': 'Update PARI Calculation',
-        'action': 'Update'
-    })
+    try:
+        calculation = CalculatePARI.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = CalculatePARIForm(request.POST, instance=calculation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'PARI calculation updated successfully!')
+                return redirect('NAWEC_KPI:pari_detail', pk=pk)
+        else:
+            form = CalculatePARIForm(instance=calculation)
+        
+        return render(request, 'NAWEC_KPI/crud/pari_form.html', {
+            'form': form,
+            'calculation': calculation,
+            'title': 'Update PARI Calculation',
+            'action': 'Update'
+        })
+    except CalculatePARI.DoesNotExist:
+        messages.error(request, f'PARI calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:pari_list')
 
 
 @login_required
 def pari_delete(request, pk):
     """Delete PARI calculation"""
-    calculation = get_object_or_404(CalculatePARI, pk=pk)
-    if request.method == 'POST':
-        calculation.delete()
-        messages.success(request, 'PARI calculation deleted successfully!')
+    try:
+        calculation = CalculatePARI.objects.get(pk=pk)
+        if request.method == 'POST':
+            calculation.delete()
+            messages.success(request, 'PARI calculation deleted successfully!')
+            return redirect('NAWEC_KPI:pari_list')
+        
+        return render(request, 'NAWEC_KPI/crud/pari_confirm_delete.html', {
+            'calculation': calculation,
+            'title': 'Delete PARI Calculation'
+        })
+    except CalculatePARI.DoesNotExist:
+        messages.error(request, f'PARI calculation with ID {pk} does not exist or has already been deleted.')
         return redirect('NAWEC_KPI:pari_list')
-    
-    return render(request, 'NAWEC_KPI/crud/pari_confirm_delete.html', {
-        'calculation': calculation,
-        'title': 'Delete PARI Calculation'
-    })
 
 
 # CalculateTSQR CRUD Views
