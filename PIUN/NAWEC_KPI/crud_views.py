@@ -425,7 +425,7 @@ def tsqr_create(request):
             calculation.loginUser = request.user
             calculation.save()
             messages.success(request, 'TSQR calculation created successfully!')
-            return redirect('tsqr_list')
+            return redirect('NAWEC_KPI:tsqr_list')
     else:
         form = CalculateTSQRForm()
     
@@ -455,7 +455,7 @@ def tsqr_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'TSQR calculation updated successfully!')
-            return redirect('tsqr_detail', pk=pk)
+            return redirect('NAWEC_KPI:tsqr_detail', pk=pk)
     else:
         form = CalculateTSQRForm(instance=calculation)
     
@@ -474,7 +474,7 @@ def tsqr_delete(request, pk):
     if request.method == 'POST':
         calculation.delete()
         messages.success(request, 'TSQR calculation deleted successfully!')
-        return redirect('tsqr_list')
+        return redirect('NAWEC_KPI:tsqr_list')
     
     return render(request, 'NAWEC_KPI/crud/tsqr_confirm_delete.html', {
         'calculation': calculation,
