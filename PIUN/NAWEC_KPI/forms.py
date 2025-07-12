@@ -210,7 +210,8 @@ class KPIMonitoringDataForm(forms.ModelForm):
         fields = [
             'project', 'pdo', 'project_outcome', 'project_result',
             'indicator_description', 'baseline_value', 'End_Target_Value',
-            'achieved_value', 'Percentage_progress_towards_end_target',
+            'achieved_value', 'Percentage_progress_from_baseline',
+            'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
             'year', 'quarter'
         ]
         widgets = {
@@ -231,7 +232,17 @@ class KPIMonitoringDataForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01'
             }),
+            'Percentage_progress_from_baseline': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'readonly': True
+            }),
             'Percentage_progress_towards_end_target': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'readonly': True
+            }),
+            'Targeted_Achieved_weight': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01'
             }),

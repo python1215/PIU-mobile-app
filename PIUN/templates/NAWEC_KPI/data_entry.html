@@ -5190,7 +5190,13 @@ function forceCalculatePercentages() {
         
         alert('Force calculation completed! Progress fields should now show 50% and 75%');
     } else {
-        alert('Could not find percentage fields for force calculation');
+        // Debug which fields are missing
+        const debugInfo = `
+        Baseline field: ${baselinePercentField ? 'FOUND' : 'NOT FOUND'} (id: id_Percentage_progress_from_baseline)
+        Target field: ${targetPercentField ? 'FOUND' : 'NOT FOUND'} (id: id_Percentage_progress_towards_end_target)
+        `;
+        alert(`Could not find percentage fields for force calculation\n${debugInfo}`);
+        console.log('Field debugging:', debugInfo);
     }
 }
 
