@@ -134,7 +134,7 @@ def esia_edit(request, pk):
         form = ESIAForm(instance=esia)
 
     context = {'form': form, 'esia': esia, 'title': 'Edit ESIA Record'}
-    return render(request, 'social_and_env/esia/esia_form.html', context)
+    return render(request, 'social_and_env/esia/esia_edit.html', context)
 
 
 
