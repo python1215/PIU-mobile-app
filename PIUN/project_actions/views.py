@@ -1166,8 +1166,8 @@ def contract_monitoring_list(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        # Get data for filter dropdowns
-        projects = Project.objects.all()
+        # Get data for filter dropdowns - filtered to show only NAWEC
+        projects = Project.objects.filter(projectID='NAWEC')
         physical_progress_options = Physicalprogress.objects.all()
         
         context = {
@@ -1193,7 +1193,7 @@ def contract_monitoring_list(request):
             'total_records': 0,
             'unique_contracts': 0,
             'overdue_milestones': 0,
-            'projects': Project.objects.all() if 'Project' in globals() else [],
+            'projects': Project.objects.filter(projectID='NAWEC') if 'Project' in globals() else [],
             'physical_progress_options': Physicalprogress.objects.all() if 'Physicalprogress' in globals() else [],
         }
     

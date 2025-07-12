@@ -495,8 +495,8 @@ def projects(request):
     from django.db.models import Q, Sum, Count, Avg
     from setup.models import Donor
     
-    # Get all projects
-    projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
+    # Get all projects - filtered to show only NAWEC
+    projects_qs = Project.objects.filter(projectID='NAWEC').select_related('currency').prefetch_related('donors', 'contributors')
     
     # Filter parameters
     project_id = request.GET.get('projectID', '')

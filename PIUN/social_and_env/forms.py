@@ -12,7 +12,7 @@ from PIU_Financial_mgt.models import Project
 
 class ESIAForm(forms.ModelForm):
     project_name = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         empty_label="Select Project",
         widget=forms.Select(attrs={
             "class": "form-select",
@@ -112,7 +112,7 @@ class ESIAForm(forms.ModelForm):
 
 class PAPForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         empty_label="Select Project",
         widget=forms.Select(attrs={
             "class": "form-select"
@@ -277,7 +277,7 @@ class PAPForm(forms.ModelForm):
 
 class GrievianceMonitoringLogForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         empty_label="Select Project",
         widget=forms.Select(attrs={
             "class": "form-select",
@@ -409,7 +409,7 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
 
 class OHSMonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         empty_label="Select Project",
         widget=forms.Select(attrs={
             "class": "form-select",

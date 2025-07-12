@@ -29,10 +29,10 @@ class ContractWorksFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Project filter using real data
+        # Project filter using real data - filtered to show only NAWEC
         if Project:
             self.fields['project'] = forms.ModelChoiceField(
-                queryset=Project.objects.all(),
+                queryset=Project.objects.filter(projectID='NAWEC'),
                 empty_label="All Projects",
                 required=False,
                 widget=forms.Select(attrs={'class': 'form-select'})

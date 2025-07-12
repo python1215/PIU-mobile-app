@@ -65,10 +65,10 @@ class ContractProfilingWorksFilter(django_filters.FilterSet):
         )
     )
     
-    # Choice filters with proper widgets
+    # Choice filters with proper widgets - filtered to show only NAWEC
     if Project:
         projectID = django_filters.ModelChoiceFilter(
-            queryset=Project.objects.all(),
+            queryset=Project.objects.filter(projectID='NAWEC'),
             widget=forms.Select(attrs={'class': 'form-select'}),
             empty_label="All Projects"
         )
@@ -184,10 +184,10 @@ class ContractProfilingGoodsServicesFilter(django_filters.FilterSet):
         )
     )
     
-    # Choice filters
+    # Choice filters - filtered to show only NAWEC
     if Project:
         projectID = django_filters.ModelChoiceFilter(
-            queryset=Project.objects.all(),
+            queryset=Project.objects.filter(projectID='NAWEC'),
             widget=forms.Select(attrs={'class': 'form-select'}),
             empty_label="All Projects"
         )
@@ -287,10 +287,10 @@ class SpecificContractMonitoringFilter(django_filters.FilterSet):
         })
     )
     
-    # Choice filters
+    # Choice filters - filtered to show only NAWEC
     if Project:
         project = django_filters.ModelChoiceFilter(
-            queryset=Project.objects.all(),
+            queryset=Project.objects.filter(projectID='NAWEC'),
             widget=forms.Select(attrs={'class': 'form-select'}),
             empty_label="All Projects"
         )

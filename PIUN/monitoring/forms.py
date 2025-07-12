@@ -8,7 +8,7 @@ class Indicator_DescriptionForm(forms.ModelForm):
      # Get the various selection when one item is selected
 
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"),
@@ -75,7 +75,7 @@ class Indicator_DescriptionForm(forms.ModelForm):
 
 class Results_Oriented_MonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
@@ -133,7 +133,7 @@ class Results_Oriented_MonitoringForm(forms.ModelForm):
 
 class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.filter(projectID='NAWEC'),
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
