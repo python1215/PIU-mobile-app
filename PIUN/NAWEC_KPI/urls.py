@@ -8,6 +8,7 @@ urlpatterns = [
     # Dashboard - Performance Dashboard is now main
     path('', views.performance_dashboard, name='dashboard'),
     path('kpi-dashboard/', views.dashboard, name='kpi_dashboard'),
+    path('kpi-management/', views.kpi_management, name='kpi_management'),
     path('performance-dashboard/', views.performance_dashboard, name='performance_dashboard'),
     path('performance-report/', views.performance_report, name='performance_report'),
     

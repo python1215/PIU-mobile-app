@@ -468,6 +468,37 @@
                                             <span class="label-text-alt text-xs opacity-70">Use calculator popup to set value</span>
                                         </label>
                                     </div>
+                                    
+                                    <!-- KPI Model Selection -->
+                                    <div class="form-control mt-4">
+                                        <label class="label py-1">
+                                            <span class="label-text text-sm">
+                                                <i class="bi bi-gear mr-2"></i>KPI Calculation Model
+                                            </span>
+                                        </label>
+                                        <select class="select select-bordered select-sm w-full" id="kpiModelSelect" onchange="handleKPIModelSelection()">
+                                            <option value="">Select KPI Model</option>
+                                            <option value="ao">AO - Audit Opinion</option>
+                                            <option value="der">DER - Debt to Equity Ratio</option>
+                                            <option value="cr">CR - Current Ratio</option>
+                                            <option value="pari">PARI - Performance Audit Recommendations Implementation</option>
+                                            <option value="tsqr">TSQR - Timely Submission of Quarterly Report</option>
+                                            <option value="roa">ROA - Return on Assets</option>
+                                            <option value="npm">NPM - Net Profit Margin</option>
+                                            <option value="dd">DD - Debtor Days</option>
+                                            <option value="tde">TDE - Training Days per Employee</option>
+                                            <option value="necd">NECD - New Electricity Connection Days</option>
+                                            <option value="nwcd">NWCD - New Water Connection Days</option>
+                                            <option value="tps">TPS - Timely Payment of Salary</option>
+                                            <option value="ttp">TTP - Timely Tax Payment</option>
+                                            <option value="wqcc">WQCC - Water Quality Compliance Corporate</option>
+                                            <option value="wqcb">WQCB - Water Quality Compliance Bacteriological</option>
+                                            <option value="nrw">NRW - Non-Revenue Water</option>
+                                        </select>
+                                        <label class="label py-1">
+                                            <span class="label-text-alt text-xs opacity-70">Choose calculation model for specialized KPI calculations</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -814,6 +845,92 @@ function populateFieldsFromIndicator(indicatorId) {
     .catch(error => {
         console.error('Error loading indicator data:', error);
     });
+}
+
+// Handle KPI Model Selection
+function handleKPIModelSelection() {
+    const kpiModelSelect = document.getElementById('kpiModelSelect');
+    const selectedModel = kpiModelSelect.value;
+    
+    if (!selectedModel) {
+        return;
+    }
+    
+    console.log('Selected KPI Model:', selectedModel);
+    
+    // Call the appropriate popup function based on selection
+    switch(selectedModel) {
+        case 'ao':
+            console.log('✅ Triggering AO (Audit Opinion) popup');
+            showAOPopup();
+            break;
+        case 'der':
+            console.log('✅ Triggering DER (Debt to Equity Ratio) popup');
+            showDERPopup();
+            break;
+        case 'cr':
+            console.log('✅ Triggering CR (Current Ratio) popup');
+            showCRPopup();
+            break;
+        case 'pari':
+            console.log('✅ Triggering PARI (Performance Audit Recommendations Implementation) popup');
+            showPARIPopup();
+            break;
+        case 'tsqr':
+            console.log('✅ Triggering TSQR (Timely Submission of Quarterly Report) popup');
+            showTSQRPopup();
+            break;
+        case 'roa':
+            console.log('✅ Triggering ROA (Return on Assets) popup');
+            showROAPopup();
+            break;
+        case 'npm':
+            console.log('✅ Triggering NPM (Net Profit Margin) popup');
+            showNPMPopup();
+            break;
+        case 'dd':
+            console.log('✅ Triggering DD (Debtor Days) popup');
+            showDDPopup();
+            break;
+        case 'tde':
+            console.log('✅ Triggering TDE (Training Days per Employee) popup');
+            showTDEPopup();
+            break;
+        case 'necd':
+            console.log('✅ Triggering NECD (New Electricity Connection Days) popup');
+            showNECDPopup();
+            break;
+        case 'nwcd':
+            console.log('✅ Triggering NWCD (New Water Connection Days) popup');
+            showNWCDPopup();
+            break;
+        case 'tps':
+            console.log('✅ Triggering TPS (Timely Payment of Salary) popup');
+            showTPSPopup();
+            break;
+        case 'ttp':
+            console.log('✅ Triggering TTP (Timely Tax Payment) popup');
+            showTTPPopup();
+            break;
+        case 'wqcc':
+            console.log('✅ Triggering WQCC (Water Quality Compliance Corporate) popup');
+            showWQCCPopup();
+            break;
+        case 'wqcb':
+            console.log('✅ Triggering WQCB (Water Quality Compliance Bacteriological) popup');
+            showWQCBPopup();
+            break;
+        case 'nrw':
+            console.log('✅ Triggering NRW (Non-Revenue Water) popup');
+            showNRWPopup();
+            break;
+        default:
+            console.log('No matching KPI model found');
+            alert('Selected KPI model not implemented yet');
+    }
+    
+    // Reset dropdown after selection
+    kpiModelSelect.value = '';
 }
 
 // Smart KPI Popup Functions

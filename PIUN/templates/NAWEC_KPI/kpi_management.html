@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+
+{% block title %}KPI Calculation Management{% endblock %}
+
+{% block extra_css %}
+<style>
+.kpi-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.kpi-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+.badge-count {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--bs-primary);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h2 mb-1">
+                                <i class="bi bi-graph-up-arrow me-2"></i>
+                                KPI Calculation Management
+                            </h1>
+                            <p class="mb-0 opacity-75">
+                                Manage and calculate Key Performance Indicators for NAWEC operations
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{% url 'NAWEC_KPI:dashboard' %}" class="btn btn-outline-light">
+                                <i class="bi bi-house-door me-1"></i>Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Models Grid -->
+    <div class="row g-4">
+        <!-- AO - Audit Opinion -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ ao_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-primary">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h5 class="card-title">Audit Opinion</h5>
+                    <p class="card-text text-muted">
+                        Track audit opinions and compliance status
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'NAWEC_KPI:ao_list' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:ao_create' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DER - Debt to Equity Ratio -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ der_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-success">
+                        <i class="bi bi-calculator"></i>
+                    </div>
+                    <h5 class="card-title">Debt to Equity Ratio</h5>
+                    <p class="card-text text-muted">
+                        Measure financial leverage and risk
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'NAWEC_KPI:der_list' %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:der_create' %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CR - Current Ratio -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ cr_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-info">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+                    <h5 class="card-title">Current Ratio</h5>
+                    <p class="card-text text-muted">
+                        Assess short-term liquidity position
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'NAWEC_KPI:cr_list' %}" class="btn btn-info btn-sm">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:cr_create' %}" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARI - Performance Audit Recommendations Implementation -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ pari_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-warning">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <h5 class="card-title">PARI</h5>
+                    <p class="card-text text-muted">
+                        Performance Audit Recommendations Implementation
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'NAWEC_KPI:pari_list' %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:pari_create' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TSQR - Timely Submission of Quarterly Report -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ tsqr_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-danger">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <h5 class="card-title">TSQR</h5>
+                    <p class="card-text text-muted">
+                        Timely Submission of Quarterly Report
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'NAWEC_KPI:tsqr_list' %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:tsqr_create' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROA - Return on Assets -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ roa_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-secondary">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="card-title">ROA</h5>
+                    <p class="card-text text-muted">
+                        Return on Assets calculation
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="#" class="btn btn-secondary btn-sm" onclick="showROAPopup()">
+                            <i class="bi bi-calculator me-1"></i>Calculate
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm disabled">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NPM - Net Profit Margin -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ npm_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-dark">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+                    <h5 class="card-title">NPM</h5>
+                    <p class="card-text text-muted">
+                        Net Profit Margin calculation
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="#" class="btn btn-dark btn-sm" onclick="showNPMPopup()">
+                            <i class="bi bi-calculator me-1"></i>Calculate
+                        </a>
+                        <a href="#" class="btn btn-outline-dark btn-sm disabled">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DD - Debtor Days -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 kpi-card position-relative">
+                <div class="badge-count">{{ dd_count }}</div>
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-primary">
+                        <i class="bi bi-calendar-day"></i>
+                    </div>
+                    <h5 class="card-title">DD</h5>
+                    <p class="card-text text-muted">
+                        Debtor Days calculation
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <a href="#" class="btn btn-primary btn-sm" onclick="showDDPopup()">
+                            <i class="bi bi-calculator me-1"></i>Calculate
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-sm disabled">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-lightning-charge me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Add KPI Data
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'NAWEC_KPI:data_entry_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-list-ul me-2"></i>
+                                View All KPIs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'NAWEC_KPI:dashboard' %}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-graph-up me-2"></i>
+                                KPI Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-info w-100" onclick="showKPIModelSelector()">
+                                <i class="bi bi-calculator me-2"></i>
+                                KPI Calculator
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-bar-chart-line me-2"></i>
+                        KPI Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-primary">{{ total_calculations }}</h3>
+                                <small class="text-muted">Total Calculations</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-success">{{ ao_count }}</h3>
+                                <small class="text-muted">Audit Opinions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-info">{{ der_count }}</h3>
+                                <small class="text-muted">DER Ratios</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-warning">{{ cr_count }}</h3>
+                                <small class="text-muted">Current Ratios</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-danger">{{ pari_count }}</h3>
+                                <small class="text-muted">PARI Records</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-3">
+                                <h3 class="text-secondary">{{ tsqr_count }}</h3>
+                                <small class="text-muted">TSQR Records</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Model Selector Modal -->
+<div class="modal fade" id="kpiModelSelectorModal" tabindex="-1" aria-labelledby="kpiModelSelectorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="kpiModelSelectorModalLabel">
+                    <i class="bi bi-calculator me-2"></i>
+                    Select KPI Model
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100" onclick="showAOPopup(); closeKPISelector()">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Audit Opinion
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-success w-100" onclick="showDERPopup(); closeKPISelector()">
+                            <i class="bi bi-calculator me-2"></i>
+                            Debt to Equity Ratio
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-info w-100" onclick="showCRPopup(); closeKPISelector()">
+                            <i class="bi bi-bar-chart me-2"></i>
+                            Current Ratio
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-warning w-100" onclick="showPARIPopup(); closeKPISelector()">
+                            <i class="bi bi-clipboard-check me-2"></i>
+                            PARI
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-danger w-100" onclick="showTSQRPopup(); closeKPISelector()">
+                            <i class="bi bi-calendar-check me-2"></i>
+                            TSQR
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-secondary w-100" onclick="showROAPopup(); closeKPISelector()">
+                            <i class="bi bi-graph-up me-2"></i>
+                            ROA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showKPIModelSelector() {
+    const modal = new bootstrap.Modal(document.getElementById('kpiModelSelectorModal'));
+    modal.show();
+}
+
+function closeKPISelector() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('kpiModelSelectorModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+// Placeholder functions for KPI calculations
+function showAOPopup() {
+    alert('AO (Audit Opinion) calculation popup will be implemented');
+}
+
+function showDERPopup() {
+    alert('DER (Debt to Equity Ratio) calculation popup will be implemented');
+}
+
+function showCRPopup() {
+    alert('CR (Current Ratio) calculation popup will be implemented');
+}
+
+function showPARIPopup() {
+    alert('PARI calculation popup will be implemented');
+}
+
+function showTSQRPopup() {
+    alert('TSQR calculation popup will be implemented');
+}
+
+function showROAPopup() {
+    alert('ROA calculation popup will be implemented');
+}
+
+function showNPMPopup() {
+    alert('NPM calculation popup will be implemented');
+}
+
+function showDDPopup() {
+    alert('DD calculation popup will be implemented');
+}
+</script>
+{% endblock %}

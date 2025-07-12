@@ -7,7 +7,8 @@ from django.core.paginator import Paginator
 from .models import (
     KPIIndicator, NAWEC_KPI_Monitoring, CalculateROA, CalculateNPM, CalculateMWh, 
     CalculateGAF, CalculateDSCR, CalculateTDE, CalculateATC, CalculateNECD,
-    CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC, CalculateWQCB, CalculateNRW, CalculateDD
+    CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC, CalculateWQCB, CalculateNRW, CalculateDD,
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR
 )
 from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, CalculateNPMForm
 
@@ -164,6 +165,40 @@ def dashboard(request):
     }
     
     return render(request, 'NAWEC_KPI/dashboard.html', context)
+
+
+@login_required
+def kpi_management(request):
+    """KPI Calculation Management dashboard"""
+    
+    # Get counts for each KPI calculation model
+    ao_count = CalculateAO.objects.count()
+    der_count = CalculateDER.objects.count()
+    cr_count = CalculateCR.objects.count()
+    pari_count = CalculatePARI.objects.count()
+    tsqr_count = CalculateTSQR.objects.count()
+    
+    # Get counts for other KPI models
+    roa_count = CalculateROA.objects.count()
+    npm_count = CalculateNPM.objects.count()
+    dd_count = CalculateDD.objects.count()
+    
+    total_calculations = ao_count + der_count + cr_count + pari_count + tsqr_count
+    
+    context = {
+        'ao_count': ao_count,
+        'der_count': der_count,
+        'cr_count': cr_count,
+        'pari_count': pari_count,
+        'tsqr_count': tsqr_count,
+        'roa_count': roa_count,
+        'npm_count': npm_count,
+        'dd_count': dd_count,
+        'total_calculations': total_calculations,
+    }
+    
+    return render(request, 'NAWEC_KPI/kpi_management.html', context)
+
 
 @login_required
 def performance_dashboard(request):
