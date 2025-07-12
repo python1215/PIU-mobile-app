@@ -1,0 +1,138 @@
+{% extends 'NAWEC_KPI/crud/base_crud.html' %}
+
+{% block crud_content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-bar-chart"></i>
+            {{ action }} CR Calculation
+        </h5>
+    </div>
+    
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.baseline_value.id_for_label }}" class="form-label">
+                            {{ form.baseline_value.label }}
+                        </label>
+                        {{ form.baseline_value }}
+                        {% if form.baseline_value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.baseline_value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label">
+                            {{ form.End_Target_Value.label }}
+                        </label>
+                        {{ form.End_Target_Value }}
+                        {% if form.End_Target_Value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.End_Target_Value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.current_assets.id_for_label }}" class="form-label">
+                            {{ form.current_assets.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.current_assets }}
+                        {% if form.current_assets.errors %}
+                            <div class="text-danger">
+                                {% for error in form.current_assets.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.current_liabilities.id_for_label }}" class="form-label">
+                            {{ form.current_liabilities.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.current_liabilities }}
+                        {% if form.current_liabilities.errors %}
+                            <div class="text-danger">
+                                {% for error in form.current_liabilities.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.year.id_for_label }}" class="form-label">
+                            {{ form.year.label }}
+                        </label>
+                        {{ form.year }}
+                        {% if form.year.errors %}
+                            <div class="text-danger">
+                                {% for error in form.year.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.quarter.id_for_label }}" class="form-label">
+                            {{ form.quarter.label }}
+                        </label>
+                        {{ form.quarter }}
+                        {% if form.quarter.errors %}
+                            <div class="text-danger">
+                                {% for error in form.quarter.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h6><i class="bi bi-info-circle"></i> CR Calculation</h6>
+                <p class="mb-0">
+                    CR (Current Ratio) measures liquidity by comparing current assets to current liabilities.
+                    Formula: <strong>CR = Current Assets ÷ Current Liabilities</strong>
+                    <br>A ratio above 1.0 indicates good short-term financial health.
+                </p>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'NAWEC_KPI:cr_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check"></i> {{ action }} Calculation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

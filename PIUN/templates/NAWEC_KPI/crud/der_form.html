@@ -1,0 +1,137 @@
+{% extends 'NAWEC_KPI/crud/base_crud.html' %}
+
+{% block crud_content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-calculator"></i>
+            {{ action }} DER Calculation
+        </h5>
+    </div>
+    
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.baseline_value.id_for_label }}" class="form-label">
+                            {{ form.baseline_value.label }}
+                        </label>
+                        {{ form.baseline_value }}
+                        {% if form.baseline_value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.baseline_value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label">
+                            {{ form.End_Target_Value.label }}
+                        </label>
+                        {{ form.End_Target_Value }}
+                        {% if form.End_Target_Value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.End_Target_Value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.total_debt.id_for_label }}" class="form-label">
+                            {{ form.total_debt.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.total_debt }}
+                        {% if form.total_debt.errors %}
+                            <div class="text-danger">
+                                {% for error in form.total_debt.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.total_equity.id_for_label }}" class="form-label">
+                            {{ form.total_equity.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.total_equity }}
+                        {% if form.total_equity.errors %}
+                            <div class="text-danger">
+                                {% for error in form.total_equity.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.year.id_for_label }}" class="form-label">
+                            {{ form.year.label }}
+                        </label>
+                        {{ form.year }}
+                        {% if form.year.errors %}
+                            <div class="text-danger">
+                                {% for error in form.year.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.quarter.id_for_label }}" class="form-label">
+                            {{ form.quarter.label }}
+                        </label>
+                        {{ form.quarter }}
+                        {% if form.quarter.errors %}
+                            <div class="text-danger">
+                                {% for error in form.quarter.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h6><i class="bi bi-info-circle"></i> DER Calculation</h6>
+                <p class="mb-0">
+                    DER (Debt to Equity Ratio) measures financial leverage by comparing total debt to total equity.
+                    Formula: <strong>DER = Total Debt ÷ Total Equity</strong>
+                </p>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'NAWEC_KPI:der_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check"></i> {{ action }} Calculation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

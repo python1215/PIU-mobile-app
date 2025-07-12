@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, crud_views
 from .api_views import SaveKPICalculationView, DeleteKPICalculationView
 
 app_name = 'NAWEC_KPI'
@@ -124,4 +124,40 @@ urlpatterns = [
     path('get-pdos-by-project/', views.get_pdos_by_project, name='get_pdos_by_project'),
     path('get-outcomes-by-pdo/', views.get_outcomes_by_pdo, name='get_outcomes_by_pdo'),
     path('get-results-by-outcome/', views.get_results_by_outcome, name='get_results_by_outcome'),
+    
+    # CRUD URLs for KPI Models
+    # AO (Audit Opinion) CRUD
+    path('ao/', crud_views.ao_list, name='ao_list'),
+    path('ao/create/', crud_views.ao_create, name='ao_create'),
+    path('ao/<int:pk>/', crud_views.ao_detail, name='ao_detail'),
+    path('ao/<int:pk>/edit/', crud_views.ao_update, name='ao_update'),
+    path('ao/<int:pk>/delete/', crud_views.ao_delete, name='ao_delete'),
+    
+    # DER (Debt to Equity Ratio) CRUD
+    path('der/', crud_views.der_list, name='der_list'),
+    path('der/create/', crud_views.der_create, name='der_create'),
+    path('der/<int:pk>/', crud_views.der_detail, name='der_detail'),
+    path('der/<int:pk>/edit/', crud_views.der_update, name='der_update'),
+    path('der/<int:pk>/delete/', crud_views.der_delete, name='der_delete'),
+    
+    # CR (Current Ratio) CRUD
+    path('cr/', crud_views.cr_list, name='cr_list'),
+    path('cr/create/', crud_views.cr_create, name='cr_create'),
+    path('cr/<int:pk>/', crud_views.cr_detail, name='cr_detail'),
+    path('cr/<int:pk>/edit/', crud_views.cr_update, name='cr_update'),
+    path('cr/<int:pk>/delete/', crud_views.cr_delete, name='cr_delete'),
+    
+    # PARI (Performance Audit Recommendations Implementation) CRUD
+    path('pari/', crud_views.pari_list, name='pari_list'),
+    path('pari/create/', crud_views.pari_create, name='pari_create'),
+    path('pari/<int:pk>/', crud_views.pari_detail, name='pari_detail'),
+    path('pari/<int:pk>/edit/', crud_views.pari_update, name='pari_update'),
+    path('pari/<int:pk>/delete/', crud_views.pari_delete, name='pari_delete'),
+    
+    # TSQR (Timely Submission of Quarterly Report) CRUD
+    path('tsqr/', crud_views.tsqr_list, name='tsqr_list'),
+    path('tsqr/create/', crud_views.tsqr_create, name='tsqr_create'),
+    path('tsqr/<int:pk>/', crud_views.tsqr_detail, name='tsqr_detail'),
+    path('tsqr/<int:pk>/edit/', crud_views.tsqr_update, name='tsqr_update'),
+    path('tsqr/<int:pk>/delete/', crud_views.tsqr_delete, name='tsqr_delete'),
 ]

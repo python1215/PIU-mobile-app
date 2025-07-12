@@ -1,0 +1,160 @@
+{% extends 'NAWEC_KPI/crud/base_crud.html' %}
+
+{% block crud_content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-calendar-check"></i>
+            {{ action }} TSQR Calculation
+        </h5>
+    </div>
+    
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.baseline_value.id_for_label }}" class="form-label">
+                            {{ form.baseline_value.label }}
+                        </label>
+                        {{ form.baseline_value }}
+                        {% if form.baseline_value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.baseline_value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.End_Target_Value.id_for_label }}" class="form-label">
+                            {{ form.End_Target_Value.label }}
+                        </label>
+                        {{ form.End_Target_Value }}
+                        {% if form.End_Target_Value.errors %}
+                            <div class="text-danger">
+                                {% for error in form.End_Target_Value.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                            {{ form.due_date.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.due_date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter the due date in number of days
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.actual_date.id_for_label }}" class="form-label">
+                            {{ form.actual_date.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.actual_date }}
+                        {% if form.actual_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.actual_date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter the actual submission date in number of days
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if calculation.achieved_value %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label class="form-label">TSQR Percentage</label>
+                        <div class="form-control-plaintext calculation-value">
+                            {{ calculation.achieved_value|floatformat:2 }}%
+                        </div>
+                        <div class="form-text">
+                            This value is automatically calculated: (B ÷ A) × 100 = ({{ calculation.actual_date }} ÷ {{ calculation.due_date }}) × 100
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.year.id_for_label }}" class="form-label">
+                            {{ form.year.label }}
+                        </label>
+                        {{ form.year }}
+                        {% if form.year.errors %}
+                            <div class="text-danger">
+                                {% for error in form.year.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.quarter.id_for_label }}" class="form-label">
+                            {{ form.quarter.label }}
+                        </label>
+                        {{ form.quarter }}
+                        {% if form.quarter.errors %}
+                            <div class="text-danger">
+                                {% for error in form.quarter.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h6><i class="bi bi-info-circle"></i> TSQR Calculation</h6>
+                <p class="mb-0">
+                    TSQR measures the timeliness of quarterly report submissions.
+                    Formula: <strong>TSQR = (B ÷ A) × 100</strong> where A = Due Date (days) and B = Actual Date (days)
+                    <br>A value ≤ 100% indicates on-time or early submission, > 100% indicates late submission.
+                </p>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'NAWEC_KPI:tsqr_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check"></i> {{ action }} Calculation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
