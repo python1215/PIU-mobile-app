@@ -491,7 +491,7 @@
                                             <option value="nwcd">NWCD - New Water Connection Days</option>
                                             <option value="tps">TPS - Timely Payment of Salary</option>
                                             <option value="ttp">TTP - Timely Tax Payment</option>
-                                            <option value="wqcc">WQCC - Water Quality Compliance Corporate</option>
+                                            <option value="wqcc">WQCC - Water Quality Compliance Chemical</option>
                                             <option value="wqcb">WQCB - Water Quality Compliance Bacteriological</option>
                                             <option value="nrw">NRW - Non-Revenue Water</option>
                                         </select>
@@ -913,7 +913,7 @@ function handleKPIModelSelection() {
             showTTPPopup();
             break;
         case 'wqcc':
-            console.log('✅ Triggering WQCC (Water Quality Compliance Corporate) popup');
+            console.log('✅ Triggering WQCC (Water Quality Compliance Chemical) popup');
             showWQCCPopup();
             break;
         case 'wqcb':
@@ -3976,7 +3976,7 @@ function showWQCCPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-check2-circle"></i> WQCC Calculation (Water Quality Compliance Corporate)
+                    <i class="bi bi-check2-circle"></i> WQCC Calculation (Water Quality Compliance Chemical)
                 </h5>
                 <span style="color: #e9ecef; font-size: 0.9rem;">KPI-12</span>
             </div>
@@ -4919,7 +4919,7 @@ function detectKPIType(indicatorText) {
         return 'TPS';
     } else if (text.includes('ttp') || text.includes('timely tax payment')) {
         return 'TTP';
-    } else if (text.includes('wqcc') || text.includes('water quality compliance corporate')) {
+    } else if (text.includes('wqcc') || text.includes('water quality compliance chemical')) {
         return 'WQCC';
     } else if (text.includes('wqcb') || text.includes('water quality compliance bacteriological')) {
         return 'WQCB';
