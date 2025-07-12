@@ -1005,3 +1005,102 @@ class CalculateCR(models.Model):
     class Meta:
         verbose_name = "Current Ratio (CR) Calculation"
         verbose_name_plural = "Current Ratio (CR) Calculations"
+
+class CalculatePARI(models.Model):
+    """KPI-19: percentage of Audit Recommendations implemented Calculation"""
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value to achieve")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated Current Ratio")
+
+    # Calculation input fields
+    total_number_of_recommendations = models.FloatField(
+        null=True, blank=True, help_text="total_number_of_recommendations")
+    total_implemented = models.FloatField(
+        null=True, blank=True, help_text="total implemented")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate PARI percentage
+        if (self.total_recommendations is not None
+                and self.total_implemented is not None
+                and self.total_recommendations > 0):
+            self.achieved_value = (float(self.total_implemented) /
+                                   float(self.total_recommendations)) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"PARI Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "PARI (Performance Audit Recommendations Implementation) Calculation"
+        verbose_name_plural = "PARI (Performance Audit Recommendations Implementation) Calculations"
+
+
+class CalculateTSQR(models.Model):
+    """KPI-21: Timely Submission of Quarterly Report Calculation"""
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value to achieve")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated TSQR ratio")
+
+    # Calculation input fields - A = Due Date, B = Actual Date
+    due_date = models.DateField(
+        null=True, blank=True, help_text="Due Date (A)")
+    actual_date = models.DateField(
+        null=True, blank=True, help_text="Actual Date (B)")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate TSQR = B/A (Actual Date / Due Date)
+        if (self.due_date is not None and self.actual_date is not None):
+            # Convert dates to days from epoch for calculation
+            due_days = (self.due_date - self.due_date.__class__(1970, 1, 1)).days
+            actual_days = (self.actual_date - self.actual_date.__class__(1970, 1, 1)).days
+            
+            if due_days > 0:
+                self.achieved_value = (float(actual_days) / float(due_days)) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"TSQR Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "Timely Submission of Quarterly Report (TSQR) Calculation"
+        verbose_name_plural = "Timely Submission of Quarterly Report (TSQR) Calculations"
