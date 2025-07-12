@@ -439,39 +439,47 @@ def tsqr_create(request):
 @login_required
 def tsqr_detail(request, pk):
     """View TSQR calculation details"""
-    calculation = get_object_or_404(CalculateTSQR, pk=pk)
-    return render(request, 'NAWEC_KPI/crud/tsqr_detail.html', {
-        'calculation': calculation,
-        'title': 'TSQR Calculation Details'
-    })
+    try:
+        calculation = CalculateTSQR.objects.get(pk=pk)
+        return render(request, 'NAWEC_KPI/crud/tsqr_detail.html', {
+            'calculation': calculation,
+            'title': 'TSQR Calculation Details'
+        })
+    except CalculateTSQR.DoesNotExist:
+        messages.error(request, f'TSQR calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:tsqr_list')
 
 
 @login_required
 def tsqr_update(request, pk):
     """Update TSQR calculation"""
-    calculation = get_object_or_404(CalculateTSQR, pk=pk)
-    if request.method == 'POST':
-        form = CalculateTSQRForm(request.POST, instance=calculation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'TSQR calculation updated successfully!')
-            return redirect('NAWEC_KPI:tsqr_detail', pk=pk)
-    else:
-        form = CalculateTSQRForm(instance=calculation)
-    
-    return render(request, 'NAWEC_KPI/crud/tsqr_form.html', {
-        'form': form,
-        'calculation': calculation,
-        'title': 'Update TSQR Calculation',
-        'action': 'Update'
-    })
+    try:
+        calculation = CalculateTSQR.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = CalculateTSQRForm(request.POST, instance=calculation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'TSQR calculation updated successfully!')
+                return redirect('NAWEC_KPI:tsqr_detail', pk=pk)
+        else:
+            form = CalculateTSQRForm(instance=calculation)
+        
+        return render(request, 'NAWEC_KPI/crud/tsqr_form.html', {
+            'form': form,
+            'calculation': calculation,
+            'title': 'Update TSQR Calculation',
+            'action': 'Update'
+        })
+    except CalculateTSQR.DoesNotExist:
+        messages.error(request, f'TSQR calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:tsqr_list')
 
 
 @login_required
 def tsqr_delete(request, pk):
     """Delete TSQR calculation"""
     try:
-        calculation = get_object_or_404(CalculateTSQR, pk=pk)
+        calculation = CalculateTSQR.objects.get(pk=pk)
         if request.method == 'POST':
             calculation.delete()
             messages.success(request, 'TSQR calculation deleted successfully!')

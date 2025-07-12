@@ -240,6 +240,7 @@ The PIUN directory contains specialized modules:
 - July 12, 2025. Updated PARI calculation name from "Performance Audit Recommendations Implementation" to "Percentage Audit Recommendations Implementation": modified all references across models.py, urls.py, templates, migrations, and CRUD views to reflect the correct percentage-based terminology instead of performance-based terminology
 - July 12, 2025. Fixed automatic progress calculation system: added missing Percentage_progress_from_baseline field to KPIMonitoringDataForm, enhanced calculation function with flexible field checking, added debug test buttons (gear and lightning icons), created comprehensive field detection and force calculation capabilities for Progress from Baseline (%) and Progress to Target (%) fields
 - July 12, 2025. Fixed TSQR CRUD URL routing error: resolved NoReverseMatch exception by updating tsqr_create, tsqr_update, and tsqr_delete redirect functions to use proper namespace ('NAWEC_KPI:tsqr_list' instead of 'tsqr_list'), ensured all TSQR operations redirect correctly after creation, update, and deletion
+- July 12, 2025. Enhanced TSQR error handling for non-existent records: replaced get_object_or_404 with try-except blocks in tsqr_detail, tsqr_update, and tsqr_delete views to catch DoesNotExist exceptions, added user-friendly error messages instead of 404 errors when attempting to access non-existent TSQR calculations (only IDs 1-4 exist), improved user experience with proper redirects to list view
 
 ## User Preferences
 
