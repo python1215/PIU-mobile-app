@@ -840,11 +840,41 @@ function populateFieldsFromIndicator(indicatorId) {
                 targetedWeightField.value = data.targeted_weight_value;
                 targetedWeightField.style.backgroundColor = '#e7f3ff';
             }
+            
+            // Calculate and populate progress values automatically
+            calculateAndPopulateProgressValues();
         }
     })
     .catch(error => {
         console.error('Error loading indicator data:', error);
     });
+}
+
+// Function to calculate and populate progress values
+function calculateAndPopulateProgressValues() {
+    const baselineField = document.getElementById('id_baseline_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    const achievedField = document.getElementById('id_achieved_value');
+    const progressFromBaselineField = document.getElementById('id_Percentage_progress_from_baseline');
+    const progressToTargetField = document.getElementById('id_Percentage_progress_towards_end_target');
+    
+    if (baselineField && targetField && achievedField && progressFromBaselineField && progressToTargetField) {
+        const baseline = parseFloat(baselineField.value) || 0;
+        const target = parseFloat(targetField.value) || 0;
+        const achieved = parseFloat(achievedField.value) || 0;
+        
+        if (achieved > 0 && baseline > 0) {
+            // Calculate progress from baseline: ((achieved - baseline) / baseline) * 100
+            const progressFromBaseline = ((achieved - baseline) / baseline) * 100;
+            progressFromBaselineField.value = progressFromBaseline.toFixed(2);
+            
+            // Calculate progress towards target: ((achieved - baseline) / (target - baseline)) * 100
+            if (target > 0 && target !== baseline) {
+                const progressToTarget = ((achieved - baseline) / (target - baseline)) * 100;
+                progressToTargetField.value = progressToTarget.toFixed(2);
+            }
+        }
+    }
 }
 
 // Handle KPI Model Selection

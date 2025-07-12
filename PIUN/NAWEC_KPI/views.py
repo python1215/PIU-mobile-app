@@ -1019,6 +1019,32 @@ def get_kpi_values(request, kpi_code):
 
 
 @login_required
+def get_kpi_progress_values(request, kpi_indicator_id):
+    """Get KPI progress values for automatic population in data entry form"""
+    try:
+        kpi_indicator = KPIIndicator.objects.get(id=kpi_indicator_id)
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'baseline_value': kpi_indicator.baseline_value if kpi_indicator.baseline_value is not None else 0,
+                'end_target_value': kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0,
+                'kpi_description': kpi_indicator.kpi_description,
+                'measurement_unit': kpi_indicator.measurement_unit.measurement_unit if kpi_indicator.measurement_unit else None,
+                'indicator_type': kpi_indicator.indicator_type.indicator_type if kpi_indicator.indicator_type else None,
+                'indicator_no': kpi_indicator.indicator_no,
+            }
+        })
+    except KPIIndicator.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'KPI Indicator not found'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
 def calculate_roa_list(request):
     """List all ROA calculations"""
     calculations = CalculateROA.objects.select_related(
