@@ -956,6 +956,8 @@ function triggerKPICalculationPopup() {
         kpiType = 'DER';
     } else if (selectedText.includes('current ratio') || selectedText.includes('cr') || selectedText.includes('kpi-19') || selectedText.includes('kpi 19') || selectedText.includes('19')) {
         kpiType = 'CR';
+    } else if (selectedText.includes('pari') || selectedText.includes('performance audit') || selectedText.includes('recommendations implementation') || selectedText.includes('kpi-20') || selectedText.includes('kpi 20') || selectedText.includes('20')) {
+        kpiType = 'PARI';
     }
     
     console.log('Detected KPI type:', kpiType);
@@ -1019,6 +1021,10 @@ function triggerKPICalculationPopup() {
         case 'CR':
             console.log('✅ Triggering CR (Current Ratio) popup for KPI-19');
             showCRPopup();
+            break;
+        case 'PARI':
+            console.log('✅ Triggering PARI (Performance Audit Recommendations Implementation) popup for KPI-20');
+            showPARIPopup();
             break;
         default:
             showROAPopup(); // fallback
@@ -5502,6 +5508,223 @@ function resetCRForm() {
 }
 
 function closeCRPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+function showPARIPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create PARI popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #6f42c1; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #6f42c1; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-clipboard-check"></i> PARI - Performance Audit Recommendations Implementation
+                </h5>
+                <span style="color: #e2d9f3; font-size: 0.9rem;">KPI-20</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #6f42c1; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: PARI = (Total Implemented ÷ Total Recommendations) × 100
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Number of Recommendations:</label>
+                    <input type="number" id="pariTotalRecommendations" min="0" step="1"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter total number of recommendations">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Implemented:</label>
+                    <input type="number" id="pariTotalImplemented" min="0" step="1"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter total number implemented">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="pariQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1 (January - March)</option>
+                        <option value="Q2">Q2 (April - June)</option>
+                        <option value="Q3">Q3 (July - September)</option>
+                        <option value="Q4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div id="pariResult" style="display: none; margin-top: 15px; padding: 10px; 
+                                           background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                    <h6 style="color: #155724; margin-bottom: 10px;">Calculation Result:</h6>
+                    <p id="pariCalculationDetails" style="margin-bottom: 10px; color: #155724;"></p>
+                    <h5 style="color: #155724; margin: 0;">Implementation Rate: <span id="pariFinalResult"></span>%</h5>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; 
+                        padding: 15px 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="resetPARIForm()" style="background: #ffc107; color: #212529; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closePARIPopup()" style="background: #6c757d; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <button onclick="calculatePARI()" style="background: #007bff; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-calculator"></i> Calculate PARI
+                </button>
+                <button onclick="usePARIResult()" style="background: #28a745; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Use Result
+                </button>
+            </div>
+        </div>
+        
+        <!-- Backdrop -->
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 9999;" onclick="closePARIPopup()"></div>
+    `;
+    
+    document.body.appendChild(popup);
+    document.getElementById('pariTotalRecommendations').focus();
+}
+
+function calculatePARI() {
+    const quarter = document.getElementById('pariQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before calculating.');
+        document.getElementById('pariQuarter').focus();
+        return;
+    }
+    
+    const totalRecommendations = parseInt(document.getElementById('pariTotalRecommendations').value) || 0;
+    const totalImplemented = parseInt(document.getElementById('pariTotalImplemented').value) || 0;
+    
+    if (totalRecommendations <= 0) {
+        alert('Please enter a valid number of total recommendations.');
+        document.getElementById('pariTotalRecommendations').focus();
+        return;
+    }
+    
+    if (totalImplemented > totalRecommendations) {
+        alert('Total implemented cannot be greater than total recommendations.');
+        document.getElementById('pariTotalImplemented').focus();
+        return;
+    }
+    
+    const pari = (totalImplemented / totalRecommendations) * 100;
+    
+    // Show result
+    const resultDiv = document.getElementById('pariResult');
+    const detailsP = document.getElementById('pariCalculationDetails');
+    const finalResultSpan = document.getElementById('pariFinalResult');
+    
+    detailsP.innerHTML = `
+        Total Recommendations: ${totalRecommendations}<br>
+        Total Implemented: ${totalImplemented}<br>
+        Calculation: (${totalImplemented} ÷ ${totalRecommendations}) × 100
+    `;
+    finalResultSpan.textContent = pari.toFixed(2);
+    resultDiv.style.display = 'block';
+    
+    window.simplePARIResult = pari.toFixed(2);
+}
+
+async function usePARIResult() {
+    const quarter = document.getElementById('pariQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result.');
+        document.getElementById('pariQuarter').focus();
+        return;
+    }
+    
+    if (!window.simplePARIResult) {
+        alert('Please calculate PARI first');
+        return;
+    }
+    
+    const totalRecommendations = parseInt(document.getElementById('pariTotalRecommendations').value) || 0;
+    const totalImplemented = parseInt(document.getElementById('pariTotalImplemented').value) || 0;
+    
+    const data = {
+        kpi_type: 'PARI',
+        input_values: {
+            total_recommendations: totalRecommendations,
+            total_implemented: totalImplemented,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simplePARIResult)
+        }
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simplePARIResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                calculatePercentages();
+            }
+            
+            closePARIPopup();
+            alert('PARI calculation saved and value applied successfully!');
+        } else {
+            throw new Error(result.error || 'Failed to save PARI calculation');
+        }
+    } catch (error) {
+        console.error('Error saving PARI calculation:', error);
+        alert('Error saving PARI calculation: ' + error.message);
+    }
+}
+
+function resetPARIForm() {
+    document.getElementById('pariTotalRecommendations').value = '';
+    document.getElementById('pariTotalImplemented').value = '';
+    document.getElementById('pariQuarter').value = '';
+    
+    const resultDiv = document.getElementById('pariResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    window.simplePARIResult = null;
+    document.getElementById('pariTotalRecommendations').focus();
+}
+
+function closePARIPopup() {
     const popup = document.getElementById('simpleKPIPopup');
     if (popup) {
         popup.remove();

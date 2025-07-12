@@ -864,100 +864,6 @@ class CalculateDD(models.Model):
     def __str__(self):
         return f"DD - {self.achieved_value} GMD (ID: {self.pk})"
 
-class CalculateDER(models.Model):
-    """KPI-16: Debt Equity Ratio calculation"""
-    # KPI tracking fields
-    baseline_value = models.FloatField(
-        null=True, blank=True, help_text="Baseline value for comparison")
-    End_Target_Value = models.FloatField(
-        null=True, blank=True, help_text="End target value to achieve")
-    achieved_value = models.FloatField(null=True,
-                                       blank=True,
-                                       help_text="achieved_value")
-
-    # Calculation input fields
-    total_debt = models.FloatField(
-        null=True, blank=True, help_text="total debt")
-    total_equity = models.FloatField(
-        null=True, blank=True, help_text="total equity")
-
-    year = models.ForeignKey(YEAR,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
-    quarter = models.ForeignKey(Quarter,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  null=True,
-                                  blank=True)
-
-    def save(self, *args, **kwargs):
-        if (self.total_debt is not None
-                and self.total_equity is not None
-                and self.total_debt > 0):
-            self.achieved_value = (float(self.total_debt) /
-                                   float(self.total_equity))
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"DER Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
-
-    class Meta:
-        verbose_name = "Debt Equity Ratio (DER) Calculation"
-        verbose_name_plural = "Debt Equity Ratio (DER) Calculation"
-
-class CalculateCR(models.Model):
-    """KPI-17: Current Ratio calculation"""
-    # KPI tracking fields
-    baseline_value = models.FloatField(
-        null=True, blank=True, help_text="Baseline value for comparison")
-    End_Target_Value = models.FloatField(
-        null=True, blank=True, help_text="End target value to achieve")
-    achieved_value = models.FloatField(null=True,
-                                       blank=True,
-                                       help_text="achieved_value")
-
-    # Calculation input fields
-    current_assets = models.FloatField(
-        null=True, blank=True, help_text="current Assets")
-    current_liabilities = models.FloatField(
-        null=True, blank=True, help_text="Current Liabilities")
-
-    year = models.ForeignKey(YEAR,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
-    quarter = models.ForeignKey(Quarter,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  null=True,
-                                  blank=True)
-
-    def save(self, *args, **kwargs):
-        if (self.current_assets is not None
-                and self.current_assets is not None
-                and self.current_liabilities > 0):
-            self.achieved_value = (float(self.current_assets) /
-                                   float(self.current_liabilities))
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"CR Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
-
-    class Meta:
-        verbose_name = "Current Ratio (CR) Calculation"
-        verbose_name_plural = "Current Ratio (CR) Calculation"
-
 class CalculateAO(models.Model):
     """KPI-17: Audit Opinion Calculation"""
     # KPI tracking fields
@@ -1099,3 +1005,52 @@ class CalculateCR(models.Model):
     class Meta:
         verbose_name = "Current Ratio (CR) Calculation"
         verbose_name_plural = "Current Ratio (CR) Calculations"
+
+
+class CalculatePARI(models.Model):
+    """KPI-20: PARI (Performance Audit Recommendations Implementation) Calculation"""
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value to achieve")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated PARI percentage")
+
+    # Calculation input fields
+    total_recommendations = models.IntegerField(
+        null=True, blank=True, help_text="Total Number of Recommendations")
+    total_implemented = models.IntegerField(
+        null=True, blank=True, help_text="Total Implemented")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate PARI percentage
+        if (self.total_recommendations is not None
+                and self.total_implemented is not None
+                and self.total_recommendations > 0):
+            self.achieved_value = (float(self.total_implemented) /
+                                   float(self.total_recommendations)) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"PARI Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "PARI (Performance Audit Recommendations Implementation) Calculation"
+        verbose_name_plural = "PARI (Performance Audit Recommendations Implementation) Calculations"

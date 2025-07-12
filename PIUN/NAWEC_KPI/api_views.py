@@ -14,7 +14,7 @@ from .models import (
     CalculateGAF, CalculateTDE, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC,
     CalculateWQCB, CalculateNRW, CalculateDD,
-    CalculateAO, CalculateDER, CalculateCR
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI
 )
 from setup.models import Quarter, YEAR
 
@@ -43,6 +43,7 @@ class SaveKPICalculationView(View):
         'AO': CalculateAO,
         'DER': CalculateDER,
         'CR': CalculateCR,
+        'PARI': CalculatePARI,
     }
     
     def post(self, request):
