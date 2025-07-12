@@ -29,8 +29,8 @@ class Migration(migrations.Migration):
                 ('year', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='setup.year')),
             ],
             options={
-                'verbose_name': 'PARI (Performance Audit Recommendations Implementation) Calculation',
-                'verbose_name_plural': 'PARI (Performance Audit Recommendations Implementation) Calculations',
+                'verbose_name': 'PARI (Percentage Audit Recommendations Implementation) Calculation',
+                'verbose_name_plural': 'PARI (Percentage Audit Recommendations Implementation) Calculations',
             },
         ),
     ]

@@ -148,7 +148,7 @@ urlpatterns = [
     path('cr/<int:pk>/edit/', crud_views.cr_update, name='cr_update'),
     path('cr/<int:pk>/delete/', crud_views.cr_delete, name='cr_delete'),
     
-    # PARI (Performance Audit Recommendations Implementation) CRUD
+    # PARI (Percentage Audit Recommendations Implementation) CRUD
     path('pari/', crud_views.pari_list, name='pari_list'),
     path('pari/create/', crud_views.pari_create, name='pari_create'),
     path('pari/<int:pk>/', crud_views.pari_detail, name='pari_detail'),

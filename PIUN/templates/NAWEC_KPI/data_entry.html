@@ -481,7 +481,7 @@
                                             <option value="ao">AO - Audit Opinion</option>
                                             <option value="der">DER - Debt to Equity Ratio</option>
                                             <option value="cr">CR - Current Ratio</option>
-                                            <option value="pari">PARI - Performance Audit Recommendations Implementation</option>
+                                            <option value="pari">PARI - Percentage Audit Recommendations Implementation</option>
                                             <option value="tsqr">TSQR - Timely Submission of Quarterly Report</option>
                                             <option value="roa">ROA - Return on Assets</option>
                                             <option value="npm">NPM - Net Profit Margin</option>
@@ -873,7 +873,7 @@ function handleKPIModelSelection() {
             showCRPopup();
             break;
         case 'pari':
-            console.log('✅ Triggering PARI (Performance Audit Recommendations Implementation) popup');
+            console.log('✅ Triggering PARI (Percentage Audit Recommendations Implementation) popup');
             showPARIPopup();
             break;
         case 'tsqr':
@@ -1142,7 +1142,7 @@ function triggerKPICalculationPopup() {
             showCRPopup();
             break;
         case 'PARI':
-            console.log('✅ Triggering PARI (Performance Audit Recommendations Implementation) popup for KPI-20');
+            console.log('✅ Triggering PARI (Percentage Audit Recommendations Implementation) popup for KPI-20');
             showPARIPopup();
             break;
         case 'TSQR':
@@ -5658,7 +5658,7 @@ function showPARIPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-clipboard-check"></i> PARI - Performance Audit Recommendations Implementation
+                    <i class="bi bi-clipboard-check"></i> PARI - Percentage Audit Recommendations Implementation
                 </h5>
                 <span style="color: #e2d9f3; font-size: 0.9rem;">KPI-20</span>
             </div>

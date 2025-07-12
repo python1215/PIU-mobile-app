@@ -1051,8 +1051,8 @@ class CalculatePARI(models.Model):
         return f"PARI Calculation - {self.achieved_value}% ({self.year}/{self.quarter})"
 
     class Meta:
-        verbose_name = "PARI (Performance Audit Recommendations Implementation) Calculation"
-        verbose_name_plural = "PARI (Performance Audit Recommendations Implementation) Calculations"
+        verbose_name = "PARI (Percentage Audit Recommendations Implementation) Calculation"
+        verbose_name_plural = "PARI (Percentage Audit Recommendations Implementation) Calculations"
 
 
 class CalculateTSQR(models.Model):

@@ -83,7 +83,7 @@
                 <div class="alert alert-info">
                     <h6><i class="bi bi-info-circle"></i> PARI Calculation Logic</h6>
                     <p class="mb-0">
-                        PARI (Performance Audit Recommendations Implementation) measures the percentage of audit recommendations that have been successfully implemented.
+                        PARI (Percentage Audit Recommendations Implementation) measures the percentage of audit recommendations that have been successfully implemented.
                         <br><strong>Formula:</strong> PARI = (Total Implemented ÷ Total Recommendations) × 100
                         <br><strong>Calculation:</strong> {{ calculation.total_implemented|default:"0" }} ÷ {{ calculation.total_number_of_recommendations|default:"0" }} × 100 = {{ calculation.achieved_value|floatformat:2|default:"0" }}%
                     </p>

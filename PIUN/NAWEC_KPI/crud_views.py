@@ -316,7 +316,7 @@ def pari_list(request):
     context = {
         'page_obj': page_obj,
         'search_query': search_query,
-        'title': 'PARI (Performance Audit Recommendations Implementation) Calculations'
+        'title': 'PARI (Percentage Audit Recommendations Implementation) Calculations'
     }
     return render(request, 'NAWEC_KPI/crud/pari_list.html', context)
 
