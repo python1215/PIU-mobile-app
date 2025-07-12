@@ -958,6 +958,8 @@ function triggerKPICalculationPopup() {
         kpiType = 'CR';
     } else if (selectedText.includes('pari') || selectedText.includes('performance audit') || selectedText.includes('recommendations implementation') || selectedText.includes('kpi-20') || selectedText.includes('kpi 20') || selectedText.includes('20')) {
         kpiType = 'PARI';
+    } else if (selectedText.includes('tsqr') || selectedText.includes('timely submission') || selectedText.includes('quarterly report') || selectedText.includes('kpi-21') || selectedText.includes('kpi 21') || selectedText.includes('21')) {
+        kpiType = 'TSQR';
     }
     
     console.log('Detected KPI type:', kpiType);
@@ -1025,6 +1027,10 @@ function triggerKPICalculationPopup() {
         case 'PARI':
             console.log('✅ Triggering PARI (Performance Audit Recommendations Implementation) popup for KPI-20');
             showPARIPopup();
+            break;
+        case 'TSQR':
+            console.log('✅ Triggering TSQR (Timely Submission of Quarterly Report) popup for KPI-21');
+            showTSQRPopup();
             break;
         default:
             showROAPopup(); // fallback
@@ -5725,6 +5731,223 @@ function resetPARIForm() {
 }
 
 function closePARIPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+function showTSQRPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create TSQR popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #17a2b8; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #17a2b8; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-calendar-check"></i> TSQR - Timely Submission of Quarterly Report
+                </h5>
+                <span style="color: #bee5eb; font-size: 0.9rem;">KPI-21</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #17a2b8; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: TSQR = B/A × 100 (Actual Date ÷ Due Date × 100)
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Due Date (A) - in days:</label>
+                    <input type="number" id="tsqrDueDate" min="1" step="1"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter due date in days">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Actual Date (B) - in days:</label>
+                    <input type="number" id="tsqrActualDate" min="1" step="1"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter actual submission date in days">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="tsqrQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1 (January - March)</option>
+                        <option value="Q2">Q2 (April - June)</option>
+                        <option value="Q3">Q3 (July - September)</option>
+                        <option value="Q4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div id="tsqrResult" style="display: none; margin-top: 15px; padding: 10px; 
+                                           background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
+                    <h6 style="color: #0c5460; margin-bottom: 10px;">Calculation Result:</h6>
+                    <p id="tsqrCalculationDetails" style="margin-bottom: 10px; color: #0c5460;"></p>
+                    <h5 style="color: #0c5460; margin: 0;">TSQR Percentage: <span id="tsqrFinalResult"></span>%</h5>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; 
+                        padding: 15px 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="resetTSQRForm()" style="background: #ffc107; color: #212529; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeTSQRPopup()" style="background: #6c757d; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <button onclick="calculateTSQR()" style="background: #007bff; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-calculator"></i> Calculate TSQR
+                </button>
+                <button onclick="useTSQRResult()" style="background: #28a745; color: white; border: none; 
+                        padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="bi bi-check"></i> Use Result
+                </button>
+            </div>
+        </div>
+        
+        <!-- Backdrop -->
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 9999;" onclick="closeTSQRPopup()"></div>
+    `;
+    
+    document.body.appendChild(popup);
+    document.getElementById('tsqrDueDate').focus();
+}
+
+function calculateTSQR() {
+    const quarter = document.getElementById('tsqrQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before calculating.');
+        document.getElementById('tsqrQuarter').focus();
+        return;
+    }
+    
+    const dueDate = parseInt(document.getElementById('tsqrDueDate').value) || 0;
+    const actualDate = parseInt(document.getElementById('tsqrActualDate').value) || 0;
+    
+    if (dueDate <= 0) {
+        alert('Please enter a valid due date in days.');
+        document.getElementById('tsqrDueDate').focus();
+        return;
+    }
+    
+    if (actualDate <= 0) {
+        alert('Please enter a valid actual submission date in days.');
+        document.getElementById('tsqrActualDate').focus();
+        return;
+    }
+    
+    const tsqr = (actualDate / dueDate) * 100;
+    
+    // Show result
+    const resultDiv = document.getElementById('tsqrResult');
+    const detailsP = document.getElementById('tsqrCalculationDetails');
+    const finalResultSpan = document.getElementById('tsqrFinalResult');
+    
+    detailsP.innerHTML = `
+        Due Date (A): ${dueDate} days<br>
+        Actual Date (B): ${actualDate} days<br>
+        Calculation: B/A × 100 = ${actualDate}/${dueDate} × 100
+    `;
+    finalResultSpan.textContent = tsqr.toFixed(2);
+    resultDiv.style.display = 'block';
+    
+    window.simpleTSQRResult = tsqr.toFixed(2);
+}
+
+async function useTSQRResult() {
+    const quarter = document.getElementById('tsqrQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result.');
+        document.getElementById('tsqrQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleTSQRResult) {
+        alert('Please calculate TSQR first');
+        return;
+    }
+    
+    const dueDate = parseInt(document.getElementById('tsqrDueDate').value) || 0;
+    const actualDate = parseInt(document.getElementById('tsqrActualDate').value) || 0;
+    
+    const data = {
+        kpi_type: 'TSQR',
+        input_values: {
+            due_date: dueDate,
+            actual_date: actualDate,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleTSQRResult)
+        }
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleTSQRResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                calculatePercentages();
+            }
+            
+            closeTSQRPopup();
+            alert('TSQR calculation saved and value applied successfully!');
+        } else {
+            throw new Error(result.error || 'Failed to save TSQR calculation');
+        }
+    } catch (error) {
+        console.error('Error saving TSQR calculation:', error);
+        alert('Error saving TSQR calculation: ' + error.message);
+    }
+}
+
+function resetTSQRForm() {
+    document.getElementById('tsqrDueDate').value = '';
+    document.getElementById('tsqrActualDate').value = '';
+    document.getElementById('tsqrQuarter').value = '';
+    
+    const resultDiv = document.getElementById('tsqrResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    window.simpleTSQRResult = null;
+    document.getElementById('tsqrDueDate').focus();
+}
+
+function closeTSQRPopup() {
     const popup = document.getElementById('simpleKPIPopup');
     if (popup) {
         popup.remove();

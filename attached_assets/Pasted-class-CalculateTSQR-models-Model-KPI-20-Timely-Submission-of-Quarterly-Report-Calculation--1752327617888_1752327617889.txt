@@ -1,0 +1,46 @@
+class CalculateTSQR(models.Model):
+    """KPI-20: Timely Submission of Quarterly Report Calculation"""
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value to achieve")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated Current Ratio")
+
+    # Calculation input fields
+    due_date = models.FloatField(
+        null=True, blank=True, help_text="due date")
+    actual_date = models.FloatField(
+        null=True, blank=True, help_text="actual date")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        if (self.due_date is not None
+                and self.actual_date is not None
+                and self.actual_date > 0):
+            self.achieved_value = (float(self.actual_date) /
+                                   float(self.due_date))*100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"PARI Calculation - {self.achieved_value} ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "Percentage of Audit recommendation implemented (CR) Calculation"
+        verbose_name_plural = "Percentage of Audit recommendation implemented (CR) Calculations"

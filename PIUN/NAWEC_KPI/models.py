@@ -1039,11 +1039,11 @@ class CalculatePARI(models.Model):
 
     def save(self, *args, **kwargs):
         # Auto-calculate PARI percentage
-        if (self.total_recommendations is not None
+        if (self.total_number_of_recommendations is not None
                 and self.total_implemented is not None
-                and self.total_recommendations > 0):
+                and self.total_number_of_recommendations > 0):
             self.achieved_value = (float(self.total_implemented) /
-                                   float(self.total_recommendations)) * 100
+                                   float(self.total_number_of_recommendations)) * 100
 
         super().save(*args, **kwargs)
 
@@ -1067,10 +1067,10 @@ class CalculateTSQR(models.Model):
                                        help_text="Calculated TSQR ratio")
 
     # Calculation input fields - A = Due Date, B = Actual Date
-    due_date = models.DateField(
-        null=True, blank=True, help_text="Due Date (A)")
-    actual_date = models.DateField(
-        null=True, blank=True, help_text="Actual Date (B)")
+    due_date = models.IntegerField(
+        null=True, blank=True, help_text="Due Date (A) - in days")
+    actual_date = models.IntegerField(
+        null=True, blank=True, help_text="Actual Date (B) - in days")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -1087,14 +1087,9 @@ class CalculateTSQR(models.Model):
                                   blank=True)
 
     def save(self, *args, **kwargs):
-        # Auto-calculate TSQR = B/A (Actual Date / Due Date)
-        if (self.due_date is not None and self.actual_date is not None):
-            # Convert dates to days from epoch for calculation
-            due_days = (self.due_date - self.due_date.__class__(1970, 1, 1)).days
-            actual_days = (self.actual_date - self.actual_date.__class__(1970, 1, 1)).days
-            
-            if due_days > 0:
-                self.achieved_value = (float(actual_days) / float(due_days)) * 100
+        # Auto-calculate TSQR = B/A * 100 (Actual Date / Due Date * 100)
+        if (self.due_date is not None and self.actual_date is not None and self.due_date > 0):
+            self.achieved_value = (float(self.actual_date) / float(self.due_date)) * 100
 
         super().save(*args, **kwargs)
 
