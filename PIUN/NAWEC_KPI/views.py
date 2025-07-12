@@ -969,6 +969,56 @@ def get_indicator_details(request, indicator_id):
 
 
 @login_required
+def get_kpi_values(request, kpi_code):
+    """Get baseline and target values for a KPI based on code"""
+    try:
+        # Map KPI codes to their corresponding indicator numbers
+        kpi_mapping = {
+            'roa': 'KPI-01',
+            'npm': 'KPI-02', 
+            'dscr': 'KPI-03',
+            'mwh': 'KPI-04',
+            'gaf': 'KPI-05',
+            'tde': 'KPI-06',
+            'atc': 'KPI-07',
+            'necd': 'KPI-08',
+            'nwcd': 'KPI-09',
+            'tps': 'KPI-10',
+            'ttp': 'KPI-11',
+            'wqcc': 'KPI-12',
+            'wqcb': 'KPI-13',
+            'nrw': 'KPI-14',
+            'dd': 'KPI-15',
+            'ao': 'KPI-16',
+            'der': 'KPI-17',
+            'cr': 'KPI-18',
+            'pari': 'KPI-20',
+            'tsqr': 'KPI-21',
+        }
+        
+        indicator_no = kpi_mapping.get(kpi_code.lower())
+        if not indicator_no:
+            return JsonResponse({'success': False, 'error': 'KPI code not found'})
+            
+        # Find the KPI indicator by indicator number
+        indicator = KPIIndicator.objects.filter(indicator_no=indicator_no).first()
+        if not indicator:
+            return JsonResponse({'success': False, 'error': 'KPI indicator not found in database'})
+            
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'baseline_value': indicator.baseline_value if indicator.baseline_value is not None else 0,
+                'End_Target_Value': indicator.End_Target_Value if indicator.End_Target_Value is not None else 0,
+                'indicator_no': indicator.indicator_no,
+                'indicator_description': indicator.indicator_description,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
 def calculate_roa_list(request):
     """List all ROA calculations"""
     calculations = CalculateROA.objects.select_related(

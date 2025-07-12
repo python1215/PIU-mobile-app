@@ -853,10 +853,15 @@ function handleKPIModelSelection() {
     const selectedModel = kpiModelSelect.value;
     
     if (!selectedModel) {
+        // Clear the fields when no KPI is selected
+        clearKPIFields();
         return;
     }
     
     console.log('Selected KPI Model:', selectedModel);
+    
+    // First, fetch baseline and target values
+    fetchKPIValues(selectedModel);
     
     // Call the appropriate popup function based on selection
     switch(selectedModel) {
@@ -931,6 +936,59 @@ function handleKPIModelSelection() {
     
     // Reset dropdown after selection
     kpiModelSelect.value = '';
+}
+
+// Fetch KPI baseline and target values
+function fetchKPIValues(kpiCode) {
+    fetch(`/NAWEC_KPI/get-kpi-values/${kpiCode}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Populate baseline value field
+            const baselineField = document.getElementById('id_baseline_value');
+            if (baselineField && data.data.baseline_value !== null) {
+                baselineField.value = data.data.baseline_value;
+                baselineField.style.backgroundColor = '#e7f3ff';
+            }
+            
+            // Populate end target value field
+            const targetField = document.getElementById('id_End_Target_Value');
+            if (targetField && data.data.End_Target_Value !== null) {
+                targetField.value = data.data.End_Target_Value;
+                targetField.style.backgroundColor = '#e7f3ff';
+            }
+            
+            console.log('KPI values loaded:', data.data);
+        } else {
+            console.error('Error fetching KPI values:', data.error);
+            // Still allow the form to be used even if values aren't found
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching KPI values:', error);
+        // Still allow the form to be used even if fetch fails
+    });
+}
+
+// Clear KPI fields when no model is selected
+function clearKPIFields() {
+    const baselineField = document.getElementById('id_baseline_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    
+    if (baselineField) {
+        baselineField.value = '';
+        baselineField.style.backgroundColor = '';
+    }
+    if (targetField) {
+        targetField.value = '';
+        targetField.style.backgroundColor = '';
+    }
 }
 
 // Smart KPI Popup Functions
