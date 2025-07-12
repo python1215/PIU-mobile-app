@@ -110,6 +110,12 @@ class CalculateROA(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated ROA percentage")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     net_profit_after_tax = models.FloatField(
@@ -143,6 +149,14 @@ class CalculateROA(models.Model):
         if self.net_profit_after_tax is not None and self.total_assets is not None and self.total_assets != 0:
             self.achieved_value = (self.net_profit_after_tax /
                                    self.total_assets) * 100
+        
+        # Calculate progress using KPI-01 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -160,6 +174,12 @@ class CalculateNPM(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_revenues_turnover = models.FloatField(
@@ -195,6 +215,14 @@ class CalculateNPM(models.Model):
                 and self.netprofit is not None
                 and self.total_revenues_turnover > 0):
             self.achieved_value = (self.netprofit / self.total_revenues_turnover) * 100
+        
+        # Calculate progress using KPI-02 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -212,6 +240,12 @@ class CalculateDSCR(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     net_operating_income = models.FloatField(
@@ -241,6 +275,14 @@ class CalculateDSCR(models.Model):
                 and self.total_debt_service != 0):
             self.achieved_value = float(self.net_operating_income) / float(
                 self.total_debt_service)
+        
+        # Calculate progress using KPI-03 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -264,6 +306,12 @@ class CalculateMWh(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated result")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     power_injected = models.FloatField(null=True,
@@ -297,6 +345,14 @@ class CalculateMWh(models.Model):
                 self.time_duration)
             self.achieved_value = single_source_energy * int(
                 self.number_of_sources)
+        
+        # Calculate progress using KPI-04 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -318,6 +374,12 @@ class CalculateGAF(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_available_hours = models.FloatField(
@@ -347,6 +409,14 @@ class CalculateGAF(models.Model):
                 and self.total_period_hours > 0):
             self.achieved_value = (float(self.total_available_hours) /
                                    float(self.total_period_hours)) * 100
+        
+        # Calculate progress using KPI-05 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -370,6 +440,12 @@ class CalculateTDE(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated result")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_training_days_conducted = models.FloatField(
@@ -399,6 +475,14 @@ class CalculateTDE(models.Model):
             self.achieved_value = float(
                 self.total_training_days_conducted) / float(
                     self.total_number_of_employees)
+        
+        # Calculate progress using KPI-06 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -422,6 +506,12 @@ class CalculateATC(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     billing_efficiency = models.FloatField(
@@ -456,6 +546,12 @@ class CalculateATC(models.Model):
             # Apply the formula
             self.achieved_value = (
                 1 - (billing_decimal * collection_decimal)) / 100
+        
+        # Calculate progress using KPI-07 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -477,6 +573,12 @@ class CalculateNECD(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_time_days = models.FloatField(null=True,
@@ -505,6 +607,12 @@ class CalculateNECD(models.Model):
                 and self.total_number_of_new_connections > 0):
             self.achieved_value = float(self.total_time_days) / float(
                 self.total_number_of_new_connections)
+        
+        # Calculate progress using KPI-08 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -526,6 +634,12 @@ class CalculateNWCD(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_time_days = models.FloatField(null=True,
@@ -556,6 +670,12 @@ class CalculateNWCD(models.Model):
                 and self.total_number_of_new_connections > 0):
             self.achieved_value = float(self.total_time_days) / float(
                 self.total_number_of_new_connections)
+        
+        # Calculate progress using KPI-09 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -577,6 +697,12 @@ class CalculateTPS(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     number_of_on_time_payments = models.FloatField(
@@ -605,6 +731,14 @@ class CalculateTPS(models.Model):
             self.achieved_value = (
                 float(self.number_of_on_time_payments) /
                 float(self.total_number_of_payments_due)) * 100
+        
+        # Calculate progress using KPI-10 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
 
         super().save(*args, **kwargs)
 
@@ -626,6 +760,12 @@ class CalculateTTP(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     timely_tax_payments = models.FloatField(
@@ -653,6 +793,14 @@ class CalculateTTP(models.Model):
                 and self.total_tax_payments_due > 0):
             self.achieved_value = float(self.timely_tax_payments) / float(
                 self.total_tax_payments_due)
+        
+        # Calculate progress using KPI-11 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
 
         super().save(*args, **kwargs)
 
@@ -665,7 +813,7 @@ class CalculateTTP(models.Model):
 
 
 class CalculateWQCC(models.Model):
-    """KPI-12: Water Quality Compliance Bacteriological calculation"""
+    """KPI-12: Water Quality Compliance Chemical calculation"""
     # KPI tracking fields
     baseline_value = models.FloatField(
         null=True, blank=True, help_text="Baseline value for comparison")
@@ -674,6 +822,12 @@ class CalculateWQCC(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     number_of_compliant_water_samples = models.FloatField(
@@ -704,6 +858,14 @@ class CalculateWQCC(models.Model):
             self.achieved_value = (
                 float(self.number_of_compliant_water_samples) /
                 float(self.total_number_of_tested_water_samples)) * 100
+        
+        # Calculate progress using KPI-12 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
 
         super().save(*args, **kwargs)
 
@@ -725,6 +887,12 @@ class CalculateWQCB(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     number_of_compliant_water_samples = models.FloatField(
@@ -755,6 +923,14 @@ class CalculateWQCB(models.Model):
             self.achieved_value = (
                 float(self.number_of_compliant_water_samples) /
                 float(self.total_number_of_tested_water_samples)) * 100
+        
+        # Calculate progress using KPI-13 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
 
         super().save(*args, **kwargs)
 
@@ -776,6 +952,12 @@ class CalculateNRW(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     water_entering_system = models.FloatField(
@@ -803,6 +985,12 @@ class CalculateNRW(models.Model):
                 and self.water_entering_system > 0):
             self.achieved_value = (float(self.billed_authorized_consumption) /
                                    float(self.water_entering_system)) * 100
+        
+        # Calculate progress using KPI-14 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -824,6 +1012,12 @@ class CalculateDD(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="achieved_value")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     trade_receivables = models.FloatField(
@@ -858,6 +1052,12 @@ class CalculateDD(models.Model):
                 and self.total_credit_sales is not None
                 and self.total_credit_sales != 0):
             self.achieved_value = (self.trade_receivables / self.total_credit_sales)
+        
+        # Calculate progress using KPI-15 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -875,6 +1075,12 @@ class CalculateAO(models.Model):
         null=True, blank=True, 
         choices=[(0, 'Qualified'), (1, 'Unqualified')],
         help_text="Audit Opinion: 0=Qualified, 1=Unqualified")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Audit Opinion input fields
     audit_opinion = models.IntegerField(
@@ -899,6 +1105,12 @@ class CalculateAO(models.Model):
         # Set achieved_value to the selected audit opinion
         if self.audit_opinion is not None:
             self.achieved_value = self.audit_opinion
+        
+        # Calculate progress using KPI-17 formula (special case for binary value)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -921,6 +1133,12 @@ class CalculateDER(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated Debt to Equity Ratio")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_debt = models.FloatField(
@@ -948,6 +1166,12 @@ class CalculateDER(models.Model):
                 and self.total_equity > 0):
             self.achieved_value = (float(self.total_debt) /
                                    float(self.total_equity))
+        
+        # Calculate progress using KPI-18 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
@@ -969,6 +1193,12 @@ class CalculateCR(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated Current Ratio")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     current_assets = models.FloatField(
@@ -996,6 +1226,14 @@ class CalculateCR(models.Model):
                 and self.current_liabilities > 0):
             self.achieved_value = (float(self.current_assets) /
                                    float(self.current_liabilities))
+        
+        # Calculate progress using KPI-19 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -1007,7 +1245,7 @@ class CalculateCR(models.Model):
         verbose_name_plural = "Current Ratio (CR) Calculations"
 
 class CalculatePARI(models.Model):
-    """KPI-19: percentage of Audit Recommendations implemented Calculation"""
+    """KPI-20: percentage of Audit Recommendations implemented Calculation"""
     # KPI tracking fields
     baseline_value = models.FloatField(
         null=True, blank=True, help_text="Baseline value for comparison")
@@ -1016,6 +1254,12 @@ class CalculatePARI(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated Current Ratio")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
     total_number_of_recommendations = models.FloatField(
@@ -1044,6 +1288,14 @@ class CalculatePARI(models.Model):
                 and self.total_number_of_recommendations > 0):
             self.achieved_value = (float(self.total_implemented) /
                                    float(self.total_number_of_recommendations)) * 100
+        
+        # Calculate progress using KPI-20 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -1065,6 +1317,12 @@ class CalculateTSQR(models.Model):
     achieved_value = models.FloatField(null=True,
                                        blank=True,
                                        help_text="Calculated TSQR ratio")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields - A = Due Date, B = Actual Date
     due_date = models.IntegerField(
@@ -1090,6 +1348,12 @@ class CalculateTSQR(models.Model):
         # Auto-calculate TSQR = B/A * 100 (Actual Date / Due Date * 100)
         if (self.due_date is not None and self.actual_date is not None and self.due_date > 0):
             self.achieved_value = (float(self.actual_date) / float(self.due_date)) * 100
+        
+        # Calculate progress using KPI-21 formula (reverse calculation)
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != self.End_Target_Value:
+                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+                self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
 
