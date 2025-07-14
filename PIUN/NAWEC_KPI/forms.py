@@ -207,7 +207,7 @@ class CalculateTSQRForm(forms.ModelForm):
 class KPIMonitoringDataForm(forms.ModelForm):
     # KPI Selection choices for specialized calculations
     KPI_CHOICES = [
-        ('', 'Select KPI'),
+        ('', 'Select Indicator Description'),
         ('AO', 'AO - Audit Opinion'),
         ('DER', 'DER - Debt to Equity Ratio'),
         ('CR', 'CR - Current Ratio'),
