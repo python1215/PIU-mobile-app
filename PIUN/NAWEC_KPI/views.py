@@ -2968,18 +2968,40 @@ class SaveKPICalculationView(View):
                 
             elif kpi_type == 'EI':
                 # EI (Energy Injection) calculation using CalculateMWh model
-                solar_energy = input_values.get('solar_energy', 0)
-                wind_energy = input_values.get('wind_energy', 0)
-                thermal_energy = input_values.get('thermal_energy', 0)
-                other_energy = input_values.get('other_energy', 0)
+                # Handle dynamic energy sources from the new popup design
+                total_energy = 0
+                source_count = 0
                 
-                # Calculate total energy injection
-                total_energy = solar_energy + wind_energy + thermal_energy + other_energy
+                # Collect all energy source values from dynamic input
+                for key, value in input_values.items():
+                    if key.endswith('_energy') and key != 'achieved_value':
+                        try:
+                            energy_value = float(value)
+                            if energy_value > 0:
+                                total_energy += energy_value
+                                source_count += 1
+                        except (ValueError, TypeError):
+                            continue
+                
+                # If no energy sources found, try the old format for backward compatibility
+                if total_energy == 0:
+                    solar_energy = input_values.get('solar_energy', 0)
+                    wind_energy = input_values.get('wind_energy', 0)
+                    thermal_energy = input_values.get('thermal_energy', 0)
+                    other_energy = input_values.get('other_energy', 0)
+                    hydro_energy = input_values.get('hydro_energy', 0)
+                    nuclear_energy = input_values.get('nuclear_energy', 0)
+                    
+                    total_energy = solar_energy + wind_energy + thermal_energy + other_energy + hydro_energy + nuclear_energy
+                    source_count = sum(1 for x in [solar_energy, wind_energy, thermal_energy, other_energy, hydro_energy, nuclear_energy] if x > 0)
+                
+                if total_energy <= 0:
+                    return JsonResponse({'success': False, 'error': 'No valid energy sources provided'})
                 
                 calculation = CalculateMWh(
                     power_injected=total_energy,  # Use total energy as power injected
                     time_duration=1,  # Set as 1 hour for MW calculation
-                    number_of_sources=1,  # Single aggregated source
+                    number_of_sources=max(source_count, 1),  # Number of actual energy sources
                     quarter=quarter,
                     loginUser=request.user
                 )
