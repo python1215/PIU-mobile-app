@@ -2979,6 +2979,19 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'TPS':
+                # TPS calculation
+                on_time_payments = input_values.get('on_time_payments', 0)
+                total_payments = input_values.get('total_payments', 0)
+                
+                calculation = CalculateTPS(
+                    on_time_payments=on_time_payments,
+                    total_payments=total_payments,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -3026,6 +3039,8 @@ class DeleteKPICalculationView(View):
                 CalculateWQCC.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TTP':
                 CalculateTTP.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'TPS':
+                CalculateTPS.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             

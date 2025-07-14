@@ -1156,7 +1156,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'NECD';
     } else if (selectedText.includes('new water connection')) {
         kpiType = 'NWCD';
-    } else if (selectedText.includes('transmission and power supply')) {
+    } else if (selectedText.includes('timely payment of salary') || selectedText.includes('transmission and power supply')) {
         kpiType = 'TPS';
     } else if (selectedText.includes('timely tax payment') || selectedText.includes('tariff and transmission payment')) {
         kpiType = 'TTP';
@@ -3758,7 +3758,7 @@ function calculateTPS() {
     window.simpleTPSResult = tps.toFixed(2);
 }
 
-function useTPSResult() {
+async function useTPSResult() {
     const quarter = document.getElementById('tpsQuarter').value;
     
     if (!quarter) {
@@ -3772,20 +3772,55 @@ function useTPSResult() {
         return;
     }
     
-    // Set the achieved value in the main form
-    const achievedValueField = document.getElementById('id_achieved_value');
-    if (achievedValueField) {
-        achievedValueField.value = window.simpleTPSResult;
-        achievedValueField.style.backgroundColor = '#e7f3ff';
+    // Prepare data for saving to database
+    const onTimePayments = parseFloat(document.getElementById('tpsOnTimePayments').value) || 0;
+    const totalPayments = parseFloat(document.getElementById('tpsTotalPayments').value) || 0;
+    
+    const data = {
+        kpi_type: 'TPS',
+        input_values: {
+            on_time_payments: onTimePayments,
+            total_payments: totalPayments,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleTPSResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
         
-        // Trigger percentage calculations
-        calculatePercentages();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleTPSResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeTPSPopup();
+            
+            alert('TPS calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving TPS calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving TPS calculation:', error);
+        alert('Error saving TPS calculation: ' + error.message);
     }
-    
-    // Close the popup
-    closeTPSPopup();
-    
-    alert('TPS value applied to form successfully!');
 }
 
 function resetTPSForm() {
