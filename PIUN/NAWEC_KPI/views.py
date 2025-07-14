@@ -2824,5 +2824,158 @@ def get_results_by_outcome(request):
     return render(request, 'NAWEC_KPI/partials/result_options.html', {'results': results})
 
 
+# API Views for KPI Calculations
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import json
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SaveKPICalculationView(View):
+    """API endpoint to save KPI calculations from popup forms"""
+    
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            kpi_type = data.get('kpi_type')
+            input_values = data.get('input_values', {})
+            
+            if not kpi_type:
+                return JsonResponse({'success': False, 'error': 'KPI type is required'})
+            
+            # Get the achieved value from input_values
+            achieved_value = input_values.get('achieved_value')
+            quarter = input_values.get('quarter')
+            
+            if not achieved_value:
+                return JsonResponse({'success': False, 'error': 'Achieved value is required'})
+            
+            # Handle different KPI types
+            if kpi_type == 'ROA':
+                # ROA calculation
+                net_income = input_values.get('net_income', 0)
+                total_assets = input_values.get('total_assets', 0)
+                
+                calculation = CalculateROA(
+                    net_income=net_income,
+                    total_assets=total_assets,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            elif kpi_type == 'DER':
+                # DER calculation
+                total_debt = input_values.get('total_debt', 0)
+                total_equity = input_values.get('total_equity', 0)
+                
+                calculation = CalculateDER(
+                    total_debt=total_debt,
+                    total_equity=total_equity,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            elif kpi_type == 'CR':
+                # CR calculation
+                current_assets = input_values.get('current_assets', 0)
+                current_liabilities = input_values.get('current_liabilities', 0)
+                
+                calculation = CalculateCR(
+                    current_assets=current_assets,
+                    current_liabilities=current_liabilities,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            elif kpi_type == 'AO':
+                # AO calculation
+                audit_opinion = input_values.get('audit_opinion')
+                
+                calculation = CalculateAO(
+                    audit_opinion=audit_opinion,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            elif kpi_type == 'PARI':
+                # PARI calculation
+                total_recommendations = input_values.get('total_recommendations', 0)
+                total_implemented = input_values.get('total_implemented', 0)
+                
+                calculation = CalculatePARI(
+                    total_recommendations=total_recommendations,
+                    total_implemented=total_implemented,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            elif kpi_type == 'TSQR':
+                # TSQR calculation
+                due_date = input_values.get('due_date', 0)
+                actual_date = input_values.get('actual_date', 0)
+                
+                calculation = CalculateTSQR(
+                    due_date=due_date,
+                    actual_date=actual_date,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
+            else:
+                return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'{kpi_type} calculation saved successfully',
+                'achieved_value': achieved_value
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteKPICalculationView(View):
+    """API endpoint to delete KPI calculations"""
+    
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            kpi_type = data.get('kpi_type')
+            calc_id = data.get('calc_id')
+            
+            if not kpi_type or not calc_id:
+                return JsonResponse({'success': False, 'error': 'KPI type and calculation ID are required'})
+            
+            # Handle different KPI types
+            if kpi_type == 'ROA':
+                CalculateROA.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'DER':
+                CalculateDER.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'CR':
+                CalculateCR.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'AO':
+                CalculateAO.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'PARI':
+                CalculatePARI.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'TSQR':
+                CalculateTSQR.objects.filter(id=calc_id).delete()
+            else:
+                return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'{kpi_type} calculation deleted successfully'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
 
 
