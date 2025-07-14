@@ -248,6 +248,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Created ProjectResult records linked to NAWEC outcome: inserted 4 ProjectResult records (IDs: 2-5) related to the NAWEC ProjectOutcome including "Enhanced water distribution network coverage", "Improved electricity transmission reliability", "Increased renewable energy capacity integration", and "Strengthened infrastructure resilience and sustainability" - completing the full PDO → Outcome → Results hierarchy for NAWEC monitoring framework
 - July 14, 2025. Fixed NAWEC KPI monitoring form IntegrityError: resolved NOT NULL constraint failed for collection_frequency_id by adding missing required fields (collection_frequency, indicator_type, measurement_unit, remarks) to KPIMonitoringDataForm, updated data_entry.html template to include collection_frequency field, added proper form field initialization in views, and ensured remarks field is properly configured as textarea input for user observations and notes
 - July 14, 2025. Removed duplicate Collection Frequency field from NAWEC KPI data entry template: eliminated redundant collection_frequency field from Indicator Information section while keeping the properly placed field in the Plan Information section for cleaner form layout
+- July 14, 2025. Removed gear and lightning bolt icons from NAWEC KPI data entry form: eliminated bi-gear and bi-lightning icons from Select KPI label and debug test buttons to provide cleaner form interface without unnecessary visual elements
 
 ## User Preferences
 
