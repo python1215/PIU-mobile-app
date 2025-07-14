@@ -205,6 +205,38 @@ class CalculateTSQRForm(forms.ModelForm):
 
 
 class KPIMonitoringDataForm(forms.ModelForm):
+    # KPI Selection choices for specialized calculations
+    KPI_CHOICES = [
+        ('', 'Select KPI'),
+        ('AO', 'AO - Audit Opinion'),
+        ('DER', 'DER - Debt to Equity Ratio'),
+        ('CR', 'CR - Current Ratio'),
+        ('PARI', 'PARI - Percentage Audit Recommendations Implementation'),
+        ('TSQR', 'TSQR - Timely Submission of Quarterly Report'),
+        ('ROA', 'ROA - Return on Net Assets'),
+        ('NPM', 'NPM - Net Profit Margin'),
+        ('DD', 'DD - Days Delinquent'),
+        ('TDE', 'TDE - Total Debt to Equity'),
+        ('NECD', 'NECD - New Electricity Connection Delivered'),
+        ('NWCD', 'NWCD - New Water Connection Delivered'),
+        ('TPS', 'TPS - Transmission and Power Supply'),
+        ('TTP', 'TTP - Tariff and Transmission Payment'),
+        ('WQCC', 'WQCC - Water Quality Compliance Chemical'),
+        ('WQCB', 'WQCB - Water Quality Compliance Biological'),
+        ('NRW', 'NRW - Non-Revenue Water'),
+    ]
+    
+    select_kpi = forms.ChoiceField(
+        choices=KPI_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_select_kpi'
+        }),
+        label='Select KPI',
+        help_text='Choose KPI for specialized calculations'
+    )
+    
     class Meta:
         model = NAWEC_KPI_Monitoring
         fields = [

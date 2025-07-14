@@ -465,7 +465,6 @@ def data_entry(request):
         form.fields['project_outcome'].queryset = ProjectOutCome.objects.none()
         form.fields['project_result'].queryset = ProjectResult.objects.none()
         form.fields['indicator_type'].queryset = Indicator_Type.objects.all()
-        form.fields['indicator_description'].queryset = KPIIndicator.objects.all()
         form.fields['measurement_unit'].queryset = Measurement_Unit.objects.all()
         form.fields['collection_frequency'].queryset = Data_Collection_Frequency.objects.all()
         form.fields['year'].queryset = YEAR.objects.all()
@@ -492,7 +491,7 @@ def data_entry_list(request):
     """List all KPI monitoring entries with search and filter - READ operation"""
     entries = NAWEC_KPI_Monitoring.objects.select_related(
         'project', 'pdo', 'project_outcome', 'project_result', 'year', 'quarter', 
-        'loginUser', 'indicator_type', 'indicator_description', 'measurement_unit', 
+        'loginUser', 'indicator_type', 'measurement_unit', 
         'collection_frequency'
     ).order_by('-date_created')
     
@@ -501,7 +500,6 @@ def data_entry_list(request):
     if search_query:
         entries = entries.filter(
             Q(project__project__icontains=search_query) |
-            Q(indicator_description__indicator_description__icontains=search_query) |
             Q(indicator_type__indicator_type__icontains=search_query)
         )
     
@@ -520,10 +518,7 @@ def data_entry_list(request):
     if indicator_type_filter:
         entries = entries.filter(indicator_type__id=indicator_type_filter)
     
-    # Filter by indicator description
-    indicator_description_filter = request.GET.get('indicator_description', '')
-    if indicator_description_filter:
-        entries = entries.filter(indicator_description__id=indicator_description_filter)
+    # Filter by indicator description - removed field
     
     # Filter by project
     project_filter = request.GET.get('project', '')
@@ -539,19 +534,19 @@ def data_entry_list(request):
     available_years = YEAR.objects.all().order_by('-profile_year')
     available_quarters = Quarter.objects.all().order_by('id')
     available_indicator_types = Indicator_Type.objects.all().order_by('indicator_type')
-    available_indicator_descriptions = KPIIndicator.objects.all().order_by('indicator_description')
+    # available_indicator_descriptions removed
     
     context = {
         'page_obj': page_obj,
         'available_years': available_years,
         'available_quarters': available_quarters,
         'available_indicator_types': available_indicator_types,
-        'available_indicator_descriptions': available_indicator_descriptions,
+        # 'available_indicator_descriptions': removed,
         'search_query': search_query,
         'year_filter': year_filter,
         'quarter_filter': quarter_filter,
         'indicator_type_filter': indicator_type_filter,
-        'indicator_description_filter': indicator_description_filter,
+        # 'indicator_description_filter': removed,
         'project_filter': project_filter,
     }
     
@@ -568,7 +563,7 @@ def data_entry_export(request):
     # Get the same filtered data as data_entry_list view
     entries = NAWEC_KPI_Monitoring.objects.select_related(
         'project', 'pdo', 'project_outcome', 'project_result', 'year', 'quarter', 
-        'loginUser', 'indicator_type', 'indicator_description', 'measurement_unit', 
+        'loginUser', 'indicator_type', 'measurement_unit', 
         'collection_frequency'
     ).order_by('-date_created')
     
@@ -577,7 +572,6 @@ def data_entry_export(request):
     if search_query:
         entries = entries.filter(
             Q(project__project__icontains=search_query) |
-            Q(indicator_description__indicator_description__icontains=search_query) |
             Q(indicator_type__indicator_type__icontains=search_query)
         )
     
@@ -593,9 +587,7 @@ def data_entry_export(request):
     if indicator_type_filter:
         entries = entries.filter(indicator_type__id=indicator_type_filter)
     
-    indicator_description_filter = request.GET.get('indicator_description', '')
-    if indicator_description_filter:
-        entries = entries.filter(indicator_description__id=indicator_description_filter)
+    # indicator_description_filter removed
     
     project_filter = request.GET.get('project', '')
     if project_filter:
