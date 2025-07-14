@@ -234,7 +234,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'id': 'id_select_kpi'
         }),
         label='Indicator Description',
-        help_text='Choose indicator for specialized calculations'
+        help_text='Choose indicator description for specialized calculations'
     )
     
     class Meta:
