@@ -1160,7 +1160,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'TPS';
     } else if (selectedText.includes('tariff and transmission payment')) {
         kpiType = 'TTP';
-    } else if (selectedText.includes('water quality compliance chemical')) {
+    } else if (selectedText.includes('water quality compliance chlorine') || selectedText.includes('water quality compliance chemical')) {
         kpiType = 'WQCC';
     } else if (selectedText.includes('water quality compliance by bacteriological') || selectedText.includes('water quality compliance biological')) {
         kpiType = 'WQCB';
@@ -4230,7 +4230,7 @@ function calculateWQCC() {
     window.simpleWQCCResult = wqcc.toFixed(2);
 }
 
-function useWQCCResult() {
+async function useWQCCResult() {
     const quarter = document.getElementById('wqccQuarter').value;
     
     if (!quarter) {
@@ -4244,20 +4244,55 @@ function useWQCCResult() {
         return;
     }
     
-    // Set the achieved value in the main form
-    const achievedValueField = document.getElementById('id_achieved_value');
-    if (achievedValueField) {
-        achievedValueField.value = window.simpleWQCCResult;
-        achievedValueField.style.backgroundColor = '#e7f3ff';
+    // Prepare data for saving to database
+    const compliantSamples = parseFloat(document.getElementById('wqccCompliantSamples').value) || 0;
+    const totalSamples = parseFloat(document.getElementById('wqccTotalSamples').value) || 0;
+    
+    const data = {
+        kpi_type: 'WQCC',
+        input_values: {
+            compliant_samples: compliantSamples,
+            total_samples: totalSamples,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleWQCCResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
         
-        // Trigger percentage calculations
-        calculatePercentages();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleWQCCResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeWQCCPopup();
+            
+            alert('WQCC calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving WQCC calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving WQCC calculation:', error);
+        alert('Error saving WQCC calculation: ' + error.message);
     }
-    
-    // Close the popup
-    closeWQCCPopup();
-    
-    alert('WQCC value applied to form successfully!');
 }
 
 function resetWQCCForm() {
