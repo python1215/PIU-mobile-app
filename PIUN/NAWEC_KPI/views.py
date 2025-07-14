@@ -2927,6 +2927,19 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'DD':
+                # DD calculation
+                trade_receivables = input_values.get('trade_receivables', 0)
+                total_credit_sales = input_values.get('total_credit_sales', 0)
+                
+                calculation = CalculateDD(
+                    trade_receivables=trade_receivables,
+                    total_credit_sales=total_credit_sales,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -2966,6 +2979,8 @@ class DeleteKPICalculationView(View):
                 CalculatePARI.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TSQR':
                 CalculateTSQR.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'DD':
+                CalculateDD.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             

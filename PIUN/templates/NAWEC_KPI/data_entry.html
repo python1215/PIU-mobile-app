@@ -1166,7 +1166,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'WQCB';
     } else if (selectedText.includes('non-revenue water')) {
         kpiType = 'NRW';
-    } else if (selectedText.includes('days delinquent')) {
+    } else if (selectedText.includes('debtor days') || selectedText.includes('days delinquent')) {
         kpiType = 'DD';
     } else if (selectedText.includes('audit opinion')) {
         kpiType = 'AO';
