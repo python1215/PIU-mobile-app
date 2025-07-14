@@ -2187,6 +2187,9 @@ function showEIPopup() {
         existingPopup.remove();
     }
     
+    // Initialize energy sources counter
+    window.energySourceCounter = 1;
+    
     // Create Energy Injection popup
     const popup = document.createElement('div');
     popup.id = 'simpleKPIPopup';
@@ -2204,6 +2207,10 @@ function showEIPopup() {
                     <i class="bi bi-lightning-charge"></i> Energy Injection Calculation (MW)
                 </h5>
                 <span style="color: #e9ecef; font-size: 0.9rem;">KPI-04</span>
+                <button onclick="closeEIPopup()" style="background: none; border: none; 
+                        color: white; font-size: 1.5rem; cursor: pointer; padding: 0; 
+                        width: 30px; height: 30px; display: flex; align-items: center; 
+                        justify-content: center;">&times;</button>
             </div>
 
             <!-- Form Content -->
@@ -2212,35 +2219,46 @@ function showEIPopup() {
                     <i class="bi bi-info-circle"></i> Formula: Total Energy Injection = Sum of all energy sources (MW)
                 </h6>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Solar Energy Injection (MW):</label>
-                    <input type="number" id="eiSolarEnergy" step="0.01" min="0"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter solar energy injection in MW">
+                <!-- Energy Sources Container -->
+                <div id="energySourcesContainer" style="margin-bottom: 20px;">
+                    <div class="energy-source" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h6 style="margin: 0; color: #28a745;">
+                                <i class="bi bi-lightning-fill"></i> Energy Source 1
+                            </h6>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Source Type:</label>
+                                <select class="energy-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="Solar">Solar</option>
+                                    <option value="Wind">Wind</option>
+                                    <option value="Thermal">Thermal</option>
+                                    <option value="Hydro">Hydro</option>
+                                    <option value="Nuclear">Nuclear</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                                <input type="number" class="energy-value" step="0.01" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                       placeholder="Enter energy in MW">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Wind Energy Injection (MW):</label>
-                    <input type="number" id="eiWindEnergy" step="0.01" min="0"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter wind energy injection in MW">
-                </div>
+                <!-- Add More Button -->
+                <button onclick="addEnergySource()" 
+                        style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
+                               border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">
+                    <i class="bi bi-plus-circle"></i> Add More Energy Sources
+                </button>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Thermal Energy Injection (MW):</label>
-                    <input type="number" id="eiThermalEnergy" step="0.01" min="0"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter thermal energy injection in MW">
-                </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Other Energy Sources (MW):</label>
-                    <input type="number" id="eiOtherEnergy" step="0.01" min="0"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter other energy sources in MW">
-                </div>
-                
-                <div style="margin-bottom: 15px;">
+                <!-- Quarter Selection -->
+                <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
                     <select id="eiQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                         <option value="">Select Quarter *</option>
@@ -2251,26 +2269,28 @@ function showEIPopup() {
                     </select>
                 </div>
                 
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #28a745;">
-                    <small style="color: #6c757d;">
-                        <strong>Energy Injection Performance Standards:</strong><br>
+                <!-- Performance Standards Section -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                    <h6 style="color: #28a745; margin: 0 0 10px 0;">Energy Injection Performance Standards:</h6>
+                    <div style="font-size: 0.9rem; color: #6c757d;">
                         • EI ≥ 50 MW: Excellent energy injection capacity<br>
                         • EI 30-49 MW: Good energy injection capacity<br>
                         • EI 15-29 MW: Moderate energy injection capacity<br>
                         • EI < 15 MW: Low energy injection capacity
-                    </small>
+                    </div>
                 </div>
             </div>
 
             <!-- Result Section -->
-            <div id="eiResult" style="display: none; background: #f8f9fa; padding: 15px; 
-                                      border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;">
-                <h6 style="color: #28a745; margin-bottom: 10px;">Calculation Result:</h6>
-                <div id="eiResultValue"></div>
+            <div id="eiResult" style="background: #d4edda; border: 1px solid #c3e6cb; 
+                                      color: #155724; padding: 15px; border-radius: 5px; 
+                                      margin-bottom: 20px; display: none;">
+                <h6 style="margin: 0 0 10px 0;">Calculation Result:</h6>
+                <div id="eiResultValue" style="font-size: 1.2rem; font-weight: bold;"></div>
             </div>
 
             <!-- Buttons -->
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
                 <div style="display: flex; gap: 10px;">
                     <button onclick="resetEIForm()" 
                             style="background: #ffc107; color: #000; border: none; padding: 10px 20px; 
@@ -2302,11 +2322,66 @@ function showEIPopup() {
     document.body.appendChild(popup);
 }
 
+function addEnergySource() {
+    window.energySourceCounter++;
+    const container = document.getElementById('energySourcesContainer');
+    
+    const newSource = document.createElement('div');
+    newSource.className = 'energy-source';
+    newSource.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;';
+    
+    newSource.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h6 style="margin: 0; color: #28a745;">
+                <i class="bi bi-lightning-fill"></i> Energy Source ${window.energySourceCounter}
+            </h6>
+            <button onclick="removeEnergySource(this)" 
+                    style="background: #dc3545; color: white; border: none; padding: 5px 10px; 
+                           border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
+                <i class="bi bi-trash"></i> Remove
+            </button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Source Type:</label>
+                <select class="energy-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="Solar">Solar</option>
+                    <option value="Wind">Wind</option>
+                    <option value="Thermal">Thermal</option>
+                    <option value="Hydro">Hydro</option>
+                    <option value="Nuclear">Nuclear</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                <input type="number" class="energy-value" step="0.01" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                       placeholder="Enter energy in MW">
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newSource);
+}
+
+function removeEnergySource(button) {
+    const energySource = button.closest('.energy-source');
+    energySource.remove();
+    
+    // Update source numbers
+    const sources = document.querySelectorAll('.energy-source');
+    sources.forEach((source, index) => {
+        const header = source.querySelector('h6');
+        header.innerHTML = `<i class="bi bi-lightning-fill"></i> Energy Source ${index + 1}`;
+    });
+    
+    // Update counter
+    window.energySourceCounter = sources.length;
+}
+
 function calculateEI() {
-    const solarEnergy = parseFloat(document.getElementById('eiSolarEnergy').value) || 0;
-    const windEnergy = parseFloat(document.getElementById('eiWindEnergy').value) || 0;
-    const thermalEnergy = parseFloat(document.getElementById('eiThermalEnergy').value) || 0;
-    const otherEnergy = parseFloat(document.getElementById('eiOtherEnergy').value) || 0;
+    const energySources = document.querySelectorAll('.energy-source');
     const quarter = document.getElementById('eiQuarter').value;
     
     if (!quarter) {
@@ -2315,14 +2390,29 @@ function calculateEI() {
         return;
     }
     
-    if (solarEnergy <= 0 && windEnergy <= 0 && thermalEnergy <= 0 && otherEnergy <= 0) {
+    // Collect energy values from all sources
+    let totalEI = 0;
+    let energyBreakdown = [];
+    let hasValidInput = false;
+    
+    energySources.forEach((source, index) => {
+        const typeSelect = source.querySelector('.energy-type');
+        const valueInput = source.querySelector('.energy-value');
+        
+        const energyType = typeSelect.value;
+        const energyValue = parseFloat(valueInput.value) || 0;
+        
+        if (energyValue > 0) {
+            hasValidInput = true;
+            totalEI += energyValue;
+            energyBreakdown.push(`${energyType}: ${energyValue.toFixed(2)} MW`);
+        }
+    });
+    
+    if (!hasValidInput) {
         alert('Please enter at least one energy source value greater than 0.');
-        document.getElementById('eiSolarEnergy').focus();
         return;
     }
-    
-    // Calculate total energy injection
-    const totalEI = solarEnergy + windEnergy + thermalEnergy + otherEnergy;
     
     // Determine performance level
     let performanceText = '';
@@ -2347,7 +2437,10 @@ function calculateEI() {
     const resultValue = document.getElementById('eiResultValue');
     
     resultValue.innerHTML = `
-        <div>Energy Injection = ${solarEnergy.toFixed(2)} + ${windEnergy.toFixed(2)} + ${thermalEnergy.toFixed(2)} + ${otherEnergy.toFixed(2)}</div>
+        <div style="margin-bottom: 10px;">
+            <strong>Energy Sources:</strong><br>
+            ${energyBreakdown.join('<br>')}
+        </div>
         <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
             Total Energy Injection = ${totalEI.toFixed(2)} MW
         </div>
@@ -2377,18 +2470,25 @@ async function useEIResult() {
     }
     
     // Prepare data for saving to database
-    const solarEnergy = parseFloat(document.getElementById('eiSolarEnergy').value) || 0;
-    const windEnergy = parseFloat(document.getElementById('eiWindEnergy').value) || 0;
-    const thermalEnergy = parseFloat(document.getElementById('eiThermalEnergy').value) || 0;
-    const otherEnergy = parseFloat(document.getElementById('eiOtherEnergy').value) || 0;
+    const energySources = document.querySelectorAll('.energy-source');
+    let energyData = {};
+    
+    energySources.forEach((source, index) => {
+        const typeSelect = source.querySelector('.energy-type');
+        const valueInput = source.querySelector('.energy-value');
+        
+        const energyType = typeSelect.value.toLowerCase();
+        const energyValue = parseFloat(valueInput.value) || 0;
+        
+        if (energyValue > 0) {
+            energyData[`${energyType}_energy`] = energyValue;
+        }
+    });
     
     const data = {
         kpi_type: 'EI',
         input_values: {
-            solar_energy: solarEnergy,
-            wind_energy: windEnergy,
-            thermal_energy: thermalEnergy,
-            other_energy: otherEnergy,
+            ...energyData,
             quarter: quarter,
             achieved_value: parseFloat(window.simpleEIResult)
         }
@@ -2432,11 +2532,41 @@ async function useEIResult() {
 }
 
 function resetEIForm() {
-    // Clear all input fields
-    document.getElementById('eiSolarEnergy').value = '';
-    document.getElementById('eiWindEnergy').value = '';
-    document.getElementById('eiThermalEnergy').value = '';
-    document.getElementById('eiOtherEnergy').value = '';
+    // Reset to single energy source
+    const container = document.getElementById('energySourcesContainer');
+    container.innerHTML = `
+        <div class="energy-source" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h6 style="margin: 0; color: #28a745;">
+                    <i class="bi bi-lightning-fill"></i> Energy Source 1
+                </h6>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Source Type:</label>
+                    <select class="energy-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="Solar">Solar</option>
+                        <option value="Wind">Wind</option>
+                        <option value="Thermal">Thermal</option>
+                        <option value="Hydro">Hydro</option>
+                        <option value="Nuclear">Nuclear</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                    <input type="number" class="energy-value" step="0.01" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter energy in MW">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Reset counter
+    window.energySourceCounter = 1;
+    
+    // Clear quarter selection
     document.getElementById('eiQuarter').value = '';
     
     // Hide the result section
@@ -2449,7 +2579,10 @@ function resetEIForm() {
     window.simpleEIResult = null;
     
     // Focus on first input field
-    document.getElementById('eiSolarEnergy').focus();
+    const firstInput = document.querySelector('.energy-value');
+    if (firstInput) {
+        firstInput.focus();
+    }
 }
 
 function closeEIPopup() {
