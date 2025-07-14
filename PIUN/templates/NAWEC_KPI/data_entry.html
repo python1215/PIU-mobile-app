@@ -2494,6 +2494,9 @@ async function useEIResult() {
         }
     };
     
+    console.log('[DEBUG] EI - Data being sent:', data);
+    console.log('[DEBUG] EI - Energy data:', energyData);
+    
     try {
         // Save calculation to database
         const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
@@ -2505,7 +2508,11 @@ async function useEIResult() {
             body: JSON.stringify(data)
         });
         
+        console.log('[DEBUG] EI - Response status:', response.status);
+        console.log('[DEBUG] EI - Response headers:', response.headers);
+        
         const result = await response.json();
+        console.log('[DEBUG] EI - API response:', result);
         
         if (result.success) {
             // Set the achieved value in the main form
