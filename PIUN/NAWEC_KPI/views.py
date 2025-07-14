@@ -2966,6 +2966,25 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'EI':
+                # EI (Energy Injection) calculation using CalculateMWh model
+                solar_energy = input_values.get('solar_energy', 0)
+                wind_energy = input_values.get('wind_energy', 0)
+                thermal_energy = input_values.get('thermal_energy', 0)
+                other_energy = input_values.get('other_energy', 0)
+                
+                # Calculate total energy injection
+                total_energy = solar_energy + wind_energy + thermal_energy + other_energy
+                
+                calculation = CalculateMWh(
+                    power_injected=total_energy,  # Use total energy as power injected
+                    time_duration=1,  # Set as 1 hour for MW calculation
+                    number_of_sources=1,  # Single aggregated source
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             elif kpi_type == 'TTP':
                 # TTP calculation
                 on_time_payments = input_values.get('on_time_payments', 0)
@@ -3053,6 +3072,8 @@ class DeleteKPICalculationView(View):
                 CalculateCR.objects.filter(id=calc_id).delete()
             elif kpi_type == 'AO':
                 CalculateAO.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'EI':
+                CalculateMWh.objects.filter(id=calc_id).delete()
             elif kpi_type == 'PARI':
                 CalculatePARI.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TSQR':
