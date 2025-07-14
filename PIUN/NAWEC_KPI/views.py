@@ -1071,7 +1071,32 @@ def get_kpi_indicator_data(request, kpi_code):
                 }
             })
         else:
-            # Return default values for KPIs not yet in database
+            # Return default values for KPIs not yet in database with meaningful descriptions
+            kpi_descriptions = {
+                'KPI-01': 'Return on Net Assets',
+                'KPI-02': 'Net Profit Margin',
+                'KPI-03': 'Debt Service Coverage Ratio',
+                'KPI-04': 'Monthly Water Hours',
+                'KPI-05': 'Grid Availability Factor',
+                'KPI-06': 'Total Debt to Equity',
+                'KPI-07': 'Average Time to Connect',
+                'KPI-08': 'New Electricity Connection Delivered',
+                'KPI-09': 'New Water Connection Delivered',
+                'KPI-10': 'Transmission and Power Supply',
+                'KPI-11': 'Tariff and Transmission Payment',
+                'KPI-12': 'Water Quality Compliance Chemical',
+                'KPI-13': 'Water Quality Compliance Biological',
+                'KPI-14': 'Non-Revenue Water',
+                'KPI-15': 'Days Delinquent',
+                'KPI-16': 'Audit Opinion',
+                'KPI-17': 'Debt to Equity Ratio',
+                'KPI-18': 'Current Ratio',
+                'KPI-20': 'Percentage Audit Recommendations Implementation',
+                'KPI-21': 'Timely Submission of Quarterly Report',
+            }
+            
+            description = kpi_descriptions.get(indicator_no, f'{kpi_code} - {indicator_no}')
+            
             return JsonResponse({
                 'success': True,
                 'data': {
@@ -1079,7 +1104,7 @@ def get_kpi_indicator_data(request, kpi_code):
                     'End_Target_Value': 0,
                     'targeted_weight_value': 0,
                     'indicator_no': indicator_no,
-                    'indicator_description': f'KPI {indicator_no} - {kpi_code}',
+                    'indicator_description': description,
                 }
             })
     except Exception as e:
