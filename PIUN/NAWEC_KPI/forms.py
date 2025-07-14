@@ -205,7 +205,7 @@ class CalculateTSQRForm(forms.ModelForm):
 
 
 class KPIMonitoringDataForm(forms.ModelForm):
-    # KPI Selection choices for specialized calculations
+    # KPI Selection choices for specialized calculations (only available KPIs)
     KPI_CHOICES = [
         ('', 'Select Indicator Description'),
         ('AO', 'AO - Audit Opinion'),
@@ -215,15 +215,6 @@ class KPIMonitoringDataForm(forms.ModelForm):
         ('TSQR', 'TSQR - Timely Submission of Quarterly Report'),
         ('ROA', 'ROA - Return on Net Assets'),
         ('NPM', 'NPM - Net Profit Margin'),
-        ('DD', 'DD - Days Delinquent'),
-        ('TDE', 'TDE - Total Debt to Equity'),
-        ('NECD', 'NECD - New Electricity Connection Delivered'),
-        ('NWCD', 'NWCD - New Water Connection Delivered'),
-        ('TPS', 'TPS - Transmission and Power Supply'),
-        ('TTP', 'TTP - Tariff and Transmission Payment'),
-        ('WQCC', 'WQCC - Water Quality Compliance Chemical'),
-        ('WQCB', 'WQCB - Water Quality Compliance Biological'),
-        ('NRW', 'NRW - Non-Revenue Water'),
     ]
     
     select_kpi = forms.ChoiceField(

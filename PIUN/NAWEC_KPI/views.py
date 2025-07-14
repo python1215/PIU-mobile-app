@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Avg, Sum, Count
 from django.core.paginator import Paginator
 from .models import (
@@ -1022,28 +1023,19 @@ def get_kpi_values(request, kpi_code):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
-@login_required
+@csrf_exempt
 def get_kpi_indicator_data(request, kpi_code):
     """Get KPI indicator data for form auto-population based on selected KPI code"""
     try:
-        # Map KPI codes to their corresponding indicator numbers
+        # Map KPI codes to their corresponding indicator numbers (only existing KPIs)
         kpi_mapping = {
-            'AO': 'KPI-16',
-            'DER': 'KPI-17', 
-            'CR': 'KPI-18',
-            'PARI': 'KPI-20',
-            'TSQR': 'KPI-21',
-            'ROA': 'KPI-01',
-            'NPM': 'KPI-02',
-            'DD': 'KPI-15',
-            'TDE': 'KPI-06',
-            'NECD': 'KPI-08',
-            'NWCD': 'KPI-09',
-            'TPS': 'KPI-10',
-            'TTP': 'KPI-11',
-            'WQCC': 'KPI-12',
-            'WQCB': 'KPI-13',
-            'NRW': 'KPI-14',
+            'AO': 'KPI-16',     # Audit Opinion
+            'DER': 'KPI-17',    # Debt to Equity Ratio
+            'CR': 'KPI-18',     # Current Ratio
+            'PARI': 'KPI-20',   # Percentage Audit Recommendations Implementation
+            'TSQR': 'KPI-21',   # Timely Submission of Quarterly Report
+            'ROA': 'KPI-01',    # Return on Assets
+            'NPM': 'KPI-02',    # Net Profit Margin
         }
         
         indicator_no = kpi_mapping.get(kpi_code.upper())
