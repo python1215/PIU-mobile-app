@@ -1144,6 +1144,8 @@ function triggerKPICalculationPopup() {
         kpiType = 'NPM';
     } else if (selectedText.includes('debt service coverage')) {
         kpiType = 'DSCR';
+    } else if (selectedText.includes('energy injection')) {
+        kpiType = 'EI';
     } else if (selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
@@ -1192,6 +1194,9 @@ function triggerKPICalculationPopup() {
             break;
         case 'DSCR':
             showDSCRPopup();
+            break;
+        case 'EI':
+            showEIPopup();
             break;
         case 'MWH':
             showMWhPopup();
@@ -2133,6 +2138,285 @@ function resetDSCRForm() {
 }
 
 function closeDSCRPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+function showEIPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create Energy Injection popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #28a745; border-radius: 8px; 
+                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #28a745; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-lightning-charge"></i> Energy Injection Calculation (MW)
+                </h5>
+                <span style="color: #e9ecef; font-size: 0.9rem;">KPI-04</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #28a745; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: Total Energy Injection = Sum of all energy sources (MW)
+                </h6>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Solar Energy Injection (MW):</label>
+                    <input type="number" id="eiSolarEnergy" step="0.01" min="0"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter solar energy injection in MW">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Wind Energy Injection (MW):</label>
+                    <input type="number" id="eiWindEnergy" step="0.01" min="0"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter wind energy injection in MW">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Thermal Energy Injection (MW):</label>
+                    <input type="number" id="eiThermalEnergy" step="0.01" min="0"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter thermal energy injection in MW">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Other Energy Sources (MW):</label>
+                    <input type="number" id="eiOtherEnergy" step="0.01" min="0"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter other energy sources in MW">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
+                    <select id="eiQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Quarter *</option>
+                        <option value="1">Q1 (January - March)</option>
+                        <option value="2">Q2 (April - June)</option>
+                        <option value="3">Q3 (July - September)</option>
+                        <option value="4">Q4 (October - December)</option>
+                    </select>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #28a745;">
+                    <small style="color: #6c757d;">
+                        <strong>Energy Injection Performance Standards:</strong><br>
+                        • EI ≥ 50 MW: Excellent energy injection capacity<br>
+                        • EI 30-49 MW: Good energy injection capacity<br>
+                        • EI 15-29 MW: Moderate energy injection capacity<br>
+                        • EI < 15 MW: Low energy injection capacity
+                    </small>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="eiResult" style="display: none; background: #f8f9fa; padding: 15px; 
+                                      border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;">
+                <h6 style="color: #28a745; margin-bottom: 10px;">Calculation Result:</h6>
+                <div id="eiResultValue"></div>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="resetEIForm()" 
+                            style="background: #ffc107; color: #000; border: none; padding: 10px 20px; 
+                                   border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                    <button onclick="closeEIPopup()" 
+                            style="background: #6c757d; color: white; border: none; padding: 10px 20px; 
+                                   border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="calculateEI()" 
+                            style="background: #28a745; color: white; border: none; padding: 10px 20px; 
+                                   border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        <i class="bi bi-calculator"></i> Calculate EI
+                    </button>
+                    <button onclick="useEIResult()" 
+                            style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
+                                   border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        <i class="bi bi-check-lg"></i> Use Result
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+}
+
+function calculateEI() {
+    const solarEnergy = parseFloat(document.getElementById('eiSolarEnergy').value) || 0;
+    const windEnergy = parseFloat(document.getElementById('eiWindEnergy').value) || 0;
+    const thermalEnergy = parseFloat(document.getElementById('eiThermalEnergy').value) || 0;
+    const otherEnergy = parseFloat(document.getElementById('eiOtherEnergy').value) || 0;
+    const quarter = document.getElementById('eiQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter. Quarter selection is mandatory.');
+        document.getElementById('eiQuarter').focus();
+        return;
+    }
+    
+    if (solarEnergy <= 0 && windEnergy <= 0 && thermalEnergy <= 0 && otherEnergy <= 0) {
+        alert('Please enter at least one energy source value greater than 0.');
+        document.getElementById('eiSolarEnergy').focus();
+        return;
+    }
+    
+    // Calculate total energy injection
+    const totalEI = solarEnergy + windEnergy + thermalEnergy + otherEnergy;
+    
+    // Determine performance level
+    let performanceText = '';
+    let performanceColor = '';
+    
+    if (totalEI >= 50) {
+        performanceText = 'Excellent energy injection capacity';
+        performanceColor = '#28a745';
+    } else if (totalEI >= 30) {
+        performanceText = 'Good energy injection capacity';
+        performanceColor = '#20c997';
+    } else if (totalEI >= 15) {
+        performanceText = 'Moderate energy injection capacity';
+        performanceColor = '#ffc107';
+    } else {
+        performanceText = 'Low energy injection capacity';
+        performanceColor = '#dc3545';
+    }
+    
+    // Display result
+    const resultDiv = document.getElementById('eiResult');
+    const resultValue = document.getElementById('eiResultValue');
+    
+    resultValue.innerHTML = `
+        <div>Energy Injection = ${solarEnergy.toFixed(2)} + ${windEnergy.toFixed(2)} + ${thermalEnergy.toFixed(2)} + ${otherEnergy.toFixed(2)}</div>
+        <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
+            Total Energy Injection = ${totalEI.toFixed(2)} MW
+        </div>
+        <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
+            <i class="bi bi-lightning-charge-fill"></i> ${performanceText}
+        </div>
+    `;
+    
+    resultDiv.style.display = 'block';
+    
+    // Store the result
+    window.simpleEIResult = totalEI.toFixed(2);
+}
+
+async function useEIResult() {
+    const quarter = document.getElementById('eiQuarter').value;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result. Quarter selection is mandatory.');
+        document.getElementById('eiQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleEIResult) {
+        alert('Please calculate Energy Injection first');
+        return;
+    }
+    
+    // Prepare data for saving to database
+    const solarEnergy = parseFloat(document.getElementById('eiSolarEnergy').value) || 0;
+    const windEnergy = parseFloat(document.getElementById('eiWindEnergy').value) || 0;
+    const thermalEnergy = parseFloat(document.getElementById('eiThermalEnergy').value) || 0;
+    const otherEnergy = parseFloat(document.getElementById('eiOtherEnergy').value) || 0;
+    
+    const data = {
+        kpi_type: 'EI',
+        input_values: {
+            solar_energy: solarEnergy,
+            wind_energy: windEnergy,
+            thermal_energy: thermalEnergy,
+            other_energy: otherEnergy,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleEIResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleEIResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeEIPopup();
+            
+            alert('Energy Injection calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving Energy Injection calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving Energy Injection calculation:', error);
+        alert('Error saving Energy Injection calculation: ' + error.message);
+    }
+}
+
+function resetEIForm() {
+    // Clear all input fields
+    document.getElementById('eiSolarEnergy').value = '';
+    document.getElementById('eiWindEnergy').value = '';
+    document.getElementById('eiThermalEnergy').value = '';
+    document.getElementById('eiOtherEnergy').value = '';
+    document.getElementById('eiQuarter').value = '';
+    
+    // Hide the result section
+    const resultDiv = document.getElementById('eiResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    // Clear stored result
+    window.simpleEIResult = null;
+    
+    // Focus on first input field
+    document.getElementById('eiSolarEnergy').focus();
+}
+
+function closeEIPopup() {
     const popup = document.getElementById('simpleKPIPopup');
     if (popup) {
         popup.remove();

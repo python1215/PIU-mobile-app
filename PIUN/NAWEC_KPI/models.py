@@ -294,6 +294,80 @@ class CalculateDSCR(models.Model):
         verbose_name_plural = "Calculate DSCR"
 
 
+class CalculateEI(models.Model):
+    """KPI-04: Energy Injection Calculation Model
+    Formula: Total Energy Injection = Solar + Wind + Thermal + Other (MW)
+    """
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value to achieve")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated total energy injection")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
+
+    # Calculation input fields
+    solar_energy = models.FloatField(null=True,
+                                     blank=True,
+                                     help_text="Solar energy injection (MW)")
+    wind_energy = models.FloatField(null=True,
+                                    blank=True,
+                                    help_text="Wind energy injection (MW)")
+    thermal_energy = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Thermal energy injection (MW)")
+    other_energy = models.FloatField(null=True,
+                                     blank=True,
+                                     help_text="Other energy sources (MW)")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate total energy injection
+        solar = float(self.solar_energy or 0)
+        wind = float(self.wind_energy or 0)
+        thermal = float(self.thermal_energy or 0)
+        other = float(self.other_energy or 0)
+        
+        self.achieved_value = solar + wind + thermal + other
+        
+        # Calculate progress using KPI-04 formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Energy Injection - {self.achieved_value} MW ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "Energy Injection (MW) Calculation"
+        verbose_name_plural = "Energy Injection (MW) Calculations"
+
+
 class CalculateMWh(models.Model):
     """KPI-04: Energy Generation Calculation Model
     Formula: Ejtotal = Σ(Ai×Bi) where A=power_injected, B=time_duration, C=number_of_sources
