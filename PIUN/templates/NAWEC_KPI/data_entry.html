@@ -571,10 +571,13 @@
                                 <div class="form-control">
                                     <label class="label py-1">
                                         <span class="label-text text-sm">
-                                            <i class="bi bi-target mr-2"></i>Targeted Achieved Weight
+                                            <i class="bi bi-target mr-2"></i>Targeted Weight Value
                                         </span>
                                     </label>
-                                    {{ form.Targeted_Achieved_weight|add_class:"input input-bordered input-sm w-full" }}
+                                    {{ form.Targeted_Achieved_weight|add_class:"input input-bordered input-sm w-full bg-gray-100 form-control-readonly" }}
+                                    <label class="label py-1">
+                                        <span class="label-text-alt text-xs opacity-70">Auto-populated from KPI indicator</span>
+                                    </label>
                                 </div>
                             </div>
                         </div>

@@ -249,6 +249,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Fixed NAWEC KPI monitoring form IntegrityError: resolved NOT NULL constraint failed for collection_frequency_id by adding missing required fields (collection_frequency, indicator_type, measurement_unit, remarks) to KPIMonitoringDataForm, updated data_entry.html template to include collection_frequency field, added proper form field initialization in views, and ensured remarks field is properly configured as textarea input for user observations and notes
 - July 14, 2025. Removed duplicate Collection Frequency field from NAWEC KPI data entry template: eliminated redundant collection_frequency field from Indicator Information section while keeping the properly placed field in the Plan Information section for cleaner form layout
 - July 14, 2025. Removed gear and lightning bolt icons from NAWEC KPI data entry form: eliminated bi-gear and bi-lightning icons from Select KPI label and debug test buttons to provide cleaner form interface without unnecessary visual elements
+- July 14, 2025. Updated Targeted Weight Value field in NAWEC KPI form: renamed "Targeted Achieved Weight" to "Targeted Weight Value", made field read-only with auto-population from KPIIndicator.targeted_weight_value when KPI is selected, added visual indicators for auto-populated field with gray background and explanatory text
 
 ## User Preferences
 

@@ -248,7 +248,8 @@ class KPIMonitoringDataForm(forms.ModelForm):
             }),
             'Targeted_Achieved_weight': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01'
+                'step': '0.01',
+                'readonly': True
             }),
             'year': forms.Select(attrs={'class': 'form-select'}),
             'quarter': forms.Select(attrs={'class': 'form-select'}),
