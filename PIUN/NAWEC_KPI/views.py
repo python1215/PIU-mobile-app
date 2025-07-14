@@ -466,6 +466,7 @@ def data_entry(request):
         form.fields['project_outcome'].queryset = ProjectOutCome.objects.none()
         form.fields['project_result'].queryset = ProjectResult.objects.none()
         form.fields['indicator_type'].queryset = Indicator_Type.objects.all()
+        form.fields['indicator_description'].queryset = KPIIndicator.objects.all()
         form.fields['measurement_unit'].queryset = Measurement_Unit.objects.all()
         form.fields['collection_frequency'].queryset = Data_Collection_Frequency.objects.all()
         form.fields['year'].queryset = YEAR.objects.all()
@@ -1121,8 +1122,9 @@ def get_kpi_progress_values(request, kpi_indicator_id):
             'success': True,
             'data': {
                 'baseline_value': kpi_indicator.baseline_value if kpi_indicator.baseline_value is not None else 0,
-                'end_target_value': kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0,
-                'kpi_description': kpi_indicator.kpi_description,
+                'End_Target_Value': kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0,
+                'targeted_weight_value': kpi_indicator.targeted_weight_value if kpi_indicator.targeted_weight_value is not None else 0,
+                'indicator_description': kpi_indicator.indicator_description,
                 'measurement_unit': kpi_indicator.measurement_unit.measurement_unit if kpi_indicator.measurement_unit else None,
                 'indicator_type': kpi_indicator.indicator_type.indicator_type if kpi_indicator.indicator_type else None,
                 'indicator_no': kpi_indicator.indicator_no,

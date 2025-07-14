@@ -205,47 +205,14 @@ class CalculateTSQRForm(forms.ModelForm):
 
 
 class KPIMonitoringDataForm(forms.ModelForm):
-    # KPI Selection choices for specialized calculations (all 20 KPIs)
-    KPI_CHOICES = [
-        ('', 'Select Indicator Description'),
-        ('ROA', 'ROA - Return on Net Assets'),
-        ('NPM', 'NPM - Net Profit Margin'),
-        ('DSCR', 'DSCR - Debt Service Coverage Ratio'),
-        ('MWH', 'MWH - Monthly Water Hours'),
-        ('GAF', 'GAF - Grid Availability Factor'),
-        ('TDE', 'TDE - Total Debt to Equity'),
-        ('ATC', 'ATC - Average Time to Connect'),
-        ('NECD', 'NECD - New Electricity Connection Delivered'),
-        ('NWCD', 'NWCD - New Water Connection Delivered'),
-        ('TPS', 'TPS - Transmission and Power Supply'),
-        ('TTP', 'TTP - Tariff and Transmission Payment'),
-        ('WQCC', 'WQCC - Water Quality Compliance Chemical'),
-        ('WQCB', 'WQCB - Water Quality Compliance Biological'),
-        ('NRW', 'NRW - Non-Revenue Water'),
-        ('DD', 'DD - Days Delinquent'),
-        ('AO', 'AO - Audit Opinion'),
-        ('DER', 'DER - Debt to Equity Ratio'),
-        ('CR', 'CR - Current Ratio'),
-        ('PARI', 'PARI - Percentage Audit Recommendations Implementation'),
-        ('TSQR', 'TSQR - Timely Submission of Quarterly Report'),
-    ]
     
-    select_kpi = forms.ChoiceField(
-        choices=KPI_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={
-            'class': 'form-select',
-            'id': 'id_select_kpi'
-        }),
-        label='Indicator Description',
-        help_text='Choose indicator description for specialized calculations'
-    )
+
     
     class Meta:
         model = NAWEC_KPI_Monitoring
         fields = [
             'project', 'pdo', 'project_outcome', 'project_result',
-            'indicator_type', 'measurement_unit',
+            'indicator_type', 'indicator_description', 'measurement_unit',
             'collection_frequency', 'baseline_value', 'End_Target_Value',
             'achieved_value', 'Percentage_progress_from_baseline',
             'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
@@ -257,7 +224,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'project_outcome': forms.Select(attrs={'class': 'form-select'}),
             'project_result': forms.Select(attrs={'class': 'form-select'}),
             'indicator_type': forms.Select(attrs={'class': 'form-select'}),
-
+            'indicator_description': forms.Select(attrs={'class': 'form-select'}),
             'measurement_unit': forms.Select(attrs={'class': 'form-select'}),
             'collection_frequency': forms.Select(attrs={'class': 'form-select'}),
             'baseline_value': forms.NumberInput(attrs={

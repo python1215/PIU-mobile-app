@@ -384,7 +384,7 @@
                                                 <i class="bi bi-bullseye mr-2"></i>Indicator Description
                                             </span>
                                         </label>
-                                        {{ form.select_kpi|add_class:"select select-bordered select-sm w-full" }}
+                                        {{ form.indicator_description|add_class:"select select-bordered select-sm w-full" }}
                                         <div class="label">
                                             <span class="label-text-alt">Choose indicator description for specialized calculations</span>
                                         </div>
@@ -724,7 +724,7 @@
 // Automatic field population when KPI indicator is selected
 document.addEventListener('DOMContentLoaded', function() {
     // KPI selection auto-population
-    const kpiSelect = document.getElementById('id_select_kpi');
+    const kpiSelect = document.getElementById('id_indicator_description');
     if (kpiSelect) {
         kpiSelect.addEventListener('change', function() {
             const selectedKPI = this.value;
@@ -744,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
 });
 
-function fetchKPIIndicatorData(kpiCode) {
+function fetchKPIIndicatorData(kpiIndicatorId) {
     // Show loading state
     const baselineField = document.getElementById('id_baseline_value');
     const targetField = document.getElementById('id_End_Target_Value');
@@ -754,8 +754,8 @@ function fetchKPIIndicatorData(kpiCode) {
     if (targetField) targetField.style.backgroundColor = '#f0f8ff';
     if (weightField) weightField.style.backgroundColor = '#f0f8ff';
     
-    // Fetch data from API endpoint
-    fetch(`/NAWEC_KPI/get-kpi-indicator-data/${kpiCode}/`)
+    // Fetch data from API endpoint using KPIIndicator ID
+    fetch(`/NAWEC_KPI/get-kpi-progress-values/${kpiIndicatorId}/`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -1124,37 +1124,71 @@ function clearKPIFields() {
 // Smart KPI Popup Functions
 function triggerKPICalculationPopup() {
     // Get the selected KPI from the dropdown
-    const kpiSelect = document.getElementById('id_select_kpi');
+    const kpiSelect = document.getElementById('id_indicator_description');
     if (!kpiSelect || !kpiSelect.value) {
         alert('Please select a KPI indicator first from the "Indicator Description" dropdown.');
         return;
     }
     
-    const selectedKPI = kpiSelect.value;
-    console.log('Selected KPI for popup:', selectedKPI);
+    const selectedKPI = kpiSelect.value; // This is now the KPIIndicator ID
+    const selectedText = kpiSelect.options[kpiSelect.selectedIndex].text.toLowerCase();
     
-    // Show appropriate KPI calculation popup based on selection
-    switch(selectedKPI) {
+    console.log('Selected KPI ID:', selectedKPI);
+    console.log('Selected KPI Text:', selectedText);
+    
+    // Determine KPI type based on indicator description text
+    let kpiType = '';
+    if (selectedText.includes('return on assets') || selectedText.includes('return on net assets')) {
+        kpiType = 'ROA';
+    } else if (selectedText.includes('net profit margin')) {
+        kpiType = 'NPM';
+    } else if (selectedText.includes('debt service coverage')) {
+        kpiType = 'DSCR';
+    } else if (selectedText.includes('monthly water hours')) {
+        kpiType = 'MWH';
+    } else if (selectedText.includes('grid availability factor')) {
+        kpiType = 'GAF';
+    } else if (selectedText.includes('total debt to equity')) {
+        kpiType = 'TDE';
+    } else if (selectedText.includes('average time to connect')) {
+        kpiType = 'ATC';
+    } else if (selectedText.includes('new electricity connection')) {
+        kpiType = 'NECD';
+    } else if (selectedText.includes('new water connection')) {
+        kpiType = 'NWCD';
+    } else if (selectedText.includes('transmission and power supply')) {
+        kpiType = 'TPS';
+    } else if (selectedText.includes('tariff and transmission payment')) {
+        kpiType = 'TTP';
+    } else if (selectedText.includes('water quality compliance chemical')) {
+        kpiType = 'WQCC';
+    } else if (selectedText.includes('water quality compliance biological')) {
+        kpiType = 'WQCB';
+    } else if (selectedText.includes('non-revenue water')) {
+        kpiType = 'NRW';
+    } else if (selectedText.includes('days delinquent')) {
+        kpiType = 'DD';
+    } else if (selectedText.includes('audit opinion')) {
+        kpiType = 'AO';
+    } else if (selectedText.includes('debt to equity ratio')) {
+        kpiType = 'DER';
+    } else if (selectedText.includes('current ratio')) {
+        kpiType = 'CR';
+    } else if (selectedText.includes('percentage audit recommendations implementation')) {
+        kpiType = 'PARI';
+    } else if (selectedText.includes('timely submission of quarterly report')) {
+        kpiType = 'TSQR';
+    }
+    
+    console.log('Detected KPI Type:', kpiType);
+    
+    // Show appropriate KPI calculation popup based on detected type
+    switch(kpiType) {
         case 'ROA':
             showROAPopup();
             break;
         case 'NPM':
             showNPMPopup();
-            break;
-        case 'AO':
-            showAOPopup();
-            break;
-        case 'DER':
-            showDERPopup();
-            break;
-        case 'CR':
-            showCRPopup();
-            break;
-        case 'PARI':
-            showPARIPopup();
-            break;
-        case 'TSQR':
-            showTSQRPopup();
             break;
         case 'DSCR':
             showDSCRPopup();
@@ -1195,8 +1229,23 @@ function triggerKPICalculationPopup() {
         case 'DD':
             showDDPopup();
             break;
+        case 'AO':
+            showAOPopup();
+            break;
+        case 'DER':
+            showDERPopup();
+            break;
+        case 'CR':
+            showCRPopup();
+            break;
+        case 'PARI':
+            showPARIPopup();
+            break;
+        case 'TSQR':
+            showTSQRPopup();
+            break;
         default:
-            alert('Calculation popup for ' + selectedKPI + ' is not yet implemented.');
+            alert('Calculation popup for "' + selectedText + '" is not yet implemented.');
     }
 }
 
