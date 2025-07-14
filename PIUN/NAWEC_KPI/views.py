@@ -3005,6 +3005,19 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'TDE':
+                # TDE calculation
+                training_days = input_values.get('training_days', 0)
+                employees = input_values.get('employees', 0)
+                
+                calculation = CalculateTDE(
+                    training_days=training_days,
+                    employees=employees,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -3056,6 +3069,8 @@ class DeleteKPICalculationView(View):
                 CalculateTPS.objects.filter(id=calc_id).delete()
             elif kpi_type == 'ATC':
                 CalculateATC.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'TDE':
+                CalculateTDE.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             

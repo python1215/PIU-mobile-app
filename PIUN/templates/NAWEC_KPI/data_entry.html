@@ -1148,7 +1148,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor')) {
         kpiType = 'GAF';
-    } else if (selectedText.includes('total debt to equity')) {
+    } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training days per employee')) {
         kpiType = 'TDE';
     } else if (selectedText.includes('average time to connect') || selectedText.includes('total losses electricity')) {
         kpiType = 'ATC';
@@ -2836,7 +2836,7 @@ function calculateTDE() {
     window.simpleTDEResult = tde.toFixed(2);
 }
 
-function useTDEResult() {
+async function useTDEResult() {
     const quarter = document.getElementById('tdeQuarter').value;
     
     if (!quarter) {
@@ -2850,20 +2850,55 @@ function useTDEResult() {
         return;
     }
     
-    // Set the achieved value in the main form
-    const achievedValueField = document.getElementById('id_achieved_value');
-    if (achievedValueField) {
-        achievedValueField.value = window.simpleTDEResult;
-        achievedValueField.style.backgroundColor = '#e7f3ff';
+    // Prepare data for saving to database
+    const trainingDays = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
+    const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
+    
+    const data = {
+        kpi_type: 'TDE',
+        input_values: {
+            training_days: trainingDays,
+            employees: employees,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleTDEResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
         
-        // Trigger percentage calculations
-        calculatePercentages();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleTDEResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeTDEPopup();
+            
+            alert('TDE calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving TDE calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving TDE calculation:', error);
+        alert('Error saving TDE calculation: ' + error.message);
     }
-    
-    // Close the popup
-    closeTDEPopup();
-    
-    alert('TDE value applied to form successfully!');
 }
 
 function resetTDEForm() {
