@@ -2940,6 +2940,19 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'WQCB':
+                # WQCB calculation
+                compliant_samples = input_values.get('compliant_samples', 0)
+                total_samples = input_values.get('total_samples', 0)
+                
+                calculation = CalculateWQCB(
+                    compliant_samples=compliant_samples,
+                    total_samples=total_samples,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -2981,6 +2994,8 @@ class DeleteKPICalculationView(View):
                 CalculateTSQR.objects.filter(id=calc_id).delete()
             elif kpi_type == 'DD':
                 CalculateDD.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'WQCB':
+                CalculateWQCB.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
