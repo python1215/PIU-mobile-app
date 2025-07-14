@@ -1027,15 +1027,28 @@ def get_kpi_values(request, kpi_code):
 def get_kpi_indicator_data(request, kpi_code):
     """Get KPI indicator data for form auto-population based on selected KPI code"""
     try:
-        # Map KPI codes to their corresponding indicator numbers (only existing KPIs)
+        # Map KPI codes to their corresponding indicator numbers (all 20 KPIs)
         kpi_mapping = {
+            'ROA': 'KPI-01',    # Return on Assets
+            'NPM': 'KPI-02',    # Net Profit Margin
+            'DSCR': 'KPI-03',   # Debt Service Coverage Ratio
+            'MWH': 'KPI-04',    # Monthly Water Hours
+            'GAF': 'KPI-05',    # Grid Availability Factor
+            'TDE': 'KPI-06',    # Total Debt to Equity
+            'ATC': 'KPI-07',    # Average Time to Connect
+            'NECD': 'KPI-08',   # New Electricity Connection Delivered
+            'NWCD': 'KPI-09',   # New Water Connection Delivered
+            'TPS': 'KPI-10',    # Transmission and Power Supply
+            'TTP': 'KPI-11',    # Tariff and Transmission Payment
+            'WQCC': 'KPI-12',   # Water Quality Compliance Chemical
+            'WQCB': 'KPI-13',   # Water Quality Compliance Biological
+            'NRW': 'KPI-14',    # Non-Revenue Water
+            'DD': 'KPI-15',     # Days Delinquent
             'AO': 'KPI-16',     # Audit Opinion
             'DER': 'KPI-17',    # Debt to Equity Ratio
             'CR': 'KPI-18',     # Current Ratio
             'PARI': 'KPI-20',   # Percentage Audit Recommendations Implementation
             'TSQR': 'KPI-21',   # Timely Submission of Quarterly Report
-            'ROA': 'KPI-01',    # Return on Assets
-            'NPM': 'KPI-02',    # Net Profit Margin
         }
         
         indicator_no = kpi_mapping.get(kpi_code.upper())
@@ -1044,19 +1057,31 @@ def get_kpi_indicator_data(request, kpi_code):
             
         # Find the KPI indicator by indicator number
         indicator = KPIIndicator.objects.filter(indicator_no=indicator_no).first()
-        if not indicator:
-            return JsonResponse({'success': False, 'error': 'KPI indicator not found in database'})
-            
-        return JsonResponse({
-            'success': True,
-            'data': {
-                'baseline_value': indicator.baseline_value if indicator.baseline_value is not None else 0,
-                'End_Target_Value': indicator.End_Target_Value if indicator.End_Target_Value is not None else 0,
-                'targeted_weight_value': indicator.targeted_weight_value if indicator.targeted_weight_value is not None else 0,
-                'indicator_no': indicator.indicator_no,
-                'indicator_description': indicator.indicator_description,
-            }
-        })
+        
+        if indicator:
+            # Return actual data from database
+            return JsonResponse({
+                'success': True,
+                'data': {
+                    'baseline_value': indicator.baseline_value if indicator.baseline_value is not None else 0,
+                    'End_Target_Value': indicator.End_Target_Value if indicator.End_Target_Value is not None else 0,
+                    'targeted_weight_value': indicator.targeted_weight_value if indicator.targeted_weight_value is not None else 0,
+                    'indicator_no': indicator.indicator_no,
+                    'indicator_description': indicator.indicator_description,
+                }
+            })
+        else:
+            # Return default values for KPIs not yet in database
+            return JsonResponse({
+                'success': True,
+                'data': {
+                    'baseline_value': 0,
+                    'End_Target_Value': 0,
+                    'targeted_weight_value': 0,
+                    'indicator_no': indicator_no,
+                    'indicator_description': f'KPI {indicator_no} - {kpi_code}',
+                }
+            })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
