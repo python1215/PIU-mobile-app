@@ -253,6 +253,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Updated KPI selection dropdown labels: changed "Select KPI" to "Indicator Description" in both the field label and dropdown placeholder text, updated help text from "Choose KPI for specialized calculations" to "Choose indicator for specialized calculations" for consistent terminology
 - July 14, 2025. Removed KPI Model Selection dropdown from NAWEC KPI data entry form: eliminated the "Indicator Description" dropdown containing specialized KPI calculation options (AO, DER, CR, PARI, TSQR, ROA, NPM, DD, TDE, NECD, NWCD, TPS, TTP, WQCC, WQCB, NRW) to streamline the form interface
 - July 14, 2025. Removed Indicator Description field from NAWEC KPI form: eliminated the indicator_description dropdown field from the Indicator Information section to simplify the form layout and reduce redundant fields
+- July 14, 2025. Added new Indicator Description dropdown field to NAWEC KPI form: implemented specialized KPI selection dropdown with 16 calculation options (AO, DER, CR, PARI, TSQR, ROA, NPM, DD, TDE, NECD, NWCD, TPS, TTP, WQCC, WQCB, NRW) in the Indicator Information section with proper styling and help text for specialized calculations
 
 ## User Preferences
 
