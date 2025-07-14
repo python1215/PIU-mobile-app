@@ -1,0 +1,21 @@
+indicator_no	indicator_description	attributes	baseline_value	End_Target_Value	targeted_weight_value	date_created	loginUser_id
+KPI-02	Net Profit Margin (NPM)	A= Total Revenues/ Turnover B= Net profit	-37	10	6	2025-07-07 13:01:00.3511810 +00:00	4
+KI-01	Return_on_Net_Assets (ROA)	A= Net profit after tax B= Total Assets	-24	6	6	2025-07-11 19:01:17.3717430 +00:00	4
+KPI-03	Debt Service Coverage Ratio (DSCR)	A= Net operating income B= Total Debt Service	-47	100	6	2025-07-11 19:12:53.5252550 +00:00	4
+KPI-04	Energy Injection (MW)	E= Energy injected (in MWh)   B. = Time duration (in hours  C= Number of sources	20	75	3	2025-07-11 19:14:33.6456110 +00:00	4
+KPI-05	Generation Plant Factor (GAP)	A= Total Available Hours (total hrs- down time)  B=   Total Period Hours (720 hrs per month or 8760hrs per year	12.25	75	4	2025-07-11 19:20:25.7079570 +00:00	4
+KPI-06	Trainings Days_per_Employee (TDE)	A= Total Training Days Conducted B= Total Number of Employees	4000	5000	4	2025-07-11 19:26:22.5487430 +00:00	4
+KPI-07	Total Losses Electricity [ATC&C]	A= Billing Efficiency B= Collection Efficiency	23	18	7	2025-07-11 19:27:53.6854050 +00:00	4
+KPI-08	New Electricity Connection Days (NECD)	A= Total Time (days) Taken for All Connections  B= Total Number of New Connections	45	25	5	2025-07-11 19:30:02.6654700 +00:00	4
+KPI-09	New Water Connection Days (NWCD)	A= Total Time (days) Taken for All Connections  B= Total Number of New Connections	45	25	5	2025-07-11 19:33:10.6287140 +00:00	4
+KPI-10	Timely Payment of Salary (TPS)	A= Number of On-Time Payments B= Total Number of Payments Due	100	100	3	2025-07-11 19:38:34.6944780 +00:00	4
+KPI-11	Timely Tax Payment (TTP)	A= Number of On-Tax Payments B= Total Number of Payments Due	100	100	3	2025-07-11 19:42:13.9091540 +00:00	4
+KPI-12	Water Quality Compliance Chlorine (WQCC)	A= Number of Compliant Water Samples B= Total Number of Tested Water Samples	84	100	4	2025-07-11 19:44:29.6940100 +00:00	4
+KPI-13	Water Quality Compliance by Bacteriological (WQCB)	A= Number of Compliant Water Samples B= Total Number of Tested Water Samples	94	100	4	2025-07-11 19:48:12.8246970 +00:00	4
+KPI-14	Non-Revenue Water(NRW)	Water entering the system (A) - Water Leaving (B) /Water entering the system (A)*100	40	30	5	2025-07-12 11:34:57.0877660 +00:00	4
+KPI-15	Debtor Days (DD)	A= Trade receivables  B= Total credit sales	145	90	6	2025-07-12 11:36:37.7721950 +00:00	4
+KPI-16	Debt Equity Ratio (DER)	A. Total Debt, B. Total Equity	89	80	7	2025-07-12 11:40:35.3438330 +00:00	4
+KPI-17	Current Ratio (CR)	A.	Current assets B.	 Current Liabilities	1.2	1.4	6	2025-07-12 11:42:30.4467980 +00:00	4
+KPI-18	Audit Opinion (AO)	0.	Qualified 1.	Unqualified	0	1	6	2025-07-12 11:44:40.7702110 +00:00	4
+KPI-19	percentage of Audit recommendation implemented (PARI)	A.	Total number of recommendations B.	Total implemented	40	90	3	2025-07-12 11:46:51.5948260 +00:00	4
+KPI-20	Timely submission of quarterly report (TSQR)	A.	Due date B.	Actual date	100	100	3	2025-07-12 11:48:40.3399920 +00:00	4
