@@ -213,7 +213,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'collection_frequency', 'baseline_value', 'End_Target_Value',
             'achieved_value', 'Percentage_progress_from_baseline',
             'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
-            'year', 'quarter'
+            'year', 'quarter', 'remarks'
         ]
         widgets = {
             'project': forms.Select(attrs={'class': 'form-select'}),
@@ -252,6 +252,11 @@ class KPIMonitoringDataForm(forms.ModelForm):
             }),
             'year': forms.Select(attrs={'class': 'form-select'}),
             'quarter': forms.Select(attrs={'class': 'form-select'}),
+            'remarks': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter any relevant observations, issues, or notes'
+            }),
         }
 
 
