@@ -254,6 +254,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Removed KPI Model Selection dropdown from NAWEC KPI data entry form: eliminated the "Indicator Description" dropdown containing specialized KPI calculation options (AO, DER, CR, PARI, TSQR, ROA, NPM, DD, TDE, NECD, NWCD, TPS, TTP, WQCC, WQCB, NRW) to streamline the form interface
 - July 14, 2025. Removed Indicator Description field from NAWEC KPI form: eliminated the indicator_description dropdown field from the Indicator Information section to simplify the form layout and reduce redundant fields
 - July 14, 2025. Added new Indicator Description dropdown field to NAWEC KPI form: implemented specialized KPI selection dropdown with 16 calculation options (AO, DER, CR, PARI, TSQR, ROA, NPM, DD, TDE, NECD, NWCD, TPS, TTP, WQCC, WQCB, NRW) in the Indicator Information section with proper styling and help text for specialized calculations
+- July 14, 2025. RESOLVED KPI auto-population functionality: fixed JavaScript URL path from '/NAWEC-KPI/' to '/NAWEC_KPI/' matching Django URL patterns, expanded dropdown to show all 20 KPIs with graceful handling of missing database entries, added meaningful targeted_weight_value data (15.0 for ROA, 20.0 for PARI, 10.0 for AO, etc.) to KPI indicators, confirmed all fields now populate correctly with baseline values, target values, and weight values with visual feedback
 
 ## User Preferences
 
