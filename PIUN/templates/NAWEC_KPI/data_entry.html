@@ -755,7 +755,7 @@ function fetchKPIIndicatorData(kpiCode) {
     if (weightField) weightField.style.backgroundColor = '#f0f8ff';
     
     // Fetch data from API endpoint
-    fetch(`/NAWEC-KPI/get-kpi-indicator-data/${kpiCode}/`)
+    fetch(`/NAWEC_KPI/get-kpi-indicator-data/${kpiCode}/`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -4932,7 +4932,7 @@ function calculatePercentages() {
     Target Field: ${targetField ? 'FOUND' : 'NOT FOUND'}
     Baseline % Field: ${baselinePercentField ? 'FOUND' : 'NOT FOUND'}
     Target % Field: ${targetPercentField ? 'FOUND' : 'NOT FOUND'}
-    Indicator Field: ${indicatorField ? 'FOUND' : 'NOT FOUND'}
+    Indicator Field: ${document.getElementById('id_indicator_description') ? 'FOUND' : 'NOT FOUND'}
     `;
     console.log('Field Detection Results:', detectionResults);
     
@@ -4961,7 +4961,8 @@ function calculatePercentages() {
     const baseline = parseFloat(baselineField.value) || 0;
     const achieved = parseFloat(achievedField.value) || 0;
     const target = parseFloat(targetField.value) || 0;
-    const selectedIndicator = indicatorField.selectedOptions[0]?.text || '';
+    const indicatorField = document.getElementById('id_indicator_description');
+    const selectedIndicator = indicatorField?.selectedOptions[0]?.text || '';
     
     console.log('📊 Values:', { baseline, achieved, target, indicator: selectedIndicator });
     
@@ -5135,6 +5136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const baselineField = document.getElementById('id_baseline_value');
     const achievedField = document.getElementById('id_achieved_value');
     const targetField = document.getElementById('id_End_Target_Value');
+    const indicatorField = document.getElementById('id_indicator_description');
     
     // Add event listeners to trigger calculations
     if (baselineField) {
