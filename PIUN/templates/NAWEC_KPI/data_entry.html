@@ -1146,7 +1146,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'DSCR';
     } else if (selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
-    } else if (selectedText.includes('grid availability factor')) {
+    } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
         kpiType = 'GAF';
     } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training days per employee')) {
         kpiType = 'TDE';

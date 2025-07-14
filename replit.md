@@ -259,6 +259,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Fixed PARI calculation popup text detection: updated pattern from "percentage audit recommendations implementation" to "percentage of audit recommendation implemented" matching database text, confirmed PARI popup fully functional with total recommendations/implemented fields, quarter selection, calculation logic, and API integration
 - July 14, 2025. Implemented DER calculation popup functionality: added missing SaveKPICalculationView and DeleteKPICalculationView API endpoints, enhanced text detection for "debt equity ratio", confirmed DER popup works with total debt/equity fields, calculation logic (DER = Total Debt ÷ Total Equity), quarter selection, and database saving capabilities
 - July 14, 2025. Implemented DD (Days Delinquent) calculation popup functionality: fixed text detection pattern for "debtor days", added DD support to SaveKPICalculationView API with trade receivables and total credit sales fields, calculation logic (DD = Trade Receivables ÷ Total Credit Sales), quarter selection, and full database integration
+- July 14, 2025. Updated Generation Plant Factor (GAP) to Generation Availability Factor (GAF): modified KPI-05 database record from "Generation Plant Factor (GAP)" to "Generation Availability Factor (GAF)", enhanced text detection pattern to include "generation availability factor" alongside existing "grid availability factor" detection, maintained all existing GAF calculation popup functionality with proper naming consistency
 
 ## User Preferences
 
