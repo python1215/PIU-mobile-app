@@ -29,6 +29,7 @@ class SaveKPICalculationView(View):
         'NPM': CalculateNPM,
         'DSCR': CalculateDSCR,
         'MWh': CalculateMWh,
+        'EI': CalculateMWh,  # Energy Injection uses MWh model
         'GAF': CalculateGAF,
         'TDE': CalculateTDE,
         'ATC': CalculateATC,
@@ -53,6 +54,10 @@ class SaveKPICalculationView(View):
             kpi_type = data.get('kpi_type')
             input_values = data.get('input_values', {})
             
+            print(f'[DEBUG] API - Raw data received: {data}')
+            print(f'[DEBUG] API - KPI type: {kpi_type}')
+            print(f'[DEBUG] API - Input values: {input_values}')
+            
             if not kpi_type or kpi_type not in self.KPI_MODEL_MAP:
                 return JsonResponse({
                     'success': False,
@@ -65,30 +70,70 @@ class SaveKPICalculationView(View):
             # Prepare data for model creation
             create_data = {}
             
-            # Handle all model fields except excluded ones
-            excluded_fields = ['loginUser', 'year', 'date_created', 'id', 'unique_id']
-            
-            for field in model_class._meta.get_fields():
-                if hasattr(field, 'name') and field.name not in excluded_fields:
-                    field_value = input_values.get(field.name)
-                    if field_value is not None and field_value != '':
-                        if field.name == 'quarter':
-                            # Handle quarter as foreign key
-                            try:
-                                quarter_instance = Quarter.objects.get(quarter=field_value)
-                                create_data['quarter'] = quarter_instance
-                            except Quarter.DoesNotExist:
-                                pass
-                        else:
-                            # Handle regular fields
-                            if hasattr(field, 'get_internal_type'):
-                                field_type = field.get_internal_type()
-                                if field_type in ['FloatField', 'DecimalField']:
-                                    create_data[field.name] = float(field_value)
-                                elif field_type == 'IntegerField':
-                                    create_data[field.name] = int(field_value)
-                                else:
-                                    create_data[field.name] = field_value
+            # Special handling for EI (Energy Injection) - aggregate energy sources
+            if kpi_type == 'EI':
+                # Calculate total energy from all energy sources
+                total_energy = 0
+                source_count = 0
+                
+                # Collect all energy source values from dynamic input
+                for key, value in input_values.items():
+                    if key.endswith('_energy') and key != 'achieved_value':
+                        try:
+                            energy_value = float(value)
+                            if energy_value > 0:
+                                total_energy += energy_value
+                                source_count += 1
+                        except (ValueError, TypeError):
+                            continue
+                
+                # If no energy sources found, try the old format for backward compatibility
+                if total_energy == 0:
+                    for energy_type in ['solar', 'wind', 'thermal', 'other', 'hydro', 'nuclear']:
+                        energy_value = input_values.get(f'{energy_type}_energy', 0)
+                        if energy_value > 0:
+                            total_energy += energy_value
+                            source_count += 1
+                
+                # Set the MWh model fields
+                create_data['power_injected'] = total_energy
+                create_data['time_duration'] = 1  # Set as 1 hour for MW calculation
+                create_data['number_of_sources'] = max(source_count, 1)
+                
+                # Handle quarter
+                quarter_value = input_values.get('quarter')
+                if quarter_value:
+                    try:
+                        quarter_instance = Quarter.objects.get(quarter=quarter_value)
+                        create_data['quarter'] = quarter_instance
+                    except Quarter.DoesNotExist:
+                        pass
+                        
+            else:
+                # Handle all other KPI types with regular field mapping
+                excluded_fields = ['loginUser', 'year', 'date_created', 'id', 'unique_id']
+                
+                for field in model_class._meta.get_fields():
+                    if hasattr(field, 'name') and field.name not in excluded_fields:
+                        field_value = input_values.get(field.name)
+                        if field_value is not None and field_value != '':
+                            if field.name == 'quarter':
+                                # Handle quarter as foreign key
+                                try:
+                                    quarter_instance = Quarter.objects.get(quarter=field_value)
+                                    create_data['quarter'] = quarter_instance
+                                except Quarter.DoesNotExist:
+                                    pass
+                            else:
+                                # Handle regular fields
+                                if hasattr(field, 'get_internal_type'):
+                                    field_type = field.get_internal_type()
+                                    if field_type in ['FloatField', 'DecimalField']:
+                                        create_data[field.name] = float(field_value)
+                                    elif field_type == 'IntegerField':
+                                        create_data[field.name] = int(field_value)
+                                    else:
+                                        create_data[field.name] = field_value
             
             # Add user information
             create_data['loginUser'] = request.user
