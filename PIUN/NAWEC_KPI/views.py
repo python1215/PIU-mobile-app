@@ -2992,6 +2992,19 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
+            elif kpi_type == 'ATC':
+                # ATC calculation
+                billing_efficiency = input_values.get('billing_efficiency', 0)
+                collection_efficiency = input_values.get('collection_efficiency', 0)
+                
+                calculation = CalculateATC(
+                    billing_efficiency=billing_efficiency,
+                    collection_efficiency=collection_efficiency,
+                    quarter=quarter,
+                    loginUser=request.user
+                )
+                calculation.save()
+                
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -3041,6 +3054,8 @@ class DeleteKPICalculationView(View):
                 CalculateTTP.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TPS':
                 CalculateTPS.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'ATC':
+                CalculateATC.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             

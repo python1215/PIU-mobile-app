@@ -1150,7 +1150,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'GAF';
     } else if (selectedText.includes('total debt to equity')) {
         kpiType = 'TDE';
-    } else if (selectedText.includes('average time to connect')) {
+    } else if (selectedText.includes('average time to connect') || selectedText.includes('total losses electricity')) {
         kpiType = 'ATC';
     } else if (selectedText.includes('new electricity connection')) {
         kpiType = 'NECD';
@@ -3070,7 +3070,7 @@ function calculateATC() {
     window.simpleATCResult = atc.toFixed(2);
 }
 
-function useATCResult() {
+async function useATCResult() {
     const quarter = document.getElementById('atcQuarter').value;
     
     if (!quarter) {
@@ -3084,20 +3084,55 @@ function useATCResult() {
         return;
     }
     
-    // Set the achieved value in the main form
-    const achievedValueField = document.getElementById('id_achieved_value');
-    if (achievedValueField) {
-        achievedValueField.value = window.simpleATCResult;
-        achievedValueField.style.backgroundColor = '#e7f3ff';
+    // Prepare data for saving to database
+    const billingEfficiency = parseFloat(document.getElementById('atcBillingEfficiency').value) || 0;
+    const collectionEfficiency = parseFloat(document.getElementById('atcCollectionEfficiency').value) || 0;
+    
+    const data = {
+        kpi_type: 'ATC',
+        input_values: {
+            billing_efficiency: billingEfficiency,
+            collection_efficiency: collectionEfficiency,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleATCResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
         
-        // Trigger percentage calculations
-        calculatePercentages();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleATCResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeATCPopup();
+            
+            alert('ATC&C calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving ATC&C calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving ATC&C calculation:', error);
+        alert('Error saving ATC&C calculation: ' + error.message);
     }
-    
-    // Close the popup
-    closeATCPopup();
-    
-    alert('ATC&C value applied to form successfully!');
 }
 
 function resetATCForm() {
