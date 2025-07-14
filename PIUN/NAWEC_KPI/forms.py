@@ -3,7 +3,7 @@ from .models import (
     CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR,
     KPIIndicator, NAWEC_KPI_Monitoring
 )
-from setup.models import Quarter, YEAR
+from setup.models import Quarter, YEAR, Indicator_Type, Measurement_Unit, Data_Collection_Frequency
 from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
 
 
@@ -209,7 +209,8 @@ class KPIMonitoringDataForm(forms.ModelForm):
         model = NAWEC_KPI_Monitoring
         fields = [
             'project', 'pdo', 'project_outcome', 'project_result',
-            'indicator_description', 'baseline_value', 'End_Target_Value',
+            'indicator_type', 'indicator_description', 'measurement_unit',
+            'collection_frequency', 'baseline_value', 'End_Target_Value',
             'achieved_value', 'Percentage_progress_from_baseline',
             'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
             'year', 'quarter'
@@ -219,7 +220,10 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'pdo': forms.Select(attrs={'class': 'form-select'}),
             'project_outcome': forms.Select(attrs={'class': 'form-select'}),
             'project_result': forms.Select(attrs={'class': 'form-select'}),
+            'indicator_type': forms.Select(attrs={'class': 'form-select'}),
             'indicator_description': forms.Select(attrs={'class': 'form-select'}),
+            'measurement_unit': forms.Select(attrs={'class': 'form-select'}),
+            'collection_frequency': forms.Select(attrs={'class': 'form-select'}),
             'baseline_value': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01'

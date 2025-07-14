@@ -12,7 +12,7 @@ from .models import (
 )
 from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, CalculateNPMForm
 
-from setup.models import YEAR, Quarter, Indicator_Type
+from setup.models import YEAR, Quarter, Indicator_Type, Measurement_Unit, Data_Collection_Frequency
 from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
 from utils.database_utils import (
     is_sql_server_mode, get_model_data, safe_model_save, 
@@ -458,6 +458,18 @@ def data_entry(request):
                     messages.error(request, f'{field}: {error}')
     else:
         form = KPIMonitoringDataForm()
+        
+        # Initialize form querysets for proper field display
+        form.fields['project'].queryset = Project.objects.filter(projectID='NAWEC')
+        form.fields['pdo'].queryset = PDO.objects.none()
+        form.fields['project_outcome'].queryset = ProjectOutCome.objects.none()
+        form.fields['project_result'].queryset = ProjectResult.objects.none()
+        form.fields['indicator_type'].queryset = Indicator_Type.objects.all()
+        form.fields['indicator_description'].queryset = KPIIndicator.objects.all()
+        form.fields['measurement_unit'].queryset = Measurement_Unit.objects.all()
+        form.fields['collection_frequency'].queryset = Data_Collection_Frequency.objects.all()
+        form.fields['year'].queryset = YEAR.objects.all()
+        form.fields['quarter'].queryset = Quarter.objects.all()
     
     # Get recent entries for display
     recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
