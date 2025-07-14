@@ -2840,7 +2840,13 @@ class SaveKPICalculationView(View):
             kpi_type = data.get('kpi_type')
             input_values = data.get('input_values', {})
             
+            # Debug logging
+            print(f"[DEBUG] SaveKPICalculationView - Raw data: {data}")
+            print(f"[DEBUG] SaveKPICalculationView - KPI type: {kpi_type}")
+            print(f"[DEBUG] SaveKPICalculationView - Input values: {input_values}")
+            
             if not kpi_type:
+                print(f"[DEBUG] SaveKPICalculationView - KPI type is missing or empty")
                 return JsonResponse({'success': False, 'error': 'KPI type is required'})
             
             # Get the achieved value from input_values
@@ -3060,6 +3066,7 @@ class SaveKPICalculationView(View):
                 calculation.save()
                 
             else:
+                print(f"[DEBUG] SaveKPICalculationView - Unhandled KPI type: '{kpi_type}'")
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
             return JsonResponse({
