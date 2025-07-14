@@ -1123,158 +1123,43 @@ function clearKPIFields() {
 
 // Smart KPI Popup Functions
 function triggerKPICalculationPopup() {
-    // Note: indicator_description field has been removed
-    // Show generic KPI calculation popup
-    alert('KPI calculation functionality has been simplified. Please use the individual KPI calculation forms.');
-    
-    // ABSOLUTE OVERRIDE FOR KPI-06 TDE
-    if (selectedText.includes('6') || 
-        selectedText.includes('tde') ||
-        selectedText.includes('training days') ||
-        selectedText.includes('training') ||
-        selectedText.includes('employee')) {
-        console.log('🔴 ABSOLUTE KPI-06 OVERRIDE - Forcing TDE popup');
-        showTDEPopup();
+    // Get the selected KPI from the dropdown
+    const kpiSelect = document.getElementById('id_select_kpi');
+    if (!kpiSelect || !kpiSelect.value) {
+        alert('Please select a KPI indicator first from the "Indicator Description" dropdown.');
         return;
     }
     
-    // ABSOLUTE OVERRIDE FOR KPI-08 NECD
-    if (selectedText.includes('8') || 
-        selectedText.includes('necd') ||
-        selectedText.includes('new electricity') ||
-        selectedText.includes('connection days') ||
-        selectedText.includes('electricity connection')) {
-        console.log('🔴 ABSOLUTE KPI-08 OVERRIDE - Forcing NECD popup');
-        showNECDPopup();
-        return;
-    }
+    const selectedKPI = kpiSelect.value;
+    console.log('Selected KPI for popup:', selectedKPI);
     
-    // ABSOLUTE OVERRIDE FOR KPI-09 NWCD
-    if (selectedText.includes('9') || 
-        selectedText.includes('nwcd') ||
-        selectedText.includes('new water') ||
-        selectedText.includes('water connection')) {
-        console.log('🔴 ABSOLUTE KPI-09 OVERRIDE - Forcing NWCD popup');
-        showNWCDPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-10 TPS
-    if (selectedText.includes('10') || 
-        selectedText.includes('tps') ||
-        selectedText.includes('timely payment') ||
-        selectedText.includes('salary')) {
-        console.log('🔴 ABSOLUTE KPI-10 OVERRIDE - Forcing TPS popup');
-        showTPSPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-11 TTP
-    if (selectedText.includes('11') || 
-        selectedText.includes('ttp') ||
-        selectedText.includes('timely tax') ||
-        selectedText.includes('tax payment')) {
-        console.log('🔴 ABSOLUTE KPI-11 OVERRIDE - Forcing TTP popup');
-        showTTPPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-12 WQCC
-    if (selectedText.includes('12') || 
-        selectedText.includes('wqcc') ||
-        selectedText.includes('water quality') ||
-        selectedText.includes('compliance corporate')) {
-        console.log('🔴 ABSOLUTE KPI-12 OVERRIDE - Forcing WQCC popup');
-        showWQCCPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-13 WQCB
-    if (selectedText.includes('13') || 
-        selectedText.includes('wqcb') ||
-        selectedText.includes('compliance bacteriological') ||
-        selectedText.includes('bacteriological')) {
-        console.log('🔴 ABSOLUTE KPI-13 OVERRIDE - Forcing WQCB popup');
-        showWQCBPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-14 NRW
-    if (selectedText.includes('14') || 
-        selectedText.includes('nrw') ||
-        selectedText.includes('non-revenue water') ||
-        selectedText.includes('revenue water')) {
-        console.log('🔴 ABSOLUTE KPI-14 OVERRIDE - Forcing NRW popup');
-        showNRWPopup();
-        return;
-    }
-    
-    // ABSOLUTE OVERRIDE FOR KPI-15 DD
-    if (selectedText.includes('15') || 
-        selectedText.includes('dd') ||
-        selectedText.includes('debtor days') ||
-        selectedText.includes('debtor')) {
-        console.log('🔴 ABSOLUTE KPI-15 OVERRIDE - Forcing DD popup');
-        showDDPopup();
-        return;
-    }
-    
-    // Determine KPI type based on indicator text
-    let kpiType = 'ROA'; // default
-    if (selectedText.includes('return on assets') || selectedText.includes('roa')) {
-        kpiType = 'ROA';
-    } else if (selectedText.includes('net profit margin') || selectedText.includes('npm')) {
-        kpiType = 'NPM';
-    } else if (selectedText.includes('debt service') || selectedText.includes('dscr')) {
-        kpiType = 'DSCR';
-    } else if (selectedText.includes('energy injection') || selectedText.includes('mwh')) {
-        kpiType = 'MWh';
-    } else if (selectedText.includes('generation availability') || selectedText.includes('gaf')) {
-        kpiType = 'GAF';
-    } else if (selectedText.includes('training days') || selectedText.includes('tde')) {
-        kpiType = 'TDE';
-    } else if (selectedText.includes('atc') || selectedText.includes('total losses')) {
-        kpiType = 'ATC';
-    } else if (selectedText.includes('new electricity') || selectedText.includes('necd') || selectedText.includes('electricity connection') || selectedText.includes('connection days') || selectedText.includes('kpi-08') || selectedText.includes('kpi 08') || selectedText.includes('08')) {
-        kpiType = 'NECD';
-    } else if (selectedText.includes('new water') || selectedText.includes('nwcd') || selectedText.includes('water connection') || selectedText.includes('kpi-09') || selectedText.includes('kpi 09') || selectedText.includes('09')) {
-        kpiType = 'NWCD';
-    } else if (selectedText.includes('timely payment') || selectedText.includes('tps') || selectedText.includes('salary') || selectedText.includes('kpi-10') || selectedText.includes('kpi 10') || selectedText.includes('10')) {
-        kpiType = 'TPS';
-    } else if (selectedText.includes('timely tax') || selectedText.includes('ttp') || selectedText.includes('tax payment') || selectedText.includes('kpi-11') || selectedText.includes('kpi 11') || selectedText.includes('11')) {
-        kpiType = 'TTP';
-    } else if (selectedText.includes('water quality') || selectedText.includes('wqcc') || selectedText.includes('compliance corporate') || selectedText.includes('kpi-12') || selectedText.includes('kpi 12') || selectedText.includes('12')) {
-        kpiType = 'WQCC';
-    } else if (selectedText.includes('wqcb') || selectedText.includes('compliance bacteriological') || selectedText.includes('bacteriological') || selectedText.includes('kpi-13') || selectedText.includes('kpi 13') || selectedText.includes('13')) {
-        kpiType = 'WQCB';
-    } else if (selectedText.includes('nrw') || selectedText.includes('non-revenue water') || selectedText.includes('revenue water') || selectedText.includes('kpi-14') || selectedText.includes('kpi 14') || selectedText.includes('14')) {
-        kpiType = 'NRW';
-    } else if (selectedText.includes('audit opinion') || selectedText.includes('ao') || selectedText.includes('kpi-17') || selectedText.includes('kpi 17') || selectedText.includes('17')) {
-        kpiType = 'AO';
-    } else if (selectedText.includes('debt to equity') || selectedText.includes('der') || selectedText.includes('debt equity ratio') || selectedText.includes('kpi-18') || selectedText.includes('kpi 18') || selectedText.includes('18')) {
-        kpiType = 'DER';
-    } else if (selectedText.includes('current ratio') || selectedText.includes('cr') || selectedText.includes('kpi-19') || selectedText.includes('kpi 19') || selectedText.includes('19')) {
-        kpiType = 'CR';
-    } else if (selectedText.includes('pari') || selectedText.includes('performance audit') || selectedText.includes('recommendations implementation') || selectedText.includes('kpi-20') || selectedText.includes('kpi 20') || selectedText.includes('20')) {
-        kpiType = 'PARI';
-    } else if (selectedText.includes('tsqr') || selectedText.includes('timely submission') || selectedText.includes('quarterly report') || selectedText.includes('kpi-21') || selectedText.includes('kpi 21') || selectedText.includes('21')) {
-        kpiType = 'TSQR';
-    }
-    
-    console.log('Detected KPI type:', kpiType);
-    
-    // Call the appropriate popup function
-    switch(kpiType) {
+    // Show appropriate KPI calculation popup based on selection
+    switch(selectedKPI) {
         case 'ROA':
             showROAPopup();
             break;
         case 'NPM':
             showNPMPopup();
             break;
+        case 'AO':
+            showAOPopup();
+            break;
+        case 'DER':
+            showDERPopup();
+            break;
+        case 'CR':
+            showCRPopup();
+            break;
+        case 'PARI':
+            showPARIPopup();
+            break;
+        case 'TSQR':
+            showTSQRPopup();
+            break;
         case 'DSCR':
             showDSCRPopup();
             break;
-        case 'MWh':
+        case 'MWH':
             showMWhPopup();
             break;
         case 'GAF':
@@ -1308,31 +1193,10 @@ function triggerKPICalculationPopup() {
             showNRWPopup();
             break;
         case 'DD':
-            console.log('✅ Triggering DD (Debtor Days) popup for KPI-15');
             showDDPopup();
             break;
-        case 'AO':
-            console.log('✅ Triggering AO (Audit Opinion) popup for KPI-17');
-            showAOPopup();
-            break;
-        case 'DER':
-            console.log('✅ Triggering DER (Debt to Equity Ratio) popup for KPI-18');
-            showDERPopup();
-            break;
-        case 'CR':
-            console.log('✅ Triggering CR (Current Ratio) popup for KPI-19');
-            showCRPopup();
-            break;
-        case 'PARI':
-            console.log('✅ Triggering PARI (Percentage Audit Recommendations Implementation) popup for KPI-20');
-            showPARIPopup();
-            break;
-        case 'TSQR':
-            console.log('✅ Triggering TSQR (Timely Submission of Quarterly Report) popup for KPI-21');
-            showTSQRPopup();
-            break;
         default:
-            showROAPopup(); // fallback
+            alert('Calculation popup for ' + selectedKPI + ' is not yet implemented.');
     }
 }
 
