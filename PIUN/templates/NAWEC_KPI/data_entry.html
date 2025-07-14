@@ -387,15 +387,7 @@
                                         {{ form.indicator_type|add_class:"select select-bordered select-sm w-full" }}
                                     </div>
                                     
-                                    <div class="form-control">
-                                        <label class="label py-1">
-                                            <span class="label-text text-sm">
-                                                <i class="bi bi-card-text mr-2"></i>Indicator Description
-                                            </span>
-                                        </label>
-                                        {{ form.indicator_description|add_class:"select select-bordered select-sm w-full" }}
-                                    </div>
-                                    
+
                                     <div class="form-control">
                                         <label class="label py-1">
                                             <span class="label-text text-sm">
@@ -719,15 +711,8 @@
 <script>
 // Automatic field population when KPI indicator is selected
 document.addEventListener('DOMContentLoaded', function() {
-    const indicatorSelect = document.getElementById('id_indicator_description');
-    if (indicatorSelect) {
-        indicatorSelect.addEventListener('change', function() {
-            const indicatorId = this.value;
-            if (indicatorId) {
-                populateFieldsFromIndicator(indicatorId);
-            }
-        });
-    }
+    // Note: indicator_description field has been removed from the form
+    // Field population functionality disabled
     
     // Initialize cascading dropdowns in edit mode
     {% if is_edit and entry %}
@@ -1049,15 +1034,9 @@ function clearKPIFields() {
 
 // Smart KPI Popup Functions
 function triggerKPICalculationPopup() {
-    // Get the selected indicator text to determine KPI type
-    const indicatorSelect = document.getElementById('id_indicator_description');
-    if (!indicatorSelect || !indicatorSelect.value) {
-        alert('Please select a KPI indicator first');
-        return;
-    }
-    
-    const selectedText = indicatorSelect.options[indicatorSelect.selectedIndex].text.toLowerCase();
-    console.log('Selected indicator:', selectedText);
+    // Note: indicator_description field has been removed
+    // Show generic KPI calculation popup
+    alert('KPI calculation functionality has been simplified. Please use the individual KPI calculation forms.');
     
     // ABSOLUTE OVERRIDE FOR KPI-06 TDE
     if (selectedText.includes('6') || 
@@ -4848,15 +4827,13 @@ function calculatePercentages() {
     const targetField = document.getElementById('id_End_Target_Value');
     const baselinePercentField = document.getElementById('id_Percentage_progress_from_baseline');
     const targetPercentField = document.getElementById('id_Percentage_progress_towards_end_target');
-    const indicatorField = document.getElementById('id_indicator_description');
     
     console.log('🔍 Field Detection Status:', {
         baseline: baselineField ? 'FOUND' : 'NOT FOUND',
         achieved: achievedField ? 'FOUND' : 'NOT FOUND', 
         target: targetField ? 'FOUND' : 'NOT FOUND',
         baselinePercent: baselinePercentField ? 'FOUND' : 'NOT FOUND',
-        targetPercent: targetPercentField ? 'FOUND' : 'NOT FOUND',
-        indicator: indicatorField ? 'FOUND' : 'NOT FOUND'
+        targetPercent: targetPercentField ? 'FOUND' : 'NOT FOUND'
     });
     
     // Show alert with field detection results for immediate feedback
@@ -5069,7 +5046,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const baselineField = document.getElementById('id_baseline_value');
     const achievedField = document.getElementById('id_achieved_value');
     const targetField = document.getElementById('id_End_Target_Value');
-    const indicatorField = document.getElementById('id_indicator_description');
     
     // Add event listeners to trigger calculations
     if (baselineField) {
@@ -5108,15 +5084,13 @@ function testProgressCalculation() {
     const targetField = document.getElementById('id_End_Target_Value');
     const progressFromBaselineField = document.getElementById('id_Percentage_progress_from_baseline');
     const progressToTargetField = document.getElementById('id_Percentage_progress_towards_end_target');
-    const indicatorField = document.getElementById('id_indicator_description');
     
     console.log('Field Detection:', {
         baseline: baselineField ? `Found: ${baselineField.value}` : 'NOT FOUND',
         achieved: achievedField ? `Found: ${achievedField.value}` : 'NOT FOUND',
         target: targetField ? `Found: ${targetField.value}` : 'NOT FOUND',
         progressFromBaseline: progressFromBaselineField ? `Found: ${progressFromBaselineField.value}` : 'NOT FOUND',
-        progressToTarget: progressToTargetField ? `Found: ${progressToTargetField.value}` : 'NOT FOUND',
-        indicator: indicatorField ? `Found: ${indicatorField.value}` : 'NOT FOUND'
+        progressToTarget: progressToTargetField ? `Found: ${progressToTargetField.value}` : 'NOT FOUND'
     });
     
     // First, set some test values

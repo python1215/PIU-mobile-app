@@ -252,6 +252,7 @@ The PIUN directory contains specialized modules:
 - July 14, 2025. Updated Targeted Weight Value field in NAWEC KPI form: renamed "Targeted Achieved Weight" to "Targeted Weight Value", made field read-only with auto-population from KPIIndicator.targeted_weight_value when KPI is selected, added visual indicators for auto-populated field with gray background and explanatory text
 - July 14, 2025. Updated KPI selection dropdown labels: changed "Select KPI" to "Indicator Description" in both the field label and dropdown placeholder text, updated help text from "Choose KPI for specialized calculations" to "Choose indicator for specialized calculations" for consistent terminology
 - July 14, 2025. Removed KPI Model Selection dropdown from NAWEC KPI data entry form: eliminated the "Indicator Description" dropdown containing specialized KPI calculation options (AO, DER, CR, PARI, TSQR, ROA, NPM, DD, TDE, NECD, NWCD, TPS, TTP, WQCC, WQCB, NRW) to streamline the form interface
+- July 14, 2025. Removed Indicator Description field from NAWEC KPI form: eliminated the indicator_description dropdown field from the Indicator Information section to simplify the form layout and reduce redundant fields
 
 ## User Preferences
 

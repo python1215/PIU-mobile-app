@@ -209,7 +209,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
         model = NAWEC_KPI_Monitoring
         fields = [
             'project', 'pdo', 'project_outcome', 'project_result',
-            'indicator_type', 'indicator_description', 'measurement_unit',
+            'indicator_type', 'measurement_unit',
             'collection_frequency', 'baseline_value', 'End_Target_Value',
             'achieved_value', 'Percentage_progress_from_baseline',
             'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
@@ -221,7 +221,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'project_outcome': forms.Select(attrs={'class': 'form-select'}),
             'project_result': forms.Select(attrs={'class': 'form-select'}),
             'indicator_type': forms.Select(attrs={'class': 'form-select'}),
-            'indicator_description': forms.Select(attrs={'class': 'form-select'}),
+
             'measurement_unit': forms.Select(attrs={'class': 'form-select'}),
             'collection_frequency': forms.Select(attrs={'class': 'form-select'}),
             'baseline_value': forms.NumberInput(attrs={
