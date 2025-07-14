@@ -723,14 +723,91 @@
 <script>
 // Automatic field population when KPI indicator is selected
 document.addEventListener('DOMContentLoaded', function() {
-    // Note: indicator_description field has been removed from the form
-    // Field population functionality disabled
+    // KPI selection auto-population
+    const kpiSelect = document.getElementById('id_select_kpi');
+    if (kpiSelect) {
+        kpiSelect.addEventListener('change', function() {
+            const selectedKPI = this.value;
+            if (selectedKPI) {
+                // Fetch KPI indicator data and populate form fields
+                fetchKPIIndicatorData(selectedKPI);
+            } else {
+                // Clear fields if no KPI selected
+                clearKPIFields();
+            }
+        });
+    }
     
     // Initialize cascading dropdowns in edit mode
     {% if is_edit and entry %}
         initializeEditDropdowns();
     {% endif %}
 });
+
+function fetchKPIIndicatorData(kpiCode) {
+    // Show loading state
+    const baselineField = document.getElementById('id_baseline_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    const weightField = document.getElementById('id_Targeted_Achieved_weight');
+    
+    if (baselineField) baselineField.style.backgroundColor = '#f0f8ff';
+    if (targetField) targetField.style.backgroundColor = '#f0f8ff';
+    if (weightField) weightField.style.backgroundColor = '#f0f8ff';
+    
+    // Fetch data from API endpoint
+    fetch(`/NAWEC-KPI/get-kpi-indicator-data/${kpiCode}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Populate form fields with fetched data
+                if (baselineField) {
+                    baselineField.value = data.data.baseline_value || '';
+                    baselineField.style.backgroundColor = '#e8f5e8';
+                }
+                if (targetField) {
+                    targetField.value = data.data.End_Target_Value || '';
+                    targetField.style.backgroundColor = '#e8f5e8';
+                }
+                if (weightField) {
+                    weightField.value = data.data.targeted_weight_value || '';
+                    weightField.style.backgroundColor = '#e8f5e8';
+                }
+                
+                // Reset background colors after a delay
+                setTimeout(() => {
+                    if (baselineField) baselineField.style.backgroundColor = '';
+                    if (targetField) targetField.style.backgroundColor = '';
+                    if (weightField) weightField.style.backgroundColor = '';
+                }, 2000);
+                
+                console.log('KPI data loaded successfully:', data.data);
+            } else {
+                console.error('Error loading KPI data:', data.error);
+                // Reset background colors on error
+                if (baselineField) baselineField.style.backgroundColor = '';
+                if (targetField) targetField.style.backgroundColor = '';
+                if (weightField) weightField.style.backgroundColor = '';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching KPI data:', error);
+            // Reset background colors on error
+            if (baselineField) baselineField.style.backgroundColor = '';
+            if (targetField) targetField.style.backgroundColor = '';
+            if (weightField) weightField.style.backgroundColor = '';
+        });
+}
+
+function clearKPIFields() {
+    // Clear the auto-populated fields when no KPI is selected
+    const baselineField = document.getElementById('id_baseline_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    const weightField = document.getElementById('id_Targeted_Achieved_weight');
+    
+    if (baselineField) baselineField.value = '';
+    if (targetField) targetField.value = '';
+    if (weightField) weightField.value = '';
+}
 
 {% if is_edit and entry %}
 function initializeEditDropdowns() {

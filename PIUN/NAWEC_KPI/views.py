@@ -1023,6 +1023,53 @@ def get_kpi_values(request, kpi_code):
 
 
 @login_required
+def get_kpi_indicator_data(request, kpi_code):
+    """Get KPI indicator data for form auto-population based on selected KPI code"""
+    try:
+        # Map KPI codes to their corresponding indicator numbers
+        kpi_mapping = {
+            'AO': 'KPI-16',
+            'DER': 'KPI-17', 
+            'CR': 'KPI-18',
+            'PARI': 'KPI-20',
+            'TSQR': 'KPI-21',
+            'ROA': 'KPI-01',
+            'NPM': 'KPI-02',
+            'DD': 'KPI-15',
+            'TDE': 'KPI-06',
+            'NECD': 'KPI-08',
+            'NWCD': 'KPI-09',
+            'TPS': 'KPI-10',
+            'TTP': 'KPI-11',
+            'WQCC': 'KPI-12',
+            'WQCB': 'KPI-13',
+            'NRW': 'KPI-14',
+        }
+        
+        indicator_no = kpi_mapping.get(kpi_code.upper())
+        if not indicator_no:
+            return JsonResponse({'success': False, 'error': 'KPI code not found'})
+            
+        # Find the KPI indicator by indicator number
+        indicator = KPIIndicator.objects.filter(indicator_no=indicator_no).first()
+        if not indicator:
+            return JsonResponse({'success': False, 'error': 'KPI indicator not found in database'})
+            
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'baseline_value': indicator.baseline_value if indicator.baseline_value is not None else 0,
+                'End_Target_Value': indicator.End_Target_Value if indicator.End_Target_Value is not None else 0,
+                'targeted_weight_value': indicator.targeted_weight_value if indicator.targeted_weight_value is not None else 0,
+                'indicator_no': indicator.indicator_no,
+                'indicator_description': indicator.indicator_description,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
 def get_kpi_progress_values(request, kpi_indicator_id):
     """Get KPI progress values for automatic population in data entry form"""
     try:

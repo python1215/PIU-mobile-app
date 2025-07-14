@@ -119,6 +119,7 @@ urlpatterns = [
     # API endpoints
     path('get-indicator-details/<int:indicator_id>/', views.get_indicator_details, name='get_indicator_details'),
     path('get-kpi-values/<str:kpi_code>/', views.get_kpi_values, name='get_kpi_values'),
+    path('get-kpi-indicator-data/<str:kpi_code>/', views.get_kpi_indicator_data, name='get_kpi_indicator_data'),
     path('get-kpi-progress-values/<int:kpi_indicator_id>/', views.get_kpi_progress_values, name='get_kpi_progress_values'),
     
     # HTMX endpoints for cascading dropdowns
