@@ -1138,7 +1138,7 @@ function triggerKPICalculationPopup() {
     
     // Determine KPI type based on indicator description text
     let kpiType = '';
-    if (selectedText.includes('return on assets') || selectedText.includes('return on net assets')) {
+    if (selectedText.includes('return on assets') || selectedText.includes('return on net assets') || selectedText.includes('return_on_net_assets')) {
         kpiType = 'ROA';
     } else if (selectedText.includes('net profit margin')) {
         kpiType = 'NPM';
@@ -1275,8 +1275,9 @@ function showROAPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-calculator"></i> ROA Calculation (Return on Assets)
+                    <i class="bi bi-calculator"></i> ROA Calculation (Return on Net Assets)
                 </h5>
+                <span style="color: #e9ecef; font-size: 0.9rem;">KPI-01</span>
                 <button onclick="closeSimplePopup()" style="background: none; border: none; 
                         color: white; font-size: 1.5rem; cursor: pointer; padding: 0; 
                         width: 30px; height: 30px; display: flex; align-items: center; 
@@ -1287,7 +1288,7 @@ function showROAPopup() {
             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
                 <h6 style="color: #007bff; margin: 0 0 10px 0;">Formula:</h6>
                 <div style="font-family: monospace; font-size: 1.1rem; color: #333;">
-                    ROA = (Net Profit After Tax ÷ Total Assets) × 100
+                    ROA = (Net Profit After Tax ÷ Total Net Assets) × 100
                 </div>
             </div>
             
@@ -1300,7 +1301,7 @@ function showROAPopup() {
                 </div>
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Assets:</label>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Net Assets:</label>
                     <input type="number" id="simpleTotalAssets" step="0.01" 
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
@@ -1432,7 +1433,7 @@ function calculateSimpleROA() {
     window.simpleROAResult = roa.toFixed(2);
 }
 
-function useSimpleROAResult() {
+async function useSimpleROAResult() {
     const quarter = document.getElementById('simpleQuarter').value;
     
     if (!quarter) {
@@ -1446,20 +1447,55 @@ function useSimpleROAResult() {
         return;
     }
     
-    // Set the achieved value in the main form
-    const achievedValueField = document.getElementById('id_achieved_value');
-    if (achievedValueField) {
-        achievedValueField.value = window.simpleROAResult;
-        achievedValueField.style.backgroundColor = '#e7f3ff';
+    // Prepare data for saving to database
+    const netProfit = parseFloat(document.getElementById('simpleNetProfit').value) || 0;
+    const totalAssets = parseFloat(document.getElementById('simpleTotalAssets').value) || 0;
+    
+    const data = {
+        kpi_type: 'ROA',
+        input_values: {
+            net_income: netProfit,
+            total_assets: totalAssets,
+            quarter: quarter,
+            achieved_value: parseFloat(window.simpleROAResult)
+        }
+    };
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
         
-        // Trigger percentage calculations
-        calculatePercentages();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleROAResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeSimplePopup();
+            
+            alert('ROA calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving ROA calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving ROA calculation:', error);
+        alert('Error saving ROA calculation: ' + error.message);
     }
-    
-    // Close the popup
-    closeSimplePopup();
-    
-    alert('ROA value applied to form successfully!');
 }
 
 
