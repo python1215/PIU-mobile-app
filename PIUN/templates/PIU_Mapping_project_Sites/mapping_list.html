@@ -179,17 +179,112 @@
     </div>
 </div>
 
+<!-- Quick Map Modal -->
+<div class="modal fade" id="quickMapModal" tabindex="-1" aria-labelledby="quickMapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickMapModalLabel">
+                    <i class="bi bi-geo-alt-fill me-2"></i>Project Site Location
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="quickLocationMap" style="height: 400px; width: 100%;"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span id="modalCoordinates"></span>
+                    </small>
+                </div>
+                <button type="button" class="btn btn-outline-primary" id="openGoogleMapsBtn">
+                    <i class="bi bi-geo-alt me-2"></i>Open in Google Maps
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript for Interactive Features -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <script>
+let quickMapInstance = null;
+let currentCoords = null;
+
 function viewOnMap(lat, lng) {
-    // Open in a popup or redirect to map view with coordinates
-    const url = `{% url 'PIU_Mapping_project_Sites:index' %}?lat=${lat}&lng=${lng}`;
-    window.open(url, '_blank', 'width=800,height=600');
+    currentCoords = { lat: lat, lng: lng };
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('quickMapModal'));
+    modal.show();
+    
+    // Update coordinates display
+    document.getElementById('modalCoordinates').textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    
+    // Initialize map when modal is shown
+    document.getElementById('quickMapModal').addEventListener('shown.bs.modal', function () {
+        if (!quickMapInstance) {
+            // Create map centered on the location
+            quickMapInstance = L.map('quickLocationMap').setView([lat, lng], 14);
+            
+            // Add OpenStreetMap tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(quickMapInstance);
+            
+            // Add marker for the location
+            const marker = L.marker([lat, lng]).addTo(quickMapInstance);
+            
+            // Add popup with basic information
+            marker.bindPopup(`
+                <div class="text-center">
+                    <h6 class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Project Site</h6>
+                    <p class="mb-1"><strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
+                    <p class="mb-0"><small class="text-muted">Click "View Details" for more information</small></p>
+                </div>
+            `).openPopup();
+            
+            // Add circle to show approximate area
+            L.circle([lat, lng], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2,
+                radius: 300
+            }).addTo(quickMapInstance);
+        }
+        
+        // Resize map to fit modal
+        setTimeout(() => {
+            quickMapInstance.invalidateSize();
+        }, 100);
+    });
+    
+    // Clean up map when modal is hidden
+    document.getElementById('quickMapModal').addEventListener('hidden.bs.modal', function () {
+        if (quickMapInstance) {
+            quickMapInstance.remove();
+            quickMapInstance = null;
+        }
+    });
 }
 
 function viewDetails(mappingId) {
     // Redirect to detail view
     window.location.href = `{% url 'PIU_Mapping_project_Sites:mapping-detail' '0' %}`.replace('0', mappingId);
 }
+
+// Google Maps button click handler
+document.getElementById('openGoogleMapsBtn').addEventListener('click', function() {
+    if (currentCoords) {
+        const url = `https://www.google.com/maps?q=${currentCoords.lat},${currentCoords.lng}`;
+        window.open(url, '_blank');
+    }
+});
 </script>
 {% endblock %}

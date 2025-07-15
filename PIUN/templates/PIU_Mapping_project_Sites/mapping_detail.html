@@ -271,12 +271,122 @@
     </div>
 </div>
 
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">
+                    <i class="bi bi-geo-alt-fill me-2"></i>{{ mapping.settlement.settlement_name }} - Location on Map
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="locationMap" style="height: 600px; width: 100%;"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Coordinates: {{ mapping.Latitude|floatformat:6 }}, {{ mapping.Longitude|floatformat:6 }}
+                    </small>
+                </div>
+                <button type="button" class="btn btn-outline-primary" onclick="openInGoogleMaps({{ mapping.Latitude }}, {{ mapping.Longitude }})">
+                    <i class="bi bi-geo-alt me-2"></i>Open in Google Maps
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript for Interactive Features -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <script>
+let mapInstance = null;
+
 function viewOnMap(lat, lng) {
-    // Open map view with coordinates
-    const url = `{% url 'PIU_Mapping_project_Sites:index' %}?lat=${lat}&lng=${lng}`;
-    window.open(url, '_blank', 'width=1200,height=800');
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('mapModal'));
+    modal.show();
+    
+    // Initialize map when modal is shown
+    document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
+        if (!mapInstance) {
+            // Create map centered on the location
+            mapInstance = L.map('locationMap').setView([lat, lng], 15);
+            
+            // Add OpenStreetMap tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(mapInstance);
+            
+            // Add marker for the location
+            const marker = L.marker([lat, lng]).addTo(mapInstance);
+            
+            // Add popup with information
+            marker.bindPopup(`
+                <div class="text-center">
+                    <h6 class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ mapping.settlement.settlement_name }}</h6>
+                    <p class="mb-1"><strong>Region:</strong> {{ mapping.region.region_name }}</p>
+                    <p class="mb-1"><strong>District:</strong> {{ mapping.district.district_name }}</p>
+                    <p class="mb-1"><strong>Access Type:</strong> {{ mapping.access.access_type }}</p>
+                    <p class="mb-1"><strong>Total Households:</strong> {{ mapping.Total_No_of_Households }}</p>
+                    <p class="mb-1"><strong>Connected:</strong> {{ mapping.no_of_connected_household|default:0 }}</p>
+                    <p class="mb-0"><strong>Access Rate:</strong> {{ access_rate|floatformat:1 }}%</p>
+                </div>
+            `).openPopup();
+            
+            // Add circle to show coverage area
+            L.circle([lat, lng], {
+                color: 'blue',
+                fillColor: '#30b4f0',
+                fillOpacity: 0.2,
+                radius: 500
+            }).addTo(mapInstance);
+        }
+        
+        // Resize map to fit modal
+        setTimeout(() => {
+            mapInstance.invalidateSize();
+        }, 100);
+    });
+    
+    // Clean up map when modal is hidden
+    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function () {
+        if (mapInstance) {
+            mapInstance.remove();
+            mapInstance = null;
+        }
+    });
+}
+
+function openInGoogleMaps(lat, lng) {
+    // Open location in Google Maps
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, '_blank');
+}
+
+// Alternative function to open in different map services
+function openInMapService(lat, lng, service = 'google') {
+    let url;
+    switch(service) {
+        case 'google':
+            url = `https://www.google.com/maps?q=${lat},${lng}`;
+            break;
+        case 'openstreetmap':
+            url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`;
+            break;
+        case 'bing':
+            url = `https://www.bing.com/maps?cp=${lat}~${lng}&lvl=15`;
+            break;
+        default:
+            url = `https://www.google.com/maps?q=${lat},${lng}`;
+    }
+    window.open(url, '_blank');
 }
 </script>
 {% endblock %}

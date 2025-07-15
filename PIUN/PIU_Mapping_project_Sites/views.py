@@ -45,8 +45,23 @@ def index(request):
         Longitude__isnull=False
     ).all()
     
+    # Check for coordinate parameters to focus on specific location
+    focus_lat = request.GET.get('lat')
+    focus_lng = request.GET.get('lng')
+    
+    if focus_lat and focus_lng:
+        try:
+            center_location = [float(focus_lat), float(focus_lng)]
+            zoom_level = 15  # Zoom in when focusing on specific location
+        except (ValueError, TypeError):
+            center_location = [13.4544, -16.5753]  # Default to Gambia center
+            zoom_level = 8
+    else:
+        center_location = [13.4544, -16.5753]  # Default to Gambia center
+        zoom_level = 8
+    
     # Create base map
-    m = folium.Map(location=[13.4544, -16.5753], zoom_start=8)
+    m = folium.Map(location=center_location, zoom_start=zoom_level)
 
     # Add optional tile layers with attribution
     folium.TileLayer(
@@ -95,6 +110,19 @@ def index(request):
                     donor_colors[primary_donor] = color_palette[color_index % len(color_palette)]
                     color_index += 1
                 marker_color = donor_colors[primary_donor]
+                
+                # Special highlighting for focused marker if coordinates match
+                is_focused = False
+                if focus_lat and focus_lng:
+                    try:
+                        focus_lat_f = float(focus_lat)
+                        focus_lng_f = float(focus_lng)
+                        # Check if coordinates match (within small tolerance for floating point)
+                        if abs(float(community.Latitude) - focus_lat_f) < 0.0001 and abs(float(community.Longitude) - focus_lng_f) < 0.0001:
+                            is_focused = True
+                            marker_color = 'red'  # Highlight focused marker in red
+                    except (ValueError, TypeError):
+                        pass
 
                 # Related info
                 total_hh = community.Total_No_of_Households or 0
@@ -108,35 +136,68 @@ def index(request):
                 year = str(community.profile_year.profile_year) if community.profile_year else 'N/A'
                 access = str(community.access.access_type) if community.access else 'N/A'
 
-                popup = f"""
-                    <div style="width: 250px;">
-                        <h4 style="color: #2c3e50; margin-bottom: 10px;">{settlement}</h4>
-                        <table style="width: 100%; font-size: 12px;">
-                            <tr><td><strong>Project:</strong></td><td>{project_label}</td></tr>
-                            <tr><td><strong>Region:</strong></td><td>{region}</td></tr>
-                            <tr><td><strong>District:</strong></td><td>{district}</td></tr>
-                            <tr><td><strong>Donor:</strong></td><td>{donor_display}</td></tr>
-                            <tr><td><strong>Households:</strong></td><td>{total_hh:,}</td></tr>
-                            <tr><td><strong>Connected:</strong></td><td>{connected_hh:,}</td></tr>
-                            <tr><td><strong>Connections:</strong></td><td>{connections:,}</td></tr>
-                            <tr><td><strong>Access Rate:</strong></td><td>{access_rate:.1f}%</td></tr>
-                            <tr><td><strong>Access Type:</strong></td><td>{access}</td></tr>
-                            <tr><td><strong>Year:</strong></td><td>{year}</td></tr>
-                            <tr><td><strong>Coordinates:</strong></td><td>{community.Latitude:.4f}, {community.Longitude:.4f}</td></tr>
-                        </table>
-                    </div>
-                """
+                # Special popup for focused location
+                if is_focused:
+                    popup = f"""
+                        <div style="width: 280px; border-left: 4px solid #e74c3c;">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">
+                                <i class="fa fa-map-marker"></i> {settlement} 
+                                <span style="font-size: 12px; color: #95a5a6;">(Focused Location)</span>
+                            </h4>
+                            <table style="width: 100%; font-size: 12px;">
+                                <tr><td><strong>Project:</strong></td><td>{project_label}</td></tr>
+                                <tr><td><strong>Region:</strong></td><td>{region}</td></tr>
+                                <tr><td><strong>District:</strong></td><td>{district}</td></tr>
+                                <tr><td><strong>Donor:</strong></td><td>{donor_display}</td></tr>
+                                <tr><td><strong>Households:</strong></td><td>{total_hh:,}</td></tr>
+                                <tr><td><strong>Connected:</strong></td><td>{connected_hh:,}</td></tr>
+                                <tr><td><strong>Connections:</strong></td><td>{connections:,}</td></tr>
+                                <tr><td><strong>Access Rate:</strong></td><td>{access_rate:.1f}%</td></tr>
+                                <tr><td><strong>Access Type:</strong></td><td>{access}</td></tr>
+                                <tr><td><strong>Year:</strong></td><td>{year}</td></tr>
+                                <tr><td><strong>Coordinates:</strong></td><td>{community.Latitude:.4f}, {community.Longitude:.4f}</td></tr>
+                            </table>
+                        </div>
+                    """
+                else:
+                    popup = f"""
+                        <div style="width: 250px;">
+                            <h4 style="color: #2c3e50; margin-bottom: 10px;">{settlement}</h4>
+                            <table style="width: 100%; font-size: 12px;">
+                                <tr><td><strong>Project:</strong></td><td>{project_label}</td></tr>
+                                <tr><td><strong>Region:</strong></td><td>{region}</td></tr>
+                                <tr><td><strong>District:</strong></td><td>{district}</td></tr>
+                                <tr><td><strong>Donor:</strong></td><td>{donor_display}</td></tr>
+                                <tr><td><strong>Households:</strong></td><td>{total_hh:,}</td></tr>
+                                <tr><td><strong>Connected:</strong></td><td>{connected_hh:,}</td></tr>
+                                <tr><td><strong>Connections:</strong></td><td>{connections:,}</td></tr>
+                                <tr><td><strong>Access Rate:</strong></td><td>{access_rate:.1f}%</td></tr>
+                                <tr><td><strong>Access Type:</strong></td><td>{access}</td></tr>
+                                <tr><td><strong>Year:</strong></td><td>{year}</td></tr>
+                                <tr><td><strong>Coordinates:</strong></td><td>{community.Latitude:.4f}, {community.Longitude:.4f}</td></tr>
+                            </table>
+                        </div>
+                    """
 
                 for project in project_names:
                     if project not in project_groups:
                         project_groups[project] = folium.FeatureGroup(name=project, show=True)
 
-                    folium.Marker(
-                        coords,
-                        popup=folium.Popup(popup, max_width=300),
-                        tooltip=f"{settlement} - {total_hh:,} HH",
-                        icon=folium.Icon(color=marker_color, icon='home', prefix='fa')
-                    ).add_to(project_groups[project])
+                    # Special marker for focused location
+                    if is_focused:
+                        folium.Marker(
+                            coords,
+                            popup=folium.Popup(popup, max_width=320),
+                            tooltip=f"🎯 {settlement} - {total_hh:,} HH (Focused)",
+                            icon=folium.Icon(color=marker_color, icon='star', prefix='fa')
+                        ).add_to(project_groups[project])
+                    else:
+                        folium.Marker(
+                            coords,
+                            popup=folium.Popup(popup, max_width=300),
+                            tooltip=f"{settlement} - {total_hh:,} HH",
+                            icon=folium.Icon(color=marker_color, icon='home', prefix='fa')
+                        ).add_to(project_groups[project])
 
                 markers_added += 1
 
