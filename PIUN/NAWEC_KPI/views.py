@@ -1221,7 +1221,7 @@ def calculate_npm_list(request):
 
 def calculate_roa_detail(request, calc_id):
     """View for displaying ROA calculation details"""
-    calculation = get_object_or_404(CalculateROA, id=calc_id, loginUser=request.user)
+    calculation = get_object_or_404(CalculateROA, id=calc_id)
     
     context = {
         'calculation': calculation,
@@ -1232,7 +1232,7 @@ def calculate_roa_detail(request, calc_id):
 
 def calculate_roa_edit(request, calc_id):
     """View for editing ROA calculations"""
-    calculation = get_object_or_404(CalculateROA, id=calc_id, loginUser=request.user)
+    calculation = get_object_or_404(CalculateROA, id=calc_id)
     
     if request.method == 'POST':
         # Update calculation fields
@@ -1257,7 +1257,7 @@ def calculate_roa_edit(request, calc_id):
 
 def calculate_npm_detail(request, calc_id):
     """View for displaying NPM calculation details"""
-    calculation = get_object_or_404(CalculateNPM, id=calc_id, loginUser=request.user)
+    calculation = get_object_or_404(CalculateNPM, id=calc_id)
     
     context = {
         'calculation': calculation,
@@ -1268,7 +1268,7 @@ def calculate_npm_detail(request, calc_id):
 
 def calculate_npm_edit(request, calc_id):
     """View for editing NPM calculations"""
-    calculation = get_object_or_404(CalculateNPM, id=calc_id, loginUser=request.user)
+    calculation = get_object_or_404(CalculateNPM, id=calc_id)
     
     if request.method == 'POST':
         # Update calculation fields
