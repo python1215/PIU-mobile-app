@@ -113,17 +113,39 @@ class SaveKPICalculationView(View):
                 # Handle all other KPI types with regular field mapping
                 excluded_fields = ['loginUser', 'year', 'date_created', 'id', 'unique_id']
                 
+                # Handle quarter field specially first
+                quarter_value = input_values.get('quarter')
+                if quarter_value:
+                    try:
+                        # Convert quarter number to Quarter model instance
+                        # Quarter 1 -> "Quarter 1", Quarter 2 -> "Monthly", etc.
+                        quarter_mapping = {
+                            '1': 'Quarter 1',
+                            '2': 'Monthly',
+                            '3': 'Quarter 3',
+                            '4': 'Quarter 4'
+                        }
+                        quarter_name = quarter_mapping.get(str(quarter_value), f'Quarter {quarter_value}')
+                        quarter_instance = Quarter.objects.get(quarter=quarter_name)
+                        create_data['quarter'] = quarter_instance
+                        print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> {quarter_name} -> {quarter_instance}')
+                    except Quarter.DoesNotExist:
+                        # Try alternative mapping
+                        try:
+                            quarter_instance = Quarter.objects.get(id=int(quarter_value))
+                            create_data['quarter'] = quarter_instance
+                            print(f'[DEBUG] API - Quarter mapped by ID: {quarter_value} -> {quarter_instance}')
+                        except (Quarter.DoesNotExist, ValueError):
+                            print(f'[DEBUG] API - Quarter mapping failed for: {quarter_value}')
+                            pass
+                
                 for field in model_class._meta.get_fields():
                     if hasattr(field, 'name') and field.name not in excluded_fields:
                         field_value = input_values.get(field.name)
                         if field_value is not None and field_value != '':
                             if field.name == 'quarter':
-                                # Handle quarter as foreign key
-                                try:
-                                    quarter_instance = Quarter.objects.get(quarter=field_value)
-                                    create_data['quarter'] = quarter_instance
-                                except Quarter.DoesNotExist:
-                                    pass
+                                # Already handled above
+                                continue
                             else:
                                 # Handle regular fields
                                 if hasattr(field, 'get_internal_type'):
