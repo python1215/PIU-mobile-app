@@ -1118,16 +1118,40 @@ def get_kpi_progress_values(request, kpi_indicator_id):
     try:
         kpi_indicator = KPIIndicator.objects.get(id=kpi_indicator_id)
         
+        # Check for compensation_end_target from calculation models
+        compensation_end_target = None
+        End_Target_Value = kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0
+        
+        # Check ROA calculations for this indicator
+        if 'return_on_net_assets' in kpi_indicator.indicator_description.lower() or 'roa' in kpi_indicator.indicator_description.lower():
+            latest_roa = CalculateROA.objects.filter(compensation_amount__gt=0, compensation_end_target__gt=0).order_by('-date_created').first()
+            if latest_roa:
+                compensation_end_target = latest_roa.compensation_end_target
+                End_Target_Value = compensation_end_target
+        
+        # Check NPM calculations for this indicator  
+        elif 'net_profit_margin' in kpi_indicator.indicator_description.lower() or 'npm' in kpi_indicator.indicator_description.lower():
+            latest_npm = CalculateNPM.objects.filter(compensation_amount__gt=0, compensation_end_target__gt=0).order_by('-date_created').first()
+            if latest_npm:
+                compensation_end_target = latest_npm.compensation_end_target
+                End_Target_Value = compensation_end_target
+        
+        # Check DSCR calculations for this indicator
+        elif 'debt_service_coverage' in kpi_indicator.indicator_description.lower() or 'dscr' in kpi_indicator.indicator_description.lower():
+            latest_dscr = CalculateDSCR.objects.filter(compensation_amount__gt=0, compensation_end_target__gt=0).order_by('-date_created').first()
+            if latest_dscr:
+                compensation_end_target = latest_dscr.compensation_end_target
+                End_Target_Value = compensation_end_target
+        
         return JsonResponse({
             'success': True,
             'data': {
                 'baseline_value': kpi_indicator.baseline_value if kpi_indicator.baseline_value is not None else 0,
-                'End_Target_Value': kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0,
+                'End_Target_Value': End_Target_Value,
                 'targeted_weight_value': kpi_indicator.targeted_weight_value if kpi_indicator.targeted_weight_value is not None else 0,
                 'indicator_description': kpi_indicator.indicator_description,
-                'measurement_unit': kpi_indicator.measurement_unit.measurement_unit if kpi_indicator.measurement_unit else None,
-                'indicator_type': kpi_indicator.indicator_type.indicator_type if kpi_indicator.indicator_type else None,
                 'indicator_no': kpi_indicator.indicator_no,
+                'compensation_end_target': compensation_end_target,
             }
         })
     except KPIIndicator.DoesNotExist:
