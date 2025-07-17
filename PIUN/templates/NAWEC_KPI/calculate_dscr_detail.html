@@ -34,19 +34,33 @@
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-12">
-                                            <label class="form-label text-muted">Debt Service</label>
-                                            <div class="h5 text-primary">GMD {{ calculation.debt_service|floatformat:2 }}</div>
+                                            <label class="form-label text-muted">Net Operating Income</label>
+                                            <div class="h5 text-info">GMD {{ calculation.net_operating_income|floatformat:2 }}</div>
                                         </div>
                                         <div class="col-12">
-                                            <label class="form-label text-muted">Cash Flow</label>
-                                            <div class="h5 text-info">GMD {{ calculation.cashflow|floatformat:2 }}</div>
+                                            <label class="form-label text-muted">Total Debt Service</label>
+                                            <div class="h5 text-primary">GMD {{ calculation.total_debt_service|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted">Compensation Amount</label>
+                                            <div class="h5 text-warning">GMD {{ calculation.compensation_amount|floatformat:2|default:"0.00" }}</div>
                                         </div>
                                         <div class="col-12">
                                             <hr>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label text-muted">Calculated DSCR Value</label>
-                                            <div class="h3 text-primary">{{ calculation.calculated_value|floatformat:2 }}</div>
+                                            <div class="h3 text-success">{{ calculation.achieved_value|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted">Compensation End Target</label>
+                                            <div class="h5 {% if calculation.compensation_end_target >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {% if calculation.compensation_end_target %}
+                                                    {{ calculation.compensation_end_target|floatformat:2 }}%
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -63,12 +77,12 @@
                                 <div class="card-body">
                                     <div class="alert alert-light border">
                                         <h6 class="text-primary">DSCR Formula:</h6>
-                                        <code>DSCR = Cash Flow ÷ Debt Service</code>
+                                        <code>DSCR = Net Operating Income ÷ Total Debt Service</code>
                                         <hr class="my-2">
                                         <small class="text-muted">
                                             <strong>Substitution:</strong><br>
-                                            DSCR = GMD {{ calculation.cashflow|floatformat:2 }} ÷ GMD {{ calculation.debt_service|floatformat:2 }}<br>
-                                            DSCR = {{ calculation.calculated_value|floatformat:2 }}
+                                            DSCR = GMD {{ calculation.net_operating_income|floatformat:2 }} ÷ GMD {{ calculation.total_debt_service|floatformat:2 }}<br>
+                                            DSCR = {{ calculation.achieved_value|floatformat:2 }}
                                         </small>
                                     </div>
                                 </div>
@@ -97,7 +111,11 @@
                                             <small class="text-muted">Quarter</small>
                                             <div class="fw-bold">
                                                 {% if calculation.quarter %}
-                                                    Q{{ calculation.quarter.quarter }}
+                                                    {% if calculation.quarter.quarter == "Quarter 1" %}Q1
+                                                    {% elif calculation.quarter.quarter == "Monthly" %}Q2
+                                                    {% elif calculation.quarter.quarter == "Quarter 3" %}Q3
+                                                    {% elif calculation.quarter.quarter == "Quarter 4" %}Q4
+                                                    {% else %}Q1{% endif %}
                                                 {% else %}
                                                     N/A
                                                 {% endif %}
@@ -121,7 +139,7 @@
                                     <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Performance Analysis</h5>
                                 </div>
                                 <div class="card-body">
-                                    {% with dscr_value=calculation.calculated_value|floatformat:2|add:0 %}
+                                    {% with dscr_value=calculation.achieved_value|floatformat:2|add:0 %}
                                     <div class="row align-items-center">
                                         <div class="col-md-8">
                                             <h6>DSCR Performance Interpretation:</h6>
