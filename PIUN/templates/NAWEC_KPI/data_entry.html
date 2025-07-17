@@ -741,6 +741,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Add achieved value event listener to trigger calculations
+    const achievedField = document.getElementById('id_achieved_value');
+    if (achievedField) {
+        achievedField.addEventListener('input', function() {
+            // Trigger percentage calculations when achieved value is entered
+            calculatePercentages();
+        });
+        
+        achievedField.addEventListener('blur', function() {
+            // Also trigger on blur to ensure calculations happen
+            calculatePercentages();
+        });
+    }
+    
     // Add form submission handler to clear form and memory after successful save
     const form = document.querySelector('form');
     if (form) {
@@ -788,6 +802,8 @@ function clearCompensationTargetStyling() {
     window.simpleROAResult = null;
     window.simpleNPMResult = null;
     window.simpleDSCRResult = null;
+    window.compensationEndTarget = null;
+    window.compensationAmount = null;
     
     console.log('🧹 All calculation memory variables cleared');
 }
@@ -821,6 +837,10 @@ function clearFormAndMemory() {
     window.simpleNPMResult = null;
     window.simpleDSCRResult = null;
     window.calculatedROAValue = null;
+    
+    // Clear any stored compensation values
+    window.compensationEndTarget = null;
+    window.compensationAmount = null;
     
     // Clear compensation badges and styling
     clearCompensationTargetStyling();
@@ -5935,8 +5955,17 @@ function calculatePercentages() {
     const targetPercentField = document.getElementById('id_Percentage_progress_towards_end_target');
     
     // Check if achieved value is entered - only calculate when there's an achieved value
-    if (!achievedField || !achievedField.value || achievedField.value.trim() === '') {
-        console.log('⏸️ No achieved value entered - skipping percentage calculations');
+    if (!achievedField || !achievedField.value || achievedField.value.trim() === '' || parseFloat(achievedField.value) === 0) {
+        console.log('⏸️ No achieved value entered or achieved value is 0 - skipping percentage calculations');
+        // Clear percentage fields when no achieved value
+        if (baselinePercentField) {
+            baselinePercentField.value = '';
+            baselinePercentField.style.backgroundColor = '';
+        }
+        if (targetPercentField) {
+            targetPercentField.value = '';
+            targetPercentField.style.backgroundColor = '';
+        }
         return;
     }
     

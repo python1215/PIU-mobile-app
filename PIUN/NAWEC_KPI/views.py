@@ -1118,49 +1118,13 @@ def get_kpi_progress_values(request, kpi_indicator_id):
     try:
         kpi_indicator = KPIIndicator.objects.get(id=kpi_indicator_id)
         
-        # Check for compensation_end_target from calculation models
+        # Use original End_Target_Value from KPI Indicator only
+        # DO NOT fetch compensation_end_target from old calculations to prevent memory persistence
         compensation_end_target = None
         End_Target_Value = kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0
         
-        
-        # Check ROA calculations for this indicator (KPI-01 or KI-01)
-        if (kpi_indicator.indicator_no in ['KPI-01', 'KI-01'] or 
-            'return_on_net_assets' in kpi_indicator.indicator_description.lower() or 
-            'roa' in kpi_indicator.indicator_description.lower()):
-            latest_roa = CalculateROA.objects.filter(
-                compensation_amount__gt=0, 
-                compensation_end_target__isnull=False
-            ).order_by('-date_created').first()
-            if latest_roa and latest_roa.compensation_end_target is not None:
-                compensation_end_target = latest_roa.compensation_end_target
-                End_Target_Value = compensation_end_target
-                print(f"[DEBUG] ROA compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
-        
-        # Check NPM calculations for this indicator (KPI-02 or KI-02)
-        elif (kpi_indicator.indicator_no in ['KPI-02', 'KI-02'] or
-              'net_profit_margin' in kpi_indicator.indicator_description.lower() or 
-              'npm' in kpi_indicator.indicator_description.lower()):
-            latest_npm = CalculateNPM.objects.filter(
-                compensation_amount__gt=0, 
-                compensation_end_target__isnull=False
-            ).order_by('-date_created').first()
-            if latest_npm and latest_npm.compensation_end_target is not None:
-                compensation_end_target = latest_npm.compensation_end_target
-                End_Target_Value = compensation_end_target
-                print(f"[DEBUG] NPM compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
-        
-        # Check DSCR calculations for this indicator (KPI-03 or KI-03)
-        elif (kpi_indicator.indicator_no in ['KPI-03', 'KI-03'] or
-              'debt_service_coverage' in kpi_indicator.indicator_description.lower() or 
-              'dscr' in kpi_indicator.indicator_description.lower()):
-            latest_dscr = CalculateDSCR.objects.filter(
-                compensation_amount__gt=0, 
-                compensation_end_target__isnull=False
-            ).order_by('-date_created').first()
-            if latest_dscr and latest_dscr.compensation_end_target is not None:
-                compensation_end_target = latest_dscr.compensation_end_target
-                End_Target_Value = compensation_end_target
-                print(f"[DEBUG] DSCR compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
+        # Compensation end target should only be applied during active calculations
+        # Not when selecting indicator for new entry
         
         return JsonResponse({
             'success': True,
