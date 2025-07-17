@@ -2903,16 +2903,75 @@ class SaveKPICalculationView(View):
             # Handle different KPI types
             if kpi_type == 'ROA':
                 # ROA calculation
-                net_income = input_values.get('net_income', 0)
+                net_profit_after_tax = input_values.get('net_income', 0)
                 total_assets = input_values.get('total_assets', 0)
+                compensation_amount = input_values.get('compensation_amount', 0)
+                
+                # Get Quarter object
+                quarter_obj = None
+                if quarter:
+                    try:
+                        quarter_obj = Quarter.objects.get(id=quarter)
+                    except Quarter.DoesNotExist:
+                        pass
                 
                 calculation = CalculateROA(
-                    net_income=net_income,
+                    net_profit_after_tax=net_profit_after_tax,
                     total_assets=total_assets,
-                    quarter=quarter,
+                    compensation_amount=compensation_amount,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
+                print(f"[DEBUG] ROA calculation saved: ID={calculation.id}, ROA={calculation.achieved_value}%")
+                
+            elif kpi_type == 'NPM':
+                # NPM calculation
+                netprofit = input_values.get('netprofit', 0)
+                total_revenues_turnover = input_values.get('total_revenues_turnover', 0)
+                compensation_amount = input_values.get('compensation_amount', 0)
+                
+                # Get Quarter object
+                quarter_obj = None
+                if quarter:
+                    try:
+                        quarter_obj = Quarter.objects.get(id=quarter)
+                    except Quarter.DoesNotExist:
+                        pass
+                
+                calculation = CalculateNPM(
+                    netprofit=netprofit,
+                    total_revenues_turnover=total_revenues_turnover,
+                    compensation_amount=compensation_amount,
+                    quarter=quarter_obj,
+                    loginUser=request.user
+                )
+                calculation.save()
+                print(f"[DEBUG] NPM calculation saved: ID={calculation.id}, NPM={calculation.achieved_value}%")
+                
+            elif kpi_type == 'DSCR':
+                # DSCR calculation
+                net_operating_income = input_values.get('net_operating_income', 0)
+                total_debt_service = input_values.get('total_debt_service', 0)
+                compensation_amount = input_values.get('compensation_amount', 0)
+                
+                # Get Quarter object
+                quarter_obj = None
+                if quarter:
+                    try:
+                        quarter_obj = Quarter.objects.get(id=quarter)
+                    except Quarter.DoesNotExist:
+                        pass
+                
+                calculation = CalculateDSCR(
+                    net_operating_income=net_operating_income,
+                    total_debt_service=total_debt_service,
+                    compensation_amount=compensation_amount,
+                    quarter=quarter_obj,
+                    loginUser=request.user
+                )
+                calculation.save()
+                print(f"[DEBUG] DSCR calculation saved: ID={calculation.id}, DSCR={calculation.achieved_value}")
                 
             elif kpi_type == 'DER':
                 # DER calculation
