@@ -1308,7 +1308,7 @@ function showROAPopup() {
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Compensation Amount:</label>
-                    <input type="number" id="roaCompensationAmount" step="0.01" 
+                    <input type="number" id="roaCompensationAmount" step="0.01" value="0"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                            placeholder="Enter compensation amount">
                 </div>
@@ -1384,7 +1384,7 @@ function resetSimpleROA() {
     // Clear all input fields
     document.getElementById('simpleNetProfit').value = '';
     document.getElementById('simpleTotalAssets').value = '';
-    document.getElementById('roaCompensationAmount').value = '';
+    document.getElementById('roaCompensationAmount').value = '0';
     document.getElementById('simpleQuarter').value = '';
     
     // Hide the result section
@@ -1403,6 +1403,7 @@ function resetSimpleROA() {
 function calculateSimpleROA() {
     const netProfit = parseFloat(document.getElementById('simpleNetProfit').value) || 0;
     const totalAssets = parseFloat(document.getElementById('simpleTotalAssets').value) || 0;
+    const compensationAmount = parseFloat(document.getElementById('roaCompensationAmount').value) || 0;
     const quarter = document.getElementById('simpleQuarter').value;
     
     if (!quarter) {
@@ -1423,6 +1424,37 @@ function calculateSimpleROA() {
     
     // Calculate ROA
     const roa = (netProfit / totalAssets) * 100;
+    
+    // Calculate compensation_end_target based on compensation_amount
+    let compensationEndTarget = 0;
+    if (compensationAmount === 0) {
+        compensationEndTarget = -12.0;
+    } else if (compensationAmount >= 2000000000) {
+        compensationEndTarget = 6.0;
+    } else {
+        // Pro rata calculation: -12% + (18% * (compensation_amount / 2000000000))
+        const ratio = compensationAmount / 2000000000;
+        compensationEndTarget = -12.0 + (18.0 * ratio);
+    }
+    
+    // Display result
+    const resultDiv = document.getElementById('simpleResult');
+    const resultValue = document.getElementById('simpleResultValue');
+    
+    resultValue.innerHTML = `
+        <div>ROA = (${netProfit.toLocaleString()} ÷ ${totalAssets.toLocaleString()}) × 100</div>
+        <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
+            ROA = ${roa.toFixed(2)}%
+        </div>
+        <div style="margin-top: 10px; font-size: 1.1rem; color: #007bff;">
+            Compensation End Target: ${compensationEndTarget.toFixed(2)}%
+        </div>
+    `;
+    
+    resultDiv.style.display = 'block';
+    
+    // Store the result
+    window.simpleROAResult = roa.toFixed(2);
     
     // Display result
     const resultDiv = document.getElementById('simpleResult');
@@ -1561,7 +1593,7 @@ function showNPMPopup() {
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Compensation Amount:</label>
-                    <input type="number" id="npmCompensationAmount" step="0.01" 
+                    <input type="number" id="npmCompensationAmount" step="0.01" value="0"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                            placeholder="Enter compensation amount">
                 </div>
@@ -1621,6 +1653,7 @@ function showNPMPopup() {
 function calculateNPM() {
     const netProfit = parseFloat(document.getElementById('npmNetProfit').value) || 0;
     const totalRevenueTurnover = parseFloat(document.getElementById('npmTotalRevenueTurnover').value) || 0;
+    const compensationAmount = parseFloat(document.getElementById('npmCompensationAmount').value) || 0;
     const quarter = document.getElementById('npmQuarter').value;
     
     if (!quarter) {
@@ -1642,6 +1675,18 @@ function calculateNPM() {
     // Calculate NPM using new formula: NPM = Net Profit / Total Revenues Turnover
     const npm = (netProfit / totalRevenueTurnover) * 100;
     
+    // Calculate compensation_end_target based on compensation_amount (NPM specific logic)
+    let compensationEndTarget = 0;
+    if (compensationAmount === 0) {
+        compensationEndTarget = -15.0;
+    } else if (compensationAmount >= 2000000000) {
+        compensationEndTarget = 10.0;
+    } else {
+        // Pro rata calculation: -15% + (25% * (compensation_amount / 2000000000))
+        const ratio = compensationAmount / 2000000000;
+        compensationEndTarget = -15.0 + (25.0 * ratio);
+    }
+    
     // Display result
     const resultDiv = document.getElementById('npmResult');
     const resultValue = document.getElementById('npmResultValue');
@@ -1650,6 +1695,9 @@ function calculateNPM() {
         <div>NPM = ${netProfit.toLocaleString()} / ${totalRevenueTurnover.toLocaleString()} × 100</div>
         <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
             NPM = ${npm.toFixed(2)}%
+        </div>
+        <div style="margin-top: 10px; font-size: 1.1rem; color: #007bff;">
+            Compensation End Target: ${compensationEndTarget.toFixed(2)}%
         </div>
     `;
     
@@ -1730,7 +1778,7 @@ function resetNPMForm() {
     // Clear all input fields
     document.getElementById('npmNetProfit').value = '';
     document.getElementById('npmTotalRevenueTurnover').value = '';
-    document.getElementById('npmCompensationAmount').value = '';
+    document.getElementById('npmCompensationAmount').value = '0';
     document.getElementById('npmQuarter').value = '';
     
     // Hide the result section
@@ -2026,7 +2074,7 @@ function showDSCRPopup() {
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Compensation Amount:</label>
-                    <input type="number" id="dscrCompensationAmount" step="0.01" 
+                    <input type="number" id="dscrCompensationAmount" step="0.01" value="0"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                            placeholder="Enter compensation amount">
                 </div>
@@ -2095,6 +2143,7 @@ function showDSCRPopup() {
 function calculateDSCR() {
     const netIncome = parseFloat(document.getElementById('dscrNetIncome').value) || 0;
     const debtService = parseFloat(document.getElementById('dscrDebtService').value) || 0;
+    const compensationAmount = parseFloat(document.getElementById('dscrCompensationAmount').value) || 0;
     const quarter = document.getElementById('dscrQuarter').value;
     
     if (!quarter) {
@@ -2115,6 +2164,18 @@ function calculateDSCR() {
     
     // Calculate DSCR
     const dscr = netIncome / debtService;
+    
+    // Calculate compensation_end_target based on compensation_amount (same as ROA)
+    let compensationEndTarget = 0;
+    if (compensationAmount === 0) {
+        compensationEndTarget = -12.0;
+    } else if (compensationAmount >= 2000000000) {
+        compensationEndTarget = 6.0;
+    } else {
+        // Pro rata calculation: -12% + (18% * (compensation_amount / 2000000000))
+        const ratio = compensationAmount / 2000000000;
+        compensationEndTarget = -12.0 + (18.0 * ratio);
+    }
     
     // Determine performance level and color
     let performanceText = '';
@@ -2142,6 +2203,9 @@ function calculateDSCR() {
         </div>
         <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
             <i class="bi bi-info-circle"></i> ${performanceText}
+        </div>
+        <div style="margin-top: 10px; font-size: 1.1rem; color: #007bff;">
+            Compensation End Target: ${compensationEndTarget.toFixed(2)}%
         </div>
     `;
     
@@ -2222,7 +2286,7 @@ function resetDSCRForm() {
     // Clear all input fields
     document.getElementById('dscrNetIncome').value = '';
     document.getElementById('dscrDebtService').value = '';
-    document.getElementById('dscrCompensationAmount').value = '';
+    document.getElementById('dscrCompensationAmount').value = '0';
     document.getElementById('dscrQuarter').value = '';
     
     // Hide the result section
