@@ -87,12 +87,8 @@
                                         <th>Net Profit After Tax</th>
                                         <th>Total Assets</th>
                                         <th>ROA (%)</th>
-                                        <th>Baseline Value</th>
-                                        <th>End Target Value</th>
                                         <th>Compensation Amount</th>
                                         <th>Compensation End Target</th>
-                                        <th>Progress from Baseline</th>
-                                        <th>Progress to Target</th>
                                         <th>Calculated By</th>
                                         <th>Date Created</th>
                                         <th>Actions</th>
@@ -135,16 +131,6 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <span class="text-info">
-                                                    {% if calc.baseline_value %}{{ calc.baseline_value|floatformat:2 }}%{% else %}N/A{% endif %}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="text-primary">
-                                                    {% if calc.End_Target_Value %}{{ calc.End_Target_Value|floatformat:2 }}%{% else %}N/A{% endif %}
-                                                </span>
-                                            </td>
-                                            <td>
                                                 <span class="text-warning">
                                                     {% if calc.compensation_amount %}{{ calc.compensation_amount|floatformat:0 }}{% else %}N/A{% endif %}
                                                 </span>
@@ -152,16 +138,6 @@
                                             <td>
                                                 <span class="text-success">
                                                     {% if calc.compensation_end_target %}{{ calc.compensation_end_target|floatformat:2 }}%{% else %}N/A{% endif %}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="text-info">
-                                                    {% if calc.progress_from_baseline %}{{ calc.progress_from_baseline|floatformat:2 }}%{% else %}N/A{% endif %}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="text-primary">
-                                                    {% if calc.progress_towards_end_target %}{{ calc.progress_towards_end_target|floatformat:2 }}%{% else %}N/A{% endif %}
                                                 </span>
                                             </td>
                                             <td>
