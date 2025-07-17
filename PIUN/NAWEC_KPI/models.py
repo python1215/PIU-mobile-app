@@ -123,6 +123,8 @@ class CalculateROA(models.Model):
     total_assets = models.FloatField(null=True,
                                      blank=True,
                                      help_text="Total assets amount")
+    compensation_amount = models.FloatField(
+        null=True, blank=True, help_text="Compensation amount")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -187,6 +189,8 @@ class CalculateNPM(models.Model):
     netprofit = models.FloatField(null=True,
                                   blank=True,
                                   help_text="Total expenses amount")
+    compensation_amount = models.FloatField(
+        null=True, blank=True, help_text="Compensation amount")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -252,6 +256,8 @@ class CalculateDSCR(models.Model):
         null=True, blank=True, help_text="Net operating income amount")
     total_debt_service = models.FloatField(
         null=True, blank=True, help_text="Total debt service amount")
+    compensation_amount = models.FloatField(
+        null=True, blank=True, help_text="Compensation amount")
     unique_id = models.AutoField(primary_key=True)
 
     year = models.ForeignKey(YEAR,
