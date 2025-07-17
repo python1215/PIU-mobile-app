@@ -245,7 +245,7 @@ def performance_dashboard(request):
         total_performance = 0
         count = 0
         for entry in all_entries:
-            if entry.End_Target_Value and entry.End_Target_Value > 0:
+            if entry.End_Target_Value and entry.End_Target_Value != 0:
                 performance = (entry.achieved_value / entry.End_Target_Value) * 100
                 total_performance += performance
                 count += 1
@@ -341,7 +341,7 @@ def performance_dashboard(request):
     
     # Calculate performance and variance for each entry with proper decimal precision
     for entry in recent_entries:
-        if entry.End_Target_Value and entry.End_Target_Value > 0 and entry.achieved_value is not None:
+        if entry.End_Target_Value and entry.End_Target_Value != 0 and entry.achieved_value is not None:
             entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
         else:
             entry.performance_calculated = None
@@ -371,7 +371,7 @@ def performance_dashboard(request):
         total_performance = 0
         count = 0
         for entry in performance_entries:
-            if entry.End_Target_Value and entry.End_Target_Value > 0:
+            if entry.End_Target_Value and entry.End_Target_Value != 0:
                 performance = (entry.achieved_value / entry.End_Target_Value) * 100
                 total_performance += performance
                 count += 1
