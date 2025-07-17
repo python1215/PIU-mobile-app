@@ -228,13 +228,16 @@ class DeleteKPICalculationView(View):
     def delete(self, request):
         try:
             data = json.loads(request.body)
-            kpi_type = data.get('kpi_type')
-            record_id = data.get('id')
+            kpi_type = data.get('kpi_type') or data.get('calc_type')
+            record_id = data.get('id') or data.get('calc_id')
+            
+            print(f'[DEBUG] Delete API - Raw data: {data}')
+            print(f'[DEBUG] Delete API - KPI type: {kpi_type}, Record ID: {record_id}')
             
             if not all([kpi_type, record_id]):
                 return JsonResponse({
                     'success': False,
-                    'error': 'Missing required fields'
+                    'error': f'Missing required fields: kpi_type={kpi_type}, record_id={record_id}'
                 }, status=400)
             
             if kpi_type not in self.KPI_MODEL_MAP:
