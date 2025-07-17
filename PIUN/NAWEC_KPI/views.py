@@ -106,7 +106,7 @@ def dashboard(request):
         # Calculate achievement gauge data
         achievement_data = calculate_achievement_gauge()
         
-        # Recent monitoring entries for quick reference
+        # Recent monitoring entries for quick reference with performance calculations
         recent_entries_query = f"""
             SELECT TOP 5 * FROM {get_sql_server_table_name('NAWEC_KPI_nawec_kpi_monitoring')}
             ORDER BY date_created DESC
@@ -121,7 +121,20 @@ def dashboard(request):
                     self.indicator_description = data[2] if isinstance(data, tuple) else data.get('indicator_description')
                     self.baseline_value = data[3] if isinstance(data, tuple) else data.get('baseline_value')
                     self.achieved_value = data[4] if isinstance(data, tuple) else data.get('achieved_value')
-                    self.date_created = data[5] if isinstance(data, tuple) else data.get('date_created')
+                    self.End_Target_Value = data[5] if isinstance(data, tuple) else data.get('End_Target_Value')
+                    self.date_created = data[6] if isinstance(data, tuple) else data.get('date_created')
+                    
+                    # Calculate performance and variance
+                    if self.End_Target_Value and self.End_Target_Value > 0 and self.achieved_value is not None:
+                        self.performance_calculated = round((self.achieved_value / self.End_Target_Value) * 100, 2)
+                    else:
+                        self.performance_calculated = None
+                        
+                    # Calculate Variance = achieved_value - End_Target_Value
+                    if self.achieved_value is not None and self.End_Target_Value is not None:
+                        self.variance_calculated = round(self.achieved_value - self.End_Target_Value, 2)
+                    else:
+                        self.variance_calculated = None
             
             recent_entries.append(MockEntry(entry_row))
     else:
@@ -145,10 +158,23 @@ def dashboard(request):
         # Calculate achievement gauge data
         achievement_data = calculate_achievement_gauge()
         
-        # Recent monitoring entries for quick reference
+        # Recent monitoring entries for quick reference with performance calculations
         recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
             'project', 'year', 'quarter', 'indicator_type'
         ).order_by('-date_created')[:5]
+        
+        # Calculate performance and variance for each entry
+        for entry in recent_entries:
+            if entry.End_Target_Value and entry.End_Target_Value > 0 and entry.achieved_value is not None:
+                entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
+            else:
+                entry.performance_calculated = None
+                
+            # Calculate Variance = achieved_value - End_Target_Value
+            if entry.achieved_value is not None and entry.End_Target_Value is not None:
+                entry.variance_calculated = round(entry.achieved_value - entry.End_Target_Value, 2)
+            else:
+                entry.variance_calculated = None
     
     # Recent indicators for overview
     recent_indicators = KPIIndicator.objects.order_by('-date_created')[:6]
