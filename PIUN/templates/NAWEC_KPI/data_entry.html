@@ -754,23 +754,44 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
     if (targetField) targetField.style.backgroundColor = '#f0f8ff';
     if (weightField) weightField.style.backgroundColor = '#f0f8ff';
     
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
     // Fetch data from API endpoint using KPIIndicator ID
-    fetch(`/NAWEC_KPI/get-kpi-progress-values/${kpiIndicatorId}/`)
-        .then(response => response.json())
+    fetch(`/NAWEC_KPI/get-kpi-progress-values/${kpiIndicatorId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            console.log('API Response Status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('API Response Data:', data);
             if (data.success) {
                 // Populate form fields with fetched data
                 if (baselineField) {
                     baselineField.value = data.data.baseline_value || '';
                     baselineField.style.backgroundColor = '#e8f5e8';
+                    console.log('Baseline value set:', data.data.baseline_value);
                 }
                 if (targetField) {
                     targetField.value = data.data.End_Target_Value || '';
                     targetField.style.backgroundColor = '#e8f5e8';
+                    console.log('Target value set:', data.data.End_Target_Value);
                 }
                 if (weightField) {
                     weightField.value = data.data.targeted_weight_value || '';
                     weightField.style.backgroundColor = '#e8f5e8';
+                    console.log('Weight value set:', data.data.targeted_weight_value);
                 }
                 
                 // Reset background colors after a delay
@@ -780,9 +801,9 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                     if (weightField) weightField.style.backgroundColor = '';
                 }, 2000);
                 
-                console.log('KPI data loaded successfully:', data.data);
+                console.log('✅ KPI data loaded successfully for indicator:', kpiIndicatorId);
             } else {
-                console.error('Error loading KPI data:', data.error);
+                console.error('❌ Error loading KPI data:', data.error);
                 // Reset background colors on error
                 if (baselineField) baselineField.style.backgroundColor = '';
                 if (targetField) targetField.style.backgroundColor = '';
@@ -790,7 +811,7 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
             }
         })
         .catch(error => {
-            console.error('Error fetching KPI data:', error);
+            console.error('❌ Error fetching KPI data:', error);
             // Reset background colors on error
             if (baselineField) baselineField.style.backgroundColor = '';
             if (targetField) targetField.style.backgroundColor = '';
@@ -1448,22 +1469,6 @@ function calculateSimpleROA() {
         </div>
         <div style="margin-top: 10px; font-size: 1.1rem; color: #007bff;">
             Compensation End Target: ${compensationEndTarget.toFixed(2)}%
-        </div>
-    `;
-    
-    resultDiv.style.display = 'block';
-    
-    // Store the result
-    window.simpleROAResult = roa.toFixed(2);
-    
-    // Display result
-    const resultDiv = document.getElementById('simpleResult');
-    const resultValue = document.getElementById('simpleResultValue');
-    
-    resultValue.innerHTML = `
-        <div>ROA = (${netProfit.toLocaleString()} ÷ ${totalAssets.toLocaleString()}) × 100</div>
-        <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
-            ROA = ${roa.toFixed(2)}%
         </div>
     `;
     
