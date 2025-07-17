@@ -1519,15 +1519,32 @@ function calculateSimpleROA() {
     // Store the result
     window.simpleROAResult = roa.toFixed(2);
     
-    // Update End_Target_Value field if compensation_end_target is available
-    if (compensationEndTarget && compensationEndTarget > 0) {
-        const endTargetField = document.getElementById('id_End_Target_Value');
-        if (endTargetField) {
-            endTargetField.value = compensationEndTarget.toFixed(2);
-            endTargetField.style.backgroundColor = '#ffe8e8';
-            endTargetField.title = `Updated with ROA compensation end target: ${compensationEndTarget.toFixed(2)}%`;
-            console.log('🎯 End Target Value updated with ROA compensation end target:', compensationEndTarget.toFixed(2));
+    // Update End_Target_Value field with compensation_end_target
+    const endTargetField = document.getElementById('id_End_Target_Value');
+    if (endTargetField && compensationEndTarget !== 0) {
+        endTargetField.value = compensationEndTarget.toFixed(2);
+        endTargetField.style.backgroundColor = '#ffe8e8';
+        endTargetField.style.border = '2px solid #ff9999';
+        endTargetField.title = `Updated with ROA compensation end target: ${compensationEndTarget.toFixed(2)}%`;
+        
+        // Add compensation badge
+        const existingBadge = endTargetField.parentNode.querySelector('.compensation-badge');
+        if (existingBadge) {
+            existingBadge.remove();
         }
+        
+        const badge = document.createElement('span');
+        badge.className = 'compensation-badge badge badge-warning badge-sm position-absolute';
+        badge.textContent = 'Compensation Target';
+        badge.style.fontSize = '10px';
+        badge.style.right = '10px';
+        badge.style.top = '5px';
+        badge.style.zIndex = '10';
+        
+        endTargetField.parentNode.style.position = 'relative';
+        endTargetField.parentNode.appendChild(badge);
+        
+        console.log(`✅ ROA - End_Target_Value updated to compensation_end_target: ${compensationEndTarget.toFixed(2)}%`);
     }
 }
 
@@ -1764,15 +1781,32 @@ function calculateNPM() {
     // Store the result
     window.simpleNPMResult = npm.toFixed(2);
     
-    // Update End_Target_Value field if compensation_end_target is available
-    if (compensationEndTarget && compensationEndTarget > 0) {
-        const endTargetField = document.getElementById('id_End_Target_Value');
-        if (endTargetField) {
-            endTargetField.value = compensationEndTarget.toFixed(2);
-            endTargetField.style.backgroundColor = '#ffe8e8';
-            endTargetField.title = `Updated with NPM compensation end target: ${compensationEndTarget.toFixed(2)}%`;
-            console.log('🎯 End Target Value updated with NPM compensation end target:', compensationEndTarget.toFixed(2));
+    // Update End_Target_Value field with compensation_end_target
+    const endTargetField = document.getElementById('id_End_Target_Value');
+    if (endTargetField && compensationEndTarget !== 0) {
+        endTargetField.value = compensationEndTarget.toFixed(2);
+        endTargetField.style.backgroundColor = '#ffe8e8';
+        endTargetField.style.border = '2px solid #ff9999';
+        endTargetField.title = `Updated with NPM compensation end target: ${compensationEndTarget.toFixed(2)}%`;
+        
+        // Add compensation badge
+        const existingBadge = endTargetField.parentNode.querySelector('.compensation-badge');
+        if (existingBadge) {
+            existingBadge.remove();
         }
+        
+        const badge = document.createElement('span');
+        badge.className = 'compensation-badge badge badge-warning badge-sm position-absolute';
+        badge.textContent = 'Compensation Target';
+        badge.style.fontSize = '10px';
+        badge.style.right = '10px';
+        badge.style.top = '5px';
+        badge.style.zIndex = '10';
+        
+        endTargetField.parentNode.style.position = 'relative';
+        endTargetField.parentNode.appendChild(badge);
+        
+        console.log(`✅ NPM - End_Target_Value updated to compensation_end_target: ${compensationEndTarget.toFixed(2)}%`);
     }
 }
 
@@ -2283,15 +2317,32 @@ function calculateDSCR() {
     // Store the result
     window.simpleDSCRResult = dscr.toFixed(3);
     
-    // Update End_Target_Value field if compensation_end_target is available
-    if (compensationEndTarget && compensationEndTarget > 0) {
-        const endTargetField = document.getElementById('id_End_Target_Value');
-        if (endTargetField) {
-            endTargetField.value = compensationEndTarget.toFixed(2);
-            endTargetField.style.backgroundColor = '#ffe8e8';
-            endTargetField.title = `Updated with DSCR compensation end target: ${compensationEndTarget.toFixed(2)}%`;
-            console.log('🎯 End Target Value updated with DSCR compensation end target:', compensationEndTarget.toFixed(2));
+    // Update End_Target_Value field with compensation_end_target
+    const endTargetField = document.getElementById('id_End_Target_Value');
+    if (endTargetField && compensationEndTarget !== 0) {
+        endTargetField.value = compensationEndTarget.toFixed(2);
+        endTargetField.style.backgroundColor = '#ffe8e8';
+        endTargetField.style.border = '2px solid #ff9999';
+        endTargetField.title = `Updated with DSCR compensation end target: ${compensationEndTarget.toFixed(2)}%`;
+        
+        // Add compensation badge
+        const existingBadge = endTargetField.parentNode.querySelector('.compensation-badge');
+        if (existingBadge) {
+            existingBadge.remove();
         }
+        
+        const badge = document.createElement('span');
+        badge.className = 'compensation-badge badge badge-warning badge-sm position-absolute';
+        badge.textContent = 'Compensation Target';
+        badge.style.fontSize = '10px';
+        badge.style.right = '10px';
+        badge.style.top = '5px';
+        badge.style.zIndex = '10';
+        
+        endTargetField.parentNode.style.position = 'relative';
+        endTargetField.parentNode.appendChild(badge);
+        
+        console.log(`✅ DSCR - End_Target_Value updated to compensation_end_target: ${compensationEndTarget.toFixed(2)}%`);
     }
 }
 

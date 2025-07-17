@@ -1122,7 +1122,6 @@ def get_kpi_progress_values(request, kpi_indicator_id):
         compensation_end_target = None
         End_Target_Value = kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0
         
-        print(f"[DEBUG] Initial values - indicator_no: {kpi_indicator.indicator_no}, Original End_Target_Value: {End_Target_Value}")
         
         # Check ROA calculations for this indicator (KPI-01 or KI-01)
         if (kpi_indicator.indicator_no in ['KPI-01', 'KI-01'] or 
