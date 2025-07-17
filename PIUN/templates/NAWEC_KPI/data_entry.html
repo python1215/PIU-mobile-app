@@ -741,6 +741,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Add form submission handler to clear form and memory after successful save
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Allow form to submit normally, then clear on success
+            setTimeout(function() {
+                // Check if form submission was successful (no error messages)
+                const errorMessages = document.querySelectorAll('.alert-danger, .errorlist');
+                if (errorMessages.length === 0) {
+                    // Clear form and memory after successful submission
+                    clearFormAndMemory();
+                    console.log('✅ Form submitted successfully - all fields and memory cleared');
+                }
+            }, 1000); // Wait 1 second to allow form processing
+        });
+    }
+    
     // Initialize cascading dropdowns in edit mode
     {% if is_edit and entry %}
         initializeEditDropdowns();
@@ -773,6 +790,42 @@ function clearCompensationTargetStyling() {
     window.simpleDSCRResult = null;
     
     console.log('🧹 All calculation memory variables cleared');
+}
+
+function clearFormAndMemory() {
+    // Clear all form fields
+    const form = document.querySelector('form');
+    if (form) {
+        // Reset all form fields except CSRF token
+        const formElements = form.elements;
+        for (let i = 0; i < formElements.length; i++) {
+            const element = formElements[i];
+            if (element.name !== 'csrfmiddlewaretoken') {
+                if (element.type === 'text' || element.type === 'number' || element.type === 'email' || element.tagName === 'TEXTAREA') {
+                    element.value = '';
+                    element.style.backgroundColor = '';
+                    element.style.border = '';
+                    element.title = '';
+                } else if (element.type === 'select-one') {
+                    element.selectedIndex = 0;
+                    element.style.backgroundColor = '';
+                } else if (element.type === 'checkbox' || element.type === 'radio') {
+                    element.checked = false;
+                }
+            }
+        }
+    }
+    
+    // Clear all memory variables
+    window.simpleROAResult = null;
+    window.simpleNPMResult = null;
+    window.simpleDSCRResult = null;
+    window.calculatedROAValue = null;
+    
+    // Clear compensation badges and styling
+    clearCompensationTargetStyling();
+    
+    console.log('🧹 Form and memory completely cleared after successful submission');
 }
 
 function clearKPIFields() {
@@ -891,7 +944,29 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                     if (weightField) weightField.style.backgroundColor = '';
                 }, 2000);
                 
+                // Clear achieved value and progress fields when new indicator is selected
+                const achievedField = document.getElementById('id_achieved_value');
+                const baselinePercentField = document.getElementById('id_Percentage_progress_from_baseline');
+                const targetPercentField = document.getElementById('id_Percentage_progress_towards_end_target');
+                
+                if (achievedField) {
+                    achievedField.value = '';
+                    achievedField.style.backgroundColor = '';
+                }
+                if (baselinePercentField) {
+                    baselinePercentField.value = '';
+                    baselinePercentField.style.backgroundColor = '';
+                }
+                if (targetPercentField) {
+                    targetPercentField.value = '';
+                    targetPercentField.style.backgroundColor = '';
+                }
+                
                 console.log('✅ KPI data loaded successfully for indicator:', kpiIndicatorId);
+                console.log('🧹 Achieved value and progress fields cleared');
+                
+                // Do NOT trigger percentage calculations here - only when achieved value is entered
+                // Remove any automatic percentage calculation triggers
             } else {
                 console.error('❌ Error loading KPI data:', data.error);
                 // Reset background colors on error
@@ -1009,11 +1084,8 @@ function populateFieldsFromIndicator(indicatorId) {
                 targetedWeightField.style.backgroundColor = '#e7f3ff';
             }
             
-            // Calculate and populate progress values automatically
-            calculateAndPopulateProgressValues();
-            
-            // Also call the existing calculatePercentages function
-            setTimeout(calculatePercentages, 100);
+            // Do NOT auto-calculate percentages when KPI is selected
+            // Only calculate when achieved value is entered
         }
     })
     .catch(error => {
@@ -5862,6 +5934,12 @@ function calculatePercentages() {
     const baselinePercentField = document.getElementById('id_Percentage_progress_from_baseline');
     const targetPercentField = document.getElementById('id_Percentage_progress_towards_end_target');
     
+    // Check if achieved value is entered - only calculate when there's an achieved value
+    if (!achievedField || !achievedField.value || achievedField.value.trim() === '') {
+        console.log('⏸️ No achieved value entered - skipping percentage calculations');
+        return;
+    }
+    
     console.log('🔍 Field Detection Status:', {
         baseline: baselineField ? 'FOUND' : 'NOT FOUND',
         achieved: achievedField ? 'FOUND' : 'NOT FOUND', 
@@ -6101,9 +6179,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (indicatorField) {
         indicatorField.addEventListener('change', function() {
-            // Load indicator details first, then calculate percentages
+            // Load indicator details but DO NOT calculate percentages
             populateFieldsFromIndicator(this.value);
-            setTimeout(calculatePercentages, 500); // Allow time for data loading
+            // Percentage calculations will only happen when achieved value is entered
         });
     }
     
