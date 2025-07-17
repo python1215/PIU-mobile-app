@@ -125,6 +125,8 @@ class CalculateROA(models.Model):
                                      help_text="Total assets amount")
     compensation_amount = models.FloatField(
         null=True, blank=True, help_text="Compensation amount")
+    compensation_end_target = models.FloatField(
+        null=True, blank=True, help_text="End target value based on compensation amount")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -151,6 +153,22 @@ class CalculateROA(models.Model):
         if self.net_profit_after_tax is not None and self.total_assets is not None and self.total_assets != 0:
             self.achieved_value = (self.net_profit_after_tax /
                                    self.total_assets) * 100
+        
+        # Calculate compensation_end_target based on compensation_amount
+        if self.compensation_amount is not None:
+            if self.compensation_amount == 0:
+                self.compensation_end_target = -12.0
+            elif self.compensation_amount >= 2000000000:
+                self.compensation_end_target = 6.0
+            elif 1 <= self.compensation_amount <= 1999999999:
+                # Pro rata calculation: 
+                # compensation_end_target = -12 + (18 * (compensation_amount - 1) / (2000000000 - 1))
+                # Range: -12% to 6% (total range of 18%)
+                ratio = (self.compensation_amount - 1) / (2000000000 - 1)
+                self.compensation_end_target = -12.0 + (18.0 * ratio)
+            else:
+                # For values less than 1 or invalid, default to -12%
+                self.compensation_end_target = -12.0
         
         # Calculate progress using KPI-01 formula
         if self.achieved_value is not None and self.baseline_value is not None:
@@ -191,6 +209,8 @@ class CalculateNPM(models.Model):
                                   help_text="Total expenses amount")
     compensation_amount = models.FloatField(
         null=True, blank=True, help_text="Compensation amount")
+    compensation_end_target = models.FloatField(
+        null=True, blank=True, help_text="End target value based on compensation amount")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -219,6 +239,22 @@ class CalculateNPM(models.Model):
                 and self.netprofit is not None
                 and self.total_revenues_turnover > 0):
             self.achieved_value = (self.netprofit / self.total_revenues_turnover) * 100
+        
+        # Calculate compensation_end_target based on compensation_amount (same logic as ROA)
+        if self.compensation_amount is not None:
+            if self.compensation_amount == 0:
+                self.compensation_end_target = -12.0
+            elif self.compensation_amount >= 2000000000:
+                self.compensation_end_target = 6.0
+            elif 1 <= self.compensation_amount <= 1999999999:
+                # Pro rata calculation: 
+                # compensation_end_target = -12 + (18 * (compensation_amount - 1) / (2000000000 - 1))
+                # Range: -12% to 6% (total range of 18%)
+                ratio = (self.compensation_amount - 1) / (2000000000 - 1)
+                self.compensation_end_target = -12.0 + (18.0 * ratio)
+            else:
+                # For values less than 1 or invalid, default to -12%
+                self.compensation_end_target = -12.0
         
         # Calculate progress using KPI-02 formula
         if self.achieved_value is not None and self.baseline_value is not None:
@@ -258,6 +294,8 @@ class CalculateDSCR(models.Model):
         null=True, blank=True, help_text="Total debt service amount")
     compensation_amount = models.FloatField(
         null=True, blank=True, help_text="Compensation amount")
+    compensation_end_target = models.FloatField(
+        null=True, blank=True, help_text="End target value based on compensation amount")
     unique_id = models.AutoField(primary_key=True)
 
     year = models.ForeignKey(YEAR,
@@ -281,6 +319,22 @@ class CalculateDSCR(models.Model):
                 and self.total_debt_service != 0):
             self.achieved_value = float(self.net_operating_income) / float(
                 self.total_debt_service)
+        
+        # Calculate compensation_end_target based on compensation_amount (same logic as ROA)
+        if self.compensation_amount is not None:
+            if self.compensation_amount == 0:
+                self.compensation_end_target = -12.0
+            elif self.compensation_amount >= 2000000000:
+                self.compensation_end_target = 6.0
+            elif 1 <= self.compensation_amount <= 1999999999:
+                # Pro rata calculation: 
+                # compensation_end_target = -12 + (18 * (compensation_amount - 1) / (2000000000 - 1))
+                # Range: -12% to 6% (total range of 18%)
+                ratio = (self.compensation_amount - 1) / (2000000000 - 1)
+                self.compensation_end_target = -12.0 + (18.0 * ratio)
+            else:
+                # For values less than 1 or invalid, default to -12%
+                self.compensation_end_target = -12.0
         
         # Calculate progress using KPI-03 formula
         if self.achieved_value is not None and self.baseline_value is not None:
