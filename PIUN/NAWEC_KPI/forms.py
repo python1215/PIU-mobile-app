@@ -234,6 +234,23 @@ class KPIMonitoringDataForm(forms.ModelForm):
         required=True
     )
     
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # Handle quarter field conversion from ID to model instance
+        quarter_id = self.cleaned_data.get('quarter')
+        if quarter_id:
+            try:
+                quarter_instance = Quarter.objects.get(id=quarter_id)
+                instance.quarter = quarter_instance
+            except Quarter.DoesNotExist:
+                # Handle invalid quarter ID
+                pass
+        
+        if commit:
+            instance.save()
+        return instance
+    
     class Meta:
         model = NAWEC_KPI_Monitoring
         fields = [
