@@ -104,7 +104,15 @@
                                             </td>
                                             <td>
                                                 <div class="fw-bold">
-                                                    {% if calc.quarter %}{{ calc.quarter.quarter }}{% else %}N/A{% endif %}
+                                                    {% if calc.quarter %}
+                                                        {% if calc.quarter.quarter == 'Quarter 1' %}Q1
+                                                        {% elif calc.quarter.quarter == 'Quarter 2' %}Q2
+                                                        {% elif calc.quarter.quarter == 'Quarter 3' %}Q3
+                                                        {% elif calc.quarter.quarter == 'Quarter 4' %}Q4
+                                                        {% elif calc.quarter.quarter == 'Monthly' %}Q2
+                                                        {% else %}{{ calc.quarter.quarter }}
+                                                        {% endif %}
+                                                    {% else %}N/A{% endif %}
                                                 </div>
                                             </td>
                                             <td>

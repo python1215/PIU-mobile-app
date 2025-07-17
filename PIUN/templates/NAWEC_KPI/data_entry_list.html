@@ -65,7 +65,13 @@
                                     {% for quarter in available_quarters %}
                                         <option value="{{ quarter.id }}" 
                                                 {% if quarter_filter == quarter.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ quarter.quarter }}
+                                            {% if quarter.quarter == 'Quarter 1' %}Q1
+                                            {% elif quarter.quarter == 'Quarter 2' %}Q2
+                                            {% elif quarter.quarter == 'Quarter 3' %}Q3
+                                            {% elif quarter.quarter == 'Quarter 4' %}Q4
+                                            {% elif quarter.quarter == 'Monthly' %}Q2
+                                            {% else %}{{ quarter.quarter }}
+                                            {% endif %}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -173,7 +179,13 @@
                                             <td>{{ entry.year.profile_year|default:"N/A" }}</td>
                                             <td>
                                                 {% if entry.quarter %}
-                                                    Q{{ entry.quarter.quarter }}
+                                                    {% if entry.quarter.quarter == 'Quarter 1' %}Q1
+                                                    {% elif entry.quarter.quarter == 'Quarter 2' %}Q2
+                                                    {% elif entry.quarter.quarter == 'Quarter 3' %}Q3
+                                                    {% elif entry.quarter.quarter == 'Quarter 4' %}Q4
+                                                    {% elif entry.quarter.quarter == 'Monthly' %}Q2
+                                                    {% else %}Q{{ entry.quarter.quarter }}
+                                                    {% endif %}
                                                 {% else %}
                                                     N/A
                                                 {% endif %}

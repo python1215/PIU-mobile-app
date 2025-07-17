@@ -405,7 +405,13 @@
                             <option value="">All</option>
                             {% for quarter in quarters %}
                                 <option value="{{ quarter.id }}" {% if request.GET.quarter == quarter.id|stringformat:"s" %}selected{% endif %}>
-                                    Q{{ quarter.quarter }}
+                                    {% if quarter.quarter == 'Quarter 1' %}Q1
+                                    {% elif quarter.quarter == 'Quarter 2' %}Q2
+                                    {% elif quarter.quarter == 'Quarter 3' %}Q3
+                                    {% elif quarter.quarter == 'Quarter 4' %}Q4
+                                    {% elif quarter.quarter == 'Monthly' %}Q2
+                                    {% else %}Q{{ quarter.quarter }}
+                                    {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
