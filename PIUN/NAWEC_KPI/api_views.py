@@ -118,10 +118,10 @@ class SaveKPICalculationView(View):
                 if quarter_value:
                     try:
                         # Convert quarter number to Quarter model instance
-                        # Quarter 1 -> "Quarter 1", Quarter 2 -> "Monthly", etc.
+                        # Map numeric quarters to existing Quarter records
                         quarter_mapping = {
                             '1': 'Quarter 1',
-                            '2': 'Monthly',
+                            '2': 'Monthly',  # Use existing Monthly record for Q2
                             '3': 'Quarter 3',
                             '4': 'Quarter 4'
                         }
