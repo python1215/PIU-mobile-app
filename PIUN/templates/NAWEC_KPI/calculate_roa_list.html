@@ -87,6 +87,12 @@
                                         <th>Net Profit After Tax</th>
                                         <th>Total Assets</th>
                                         <th>ROA (%)</th>
+                                        <th>Baseline Value</th>
+                                        <th>End Target Value</th>
+                                        <th>Compensation Amount</th>
+                                        <th>Compensation End Target</th>
+                                        <th>Progress from Baseline</th>
+                                        <th>Progress to Target</th>
                                         <th>Calculated By</th>
                                         <th>Date Created</th>
                                         <th>Actions</th>
@@ -102,27 +108,61 @@
                                             </td>
                                             <td>
                                                 <div class="fw-bold">
-                                                    {% if calc.quarter %}Q{{ calc.quarter.Quarter }}{% else %}N/A{% endif %}
+                                                    {% if calc.quarter %}{{ calc.quarter.quarter }}{% else %}N/A{% endif %}
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-success">{{ calc.net_profit_after_tax|floatformat:2 }}</span>
+                                                <span class="fw-bold text-success">
+                                                    {% if calc.net_profit_after_tax %}{{ calc.net_profit_after_tax|floatformat:2 }}{% else %}N/A{% endif %}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span class="fw-bold">{{ calc.total_assets|floatformat:2 }}</span>
+                                                <span class="fw-bold">
+                                                    {% if calc.total_assets %}{{ calc.total_assets|floatformat:2 }}{% else %}N/A{% endif %}
+                                                </span>
                                             </td>
                                             <td>
-                                                {% if calc.calculated_value %}
-                                                    {% if calc.calculated_value >= 15 %}
-                                                        <span class="badge bg-success fs-6">{{ calc.calculated_value|floatformat:2 }}%</span>
-                                                    {% elif calc.calculated_value >= 10 %}
-                                                        <span class="badge bg-warning fs-6">{{ calc.calculated_value|floatformat:2 }}%</span>
+                                                {% if calc.achieved_value %}
+                                                    {% if calc.achieved_value >= 15 %}
+                                                        <span class="badge bg-success fs-6">{{ calc.achieved_value|floatformat:2 }}%</span>
+                                                    {% elif calc.achieved_value >= 10 %}
+                                                        <span class="badge bg-warning fs-6">{{ calc.achieved_value|floatformat:2 }}%</span>
                                                     {% else %}
-                                                        <span class="badge bg-danger fs-6">{{ calc.calculated_value|floatformat:2 }}%</span>
+                                                        <span class="badge bg-danger fs-6">{{ calc.achieved_value|floatformat:2 }}%</span>
                                                     {% endif %}
                                                 {% else %}
                                                     <span class="text-muted">N/A</span>
                                                 {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="text-info">
+                                                    {% if calc.baseline_value %}{{ calc.baseline_value|floatformat:2 }}%{% else %}N/A{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-primary">
+                                                    {% if calc.End_Target_Value %}{{ calc.End_Target_Value|floatformat:2 }}%{% else %}N/A{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-warning">
+                                                    {% if calc.compensation_amount %}{{ calc.compensation_amount|floatformat:0 }}{% else %}N/A{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-success">
+                                                    {% if calc.compensation_end_target %}{{ calc.compensation_end_target|floatformat:2 }}%{% else %}N/A{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-info">
+                                                    {% if calc.progress_from_baseline %}{{ calc.progress_from_baseline|floatformat:2 }}%{% else %}N/A{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-primary">
+                                                    {% if calc.progress_towards_end_target %}{{ calc.progress_towards_end_target|floatformat:2 }}%{% else %}N/A{% endif %}
+                                                </span>
                                             </td>
                                             <td>
                                                 <small class="text-muted">{{ calc.loginUser.username }}</small>

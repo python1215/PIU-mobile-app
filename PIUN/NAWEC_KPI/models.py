@@ -240,21 +240,21 @@ class CalculateNPM(models.Model):
                 and self.total_revenues_turnover > 0):
             self.achieved_value = (self.netprofit / self.total_revenues_turnover) * 100
         
-        # Calculate compensation_end_target based on compensation_amount (same logic as ROA)
+        # Calculate compensation_end_target based on compensation_amount (NPM specific logic)
         if self.compensation_amount is not None:
             if self.compensation_amount == 0:
-                self.compensation_end_target = -12.0
+                self.compensation_end_target = -15.0
             elif self.compensation_amount >= 2000000000:
-                self.compensation_end_target = 6.0
+                self.compensation_end_target = 10.0
             elif 1 <= self.compensation_amount <= 1999999999:
                 # Pro rata calculation: 
-                # compensation_end_target = -12 + (18 * (compensation_amount - 1) / (2000000000 - 1))
-                # Range: -12% to 6% (total range of 18%)
+                # compensation_end_target = -15 + (25 * (compensation_amount - 1) / (2000000000 - 1))
+                # Range: -15% to 10% (total range of 25%)
                 ratio = (self.compensation_amount - 1) / (2000000000 - 1)
-                self.compensation_end_target = -12.0 + (18.0 * ratio)
+                self.compensation_end_target = -15.0 + (25.0 * ratio)
             else:
-                # For values less than 1 or invalid, default to -12%
-                self.compensation_end_target = -12.0
+                # For values less than 1 or invalid, default to -15%
+                self.compensation_end_target = -15.0
         
         # Calculate progress using KPI-02 formula
         if self.achieved_value is not None and self.baseline_value is not None:

@@ -110,7 +110,7 @@ class SaveKPICalculationView(View):
                         pass
                         
             else:
-                # Handle all other KPI types with regular field mapping
+                # Handle all other KPI types with popup form field mapping
                 excluded_fields = ['loginUser', 'year', 'date_created', 'id', 'unique_id']
                 
                 # Handle quarter field specially first
@@ -139,8 +139,37 @@ class SaveKPICalculationView(View):
                             print(f'[DEBUG] API - Quarter mapping failed for: {quarter_value}')
                             pass
                 
+                # Special field mapping for popup forms
+                field_mapping = {
+                    'net_income': 'net_profit_after_tax',  # ROA popup uses 'net_income'
+                    'total_assets': 'total_assets',
+                    'compensation_amount': 'compensation_amount',
+                    'achieved_value': 'achieved_value',
+                    'baseline_value': 'baseline_value',
+                    'End_Target_Value': 'End_Target_Value',
+                    'net_profit': 'netprofit',  # NPM popup uses 'net_profit'
+                    'total_revenue': 'total_revenues_turnover',  # NPM popup uses 'total_revenue'
+                    'net_operating_income': 'net_operating_income',
+                    'total_debt_service': 'total_debt_service',
+                }
+                
+                # Map popup form fields to model fields
+                for popup_field, model_field in field_mapping.items():
+                    field_value = input_values.get(popup_field)
+                    if field_value is not None and field_value != '':
+                        try:
+                            create_data[model_field] = float(field_value)
+                            print(f'[DEBUG] API - Field mapped: {popup_field} -> {model_field} = {field_value}')
+                        except (ValueError, TypeError):
+                            print(f'[DEBUG] API - Field mapping failed: {popup_field} -> {model_field} = {field_value}')
+                            pass
+                
+                # Handle any remaining fields from the model
                 for field in model_class._meta.get_fields():
                     if hasattr(field, 'name') and field.name not in excluded_fields:
+                        if field.name in create_data:
+                            # Already mapped above
+                            continue
                         field_value = input_values.get(field.name)
                         if field_value is not None and field_value != '':
                             if field.name == 'quarter':
