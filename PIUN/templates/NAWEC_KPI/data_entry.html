@@ -729,6 +729,9 @@ document.addEventListener('DOMContentLoaded', function() {
         kpiSelect.addEventListener('change', function() {
             const selectedKPI = this.value;
             if (selectedKPI) {
+                // Clear compensation target styling before fetching new data
+                clearCompensationTargetStyling();
+                
                 // Fetch KPI indicator data and populate form fields
                 fetchKPIIndicatorData(selectedKPI);
             } else {
@@ -743,6 +746,53 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeEditDropdowns();
     {% endif %}
 });
+
+function clearCompensationTargetStyling() {
+    const targetField = document.getElementById('id_End_Target_Value');
+    if (targetField) {
+        // Reset field styling to default
+        targetField.style.backgroundColor = '';
+        targetField.style.border = '';
+        targetField.title = '';
+        
+        // Remove any existing compensation badges
+        const existingBadge = targetField.parentNode.querySelector('.compensation-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Reset parent container position
+        targetField.parentNode.style.position = '';
+        
+        console.log('🧹 Compensation target styling cleared');
+    }
+}
+
+function clearKPIFields() {
+    const baselineField = document.getElementById('id_baseline_value');
+    const targetField = document.getElementById('id_End_Target_Value');
+    const weightField = document.getElementById('id_Targeted_Achieved_weight');
+    
+    if (baselineField) {
+        baselineField.value = '';
+        baselineField.style.backgroundColor = '';
+    }
+    if (targetField) {
+        targetField.value = '';
+        targetField.style.backgroundColor = '';
+        targetField.style.border = '';
+        targetField.title = '';
+    }
+    if (weightField) {
+        weightField.value = '';
+        weightField.style.backgroundColor = '';
+    }
+    
+    // Clear any compensation badges
+    clearCompensationTargetStyling();
+    
+    console.log('🧹 All KPI fields cleared');
+}
 
 function fetchKPIIndicatorData(kpiIndicatorId) {
     // Show loading state
