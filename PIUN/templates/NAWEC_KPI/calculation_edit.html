@@ -33,6 +33,25 @@
                                                id="total_assets" name="total_assets" 
                                                value="{{ calculation.total_assets }}" required>
                                     </div>
+                                {% elif calc_type == 'NPM' %}
+                                    <div class="mb-3">
+                                        <label for="total_revenues_turnover" class="form-label">Total Revenue</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               id="total_revenues_turnover" name="total_revenues_turnover" 
+                                               value="{{ calculation.total_revenues_turnover }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="netprofit" class="form-label">Net Profit</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               id="netprofit" name="netprofit" 
+                                               value="{{ calculation.netprofit }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="compensation_amount" class="form-label">Compensation Amount</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               id="compensation_amount" name="compensation_amount" 
+                                               value="{{ calculation.compensation_amount|default:0 }}" required>
+                                    </div>
                                 {% elif calc_type == 'PAT' %}
                                     <div class="mb-3">
                                         <label for="total_revenues_turnover" class="form-label">Total Revenue</label>
@@ -57,12 +76,19 @@
                             <div class="col-md-6">
                                 <h5>Calculation Info</h5>
                                 <div class="alert alert-info">
-                                    <strong>Current Calculated Value:</strong> {{ calculation.calculated_value|floatformat:2 }}
+                                    <strong>Current Calculated Value:</strong> 
+                                    {% if calc_type == 'NPM' %}
+                                        {{ calculation.achieved_value|floatformat:2 }}%
+                                    {% else %}
+                                        {{ calculation.calculated_value|floatformat:2 }}
+                                    {% endif %}
                                 </div>
                                 <div class="alert alert-secondary">
                                     <strong>Formula:</strong><br>
                                     {% if calc_type == 'ROA' %}
                                         ROA = (Net Profit After Tax ÷ Total Assets) × 100
+                                    {% elif calc_type == 'NPM' %}
+                                        NPM = (Net Profit ÷ Total Revenue) × 100
                                     {% elif calc_type == 'PAT' %}
                                         PAT = Total Revenue - Total Expenses - Tax Amount
                                     {% endif %}

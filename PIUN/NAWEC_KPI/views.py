@@ -1274,6 +1274,7 @@ def calculate_npm_edit(request, calc_id):
         # Update calculation fields
         calculation.total_revenues_turnover = float(request.POST.get('total_revenues_turnover', 0))
         calculation.netprofit = float(request.POST.get('netprofit', 0))
+        calculation.compensation_amount = float(request.POST.get('compensation_amount', 0))
         
         # Recalculate NPM
         if calculation.total_revenues_turnover > 0:
