@@ -785,14 +785,30 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                 }
                 if (targetField) {
                     targetField.value = data.data.End_Target_Value || '';
-                    targetField.style.backgroundColor = '#e8f5e8';
-                    console.log('Target value set:', data.data.End_Target_Value);
                     
-                    // If compensation_end_target is available, show additional info
-                    if (data.data.compensation_end_target) {
-                        console.log('📊 Compensation End Target applied:', data.data.compensation_end_target);
+                    // If compensation_end_target is available, show it was applied
+                    if (data.data.compensation_end_target !== null && data.data.compensation_end_target !== undefined) {
                         targetField.style.backgroundColor = '#ffe8e8';
                         targetField.title = `Updated with compensation end target: ${data.data.compensation_end_target}%`;
+                        console.log('📊 Compensation End Target applied:', data.data.compensation_end_target);
+                        console.log('Target value replaced with compensation end target:', data.data.End_Target_Value);
+                        
+                        // Add a small badge next to the field to indicate compensation target
+                        const badge = document.createElement('span');
+                        badge.className = 'badge badge-warning badge-sm ml-2';
+                        badge.textContent = 'Compensation Target Applied';
+                        badge.style.fontSize = '10px';
+                        
+                        // Remove any existing badges first
+                        const existingBadge = targetField.parentNode.querySelector('.badge');
+                        if (existingBadge) {
+                            existingBadge.remove();
+                        }
+                        
+                        targetField.parentNode.appendChild(badge);
+                    } else {
+                        targetField.style.backgroundColor = '#e8f5e8';
+                        console.log('Target value set:', data.data.End_Target_Value);
                     }
                 }
                 if (weightField) {
@@ -804,7 +820,14 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                 // Reset background colors after a delay
                 setTimeout(() => {
                     if (baselineField) baselineField.style.backgroundColor = '';
-                    if (targetField) targetField.style.backgroundColor = '';
+                    if (targetField) {
+                        targetField.style.backgroundColor = '';
+                        // Remove compensation badge if it exists
+                        const existingBadge = targetField.parentNode.querySelector('.badge');
+                        if (existingBadge) {
+                            existingBadge.remove();
+                        }
+                    }
                     if (weightField) weightField.style.backgroundColor = '';
                 }, 2000);
                 
@@ -833,7 +856,14 @@ function clearKPIFields() {
     const weightField = document.getElementById('id_Targeted_Achieved_weight');
     
     if (baselineField) baselineField.value = '';
-    if (targetField) targetField.value = '';
+    if (targetField) {
+        targetField.value = '';
+        // Remove compensation badge if it exists
+        const existingBadge = targetField.parentNode.querySelector('.badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+    }
     if (weightField) weightField.value = '';
 }
 
