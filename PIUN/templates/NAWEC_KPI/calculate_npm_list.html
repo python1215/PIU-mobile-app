@@ -87,6 +87,7 @@
                                         <th>Total Revenue</th>
                                         <th>Net Profit</th>
                                         <th>Compensation Amount</th>
+                                        <th>Compensation End Target</th>
                                         <th>NPM (%)</th>
                                         <th>Calculated By</th>
                                         <th>Date Created</th>
@@ -116,6 +117,17 @@
                                             </td>
                                             <td>
                                                 <span class="fw-bold text-info">{{ calc.compensation_amount|floatformat:2 }}</span>
+                                            </td>
+                                            <td>
+                                                {% if calc.compensation_end_target %}
+                                                    {% if calc.compensation_end_target > 0 %}
+                                                        <span class="badge bg-success fs-6">{{ calc.compensation_end_target|floatformat:2 }}%</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger fs-6">{{ calc.compensation_end_target|floatformat:2 }}%</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 {% if calc.achieved_value %}
