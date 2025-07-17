@@ -788,26 +788,33 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                     
                     // If compensation_end_target is available, show it was applied
                     if (data.data.compensation_end_target !== null && data.data.compensation_end_target !== undefined) {
-                        targetField.style.backgroundColor = '#ffe8e8';
+                        targetField.style.backgroundColor = '#ffe8e8 !important';
+                        targetField.style.border = '2px solid #ff9999';
                         targetField.title = `Updated with compensation end target: ${data.data.compensation_end_target}%`;
                         console.log('📊 Compensation End Target applied:', data.data.compensation_end_target);
                         console.log('Target value replaced with compensation end target:', data.data.End_Target_Value);
                         
-                        // Add a small badge next to the field to indicate compensation target
-                        const badge = document.createElement('span');
-                        badge.className = 'badge badge-warning badge-sm ml-2';
-                        badge.textContent = 'Compensation Target Applied';
-                        badge.style.fontSize = '10px';
-                        
                         // Remove any existing badges first
-                        const existingBadge = targetField.parentNode.querySelector('.badge');
+                        const existingBadge = targetField.parentNode.querySelector('.compensation-badge');
                         if (existingBadge) {
                             existingBadge.remove();
                         }
                         
+                        // Add a small badge next to the field to indicate compensation target
+                        const badge = document.createElement('span');
+                        badge.className = 'compensation-badge badge badge-warning badge-sm position-absolute';
+                        badge.textContent = 'Compensation Target';
+                        badge.style.fontSize = '10px';
+                        badge.style.right = '10px';
+                        badge.style.top = '5px';
+                        badge.style.zIndex = '10';
+                        
+                        // Make the parent container relative for badge positioning
+                        targetField.parentNode.style.position = 'relative';
                         targetField.parentNode.appendChild(badge);
                     } else {
                         targetField.style.backgroundColor = '#e8f5e8';
+                        targetField.style.border = '';
                         console.log('Target value set:', data.data.End_Target_Value);
                     }
                 }
@@ -817,16 +824,12 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                     console.log('Weight value set:', data.data.targeted_weight_value);
                 }
                 
-                // Reset background colors after a delay
+                // Reset background colors after a delay, but keep compensation indicators
                 setTimeout(() => {
                     if (baselineField) baselineField.style.backgroundColor = '';
-                    if (targetField) {
+                    if (targetField && data.data.compensation_end_target === null) {
+                        // Only reset target field if no compensation_end_target is applied
                         targetField.style.backgroundColor = '';
-                        // Remove compensation badge if it exists
-                        const existingBadge = targetField.parentNode.querySelector('.badge');
-                        if (existingBadge) {
-                            existingBadge.remove();
-                        }
                     }
                     if (weightField) weightField.style.backgroundColor = '';
                 }, 2000);
@@ -858,8 +861,10 @@ function clearKPIFields() {
     if (baselineField) baselineField.value = '';
     if (targetField) {
         targetField.value = '';
+        targetField.style.backgroundColor = '';
+        targetField.style.border = '';
         // Remove compensation badge if it exists
-        const existingBadge = targetField.parentNode.querySelector('.badge');
+        const existingBadge = targetField.parentNode.querySelector('.compensation-badge');
         if (existingBadge) {
             existingBadge.remove();
         }
