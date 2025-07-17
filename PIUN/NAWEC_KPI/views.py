@@ -470,7 +470,7 @@ def data_entry(request):
         form.fields['measurement_unit'].queryset = Measurement_Unit.objects.all()
         form.fields['collection_frequency'].queryset = Data_Collection_Frequency.objects.all()
         form.fields['year'].queryset = YEAR.objects.all()
-        form.fields['quarter'].queryset = Quarter.objects.all()
+        # Quarter field is now a ChoiceField defined in the form, not a ModelChoiceField
     
     # Get recent entries for display
     recent_entries = NAWEC_KPI_Monitoring.objects.select_related(

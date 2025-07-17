@@ -206,7 +206,33 @@ class CalculateTSQRForm(forms.ModelForm):
 
 class KPIMonitoringDataForm(forms.ModelForm):
     
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Dynamically populate quarter choices from database
+        quarter_choices = [('', 'Select Quarter')]
+        for quarter in Quarter.objects.all():
+            # Map quarter names to display numbers
+            display_text = quarter.quarter
+            if quarter.quarter == 'Quarter 1':
+                display_text = '1'
+            elif quarter.quarter == 'Quarter 2':
+                display_text = '2'
+            elif quarter.quarter == 'Quarter 3':
+                display_text = '3'
+            elif quarter.quarter == 'Quarter 4':
+                display_text = '4'
+            elif quarter.quarter == 'Monthly':
+                display_text = '2'  # Map Monthly to Quarter 2
+            
+            quarter_choices.append((quarter.id, display_text))
+        
+        self.fields['quarter'].choices = quarter_choices
+    
+    quarter = forms.ChoiceField(
+        choices=[],  # Will be populated dynamically
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
+    )
     
     class Meta:
         model = NAWEC_KPI_Monitoring
@@ -216,7 +242,7 @@ class KPIMonitoringDataForm(forms.ModelForm):
             'collection_frequency', 'baseline_value', 'End_Target_Value',
             'achieved_value', 'Percentage_progress_from_baseline',
             'Percentage_progress_towards_end_target', 'Targeted_Achieved_weight',
-            'year', 'quarter', 'remarks'
+            'year', 'remarks'
         ]
         widgets = {
             'project': forms.Select(attrs={'class': 'form-select'}),
@@ -255,7 +281,6 @@ class KPIMonitoringDataForm(forms.ModelForm):
                 'readonly': True
             }),
             'year': forms.Select(attrs={'class': 'form-select'}),
-            'quarter': forms.Select(attrs={'class': 'form-select'}),
             'remarks': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
