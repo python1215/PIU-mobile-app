@@ -766,6 +766,13 @@ function clearCompensationTargetStyling() {
         
         console.log('🧹 Compensation target styling cleared');
     }
+    
+    // Clear all calculation memory variables
+    window.simpleROAResult = null;
+    window.simpleNPMResult = null;
+    window.simpleDSCRResult = null;
+    
+    console.log('🧹 All calculation memory variables cleared');
 }
 
 function clearKPIFields() {
@@ -1652,10 +1659,25 @@ async function useSimpleROAResult() {
                 calculatePercentages();
             }
             
+            // Clear all popup form fields and memory
+            document.getElementById('simpleNetProfit').value = '';
+            document.getElementById('simpleTotalAssets').value = '';
+            document.getElementById('roaCompensationAmount').value = '0';
+            document.getElementById('simpleQuarter').value = '';
+            
+            // Clear stored result from memory
+            window.simpleROAResult = null;
+            
+            // Hide the result section
+            const resultDiv = document.getElementById('simpleResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+            
             // Close the popup
             closeSimplePopup();
             
-            alert('ROA calculation saved successfully and value applied to form!');
+            alert('ROA calculation saved to database successfully! All form fields cleared.');
         } else {
             alert('Error saving ROA calculation: ' + result.error);
         }
@@ -1914,10 +1936,25 @@ async function useNPMResult() {
                 calculatePercentages();
             }
             
+            // Clear all popup form fields and memory
+            document.getElementById('npmNetProfit').value = '';
+            document.getElementById('npmTotalRevenueTurnover').value = '';
+            document.getElementById('npmCompensationAmount').value = '0';
+            document.getElementById('npmQuarter').value = '';
+            
+            // Clear stored result from memory
+            window.simpleNPMResult = null;
+            
+            // Hide the result section
+            const resultDiv = document.getElementById('npmResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+            
             // Close the popup
             closeNPMPopup();
             
-            alert('NPM calculation saved and value applied successfully!');
+            alert('NPM calculation saved to database successfully! All form fields cleared.');
         } else {
             throw new Error(result.error || 'Failed to save NPM calculation');
         }
@@ -2450,10 +2487,25 @@ async function useDSCRResult() {
                 calculatePercentages();
             }
             
+            // Clear all popup form fields and memory
+            document.getElementById('dscrNetIncome').value = '';
+            document.getElementById('dscrDebtService').value = '';
+            document.getElementById('dscrCompensationAmount').value = '0';
+            document.getElementById('dscrQuarter').value = '';
+            
+            // Clear stored result from memory
+            window.simpleDSCRResult = null;
+            
+            // Hide the result section
+            const resultDiv = document.getElementById('dscrResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+            
             // Close the popup
             closeDSCRPopup();
             
-            alert('DSCR calculation saved and value applied successfully!');
+            alert('DSCR calculation saved to database successfully! All form fields cleared.');
         } else {
             throw new Error(result.error || 'Failed to save DSCR calculation');
         }
