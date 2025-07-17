@@ -1122,8 +1122,10 @@ def get_kpi_progress_values(request, kpi_indicator_id):
         compensation_end_target = None
         End_Target_Value = kpi_indicator.End_Target_Value if kpi_indicator.End_Target_Value is not None else 0
         
-        # Check ROA calculations for this indicator (KPI-01)
-        if (kpi_indicator.indicator_no == 'KPI-01' or 
+        print(f"[DEBUG] Initial values - indicator_no: {kpi_indicator.indicator_no}, Original End_Target_Value: {End_Target_Value}")
+        
+        # Check ROA calculations for this indicator (KPI-01 or KI-01)
+        if (kpi_indicator.indicator_no in ['KPI-01', 'KI-01'] or 
             'return_on_net_assets' in kpi_indicator.indicator_description.lower() or 
             'roa' in kpi_indicator.indicator_description.lower()):
             latest_roa = CalculateROA.objects.filter(
@@ -1133,9 +1135,10 @@ def get_kpi_progress_values(request, kpi_indicator_id):
             if latest_roa and latest_roa.compensation_end_target is not None:
                 compensation_end_target = latest_roa.compensation_end_target
                 End_Target_Value = compensation_end_target
+                print(f"[DEBUG] ROA compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
         
-        # Check NPM calculations for this indicator (KPI-02)
-        elif (kpi_indicator.indicator_no == 'KPI-02' or
+        # Check NPM calculations for this indicator (KPI-02 or KI-02)
+        elif (kpi_indicator.indicator_no in ['KPI-02', 'KI-02'] or
               'net_profit_margin' in kpi_indicator.indicator_description.lower() or 
               'npm' in kpi_indicator.indicator_description.lower()):
             latest_npm = CalculateNPM.objects.filter(
@@ -1145,9 +1148,10 @@ def get_kpi_progress_values(request, kpi_indicator_id):
             if latest_npm and latest_npm.compensation_end_target is not None:
                 compensation_end_target = latest_npm.compensation_end_target
                 End_Target_Value = compensation_end_target
+                print(f"[DEBUG] NPM compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
         
-        # Check DSCR calculations for this indicator (KPI-03)
-        elif (kpi_indicator.indicator_no == 'KPI-03' or
+        # Check DSCR calculations for this indicator (KPI-03 or KI-03)
+        elif (kpi_indicator.indicator_no in ['KPI-03', 'KI-03'] or
               'debt_service_coverage' in kpi_indicator.indicator_description.lower() or 
               'dscr' in kpi_indicator.indicator_description.lower()):
             latest_dscr = CalculateDSCR.objects.filter(
@@ -1157,6 +1161,7 @@ def get_kpi_progress_values(request, kpi_indicator_id):
             if latest_dscr and latest_dscr.compensation_end_target is not None:
                 compensation_end_target = latest_dscr.compensation_end_target
                 End_Target_Value = compensation_end_target
+                print(f"[DEBUG] DSCR compensation_end_target applied: {compensation_end_target} -> End_Target_Value: {End_Target_Value}")
         
         return JsonResponse({
             'success': True,
