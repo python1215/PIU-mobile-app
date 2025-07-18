@@ -636,7 +636,7 @@
                     {% for entry in recent_entries %}
                     <tr>
                         <td class="text-sm">
-                            <div class="font-medium">{{ entry.indicator_description }}</div>
+                            <div class="font-medium">{{ entry.indicator_description.indicator_description }}</div>
                             <div class="text-xs opacity-70">{{ entry.indicator_type }}</div>
                         </td>
                         <td class="text-sm">{{ entry.baseline_value|floatformat:2 }}</td>
@@ -660,7 +660,7 @@
                         </td>
                         <td class="text-sm">
                             {% if entry.achieved_value is not None and entry.End_Target_Value is not None %}
-                                {% if "Total Losses Electricity" in entry.indicator_description or "ATC&C" in entry.indicator_description %}
+                                {% if "Total Losses Electricity" in entry.indicator_description.indicator_description or "ATC&C" in entry.indicator_description.indicator_description %}
                                     <!-- For ATC&C, lower is better -->
                                     {% if entry.achieved_value <= entry.End_Target_Value %}
                                         <div class="font-bold text-green-600">Achieve</div>
