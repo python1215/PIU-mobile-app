@@ -577,7 +577,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button type="button" class="btn btn-sm btn-outline-primary select-contract-btn" 
                                 data-contract-id="${contract.id}"
                                 data-contract-ref="${contract.contract_refNo}"
-                                data-contract-url="${contract.detail_url}">
+                                data-contract-url="${contract.detail_url}"
+                                onclick="return false;">
                                 <i class="bi bi-check-circle me-1"></i>Select
                             </button>
                             <a href="${contract.detail_url}" target="_blank" class="btn btn-sm btn-outline-info">
@@ -597,6 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
         contractList.addEventListener('click', function(e) {
             if (e.target.closest('.select-contract-btn')) {
                 e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.select-contract-btn');
                 const contractRef = btn.dataset.contractRef;
                 const contractUrl = btn.dataset.contractUrl;
@@ -606,6 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (selectedContract) {
                     selectContract(selectedContract);
                 }
+                return false; // Prevent any further event handling
             }
         });
         
@@ -622,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!contractRefInput) {
             console.error('Contract reference input field not found!');
             alert('Error: Could not find contract reference field');
-            return;
+            return false;
         }
         
         // Set contract reference in the input field
@@ -632,18 +635,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store contract details for potential navigation
         contractRefInput.dataset.contractDetailUrl = contract.detail_url;
         
-        // Close modal
+        // Close modal immediately
         const modal = document.getElementById('contractSelectionModal');
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        bootstrapModal.hide();
+        if (bootstrapModal) {
+            bootstrapModal.hide();
+        }
         
-        // Optional: Show success message with clickable link
+        // Show simple success message without links to prevent navigation
         const successMsg = document.createElement('div');
         successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
         successMsg.innerHTML = `
-            <strong>Contract Selected:</strong> 
-            <a href="${contract.detail_url}" class="alert-link" target="_blank">${contract.contract_refNo}</a>
-            <small class="text-muted d-block">Click the contract reference to view details</small>
+            <strong>Contract Selected:</strong> ${contract.contract_refNo}
+            <small class="text-muted d-block">Contract reference has been populated</small>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         
@@ -651,15 +655,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const inputGroup = contractRefInput.parentNode;
         inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
         
-        // Auto-remove success message after 5 seconds
+        // Auto-remove success message after 3 seconds
         setTimeout(() => {
             if (successMsg.parentNode) {
                 successMsg.parentNode.removeChild(successMsg);
             }
-        }, 5000);
+        }, 3000);
         
         // Trigger change event on the input to ensure form validation updates
         contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        return false; // Prevent any navigation
     }
     
     // Initialize button state on page load
