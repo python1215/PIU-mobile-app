@@ -458,7 +458,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Contract Selection Popup Functionality
     const contractTypeSelect = document.getElementById('id_type_of_contract');
     const selectContractBtn = document.getElementById('selectContractBtn');
-    const contractRefInput = document.getElementById('id_contract_refNo');
+    // Find contract reference input field - try multiple methods to ensure we get the right field
+    let contractRefInput = selectContractBtn.parentNode.querySelector('input[name="contract_refNo"]');
+    if (!contractRefInput) {
+        contractRefInput = document.querySelector('input[name="contract_refNo"]');
+    }
+    if (!contractRefInput) {
+        contractRefInput = document.getElementById('id_contract_refNo');
+    }
+    
+    console.log('Contract reference input field found:', contractRefInput);
     
     // Enable/disable contract selection button based on project and contract type selection
     function updateContractSelectionButton() {
@@ -607,8 +616,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to select a contract
     function selectContract(contract) {
+        console.log('Selecting contract:', contract);
+        console.log('Contract reference input field:', contractRefInput);
+        
+        if (!contractRefInput) {
+            console.error('Contract reference input field not found!');
+            alert('Error: Could not find contract reference field');
+            return;
+        }
+        
         // Set contract reference in the input field
         contractRefInput.value = contract.contract_refNo;
+        console.log('Set contract reference value to:', contract.contract_refNo);
         
         // Store contract details for potential navigation
         contractRefInput.dataset.contractDetailUrl = contract.detail_url;
@@ -638,6 +657,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 successMsg.parentNode.removeChild(successMsg);
             }
         }, 5000);
+        
+        // Trigger change event on the input to ensure form validation updates
+        contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
     
     // Initialize button state on page load
