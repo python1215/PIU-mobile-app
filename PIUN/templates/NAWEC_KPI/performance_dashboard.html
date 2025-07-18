@@ -636,7 +636,7 @@
                     {% for entry in recent_entries %}
                     <tr>
                         <td class="text-sm">
-                            <div class="font-medium">{{ entry.indicator_description|truncatechars:30 }}</div>
+                            <div class="font-medium">{{ entry.indicator_description }}</div>
                             <div class="text-xs opacity-70">{{ entry.indicator_type }}</div>
                         </td>
                         <td class="text-sm">{{ entry.baseline_value|floatformat:2 }}</td>
