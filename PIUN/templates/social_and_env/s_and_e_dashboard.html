@@ -29,7 +29,7 @@
         <div class="card bg-primary text-white h-100">
             <div class="card-body text-center">
                 <i class="bi bi-file-earmark-check display-4 mb-2"></i>
-                <h5 class="card-title">ESIA Records</h5>
+                <h5 class="card-title">ESIA/ESMP Records</h5>
                 <h2 class="mb-0">{{ esia_count }}</h2>
             </div>
             <div class="card-footer bg-primary-subtle">
@@ -177,11 +177,11 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted">No ESIA records yet.</p>
+                    <p class="text-muted">No ESIA/ESMP records yet.</p>
                 {% endif %}
             </div>
             <div class="card-footer">
-                <a href="{% url 'esia_list' %}" class="btn btn-outline-primary btn-sm w-100">View All ESIA</a>
+                <a href="{% url 'esia_list' %}" class="btn btn-outline-primary btn-sm w-100">View All ESIA/ESMP</a>
             </div>
         </div>
     </div>

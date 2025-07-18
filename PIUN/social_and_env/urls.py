@@ -5,7 +5,7 @@ urlpatterns = [
     # Main social and environmental dashboard
     path('', views.social_env_dashboard, name='social_env_dashboard'),
     
-    # ESIA Management
+    # ESIA/ESMP Management
     path('esia/', views.esia_list, name='esia_list'),
     path('esia/add/', views.esia_add, name='esia_add'),
     path('esia/<str:pk>/', views.esia_detail, name='esia_detail'),

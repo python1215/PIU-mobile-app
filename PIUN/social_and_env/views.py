@@ -34,7 +34,7 @@ from utils.database_utils import (is_sql_server_mode, get_cascading_dropdown_dat
 # ======================== ESIA Views ========================
 @login_required
 def esia_list(request):
-    """Enhanced ESIA list view with filtering and pagination"""
+    """Enhanced ESIA/ESMP list view with filtering and pagination"""
     esia_list = ESIA.objects.select_related('project_name',
                                             'type_of_investment',
                                             'loginUser').all()
@@ -93,10 +93,10 @@ def esia_add(request):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA record created successfully!')
+                messages.success(request, 'ESIA/ESMP record created successfully!')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error saving ESIA record: {str(e)}')
+                messages.error(request, f'Error saving ESIA/ESMP record: {str(e)}')
         else:
             # Print form errors for debugging
             for field, errors in form.errors.items():
@@ -105,13 +105,13 @@ def esia_add(request):
     else:
         form = ESIAForm()
 
-    context = {'form': form, 'title': 'Add ESIA Record'}
+    context = {'form': form, 'title': 'Add ESIA/ESMP Record'}
     return render(request, 'social_and_env/esia/esia_form.html', context)
 
 
 @login_required
 def esia_edit(request, pk):
-    """Edit ESIA record"""
+    """Edit ESIA/ESMP record"""
     esia = get_object_or_404(ESIA, pk=pk)
 
     if request.method == 'POST':
@@ -121,10 +121,10 @@ def esia_edit(request, pk):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA record updated successfully!')
+                messages.success(request, 'ESIA/ESMP record updated successfully!')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error updating ESIA record: {str(e)}')
+                messages.error(request, f'Error updating ESIA/ESMP record: {str(e)}')
         else:
             # Print form errors for debugging
             for field, errors in form.errors.items():
@@ -133,7 +133,7 @@ def esia_edit(request, pk):
     else:
         form = ESIAForm(instance=esia)
 
-    context = {'form': form, 'esia': esia, 'title': 'Edit ESIA Record'}
+    context = {'form': form, 'esia': esia, 'title': 'Edit ESIA/ESMP Record'}
     return render(request, 'social_and_env/esia/esia_edit.html', context)
 
 
@@ -143,10 +143,10 @@ def esia_edit(request, pk):
 @login_required
 @require_http_methods(["DELETE"])
 def esia_delete(request, pk):
-    """Delete ESIA record"""
+    """Delete ESIA/ESMP record"""
     esia = get_object_or_404(ESIA, pk=pk)
     esia.delete()
-    messages.success(request, 'ESIA record deleted successfully!')
+    messages.success(request, 'ESIA/ESMP record deleted successfully!')
     return JsonResponse({'success': True})
 
 
@@ -1241,13 +1241,13 @@ def esia_list(request):
             'projects': projects,
             'regions': regions,
             'years': years,
-            'title': 'ESIA Management'
+            'title': 'ESIA/ESMP Management'
         }
         
         return render(request, 'social_and_env/esia/esia_list.html', context)
     
     except Exception as e:
-        messages.error(request, f'Error loading ESIA records: {str(e)}')
+        messages.error(request, f'Error loading ESIA/ESMP records: {str(e)}')
         # Get filter data for error case
         from PIU_Financial_mgt.models import Project
         projects = Project.objects.all()
@@ -1260,13 +1260,13 @@ def esia_list(request):
             'projects': projects,
             'regions': regions,
             'years': years,
-            'title': 'ESIA Management'
+            'title': 'ESIA/ESMP Management'
         })
 
 
 @login_required
 def esia_add(request):
-    """Add new ESIA record"""
+    """Add new ESIA/ESMP record"""
     if request.method == 'POST':
         form = ESIAForm(request.POST)
         if form.is_valid():
@@ -1274,22 +1274,22 @@ def esia_add(request):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA record added successfully.')
+                messages.success(request, 'ESIA/ESMP record added successfully.')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error saving ESIA record: {str(e)}')
+                messages.error(request, f'Error saving ESIA/ESMP record: {str(e)}')
     else:
         form = ESIAForm()
     
     return render(request, 'social_and_env/esia/esia_form.html', {
         'form': form,
-        'title': 'Add ESIA Record'
+        'title': 'Add ESIA/ESMP Record'
     })
 
 
 @login_required
 def esia_detail(request, pk):
-    """ESIA detail view"""
+    """ESIA/ESMP detail view"""
     try:
         esia = get_object_or_404(ESIA.objects.select_related(
             'project_name', 'type_of_investment', 'loginUser'
@@ -1297,13 +1297,13 @@ def esia_detail(request, pk):
         
         context = {
             'esia': esia,
-            'title': f'ESIA Details - {esia.project_name.project if esia.project_name else "Unknown"}',
+            'title': f'ESIA/ESMP Details - {esia.project_name.project if esia.project_name else "Unknown"}',
         }
         
         return render(request, 'social_and_env/esia/esia_detail.html', context)
     
     except Exception as e:
-        messages.error(request, f'Error loading ESIA details: {str(e)}')
+        messages.error(request, f'Error loading ESIA/ESMP details: {str(e)}')
         return redirect('esia_list')
 
 
