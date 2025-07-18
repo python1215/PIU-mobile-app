@@ -1,5 +1,6 @@
 {% extends "PIU_Financial_mgt/base.html" %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Delete Subcomponent - PIUN{% endblock %}
 
@@ -50,7 +51,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="text-muted small">Allocation</label>
-                            <div class="fw-bold text-danger">${{ subcomponent.allocation|floatformat:2 }} {{ subcomponent.currency.currency }}</div>
+                            <div class="fw-bold text-danger">{{ subcomponent.allocation|format_currency:subcomponent.currency.currency }}</div>
                         </div>
                         <div class="col-12">
                             <label class="text-muted small">Description</label>
