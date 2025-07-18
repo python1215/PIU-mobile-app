@@ -663,20 +663,20 @@
                                 {% if "Total Losses Electricity" in entry.indicator_description.indicator_description or "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
                                     <!-- For ATC&C, NRW, NWCD, and NECD, lower is better -->
                                     {% if entry.achieved_value <= entry.End_Target_Value %}
-                                        <div class="font-bold text-green-600">Achieve</div>
+                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieve</span>
                                     {% else %}
-                                        <div class="font-bold text-red-600">Not Achieve</div>
+                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieve</span>
                                     {% endif %}
                                 {% else %}
                                     <!-- For other indicators, higher is better -->
                                     {% if entry.achieved_value >= entry.End_Target_Value %}
-                                        <div class="font-bold text-green-600">Achieve</div>
+                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieve</span>
                                     {% else %}
-                                        <div class="font-bold text-red-600">Not Achieve</div>
+                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieve</span>
                                     {% endif %}
                                 {% endif %}
                             {% else %}
-                                <div class="font-bold text-gray-500">N/A</div>
+                                <span class="badge bg-secondary text-white px-3 py-1 rounded-pill">N/A</span>
                             {% endif %}
                         </td>
 
