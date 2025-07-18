@@ -1576,13 +1576,13 @@ def calculate_tde_detail(request, calc_id):
     calculation = get_object_or_404(CalculateTDE, id=calc_id)
     
     # Performance analysis
-    performance_status = "excellent" if calculation.calculated_value >= 5 else "good" if calculation.calculated_value >= 3 else "needs_improvement"
+    performance_status = "excellent" if calculation.achieved_value >= 5 else "good" if calculation.achieved_value >= 3 else "needs_improvement"
     
     context = {
         'calculation': calculation,
         'calculation_type': 'TDE',
         'performance_status': performance_status,
-        'efficiency_percentage': min((calculation.calculated_value / 5) * 100, 100) if calculation.calculated_value else 0
+        'efficiency_percentage': min((calculation.achieved_value / 5) * 100, 100) if calculation.achieved_value else 0
     }
     return render(request, 'NAWEC_KPI/calculate_tde_detail.html', context)
 
@@ -1598,12 +1598,12 @@ def calculate_tde_edit(request, calc_id):
         quarter_id = request.POST.get('quarter')
         
         # Calculate TDE: TDE = Total Training Days Conducted ÷ Total Number of Employees
-        calculated_value = (total_training_days_conducted / total_number_of_employees) if total_number_of_employees > 0 else 0
+        achieved_value = (total_training_days_conducted / total_number_of_employees) if total_number_of_employees > 0 else 0
         
         # Update calculation
         calculation.total_training_days_conducted = total_training_days_conducted
         calculation.total_number_of_employees = total_number_of_employees
-        calculation.calculated_value = calculated_value
+        calculation.achieved_value = achieved_value
         if year_id:
             calculation.year_id = year_id
         if quarter_id:
@@ -3150,9 +3150,13 @@ class SaveKPICalculationView(View):
                 training_days = input_values.get('training_days', 0)
                 employees = input_values.get('employees', 0)
                 
+                # Calculate TDE value: Training Days ÷ Employees
+                tde_value = (training_days / employees) if employees > 0 else 0
+                
                 calculation = CalculateTDE(
-                    training_days=training_days,
-                    employees=employees,
+                    total_training_days_conducted=training_days,
+                    total_number_of_employees=employees,
+                    achieved_value=tde_value,
                     quarter=quarter,
                     loginUser=request.user
                 )

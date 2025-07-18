@@ -68,7 +68,7 @@
                                     <td>{{ calculation.total_number_of_employees|floatformat:0 }}</td>
                                     <td>
                                         <span class="badge bg-success">
-                                            {{ calculation.calculated_value|floatformat:2 }}
+                                            {{ calculation.achieved_value|floatformat:2 }}
                                         </span>
                                     </td>
                                     <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}2025{% endif %}</td>
