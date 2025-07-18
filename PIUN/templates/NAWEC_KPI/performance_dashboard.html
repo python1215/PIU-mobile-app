@@ -660,8 +660,8 @@
                         </td>
                         <td class="text-sm">
                             {% if entry.achieved_value is not None and entry.End_Target_Value is not None %}
-                                {% if "Total Losses Electricity" in entry.indicator_description.indicator_description or "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description %}
-                                    <!-- For ATC&C and NRW, lower is better -->
+                                {% if "Total Losses Electricity" in entry.indicator_description.indicator_description or "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
+                                    <!-- For ATC&C, NRW, NWCD, and NECD, lower is better -->
                                     {% if entry.achieved_value <= entry.End_Target_Value %}
                                         <div class="font-bold text-green-600">Achieve</div>
                                     {% else %}

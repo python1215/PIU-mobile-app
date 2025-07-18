@@ -290,6 +290,7 @@ The PIUN directory contains specialized modules:
 - July 18, 2025. Implemented special status logic for Total Losses Electricity [ATC&C] indicator in Performance Dashboard: added conditional logic where achieved value less than target shows "Achieve" status (lower losses are better), while other indicators use standard logic where achieved value greater than or equal to target shows "Achieve" status, enhanced template with ATC&C-specific status calculation
 - July 18, 2025. Fixed ATC&C status logic foreign key reference: corrected template to access indicator_description through foreign key relationship (entry.indicator_description.indicator_description), ensuring proper text matching for status calculation
 - July 18, 2025. Extended special status logic to include Non-Revenue Water (NRW) indicator: added NRW to loss indicators where achieved value less than target shows "Achieve" status (lower water losses are better), updated template condition to check for both "Non-Revenue Water" and "NRW" patterns alongside ATC&C indicators
+- July 18, 2025. Extended special status logic to include New Water Connection Days (NWCD) and New Electricity Connection Days (NECD) indicators: added NWCD and NECD to service efficiency indicators where achieved value less than target shows "Achieve" status (fewer connection days are better service), updated template condition to check for both full names and abbreviations alongside other reverse-logic indicators
 
 ## User Preferences
 
