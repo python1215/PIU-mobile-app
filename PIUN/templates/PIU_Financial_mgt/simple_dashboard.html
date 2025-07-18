@@ -1,5 +1,6 @@
 {% extends 'monitoring/base.html' %}
 {% load static %}
+{% load currency_tags %}
 
 {% block monitoring_content %}
 <div class="container-fluid" style="background-color: #f8f9fa; min-height: 100vh; padding-top: 20px; padding-bottom: 20px;">
@@ -58,7 +59,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-subtitle mb-2">Total Funding</h6>
-                            <h3 class="card-title mb-0">${{ total_funding|floatformat:0|default:"0" }}</h3>
+                            <h3 class="card-title mb-0">{{ total_funding|floatformat:0|default:"0" }}</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="bi bi-currency-dollar fs-2"></i>
@@ -118,7 +119,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="fw-medium text-success">${{ project.funding|floatformat:2 }}</td>
+                                        <td class="fw-medium text-success">{{ project.funding|format_currency:project.currency.currency }}</td>
                                         <td>
                                             <span class="badge bg-secondary">{{ project.currency.currency|default:"N/A" }}</span>
                                         </td>
@@ -160,7 +161,7 @@
                         {% for component in recent_components %}
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-truncate me-2">{{ component.Project_Components|default:"Unknown"|truncatechars:20 }}</span>
-                            <span class="badge bg-primary">${{ component.allocation|floatformat:0 }}</span>
+                            <span class="badge bg-primary">{{ component.allocation|format_currency:component.currency.currency }}</span>
                         </div>
                         <div class="progress mb-3" style="height: 4px;">
                             <div class="progress-bar" style="width: {% if total_funding %}{% widthratio component.allocation total_funding 100 %}{% else %}0{% endif %}%"></div>
@@ -182,7 +183,7 @@
                         {% for subcomponent in recent_subcomponents %}
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-truncate me-2">{{ subcomponent.subcomponent|default:"Unknown"|truncatechars:20 }}</span>
-                            <span class="badge bg-success">${{ subcomponent.allocation|floatformat:0 }}</span>
+                            <span class="badge bg-success">{{ subcomponent.allocation|format_currency:subcomponent.currency.currency }}</span>
                         </div>
                         <div class="progress mb-3" style="height: 4px;">
                             <div class="progress-bar bg-success" style="width: {% if total_funding %}{% widthratio subcomponent.allocation total_funding 100 %}{% else %}0{% endif %}%"></div>
