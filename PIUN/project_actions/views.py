@@ -1293,7 +1293,7 @@ def contract_monitoring_create(request):
                 
                 # Validation for required fields
                 if not record.Type_of_Investment:
-                    messages.error(request, "Please select a Type of Investment.")
+                    messages.error(request, "Please select a Type of Investment.", extra_tags='project_actions')
                     return render(request, 'project_actions/contract_monitoring_form.html', {
                         'page_title': 'Create Monitoring Record',
                         'form': form,
@@ -1301,7 +1301,7 @@ def contract_monitoring_create(request):
                     })
                 
                 if not record.Kpi_description:
-                    messages.error(request, "Please select a KPI Description.")
+                    messages.error(request, "Please select a KPI Description.", extra_tags='project_actions')
                     return render(request, 'project_actions/contract_monitoring_form.html', {
                         'page_title': 'Create Monitoring Record',
                         'form': form,
@@ -1313,7 +1313,8 @@ def contract_monitoring_create(request):
                 
                 messages.success(
                     request, 
-                    f"Monitoring record for contract '{record.contract_refNo}' created successfully!"
+                    f"Monitoring record for contract '{record.contract_refNo}' created successfully!",
+                    extra_tags='project_actions'
                 )
                 return redirect('project_actions:contract_monitoring_list')
                 
@@ -1321,18 +1322,18 @@ def contract_monitoring_create(request):
                 error_msg = str(e)
                 # Handle specific SQL Server constraints if needed
                 if 'FOREIGN KEY constraint' in error_msg:
-                    messages.error(request, "One or more selected options are not valid. Please refresh the page and try again.")
+                    messages.error(request, "One or more selected options are not valid. Please refresh the page and try again.", extra_tags='project_actions')
                 elif 'NOT NULL constraint' in error_msg:
-                    messages.error(request, "Please fill in all required fields.")
+                    messages.error(request, "Please fill in all required fields.", extra_tags='project_actions')
                 else:
-                    messages.error(request, f"Error creating monitoring record: {error_msg}")
+                    messages.error(request, f"Error creating monitoring record: {error_msg}", extra_tags='project_actions')
                     
                 # Log the error for debugging
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error saving monitoring record: {error_msg}")
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "Please correct the errors below.", extra_tags='project_actions')
             # Log form errors for debugging
             import logging
             logger = logging.getLogger(__name__)
