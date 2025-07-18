@@ -338,7 +338,7 @@ def performance_dashboard(request):
         if quarter_filter in ['1', '2', '3', '4']:
             # Map numeric quarters to actual Quarter database IDs
             quarter_mapping = {
-                '1': 1,  # Quarter 1 (ID: 1)
+                '1': 1,  # Quarter 1 (ID: 1) - RESTORED
                 '2': 3,  # Quarter 2 (ID: 3) 
                 '3': 4,  # Quarter 3 (ID: 4)
                 '4': 5   # Quarter 4 (ID: 5)

@@ -1,0 +1,47 @@
+Page not found (404)
+No Quarter matches the given query.
+Request Method:	POST
+Request URL:	http://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev/setup/quarters/1/delete/
+Raised by:	setup.views.quarter_delete
+Using the URLconf defined in piu_project.urls, Django tried these URL patterns, in this order:
+
+admin-panel/
+[name='main_dashboard']
+dashboard/ [name='dashboard-alt']
+user-accounts/
+accounts/
+accounts/profile/ [name='profile']
+setup/ [name='setup_dashboard']
+setup/ donors/ [name='donor_list']
+setup/ donors/add/ [name='donor_create']
+setup/ donors/<int:pk>/ [name='donor_detail']
+setup/ donors/<int:pk>/edit/ [name='donor_update']
+setup/ donors/<int:pk>/delete/ [name='donor_delete']
+setup/ contributors/ [name='contributors_list']
+setup/ contributors/add/ [name='contributors_create']
+setup/ contributors/<int:pk>/ [name='contributors_detail']
+setup/ contributors/<int:pk>/edit/ [name='contributors_update']
+setup/ contributors/<int:pk>/delete/ [name='contributors_delete']
+setup/ project-categories/ [name='project_category_list']
+setup/ project-categories/add/ [name='project_category_create']
+setup/ project-categories/<int:pk>/ [name='project_category_detail']
+setup/ project-categories/<int:pk>/edit/ [name='project_category_update']
+setup/ project-categories/<int:pk>/delete/ [name='project_category_delete']
+setup/ monitoring-types/ [name='type_of_monitoring_list']
+setup/ monitoring-types/add/ [name='type_of_monitoring_create']
+setup/ monitoring-types/<str:pk>/ [name='type_of_monitoring_detail']
+setup/ monitoring-types/<str:pk>/edit/ [name='type_of_monitoring_update']
+setup/ monitoring-types/<str:pk>/delete/ [name='type_of_monitoring_delete']
+setup/ kpi-for-contract/ [name='kpi_for_contract_list']
+setup/ kpi-for-contract/add/ [name='kpi_for_contract_create']
+setup/ kpi-for-contract/<str:pk>/ [name='kpi_for_contract_detail']
+setup/ kpi-for-contract/<str:pk>/edit/ [name='kpi_for_contract_update']
+setup/ kpi-for-contract/<str:pk>/delete/ [name='kpi_for_contract_delete']
+setup/ quarters/ [name='quarter_list']
+setup/ quarters/add/ [name='quarter_create']
+setup/ quarters/<int:pk>/ [name='quarter_detail']
+setup/ quarters/<int:pk>/edit/ [name='quarter_update']
+setup/ quarters/<int:pk>/delete/ [name='quarter_delete']
+The current path, setup/quarters/1/delete/, matched the last one.
+
+You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
