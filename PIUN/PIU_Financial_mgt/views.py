@@ -159,90 +159,18 @@ def enhanced_project_dashboard(request, project_id=None):
         active_projects = Project.objects.filter(closure_Date__isnull=True).count()
         total_disbursed = Component.objects.aggregate(Sum('allocation'))['allocation__sum'] or 0
         
-        # Social and Environmental data - SQL Server compatible
-        # Force SQL Server mode - always use raw SQL queries
-        if True:  # Always use SQL Server compatible queries
-            from social_and_env.sql_server_monitoring_utils import get_sql_server_monitoring_data
-            monitoring_data = get_sql_server_monitoring_data()
-            
-            # Convert to queryset-like objects for template compatibility
-            class MockQuerySet:
-                def __init__(self, records, count):
-                    self.records = records
-                    self._count = count
-                
-                def count(self):
-                    return self._count
-                
-                def __iter__(self):
-                    return iter(self.records)
-            
-            esia_records = MockQuerySet(monitoring_data['esia_records'], monitoring_data['esia_count'])
-            grievance_records = MockQuerySet(monitoring_data['grievance_records'], monitoring_data['grievance_count'])
-            ohs_records = MockQuerySet(monitoring_data['ohs_records'], monitoring_data['ohs_count'])
-            pap_records = MockQuerySet(monitoring_data['pap_records'], monitoring_data['pap_count'])
-            community_records = MockQuerySet(monitoring_data['community_records'], monitoring_data['community_count'])
-        else:
-            # SQLite - use Django ORM
-            esia_records = ESIA.objects.all()
-            grievance_records = GrievianceMonitoringLog.objects.all()
-            ohs_records = OHS_Monitoring.objects.all()
-            pap_records = PAP.objects.all()
-            community_records = CommunityConsult_Engagement.objects.all()
+        # Social and Environmental data - Use Django ORM for SQLite compatibility
+        esia_records = ESIA.objects.all()
+        grievance_records = GrievianceMonitoringLog.objects.all()
+        ohs_records = OHS_Monitoring.objects.all()
+        pap_records = PAP.objects.all()
+        community_records = CommunityConsult_Engagement.objects.all()
+        print(f"Successfully loaded Social & Environmental data using Django ORM")
     
-    # Recent data - SQL Server compatible
+    # Recent data - Use Django ORM for SQLite compatibility
     try:
-        # Force SQL Server mode - always use raw SQL queries
-        from django.db import connection
-        if True:  # Always use SQL Server compatible queries
-            # Use raw SQL for SQL Server compatibility
-            with connection.cursor() as cursor:
-                # Try different table names for test vs production environments
-                table_names = [
-                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
-                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Production environment  
-                    'PIU_Financial_mgt_activities'  # Fallback without schema
-                ]
-                
-                recent_activities = []
-                for table_name in table_names:
-                    try:
-                        query = f"""
-                            SELECT TOP 5 
-                                activity,
-                                allocation,
-                                date,
-                                projectID_id,
-                                compID_id,
-                                subcompID_id
-                            FROM {table_name}
-                            ORDER BY date DESC
-                        """
-                        cursor.execute(query)
-                        results = cursor.fetchall()
-                        
-                        # Convert to dict format for template compatibility
-                        recent_activities = []
-                        for row in results:
-                            recent_activities.append({
-                                'activity': row[0],
-                                'allocation': row[1],
-                                'date': row[2],
-                                'projectID_id': row[3],
-                                'compID_id': row[4],
-                                'subcompID_id': row[5]
-                            })
-                        
-                        print(f"Successfully queried activities table: {table_name}")
-                        print(f"Found {len(recent_activities)} recent activities")
-                        break
-                    except Exception as e:
-                        print(f"Failed to query activities {table_name}: {e}")
-                        continue
-                        
-        else:
-            # SQLite - use Django ORM
-            recent_activities = Activities.objects.order_by('-date')[:5]
+        recent_activities = Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5]
+        print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")
         recent_activities = []
