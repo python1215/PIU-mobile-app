@@ -1772,7 +1772,7 @@ def get_contracts_by_project_and_type(request):
                     'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
                     'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
                     'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
-                    'detail_url': f"/project-actions/contract-profiling-works/{contract.id}/"
+                    'detail_url': f"/project_actions/contract-profiling-works/{contract.id}/"
                 })
                 
         elif contract_type == 'goods_services':
@@ -1792,7 +1792,7 @@ def get_contracts_by_project_and_type(request):
                     'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
                     'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
                     'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
-                    'detail_url': f"/project-actions/contract-profiling-goods-services/{contract.id}/"
+                    'detail_url': f"/project_actions/contract-profiling-goods-services/{contract.id}/"
                 })
         
         return JsonResponse({
