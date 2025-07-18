@@ -660,10 +660,20 @@
                         </td>
                         <td class="text-sm">
                             {% if entry.achieved_value is not None and entry.End_Target_Value is not None %}
-                                {% if entry.achieved_value >= entry.End_Target_Value %}
-                                    <div class="font-bold text-green-600">Achieve</div>
+                                {% if "Total Losses Electricity" in entry.indicator_description or "ATC&C" in entry.indicator_description %}
+                                    <!-- For ATC&C, lower is better -->
+                                    {% if entry.achieved_value <= entry.End_Target_Value %}
+                                        <div class="font-bold text-green-600">Achieve</div>
+                                    {% else %}
+                                        <div class="font-bold text-red-600">Not Achieve</div>
+                                    {% endif %}
                                 {% else %}
-                                    <div class="font-bold text-red-600">Not Achieve</div>
+                                    <!-- For other indicators, higher is better -->
+                                    {% if entry.achieved_value >= entry.End_Target_Value %}
+                                        <div class="font-bold text-green-600">Achieve</div>
+                                    {% else %}
+                                        <div class="font-bold text-red-600">Not Achieve</div>
+                                    {% endif %}
                                 {% endif %}
                             {% else %}
                                 <div class="font-bold text-gray-500">N/A</div>
