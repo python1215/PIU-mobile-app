@@ -23,8 +23,8 @@ from .forms import (ESIAForm, ESIAUpdateForm, PAPForm, PAPUpdateForm,
                     OHSMonitoringForm, OHSUpdateForm, CommunityEngagementForm)
 from .filters import (ESIAFilter, PAPFilter, GrievianceMonitoringLogFilter,
                       OHSMonitoringFilter, CommunityEngagementFilter)
-from setup.models import Districts, Settlement, Regions
-from PIU_Financial_mgt.models import KPI_For_Contract
+from setup.models import Districts, Settlement, Regions, Quarter, YEAR
+from PIU_Financial_mgt.models import KPI_For_Contract, Project
 from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
 from monitoring.models import Indicator_Description
 from utils.database_utils import (is_sql_server_mode, get_cascading_dropdown_data, 
@@ -787,8 +787,8 @@ def ohs_list(request):
             'projects': Project.objects.filter(projectID='NAWEC').values('projectID', 'project'),
             'regions': Regions.objects.all().values('region_code', 'region_name'),
             'districts': Districts.objects.all().values('district_code', 'district_name'),
-            'years': Year_of_Report.objects.all().values('year_Code', 'year_name'),
-            'quarters': Quarter.objects.all().values('quarter_code', 'quarter_name'),
+            'years': YEAR.objects.all().values('year_Code', 'year_name'),
+            'quarters': Quarter.objects.all().values('id', 'quarter'),
         }
         
         context = {
