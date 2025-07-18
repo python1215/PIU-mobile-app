@@ -152,7 +152,7 @@
                 <i class="bi bi-activity me-2"></i>Activity Dashboard
             </h5>
             {% if activities %}
-                <span class="badge bg-secondary">{{ activities|length }} activit{{ activities|length|pluralize:"y,ies" }}</span>
+                <span class="badge bg-secondary">{{ activities.paginator.count }} activit{{ activities.paginator.count|pluralize:"y,ies" }}</span>
             {% endif %}
         </div>
     </div>
@@ -212,6 +212,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination -->
+            {% include 'includes/pagination.html' with page_obj=activities %}
         {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-activity text-muted" style="font-size: 4rem;"></i>

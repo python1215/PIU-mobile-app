@@ -870,8 +870,9 @@ def load_project_subcomponents(request):
 
 @login_required
 def activities(request):
-    """Enhanced activities list with filtering and statistics"""
+    """Enhanced activities list with filtering, pagination, and statistics"""
     from django.db.models import Sum, Count
+    from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
     from PIU_Financial_mgt.models import Currency
     
     # Get all activities
@@ -919,6 +920,20 @@ def activities(request):
         'unique_projects': unique_projects,
     }
     
+    # Order activities
+    activities_qs = activities_qs.order_by('-year', '-date')
+    
+    # Pagination - 5 records per page
+    paginator = Paginator(activities_qs, 5)
+    page = request.GET.get('page')
+    
+    try:
+        activities = paginator.page(page)
+    except PageNotAnInteger:
+        activities = paginator.page(1)
+    except EmptyPage:
+        activities = paginator.page(paginator.num_pages)
+    
     # Get filter options
     projects = Project.objects.all()
     components = Component.objects.all()
@@ -929,7 +944,7 @@ def activities(request):
     is_filtered = bool(project_filter or component_filter or subcomponent_filter or currency_filter or year_filter or search_filter)
     
     context = {
-        'activities': activities_qs.order_by('-year'),
+        'activities': activities,
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
