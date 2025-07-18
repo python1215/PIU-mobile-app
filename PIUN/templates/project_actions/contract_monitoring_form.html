@@ -90,10 +90,16 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label for="{{ form.contract_refNo.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Contract Reference <span class="text-danger">*</span></label>
-                                {{ form.contract_refNo|add_class:"form-control" }}
+                                <div class="input-group">
+                                    {{ form.contract_refNo|add_class:"form-control" }}
+                                    <button type="button" class="btn btn-outline-primary" id="selectContractBtn" disabled>
+                                        <i class="bi bi-search me-1"></i>Select Contract
+                                    </button>
+                                </div>
                                 {% if form.contract_refNo.errors %}
                                     <div class="text-danger small mt-1">{{ form.contract_refNo.errors.0 }}</div>
                                 {% endif %}
+                                <small class="text-muted">First select a project and contract type, then click "Select Contract" to choose from available contracts.</small>
                             </div>
                         </div>
 
@@ -448,6 +454,216 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeOfMonitoringSelect.value && projectSelect.value) {
         initializeEditMode();
     }
+    
+    // Contract Selection Popup Functionality
+    const contractTypeSelect = document.getElementById('id_type_of_contract');
+    const selectContractBtn = document.getElementById('selectContractBtn');
+    const contractRefInput = document.getElementById('id_contract_refNo');
+    
+    // Enable/disable contract selection button based on project and contract type selection
+    function updateContractSelectionButton() {
+        if (projectSelect.value && contractTypeSelect.value) {
+            selectContractBtn.disabled = false;
+            selectContractBtn.classList.remove('disabled');
+        } else {
+            selectContractBtn.disabled = true;
+            selectContractBtn.classList.add('disabled');
+        }
+    }
+    
+    // Watch for changes in project and contract type dropdowns
+    projectSelect.addEventListener('change', updateContractSelectionButton);
+    contractTypeSelect.addEventListener('change', updateContractSelectionButton);
+    
+    // Handle contract selection button click
+    selectContractBtn.addEventListener('click', function() {
+        const projectId = projectSelect.value;
+        const contractType = contractTypeSelect.value;
+        
+        if (!projectId || !contractType) {
+            alert('Please select both a project and contract type first.');
+            return;
+        }
+        
+        // Show loading state
+        selectContractBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
+        selectContractBtn.disabled = true;
+        
+        // Fetch contracts by project and type
+        fetch(`/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${projectId}&contract_type=${contractType}`)
+            .then(response => response.json())
+            .then(data => {
+                // Reset button state
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
+                
+                if (data.error) {
+                    alert('Error loading contracts: ' + data.error);
+                    return;
+                }
+                
+                if (data.contracts && data.contracts.length > 0) {
+                    showContractSelectionModal(data.contracts, contractType);
+                } else {
+                    alert('No contracts found for the selected project and contract type.');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching contracts:', error);
+                alert('Error loading contracts. Please try again.');
+                
+                // Reset button state
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
+            });
+    });
+    
+    // Function to show contract selection modal
+    function showContractSelectionModal(contracts, contractType) {
+        const modal = document.getElementById('contractSelectionModal');
+        const modalTitle = document.getElementById('contractModalTitle');
+        const modalBody = document.getElementById('contractModalBody');
+        
+        // Set modal title
+        const typeText = contractType === 'works_contract' ? 'Works Contracts' : 'Goods & Services Contracts';
+        modalTitle.textContent = `Select ${typeText}`;
+        
+        // Clear modal body
+        modalBody.innerHTML = '';
+        
+        // Create contract list
+        const contractList = document.createElement('div');
+        contractList.className = 'list-group';
+        
+        contracts.forEach(contract => {
+            const contractItem = document.createElement('div');
+            contractItem.className = 'list-group-item';
+            
+            // Get status badge class
+            let statusClass = 'bg-secondary';
+            if (contract.status === 'active') statusClass = 'bg-success';
+            else if (contract.status === 'pending') statusClass = 'bg-warning';
+            else if (contract.status === 'completed') statusClass = 'bg-secondary';
+            
+            contractItem.innerHTML = `
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${contract.contract_refNo}</h6>
+                        <p class="mb-1">
+                            <strong>Value:</strong> ${contract.currency} ${contract.contract_value.toLocaleString()}
+                        </p>
+                        <small class="text-muted">
+                            ${contractType === 'works_contract' ? 
+                                `Contractor: ${contract.contractor} | Consultant: ${contract.consultant}` :
+                                `Supplier: ${contract.supplier} | Consultant: ${contract.consultant}`
+                            }
+                        </small>
+                        <small class="text-muted d-block">
+                            Duration: ${contract.start_date} to ${contract.end_date}
+                        </small>
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                        <span class="badge ${statusClass} mb-2">${contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}</span>
+                        <div class="btn-group-vertical" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary select-contract-btn" 
+                                data-contract-id="${contract.id}"
+                                data-contract-ref="${contract.contract_refNo}"
+                                data-contract-url="${contract.detail_url}">
+                                <i class="bi bi-check-circle me-1"></i>Select
+                            </button>
+                            <a href="${contract.detail_url}" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            contractList.appendChild(contractItem);
+        });
+        
+        modalBody.appendChild(contractList);
+        
+        // Add event delegation for Select buttons
+        contractList.addEventListener('click', function(e) {
+            if (e.target.closest('.select-contract-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.select-contract-btn');
+                const contractRef = btn.dataset.contractRef;
+                const contractUrl = btn.dataset.contractUrl;
+                
+                // Find the contract data
+                const selectedContract = contracts.find(c => c.contract_refNo === contractRef);
+                if (selectedContract) {
+                    selectContract(selectedContract);
+                }
+            }
+        });
+        
+        // Show modal
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+    
+    // Function to select a contract
+    function selectContract(contract) {
+        // Set contract reference in the input field
+        contractRefInput.value = contract.contract_refNo;
+        
+        // Store contract details for potential navigation
+        contractRefInput.dataset.contractDetailUrl = contract.detail_url;
+        
+        // Close modal
+        const modal = document.getElementById('contractSelectionModal');
+        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+        bootstrapModal.hide();
+        
+        // Optional: Show success message with clickable link
+        const successMsg = document.createElement('div');
+        successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+        successMsg.innerHTML = `
+            <strong>Contract Selected:</strong> 
+            <a href="${contract.detail_url}" class="alert-link" target="_blank">${contract.contract_refNo}</a>
+            <small class="text-muted d-block">Click the contract reference to view details</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert success message after contract reference input
+        const inputGroup = contractRefInput.parentNode;
+        inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
+        
+        // Auto-remove success message after 5 seconds
+        setTimeout(() => {
+            if (successMsg.parentNode) {
+                successMsg.parentNode.removeChild(successMsg);
+            }
+        }, 5000);
+    }
+    
+    // Initialize button state on page load
+    updateContractSelectionButton();
 });
 </script>
+
+<!-- Contract Selection Modal -->
+<div class="modal fade" id="contractSelectionModal" tabindex="-1" aria-labelledby="contractModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contractModalTitle">Select Contract</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="contractModalBody">
+                <!-- Contract list will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </button>
+                <small class="text-muted">Click on a contract to select it</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

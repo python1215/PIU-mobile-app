@@ -39,6 +39,7 @@ urlpatterns = [
     path('ajax/get-project-subcomponents/', views.get_project_subcomponents, name='get_project_subcomponents'),
     path('ajax/get-project-activities/', views.get_project_activities, name='get_project_activities'),
     path('ajax/get-contract-info/', views.get_contract_info, name='get_contract_info'),
+    path('ajax/get-contracts-by-project-and-type/', views.get_contracts_by_project_and_type, name='get_contracts_by_project_and_type'),
     
     # Bulk actions
     path('ajax/bulk-actions/', views.bulk_actions, name='bulk_actions'),

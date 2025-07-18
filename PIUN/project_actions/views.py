@@ -1741,3 +1741,78 @@ def debug_cascading_dropdowns(request):
                 "project_id": project_id
             }
         })
+
+
+@login_required
+def get_contracts_by_project_and_type(request):
+    """AJAX endpoint to fetch contracts by project and contract type"""
+    project_id = request.GET.get('project_id')
+    contract_type = request.GET.get('contract_type')
+    
+    if not project_id or not contract_type:
+        return JsonResponse({'error': 'Project ID and contract type are required'}, status=400)
+    
+    try:
+        contracts = []
+        
+        if contract_type == 'works_contract':
+            # Fetch Works contracts
+            works_contracts = Contract_Profiling_works.objects.filter(
+                projectID_id=project_id
+            ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
+            
+            for contract in works_contracts:
+                contracts.append({
+                    'id': contract.id,
+                    'contract_refNo': contract.contract_refNo,
+                    'contract_value': float(contract.contract_value),
+                    'currency': contract.currency.currency_code if contract.currency else 'USD',
+                    'contractor': contract.name_of_contractor or 'N/A',
+                    'consultant': contract.name_of_consultant or 'N/A',
+                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
+                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
+                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
+                    'detail_url': f"/project-actions/contract-profiling-works/{contract.id}/"
+                })
+                
+        elif contract_type == 'goods_services':
+            # Fetch Goods & Services contracts
+            goods_contracts = Contract_Profiling_goods_services.objects.filter(
+                projectID_id=project_id
+            ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
+            
+            for contract in goods_contracts:
+                contracts.append({
+                    'id': contract.id,
+                    'contract_refNo': contract.contract_refNo,
+                    'contract_value': float(contract.contract_value),
+                    'currency': contract.currency.currency_code if contract.currency else 'USD',
+                    'supplier': contract.name_of_Supplier or 'N/A',
+                    'consultant': contract.name_of_consultant or 'N/A',
+                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
+                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
+                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
+                    'detail_url': f"/project-actions/contract-profiling-goods-services/{contract.id}/"
+                })
+        
+        return JsonResponse({
+            'contracts': contracts,
+            'total_count': len(contracts),
+            'contract_type': contract_type
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_contract_status(start_date, end_date):
+    """Helper function to determine contract status"""
+    from django.utils import timezone
+    today = timezone.now().date()
+    
+    if start_date > today:
+        return 'pending'
+    elif end_date < today:
+        return 'completed'
+    else:
+        return 'active'
