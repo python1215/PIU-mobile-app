@@ -334,7 +334,22 @@ def performance_dashboard(request):
     if year_filter:
         entries_queryset = entries_queryset.filter(year_id=year_filter)
     if quarter_filter:
-        entries_queryset = entries_queryset.filter(quarter_id=quarter_filter)
+        # Handle simple numeric quarter values (1, 2, 3, 4)
+        if quarter_filter in ['1', '2', '3', '4']:
+            # Map numeric quarters to Quarter objects
+            quarter_mapping = {
+                '1': 'Quarter 1',
+                '2': 'Quarter 2', 
+                '3': 'Quarter 3',
+                '4': 'Quarter 4'
+            }
+            quarter_name = quarter_mapping.get(quarter_filter)
+            if quarter_name:
+                try:
+                    quarter_obj = Quarter.objects.get(quarter=quarter_name)
+                    entries_queryset = entries_queryset.filter(quarter=quarter_obj)
+                except Quarter.DoesNotExist:
+                    pass
     
     # Get filtered recent entries and calculate performance
     recent_entries = entries_queryset.order_by('-date_created')[:20]
