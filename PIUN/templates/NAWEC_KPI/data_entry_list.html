@@ -139,6 +139,7 @@
                                         <th>End Target Value</th>
                                         <th>Percentage progress from baseline</th>
                                         <th>Percentage progress towards end target</th>
+                                        <th>Status</th>
                                         <th>Targeted Weight</th>
                                         <th>Achieved Weight</th>
                                         <th>Remarks</th>
@@ -218,6 +219,25 @@
                                                 {% endif %}
                                             </td>
                                             <td>
+                                                {% if entry.achieved_value and entry.End_Target_Value %}
+                                                    {% if "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
+                                                        {% if entry.achieved_value < entry.End_Target_Value %}
+                                                            <span class="badge bg-success rounded-pill">Achieve</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {% if entry.achieved_value >= entry.End_Target_Value %}
+                                                            <span class="badge bg-success rounded-pill">Achieve</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary rounded-pill">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
                                                 <span class="fw-bold text-warning">{{ entry.Targeted_Achieved_weight|floatformat:2|default:"0.00" }}</span>
                                             </td>
                                             <td>
@@ -248,7 +268,7 @@
                                         </tr>
                                     {% empty %}
                                         <tr>
-                                            <td colspan="11" class="text-center text-muted py-4">
+                                            <td colspan="18" class="text-center text-muted py-4">
                                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                                 No KPI data entries found.
                                             </td>

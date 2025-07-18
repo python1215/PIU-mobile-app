@@ -56,6 +56,7 @@
                                 <th>Achieved</th>
                                 <th>Target</th>
                                 <th>% vs Baseline</th>
+                                <th>Status</th>
                                 <th>Date Created</th>
                                 <th>Actions</th>
                             </tr>
@@ -97,6 +98,17 @@
                                             {% endif %}
                                         {% else %}
                                             <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.achieved_value and record.End_Target_Value %}
+                                            {% if record.achieved_value >= record.End_Target_Value %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
