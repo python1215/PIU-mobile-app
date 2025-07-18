@@ -211,20 +211,20 @@ class KPIMonitoringDataForm(forms.ModelForm):
         # Dynamically populate quarter choices from database
         quarter_choices = [('', 'Select Quarter')]
         for quarter in Quarter.objects.all():
-            # Map quarter names to display numbers
-            display_text = quarter.quarter
+            # Only include proper Quarter entries, skip Monthly to avoid duplicates
             if quarter.quarter == 'Quarter 1':
                 display_text = '1'
+                quarter_choices.append((quarter.id, display_text))
             elif quarter.quarter == 'Quarter 2':
                 display_text = '2'
+                quarter_choices.append((quarter.id, display_text))
             elif quarter.quarter == 'Quarter 3':
                 display_text = '3'
+                quarter_choices.append((quarter.id, display_text))
             elif quarter.quarter == 'Quarter 4':
                 display_text = '4'
-            elif quarter.quarter == 'Monthly':
-                display_text = '2'  # Map Monthly to Quarter 2
-            
-            quarter_choices.append((quarter.id, display_text))
+                quarter_choices.append((quarter.id, display_text))
+            # Skip 'Monthly' to avoid duplicate "2" entries
         
         self.fields['quarter'].choices = quarter_choices
     
