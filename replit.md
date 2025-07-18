@@ -292,6 +292,7 @@ The PIUN directory contains specialized modules:
 - July 18, 2025. Extended special status logic to include Non-Revenue Water (NRW) indicator: added NRW to loss indicators where achieved value less than target shows "Achieve" status (lower water losses are better), updated template condition to check for both "Non-Revenue Water" and "NRW" patterns alongside ATC&C indicators
 - July 18, 2025. Extended special status logic to include New Water Connection Days (NWCD) and New Electricity Connection Days (NECD) indicators: added NWCD and NECD to service efficiency indicators where achieved value less than target shows "Achieve" status (fewer connection days are better service), updated template condition to check for both full names and abbreviations alongside other reverse-logic indicators
 - July 18, 2025. Enhanced Performance Dashboard Status column with badge styling: replaced plain text status with Bootstrap badges featuring green badges for "Achieve" status, red badges for "Not Achieve" status, and gray badges for "N/A" status, improved visual distinction and user experience with rounded pill-style badges
+- July 18, 2025. Implemented selective quarter filtering for Performance Dashboard: updated Quarter dropdown to display only numeric values 1, 2, 3, 4 regardless of database content (Weekly, Monthly, Quarterly, Annually), enhanced backend filtering logic to properly map display values to actual Quarter database IDs, separated top header card from main content table with improved responsive centering for small screens
 
 ## User Preferences
 

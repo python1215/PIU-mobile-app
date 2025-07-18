@@ -336,17 +336,17 @@ def performance_dashboard(request):
     if quarter_filter:
         # Handle simple numeric quarter values (1, 2, 3, 4)
         if quarter_filter in ['1', '2', '3', '4']:
-            # Map numeric quarters to Quarter objects
+            # Map numeric quarters to actual Quarter database IDs
             quarter_mapping = {
-                '1': 'Quarter 1',
-                '2': 'Quarter 2', 
-                '3': 'Quarter 3',
-                '4': 'Quarter 4'
+                '1': 1,  # Quarter 1 (ID: 1)
+                '2': 3,  # Quarter 2 (ID: 3) 
+                '3': 4,  # Quarter 3 (ID: 4)
+                '4': 5   # Quarter 4 (ID: 5)
             }
-            quarter_name = quarter_mapping.get(quarter_filter)
-            if quarter_name:
+            quarter_id = quarter_mapping.get(quarter_filter)
+            if quarter_id:
                 try:
-                    quarter_obj = Quarter.objects.get(quarter=quarter_name)
+                    quarter_obj = Quarter.objects.get(id=quarter_id)
                     entries_queryset = entries_queryset.filter(quarter=quarter_obj)
                 except Quarter.DoesNotExist:
                     pass
