@@ -223,6 +223,9 @@
                             </table>
                         </div>
                         <div class="mt-3 text-center">
+                            <a href="{% url 'project_actions:contract_monitoring_create' %}" class="btn btn-primary me-2">
+                                <i class="bi bi-plus-circle me-1"></i>Create Monitoring Record
+                            </a>
                             <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-primary">
                                 <i class="bi bi-list me-1"></i>View All Monitoring Records
                             </a>
@@ -251,6 +254,9 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'project_actions:contract_monitoring_create' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Create Monitoring Record
+                        </a>
                         <a href="{% url 'project_actions:update-contract_profiling_goods_service' contract.pk %}" class="btn btn-primary">
                             <i class="bi bi-pencil me-1"></i>Edit Contract
                         </a>
