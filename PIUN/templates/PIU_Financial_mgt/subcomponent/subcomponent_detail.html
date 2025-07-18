@@ -129,7 +129,7 @@
                                             </div>
                                         </td>
                                         <td><span class="badge bg-info">{{ activity.currency.currency }}</span></td>
-                                        <td class="text-end"><strong>${{ activity.allocation|floatformat:2 }}</strong></td>
+                                        <td class="text-end"><strong>{{ activity.allocation|format_currency:activity.currency.currency }}</strong></td>
                                         <td>{{ activity.date|date:"M d, Y" }}</td>
                                         <td class="text-center">
                                             <a href="{% url 'PIU_Financial_mgt:activity_detail' activity.activityID %}" class="btn btn-sm btn-outline-primary" title="View">

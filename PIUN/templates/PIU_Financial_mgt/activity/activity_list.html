@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Activities - PIU Financial Management{% endblock %}
 
@@ -106,7 +107,7 @@
                                             <td>{{ activity.compID.Project_Components }}</td>
                                             <td>{{ activity.subcompID.subcomponent }}</td>
                                             <td>{{ activity.year.profile_year }}</td>
-                                            <td class="fw-bold text-success">${{ activity.allocation|floatformat:2 }}</td>
+                                            <td class="fw-bold text-success">{{ activity.allocation|format_currency:activity.currency.currency }}</td>
                                             <td>{{ activity.currency.currency|default:"N/A" }}</td>
                                             <td>{{ activity.date|date:"M d, Y" }}</td>
                                             <td>

@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Activity Details - PIUN Resources{% endblock %}
 
@@ -68,7 +69,7 @@
                                 </tr>
                                 <tr>
                                     <td class="fw-bold text-white">Allocation:</td>
-                                    <td class="text-danger">{{ activity.currency.currency }} {{ activity.allocation|floatformat:2 }}</td>
+                                    <td class="text-danger">{{ activity.allocation|format_currency:activity.currency.currency }}</td>
                                 </tr>
                                 <tr>
                                     <td class="fw-bold text-white">Year:</td>

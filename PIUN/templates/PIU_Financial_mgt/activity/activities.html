@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Activities - PIU Financial Management{% endblock %}
 
@@ -44,7 +45,7 @@
     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
         <div class="card bg-success text-white border-0">
             <div class="card-body text-center py-2 px-2">
-                <h5 class="mb-0 fw-bold">${{ stats.total_allocation|floatformat:0 }}</h5>
+                <h5 class="mb-0 fw-bold">{{ stats.total_allocation|floatformat:0 }}</h5>
                 <small class="d-block">Total Allocation</small>
             </div>
         </div>
@@ -183,7 +184,7 @@
                                 <td>{{ activity.subcompID.subcomponent|truncatechars:25 }}</td>
                                 <td>{{ activity.activity|truncatechars:40 }}</td>
                                 <td>{{ activity.currency.currency }}</td>
-                                <td>${{ activity.allocation|floatformat:2 }}</td>
+                                <td>{{ activity.allocation|format_currency:activity.currency.currency }}</td>
                                 <td>{{ activity.year.profile_year }}</td>
                                 <td>{{ activity.date|date:"M d, Y" }}</td>
                                 <td>
