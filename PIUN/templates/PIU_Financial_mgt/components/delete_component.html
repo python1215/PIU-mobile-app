@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Delete Component - PIU Financial Management{% endblock %}
 
@@ -41,7 +42,7 @@
                             <td><strong>Allocation:</strong></td>
                             <td>
                                 <span class="text-success fw-bold">
-                                    {{ component.currency.currency }} {{ component.allocation|floatformat:2 }}
+                                    {{ component.allocation|format_currency:component.currency.currency }}
                                 </span>
                             </td>
                         </tr>

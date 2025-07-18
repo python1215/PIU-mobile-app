@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Projects - PIU Financial Management{% endblock %}
 
@@ -49,7 +50,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-subtitle mb-2">Total Funding</h6>
-                            <h3 class="card-title mb-0">${{ stats.total_funding|floatformat:0|default:"0" }}</h3>
+                            <h3 class="card-title mb-0">Multi-Currency</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="bi bi-currency-dollar fs-2"></i>
@@ -194,7 +195,7 @@
                                             {% endfor %}
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-success">${{ project.funding|floatformat:2 }}</span>
+                                            <span class="fw-bold text-success">{{ project.funding|format_currency:project.currency.currency }}</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary">{{ project.currency.currency|default:"N/A" }}</span>
