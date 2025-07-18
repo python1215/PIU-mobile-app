@@ -1633,7 +1633,7 @@ def calculate_atc_list(request):
     search_query = request.GET.get('search')
     if search_query:
         calculations = calculations.filter(
-            Q(calculated_value__icontains=search_query) |
+            Q(achieved_value__icontains=search_query) |
             Q(loginUser__username__icontains=search_query)
         )
     
@@ -3137,9 +3137,16 @@ class SaveKPICalculationView(View):
                 billing_efficiency = input_values.get('billing_efficiency', 0)
                 collection_efficiency = input_values.get('collection_efficiency', 0)
                 
+                # Calculate ATC&C: (1 - (billing_efficiency * collection_efficiency) / 10000) * 100
+                # Convert percentages to decimals first, then calculate
+                billing_decimal = billing_efficiency / 100
+                collection_decimal = collection_efficiency / 100
+                atc_value = (1 - (billing_decimal * collection_decimal)) * 100
+                
                 calculation = CalculateATC(
                     billing_efficiency=billing_efficiency,
                     collection_efficiency=collection_efficiency,
+                    achieved_value=atc_value,
                     quarter=quarter,
                     loginUser=request.user
                 )
