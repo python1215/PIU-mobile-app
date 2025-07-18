@@ -1050,18 +1050,30 @@ def export_ohs_excel(request):
 def community_list(request):
     """Enhanced Community Engagement list view with filtering and pagination"""
     from django.core.paginator import Paginator
+    from django.db.models import Sum
     
     try:
-        engagements = CommunityConsult_engagement.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+        engagements = CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'stake_holder_engagement_Types', 'year', 'loginUser'
         ).all()
         
         # Apply filters
         if request.GET.get('project'):
-            engagements = engagements.filter(project=request.GET.get('project'))
+            engagements = engagements.filter(project_name=request.GET.get('project'))
         
         if request.GET.get('engagement_type'):
-            engagements = engagements.filter(engagement_type=request.GET.get('engagement_type'))
+            engagements = engagements.filter(stake_holder_engagement_Types=request.GET.get('engagement_type'))
+        
+        if request.GET.get('year'):
+            engagements = engagements.filter(year=request.GET.get('year'))
+        
+        if request.GET.get('search'):
+            search_term = request.GET.get('search')
+            engagements = engagements.filter(
+                models.Q(place_of_event__icontains=search_term) |
+                models.Q(key_issues_discussed__icontains=search_term) |
+                models.Q(reference_number__icontains=search_term)
+            )
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -1076,18 +1088,28 @@ def community_list(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        # Get statistics
+        # Get statistics with correct field names
         stats = {
-            'total_engagements': CommunityConsult_engagement.objects.count(),
+            'total_engagements': CommunityConsult_Engagement.objects.count(),
             'filtered_count': engagements.count(),
-            'total_male_participants': engagements.aggregate(total=models.Sum('male_participants'))['total'] or 0,
-            'total_female_participants': engagements.aggregate(total=models.Sum('female_participants'))['total'] or 0,
-            'total_participants': engagements.aggregate(total=models.Sum('total_participants'))['total'] or 0,
+            'total_male_participants': engagements.aggregate(total=Sum('male'))['total'] or 0,
+            'total_female_participants': engagements.aggregate(total=Sum('female'))['total'] or 0,
+            'total_participants': engagements.aggregate(total=Sum('total_participants'))['total'] or 0,
         }
+        
+        # Get filter data
+        from PIU_Financial_mgt.models import Project
+        from setup.models import YEAR
+        projects = Project.objects.filter(project='National Electricity and Water Company')
+        years = YEAR.objects.all()
+        engagement_types = TypeOfStakeholderEngagement.objects.all()
         
         context = {
             'page_obj': page_obj,
             'stats': stats,
+            'projects': projects,
+            'years': years,
+            'engagement_types': engagement_types,
             'title': 'Community Engagement'
         }
         
@@ -1095,9 +1117,24 @@ def community_list(request):
     
     except Exception as e:
         messages.error(request, f'Error loading community engagements: {str(e)}')
+        # Get filter data for error case
+        try:
+            from PIU_Financial_mgt.models import Project
+            from setup.models import YEAR
+            projects = Project.objects.filter(project='National Electricity and Water Company')
+            years = YEAR.objects.all()
+            engagement_types = TypeOfStakeholderEngagement.objects.all()
+        except:
+            projects = []
+            years = []
+            engagement_types = []
+        
         return render(request, 'social_and_env/community/community_list.html', {
             'page_obj': None,
             'stats': {},
+            'projects': projects,
+            'years': years,
+            'engagement_types': engagement_types,
             'title': 'Community Engagement'
         })
 
@@ -1129,13 +1166,13 @@ def community_add(request):
 def community_detail(request, pk):
     """Community Engagement detail view"""
     try:
-        engagement = get_object_or_404(CommunityConsult_engagement.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
+        engagement = get_object_or_404(CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'stake_holder_engagement_Types', 'year', 'loginUser'
         ), pk=pk)
         
         context = {
             'engagement': engagement,
-            'title': f'Community Engagement - {engagement.project.project if engagement.project else "Unknown"}',
+            'title': f'Community Engagement - {engagement.project_name.project if engagement.project_name else "Unknown"}',
         }
         
         return render(request, 'social_and_env/community/community_detail.html', context)
@@ -1148,7 +1185,7 @@ def community_detail(request, pk):
 @login_required
 def community_edit(request, pk):
     """Edit Community Engagement record"""
-    engagement = get_object_or_404(CommunityConsult_engagement, pk=pk)
+    engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
     
     if request.method == 'POST':
         form = CommunityEngagementForm(request.POST, request.FILES, instance=engagement)
@@ -1173,7 +1210,7 @@ def community_edit(request, pk):
 @login_required
 def community_delete(request, pk):
     """Delete Community Engagement record"""
-    engagement = get_object_or_404(CommunityConsult_engagement, pk=pk)
+    engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
     
     if request.method == 'POST':
         try:
