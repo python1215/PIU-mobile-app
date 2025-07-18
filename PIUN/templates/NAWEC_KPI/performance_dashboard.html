@@ -317,6 +317,28 @@
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
+        }
+
+        .performance-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+        }
+
+        .header-responsive {
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 1rem !important;
+        }
+
+        .header-buttons {
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 0.5rem !important;
         }
 
         .btn {
@@ -380,6 +402,31 @@
             margin-left: 0 !important;
             margin-right: 0 !important;
         }
+
+        .filter-form-responsive {
+            flex-direction: column !important;
+            gap: 1rem !important;
+            align-items: center !important;
+        }
+
+        .filter-controls {
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+            gap: 0.75rem !important;
+        }
+
+        .stats-cards-responsive {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 1rem !important;
+        }
+
+        .stats-card {
+            width: 100% !important;
+            max-width: 280px !important;
+            margin: 0 auto !important;
+        }
     }
 </style>
 {% endblock %}
@@ -387,25 +434,34 @@
 {% block content %}
 <div class="container-fluid min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
     
-    <!-- Centered Container for All Content -->
+    <!-- Top Header Card - Separated -->
     <div class="container-xl mx-auto px-3 py-4">
         <div class="centered-content-wrapper">
-        <!-- Recent Performance Data -->
-        <div class="performance-card p-6">
-        <div class="flex items-center justify-between mb-6 header-responsive">
-            <div>
-                <h2 class="text-2xl font-bold text-white">NAWEC KPI Performance Dashboard</h2>
-                <p class="text-sm text-white opacity-70"> KPI monitoring entries</p>
-            </div>
-            <div class="flex gap-3 header-buttons">
-                <a href="{% url 'NAWEC_KPI:kpi_dashboard' %}" class="btn btn-outline btn-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-white border-white hover:bg-white hover:text-blue-600">
-                    <i class="bi bi-speedometer2 mr-2"></i>KPI Dashboard
-                </a>
-                <a href="{% url 'NAWEC_KPI:data_entry_list' %}" class="btn btn-primary btn-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                    <i class="bi bi-list-ul mr-2"></i>View All Data
-                </a>
+            <!-- Header Card -->
+            <div class="performance-card p-6 mb-6">
+                <div class="flex items-center justify-between mb-6 header-responsive">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">NAWEC KPI Performance Dashboard</h2>
+                        <p class="text-sm text-white opacity-70"> KPI monitoring entries</p>
+                    </div>
+                    <div class="flex gap-3 header-buttons">
+                        <a href="{% url 'NAWEC_KPI:kpi_dashboard' %}" class="btn btn-outline btn-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-white border-white hover:bg-white hover:text-blue-600">
+                            <i class="bi bi-speedometer2 mr-2"></i>KPI Dashboard
+                        </a>
+                        <a href="{% url 'NAWEC_KPI:data_entry_list' %}" class="btn btn-primary btn-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                            <i class="bi bi-list-ul mr-2"></i>View All Data
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Main Content Container - Separated -->
+    <div class="container-xl mx-auto px-3 pb-4">
+        <div class="centered-content-wrapper">
+            <!-- Filter and Data Section -->
+            <div class="performance-card p-6">
 
         <!-- Filter Form and Stats Cards -->
         <div class="bg-gray-50 p-4 rounded-lg mb-6">
