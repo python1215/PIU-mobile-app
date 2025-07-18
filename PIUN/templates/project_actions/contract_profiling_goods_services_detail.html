@@ -41,11 +41,11 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Contract Reference No</label>
+                            <label class="form-label" style="color: #000 !important;">Contract Reference No</label>
                             <p class="fw-bold">{{ contract.contract_refNo|default:"N/A" }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Contract Value</label>
+                            <label class="form-label" style="color: #000 !important;">Contract Value</label>
                             <p class="fw-bold text-success">
                                 {{ contract.currency.currency_code|default:"USD" }} {{ contract.contract_value|floatformat:2|default:"0.00" }}
                             </p>
@@ -54,33 +54,33 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Supplier Name</label>
+                            <label class="form-label" style="color: #000 !important;">Supplier Name</label>
                             <p class="fw-bold">{{ contract.name_of_Supplier|default:"N/A" }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Consultant Name</label>
+                            <label class="form-label" style="color: #000 !important;">Consultant Name</label>
                             <p class="fw-bold">{{ contract.name_of_consultant|default:"N/A" }}</p>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Start Date</label>
+                            <label class="form-label" style="color: #000 !important;">Start Date</label>
                             <p class="fw-bold">{{ contract.contract_start_date|date:"M d, Y"|default:"N/A" }}</p>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label" style="color: #fff !important;">End Date</label>
+                            <label class="form-label" style="color: #000 !important;">End Date</label>
                             <p class="fw-bold">{{ contract.contract_end_date|date:"M d, Y"|default:"N/A" }}</p>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Duration</label>
+                            <label class="form-label" style="color: #000 !important;">Duration</label>
                             <p class="fw-bold">{{ contract.duration|default:"N/A" }} months</p>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label" style="color: #fff !important;">Remarks</label>
+                            <label class="form-label" style="color: #000 !important;">Remarks</label>
                             <p>{{ contract.remarks|default:"No remarks" }}</p>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Contract Status</label>
+                        <label class="form-label" style="color: #000 !important;">Contract Status</label>
                         {% if contract_status == 'active' %}
                             <span class="badge bg-success fs-6">Active</span>
                         {% elif contract_status == 'completed' %}
@@ -116,49 +116,49 @@
 
                     {% if contract.projectID %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Project</label>
+                        <label class="form-label" style="color: #000 !important;">Project</label>
                         <p class="fw-bold">{{ contract.projectID.project|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.compID %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Component</label>
+                        <label class="form-label" style="color: #000 !important;">Component</label>
                         <p>{{ contract.compID.Project_Components|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.subcompID %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Subcomponent</label>
+                        <label class="form-label" style="color: #000 !important;">Subcomponent</label>
                         <p>{{ contract.subcompID.subcomponent|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.activityID %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Activity</label>
+                        <label class="form-label" style="color: #000 !important;">Activity</label>
                         <p>{{ contract.activityID.activity|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.project_Category %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Project Category</label>
+                        <label class="form-label" style="color: #000 !important;">Project Category</label>
                         <p>{{ contract.project_Category.category|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.funding_source %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Funding Source</label>
+                        <label class="form-label" style="color: #000 !important;">Funding Source</label>
                         <p>{{ contract.funding_source.name|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if duration_days %}
                     <div class="mb-3">
-                        <label class="form-label" style="color: #fff !important;">Total Duration</label>
+                        <label class="form-label" style="color: #000 !important;">Total Duration</label>
                         <p>{{ duration_days }} days</p>
                     </div>
                     {% endif %}
