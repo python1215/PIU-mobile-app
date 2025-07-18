@@ -718,7 +718,7 @@ def ohs_list(request):
         ohs_records = OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter', 
             'region', 'district', 'settlement', 'loginUser'
-        ).prefetch_related('project__donor_set', 'project__contributor_set')
+        )
         
         # Apply filters efficiently
         filters = Q()
