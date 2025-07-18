@@ -2670,7 +2670,7 @@ function showEIPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #28a745; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: Total Energy Injection = Sum of all energy sources (MW)
+                    <i class="bi bi-info-circle"></i> Formula: Energy Injection (MW) = Energy (MWH) / Time (H)
                 </h6>
                 
                 <!-- Energy Sources Container -->
@@ -2694,10 +2694,16 @@ function showEIPopup() {
                                 </select>
                             </div>
                             <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MWH):</label>
                                 <input type="number" class="energy-value" step="0.01" 
                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                                       placeholder="Enter energy in MW">
+                                       placeholder="Enter energy in MWH">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Time (H):</label>
+                                <input type="number" class="time-value" step="0.01" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                       placeholder="Enter time in hours">
                             </div>
                         </div>
                     </div>
@@ -2808,10 +2814,16 @@ function addEnergySource() {
                 </select>
             </div>
             <div style="flex: 1;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MWH):</label>
                 <input type="number" class="energy-value" step="0.01" 
                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                       placeholder="Enter energy in MW">
+                       placeholder="Enter energy in MWH">
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Time (H):</label>
+                <input type="number" class="time-value" step="0.01" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                       placeholder="Enter time in hours">
             </div>
         </div>
     `;
@@ -2852,19 +2864,22 @@ function calculateEI() {
     energySources.forEach((source, index) => {
         const typeSelect = source.querySelector('.energy-type');
         const valueInput = source.querySelector('.energy-value');
+        const timeInput = source.querySelector('.time-value');
         
         const energyType = typeSelect.value;
         const energyValue = parseFloat(valueInput.value) || 0;
+        const timeValue = parseFloat(timeInput.value) || 0;
         
-        if (energyValue > 0) {
+        if (energyValue > 0 && timeValue > 0) {
             hasValidInput = true;
-            totalEI += energyValue;
-            energyBreakdown.push(`${energyType}: ${energyValue.toFixed(2)} MW`);
+            const powerMW = energyValue / timeValue; // Energy(MWH) / Time(H) = MW
+            totalEI += powerMW;
+            energyBreakdown.push(`${energyType}: ${energyValue.toFixed(2)} MWH ÷ ${timeValue.toFixed(2)} H = ${powerMW.toFixed(2)} MW`);
         }
     });
     
     if (!hasValidInput) {
-        alert('Please enter at least one energy source value greater than 0.');
+        alert('Please enter both Energy (MWH) and Time (H) values greater than 0 for at least one energy source.');
         return;
     }
     
@@ -2930,12 +2945,15 @@ async function useEIResult() {
     energySources.forEach((source, index) => {
         const typeSelect = source.querySelector('.energy-type');
         const valueInput = source.querySelector('.energy-value');
+        const timeInput = source.querySelector('.time-value');
         
         const energyType = typeSelect.value.toLowerCase();
         const energyValue = parseFloat(valueInput.value) || 0;
+        const timeValue = parseFloat(timeInput.value) || 0;
         
-        if (energyValue > 0) {
+        if (energyValue > 0 && timeValue > 0) {
             energyData[`${energyType}_energy`] = energyValue;
+            energyData[`${energyType}_time`] = timeValue;
         }
     });
     
@@ -3015,10 +3033,16 @@ function resetEIForm() {
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MW):</label>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy (MWH):</label>
                     <input type="number" class="energy-value" step="0.01" 
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter energy in MW">
+                           placeholder="Enter energy in MWH">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Time (H):</label>
+                    <input type="number" class="time-value" step="0.01" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter time in hours">
                 </div>
             </div>
         </div>
