@@ -941,7 +941,7 @@ def contract_profiling_goods_services_list(request):
         ).count()
         
         # Pagination
-        paginator = Paginator(queryset, 25)
+        paginator = Paginator(queryset, 5)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
