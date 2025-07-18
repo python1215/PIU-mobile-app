@@ -19,16 +19,16 @@
         border-color: #3b82f6;
     }
 
-    /* Responsive Container */
-    .responsive-container {
-        padding: 1rem;
-    }
-
     /* Centered Content Wrapper */
     .centered-content-wrapper {
         max-width: 100%;
         margin: 0 auto;
         width: 100%;
+    }
+
+    /* Responsive Padding */
+    .responsive-padding {
+        padding: 1rem 0.75rem;
     }
 
     /* Header Responsive */
@@ -188,8 +188,9 @@
 
     /* Tablet Responsive (768px and up) */
     @media (min-width: 768px) {
-        .responsive-container {
-            padding: 1.5rem;
+        .container-xl {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
         }
 
         .centered-content-wrapper {
@@ -259,8 +260,9 @@
 
     /* Desktop Responsive (1024px and up) */
     @media (min-width: 1024px) {
-        .responsive-container {
-            padding: 2rem;
+        .container-xl {
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
         }
 
         .centered-content-wrapper {
@@ -288,8 +290,9 @@
 
     /* Large Desktop (1280px and up) */
     @media (min-width: 1280px) {
-        .responsive-container {
-            padding: 2.5rem;
+        .container-xl {
+            padding-left: 2.5rem !important;
+            padding-right: 2.5rem !important;
         }
 
         .stats-cards-responsive {
@@ -304,6 +307,18 @@
 
     /* Mobile Specific Overrides */
     @media (max-width: 767px) {
+        .container-xl {
+            max-width: 100% !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        .centered-content-wrapper {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+        }
+
         .btn {
             width: 100%;
             margin-bottom: 0.5rem;
@@ -353,14 +368,28 @@
             margin-top: 0.75rem !important;
         }
     }
+
+    /* Small Screen Centering */
+    @media (max-width: 575px) {
+        .container-xl {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+
+        .performance-card {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 responsive-container">
+<div class="container-fluid min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
     
     <!-- Centered Container for All Content -->
-    <div class="centered-content-wrapper">
+    <div class="container-xl mx-auto px-3 py-4">
+        <div class="centered-content-wrapper">
         <!-- Recent Performance Data -->
         <div class="performance-card p-6">
         <div class="flex items-center justify-between mb-6 header-responsive">
@@ -713,7 +742,8 @@
         </button>
     </div>
         </div> <!-- End performance-card -->
-    </div> <!-- End centered-content-wrapper -->
+        </div> <!-- End centered-content-wrapper -->
+    </div> <!-- End container-xl -->
 </div> <!-- End container-fluid -->
 
 <script>
