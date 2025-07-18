@@ -16,9 +16,9 @@
         <a href="{% url 'ohs_add' %}" class="btn btn-primary">
             <i class="bi bi-plus me-1"></i>Add OHS Report
         </a>
-        <button type="button" class="btn btn-success" disabled>
+        <a href="{% url 'export_ohs_excel' %}" class="btn btn-success">
             <i class="bi bi-file-excel me-1"></i>Export Excel
-        </button>
+        </a>
     </div>
 </div>
 
@@ -28,7 +28,7 @@
     <div class="col-md-3">
         <div class="card bg-info text-white">
             <div class="card-body text-center">
-                <h4 class="mb-0">{{ stats.total_reports }}</h4>
+                <h4 class="mb-0">{{ stats.total_ohs }}</h4>
                 <small>Total Reports</small>
             </div>
         </div>
@@ -73,22 +73,44 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label">Project</label>
-                {% render_field filter.form.project class="form-select" %}
+                <label for="search" class="form-label">Search</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Search OHS records..." value="{{ request.GET.search }}">
             </div>
             <div class="col-md-3">
-                <label class="form-label">Year</label>
-                {% render_field filter.form.year_of_report class="form-select" %}
+                <label for="project" class="form-label">Project</label>
+                <select name="project" id="project" class="form-select">
+                    <option value="">All Projects</option>
+                    {% for project in filter_choices.projects %}
+                        <option value="{{ project.projectID }}" 
+                                {% if request.GET.project == project.projectID %}selected{% endif %}>
+                            {{ project.project }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Quarter</label>
-                {% render_field filter.form.quarter class="form-select" %}
+            <div class="col-md-3">
+                <label for="region" class="form-label">Region</label>
+                <select name="region" id="region" class="form-select">
+                    <option value="">All Regions</option>
+                    {% for region in filter_choices.regions %}
+                        <option value="{{ region.region_code }}" 
+                                {% if request.GET.region == region.region_code %}selected{% endif %}>
+                            {{ region.region_name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Region</label>
-                {% render_field filter.form.region class="form-select" %}
+            <div class="col-md-3">
+                <label for="page_size" class="form-label">Page Size</label>
+                <select name="page_size" id="page_size" class="form-select">
+                    <option value="10" {% if request.GET.page_size == '10' %}selected{% endif %}>10</option>
+                    <option value="25" {% if request.GET.page_size == '25' %}selected{% endif %}>25</option>
+                    <option value="50" {% if request.GET.page_size == '50' %}selected{% endif %}>50</option>
+                    <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100</option>
+                </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-12 d-flex justify-content-end mt-3">
                 <button type="submit" class="btn btn-primary me-2">
                     <i class="bi bi-search me-1"></i>Filter
                 </button>

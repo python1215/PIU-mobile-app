@@ -711,19 +711,49 @@ def grievance_delete(request, pk):
 def ohs_list(request):
     """Enhanced OHS list view with filtering and pagination"""
     from django.core.paginator import Paginator
+    from django.db.models import Q
     
     try:
+        # Base queryset with optimized select_related
         ohs_records = OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter', 
             'region', 'district', 'settlement', 'loginUser'
-        ).all()
+        ).prefetch_related('project__donor_set', 'project__contributor_set')
         
-        # Apply filters
+        # Apply filters efficiently
+        filters = Q()
+        
         if request.GET.get('project'):
-            ohs_records = ohs_records.filter(project=request.GET.get('project'))
+            filters &= Q(project=request.GET.get('project'))
         
         if request.GET.get('region'):
-            ohs_records = ohs_records.filter(region=request.GET.get('region'))
+            filters &= Q(region=request.GET.get('region'))
+            
+        if request.GET.get('district'):
+            filters &= Q(district=request.GET.get('district'))
+            
+        if request.GET.get('year'):
+            filters &= Q(year_of_report=request.GET.get('year'))
+            
+        if request.GET.get('quarter'):
+            filters &= Q(quarter=request.GET.get('quarter'))
+            
+        # Apply search filter
+        search_query = request.GET.get('search', '').strip()
+        if search_query:
+            filters &= (
+                Q(project__project__icontains=search_query) |
+                Q(quality_at_entry_requirement__icontains=search_query) |
+                Q(working_environment__icontains=search_query) |
+                Q(remarks__icontains=search_query)
+            )
+        
+        # Apply all filters at once
+        if filters:
+            ohs_records = ohs_records.filter(filters)
+        
+        # Order by most recent first
+        ohs_records = ohs_records.order_by('-date', '-date_created')
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -738,7 +768,7 @@ def ohs_list(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        # Get statistics
+        # Get statistics efficiently with aggregation
         stats = {
             'total_ohs': OHS_Monitoring.objects.count(),
             'filtered_count': ohs_records.count(),
@@ -748,9 +778,24 @@ def ohs_list(request):
             'total_youth_female': ohs_records.aggregate(total=models.Sum('youth_female'))['total'] or 0,
         }
         
+        # Calculate additional metrics
+        stats['total_workers'] = stats['total_male_workers'] + stats['total_female_workers']
+        stats['total_youth'] = stats['total_youth_male'] + stats['total_youth_female']
+        
+        # Get filter choices for dropdowns
+        filter_choices = {
+            'projects': Project.objects.filter(projectID='NAWEC').values('projectID', 'project'),
+            'regions': Regions.objects.all().values('region_code', 'region_name'),
+            'districts': Districts.objects.all().values('district_code', 'district_name'),
+            'years': Year_of_Report.objects.all().values('year_Code', 'year_name'),
+            'quarters': Quarter.objects.all().values('quarter_code', 'quarter_name'),
+        }
+        
         context = {
             'page_obj': page_obj,
             'stats': stats,
+            'filter_choices': filter_choices,
+            'current_filters': request.GET,
             'title': 'OHS Monitoring'
         }
         
@@ -767,18 +812,38 @@ def ohs_list(request):
 
 @login_required
 def ohs_add(request):
-    """Add new OHS record"""
+    """Add new OHS record with improved form handling"""
     if request.method == 'POST':
-        form = OHSMonitoringForm(request.POST)
+        form = OHSMonitoringForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 ohs = form.save(commit=False)
                 ohs.loginUser = request.user
+                
+                # Set default values for optional fields
+                if not ohs.male:
+                    ohs.male = 0
+                if not ohs.female:
+                    ohs.female = 0
+                if not ohs.youth_male:
+                    ohs.youth_male = 0
+                if not ohs.youth_female:
+                    ohs.youth_female = 0
+                
                 ohs.save()
                 messages.success(request, 'OHS record added successfully.')
+                
+                # Redirect to list with success message
                 return redirect('ohs_list')
+            except ValidationError as e:
+                messages.error(request, f'Validation error: {str(e)}')
             except Exception as e:
                 messages.error(request, f'Error saving OHS record: {str(e)}')
+        else:
+            # Show form validation errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = OHSMonitoringForm()
     
@@ -811,46 +876,173 @@ def ohs_detail(request, pk):
 
 @login_required
 def ohs_edit(request, pk):
-    """Edit OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+    """Edit OHS monitoring record with improved handling"""
+    try:
+        ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter',
+            'region', 'district', 'settlement'
+        ), pk=pk)
+    except OHS_Monitoring.DoesNotExist:
+        messages.error(request, 'OHS record not found.')
+        return redirect('ohs_list')
     
     if request.method == 'POST':
-        form = OHSMonitoringForm(request.POST, instance=ohs)
+        form = OHSMonitoringForm(request.POST, request.FILES, instance=ohs)
         if form.is_valid():
             try:
                 ohs = form.save(commit=False)
                 ohs.loginUser = request.user
+                
+                # Ensure numeric fields have valid values
+                if not ohs.male:
+                    ohs.male = 0
+                if not ohs.female:
+                    ohs.female = 0
+                if not ohs.youth_male:
+                    ohs.youth_male = 0
+                if not ohs.youth_female:
+                    ohs.youth_female = 0
+                
                 ohs.save()
                 messages.success(request, 'OHS record updated successfully.')
                 return redirect('ohs_list')
+            except ValidationError as e:
+                messages.error(request, f'Validation error: {str(e)}')
             except Exception as e:
                 messages.error(request, f'Error updating OHS record: {str(e)}')
+        else:
+            # Show form validation errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = OHSMonitoringForm(instance=ohs)
     
     return render(request, 'social_and_env/ohs/ohs_form.html', {
         'form': form,
+        'ohs': ohs,
         'title': 'Edit OHS Record'
     })
 
 
 @login_required
 def ohs_delete(request, pk):
-    """Delete OHS monitoring record"""
-    ohs = get_object_or_404(OHS_Monitoring, pk=pk)
+    """Delete OHS monitoring record with improved error handling"""
+    try:
+        ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'region', 'district', 'settlement'
+        ), pk=pk)
+    except OHS_Monitoring.DoesNotExist:
+        messages.error(request, 'OHS record not found.')
+        return redirect('ohs_list')
     
     if request.method == 'POST':
         try:
+            ohs_project = ohs.project.project if ohs.project else "Unknown"
+            ohs_id = ohs.ohs_Id
             ohs.delete()
-            messages.success(request, 'OHS record deleted successfully.')
+            messages.success(request, f'OHS record OHS-{ohs_id} for project {ohs_project} deleted successfully.')
             return redirect('ohs_list')
         except Exception as e:
             messages.error(request, f'Error deleting OHS record: {str(e)}')
+            return redirect('ohs_detail', pk=pk)
     
     return render(request, 'social_and_env/ohs/ohs_confirm_delete.html', {
         'ohs': ohs,
         'title': 'Delete OHS Record'
     })
+
+
+@login_required
+def export_ohs_excel(request):
+    """Export OHS monitoring data to Excel"""
+    import openpyxl
+    from openpyxl.styles import Font, Alignment, PatternFill
+    from django.http import HttpResponse
+    import io
+    
+    try:
+        # Create workbook and worksheet
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "OHS Monitoring Data"
+        
+        # Headers
+        headers = [
+            'OHS ID', 'Project', 'Investment Type', 'Year', 'Quarter', 'Date',
+            'Region', 'District', 'Settlement', 'Male Workers', 'Female Workers',
+            'Youth Male', 'Youth Female', 'Total Workers', 'Quality Requirements',
+            'Working Environment', 'Remarks', 'Created By', 'Created Date'
+        ]
+        
+        # Style headers
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        # Get OHS data with related fields
+        ohs_records = OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter',
+            'region', 'district', 'settlement', 'loginUser'
+        ).order_by('-date')
+        
+        # Add data rows
+        for row, ohs in enumerate(ohs_records, 2):
+            ws.cell(row=row, column=1, value=f"OHS-{ohs.ohs_Id}")
+            ws.cell(row=row, column=2, value=ohs.project.project if ohs.project else "N/A")
+            ws.cell(row=row, column=3, value=ohs.Type_of_Investment.monitoring_Type_Code if ohs.Type_of_Investment else "N/A")
+            ws.cell(row=row, column=4, value=ohs.year_of_report.year_name if ohs.year_of_report else "N/A")
+            ws.cell(row=row, column=5, value=ohs.quarter.quarter_name if ohs.quarter else "N/A")
+            ws.cell(row=row, column=6, value=ohs.date.strftime('%Y-%m-%d') if ohs.date else "N/A")
+            ws.cell(row=row, column=7, value=ohs.region.region_name if ohs.region else "N/A")
+            ws.cell(row=row, column=8, value=ohs.district.district_name if ohs.district else "N/A")
+            ws.cell(row=row, column=9, value=ohs.settlement.settlement_name if ohs.settlement else "N/A")
+            ws.cell(row=row, column=10, value=ohs.male or 0)
+            ws.cell(row=row, column=11, value=ohs.female or 0)
+            ws.cell(row=row, column=12, value=ohs.youth_male or 0)
+            ws.cell(row=row, column=13, value=ohs.youth_female or 0)
+            ws.cell(row=row, column=14, value=ohs.total_workers)
+            ws.cell(row=row, column=15, value=ohs.quality_at_entry_requirement or "N/A")
+            ws.cell(row=row, column=16, value=ohs.working_environment or "N/A")
+            ws.cell(row=row, column=17, value=ohs.remarks or "N/A")
+            ws.cell(row=row, column=18, value=ohs.loginUser.username if ohs.loginUser else "N/A")
+            ws.cell(row=row, column=19, value=ohs.date_created.strftime('%Y-%m-%d %H:%M') if ohs.date_created else "N/A")
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to response
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="OHS_Monitoring_Data.xlsx"'
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f'Error exporting OHS data: {str(e)}')
+        return redirect('ohs_list')
 
 
 # ======================== Community Engagement Views ========================

@@ -420,10 +420,11 @@ class OHSMonitoringForm(forms.ModelForm):
     )
 
     Type_of_Investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.none(),
+        queryset=KPI_For_Contract.objects.all(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
-        to_field_name='monitoring_Type_Code'
+        to_field_name='monitoring_Type_Code',
+        required=False
     )
 
     region = forms.ModelChoiceField(
@@ -438,20 +439,22 @@ class OHSMonitoringForm(forms.ModelForm):
     )
 
     district = forms.ModelChoiceField(
-        queryset=Districts.objects.none(),
+        queryset=Districts.objects.all(),
         empty_label="Select District",
         widget=forms.Select(attrs={
             "class": "form-select",
             "hx-get": reverse_lazy("load_settlements_ohs"),
             "hx-target": "#id_settlement",
             "hx-trigger": "change"
-        })
+        }),
+        required=False
     )
 
     settlement = forms.ModelChoiceField(
-        queryset=Settlement.objects.none(),
+        queryset=Settlement.objects.all(),
         empty_label="Select Settlement",
-        widget=forms.Select(attrs={"class": "form-select"})
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False
     )
 
     class Meta:
