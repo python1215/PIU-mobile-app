@@ -1,5 +1,6 @@
 {% extends 'PIU_Financial_mgt/base.html' %}
 {% load widget_tweaks %}
+{% load currency_tags %}
 
 {% block title %}Subcomponents - PIUN{% endblock %}
 
@@ -173,7 +174,7 @@
                                     <span class="badge bg-info">{{ subcomponent.currency.currency }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <strong>${{ subcomponent.allocation|floatformat:2 }}</strong>
+                                    <strong>{{ subcomponent.allocation|format_currency:subcomponent.currency.currency }}</strong>
                                 </td>
                                 <td>{{ subcomponent.loginUser.username }}</td>
                                 <td>{{ subcomponent.date|date:"M d, Y" }}</td>
