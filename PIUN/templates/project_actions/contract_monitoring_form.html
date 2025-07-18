@@ -78,6 +78,17 @@
                                 {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="id_type_of_contract" class="form-label" style="color: #2c3e50 !important;">Select Type of Contract <span class="text-danger">*</span></label>
+                                <select id="id_type_of_contract" name="type_of_contract" class="form-select" required>
+                                    <option value="">-- Please select --</option>
+                                    <option value="works_contract">Works Contract</option>
+                                    <option value="goods_services">Goods & Services</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
                                 <label for="{{ form.contract_refNo.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Contract Reference <span class="text-danger">*</span></label>
                                 {{ form.contract_refNo|add_class:"form-control" }}
                                 {% if form.contract_refNo.errors %}
