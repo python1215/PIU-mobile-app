@@ -133,9 +133,9 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Contract Ref</th>
-                                        <th>Target</th>
-                                        <th>Achieved</th>
+                                        <th>Indicator Description</th>
+                                        <th>Target Value</th>
+                                        <th>Achieved Value</th>
                                         <th>Status</th>
                                         <th>Date</th>
                                     </tr>
@@ -143,13 +143,21 @@
                                 <tbody>
                                     {% for record in recent_monitoring %}
                                     <tr>
-                                        <td>{{ record.contract_ref|default:"N/A"|truncatechars:30 }}</td>
-                                        <td>{{ record.target|default:"N/A"|truncatechars:25 }}</td>
-                                        <td>{{ record.achieved|default:"N/A" }}</td>
+                                        <td>{{ record.indicator_description|default:"N/A"|truncatechars:30 }}</td>
+                                        <td>{{ record.End_Target_Value|default:"N/A" }}</td>
+                                        <td>{{ record.achieved_value|default:"N/A" }}</td>
                                         <td>
-                                            <span class="badge bg-success">Active</span>
+                                            {% if record.achieved_value and record.End_Target_Value %}
+                                                {% if record.achieved_value >= record.End_Target_Value %}
+                                                    <span class="badge bg-success">Achieved</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">In Progress</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
                                         </td>
-                                        <td>{{ record.monitoring_date|date:"M j, Y"|default:"N/A" }}</td>
+                                        <td>{{ record.date_created|date:"M j, Y"|default:"N/A" }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
