@@ -1265,7 +1265,33 @@ def contract_monitoring_create(request):
                 record = form.save(commit=False)
                 record.loginUser = request.user
                 
-                # Additional validation for cascading dropdown fields
+                # Handle cascading dropdown fields - convert string values to KPI_For_Contract instances
+                type_of_investment_value = form.cleaned_data.get('Type_of_Investment')
+                kpi_description_value = form.cleaned_data.get('Kpi_description')
+                
+                if type_of_investment_value:
+                    try:
+                        # Find KPI_For_Contract instance by type_of_investment
+                        kpi_investment = KPI_For_Contract.objects.filter(
+                            type_of_investment=type_of_investment_value
+                        ).first()
+                        if kpi_investment:
+                            record.Type_of_Investment = kpi_investment
+                    except Exception as e:
+                        print(f"Error finding Type_of_Investment: {e}")
+                
+                if kpi_description_value:
+                    try:
+                        # Find KPI_For_Contract instance by monitoring_Type_Code
+                        kpi_desc = KPI_For_Contract.objects.filter(
+                            monitoring_Type_Code=kpi_description_value
+                        ).first()
+                        if kpi_desc:
+                            record.Kpi_description = kpi_desc
+                    except Exception as e:
+                        print(f"Error finding Kpi_description: {e}")
+                
+                # Validation for required fields
                 if not record.Type_of_Investment:
                     messages.error(request, "Please select a Type of Investment.")
                     return render(request, 'project_actions/contract_monitoring_form.html', {

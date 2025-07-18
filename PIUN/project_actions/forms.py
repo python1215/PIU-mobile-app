@@ -408,6 +408,18 @@ class ContractProfilingGoodsServicesForm(forms.ModelForm):
 class SpecificContractMonitoringForm(forms.ModelForm):
     """Enhanced form for Specific Contract Monitoring"""
     
+    # Override cascading dropdown fields as CharFields to handle AJAX values
+    Type_of_Investment = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    Kpi_description = forms.CharField(
+        max_length=200, 
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
     class Meta:
         model = Specific_Contract_Monitoring
         fields = [
@@ -449,36 +461,15 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             self.fields['type_of_monitoring'].queryset = Type_of_Monitoring.objects.all()
             self.fields['Contract_implementation_Status'].queryset = Physicalprogress.objects.all()
             
-            # Handle KPI fields with fallback - make them simple text/choice fields
-            # Set to empty queryset initially - will be populated via AJAX
-            kpi_queryset = KPI_For_Contract.objects.all()
-            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.none()
-            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.none()
-            
-            # If no KPI data exists, make fields optional and add helpful text
-            if not kpi_queryset.exists():
-                self.fields['Type_of_Investment'].required = False
-                self.fields['Kpi_description'].required = False
-                self.fields['Type_of_Investment'].help_text = 'No KPI data available. Please contact administrator to set up KPI records.'
-                self.fields['Kpi_description'].help_text = 'No KPI data available. Please contact administrator to set up KPI records.'
-            else:
-                # Make fields optional initially - they'll be populated via AJAX
-                self.fields['Type_of_Investment'].required = False
-                self.fields['Kpi_description'].required = False
-                self.fields['Type_of_Investment'].help_text = 'Will be populated based on project and monitoring type selection'
-                self.fields['Kpi_description'].help_text = 'Will be populated based on type of investment selection'
+            # KPI fields are now CharFields - no need to set querysets
                 
         except ImportError:
             # Handle missing setup models gracefully
             self.fields['quarter'].queryset = self.fields['quarter'].queryset.none()
             self.fields['type_of_monitoring'].queryset = self.fields['type_of_monitoring'].queryset.none()
             self.fields['Contract_implementation_Status'].queryset = self.fields['Contract_implementation_Status'].queryset.none()
-            self.fields['Type_of_Investment'].queryset = self.fields['Type_of_Investment'].queryset.none()
-            self.fields['Kpi_description'].queryset = self.fields['Kpi_description'].queryset.none()
             
-            # Make KPI fields optional if models don't exist
-            self.fields['Type_of_Investment'].required = False
-            self.fields['Kpi_description'].required = False
+            # KPI fields are CharFields - no queryset needed
         
         # Make certain fields required
         self.fields['project'].required = True
