@@ -204,10 +204,10 @@
                                             <span class="text-white">{{ contract.activityID.activity|truncatechars:20|default:"N/A" }}</span>
                                         </td>
                                         <td>
-                                            <span class="text-white">{{ contract.project_Category.project_category|default:"N/A" }}</span>
+                                            <span class="text-white">{{ contract.project_Category.category|default:"N/A" }}</span>
                                         </td>
                                         <td>
-                                            <span class="text-white">{{ contract.funding_source.donor|default:"N/A" }}</span>
+                                            <span class="text-white">{{ contract.funding_source.name|default:"N/A" }}</span>
                                         </td>
                                         <td>
                                             <span class="text-white">{{ contract.currency.currency|default:"N/A" }}</span>

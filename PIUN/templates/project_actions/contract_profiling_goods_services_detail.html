@@ -145,14 +145,14 @@
                     {% if contract.project_Category %}
                     <div class="mb-3">
                         <label class="form-label" style="color: #fff !important;">Project Category</label>
-                        <p>{{ contract.project_Category.project_category|default:"N/A" }}</p>
+                        <p>{{ contract.project_Category.category|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
                     {% if contract.funding_source %}
                     <div class="mb-3">
                         <label class="form-label" style="color: #fff !important;">Funding Source</label>
-                        <p>{{ contract.funding_source.donor|default:"N/A" }}</p>
+                        <p>{{ contract.funding_source.name|default:"N/A" }}</p>
                     </div>
                     {% endif %}
 
