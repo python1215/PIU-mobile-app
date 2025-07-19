@@ -184,10 +184,10 @@ class ContractProfilingGoodsServicesFilter(django_filters.FilterSet):
         )
     )
     
-    # Choice filters - filtered to show only NAWEC
+    # Choice filters - show all projects for contract profiling
     if Project:
         projectID = django_filters.ModelChoiceFilter(
-            queryset=Project.objects.filter(projectID='NAWEC'),
+            queryset=Project.objects.all(),
             widget=forms.Select(attrs={'class': 'form-select'}),
             empty_label="All Projects"
         )
