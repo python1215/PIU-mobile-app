@@ -12,19 +12,19 @@ class Indicator_DescriptionForm(forms.ModelForm):
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"),
-                "hx-target": "#id_PDO",
+                "hx-target": "#id_pdo",
                 "hx-trigger": "change",
             }
         )
     )
 
-    PDO = forms.ModelChoiceField(
+    pdo = forms.ModelChoiceField(
        
         queryset=PDO.objects.none(),  # Initially empty until a project is selected
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_Outcome"),
-                "hx-include": "[name='PDO']" , # Include PDO field value in the request
+                "hx-include": "[name='pdo']" , # Include pdo field value in the request
                 "hx-target": "#id_project_outcome"
             }
         ),
@@ -55,13 +55,13 @@ class Indicator_DescriptionForm(forms.ModelForm):
         if 'project' in self.data:  # Use the correct key
             try:
                 project_id = self.data.get('project')  # Adjust this to match your field name
-                self.fields['PDO'].queryset = PDO.objects.filter(project_id=project_id)
+                self.fields['pdo'].queryset = PDO.objects.filter(project_id=project_id)
             except (ValueError, TypeError):
                 pass
 
-        if 'PDO' in self.data:  # Use the correct key
+        if 'pdo' in self.data:  # Use the correct key
             try:
-                pdo_id = self.data.get('PDO')  # Adjust this to match your field name
+                pdo_id = self.data.get('pdo')  # Adjust this to match your field name
                 self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo_id=pdo_id)
             except (ValueError, TypeError):
                 pass

@@ -266,6 +266,11 @@ def add_indicator_description(request):
             instance.save()
             messages.success(request, "Indicator Description saved successfully!")
             return redirect('monitoring:monitoring_dashboard')
+        else:
+            # Add error messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = Indicator_DescriptionForm()
     
