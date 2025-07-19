@@ -109,7 +109,7 @@
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {% if mapping.Latitude and mapping.Longitude %}
                                                     <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                            onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }})"
+                                                            onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }}, {{ mapping.pk }})"
                                                             title="View on Map">
                                                         <i class="bi bi-geo-alt"></i>
                                                     </button>
@@ -211,8 +211,11 @@
 let quickMapInstance = null;
 let currentCoords = null;
 
-function viewOnMap(lat, lng) {
+let currentMappingId = null;
+
+function viewOnMap(lat, lng, mappingId = null) {
     currentCoords = { lat: lat, lng: lng };
+    currentMappingId = mappingId;
     
     // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('quickMapModal'));
@@ -251,6 +254,11 @@ function viewOnMap(lat, lng) {
                 <div class="alert alert-info py-2">
                     <small><i class="bi bi-info-circle me-1"></i>Click "View Details" button for complete location information</small>
                 </div>
+                <div class="text-center mt-2">
+                    <button class="btn btn-sm btn-primary" onclick="editFromPopup()">
+                        <i class="bi bi-pencil me-1"></i>Edit Details
+                    </button>
+                </div>
                 <div class="mt-2">
                     <small class="text-muted">
                         <i class="bi bi-wifi-off me-1"></i>
@@ -265,6 +273,15 @@ function viewOnMap(lat, lng) {
 function viewDetails(mappingId) {
     // Redirect to detail view
     window.location.href = `{% url 'PIU_Mapping_project_Sites:mapping-detail' '0' %}`.replace('0', mappingId);
+}
+
+function editFromPopup() {
+    // Redirect to edit view if mapping ID is available
+    if (currentMappingId) {
+        window.location.href = `{% url 'PIU_Mapping_project_Sites:update-mapping' '0' %}`.replace('0', currentMappingId);
+    } else {
+        alert('Unable to edit: Mapping ID not available. Please use the table action buttons instead.');
+    }
 }
 
 // Google Maps button click handler (offline mode - copy coordinates)
