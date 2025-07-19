@@ -5,12 +5,12 @@ from setup.models import Regions, Districts, Settlement
 class MappingForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
-        widget=forms.Select(attrs={"hx-get": "/PIU_Mapping_project_Sites/load_districts", "hx-target": "#id_district"}),
+        widget=forms.Select(),
     )
 
     district = forms.ModelChoiceField(
         queryset=Districts.objects.none(),
-        widget=forms.Select(attrs={"hx-get": "/PIU_Mapping_project_Sites/load_settlement", "hx-target": "#id_settlement"}),
+        widget=forms.Select(),
     )
 
     settlement = forms.ModelChoiceField(

@@ -307,6 +307,7 @@ The PIUN directory contains specialized modules:
 - July 19, 2025. Enhanced Project Site Mappings actions: added edit button to the actions column in mapping list table with green outline styling, users can now edit mappings directly from the table using the pencil icon alongside existing view and map buttons
 - July 19, 2025. Added edit icons to map popups: implemented edit functionality in interactive map popups by adding green edit icons (fa-edit) positioned next to settlement names in both focused and regular popup displays, edit icons link directly to update-mapping templates for seamless editing from map interface
 - July 19, 2025. Implemented popup form close and refresh functionality: added from_popup parameter detection to update_mapping view, implemented JavaScript form submission handling for popup mode, created closePopupForm() function to handle window/tab closing and parent map refresh, added target="_blank" to popup edit links for proper form isolation, enhanced form with cancel button detection and automatic map refresh after successful updates
+- July 19, 2025. RESOLVED cascading dropdown conflicts in Project Site Mappings: fixed district and settlement loading issues by removing conflicting HTMX attributes from form widgets, replaced HTMX with pure JavaScript fetch API calls, corrected foreign key field references (region_code_id, district_code_id), verified API endpoints return proper JSON data, ensured complete region → district → settlement cascading functionality works without JavaScript conflicts
 
 ## User Preferences
 
