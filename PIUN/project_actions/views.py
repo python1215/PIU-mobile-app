@@ -1537,7 +1537,7 @@ def get_contract_info(request):
             return JsonResponse({
                 'found': True,
                 'type': 'works',
-                'project_id': works_contract.projectID.id if works_contract.projectID else None,
+                'project_id': works_contract.projectID.pk if works_contract.projectID else None,
                 'project_name': str(works_contract.projectID) if works_contract.projectID else '',
                 'contractor': works_contract.name_of_contractor or '',
                 'consultant': works_contract.name_of_consultant or '',
@@ -1554,7 +1554,7 @@ def get_contract_info(request):
             return JsonResponse({
                 'found': True,
                 'type': 'goods_services',
-                'project_id': gs_contract.projectID.id if gs_contract.projectID else None,
+                'project_id': gs_contract.projectID.pk if gs_contract.projectID else None,
                 'project_name': str(gs_contract.projectID) if gs_contract.projectID else '',
                 'supplier': gs_contract.name_of_Supplier or '',
                 'consultant': gs_contract.name_of_consultant or '',
@@ -1785,7 +1785,7 @@ def get_contracts_by_project_and_type(request):
         if contract_type == 'works_contract':
             # Fetch Works contracts
             works_contracts = Contract_Profiling_works.objects.filter(
-                projectID_id=project_id
+                projectID=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in works_contracts:
@@ -1805,7 +1805,7 @@ def get_contracts_by_project_and_type(request):
         elif contract_type == 'goods_services':
             # Fetch Goods & Services contracts
             goods_contracts = Contract_Profiling_goods_services.objects.filter(
-                projectID_id=project_id
+                projectID=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in goods_contracts:
