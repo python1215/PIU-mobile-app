@@ -1,0 +1,80 @@
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\PIUN\manage.py", line 22, in <module>
+    main()
+    ~~~~^^
+  File "C:\PIUN\manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\base.py", line 413, in run_from_argv
+    self.execute(*args, **cmd_options)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\commands\runserver.py", line 74, in execute
+    super().execute(*args, **options)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\base.py", line 459, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\commands\runserver.py", line 111, in handle
+    self.run(**options)
+    ~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\commands\runserver.py", line 118, in run
+    autoreload.run_with_reloader(self.inner_run, **options)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\utils\autoreload.py", line 671, in run_with_reloader
+    start_django(reloader, main_func, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\utils\autoreload.py", line 660, in start_django
+    reloader.run(django_main_thread)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\utils\autoreload.py", line 343, in run
+    autoreload_started.send(sender=self)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\dispatch\dispatcher.py", line 189, in send
+    response = receiver(signal=self, sender=sender, **named)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\autoreload.py", line 50, in watch_for_template_changes
+    for directory in get_template_directories():
+                     ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\autoreload.py", line 16, in get_template_directories
+    for backend in engines.all():
+                   ~~~~~~~~~~~^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\utils.py", line 94, in all
+    return [self[alias] for alias in self]
+            ~~~~^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\utils.py", line 85, in __getitem__
+    engine = engine_cls(params)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\backends\django.py", line 24, in __init__
+    options["libraries"] = self.get_templatetag_libraries(libraries)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\backends\django.py", line 42, in get_templatetag_libraries
+    libraries = get_installed_libraries()
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\backends\django.py", line 117, in get_installed_libraries
+    module_name: full_name for module_name, full_name in get_template_tag_modules()
+                                                         ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\backends\django.py", line 105, in get_template_tag_modules
+    for name in get_package_libraries(pkg):
+                ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\template\backends\django.py", line 128, in get_package_libraries
+    module = import_module(entry[1])
+  File "C:\Users\PGOMEZ_1\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1018, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1156, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1086, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\PIUN\PIU_Financial_mgt\templatetags\currency_tags.py", line 10
+    'EUR': '�',
+           ^
+SyntaxError: (unicode error) 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte
+PS C:\PIUN> 
