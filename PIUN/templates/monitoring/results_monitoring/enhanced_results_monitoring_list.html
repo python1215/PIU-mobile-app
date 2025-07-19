@@ -47,7 +47,8 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Year/Quarter</th>
+                                <th>Year</th>
+                                <th>Quarter</th>
                                 <th>Project</th>
                                 <th>PDO</th>
                                 <th>Indicator Type</th>
@@ -65,8 +66,10 @@
                             {% for record in monitoring_records %}
                                 <tr>
                                     <td>
-                                        <strong>{{ record.year|default:"N/A" }}</strong><br>
-                                        <small class="text-muted">{{ record.quarter|default:"N/A" }}</small>
+                                        <strong>{{ record.year|default:"N/A" }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ record.quarter|default:"N/A" }}</span>
                                     </td>
                                     <td>
                                         <strong>{{ record.project.project|truncatechars:20 }}</strong><br>

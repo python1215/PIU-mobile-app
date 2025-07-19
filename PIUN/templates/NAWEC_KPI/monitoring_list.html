@@ -151,7 +151,8 @@
                                     <tr>
                                         <th>Project</th>
                                         <th>Indicator</th>
-                                        <th>Year/Quarter</th>
+                                        <th>Year</th>
+                                        <th>Quarter</th>
                                         <th>Baseline</th>
                                         <th>Achieved</th>
                                         <th>Target</th>
@@ -177,8 +178,10 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                {% if entry.year %}{{ entry.year.year }}{% else %}N/A{% endif %} / 
-                                                {{ entry.quarter.quarter }}
+                                                {% if entry.year %}{{ entry.year.year }}{% else %}N/A{% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ entry.quarter.quarter }}</span>
                                             </td>
                                             <td>
                                                 {% if entry.baseline_value %}
