@@ -6,7 +6,7 @@ import locale
 import json
 from django.utils import timezone
 from .models import projectMapping, settlementwithCoordinates, Access, nawecinfrastructure
-from .forms import MappingForm, NAWECInfrastructureForm, SettlementWithCoordinatesForm
+from .forms import MappingForm, NAWECInfrastructureForm, settlementwithCoordinatesForm
 from django.contrib import messages
 from PIU_Financial_mgt.models import Project, Donor
 from social_and_env.models import Settlement, Regions
@@ -695,27 +695,50 @@ def update_mapping(request, pk):
     
     if request.method == 'POST':
         form = MappingForm(request.POST, instance=mapping)
+        
+        # Log form data for debugging
+        print(f"Form data received: {request.POST}")
+        print(f"Form is bound: {form.is_bound}")
+        print(f"Form is valid: {form.is_valid()}")
+        
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+            print(f"Non-field errors: {form.non_field_errors()}")
+            for field, errors in form.errors.items():
+                print(f"Field {field} errors: {errors}")
+        
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Mapping updated successfully!')
-            
-            # If from popup, return JavaScript to close and refresh
-            if request.POST.get('from_popup'):
-                return JsonResponse({
-                    'success': True, 
-                    'message': 'Mapping updated successfully!',
-                    'action': 'close_and_refresh'
-                })
-            
-            return redirect('PIU_Mapping_project_Sites:mapping-list')
+            try:
+                updated_mapping = form.save()
+                messages.success(request, 'Mapping updated successfully!')
+                
+                # If from popup, return JavaScript to close and refresh
+                if request.POST.get('from_popup'):
+                    return JsonResponse({
+                        'success': True, 
+                        'message': 'Mapping updated successfully!',
+                        'action': 'close_and_refresh'
+                    })
+                
+                return redirect('PIU_Mapping_project_Sites:mapping-list')
+            except Exception as e:
+                print(f"Error saving form: {str(e)}")
+                if request.POST.get('from_popup'):
+                    return JsonResponse({
+                        'success': False,
+                        'errors': {'__all__': [f'Error saving: {str(e)}']},
+                        'message': 'Database error occurred'
+                    })
+                messages.error(request, f'Error saving mapping: {str(e)}')
         else:
             # If form is invalid and from popup, return errors
             if request.POST.get('from_popup'):
                 return JsonResponse({
                     'success': False,
                     'errors': form.errors,
-                    'message': 'Form validation failed'
+                    'message': 'Form validation failed. Please check the fields and try again.'
                 })
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = MappingForm(instance=mapping)
     

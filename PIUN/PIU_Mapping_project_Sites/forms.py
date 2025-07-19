@@ -30,15 +30,15 @@ class MappingForm(forms.ModelForm):
         # For new forms (from POST data)
         if 'region' in self.data:
             try:
-                region_code = int(self.data.get('region'))
-                self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
+                region_code = self.data.get('region')
+                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_code)
             except (ValueError, TypeError):
                 pass
 
         if 'district' in self.data:
             try:
-                district_code = int(self.data.get('district'))
-                self.fields['settlement'].queryset = Settlement.objects.filter(district_code=district_code)
+                district_code = self.data.get('district')
+                self.fields['settlement'].queryset = Settlement.objects.filter(district_code_id=district_code)
             except (ValueError, TypeError):
                 pass
         
@@ -46,19 +46,14 @@ class MappingForm(forms.ModelForm):
         elif self.instance and self.instance.pk:
             # Populate district dropdown based on selected region
             if self.instance.region:
-                self.fields['district'].queryset = Districts.objects.filter(region_code=self.instance.region.pk)
+                self.fields['district'].queryset = Districts.objects.filter(region_code_id=self.instance.region.region_code)
             
             # Populate settlement dropdown based on selected district
             if self.instance.district:
-                self.fields['settlement'].queryset = Settlement.objects.filter(district_code=self.instance.district.pk)
+                self.fields['settlement'].queryset = Settlement.objects.filter(district_code_id=self.instance.district.district_code)
 
     def clean(self):
         cleaned_data = super().clean()
-        settlement = cleaned_data.get('settlement_name')
-
-        if settlement and not Settlement.objects.filter(pk=settlement.pk).exists():
-            raise forms.ValidationError("Invalid settlement selected. Please choose a valid settlement.")
-
         return cleaned_data
 
 
@@ -98,53 +93,31 @@ class NAWECInfrastructureForm(forms.ModelForm):
         }
 
 
-class SettlementWithCoordinatesForm(forms.ModelForm):
+class settlementwithCoordinatesForm(forms.ModelForm):
     class Meta:
         model = settlementwithCoordinates
-        fields = ['region', 'lga', 'district', 'ward', 'settlement_code', 'settlement_name', 
-                 'population_household', 'Latitude', 'Longitude']
+        fields = ['settlement_code', 'settlement_name', 'Latitude', 'Longitude', 'region', 'district']
         widgets = {
-            'region': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Region name'
-            }),
-            'lga': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'LGA name'
-            }),
-            'district': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'District name'
-            }),
-            'ward': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ward name'
-            }),
             'settlement_code': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Settlement code'
+                'placeholder': 'Enter settlement code'
             }),
             'settlement_name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Settlement name'
+                'placeholder': 'Enter settlement name'
             }),
-            'population_household': forms.NumberInput(attrs={
+            'Latitude': forms.TextInput(attrs={
                 'class': 'form-control',
-                'min': '0',
-                'placeholder': 'Population/Household count'
+                'placeholder': 'Enter latitude'
             }),
-            'Latitude': forms.NumberInput(attrs={
+            'Longitude': forms.TextInput(attrs={
                 'class': 'form-control',
-                'step': '0.000001',
-                'min': '13.0',
-                'max': '14.0',
-                'placeholder': 'Latitude (13.0 - 14.0)'
+                'placeholder': 'Enter longitude'
             }),
-            'Longitude': forms.NumberInput(attrs={
+            'region': forms.Select(attrs={
                 'class': 'form-control',
-                'step': '0.000001',
-                'min': '-18.0',
-                'max': '-14.0',
-                'placeholder': 'Longitude (-18.0 - -14.0)'
+            }),
+            'district': forms.Select(attrs={
+                'class': 'form-control',
             }),
         }
