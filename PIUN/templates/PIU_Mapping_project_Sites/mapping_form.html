@@ -15,8 +15,8 @@
                     <p class="text-muted">{% if action == 'Add' %}Create new geographic project mapping entry{% else %}Update existing project mapping information{% endif %}</p>
                 </div>
                 <div>
-                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    <a href="{% url 'PIU_Mapping_project_Sites:index' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Interactive Map
                     </a>
                 </div>
             </div>
@@ -165,7 +165,7 @@
                                             <i class="bi bi-x-circle me-1"></i>Cancel
                                         </button>
                                     {% else %}
-                                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
+                                        <a href="{% url 'PIU_Mapping_project_Sites:index' %}" class="btn btn-outline-secondary">
                                             <i class="bi bi-x-circle me-1"></i>Cancel
                                         </a>
                                     {% endif %}
@@ -302,7 +302,7 @@ function closePopupForm() {
         if (document.referrer) {
             window.location.href = document.referrer;
         } else {
-            window.location.href = '/PIU_Mapping_project_Sites/offline-map/';
+            window.location.href = '/PIU_Mapping_project_Sites/';
         }
     }
 }

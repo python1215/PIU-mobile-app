@@ -718,10 +718,10 @@ def update_mapping(request, pk):
                         'success': True, 
                         'message': 'Mapping updated successfully!',
                         'action': 'redirect_to_mapping',
-                        'redirect_url': '/PIU_Mapping_project_Sites/offline-map/'
+                        'redirect_url': '/PIU_Mapping_project_Sites/'
                     })
                 
-                return redirect('PIU_Mapping_project_Sites:mapping-list')
+                return redirect('PIU_Mapping_project_Sites:index')
             except Exception as e:
                 print(f"Error saving form: {str(e)}")
                 if request.POST.get('from_popup'):
