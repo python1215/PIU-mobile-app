@@ -257,20 +257,22 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.action === 'close_and_refresh') {
-                // Close current window/tab and refresh parent
-                closePopupForm();
-                // If opened in a new tab/window, close it
+            if (data.success && data.action === 'redirect_to_mapping') {
+                // Redirect to NAWEC PIU Project Site Mapping
                 if (window.opener) {
-                    window.opener.location.reload();
+                    // If opened in popup, redirect opener and close popup
+                    window.opener.location.href = data.redirect_url;
                     window.close();
                 } else if (window.parent !== window) {
-                    // If in iframe, refresh parent
-                    window.parent.location.reload();
+                    // If in iframe, navigate parent
+                    window.parent.location.href = data.redirect_url;
                 } else {
-                    // Fallback - go back to map
-                    window.location.href = '/PIU_Mapping_project_Sites/offline-map/';
+                    // Direct navigation
+                    window.location.href = data.redirect_url;
                 }
+            } else if (data.success && data.action === 'close_and_refresh') {
+                // Fallback for backward compatibility
+                closePopupForm();
             } else if (!data.success) {
                 // Show validation errors
                 console.error('Form validation errors:', data.errors);
