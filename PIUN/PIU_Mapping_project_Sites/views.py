@@ -665,7 +665,7 @@ def load_districts(request):
 def load_settlement(request):
     """AJAX view to load settlements based on district"""
     district_id = request.GET.get('district_id')
-    settlements = Settlement.objects.filter(district_code=district_id).values('settlement_code', 'settlement_name')
+    settlements = Settlement.objects.filter(district_code_id=district_id).values('settlement_code', 'settlement_name')
     return JsonResponse({'settlements': list(settlements)})
 
 def settlementswithcor(request):
