@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Results_Oriented_Monitoring
 from django.contrib import messages
 
-from .forms import Results_Oriented_MonitoringForm, updateResults_Oriented_MonitoringForm
+from .forms import Results_Oriented_MonitoringForm, updateResults_Oriented_MonitoringForm, Indicator_DescriptionForm
 # Using standard forms from forms.py
 from django.contrib import messages
 
@@ -267,7 +267,7 @@ def add_indicator_description(request):
             messages.success(request, "Indicator Description saved successfully!")
             return redirect('monitoring:enhanced-indicator-description-list')
     else:
-        form = SimpleIndicatorDescriptionForm()
+        form = Indicator_DescriptionForm()
     
     context = {'form': form}
     return render(request, 'monitoring/indicator_description/add_indicator_description.html', context)
