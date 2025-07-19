@@ -205,9 +205,7 @@
     </div>
 </div>
 
-<!-- JavaScript for Interactive Features -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Offline Compatible Solution -->
 
 <script>
 let quickMapInstance = null;
@@ -223,52 +221,45 @@ function viewOnMap(lat, lng) {
     // Update coordinates display
     document.getElementById('modalCoordinates').textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     
-    // Initialize map when modal is shown
-    document.getElementById('quickMapModal').addEventListener('shown.bs.modal', function () {
-        if (!quickMapInstance) {
-            // Create map centered on the location
-            quickMapInstance = L.map('quickLocationMap').setView([lat, lng], 14);
-            
-            // Add OpenStreetMap tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(quickMapInstance);
-            
-            // Add marker for the location
-            const marker = L.marker([lat, lng]).addTo(quickMapInstance);
-            
-            // Add popup with basic information
-            marker.bindPopup(`
-                <div class="text-center">
-                    <h6 class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Project Site</h6>
-                    <p class="mb-1"><strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
-                    <p class="mb-0"><small class="text-muted">Click "View Details" for more information</small></p>
+    // Create offline coordinate display instead of loading external map libraries
+    const mapContainer = document.getElementById('quickLocationMap');
+    mapContainer.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+            <div class="text-center p-4">
+                <div class="mb-4">
+                    <i class="bi bi-geo-alt-fill text-danger" style="font-size: 3rem;"></i>
                 </div>
-            `).openPopup();
-            
-            // Add circle to show approximate area
-            L.circle([lat, lng], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.2,
-                radius: 300
-            }).addTo(quickMapInstance);
-        }
-        
-        // Resize map to fit modal
-        setTimeout(() => {
-            quickMapInstance.invalidateSize();
-        }, 100);
-    });
-    
-    // Clean up map when modal is hidden
-    document.getElementById('quickMapModal').addEventListener('hidden.bs.modal', function () {
-        if (quickMapInstance) {
-            quickMapInstance.remove();
-            quickMapInstance = null;
-        }
-    });
+                <h5 class="mb-3">Project Site Location</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card bg-primary text-white mb-2">
+                            <div class="card-body text-center py-2">
+                                <h6 class="card-title mb-1">Latitude</h6>
+                                <small class="card-text">${lat.toFixed(6)}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card bg-success text-white mb-2">
+                            <div class="card-body text-center py-2">
+                                <h6 class="card-title mb-1">Longitude</h6>
+                                <small class="card-text">${lng.toFixed(6)}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info py-2">
+                    <small><i class="bi bi-info-circle me-1"></i>Click "View Details" button for complete location information</small>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-wifi-off me-1"></i>
+                        Offline Mode: External map services unavailable
+                    </small>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function viewDetails(mappingId) {
@@ -276,11 +267,24 @@ function viewDetails(mappingId) {
     window.location.href = `{% url 'PIU_Mapping_project_Sites:mapping-detail' '0' %}`.replace('0', mappingId);
 }
 
-// Google Maps button click handler
+// Google Maps button click handler (offline mode - copy coordinates)
 document.getElementById('openGoogleMapsBtn').addEventListener('click', function() {
     if (currentCoords) {
-        const url = `https://www.google.com/maps?q=${currentCoords.lat},${currentCoords.lng}`;
-        window.open(url, '_blank');
+        const coords = `${currentCoords.lat},${currentCoords.lng}`;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(coords).then(function() {
+                alert('Coordinates copied to clipboard: ' + coords + '\nYou can paste these into any map application when online.');
+            });
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = coords;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Coordinates copied to clipboard: ' + coords + '\nYou can paste these into any map application when online.');
+        }
     }
 });
 </script>

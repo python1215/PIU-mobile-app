@@ -300,9 +300,7 @@
     </div>
 </div>
 
-<!-- JavaScript for Interactive Features -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Offline Compatible Solution -->
 
 <script>
 let mapInstance = null;
@@ -312,62 +310,72 @@ function viewOnMap(lat, lng) {
     const modal = new bootstrap.Modal(document.getElementById('mapModal'));
     modal.show();
     
-    // Initialize map when modal is shown
-    document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
-        if (!mapInstance) {
-            // Create map centered on the location
-            mapInstance = L.map('locationMap').setView([lat, lng], 15);
-            
-            // Add OpenStreetMap tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(mapInstance);
-            
-            // Add marker for the location
-            const marker = L.marker([lat, lng]).addTo(mapInstance);
-            
-            // Add popup with information
-            marker.bindPopup(`
-                <div class="text-center">
-                    <h6 class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ mapping.settlement.settlement_name }}</h6>
-                    <p class="mb-1"><strong>Region:</strong> {{ mapping.region.region_name }}</p>
-                    <p class="mb-1"><strong>District:</strong> {{ mapping.district.district_name }}</p>
-                    <p class="mb-1"><strong>Access Type:</strong> {{ mapping.access.access_type }}</p>
-                    <p class="mb-1"><strong>Total Households:</strong> {{ mapping.Total_No_of_Households }}</p>
-                    <p class="mb-1"><strong>Connected:</strong> {{ mapping.no_of_connected_household|default:0 }}</p>
-                    <p class="mb-0"><strong>Access Rate:</strong> {{ access_rate|floatformat:1 }}%</p>
+    // Create offline coordinate display instead of loading external map libraries
+    const mapContainer = document.getElementById('locationMap');
+    mapContainer.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+            <div class="text-center p-4" style="max-width: 600px;">
+                <div class="mb-4">
+                    <i class="bi bi-geo-alt-fill text-primary" style="font-size: 4rem;"></i>
                 </div>
-            `).openPopup();
-            
-            // Add circle to show coverage area
-            L.circle([lat, lng], {
-                color: 'blue',
-                fillColor: '#30b4f0',
-                fillOpacity: 0.2,
-                radius: 500
-            }).addTo(mapInstance);
-        }
-        
-        // Resize map to fit modal
-        setTimeout(() => {
-            mapInstance.invalidateSize();
-        }, 100);
-    });
-    
-    // Clean up map when modal is hidden
-    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function () {
-        if (mapInstance) {
-            mapInstance.remove();
-            mapInstance = null;
-        }
-    });
+                <h4 class="mb-3">{{ mapping.settlement.settlement_name }}</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Latitude</h5>
+                                <h3 class="card-text">${lat.toFixed(6)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-success text-white mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Longitude</h5>
+                                <h3 class="card-text">${lng.toFixed(6)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle me-2"></i>Location Details</h6>
+                    <div class="row text-start">
+                        <div class="col-6"><strong>Region:</strong> {{ mapping.region.region_name }}</div>
+                        <div class="col-6"><strong>District:</strong> {{ mapping.district.district_name }}</div>
+                        <div class="col-6"><strong>Total Households:</strong> {{ mapping.Total_No_of_Households }}</div>
+                        <div class="col-6"><strong>Connected:</strong> {{ mapping.no_of_connected_household|default:0 }}</div>
+                        <div class="col-6"><strong>Access Type:</strong> {{ mapping.access.access_type|default:"N/A" }}</div>
+                        <div class="col-6"><strong>Access Rate:</strong> {{ access_rate|floatformat:1 }}%</div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-wifi-off me-1"></i>
+                        Offline Mode: External map services unavailable
+                    </small>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function openInGoogleMaps(lat, lng) {
-    // Open location in Google Maps
-    const url = `https://www.google.com/maps?q=${lat},${lng}`;
-    window.open(url, '_blank');
+    // For offline mode, copy coordinates to clipboard
+    const coords = `${lat},${lng}`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(coords).then(function() {
+            alert('Coordinates copied to clipboard: ' + coords + '\nYou can paste these into any map application when online.');
+        });
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = coords;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Coordinates copied to clipboard: ' + coords + '\nYou can paste these into any map application when online.');
+    }
 }
 
 // Alternative function to open in different map services

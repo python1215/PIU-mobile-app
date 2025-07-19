@@ -302,6 +302,7 @@ The PIUN directory contains specialized modules:
 - July 19, 2025. Fixed monitoring template syntax error: corrected Django template block structure in add_indicator_description.html by fixing incorrect endblock tags, changed {% block monitoring_content %} to {% block content %} to match base template structure, resolved TemplateSyntaxError that prevented indicator description form from loading
 - July 19, 2025. Fixed monitoring URL routing issues: resolved NoReverseMatch error for 'enhanced-indicator-description-list' by updating template URL references to use existing 'monitoring_dashboard' URL, corrected view redirects to use proper URL patterns, ensured all monitoring form navigation works correctly
 - July 19, 2025. Enhanced monitoring records display: separated Year/Quarter column into two distinct columns (Year and Quarter) in both Enhanced Results Monitoring and NAWEC KPI Monitoring list templates for improved data visualization and readability, added badge styling for quarter display with consistent color coding
+- July 19, 2025. Fixed offline mapping "View on Map" functionality: resolved hanging issue caused by external library dependencies (Leaflet CDN and OpenStreetMap tiles) by replacing with offline-compatible coordinate display, implemented coordinate copying to clipboard for offline environments, enhanced both mapping detail and mapping list templates with pure HTML/CSS coordinate visualization instead of interactive maps
 
 ## User Preferences
 
