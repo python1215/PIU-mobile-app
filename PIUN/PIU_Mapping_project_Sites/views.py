@@ -659,7 +659,7 @@ def mappingCreateView(request):
 def load_districts(request):
     """AJAX view to load districts based on region"""
     region_id = request.GET.get('region_id')
-    districts = Districts.objects.filter(region_code=region_id).values('district_code', 'district_name')
+    districts = Districts.objects.filter(region_code_id=region_id).values('district_code', 'district_name')
     return JsonResponse({'districts': list(districts)})
 
 def load_settlement(request):

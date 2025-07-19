@@ -190,10 +190,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('id_region').addEventListener('change', function() {
         const regionId = this.value;
         if (regionId) {
-            htmx.ajax('GET', `/PIU_Mapping_project_Sites/load_districts/?region_id=${regionId}`, {
-                target: '#id_district',
-                swap: 'innerHTML'
-            });
+            fetch(`/PIU_Mapping_project_Sites/load_districts/?region_id=${regionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const districtSelect = document.getElementById('id_district');
+                    districtSelect.innerHTML = '<option value="">---------</option>';
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.district_code;
+                        option.textContent = district.district_name;
+                        districtSelect.appendChild(option);
+                    });
+                    // Clear settlements when districts change
+                    document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+                })
+                .catch(error => {
+                    console.error('Error loading districts:', error);
+                });
         } else {
             document.getElementById('id_district').innerHTML = '<option value="">---------</option>';
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
@@ -204,10 +217,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('id_district').addEventListener('change', function() {
         const districtId = this.value;
         if (districtId) {
-            htmx.ajax('GET', `/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`, {
-                target: '#id_settlement',
-                swap: 'innerHTML'
-            });
+            fetch(`/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const settlementSelect = document.getElementById('id_settlement');
+                    settlementSelect.innerHTML = '<option value="">---------</option>';
+                    data.settlements.forEach(settlement => {
+                        const option = document.createElement('option');
+                        option.value = settlement.settlement_code;
+                        option.textContent = settlement.settlement_name;
+                        settlementSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading settlements:', error);
+                });
         } else {
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
         }
