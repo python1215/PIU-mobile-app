@@ -34,8 +34,11 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <form method="post" hx-boost="true">
+                    <form method="post" hx-boost="true" id="mappingForm">
                         {% csrf_token %}
+                        {% if from_popup %}
+                            <input type="hidden" name="from_popup" value="1">
+                        {% endif %}
                         
                         <div class="row">
                             <!-- Profile Year and Access -->
@@ -157,9 +160,15 @@
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
-                                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-x-circle me-1"></i>Cancel
-                                    </a>
+                                    {% if from_popup %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="closePopupForm()">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </a>
+                                    {% endif %}
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-{% if action == 'Add' %}plus-circle{% else %}check-circle{% endif %} me-1"></i>
                                         {{ action }} Mapping
@@ -203,6 +212,65 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
         }
     });
+
+    // Handle form submission for popup mode
+    {% if from_popup %}
+    document.getElementById('mappingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch(this.action || window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.action === 'close_and_refresh') {
+                // Close current window/tab and refresh parent
+                closePopupForm();
+                // If opened in a new tab/window, close it
+                if (window.opener) {
+                    window.opener.location.reload();
+                    window.close();
+                } else if (window.parent !== window) {
+                    // If in iframe, refresh parent
+                    window.parent.location.reload();
+                } else {
+                    // Fallback - go back to map
+                    window.location.href = '/PIU_Mapping_project_Sites/offline-map/';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Fallback submission
+            this.submit();
+        });
+    });
+    {% endif %}
 });
+
+// Function to close popup form
+function closePopupForm() {
+    if (window.opener) {
+        // If opened as popup, close and refresh opener
+        window.opener.location.reload();
+        window.close();
+    } else if (window.parent !== window) {
+        // If in iframe, navigate parent back
+        window.parent.history.back();
+    } else {
+        // Fallback - go back to previous page or map
+        if (document.referrer) {
+            window.location.href = document.referrer;
+        } else {
+            window.location.href = '/PIU_Mapping_project_Sites/offline-map/';
+        }
+    }
+}
 </script>
 {% endblock %}

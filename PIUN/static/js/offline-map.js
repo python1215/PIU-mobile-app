@@ -247,12 +247,12 @@ class OfflineMap {
 
     // Create popup content for project marker
     createPopupContent(project) {
-        const editUrl = project.id ? `/PIU_Mapping_project_Sites/update-mapping/${project.id}/` : '#';
+        const editUrl = project.id ? `/PIU_Mapping_project_Sites/update-mapping/${project.id}/?from_popup=1` : '#';
         return `
             <div class="project-popup-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h5 class="mb-0">${project.settlement_name || 'Unknown Settlement'}</h5>
-                    ${project.id ? `<a href="${editUrl}" style="color: #27ae60; text-decoration: none; font-size: 16px;" title="Edit Details">
+                    ${project.id ? `<a href="${editUrl}" style="color: #27ae60; text-decoration: none; font-size: 16px;" title="Edit Details" target="_blank">
                         <i class="fa fa-edit"></i>
                     </a>` : ''}
                 </div>

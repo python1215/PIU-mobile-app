@@ -306,6 +306,7 @@ The PIUN directory contains specialized modules:
 - July 19, 2025. Added edit buttons to map popups: implemented "Edit Details" buttons in both mapping detail and mapping list coordinate popups that link directly to edit templates, enhanced popup functionality with mapping ID tracking for seamless editing access from map views
 - July 19, 2025. Enhanced Project Site Mappings actions: added edit button to the actions column in mapping list table with green outline styling, users can now edit mappings directly from the table using the pencil icon alongside existing view and map buttons
 - July 19, 2025. Added edit icons to map popups: implemented edit functionality in interactive map popups by adding green edit icons (fa-edit) positioned next to settlement names in both focused and regular popup displays, edit icons link directly to update-mapping templates for seamless editing from map interface
+- July 19, 2025. Implemented popup form close and refresh functionality: added from_popup parameter detection to update_mapping view, implemented JavaScript form submission handling for popup mode, created closePopupForm() function to handle window/tab closing and parent map refresh, added target="_blank" to popup edit links for proper form isolation, enhanced form with cancel button detection and automatic map refresh after successful updates
 
 ## User Preferences
 

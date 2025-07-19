@@ -145,9 +145,9 @@ def index(request):
                                     <i class="fa fa-map-marker"></i> {settlement} 
                                     <span style="font-size: 12px; color: #95a5a6;">(Focused Location)</span>
                                 </h4>
-                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/" 
+                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/?from_popup=1" 
                                    style="color: #27ae60; text-decoration: none; font-size: 16px;" 
-                                   title="Edit Details">
+                                   title="Edit Details" target="_blank">
                                     <i class="fa fa-edit"></i>
                                 </a>
                             </div>
@@ -171,9 +171,9 @@ def index(request):
                         <div style="width: 250px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <h4 style="color: #2c3e50; margin: 0;">{settlement}</h4>
-                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/" 
+                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/?from_popup=1" 
                                    style="color: #27ae60; text-decoration: none; font-size: 16px;" 
-                                   title="Edit Details">
+                                   title="Edit Details" target="_blank">
                                     <i class="fa fa-edit"></i>
                                 </a>
                             </div>
@@ -659,13 +659,13 @@ def mappingCreateView(request):
 def load_districts(request):
     """AJAX view to load districts based on region"""
     region_id = request.GET.get('region_id')
-    districts = Districts.objects.filter(region_id=region_id).values('district_code', 'district')
+    districts = Districts.objects.filter(region_code=region_id).values('district_code', 'district_name')
     return JsonResponse({'districts': list(districts)})
 
 def load_settlement(request):
     """AJAX view to load settlements based on district"""
     district_id = request.GET.get('district_id')
-    settlements = Settlement.objects.filter(district_id=district_id).values('settlement_code', 'settlement_name')
+    settlements = Settlement.objects.filter(district_code=district_id).values('settlement_code', 'settlement_name')
     return JsonResponse({'settlements': list(settlements)})
 
 def settlementswithcor(request):
@@ -691,17 +691,32 @@ def add_mapping(request):
 def update_mapping(request, pk):
     """Update existing mapping"""
     mapping = get_object_or_404(projectMapping, pk=pk)
+    from_popup = request.GET.get('from_popup', False)
     
     if request.method == 'POST':
         form = MappingForm(request.POST, instance=mapping)
         if form.is_valid():
             form.save()
             messages.success(request, 'Mapping updated successfully!')
+            
+            # If from popup, return JavaScript to close and refresh
+            if request.POST.get('from_popup'):
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Mapping updated successfully!',
+                    'action': 'close_and_refresh'
+                })
+            
             return redirect('PIU_Mapping_project_Sites:mapping-list')
     else:
         form = MappingForm(instance=mapping)
     
-    context = {'form': form, 'mapping': mapping, 'action': 'Update'}
+    context = {
+        'form': form, 
+        'mapping': mapping, 
+        'action': 'Update',
+        'from_popup': from_popup
+    }
     return render(request, 'PIU_Mapping_project_Sites/mapping_form.html', context)
 
 def delete_mapping(request, pk):
