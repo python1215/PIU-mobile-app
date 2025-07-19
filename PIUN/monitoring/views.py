@@ -265,7 +265,7 @@ def add_indicator_description(request):
             instance.loginUser = request.user
             instance.save()
             messages.success(request, "Indicator Description saved successfully!")
-            return redirect('monitoring:enhanced-indicator-description-list')
+            return redirect('monitoring:monitoring_dashboard')
     else:
         form = Indicator_DescriptionForm()
     
@@ -281,7 +281,7 @@ def update_indicator_description(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Indicator Description updated successfully!")
-            return redirect('monitoring:enhanced-indicator-description-list')
+            return redirect('monitoring:monitoring_dashboard')
     else:
         form = Indicator_DescriptionForm(instance=indicator)
     
@@ -295,7 +295,7 @@ def delete_indicator_description(request, pk):
     if request.method == 'POST':
         indicator.delete()
         messages.success(request, "Indicator Description deleted successfully!")
-        return redirect('monitoring:enhanced-indicator-description-list')
+        return redirect('monitoring:monitoring_dashboard')
     
     context = {'indicator': indicator}
     return render(request, 'monitoring/indicator_description/delete_indicator_description.html', context)
