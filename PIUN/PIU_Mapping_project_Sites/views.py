@@ -708,6 +708,14 @@ def update_mapping(request, pk):
                 })
             
             return redirect('PIU_Mapping_project_Sites:mapping-list')
+        else:
+            # If form is invalid and from popup, return errors
+            if request.POST.get('from_popup'):
+                return JsonResponse({
+                    'success': False,
+                    'errors': form.errors,
+                    'message': 'Form validation failed'
+                })
     else:
         form = MappingForm(instance=mapping)
     

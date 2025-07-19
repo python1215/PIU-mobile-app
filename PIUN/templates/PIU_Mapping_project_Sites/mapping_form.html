@@ -243,12 +243,16 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const formData = new FormData(this);
+        // Ensure from_popup is included
+        formData.append('from_popup', '1');
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
         fetch(this.action || window.location.href, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': csrfToken
             }
         })
         .then(response => response.json())
@@ -267,6 +271,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Fallback - go back to map
                     window.location.href = '/PIU_Mapping_project_Sites/offline-map/';
                 }
+            } else if (!data.success) {
+                // Show validation errors
+                console.error('Form validation errors:', data.errors);
+                alert('Form validation failed. Please check the console for details and correct the errors.');
             }
         })
         .catch(error => {
