@@ -140,10 +140,17 @@ def index(request):
                 if is_focused:
                     popup = f"""
                         <div style="width: 280px; border-left: 4px solid #e74c3c;">
-                            <h4 style="color: #e74c3c; margin-bottom: 10px;">
-                                <i class="fa fa-map-marker"></i> {settlement} 
-                                <span style="font-size: 12px; color: #95a5a6;">(Focused Location)</span>
-                            </h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="color: #e74c3c; margin: 0;">
+                                    <i class="fa fa-map-marker"></i> {settlement} 
+                                    <span style="font-size: 12px; color: #95a5a6;">(Focused Location)</span>
+                                </h4>
+                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/" 
+                                   style="color: #27ae60; text-decoration: none; font-size: 16px;" 
+                                   title="Edit Details">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                            </div>
                             <table style="width: 100%; font-size: 12px;">
                                 <tr><td><strong>Project:</strong></td><td>{project_label}</td></tr>
                                 <tr><td><strong>Region:</strong></td><td>{region}</td></tr>
@@ -162,7 +169,14 @@ def index(request):
                 else:
                     popup = f"""
                         <div style="width: 250px;">
-                            <h4 style="color: #2c3e50; margin-bottom: 10px;">{settlement}</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="color: #2c3e50; margin: 0;">{settlement}</h4>
+                                <a href="/PIU_Mapping_project_Sites/update-mapping/{community.pk}/" 
+                                   style="color: #27ae60; text-decoration: none; font-size: 16px;" 
+                                   title="Edit Details">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                            </div>
                             <table style="width: 100%; font-size: 12px;">
                                 <tr><td><strong>Project:</strong></td><td>{project_label}</td></tr>
                                 <tr><td><strong>Region:</strong></td><td>{region}</td></tr>
@@ -555,6 +569,7 @@ def offline_map(request):
         project_str = ', '.join(project_names) if project_names else None
         
         project_info = {
+            'id': mapping.pk,  # Add mapping ID for edit functionality
             'latitude': float(mapping.Latitude),
             'longitude': float(mapping.Longitude),
             'settlement_name': mapping.settlement.settlement_name if mapping.settlement else 'Unknown',
