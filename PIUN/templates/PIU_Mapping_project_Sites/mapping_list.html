@@ -74,12 +74,9 @@
                                         <td>
                                             {% if mapping.donor.all %}
                                                 <div class="d-flex flex-wrap gap-1">
-                                                    {% for donor in mapping.donor.all|slice:":2" %}
-                                                        <span class="badge badge-success">{{ donor.name|truncatechars:15 }}</span>
+                                                    {% for donor in mapping.donor.all %}
+                                                        <span class="badge badge-success">{{ donor.name }}</span>
                                                     {% endfor %}
-                                                    {% if mapping.donor.count > 2 %}
-                                                        <span class="badge badge-secondary">+{{ mapping.donor.count|add:"-2" }} more</span>
-                                                    {% endif %}
                                                 </div>
                                             {% else %}
                                                 <span class="text-muted">No donors</span>
