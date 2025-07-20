@@ -34,9 +34,9 @@ def main_dashboard(request):
         'total_community': CommunityConsult_Engagement.objects.count() if CommunityConsult_Engagement else 0,
         
         # Recent activity - using safe field references
-        'recent_projects': Project.objects.order_by('-date')[:5],
-        'recent_esia': ESIA.objects.order_by('-date_created')[:5] if ESIA else [],
-        'recent_pap': PAP.objects.order_by('-date_created')[:5] if PAP else [],
+        'recent_projects': list(Project.objects.order_by('-date')[:5]),
+        'recent_esia': list(ESIA.objects.order_by('-date_created')[:5]) if ESIA else [],
+        'recent_pap': list(PAP.objects.order_by('-date_created')[:5]) if PAP else [],
         
         # Simple statistics without complex filtering
         'active_projects': Project.objects.count() if Project else 0,

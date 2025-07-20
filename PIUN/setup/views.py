@@ -22,8 +22,8 @@ def setup_dashboard(request):
         'total_measurement_units': Measurement_Unit.objects.count(),
         
         # Recent items
-        'recent_donors': Donor.objects.order_by('-donorID')[:5],
-        'recent_categories': ProjectCategory.objects.order_by('-categoryID')[:5],
+        'recent_donors': list(Donor.objects.order_by('-donorID')[:5]),
+        'recent_categories': list(ProjectCategory.objects.order_by('-categoryID')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
