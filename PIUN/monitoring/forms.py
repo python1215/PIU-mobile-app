@@ -196,16 +196,31 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             # Set proper cascading relationships based on existing data
             if self.instance.project:
-                # Filter PDOs to those related to the project
-                self.fields['pdo'].queryset = PDO.objects.filter(project=self.instance.project)
+                # Show all PDOs for the project including the current one
+                project_pdos = PDO.objects.filter(project=self.instance.project)
+                self.fields['pdo'].queryset = project_pdos
+                
+                # Debug: Print current PDO
+                print(f"Instance PDO: {self.instance.pdo} (ID: {self.instance.pdo.id if self.instance.pdo else 'None'})")
+                print(f"Available PDOs: {list(project_pdos.values_list('id', 'pdo_statement'))}")
             
             if self.instance.pdo:
-                # Filter outcomes to those related to the PDO
-                self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
+                # Show all outcomes for the PDO including the current one
+                pdo_outcomes = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
+                self.fields['project_outcome'].queryset = pdo_outcomes
+                
+                # Debug: Print current outcome
+                print(f"Instance Outcome: {self.instance.project_outcome} (ID: {self.instance.project_outcome.id if self.instance.project_outcome else 'None'})")
+                print(f"Available Outcomes: {list(pdo_outcomes.values_list('id', 'project_outcome'))}")
             
             if self.instance.project_outcome:
-                # Filter results to those related to the outcome
-                self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
+                # Show all results for the outcome including the current one
+                outcome_results = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
+                self.fields['project_result'].queryset = outcome_results
+                
+                # Debug: Print current result
+                print(f"Instance Result: {self.instance.project_result} (ID: {self.instance.project_result.id if self.instance.project_result else 'None'})")
+                print(f"Available Results: {list(outcome_results.values_list('id', 'project_result'))}")
 
         # Dynamic filtering for form submission validation
         if self.data:

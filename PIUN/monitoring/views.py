@@ -264,6 +264,7 @@ def enhanced_results_monitoring_list(request):
 @login_required
 def update_results_monitoring(request, pk):
     monitoring = get_object_or_404(Results_Oriented_Monitoring, pk=pk)
+    
     if request.method == 'POST':
         form = updateResults_Oriented_MonitoringForm(request.POST, instance=monitoring)
         if form.is_valid():
