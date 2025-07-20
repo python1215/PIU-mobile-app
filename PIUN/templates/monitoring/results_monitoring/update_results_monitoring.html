@@ -309,4 +309,39 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force refresh of select fields to ensure saved values are displayed
+    console.log('Refreshing form field values...');
+    
+    // Check each select field and log its value
+    const selectFields = ['id_project', 'id_pdo', 'id_project_outcome', 'id_project_result', 'id_indicator_type', 'id_measurement_unit'];
+    
+    selectFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            console.log(`${fieldId} value: ${field.value}`);
+            // Trigger change event to ensure proper display
+            field.dispatchEvent(new Event('change'));
+        }
+    });
+    
+    // Specifically handle PDO field
+    const pdoField = document.getElementById('id_pdo');
+    if (pdoField) {
+        console.log(`PDO field current value: ${pdoField.value}`);
+        console.log(`PDO field options:`, Array.from(pdoField.options).map(opt => ({value: opt.value, text: opt.text, selected: opt.selected})));
+        
+        // Force selection if value exists but not showing
+        if (pdoField.value && !pdoField.selectedOptions.length) {
+            const correctOption = pdoField.querySelector(`option[value="${pdoField.value}"]`);
+            if (correctOption) {
+                correctOption.selected = true;
+                console.log('Manually selected PDO option');
+            }
+        }
+    }
+});
+</script>
 {% endblock content %}

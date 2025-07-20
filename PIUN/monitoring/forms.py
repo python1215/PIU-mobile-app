@@ -134,36 +134,18 @@ class Results_Oriented_MonitoringForm(forms.ModelForm):
 class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
         queryset=Project.objects.filter(project__icontains='water'),
-        widget=forms.Select(
-            attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
-                "hx-target": "#id_pdo", 
-                "hx-trigger": "change",  # Trigger when project changes
-            }
-        )
+        widget=forms.Select()
     )
 
     pdo = forms.ModelChoiceField(
         queryset=PDO.objects.all(),  # Show all PDOs for editing mode
-        widget=forms.Select(
-            attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_Outcome"), 
-                "hx-target": "#id_project_outcome",
-                "hx-trigger": "change",  # Trigger when PDO changes
-            }
-        ),
+        widget=forms.Select(),
         required=False
     )
 
     project_outcome = forms.ModelChoiceField(
         queryset=ProjectOutCome.objects.all(),  # Show all outcomes for editing mode
-        widget=forms.Select(
-            attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_Result"), 
-                "hx-target": "#id_project_result",
-                "hx-trigger": "change",  # Trigger when outcome changes
-            }
-        ),
+        widget=forms.Select(),
         required=False
     )
 
