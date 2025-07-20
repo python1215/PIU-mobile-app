@@ -144,7 +144,7 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     )
 
     pdo = forms.ModelChoiceField(
-        queryset=PDO.objects.none(),  # Initially empty until a project is selected
+        queryset=PDO.objects.all(),  # Show all PDOs for editing mode
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_Outcome"), 
@@ -156,7 +156,7 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     )
 
     project_outcome = forms.ModelChoiceField(
-        queryset=ProjectOutCome.objects.none(),  # Initially empty until PDO is selected
+        queryset=ProjectOutCome.objects.all(),  # Show all outcomes for editing mode
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_Result"), 
@@ -168,7 +168,7 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     )
 
     project_result = forms.ModelChoiceField(
-        queryset=ProjectResult.objects.none(),  # Initially empty until project_outcome is selected
+        queryset=ProjectResult.objects.all(),  # Show all results for editing mode
         required=False
     )
 
@@ -200,27 +200,18 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
                 project_pdos = PDO.objects.filter(project=self.instance.project)
                 self.fields['pdo'].queryset = project_pdos
                 
-                # Debug: Print current PDO
-                print(f"Instance PDO: {self.instance.pdo} (ID: {self.instance.pdo.id if self.instance.pdo else 'None'})")
-                print(f"Available PDOs: {list(project_pdos.values_list('id', 'pdo_statement'))}")
+                # Set proper queryset for project to ensure form validation works
+                self.fields['pdo'].queryset = project_pdos
             
             if self.instance.pdo:
                 # Show all outcomes for the PDO including the current one
                 pdo_outcomes = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
                 self.fields['project_outcome'].queryset = pdo_outcomes
-                
-                # Debug: Print current outcome
-                print(f"Instance Outcome: {self.instance.project_outcome} (ID: {self.instance.project_outcome.id if self.instance.project_outcome else 'None'})")
-                print(f"Available Outcomes: {list(pdo_outcomes.values_list('id', 'project_outcome'))}")
             
             if self.instance.project_outcome:
                 # Show all results for the outcome including the current one
                 outcome_results = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
                 self.fields['project_result'].queryset = outcome_results
-                
-                # Debug: Print current result
-                print(f"Instance Result: {self.instance.project_result} (ID: {self.instance.project_result.id if self.instance.project_result else 'None'})")
-                print(f"Available Results: {list(outcome_results.values_list('id', 'project_result'))}")
 
         # Dynamic filtering for form submission validation
         if self.data:
