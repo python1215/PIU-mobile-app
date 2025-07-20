@@ -75,7 +75,7 @@ class Indicator_DescriptionForm(forms.ModelForm):
 
 class Results_Oriented_MonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.filter(projectID='NAWEC'),
+        queryset=Project.objects.filter(project__icontains='water'),
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
@@ -133,7 +133,7 @@ class Results_Oriented_MonitoringForm(forms.ModelForm):
 
 class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
-        queryset=Project.objects.filter(projectID='NAWEC'),
+        queryset=Project.objects.filter(project__icontains='water'),
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
@@ -183,6 +183,24 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # For editing mode, set all querysets to show all options initially
+        # Make required fields actually required for database integrity
+        self.fields['project_outcome'].required = True
+        self.fields['project_result'].required = True
+        self.fields['pdo'].required = True
+        
+        # Populate all querysets for editing
+        self.fields['pdo'].queryset = PDO.objects.all()
+        self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()
+        self.fields['project_result'].queryset = ProjectResult.objects.all()
+        
+        # If this is bound form with instance, set proper cascading relationships
+        if self.instance and self.instance.pk:
+            if self.instance.project:
+                self.fields['pdo'].queryset = PDO.objects.filter(project=self.instance.project)
+            if self.instance.pdo:
+                self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
+            if self.instance.project_outcome:
+                self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
         # HTMX will handle dynamic filtering
         self.fields['pdo'].queryset = PDO.objects.all()
         self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()

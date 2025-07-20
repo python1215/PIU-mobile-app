@@ -269,9 +269,22 @@ def update_results_monitoring(request, pk):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.loginUser = request.user
-            instance.save()
-            messages.success(request, "Results Monitoring record updated successfully!")
-            return redirect('monitoring:enhanced-results-monitoring-list')
+            
+            # Ensure all required foreign key fields are set
+            if not instance.project_outcome_id:
+                messages.error(request, "Project Outcome is required.")
+                return render(request, 'monitoring/results_monitoring/update_results_monitoring.html', 
+                             {'form': form, 'monitoring': monitoring})
+            
+            try:
+                instance.save()
+                messages.success(request, "Results Monitoring record updated successfully!")
+                return redirect('monitoring:enhanced-results-monitoring-list')
+            except Exception as e:
+                messages.error(request, f"Error saving record: {str(e)}")
+        else:
+            # Show form validation errors
+            messages.error(request, "Please correct the errors below.")
     else:
         form = updateResults_Oriented_MonitoringForm(instance=monitoring)
     
