@@ -1133,59 +1133,10 @@ def simple_financial_dashboard(request):
     # Recent subcomponents (last 5) - needed for template
     recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
     
-    # Recent activities (last 5) - Database mode compatible
+    # Recent activities (last 5) - Use Django ORM for SQLite compatibility
     try:
-        # Use proper database mode detection
-        from django.db import connection
-        if is_sql_server_mode():  # Use actual database mode detection
-            # Use raw SQL for SQL Server compatibility
-            with connection.cursor() as cursor:
-                # Try different table names for test vs production environments
-                table_names = [
-                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Test environment
-                    '[piuprod3].[dbo].[PIU_Financial_mgt_activities]',  # Production environment  
-                    'PIU_Financial_mgt_activities'  # Fallback without schema
-                ]
-                
-                recent_activities = []
-                for table_name in table_names:
-                    try:
-                        query = f"""
-                            SELECT TOP 5 
-                                activity,
-                                allocation,
-                                date,
-                                projectID_id,
-                                compID_id,
-                                subcompID_id
-                            FROM {table_name}
-                            ORDER BY date DESC
-                        """
-                        cursor.execute(query)
-                        results = cursor.fetchall()
-                        
-                        # Convert to dict format for template compatibility
-                        recent_activities = []
-                        for row in results:
-                            recent_activities.append({
-                                'activity': row[0],
-                                'allocation': row[1],
-                                'date': row[2],
-                                'projectID_id': row[3],
-                                'compID_id': row[4],
-                                'subcompID_id': row[5]
-                            })
-                        
-                        print(f"Successfully queried activities table: {table_name}")
-                        print(f"Found {len(recent_activities)} recent activities")
-                        break
-                    except Exception as e:
-                        print(f"Failed to query activities {table_name}: {e}")
-                        continue
-                        
-        else:
-            # SQLite - use Django ORM
-            recent_activities = Activities.objects.order_by('-date')[:5]
+        recent_activities = Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5]
+        print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")
         recent_activities = []
