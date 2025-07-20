@@ -244,20 +244,50 @@ def add_results_monitoring(request):
 
 @login_required
 def enhanced_results_monitoring_list(request):
-    """Enhanced list view for Results Oriented Monitoring records"""
-    monitoring_records_qs = Results_Oriented_Monitoring.objects.all().select_related(
-        'project', 'pdo', 'project_outcome', 'project_result', 
-        'indicator_type', 'measurement_unit', 'collection_frequency',
-        'year', 'quarter', 'loginUser'
-    ).order_by('-date_created')
+    """Enhanced list view for Results Oriented Monitoring records with dual-mode support"""
+    from utils.database_utils import is_sql_server_mode
     
-    # Convert QuerySet to list for reliable template evaluation
-    monitoring_records = list(monitoring_records_qs)
+    try:
+        if is_sql_server_mode():
+            # Use raw SQL for SQL Server mode
+            from django.db import connection
+            with connection.cursor() as cursor:
+                table_name = "[piuprod3].[dbo].[monitoring_results_oriented_monitoring]"
+                cursor.execute(f"SELECT * FROM {table_name} ORDER BY date_created DESC")
+                raw_records = cursor.fetchall()
+                
+                # Create mock objects for template compatibility
+                class MockMonitoringRecord:
+                    def __init__(self, data):
+                        self.id = data[0] if len(data) > 0 else None
+                        self.indicator_description = data[1] if len(data) > 1 else ""
+                        self.date_created = data[2] if len(data) > 2 else None
+                        
+                monitoring_records = [MockMonitoringRecord(record) for record in raw_records]
+        else:
+            # Use Django ORM for SQLite mode - convert to list to prevent template issues
+            monitoring_records_qs = Results_Oriented_Monitoring.objects.all().select_related(
+                'project', 'pdo', 'project_outcome', 'project_result', 
+                'indicator_type', 'measurement_unit', 'collection_frequency',
+                'year', 'quarter', 'loginUser'
+            ).order_by('-date_created')
+            
+            # Convert QuerySet to list for reliable template evaluation
+            monitoring_records = list(monitoring_records_qs)
+        
+        context = {
+            'monitoring_records': monitoring_records,
+            'title': 'Enhanced Results Monitoring List'
+        }
+        
+    except Exception as e:
+        # Error handling
+        monitoring_records = []
+        context = {
+            'monitoring_records': monitoring_records,
+            'title': 'Enhanced Results Monitoring List'
+        }
     
-    context = {
-        'monitoring_records': monitoring_records,
-        'title': 'Enhanced Results Monitoring List'
-    }
     return render(request, 'monitoring/results_monitoring/enhanced_results_monitoring_list.html', context)
 
 
