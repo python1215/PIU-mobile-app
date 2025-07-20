@@ -589,7 +589,7 @@ def components(request):
         is_filtered = True
     
     if currency_id and currency_id != '':
-        components_qs = components_qs.filter(currency__currency=currency_id)
+        components_qs = components_qs.filter(currency__id=currency_id)
         is_filtered = True
     
     if allocation_min:
@@ -771,15 +771,15 @@ def subcomponents(request):
     currency_filter = request.GET.get('currency', '')
     search_filter = request.GET.get('search', '')
     
-    # Apply filters
+    # Apply filters with correct field references
     if project_filter:
-        subcomponents_qs = subcomponents_qs.filter(projectID=project_filter)
+        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
     
     if component_filter:
-        subcomponents_qs = subcomponents_qs.filter(compID=component_filter)
+        subcomponents_qs = subcomponents_qs.filter(compID__compID=component_filter)
     
     if currency_filter:
-        subcomponents_qs = subcomponents_qs.filter(currency=currency_filter)
+        subcomponents_qs = subcomponents_qs.filter(currency__id=currency_filter)
     
     if search_filter:
         subcomponents_qs = subcomponents_qs.filter(
