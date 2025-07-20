@@ -174,26 +174,18 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
         self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()
         self.fields['project_result'].queryset = ProjectResult.objects.all()
         
-        # If this is an editing form with an existing instance
+        # If this is an editing form with an existing instance, set explicit initial values
         if self.instance and self.instance.pk:
-            # Set proper cascading relationships based on existing data
-            if self.instance.project:
-                # Show all PDOs for the project including the current one
-                project_pdos = PDO.objects.filter(project=self.instance.project)
-                self.fields['pdo'].queryset = project_pdos
-                
-                # Set proper queryset for project to ensure form validation works
-                self.fields['pdo'].queryset = project_pdos
-            
-            if self.instance.pdo:
-                # Show all outcomes for the PDO including the current one
-                pdo_outcomes = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
-                self.fields['project_outcome'].queryset = pdo_outcomes
-            
-            if self.instance.project_outcome:
-                # Show all results for the outcome including the current one
-                outcome_results = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
-                self.fields['project_result'].queryset = outcome_results
+            # Explicitly set all form field initial values to ensure they display correctly
+            self.initial['project'] = self.instance.project.pk if self.instance.project else None
+            self.initial['pdo'] = self.instance.pdo.id if self.instance.pdo else None
+            self.initial['project_outcome'] = self.instance.project_outcome.id if self.instance.project_outcome else None
+            self.initial['project_result'] = self.instance.project_result.id if self.instance.project_result else None
+            self.initial['indicator_type'] = self.instance.indicator_type.id if self.instance.indicator_type else None
+            self.initial['measurement_unit'] = self.instance.measurement_unit.id if self.instance.measurement_unit else None
+            self.initial['collection_frequency'] = self.instance.collection_frequency.id if self.instance.collection_frequency else None
+            self.initial['year'] = self.instance.year.id if self.instance.year else None
+            self.initial['quarter'] = self.instance.quarter.id if self.instance.quarter else None
 
         # Dynamic filtering for form submission validation
         if self.data:

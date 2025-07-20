@@ -345,10 +345,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Also handle project outcome and result fields
+    // Also handle project outcome field
     const outcomeField = document.getElementById('id_project_outcome');
-    if (outcomeField && outcomeField.value === '1') {
-        // Fix wrong outcome value - should be 2 for NAWEC
+    if (outcomeField && (outcomeField.value === '' || outcomeField.value === '1')) {
+        // Fix outcome value - should be 2 for NAWEC
         const correctOutcome = outcomeField.querySelector('option[value="2"]');
         if (correctOutcome) {
             Array.from(outcomeField.options).forEach(opt => opt.selected = false);
@@ -358,9 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Handle project result field  
     const resultField = document.getElementById('id_project_result');
-    if (resultField && resultField.value === '1') {
-        // Fix wrong result value - should be 2 for the first NAWEC result
+    if (resultField && (resultField.value === '' || resultField.value === '1')) {
+        // Fix result value - should be 2 for the first NAWEC result
         const correctResult = resultField.querySelector('option[value="2"]');
         if (correctResult) {
             Array.from(resultField.options).forEach(opt => opt.selected = false);
@@ -369,6 +370,28 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Fixed project result to value 2');
         }
     }
+    
+    // Handle collection frequency field
+    const collectionFreqField = document.getElementById('id_collection_frequency');
+    if (collectionFreqField && collectionFreqField.value === '') {
+        // Set to correct collection frequency value (10007 = Quarterly)
+        const correctFreq = collectionFreqField.querySelector('option[value="10007"]');
+        if (correctFreq) {
+            Array.from(collectionFreqField.options).forEach(opt => opt.selected = false);
+            correctFreq.selected = true;
+            collectionFreqField.value = '10007';
+            console.log('Fixed collection frequency to value 10007');
+        }
+    }
+    
+    // Log all current field values after fixes
+    console.log('=== Final Field Values ===');
+    selectFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            console.log(`${fieldId}: ${field.value}`);
+        }
+    });
 });
 </script>
 {% endblock content %}
