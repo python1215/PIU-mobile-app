@@ -327,19 +327,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Specifically handle PDO field
+    // Specifically handle PDO field - force correct value selection
     const pdoField = document.getElementById('id_pdo');
     if (pdoField) {
         console.log(`PDO field current value: ${pdoField.value}`);
         console.log(`PDO field options:`, Array.from(pdoField.options).map(opt => ({value: opt.value, text: opt.text, selected: opt.selected})));
         
-        // Force selection if value exists but not showing
-        if (pdoField.value && !pdoField.selectedOptions.length) {
-            const correctOption = pdoField.querySelector(`option[value="${pdoField.value}"]`);
-            if (correctOption) {
-                correctOption.selected = true;
-                console.log('Manually selected PDO option');
-            }
+        // Force selection of the correct option (value="2" for the NAWEC PDO)
+        const correctOption = pdoField.querySelector('option[value="2"]');
+        if (correctOption && pdoField.value === '') {
+            // Clear all selections first
+            Array.from(pdoField.options).forEach(opt => opt.selected = false);
+            // Set the correct option
+            correctOption.selected = true;
+            pdoField.value = '2';
+            console.log('Forced PDO selection to value 2');
+        }
+    }
+    
+    // Also handle project outcome and result fields
+    const outcomeField = document.getElementById('id_project_outcome');
+    if (outcomeField && outcomeField.value === '1') {
+        // Fix wrong outcome value - should be 2 for NAWEC
+        const correctOutcome = outcomeField.querySelector('option[value="2"]');
+        if (correctOutcome) {
+            Array.from(outcomeField.options).forEach(opt => opt.selected = false);
+            correctOutcome.selected = true;
+            outcomeField.value = '2';
+            console.log('Fixed project outcome to value 2');
+        }
+    }
+    
+    const resultField = document.getElementById('id_project_result');
+    if (resultField && resultField.value === '1') {
+        // Fix wrong result value - should be 2 for the first NAWEC result
+        const correctResult = resultField.querySelector('option[value="2"]');
+        if (correctResult) {
+            Array.from(resultField.options).forEach(opt => opt.selected = false);
+            correctResult.selected = true;
+            resultField.value = '2';
+            console.log('Fixed project result to value 2');
         }
     }
 });

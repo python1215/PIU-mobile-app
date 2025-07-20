@@ -288,6 +288,14 @@ def update_results_monitoring(request, pk):
             messages.error(request, "Please correct the errors below.")
     else:
         form = updateResults_Oriented_MonitoringForm(instance=monitoring)
+        
+        # Ensure form fields have the correct initial values from the instance
+        form.initial['project'] = monitoring.project
+        form.initial['pdo'] = monitoring.pdo
+        form.initial['project_outcome'] = monitoring.project_outcome
+        form.initial['project_result'] = monitoring.project_result
+        form.initial['indicator_type'] = monitoring.indicator_type
+        form.initial['measurement_unit'] = monitoring.measurement_unit
     
     context = {'form': form, 'monitoring': monitoring}
     return render(request, 'monitoring/results_monitoring/update_results_monitoring.html', context)
