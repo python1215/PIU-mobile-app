@@ -182,62 +182,62 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # For editing mode, set all querysets to show all options initially
         # Make required fields actually required for database integrity
         self.fields['project_outcome'].required = True
         self.fields['project_result'].required = True
         self.fields['pdo'].required = True
         
-        # Populate all querysets for editing
+        # Set initial querysets - show all options for editing
         self.fields['pdo'].queryset = PDO.objects.all()
         self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()
         self.fields['project_result'].queryset = ProjectResult.objects.all()
         
-        # If this is bound form with instance, set proper cascading relationships
+        # If this is an editing form with an existing instance
         if self.instance and self.instance.pk:
+            # Set proper cascading relationships based on existing data
             if self.instance.project:
+                # Filter PDOs to those related to the project
                 self.fields['pdo'].queryset = PDO.objects.filter(project=self.instance.project)
+            
             if self.instance.pdo:
+                # Filter outcomes to those related to the PDO
                 self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
+            
             if self.instance.project_outcome:
-                self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
-        # HTMX will handle dynamic filtering
-        self.fields['pdo'].queryset = PDO.objects.all()
-        self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()
-        self.fields['project_result'].queryset = ProjectResult.objects.all()
-
-        if self.instance.pk:  # Check if instance is being loaded for editing
-            # Ensure pdo is not None before filtering
-            if hasattr(self.instance, 'pdo') and self.instance.pdo:
-                self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo=self.instance.pdo)
-
-            # Set the queryset for project_result based on the selected project_outcome
-            if hasattr(self.instance, 'project_outcome') and self.instance.project_outcome:
+                # Filter results to those related to the outcome
                 self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome=self.instance.project_outcome)
 
-        # If 'project' is in the data, filter pdo options
-        if 'project' in self.data:
-            try:
-                project_id = self.data.get('project')
-                self.fields['pdo'].queryset = PDO.objects.filter(project_id=project_id)
-            except (ValueError, TypeError):
-                pass
+        # Dynamic filtering for form submission validation
+        if self.data:
+            # If 'project' is in the data, filter pdo options
+            if 'project' in self.data:
+                try:
+                    project_id = self.data.get('project')
+                    if project_id:
+                        self.fields['pdo'].queryset = PDO.objects.filter(project_id=project_id)
+                except (ValueError, TypeError):
+                    # Keep all PDOs if there's an error
+                    self.fields['pdo'].queryset = PDO.objects.all()
 
-        # If 'pdo' is in the data, filter project_outcome options
-        if 'pdo' in self.data:
-            try:
-                pdo_id = self.data.get('pdo')
-                self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo_id=pdo_id)
-            except (ValueError, TypeError):
-                pass
+            # If 'pdo' is in the data, filter project_outcome options
+            if 'pdo' in self.data:
+                try:
+                    pdo_id = self.data.get('pdo')
+                    if pdo_id:
+                        self.fields['project_outcome'].queryset = ProjectOutCome.objects.filter(pdo_id=pdo_id)
+                except (ValueError, TypeError):
+                    # Keep all outcomes if there's an error
+                    self.fields['project_outcome'].queryset = ProjectOutCome.objects.all()
 
-        # If 'project_outcome' is in the data, filter project_result options
-        if 'project_outcome' in self.data:
-            try:
-                project_outcome_id = self.data.get('project_outcome')
-                self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome_id=project_outcome_id)
-            except (ValueError, TypeError):
-                pass
+            # If 'project_outcome' is in the data, filter project_result options
+            if 'project_outcome' in self.data:
+                try:
+                    project_outcome_id = self.data.get('project_outcome')
+                    if project_outcome_id:
+                        self.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome_id=project_outcome_id)
+                except (ValueError, TypeError):
+                    # Keep all results if there's an error
+                    self.fields['project_result'].queryset = ProjectResult.objects.all()
 
 
 ################Result Oreiented Monitoring For Nawec KPIs/Nawec KPI Monitoring ################
