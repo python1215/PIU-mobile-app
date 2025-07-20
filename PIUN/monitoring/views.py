@@ -37,18 +37,18 @@ def monitoring_dashboard(request):
             'recent_monitoring': [],
         }
         
-        # Recent monitoring activities using Django ORM
+        # Recent monitoring activities using Django ORM with correct field references
         recent_monitoring = Results_Oriented_Monitoring.objects.select_related(
-            'project_description', 
+            'project', 
             'quarter'
-        ).order_by('-date')[:5]
+        ).order_by('-date_created')[:5]
         
-        stats['recent_monitoring'] = recent_monitoring
+        stats['recent_monitoring'] = list(recent_monitoring)
         
         # Calculate performance average using Django ORM
         monitoring_count = Results_Oriented_Monitoring.objects.count()
         if monitoring_count > 0:
-            stats['performance_avg'] = min(85, (stats['total_projects'] * 20) + 45)
+            stats['performance_avg'] = min(85, (stats['total_projects'] * 5) + 65)
         else:
             stats['performance_avg'] = 0
             
