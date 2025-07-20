@@ -911,8 +911,8 @@ def activities(request):
     from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
     from PIU_Financial_mgt.models import Currency
     
-    # Get all activities
-    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency', 'loginUser')
+    # Get all activities with proper field references
+    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
     
     # Filter parameters
     project_filter = request.GET.get('project', '')
@@ -922,7 +922,7 @@ def activities(request):
     year_filter = request.GET.get('year', '')
     search_filter = request.GET.get('search', '')
     
-    # Apply filters
+    # Apply filters with correct field names
     if project_filter:
         activities_qs = activities_qs.filter(projectID__projectID=project_filter)
     
@@ -936,7 +936,7 @@ def activities(request):
         activities_qs = activities_qs.filter(currency__id=currency_filter)
     
     if year_filter:
-        activities_qs = activities_qs.filter(year__id=year_filter)
+        activities_qs = activities_qs.filter(year=year_filter)
     
     if search_filter:
         activities_qs = activities_qs.filter(
@@ -949,10 +949,6 @@ def activities(request):
     total_allocation = activities_qs.aggregate(Sum('allocation'))['allocation__sum'] or 0
     unique_projects = activities_qs.values('projectID').distinct().count()
     
-    # Debug output - remove after testing
-    # print(f"DEBUG ACTIVITIES: Total in DB: {total_activities}, Filtered: {filtered_count}")
-    # print(f"DEBUG FILTERS: project={project_filter}, component={component_filter}, search={search_filter}")
-    
     stats = {
         'total_activities': total_activities,
         'filtered_count': filtered_count,
@@ -960,7 +956,7 @@ def activities(request):
         'unique_projects': unique_projects,
     }
     
-    # Order activities
+    # Order activities by year and date (newest first)
     activities_qs = activities_qs.order_by('-year', '-date')
     
     # Pagination - 5 records per page
