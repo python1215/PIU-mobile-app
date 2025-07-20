@@ -816,8 +816,11 @@ def subcomponents(request):
     
     is_filtered = bool(project_filter or component_filter or currency_filter or search_filter)
     
+    # Ensure the QuerySet is properly evaluated for the template
+    final_subcomponents = subcomponents_qs.order_by('-date')
+    
     context = {
-        'subcomponents': subcomponents_qs.order_by('-date'),
+        'subcomponents': list(final_subcomponents),  # Convert to list for reliable template evaluation
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
