@@ -1085,11 +1085,11 @@ def simple_financial_dashboard(request):
     # Recent subcomponents (last 5) - needed for template
     recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
     
-    # Recent activities (last 5) - SQL Server compatible
+    # Recent activities (last 5) - Database mode compatible
     try:
-        # Force SQL Server mode - always use raw SQL queries
+        # Use proper database mode detection
         from django.db import connection
-        if True:  # Always use SQL Server compatible queries
+        if is_sql_server_mode():  # Use actual database mode detection
             # Use raw SQL for SQL Server compatibility
             with connection.cursor() as cursor:
                 # Try different table names for test vs production environments
