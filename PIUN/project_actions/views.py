@@ -156,14 +156,14 @@ def dashboard(request):
         
         total_contract_value = works_value + goods_value
         
-        # Get recent contracts (last 5)
-        recent_works = Contract_Profiling_works.objects.select_related(
+        # Get recent contracts (last 5) - convert to lists for template evaluation
+        recent_works = list(Contract_Profiling_works.objects.select_related(
             'projectID', 'currency'
-        ).order_by('-date')[:3]
+        ).order_by('-date')[:3])
         
-        recent_goods = Contract_Profiling_goods_services.objects.select_related(
+        recent_goods = list(Contract_Profiling_goods_services.objects.select_related(
             'projectID', 'currency'
-        ).order_by('-date')[:2]
+        ).order_by('-date')[:2])
         
         # Combine recent contracts
         recent_contracts = list(recent_works) + list(recent_goods)

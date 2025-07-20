@@ -108,8 +108,8 @@ def source_detail(request, pk):
     """View issue action source details"""
     source = get_object_or_404(issue_action_source, pk=pk)
     
-    # Get related issues/actions
-    related_issues = IssueActions.objects.filter(source_of_issue_or_action=source)[:5]
+    # Get related issues/actions - convert to list for template evaluation
+    related_issues = list(IssueActions.objects.filter(source_of_issue_or_action=source)[:5])
     
     context = {
         'source': source,

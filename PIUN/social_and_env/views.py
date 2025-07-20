@@ -531,10 +531,10 @@ def social_env_dashboard(request):
             'closed_grievances': GrievianceMonitoringLog.objects.filter(was_complainant_satisfied_with_decision='Y').count(),
         }
         
-        # Get recent activities
-        recent_pap = PAP.objects.select_related('project', 'loginUser').order_by('-date_created')[:5]
-        recent_grievances = GrievianceMonitoringLog.objects.select_related('project', 'loginUser').order_by('-date_created')[:5]
-        recent_esia = ESIA.objects.select_related('project', 'loginUser').order_by('-date_created')[:5]
+        # Get recent activities - convert to lists for template evaluation
+        recent_pap = list(PAP.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
+        recent_grievances = list(GrievianceMonitoringLog.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
+        recent_esia = list(ESIA.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
         
         context = {
             'stats': stats,
@@ -781,13 +781,13 @@ def ohs_list(request):
         stats['total_workers'] = stats['total_male_workers'] + stats['total_female_workers']
         stats['total_youth'] = stats['total_youth_male'] + stats['total_youth_female']
         
-        # Get filter choices for dropdowns
+        # Get filter choices for dropdowns - convert to lists for template evaluation
         filter_choices = {
-            'projects': Project.objects.all().values('projectID', 'project'),
-            'regions': Regions.objects.all().values('region_code', 'region_name'),
-            'districts': Districts.objects.all().values('district_code', 'district_name'),
-            'years': YEAR.objects.all().values('id', 'profile_year'),
-            'quarters': Quarter.objects.all().values('id', 'quarter'),
+            'projects': list(Project.objects.all().values('projectID', 'project')),
+            'regions': list(Regions.objects.all().values('region_code', 'region_name')),
+            'districts': list(Districts.objects.all().values('district_code', 'district_name')),
+            'years': list(YEAR.objects.all().values('id', 'profile_year')),
+            'quarters': list(Quarter.objects.all().values('id', 'quarter')),
         }
         
         context = {

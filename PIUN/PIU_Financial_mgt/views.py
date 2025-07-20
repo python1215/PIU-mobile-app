@@ -84,16 +84,16 @@ def project_detail(request, project_id):
     
     project = get_object_or_404(Project, projectID=project_id)
     
-    # Get related data
-    components = Component.objects.filter(projectID=project).order_by('-date')
-    subcomponents = Subcomponent.objects.filter(projectID=project).order_by('-date')
-    recent_activities = Activities.objects.filter(projectID=project).order_by('-date')[:10]
+    # Get related data - convert to lists for template evaluation
+    components = list(Component.objects.filter(projectID=project).order_by('-date'))
+    subcomponents = list(Subcomponent.objects.filter(projectID=project).order_by('-date'))
+    recent_activities = list(Activities.objects.filter(projectID=project).order_by('-date')[:10])
     
-    # Calculate statistics
-    components_count = components.count()
-    subcomponents_count = subcomponents.count()
+    # Calculate statistics  
+    components_count = len(components)
+    subcomponents_count = len(subcomponents)
     activities_count = Activities.objects.filter(projectID=project).count()
-    total_allocation = components.aggregate(Sum('allocation'))['allocation__sum'] or 0
+    total_allocation = sum(c.allocation for c in components if c.allocation) or 0
     
     context = {
         'project': project,
@@ -205,21 +205,21 @@ def enhanced_project_dashboard(request, project_id=None):
     
     # Recent data - Use Django ORM for SQLite compatibility
     try:
-        recent_activities = Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5]
+        recent_activities = list(Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5])
         print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")
         recent_activities = []
     
-    # Other recent data (project-specific or overall)
+    # Other recent data (project-specific or overall) - convert to lists for template evaluation
     if selected_project:
         recent_projects = [selected_project]
-        recent_components = Component.objects.filter(projectID=selected_project).order_by('-date')[:5]
-        recent_subcomponents = Subcomponent.objects.filter(projectID=selected_project).order_by('-date')[:5]
+        recent_components = list(Component.objects.filter(projectID=selected_project).order_by('-date')[:5])
+        recent_subcomponents = list(Subcomponent.objects.filter(projectID=selected_project).order_by('-date')[:5])
     else:
-        recent_projects = Project.objects.order_by('-date')[:5]
-        recent_components = Component.objects.order_by('-date')[:5]
-        recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
+        recent_projects = list(Project.objects.order_by('-date')[:5])
+        recent_components = list(Component.objects.order_by('-date')[:5])
+        recent_subcomponents = list(Subcomponent.objects.order_by('-date')[:5])
     
     # Budget utilization percentage
     budget_utilization = (total_disbursed / total_funding * 100) if total_funding > 0 else 0
@@ -1118,22 +1118,22 @@ def simple_financial_dashboard(request):
     currencies_count = Currency.objects.count()
     
     # Recent projects (last 5)
-    recent_projects = Project.objects.order_by('-date')[:5]
+    recent_projects = list(Project.objects.order_by('-date')[:5])
     
     # Top funded projects (top 5)
-    top_funded = Project.objects.filter(
+    top_funded = list(Project.objects.filter(
         funding__isnull=False
-    ).order_by('-funding')[:5]
+    ).order_by('-funding')[:5])
     
-    # Recent components (last 5)
-    recent_components = Component.objects.order_by('-date')[:5]
+    # Recent components (last 5) - convert to list for template evaluation
+    recent_components = list(Component.objects.order_by('-date')[:5])
     
-    # Recent subcomponents (last 5) - needed for template
-    recent_subcomponents = Subcomponent.objects.order_by('-date')[:5]
+    # Recent subcomponents (last 5) - convert to list for template evaluation
+    recent_subcomponents = list(Subcomponent.objects.order_by('-date')[:5])
     
-    # Recent activities (last 5) - Use Django ORM for SQLite compatibility
+    # Recent activities (last 5) - Use Django ORM for SQLite compatibility - convert to list for template evaluation
     try:
-        recent_activities = Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5]
+        recent_activities = list(Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5])
         print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")

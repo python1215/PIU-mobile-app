@@ -245,11 +245,14 @@ def add_results_monitoring(request):
 @login_required
 def enhanced_results_monitoring_list(request):
     """Enhanced list view for Results Oriented Monitoring records"""
-    monitoring_records = Results_Oriented_Monitoring.objects.all().select_related(
+    monitoring_records_qs = Results_Oriented_Monitoring.objects.all().select_related(
         'project', 'pdo', 'project_outcome', 'project_result', 
         'indicator_type', 'measurement_unit', 'collection_frequency',
         'year', 'quarter', 'loginUser'
     ).order_by('-date_created')
+    
+    # Convert QuerySet to list for reliable template evaluation
+    monitoring_records = list(monitoring_records_qs)
     
     context = {
         'monitoring_records': monitoring_records,

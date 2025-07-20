@@ -98,9 +98,12 @@ def dashboard(request):
     achievement_data = calculate_achievement_gauge()
     
     # Recent monitoring entries for quick reference with performance calculations
-    recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
+    recent_entries_qs = NAWEC_KPI_Monitoring.objects.select_related(
         'project', 'year', 'quarter', 'indicator_type'
     ).order_by('-date_created')[:5]
+    
+    # Convert to list for template evaluation
+    recent_entries = list(recent_entries_qs)
     
     # Calculate performance and variance for each entry
     for entry in recent_entries:
@@ -115,8 +118,8 @@ def dashboard(request):
         else:
             entry.variance_calculated = None
     
-    # Recent indicators for overview
-    recent_indicators = KPIIndicator.objects.order_by('-date_created')[:6]
+    # Recent indicators for overview - convert to list for template evaluation
+    recent_indicators = list(KPIIndicator.objects.order_by('-date_created')[:6])
     
     context = {
         'total_monitoring_records': total_monitoring_records,
@@ -290,8 +293,8 @@ def performance_dashboard(request):
                 except Quarter.DoesNotExist:
                     pass
     
-    # Get filtered recent entries and calculate performance
-    recent_entries = entries_queryset.order_by('-date_created')[:20]
+    # Get filtered recent entries and calculate performance - convert to list for template evaluation
+    recent_entries = list(entries_queryset.order_by('-date_created')[:20])
     
     # Calculate performance and variance for each entry with proper decimal precision
     for entry in recent_entries:
@@ -452,10 +455,10 @@ def data_entry(request):
         form.fields['year'].queryset = YEAR.objects.all()
         # Quarter field is now a ChoiceField defined in the form, not a ModelChoiceField
     
-    # Get recent entries for display
-    recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
+    # Get recent entries for display - convert to list for template evaluation
+    recent_entries = list(NAWEC_KPI_Monitoring.objects.select_related(
         'project', 'year', 'quarter'
-    ).order_by('-date_created')[:5]
+    ).order_by('-date_created')[:5])
     
     # Filter projects to only show NAWEC projects
     nawec_projects = Project.objects.filter(projectID__startswith='NAWEC').order_by('project')
@@ -837,12 +840,12 @@ def indicator_detail(request, pk):
     """View KPI indicator details with monitoring statistics"""
     indicator = get_object_or_404(KPIIndicator, pk=pk)
     
-    # Get related monitoring records
-    monitoring_records = NAWEC_KPI_Monitoring.objects.filter(
+    # Get related monitoring records - convert to list for template evaluation
+    monitoring_records = list(NAWEC_KPI_Monitoring.objects.filter(
         indicator_description=indicator
     ).select_related(
         'project', 'pdo', 'year', 'quarter'
-    ).order_by('-date_created')[:10]
+    ).order_by('-date_created')[:10])
     
     # Calculate statistics
     total_monitoring = NAWEC_KPI_Monitoring.objects.filter(
