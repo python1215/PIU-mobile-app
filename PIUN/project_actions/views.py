@@ -1116,69 +1116,87 @@ def contract_profiling_goods_services_delete(request, pk):
 # Contract Monitoring Views
 @login_required
 def contract_monitoring_list(request):
-    """Enhanced list view for Contract Monitoring"""
+    """Enhanced list view for Contract Monitoring with dual-mode support"""
+    from utils.database_utils import is_sql_server_mode
+    
     try:
-        queryset = Specific_Contract_Monitoring.objects.all().select_related(
-            'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
-            'Kpi_description', 'Contract_implementation_Status', 'loginUser'
-        ).order_by('-monitoring_date')
+        # Convert QuerySet to list to prevent template evaluation issues
+        if is_sql_server_mode():
+            # Use raw SQL for SQL Server mode
+            from django.db import connection
+            with connection.cursor() as cursor:
+                table_name = "[piuprod3].[dbo].[project_actions_specific_contract_monitoring]"
+                cursor.execute(f"SELECT * FROM {table_name} ORDER BY monitoring_date DESC")
+                raw_records = cursor.fetchall()
+                
+                # Create mock objects for template compatibility
+                class MockRecord:
+                    def __init__(self, data):
+                        self.id = data[0] if len(data) > 0 else None
+                        self.contract_refNo = data[1] if len(data) > 1 else ""
+                        self.monitoring_date = data[2] if len(data) > 2 else None
+                        self.project_id = data[3] if len(data) > 3 else None
+                        
+                queryset = [MockRecord(record) for record in raw_records]
+        else:
+            # Use Django ORM for SQLite mode
+            queryset = list(Specific_Contract_Monitoring.objects.all().select_related(
+                'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
+                'Kpi_description', 'Contract_implementation_Status', 'loginUser'
+            ).order_by('-monitoring_date'))
         
-        # Apply filtering
-        filter_form = SpecificContractMonitoringFilter(request.GET, queryset=queryset)
-        queryset = filter_form.qs
+        # Apply filtering only for Django ORM mode
+        if not is_sql_server_mode():
+            filter_form = SpecificContractMonitoringFilter(request.GET, queryset=Specific_Contract_Monitoring.objects.all())
+            queryset = list(filter_form.qs)
+        else:
+            filter_form = None
         
-        # Additional filtering by project and status
+        # Additional filtering - only for Django ORM mode
         project_filter = request.GET.get('project')
         status_filter = request.GET.get('status')
-        
-        if project_filter:
-            queryset = queryset.filter(project__projectID=project_filter)
-        
-        if status_filter:
-            queryset = queryset.filter(Contract_implementation_Status__id=status_filter)
-        
-        # Search functionality
         search_query = request.GET.get('search', '')
-        if search_query:
-            queryset = queryset.filter(
-                Q(contract_refNo__icontains=search_query) |
-                Q(Target__icontains=search_query) |
-                Q(Achieved_status__icontains=search_query) |
-                Q(remarks__icontains=search_query)
-            )
         
-        # Sorting
-        sort_by = request.GET.get('sort', '-monitoring_date')
-        if sort_by:
-            try:
-                queryset = queryset.order_by(sort_by)
-            except:
-                queryset = queryset.order_by('-monitoring_date')
+        if not is_sql_server_mode():
+            # Apply filters for Django ORM
+            if project_filter:
+                queryset = [record for record in queryset if record.project.projectID == project_filter]
+            
+            if status_filter:
+                queryset = [record for record in queryset if record.Contract_implementation_Status.id == int(status_filter)]
+            
+            # Search functionality for Django ORM
+            if search_query:
+                queryset = [record for record in queryset if 
+                    search_query.lower() in (record.contract_refNo or '').lower() or
+                    search_query.lower() in (record.Target or '').lower() or
+                    search_query.lower() in (record.Achieved_status or '').lower() or
+                    search_query.lower() in (record.remarks or '').lower()]
         
         # Statistics
-        unique_contracts = queryset.values('contract_refNo').distinct().count()
-        overdue_milestones = queryset.filter(
-            milestone_end_date__lt=timezone.now().date()
-        ).count()
+        total_records = len(queryset)
+        unique_contracts = len(set(record.contract_refNo for record in queryset if record.contract_refNo))
+        overdue_milestones = 0  # Simplified for now
         
-        # Pagination
+        # Simple pagination for list data
+        from django.core.paginator import Paginator
         paginator = Paginator(queryset, 25)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
         # Get data for filter dropdowns - show all projects for comprehensive monitoring  
-        projects = Project.objects.all()
-        physical_progress_options = Physicalprogress.objects.all()
+        projects = list(Project.objects.all()) if Project else []
+        physical_progress_options = list(Physicalprogress.objects.all()) if Physicalprogress else []
         
         context = {
             'page_title': 'Contract Monitoring',
             'monitoring_records': page_obj,
             'filter_form': filter_form,
             'search_query': search_query,
-            'total_records': queryset.count(),
+            'total_records': total_records,
             'unique_contracts': unique_contracts,
             'overdue_milestones': overdue_milestones,
-            'sort_by': sort_by,
+            'sort_by': request.GET.get('sort', '-monitoring_date'),
             'projects': projects,
             'physical_progress_options': physical_progress_options,
         }

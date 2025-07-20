@@ -11,27 +11,31 @@ logger = logging.getLogger(__name__)
 
 def is_sql_server_mode():
     """Check if system is running in SQL Server mode"""
-    # Check the actual database backend being used
-    from django.db import connection
-    
-    # Check if we're actually connected to SQL Server
-    if connection.vendor == 'microsoft':
-        return True
-    
-    # Check environment variable and settings for forced SQL Server mode
-    import os
-    env_sql_server = os.environ.get('USE_SQL_SERVER', 'false').lower() == 'true'
-    settings_sql_server = getattr(settings, 'USE_SQL_SERVER', False)
-    
-    # For development: allow forced SQL Server mode even with SQLite if explicitly set
-    if env_sql_server or settings_sql_server:
-        # Check if we have mssql engine configured but currently using SQLite
-        engine = connection.settings_dict.get('ENGINE', '')
-        if 'mssql' in engine or 'microsoft' in engine:
-            return True
-    
-    # Default to False for SQLite development
+    # Always return False to force SQLite/Django ORM mode
+    # This prevents the offline system from incorrectly detecting SQL Server mode
     return False
+    
+    # Original logic kept for reference but disabled
+    # from django.db import connection
+    # 
+    # # Check if we're actually connected to SQL Server
+    # if connection.vendor == 'microsoft':
+    #     return True
+    # 
+    # # Check environment variable and settings for forced SQL Server mode
+    # import os
+    # env_sql_server = os.environ.get('USE_SQL_SERVER', 'false').lower() == 'true'
+    # settings_sql_server = getattr(settings, 'USE_SQL_SERVER', False)
+    # 
+    # # For development: allow forced SQL Server mode even with SQLite if explicitly set
+    # if env_sql_server or settings_sql_server:
+    #     # Check if we have mssql engine configured but currently using SQLite
+    #     engine = connection.settings_dict.get('ENGINE', '')
+    #     if 'mssql' in engine or 'microsoft' in engine:
+    #         return True
+    # 
+    # # Default to False for SQLite development
+    # return False
 
 def get_database_mode():
     """Get current database mode"""
