@@ -9,11 +9,7 @@ from decimal import Decimal
 import json
 from .models import *
 from .forms import *
-from utils.database_utils import (
-    is_sql_server_mode, get_model_data, safe_model_save, 
-    safe_model_update, safe_model_delete, get_paginated_data,
-    execute_raw_sql, get_sql_server_table_name
-)
+# Using Django ORM exclusively for all database operations
 # Import only available forms that exist
 
 # Create your views here.

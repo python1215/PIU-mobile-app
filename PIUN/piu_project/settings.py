@@ -116,7 +116,7 @@ WSGI_APPLICATION = 'piu_project.wsgi.application'
 # Database Configuration - Dual Mode Support
 # Development: SQLite with Django ORM for full functionality
 # Production: SQL Server with raw queries for offline LAN deployment
-USE_SQL_SERVER = os.environ.get('USE_SQL_SERVER', 'false').lower() == 'true'
+USE_SQL_SERVER = False  # Force SQLite for all operations
 
 # Default SQLite configuration for development
 DATABASES = {
@@ -126,25 +126,10 @@ DATABASES = {
     }
 }
 
-# SQL Server configuration for production deployment
-if USE_SQL_SERVER:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'mssql',
-            'NAME': os.environ.get('SQL_SERVER_DB', 'piuprod3'),
-            'USER': os.environ.get('SQL_SERVER_USER', 'sa'),
-            'PASSWORD': os.environ.get('SQL_SERVER_PASSWORD', ''),
-            'HOST': os.environ.get('SQL_SERVER_HOST', 'localhost'),
-            'PORT': os.environ.get('SQL_SERVER_PORT', '1433'),
-            'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
-                'extra_params': 'TrustServerCertificate=yes',
-            },
-        }
-    }
+# SQL Server configuration disabled - using SQLite only
 
-# Database mode detection for views
-DATABASE_MODE = 'sql_server' if USE_SQL_SERVER else 'sqlite'
+# Database mode always SQLite
+DATABASE_MODE = 'sqlite'
 
 
 # Password validation

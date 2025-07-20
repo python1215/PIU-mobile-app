@@ -15,11 +15,7 @@ from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, Ca
 
 from setup.models import YEAR, Quarter, Indicator_Type, Measurement_Unit, Data_Collection_Frequency
 from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
-from utils.database_utils import (
-    is_sql_server_mode, get_model_data, safe_model_save, 
-    safe_model_update, safe_model_delete, get_paginated_data,
-    execute_raw_sql, get_sql_server_table_name, get_model_count
-)
+# Using Django ORM exclusively - no SQL Server utilities needed
 
 def calculate_achievement_gauge():
     """Calculate achievement data for the gauge visualization"""
@@ -80,101 +76,44 @@ def calculate_achievement_gauge():
 @login_required
 def dashboard(request):
     """NAWEC KPI Dashboard with monitoring integration"""
-    if is_sql_server_mode():
-        # Use SQL Server backend for dashboard statistics
-        total_monitoring_records = get_model_count(NAWEC_KPI_Monitoring)
-        total_indicators = get_model_count(KPIIndicator)
-        
-        # Get current quarter entries
-        from datetime import datetime
-        current_year = datetime.now().year
-        
-        # Use raw SQL for complex queries
-        current_quarter_query = f"""
-            SELECT COUNT(*) FROM {get_sql_server_table_name('NAWEC_KPI_nawec_kpi_monitoring')} m
-            INNER JOIN {get_sql_server_table_name('setup_year')} y ON m.year_id = y.id
-            WHERE y.profile_year = %s
-        """
-        current_quarter_result = execute_raw_sql(current_quarter_query, [current_year])
-        current_quarter_entries = current_quarter_result[0][0] if current_quarter_result else 0
-        
-        # Get project-related statistics
-        total_pdos = get_model_count(PDO)
-        total_outcomes = get_model_count(ProjectOutCome)
-        total_results = get_model_count(ProjectResult)
-        
-        # Calculate achievement gauge data
-        achievement_data = calculate_achievement_gauge()
-        
-        # Recent monitoring entries for quick reference with performance calculations
-        recent_entries_query = f"""
-            SELECT TOP 5 * FROM {get_sql_server_table_name('NAWEC_KPI_nawec_kpi_monitoring')}
-            ORDER BY date_created DESC
-        """
-        recent_entries_data = execute_raw_sql(recent_entries_query)
-        recent_entries = []
-        for entry_row in recent_entries_data:
-            class MockEntry:
-                def __init__(self, data):
-                    self.id = data[0] if isinstance(data, tuple) else data.get('id')
-                    self.project_id = data[1] if isinstance(data, tuple) else data.get('project_id')
-                    self.indicator_description = data[2] if isinstance(data, tuple) else data.get('indicator_description')
-                    self.baseline_value = data[3] if isinstance(data, tuple) else data.get('baseline_value')
-                    self.achieved_value = data[4] if isinstance(data, tuple) else data.get('achieved_value')
-                    self.End_Target_Value = data[5] if isinstance(data, tuple) else data.get('End_Target_Value')
-                    self.date_created = data[6] if isinstance(data, tuple) else data.get('date_created')
-                    
-                    # Calculate performance and variance
-                    if self.End_Target_Value and self.End_Target_Value > 0 and self.achieved_value is not None:
-                        self.performance_calculated = round((self.achieved_value / self.End_Target_Value) * 100, 2)
-                    else:
-                        self.performance_calculated = None
-                        
-                    # Calculate Variance = achieved_value - End_Target_Value
-                    if self.achieved_value is not None and self.End_Target_Value is not None:
-                        self.variance_calculated = round(self.achieved_value - self.End_Target_Value, 2)
-                    else:
-                        self.variance_calculated = None
+    # Using Django ORM exclusively
+    total_monitoring_records = NAWEC_KPI_Monitoring.objects.count()
+    total_indicators = KPIIndicator.objects.count()
+    
+    # Get current quarter entries using Django ORM
+    from datetime import datetime
+    current_year = datetime.now().year
+    
+    # Use Django ORM for queries
+    current_quarter_entries = NAWEC_KPI_Monitoring.objects.filter(
+        year__profile_year=current_year
+    ).count()
+    
+    # Get project-related statistics using Django ORM
+    total_pdos = PDO.objects.count()
+    total_outcomes = ProjectOutCome.objects.count()
+    total_results = ProjectResult.objects.count()
+    
+    # Calculate achievement gauge data
+    achievement_data = calculate_achievement_gauge()
+    
+    # Recent monitoring entries for quick reference with performance calculations
+    recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
+        'project', 'year', 'quarter', 'indicator_type'
+    ).order_by('-date_created')[:5]
+    
+    # Calculate performance and variance for each entry
+    for entry in recent_entries:
+        if entry.End_Target_Value and entry.End_Target_Value > 0 and entry.achieved_value is not None:
+            entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
+        else:
+            entry.performance_calculated = None
             
-            recent_entries.append(MockEntry(entry_row))
-    else:
-        # Use Django ORM for SQLite
-        total_monitoring_records = NAWEC_KPI_Monitoring.objects.count()
-        total_indicators = KPIIndicator.objects.count()
-        
-        # Get current quarter entries
-        from datetime import datetime
-        current_year = datetime.now().year
-        current_quarter = ((datetime.now().month - 1) // 3) + 1
-        current_quarter_entries = NAWEC_KPI_Monitoring.objects.filter(
-            year__profile_year=current_year
-        ).count()
-        
-        # Get project-related statistics
-        total_pdos = PDO.objects.count()
-        total_outcomes = ProjectOutCome.objects.count()
-        total_results = ProjectResult.objects.count()
-        
-        # Calculate achievement gauge data
-        achievement_data = calculate_achievement_gauge()
-        
-        # Recent monitoring entries for quick reference with performance calculations
-        recent_entries = NAWEC_KPI_Monitoring.objects.select_related(
-            'project', 'year', 'quarter', 'indicator_type'
-        ).order_by('-date_created')[:5]
-        
-        # Calculate performance and variance for each entry
-        for entry in recent_entries:
-            if entry.End_Target_Value and entry.End_Target_Value > 0 and entry.achieved_value is not None:
-                entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
-            else:
-                entry.performance_calculated = None
-                
-            # Calculate Variance = achieved_value - End_Target_Value
-            if entry.achieved_value is not None and entry.End_Target_Value is not None:
-                entry.variance_calculated = round(entry.achieved_value - entry.End_Target_Value, 2)
-            else:
-                entry.variance_calculated = None
+        # Calculate Variance = achieved_value - End_Target_Value
+        if entry.achieved_value is not None and entry.End_Target_Value is not None:
+            entry.variance_calculated = round(entry.achieved_value - entry.End_Target_Value, 2)
+        else:
+            entry.variance_calculated = None
     
     # Recent indicators for overview
     recent_indicators = KPIIndicator.objects.order_by('-date_created')[:6]

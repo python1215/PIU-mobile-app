@@ -27,8 +27,7 @@ from setup.models import Districts, Settlement, Regions, Quarter, YEAR
 from PIU_Financial_mgt.models import KPI_For_Contract, Project
 from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
 from monitoring.models import Indicator_Description
-from utils.database_utils import (is_sql_server_mode, get_cascading_dropdown_data, 
-                                 safe_model_save, safe_model_update, get_model_data)
+# Using Django ORM exclusively for all database operations
 
 
 # ======================== ESIA Views ========================

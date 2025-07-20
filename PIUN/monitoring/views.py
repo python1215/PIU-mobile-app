@@ -27,124 +27,30 @@ def monitoring_dashboard(request):
     from PIU_Financial_mgt.models import Project
     from setup.models import Quarter
     
-    # Get dashboard statistics
+    # Get dashboard statistics using Django ORM
     try:
-        # Check if we're in SQL Server mode
-        if hasattr(settings, 'USE_SQL_SERVER') and settings.USE_SQL_SERVER:
-            # Use raw SQL for SQL Server compatibility
-            from django.db import connection
-            
-            stats = {
-                'total_projects': 0,
-                'total_indicators': 0,
-                'quarterly_reports': 0,
-                'performance_avg': 0,
-                'recent_monitoring': [],
-            }
-            
-            with connection.cursor() as cursor:
-                # Try to get project count
-                tables_to_try = [
-                    '[piuprod].[dbo].[PIU_Financial_mgt_project]',
-                    '[piuprod3].[dbo].[PIU_Financial_mgt_project]',
-                    'PIU_Financial_mgt_project'
-                ]
-                
-                for table_name in tables_to_try:
-                    try:
-                        query = "SELECT COUNT(*) FROM " + table_name
-                        cursor.execute(query)
-                        stats['total_projects'] = cursor.fetchone()[0]
-                        break
-                    except:
-                        continue
-                
-                # Try to get monitoring records count
-                monitoring_tables = [
-                    '[piuprod].[dbo].[monitoring_results_oriented_monitoring]',
-                    '[piuprod3].[dbo].[monitoring_results_oriented_monitoring]',
-                    'monitoring_results_oriented_monitoring'
-                ]
-                
-                for table_name in monitoring_tables:
-                    try:
-                        query = "SELECT COUNT(*) FROM " + table_name
-                        cursor.execute(query)
-                        stats['quarterly_reports'] = cursor.fetchone()[0]
-                        break
-                    except:
-                        continue
-                
-                # Try to get indicator descriptions count
-                indicator_tables = [
-                    '[piuprod].[dbo].[monitoring_indicator_description]',
-                    '[piuprod3].[dbo].[monitoring_indicator_description]',
-                    'monitoring_indicator_description'
-                ]
-                
-                for table_name in indicator_tables:
-                    try:
-                        query = "SELECT COUNT(*) FROM " + table_name
-                        cursor.execute(query)
-                        stats['total_indicators'] = cursor.fetchone()[0]
-                        break
-                    except:
-                        continue
-                
-                # Try to get recent monitoring records
-                for table_name in monitoring_tables:
-                    try:
-                        query = """
-                            SELECT TOP 5 
-                                ISNULL(contract_refNo, 'N/A') as contract_ref,
-                                ISNULL(Target, 'N/A') as target,
-                                ISNULL(Achieved_status, 'N/A') as achieved,
-                                ISNULL(monitoring_date, GETDATE()) as monitoring_date
-                            FROM """ + table_name + """
-                            ORDER BY monitoring_date DESC
-                        """
-                        cursor.execute(query)
-                        
-                        rows = cursor.fetchall()
-                        if rows:
-                            columns = [col[0] for col in cursor.description]
-                            stats['recent_monitoring'] = [
-                                dict(zip(columns, row)) for row in rows
-                            ]
-                        break
-                    except:
-                        continue
-                        
-                # Calculate performance average (simple calculation based on available data)
-                if stats['quarterly_reports'] > 0:
-                    stats['performance_avg'] = min(85, (stats['total_projects'] * 20) + 45)
-                else:
-                    stats['performance_avg'] = 0
-                    
+        stats = {
+            'total_projects': Project.objects.count(),
+            'total_indicators': Indicator_Description.objects.count(), 
+            'quarterly_reports': Quarter.objects.count(),
+            'performance_avg': 0,
+            'recent_monitoring': [],
+        }
+        
+        # Recent monitoring activities using Django ORM
+        recent_monitoring = Results_Oriented_Monitoring.objects.select_related(
+            'project_description', 
+            'quarter'
+        ).order_by('-date')[:5]
+        
+        stats['recent_monitoring'] = recent_monitoring
+        
+        # Calculate performance average using Django ORM
+        monitoring_count = Results_Oriented_Monitoring.objects.count()
+        if monitoring_count > 0:
+            stats['performance_avg'] = min(85, (stats['total_projects'] * 20) + 45)
         else:
-            # Use Django ORM for SQLite
-            total_projects = Project.objects.count()
-            total_indicators = Indicator_Description.objects.count()
-            quarterly_reports = Results_Oriented_Monitoring.objects.count()
-            
-            # Get recent monitoring activity
-            recent_monitoring = Results_Oriented_Monitoring.objects.select_related(
-                'project', 'quarter', 'loginUser'
-            ).order_by('-date_created')[:5]
-            
-            # Calculate performance average
-            if quarterly_reports > 0:
-                performance_avg = min(85, (total_projects * 20) + 45)
-            else:
-                performance_avg = 0
-            
-            stats = {
-                'total_projects': total_projects,
-                'total_indicators': total_indicators,
-                'quarterly_reports': quarterly_reports,
-                'performance_avg': performance_avg,
-                'recent_monitoring': recent_monitoring,
-            }
+            stats['performance_avg'] = 0
             
     except Exception as e:
         # Fallback stats if there's an error
