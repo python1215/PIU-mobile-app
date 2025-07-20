@@ -631,8 +631,11 @@ def components(request):
     projects = Project.objects.all()
     currencies = Currency.objects.all()
     
+    # Ensure the QuerySet is properly evaluated for the template
+    final_components = components_qs.order_by('-date')
+    
     context = {
-        'components': components_qs.order_by('-date'),
+        'components': list(final_components),  # Convert to list for reliable template evaluation
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
