@@ -784,7 +784,7 @@ def ohs_list(request):
         
         # Get filter choices for dropdowns
         filter_choices = {
-            'projects': Project.objects.filter(projectID='NAWEC').values('projectID', 'project'),
+            'projects': Project.objects.all().values('projectID', 'project'),
             'regions': Regions.objects.all().values('region_code', 'region_name'),
             'districts': Districts.objects.all().values('district_code', 'district_name'),
             'years': YEAR.objects.all().values('id', 'profile_year'),
