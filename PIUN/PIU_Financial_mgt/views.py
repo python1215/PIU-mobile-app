@@ -19,27 +19,67 @@ from utils.database_utils import (
 # Create your views here.
 @login_required
 def project_list(request):
-    if is_sql_server_mode():
-        # Use SQL Server backend for project list
-        projects_data = get_model_data(Project)
-        projects = []
-        for project_row in projects_data:
-            # Create mock project objects for template compatibility
-            class MockProject:
-                def __init__(self, data):
-                    self.projectID = data[0] if isinstance(data, tuple) else data.get('projectID')
-                    self.project = data[1] if isinstance(data, tuple) else data.get('project')
-                    self.amount = data[2] if isinstance(data, tuple) else data.get('amount')
-                    self.currency = data[3] if isinstance(data, tuple) else data.get('currency')
-                    self.starting_date = data[4] if isinstance(data, tuple) else data.get('starting_date')
-                    self.ending_date = data[5] if isinstance(data, tuple) else data.get('ending_date')
-                    self.status = data[6] if isinstance(data, tuple) else data.get('status')
-            
-            projects.append(MockProject(project_row))
-    else:
-        projects = Project.objects.all()
+    """Enhanced project list with filtering and statistics"""
+    from django.db.models import Q, Sum, Count, Avg
+    from setup.models import Donor
     
-    return render(request, 'PIU_Financial_mgt/projects/enhanced_project_list.html', {'projects': projects})
+    # Get all projects - show all projects for comprehensive monitoring
+    projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
+    
+    # Filter parameters
+    project_id = request.GET.get('projectID', '')
+    project_name = request.GET.get('project', '')
+    donor_filter = request.GET.get('donor', '')
+    currency_filter = request.GET.get('currency', '')
+    status_filter = request.GET.get('status', '')
+    search_filter = request.GET.get('search', '')
+    
+    # Apply filters
+    if project_id:
+        projects_qs = projects_qs.filter(projectID__icontains=project_id)
+    
+    if project_name:
+        projects_qs = projects_qs.filter(project__icontains=project_name)
+    
+    if donor_filter:
+        projects_qs = projects_qs.filter(donors__id=donor_filter)
+    
+    if currency_filter:
+        projects_qs = projects_qs.filter(currency__id=currency_filter)
+    
+    if search_filter:
+        projects_qs = projects_qs.filter(
+            Q(projectID__icontains=search_filter) |
+            Q(project__icontains=search_filter) |
+            Q(implementation_Status__icontains=search_filter)
+        )
+    
+    # Calculate statistics
+    total_projects = projects_qs.count()
+    total_funding = projects_qs.aggregate(Sum('funding'))['funding__sum'] or 0
+    unique_donors = projects_qs.values('donors').distinct().count()
+    
+    stats = {
+        'total_projects': total_projects,
+        'total_funding': total_funding,
+        'unique_donors': unique_donors,
+    }
+    
+    # Get filter options
+    donors = Donor.objects.all()
+    currencies = Currency.objects.all()
+    
+    is_filtered = bool(project_id or project_name or donor_filter or currency_filter or status_filter or search_filter)
+    
+    context = {
+        'projects': projects_qs,
+        'stats': stats,
+        'is_filtered': is_filtered,
+        'donors': donors,
+        'currencies': currencies,
+    }
+    
+    return render(request, 'PIU_Financial_mgt/projects/enhanced_project_list.html', context)
 
 @login_required
 def project_detail(request, project_id):

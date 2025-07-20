@@ -195,7 +195,7 @@
                                             {% endfor %}
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-success">{{ project.funding|format_currency:project.currency.currency }}</span>
+                                            <span class="fw-bold text-success">{{ project.funding|floatformat:2 }}</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary">{{ project.currency.currency|default:"N/A" }}</span>
