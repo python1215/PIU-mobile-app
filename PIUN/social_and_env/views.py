@@ -790,6 +790,11 @@ def ohs_list(request):
             'quarters': list(Quarter.objects.all().values('id', 'quarter')),
         }
         
+        # Debug: Check if page_obj is working properly
+        print(f"DEBUG: page_obj exists: {page_obj is not None}")
+        print(f"DEBUG: page_obj length: {len(page_obj) if page_obj else 0}")
+        print(f"DEBUG: total OHS records: {ohs_records.count()}")
+        
         context = {
             'page_obj': page_obj,
             'stats': stats,
