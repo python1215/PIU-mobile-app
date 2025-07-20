@@ -913,6 +913,10 @@ def activities(request):
     total_allocation = activities_qs.aggregate(Sum('allocation'))['allocation__sum'] or 0
     unique_projects = activities_qs.values('projectID').distinct().count()
     
+    # Debug output - remove after testing
+    # print(f"DEBUG ACTIVITIES: Total in DB: {total_activities}, Filtered: {filtered_count}")
+    # print(f"DEBUG FILTERS: project={project_filter}, component={component_filter}, search={search_filter}")
+    
     stats = {
         'total_activities': total_activities,
         'filtered_count': filtered_count,
@@ -933,6 +937,10 @@ def activities(request):
         activities = paginator.page(1)
     except EmptyPage:
         activities = paginator.page(paginator.num_pages)
+    
+    # Debug pagination - remove after testing
+    # print(f"DEBUG PAGINATION: Page count: {paginator.count}, Num pages: {paginator.num_pages}")
+    # print(f"DEBUG CURRENT PAGE: {activities.number}, Has activities: {len(activities.object_list)}")
     
     # Get filter options
     projects = Project.objects.all()

@@ -184,7 +184,7 @@
                                 <td>{{ activity.subcompID.subcomponent|truncatechars:25 }}</td>
                                 <td>{{ activity.activity|truncatechars:40 }}</td>
                                 <td>{{ activity.currency.currency }}</td>
-                                <td>{{ activity.allocation|format_currency:activity.currency.currency }}</td>
+                                <td>{{ activity.allocation|floatformat:2 }}</td>
                                 <td>{{ activity.year.profile_year }}</td>
                                 <td>{{ activity.date|date:"M d, Y" }}</td>
                                 <td>
