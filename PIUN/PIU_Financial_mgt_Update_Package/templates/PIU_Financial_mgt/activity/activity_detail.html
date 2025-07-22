@@ -1,0 +1,132 @@
+{% extends 'PIU_Financial_mgt/base.html' %}
+{% load widget_tweaks %}
+{% load currency_tags %}
+
+{% block title %}Activity Details - PIUN Resources{% endblock %}
+
+{% block financial_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-dark mb-0">Activity Details</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'PIU_Financial_mgt:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'PIU_Financial_mgt:activities' %}">Activities</a></li>
+                            <li class="breadcrumb-item active">Activity #{{ activity.activityID }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'PIU_Financial_mgt:edit_activity' activity.activityID %}" class="btn btn-warning me-2">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'PIU_Financial_mgt:activities' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Activity Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Activity Information</h5>
+                </div>
+                <div class="card-body" style="background-color: #fdfdf5;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold text-white" style="width: 40%;">Activity ID:</td>
+                                    <td class="text-danger">{{ activity.activityID }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Activity Name:</td>
+                                    <td class="text-danger">{{ activity.activity }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Project:</td>
+                                    <td class="text-danger">{{ activity.projectID.project }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Component:</td>
+                                    <td class="text-danger">{{ activity.compID.Project_Components }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Subcomponent:</td>
+                                    <td class="text-danger">{{ activity.subcompID.subcomponent }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold text-white" style="width: 40%;">Currency:</td>
+                                    <td class="text-danger">{{ activity.currency.currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Allocation:</td>
+                                    <td class="text-danger">{{ activity.allocation|format_currency:activity.currency.currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Year:</td>
+                                    <td class="text-danger">{{ activity.year.profile_year }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Created By:</td>
+                                    <td class="text-danger">
+                                        {% if activity.loginUser.first_name %}
+                                            {{ activity.loginUser.first_name }} {{ activity.loginUser.last_name }}
+                                        {% else %}
+                                            {{ activity.loginUser.username }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Date Created:</td>
+                                    <td class="text-danger">{{ activity.date|date:"M d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if activity.subcompID.subcomponent_Description %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Subcomponent Description</h5>
+                </div>
+                <div class="card-body" style="background-color: #fdfdf5;">
+                    <p class="text-dark mb-0">{{ activity.subcompID.subcomponent_Description }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-tools"></i> Actions</h5>
+                </div>
+                <div class="card-body" style="background-color: #fdfdf5;">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'PIU_Financial_mgt:edit_activity' activity.activityID %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Activity
+                        </a>
+                        <a href="{% url 'PIU_Financial_mgt:delete_activity' activity.activityID %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this activity?')">
+                            <i class="bi bi-trash"></i> Delete Activity
+                        </a>
+                        <a href="{% url 'PIU_Financial_mgt:activities' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Activities
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+PIU Financial Management Module Package Statistics
+Generated on: 2025-07-22 20:44:05
+
+Package Contents:
+- Total Files: 71
+- Python Files: 19
+- Template Files: 28
+- Package Size: 0.69 MB
+
+Module Components:
+- Core Models: 6 (Currency, Project, Component, SubComponent, Activities, KPI_For_Contract)
+- Views: 30+ (CRUD operations, dashboards, reports, exports)
+- Templates: 28 (responsive design with Bootstrap 5)
+- URL Patterns: 25+ (comprehensive routing)
+- Forms: 15+ (with validation and AJAX support)
+
+Key Features:
+✓ Project financial management
+✓ Budget allocation tracking
+✓ Component hierarchy management
+✓ Activity monitoring
+✓ Multi-currency support (USD, GMD, EUR, UA)
+✓ Excel export functionality
+✓ Interactive dashboards
+✓ Real-time budget validation
+✓ Dual-mode database support (SQLite/SQL Server)
+✓ Responsive design
+✓ User authentication and tracking
+
+Installation:
+1. Run install.sh (Linux/Mac) or install.bat (Windows)
+2. Update Django settings and URLs as instructed
+3. Access module at /PIU-Financial-mgt/
+
+Support:
+- Review module_config.json for detailed configuration
+- Check PIU_FINANCIAL_MGT_UPDATE_PACKAGE.md for comprehensive documentation
+- Examine model files for database structure

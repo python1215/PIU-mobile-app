@@ -1,0 +1,101 @@
+{% extends 'PIU_Financial_mgt/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Delete Activity - PIUN Resources{% endblock %}
+
+{% block financial_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-dark mb-0">Delete Activity</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'PIU_Financial_mgt:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'PIU_Financial_mgt:activities' %}">Activities</a></li>
+                            <li class="breadcrumb-item active">Delete Activity</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Warning Card -->
+            <div class="card shadow-sm mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Deletion</h5>
+                </div>
+                <div class="card-body" style="background-color: #fdfdf5;">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-warning"></i> Warning!</h6>
+                        <p class="mb-0">You are about to permanently delete this activity. This action cannot be undone.</p>
+                    </div>
+
+                    <!-- Activity Details -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold text-dark" style="width: 40%;">Activity ID:</td>
+                                    <td class="text-danger">{{ activity.activityID }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Activity Name:</td>
+                                    <td class="text-danger">{{ activity.activity }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Project:</td>
+                                    <td class="text-danger">{{ activity.projectID.project }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Component:</td>
+                                    <td class="text-danger">{{ activity.compID.Project_Components }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold text-dark" style="width: 40%;">Subcomponent:</td>
+                                    <td class="text-danger">{{ activity.subcompID.subcomponent }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Allocation:</td>
+                                    <td class="text-danger">{{ activity.currency.currency }} {{ activity.allocation|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Year:</td>
+                                    <td class="text-danger">{{ activity.year.year }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Date Created:</td>
+                                    <td class="text-danger">{{ activity.date|date:"M d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Form -->
+                    <div class="mt-4 pt-3 border-top">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i> Yes, Delete Activity
+                                </button>
+                                <a href="{% url 'PIU_Financial_mgt:activities' %}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <a href="{% url 'PIU_Financial_mgt:activity_detail' activity.activityID %}" class="btn btn-info">
+                                    <i class="bi bi-eye"></i> View Details
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

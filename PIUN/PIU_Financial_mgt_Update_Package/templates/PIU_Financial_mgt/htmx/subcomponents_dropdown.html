@@ -1,0 +1,8 @@
+{% if subcomponents %}
+    <option value="">Select a Subcomponent</option>
+    {% for subcomponent in subcomponents %}
+        <option value="{{ subcomponent.subcompID }}">{{ subcomponent.subcomponent }}</option>
+    {% endfor %}
+{% else %}
+    <option value="">No subcomponents available for this component</option>
+{% endif %}
