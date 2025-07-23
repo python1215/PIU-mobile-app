@@ -241,10 +241,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const lat = project.latitude;
         const lng = project.longitude;
         
-        // Create custom icon based on access rate
-        let iconColor = 'red';
-        if (project.access_rate >= 80) iconColor = 'green';
-        else if (project.access_rate >= 50) iconColor = 'orange';
+        // Create custom icon based on project type
+        let iconColor = 'blue'; // default color
+        const projectName = project.projects[0] || ''; // Get first project name
+        
+        if (projectName.includes('ECOWAS') || projectName.includes('Access')) {
+            iconColor = 'green'; // Access projects
+        } else if (projectName.includes('Restoration') || projectName.includes('Modernization')) {
+            iconColor = 'orange'; // Restoration/Modernization projects
+        } else if (projectName.includes('Rehabilitation') || projectName.includes('Expansion')) {
+            iconColor = 'red'; // Rehabilitation/Expansion projects
+        } else if (projectName.includes('Electricity')) {
+            iconColor = 'purple'; // General electricity projects
+        }
         
         // Create marker
         const marker = L.circleMarker([lat, lng], {
@@ -278,9 +287,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 ${project.projects.length > 0 ? `
-                    <div style="margin: 8px 0;">
-                        <div style="font-size: 12px; color: #666; margin-bottom: 4px;"><strong>Projects</strong></div>
-                        <div style="font-size: 13px; color: #007bff;">
+                    <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin: 8px 0; border-left: 4px solid ${iconColor};">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 4px;"><strong>Active Projects</strong></div>
+                        <div style="font-size: 13px; color: #1976d2; font-weight: 500;">
                             ${project.projects.join(', ')}
                         </div>
                     </div>
@@ -320,11 +329,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const div = L.DomUtil.create('div', 'info legend');
         div.innerHTML = `
             <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-                <h6 style="margin: 0 0 8px 0; font-size: 14px;">Access Rate</h6>
+                <h6 style="margin: 0 0 8px 0; font-size: 14px;">Project Types</h6>
                 <div style="font-size: 12px;">
-                    <div><span style="color: green;">●</span> 80%+ (High)</div>
-                    <div><span style="color: orange;">●</span> 50-79% (Medium)</div>
-                    <div><span style="color: red;">●</span> <50% (Low)</div>
+                    <div><span style="color: green;">●</span> Access Projects</div>
+                    <div><span style="color: orange;">●</span> Restoration/Modernization</div>
+                    <div><span style="color: red;">●</span> Rehabilitation/Expansion</div>
+                    <div><span style="color: purple;">●</span> General Electricity</div>
+                    <div><span style="color: blue;">●</span> Other Projects</div>
                 </div>
             </div>
         `;
