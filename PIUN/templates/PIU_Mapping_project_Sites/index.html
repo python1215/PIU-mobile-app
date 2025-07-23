@@ -236,24 +236,97 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Map size invalidated for proper display');
     }, 100);
     
+    // Create a comprehensive project color mapping system
+    const projectColorMap = new Map();
+    const availableColors = [
+        '#2E7D32', // Green - Access Projects
+        '#F57C00', // Orange - Restoration/Modernization  
+        '#D32F2F', // Red - Rehabilitation/Expansion
+        '#7B1FA2', // Purple - General Electricity
+        '#1976D2', // Blue - Infrastructure
+        '#00796B', // Teal - Water Projects
+        '#5D4037', // Brown - Rural Development
+        '#616161', // Grey - Maintenance
+        '#C2185B', // Pink - Community Projects
+        '#00ACC1', // Cyan - Smart Grid
+        '#8BC34A', // Light Green - Renewable Energy
+        '#FF5722', // Deep Orange - Emergency Projects
+        '#9C27B0', // Deep Purple - Innovation
+        '#4CAF50', // Medium Green - Sustainability
+        '#FF9800', // Amber - Modernization
+        '#795548'  // Deep Brown - Legacy Projects
+    ];
+    
+    // Function to get color for a project
+    function getProjectColor(projectName) {
+        const lowerProjectName = projectName.toLowerCase();
+        
+        // Check existing mappings first
+        if (projectColorMap.has(projectName)) {
+            return projectColorMap.get(projectName);
+        }
+        
+        // Assign colors based on project type keywords
+        let colorIndex = 0;
+        if (lowerProjectName.includes('access') || lowerProjectName.includes('ecowas')) {
+            colorIndex = 0; // Green
+        } else if (lowerProjectName.includes('restoration') || lowerProjectName.includes('modernization')) {
+            colorIndex = 1; // Orange
+        } else if (lowerProjectName.includes('rehabilitation') || lowerProjectName.includes('expansion')) {
+            colorIndex = 2; // Red
+        } else if (lowerProjectName.includes('electricity') && !lowerProjectName.includes('access')) {
+            colorIndex = 3; // Purple
+        } else if (lowerProjectName.includes('infrastructure')) {
+            colorIndex = 4; // Blue
+        } else if (lowerProjectName.includes('water')) {
+            colorIndex = 5; // Teal
+        } else if (lowerProjectName.includes('rural')) {
+            colorIndex = 6; // Brown
+        } else if (lowerProjectName.includes('maintenance')) {
+            colorIndex = 7; // Grey
+        } else if (lowerProjectName.includes('community')) {
+            colorIndex = 8; // Pink
+        } else if (lowerProjectName.includes('smart') || lowerProjectName.includes('grid')) {
+            colorIndex = 9; // Cyan
+        } else if (lowerProjectName.includes('renewable') || lowerProjectName.includes('solar') || lowerProjectName.includes('wind')) {
+            colorIndex = 10; // Light Green
+        } else if (lowerProjectName.includes('emergency')) {
+            colorIndex = 11; // Deep Orange
+        } else if (lowerProjectName.includes('innovation')) {
+            colorIndex = 12; // Deep Purple
+        } else if (lowerProjectName.includes('sustain')) {
+            colorIndex = 13; // Medium Green
+        } else if (lowerProjectName.includes('modern')) {
+            colorIndex = 14; // Amber
+        } else {
+            // For completely new project types, assign next available color
+            colorIndex = projectColorMap.size % availableColors.length;
+        }
+        
+        const assignedColor = availableColors[colorIndex];
+        projectColorMap.set(projectName, assignedColor);
+        return assignedColor;
+    }
+    
+    // Collect all unique project types for legend
+    const uniqueProjectTypes = new Set();
+    projectData.forEach(p => {
+        if (p.projects && p.projects.length > 0) {
+            p.projects.forEach(proj => uniqueProjectTypes.add(proj));
+        }
+    });
+    
     // Add markers for each project location
     projectData.forEach(function(project) {
         const lat = project.latitude;
         const lng = project.longitude;
         
-        // Create custom icon based on project type
-        let iconColor = 'blue'; // default color
-        const projectName = project.projects[0] || ''; // Get first project name
+        // Get color for the project
+        const projectName = project.projects[0] || 'Unknown Project';
+        const iconColor = getProjectColor(projectName);
         
-        if (projectName.includes('ECOWAS') || projectName.includes('Access')) {
-            iconColor = 'green'; // Access projects
-        } else if (projectName.includes('Restoration') || projectName.includes('Modernization')) {
-            iconColor = 'orange'; // Restoration/Modernization projects
-        } else if (projectName.includes('Rehabilitation') || projectName.includes('Expansion')) {
-            iconColor = 'red'; // Rehabilitation/Expansion projects
-        } else if (projectName.includes('Electricity')) {
-            iconColor = 'purple'; // General electricity projects
-        }
+        // Log color assignment for debugging
+        console.log(`Project: "${projectName}" assigned color: ${iconColor}`);
         
         // Create marker
         const marker = L.circleMarker([lat, lng], {
@@ -323,19 +396,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Add a legend
+    // Add a dynamic legend showing all current project types
     const legend = L.control({position: 'bottomright'});
     legend.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'info legend');
+        
+        // Generate legend items for all unique project types
+        let legendItems = '';
+        uniqueProjectTypes.forEach(projectType => {
+            const color = getProjectColor(projectType);
+            const shortName = projectType.replace(/The Gambia |Gambia |Project/g, '').trim();
+            legendItems += `<div><span style="color: ${color}; font-size: 16px;">●</span> ${shortName}</div>`;
+        });
+        
         div.innerHTML = `
-            <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-                <h6 style="margin: 0 0 8px 0; font-size: 14px;">Project Types</h6>
-                <div style="font-size: 12px;">
-                    <div><span style="color: green;">●</span> Access Projects</div>
-                    <div><span style="color: orange;">●</span> Restoration/Modernization</div>
-                    <div><span style="color: red;">●</span> Rehabilitation/Expansion</div>
-                    <div><span style="color: purple;">●</span> General Electricity</div>
-                    <div><span style="color: blue;">●</span> Other Projects</div>
+            <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); max-width: 300px;">
+                <h6 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Active Projects</h6>
+                <div style="font-size: 11px; line-height: 1.4;">
+                    ${legendItems}
+                </div>
+                <div style="margin-top: 8px; font-size: 10px; color: #666; border-top: 1px solid #eee; padding-top: 6px;">
+                    <i class="bi bi-info-circle me-1"></i>New projects automatically assigned unique colors from 16-color palette
                 </div>
             </div>
         `;
