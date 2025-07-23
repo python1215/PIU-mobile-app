@@ -4,10 +4,11 @@
 {% block title %}Project Site Mapping - NAWEC PIU{% endblock %}
 
 {% block extra_css %}
-<!-- Leaflet CSS -->
+<!-- Leaflet CSS with fallback -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-      crossorigin="" />
+      crossorigin="" 
+      onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';" />
 <style>
     .map-container {
         width: 100%;
@@ -172,10 +173,11 @@
     </div>
 </div>
 
-<!-- Leaflet JavaScript -->
+<!-- Leaflet JavaScript with fallback -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-        crossorigin=""></script>
+        crossorigin=""
+        onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';"></script>
 
 <script>
 function refreshMap() {
@@ -217,18 +219,127 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         console.log('Map container found:', mapContainer);
         
-        // Initialize the map
-        const map = L.map('project-map').setView([centerLat, centerLng], zoomLevel);
+        // Initialize the map with enhanced error handling
+        const map = L.map('project-map', {
+            zoomControl: true,
+            attributionControl: true,
+            preferCanvas: false,
+            bounceAtZoomLimits: false
+        }).setView([centerLat, centerLng], zoomLevel);
         console.log('Map object created successfully');
+        
+        // Ensure map container is properly sized
+        setTimeout(function() {
+            map.invalidateSize();
+            console.log('Map size invalidated immediately after creation');
+        }, 100);
     
-    // Add OpenStreetMap tiles
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18
-    });
+    // Add multiple tile server options with fallbacks
+    let tileLayer;
+    let tileServers = [
+        {
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            name: 'OpenStreetMap'
+        },
+        {
+            url: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+            attribution: '© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            name: 'CartoDB Light'
+        },
+        {
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+            attribution: '© <a href="https://www.esri.com/">Esri</a>',
+            name: 'ESRI World'
+        }
+    ];
     
-    tileLayer.addTo(map);
-    console.log('Tile layer added successfully');
+    let tileServerIndex = 0;
+    let tilesLoaded = false;
+    
+    function loadTileLayer(serverIndex) {
+        if (serverIndex >= tileServers.length) {
+            console.error('All tile servers failed, showing offline map');
+            showOfflineMap();
+            return;
+        }
+        
+        const server = tileServers[serverIndex];
+        console.log(`Attempting to load tiles from: ${server.name}`);
+        
+        if (tileLayer) {
+            map.removeLayer(tileLayer);
+        }
+        
+        tileLayer = L.tileLayer(server.url, {
+            attribution: server.attribution,
+            maxZoom: 18,
+            timeout: 5000
+        });
+        
+        tileLayer.on('tileerror', function(e) {
+            console.warn(`Tile error with ${server.name}, trying next server...`);
+            setTimeout(() => loadTileLayer(serverIndex + 1), 1000);
+        });
+        
+        tileLayer.on('tileload', function(e) {
+            if (!tilesLoaded) {
+                console.log(`Successfully loaded tiles from: ${server.name}`);
+                tilesLoaded = true;
+            }
+        });
+        
+        tileLayer.addTo(map);
+    }
+    
+    function showOfflineMap() {
+        // Add a simple gray background for offline mode
+        map.getContainer().style.backgroundColor = '#e8e8e8';
+        
+        // Add grid pattern for better visual reference
+        const style = document.createElement('style');
+        style.textContent = `
+            #project-map {
+                background-image: 
+                    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+                background-size: 50px 50px;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add offline notice
+        const offlineNotice = L.control({position: 'topright'});
+        offlineNotice.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'offline-notice');
+            div.innerHTML = `
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 8px 12px; border-radius: 4px; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="bi bi-wifi-off me-1"></i>Offline Mode - Coordinates Only
+                </div>
+            `;
+            return div;
+        };
+        offlineNotice.addTo(map);
+        
+        console.log('Running in offline mode - showing coordinates only');
+    }
+    
+    // Start loading tiles
+    loadTileLayer(0);
+    
+    // Fallback to offline mode after 8 seconds if no tiles load
+    setTimeout(function() {
+        if (!tilesLoaded) {
+            console.log('Tiles taking too long, switching to offline mode');
+            showOfflineMap();
+        }
+    }, 8000);
+    
+    // Force show markers even if tiles don't load
+    setTimeout(function() {
+        console.log('Ensuring markers are displayed regardless of tile status');
+        addProjectMarkers();
+    }, 2000);
     
     // Wait for tiles to load
     setTimeout(function() {
@@ -316,7 +427,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Add markers for each project location
+    // Function to add project markers (can be called independently)
+    function addProjectMarkers() {
+        console.log('Adding project markers to map...');
+        
+        // Add markers for each project location
     projectData.forEach(function(project) {
         const lat = project.latitude;
         const lng = project.longitude;
@@ -395,6 +510,12 @@ document.addEventListener('DOMContentLoaded', function() {
             map.setView([lat, lng], Math.max(zoomLevel, 12));
         }
     });
+    
+    console.log('All project markers added successfully');
+    } // End of addProjectMarkers function
+    
+    // Call the function to add markers initially
+    addProjectMarkers();
     
     // Add a dynamic legend showing all current project types
     const legend = L.control({position: 'bottomright'});
