@@ -5,7 +5,9 @@
 
 {% block extra_css %}
 <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin="" />
 <style>
     .map-container {
         width: 100%;
@@ -171,7 +173,9 @@
 </div>
 
 <!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+        crossorigin=""></script>
 
 <script>
 function refreshMap() {
@@ -187,21 +191,50 @@ function fullscreenMap() {
 
 // Initialize the project map with real data
 document.addEventListener('DOMContentLoaded', function() {
-    const projectData = {{ project_data_json|safe }};
-    const centerLat = {{ center_lat|default:"13.4544" }};
-    const centerLng = {{ center_lng|default:"-16.5753" }};
-    const zoomLevel = {{ zoom_level|default:"8" }};
+    console.log('DOM loaded, starting map initialization...');
     
-    console.log('Initializing map with', projectData.length, 'project locations');
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded!');
+        document.getElementById('debug-info').innerHTML = '<small><i class="bi bi-exclamation-triangle me-1"></i>Map library loading error. Please refresh the page.</small>';
+        document.getElementById('debug-info').className = 'alert alert-danger';
+        return;
+    }
     
-    // Initialize the map
-    const map = L.map('project-map').setView([centerLat, centerLng], zoomLevel);
+    try {
+        const projectData = {{ project_data_json|safe }};
+        const centerLat = {{ center_lat|default:"13.4544" }};
+        const centerLng = {{ center_lng|default:"-16.5753" }};
+        const zoomLevel = {{ zoom_level|default:"8" }};
+        
+        console.log('Project data loaded:', projectData.length, 'locations');
+        console.log('Map center:', [centerLat, centerLng], 'zoom:', zoomLevel);
+        
+        // Check if the map container exists
+        const mapContainer = document.getElementById('project-map');
+        if (!mapContainer) {
+            throw new Error('Map container not found');
+        }
+        console.log('Map container found:', mapContainer);
+        
+        // Initialize the map
+        const map = L.map('project-map').setView([centerLat, centerLng], zoomLevel);
+        console.log('Map object created successfully');
     
     // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
-    }).addTo(map);
+    });
+    
+    tileLayer.addTo(map);
+    console.log('Tile layer added successfully');
+    
+    // Wait for tiles to load
+    setTimeout(function() {
+        map.invalidateSize();
+        console.log('Map size invalidated for proper display');
+    }, 100);
     
     // Add markers for each project location
     projectData.forEach(function(project) {
@@ -299,7 +332,23 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     legend.addTo(map);
     
-    console.log('Map initialized successfully with OpenStreetMap tiles');
+        console.log('Map initialized successfully with OpenStreetMap tiles');
+        
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        document.getElementById('debug-info').innerHTML = '<small><i class="bi bi-exclamation-triangle me-1"></i>Map initialization error: ' + error.message + '</small>';
+        document.getElementById('debug-info').className = 'alert alert-danger';
+        
+        // Show fallback message
+        document.getElementById('project-map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border: 2px dashed #ddd; border-radius: 6px;"><div class="text-center"><i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i><h5>Map Loading Error</h5><p class="text-muted">Unable to load the interactive map. Please refresh the page or try again later.</p><button onclick="location.reload()" class="btn btn-primary">Refresh Page</button></div></div>';
+    }
+});
+
+// Additional error handling for network issues
+window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('tile')) {
+        console.warn('Tile loading issue detected, but map should still work');
+    }
 });
 </script>
 {% endblock %}
