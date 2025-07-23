@@ -95,6 +95,9 @@
             </div>
             <div class="col-md-4 text-end">
                 <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="forceOfflineMap()" title="Show map without external tiles">
+                        <i class="bi bi-map-fill me-1"></i>Show Map
+                    </button>
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshMap()">
                         <i class="bi bi-arrow-clockwise me-1"></i>Refresh
                     </button>
@@ -191,6 +194,18 @@ function fullscreenMap() {
     }
 }
 
+function forceOfflineMap() {
+    console.log('User requested force offline map mode');
+    if (typeof showOfflineMap === 'function') {
+        showOfflineMap();
+        document.getElementById('debug-info').innerHTML = '<small><i class="bi bi-check-circle me-1"></i>Map displayed in offline mode - all project markers visible</small>';
+        document.getElementById('debug-info').className = 'alert alert-info';
+    } else {
+        console.log('Offline map function not available yet, refreshing page...');
+        location.reload();
+    }
+}
+
 // Initialize the project map with real data
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, starting map initialization...');
@@ -274,7 +289,9 @@ document.addEventListener('DOMContentLoaded', function() {
         tileLayer = L.tileLayer(server.url, {
             attribution: server.attribution,
             maxZoom: 18,
-            timeout: 5000
+            timeout: 3000,
+            errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+            crossOrigin: true
         });
         
         tileLayer.on('tileerror', function(e) {
@@ -293,47 +310,97 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showOfflineMap() {
-        // Add a simple gray background for offline mode
-        map.getContainer().style.backgroundColor = '#e8e8e8';
+        tilesLoaded = true; // Prevent further tile loading attempts
         
-        // Add grid pattern for better visual reference
+        // Create a more attractive offline background
+        map.getContainer().style.backgroundColor = '#f0f4f8';
+        
+        // Add enhanced grid pattern and styling
         const style = document.createElement('style');
         style.textContent = `
             #project-map {
-                background-image: 
-                    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
-                background-size: 50px 50px;
+                background: linear-gradient(45deg, #f0f4f8 25%, transparent 25%), 
+                           linear-gradient(-45deg, #f0f4f8 25%, transparent 25%), 
+                           linear-gradient(45deg, transparent 75%, #f0f4f8 75%), 
+                           linear-gradient(-45deg, transparent 75%, #f0f4f8 75%);
+                background-size: 40px 40px;
+                background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+                background-color: #f8fafc;
+            }
+            .leaflet-container {
+                background: #f8fafc !important;
             }
         `;
         document.head.appendChild(style);
         
-        // Add offline notice
+        // Add comprehensive offline notice with instructions
         const offlineNotice = L.control({position: 'topright'});
         offlineNotice.onAdd = function(map) {
             const div = L.DomUtil.create('div', 'offline-notice');
             div.innerHTML = `
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 8px 12px; border-radius: 4px; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <i class="bi bi-wifi-off me-1"></i>Offline Mode - Coordinates Only
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 280px;">
+                    <div style="font-weight: 600; margin-bottom: 6px;">
+                        <i class="bi bi-map me-2"></i>Offline Map Mode
+                    </div>
+                    <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                        Interactive markers active<br>
+                        Click markers for project details<br>
+                        All ${projectData.length} locations visible
+                    </div>
                 </div>
             `;
             return div;
         };
         offlineNotice.addTo(map);
         
-        console.log('Running in offline mode - showing coordinates only');
+        // Add location indicator
+        const locationControl = L.control({position: 'topleft'});
+        locationControl.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'location-info');
+            div.innerHTML = `
+                <div style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-left: 4px solid #007bff;">
+                    <strong>The Gambia</strong><br>
+                    <span style="color: #666;">Project Implementation Sites</span>
+                </div>
+            `;
+            return div;
+        };
+        locationControl.addTo(map);
+        
+        console.log('Running in enhanced offline mode with', projectData.length, 'interactive locations');
     }
     
-    // Start loading tiles
+    // For immediate display, start in offline mode if network seems unreliable
+    // Try tiles first, but fall back quickly
+    console.log('Starting map in hybrid mode for better reliability');
+    
+    // Show offline mode immediately for better user experience
+    setTimeout(function() {
+        console.log('Activating offline mode for immediate display');
+        showOfflineMap();
+    }, 500);
+    
+    // Also try loading tiles in background
     loadTileLayer(0);
     
-    // Fallback to offline mode after 8 seconds if no tiles load
+    // More aggressive fallback - switch to offline mode after 3 seconds
     setTimeout(function() {
         if (!tilesLoaded) {
             console.log('Tiles taking too long, switching to offline mode');
             showOfflineMap();
         }
-    }, 8000);
+    }, 3000);
+    
+    // Force offline mode if still no tiles after 5 seconds
+    setTimeout(function() {
+        if (!tilesLoaded) {
+            console.log('Forcing offline mode due to tile loading issues');
+            if (tileLayer) {
+                map.removeLayer(tileLayer);
+            }
+            showOfflineMap();
+        }
+    }, 5000);
     
     // Force show markers even if tiles don't load
     setTimeout(function() {
