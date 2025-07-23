@@ -330,14 +330,56 @@ def index(request):
     #     legend_html += '</div>'
     #     m.get_root().html.add_child(folium.Element(legend_html))
 
-    # Map HTML - use get_root().render() instead of _repr_html_() for better web compatibility
-    try:
-        map_html = m.get_root().render()
-        print("DEBUG: Map HTML generated successfully")
-    except Exception as e:
-        print(f"DEBUG: Error generating map HTML: {e}")
-        # Fallback to _repr_html_
-        map_html = m._repr_html_()
+    # Generate project data for JavaScript map instead of Folium
+    project_data = []
+    for community in project_communities:
+        try:
+            if community.Latitude and community.Longitude:
+                projects = community.project.all()
+                donors = community.donor.all()
+                
+                project_names = [str(p.project) for p in projects]
+                donor_names = [str(d.name) for d in donors]
+                
+                # Check if this is the focused location
+                is_focused = False
+                if focus_lat and focus_lng:
+                    try:
+                        focus_lat_f = float(focus_lat)
+                        focus_lng_f = float(focus_lng)
+                        if abs(float(community.Latitude) - focus_lat_f) < 0.0001 and abs(float(community.Longitude) - focus_lng_f) < 0.0001:
+                            is_focused = True
+                    except (ValueError, TypeError):
+                        pass
+                
+                total_hh = community.Total_No_of_Households or 0
+                connected_hh = community.no_of_connected_household or 0
+                access_rate = (connected_hh / total_hh * 100) if total_hh > 0 else 0
+                
+                project_data.append({
+                    'id': community.pk,
+                    'latitude': float(community.Latitude),
+                    'longitude': float(community.Longitude),
+                    'settlement': str(community.settlement.settlement_name) if community.settlement else 'N/A',
+                    'region': str(community.region.region_name) if community.region else 'N/A',
+                    'district': str(community.district.district_name) if community.district else 'N/A',
+                    'projects': project_names,
+                    'donors': donor_names,
+                    'total_households': total_hh,
+                    'connected_households': connected_hh,
+                    'access_rate': round(access_rate, 1),
+                    'access_type': str(community.access.access_type) if community.access else 'N/A',
+                    'profile_year': str(community.profile_year.profile_year) if community.profile_year else 'N/A',
+                    'is_focused': is_focused
+                })
+        except Exception as e:
+            print(f"DEBUG: Error processing community {community.id}: {str(e)}")
+            continue
+    
+    print(f"DEBUG: Generated data for {len(project_data)} project locations")
+    
+    # Create a simple HTML placeholder for the map
+    map_html = '<div id="project-map" style="height: 75vh; border-radius: 6px;"></div>'
 
     total_communities = project_communities.count()
     total_households = project_communities.aggregate(total=Sum('Total_No_of_Households'))['total'] or 0
@@ -348,8 +390,12 @@ def index(request):
         'total_communities': total_communities,
         'total_households': total_households,
         'total_connected': total_connected,
-        'markers_added': markers_added,
-        'overall_access_rate': (total_connected / total_households * 100) if total_households else 0
+        'markers_added': len(project_data),
+        'overall_access_rate': (total_connected / total_households * 100) if total_households else 0,
+        'project_data_json': json.dumps(project_data),
+        'center_lat': center_location[0],
+        'center_lng': center_location[1],
+        'zoom_level': zoom_level
     }
 
     return render(request, 'PIU_Mapping_project_Sites/index.html', context)

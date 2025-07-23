@@ -30,16 +30,27 @@
     }
     
     /* Ensure map renders properly */
-    #map {
-        height: 100%;
+    #project-map {
+        height: 75vh;
         width: 100%;
         border-radius: 6px;
+        min-height: 500px;
     }
     
-    /* Disable iframe security warning */
-    .folium-map iframe {
-        border: none;
-        border-radius: 6px;
+    /* Custom popup styling */
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .custom-popup .leaflet-popup-content {
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Legend styling */
+    .legend {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 </style>
 {% endblock %}
@@ -98,17 +109,14 @@
             <div class="map-container">
                 {% if map %}
                     <!-- Debug info -->
-                    <div class="alert alert-info" id="debug-info">
+                    <div class="alert alert-success" id="debug-info">
                         <small>
-                            <i class="bi bi-info-circle me-1"></i>
-                            Map loaded with {{ markers_added|default:0 }} markers from {{ total_communities|default:0 }} total communities
+                            <i class="bi bi-check-circle me-1"></i>
+                            Interactive map with {{ markers_added|default:0 }} project locations from {{ total_communities|default:0 }} total communities
                         </small>
                     </div>
-                    <!-- Fallback Leaflet Map -->
-                    <div id="fallback-map" style="height: 75vh; display: none; border-radius: 6px;"></div>
-                    <div id="folium-map">
-                        {{ map|safe }}
-                    </div>
+                    <!-- Direct Leaflet Map -->
+                    {{ map|safe }}
                 {% else %}
                     <div class="d-flex align-items-center justify-content-center h-100 bg-light">
                         <div class="text-center">
@@ -177,52 +185,121 @@ function fullscreenMap() {
     }
 }
 
-// Check if Folium map loads properly, provide fallback if needed
+// Initialize the project map with real data
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait for Folium map to load
-    setTimeout(function() {
-        const foliumMap = document.getElementById('folium-map');
-        const iframe = foliumMap ? foliumMap.querySelector('iframe') : null;
-        
-        // Check if iframe loaded properly
-        if (!iframe || iframe.src === 'about:blank' || iframe.contentDocument === null) {
-            console.log('Folium map loading issue detected, initializing fallback map');
-            showFallbackMap();
-        } else {
-            console.log('Folium map loaded successfully');
-        }
-    }, 2000);
-});
-
-function showFallbackMap() {
-    const foliumDiv = document.getElementById('folium-map');
-    const fallbackDiv = document.getElementById('fallback-map');
+    const projectData = {{ project_data_json|safe }};
+    const centerLat = {{ center_lat|default:"13.4544" }};
+    const centerLng = {{ center_lng|default:"-16.5753" }};
+    const zoomLevel = {{ zoom_level|default:"8" }};
     
-    if (foliumDiv && fallbackDiv) {
-        foliumDiv.style.display = 'none';
-        fallbackDiv.style.display = 'block';
+    console.log('Initializing map with', projectData.length, 'project locations');
+    
+    // Initialize the map
+    const map = L.map('project-map').setView([centerLat, centerLng], zoomLevel);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    // Add markers for each project location
+    projectData.forEach(function(project) {
+        const lat = project.latitude;
+        const lng = project.longitude;
         
-        // Initialize basic Leaflet map
-        const map = L.map('fallback-map').setView([13.4544, -16.5753], 8);
+        // Create custom icon based on access rate
+        let iconColor = 'red';
+        if (project.access_rate >= 80) iconColor = 'green';
+        else if (project.access_rate >= 50) iconColor = 'orange';
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+        // Create marker
+        const marker = L.circleMarker([lat, lng], {
+            radius: project.is_focused ? 12 : 8,
+            fillColor: iconColor,
+            color: project.is_focused ? '#000' : '#333',
+            weight: project.is_focused ? 3 : 2,
+            opacity: 1,
+            fillOpacity: 0.8
         }).addTo(map);
         
-        // Add a sample marker for testing
-        L.marker([13.4544, -16.5753])
-            .addTo(map)
-            .bindPopup('<b>Gambia Center</b><br>Project locations will appear here.')
-            .openPopup();
-            
-        // Update debug info
-        const debugInfo = document.getElementById('debug-info');
-        if (debugInfo) {
-            debugInfo.innerHTML = '<small><i class="bi bi-exclamation-triangle me-1"></i>Using fallback map. Folium map had loading issues.</small>';
-            debugInfo.className = 'alert alert-warning';
+        // Create popup content
+        const popupContent = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <h6 style="margin: 0 0 8px 0; color: #333; font-weight: 600;">
+                    <i class="bi bi-geo-alt-fill me-1" style="color: ${iconColor};"></i>
+                    ${project.settlement}
+                </h6>
+                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                    <strong>Region:</strong> ${project.region}<br>
+                    <strong>District:</strong> ${project.district}
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;"><strong>Household Statistics</strong></div>
+                    <div style="font-size: 13px;">
+                        <span style="color: #28a745; font-weight: 600;">${project.connected_households}</span> / 
+                        <span style="color: #333;">${project.total_households}</span> connected
+                        <span style="color: #666;">(${project.access_rate}%)</span>
+                    </div>
+                </div>
+                
+                ${project.projects.length > 0 ? `
+                    <div style="margin: 8px 0;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 4px;"><strong>Projects</strong></div>
+                        <div style="font-size: 13px; color: #007bff;">
+                            ${project.projects.join(', ')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #dee2e6;">
+                    <div style="font-size: 12px; color: #666;">
+                        Access Type: <span style="color: #333;">${project.access_type}</span><br>
+                        Profile Year: <span style="color: #333;">${project.profile_year}</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 8px; text-align: center;">
+                    <a href="/PIU_Mapping_project_Sites/mapping/${project.id}/" 
+                       style="display: inline-block; padding: 4px 12px; background: #007bff; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">
+                        <i class="bi bi-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent, {
+            maxWidth: 300,
+            className: 'custom-popup'
+        });
+        
+        // Open popup for focused marker
+        if (project.is_focused) {
+            marker.openPopup();
+            map.setView([lat, lng], Math.max(zoomLevel, 12));
         }
-    }
-}
+    });
+    
+    // Add a legend
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.innerHTML = `
+            <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                <h6 style="margin: 0 0 8px 0; font-size: 14px;">Access Rate</h6>
+                <div style="font-size: 12px;">
+                    <div><span style="color: green;">●</span> 80%+ (High)</div>
+                    <div><span style="color: orange;">●</span> 50-79% (Medium)</div>
+                    <div><span style="color: red;">●</span> <50% (Low)</div>
+                </div>
+            </div>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+    
+    console.log('Map initialized successfully with OpenStreetMap tiles');
+});
 </script>
 {% endblock %}
