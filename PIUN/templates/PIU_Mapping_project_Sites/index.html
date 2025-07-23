@@ -4,6 +4,8 @@
 {% block title %}Project Site Mapping - NAWEC PIU{% endblock %}
 
 {% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .map-container {
         width: 100%;
@@ -25,6 +27,19 @@
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 1rem;
+    }
+    
+    /* Ensure map renders properly */
+    #map {
+        height: 100%;
+        width: 100%;
+        border-radius: 6px;
+    }
+    
+    /* Disable iframe security warning */
+    .folium-map iframe {
+        border: none;
+        border-radius: 6px;
     }
 </style>
 {% endblock %}
@@ -82,13 +97,29 @@
         <div class="col-12">
             <div class="map-container">
                 {% if map %}
-                    {{ map|safe }}
+                    <!-- Debug info -->
+                    <div class="alert alert-info" id="debug-info">
+                        <small>
+                            <i class="bi bi-info-circle me-1"></i>
+                            Map loaded with {{ markers_added|default:0 }} markers from {{ total_communities|default:0 }} total communities
+                        </small>
+                    </div>
+                    <!-- Fallback Leaflet Map -->
+                    <div id="fallback-map" style="height: 75vh; display: none; border-radius: 6px;"></div>
+                    <div id="folium-map">
+                        {{ map|safe }}
+                    </div>
                 {% else %}
                     <div class="d-flex align-items-center justify-content-center h-100 bg-light">
                         <div class="text-center">
                             <i class="bi bi-geo-alt-fill display-1 text-muted mb-3"></i>
                             <h5 class="text-muted">Map Loading...</h5>
                             <p class="text-muted">Please wait while the project sites are being loaded.</p>
+                            <div class="mt-3">
+                                <a href="{% url 'PIU_Mapping_project_Sites:offline-map' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-map me-2"></i>Try Offline Map
+                                </a>
+                            </div>
                         </div>
                     </div>
                 {% endif %}
@@ -131,6 +162,9 @@
     </div>
 </div>
 
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 function refreshMap() {
     location.reload();
@@ -140,6 +174,54 @@ function fullscreenMap() {
     const mapContainer = document.querySelector('.map-container');
     if (mapContainer.requestFullscreen) {
         mapContainer.requestFullscreen();
+    }
+}
+
+// Check if Folium map loads properly, provide fallback if needed
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Folium map to load
+    setTimeout(function() {
+        const foliumMap = document.getElementById('folium-map');
+        const iframe = foliumMap ? foliumMap.querySelector('iframe') : null;
+        
+        // Check if iframe loaded properly
+        if (!iframe || iframe.src === 'about:blank' || iframe.contentDocument === null) {
+            console.log('Folium map loading issue detected, initializing fallback map');
+            showFallbackMap();
+        } else {
+            console.log('Folium map loaded successfully');
+        }
+    }, 2000);
+});
+
+function showFallbackMap() {
+    const foliumDiv = document.getElementById('folium-map');
+    const fallbackDiv = document.getElementById('fallback-map');
+    
+    if (foliumDiv && fallbackDiv) {
+        foliumDiv.style.display = 'none';
+        fallbackDiv.style.display = 'block';
+        
+        // Initialize basic Leaflet map
+        const map = L.map('fallback-map').setView([13.4544, -16.5753], 8);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add a sample marker for testing
+        L.marker([13.4544, -16.5753])
+            .addTo(map)
+            .bindPopup('<b>Gambia Center</b><br>Project locations will appear here.')
+            .openPopup();
+            
+        // Update debug info
+        const debugInfo = document.getElementById('debug-info');
+        if (debugInfo) {
+            debugInfo.innerHTML = '<small><i class="bi bi-exclamation-triangle me-1"></i>Using fallback map. Folium map had loading issues.</small>';
+            debugInfo.className = 'alert alert-warning';
+        }
     }
 }
 </script>

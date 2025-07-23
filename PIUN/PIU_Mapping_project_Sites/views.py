@@ -45,6 +45,9 @@ def index(request):
         Longitude__isnull=False
     ).all()
     
+    # Debug: Print number of communities found
+    print(f"DEBUG: Found {project_communities.count()} communities with coordinates")
+    
     # Check for coordinate parameters to focus on specific location
     focus_lat = request.GET.get('lat')
     focus_lng = request.GET.get('lng')
@@ -60,15 +63,37 @@ def index(request):
         center_location = [13.4544, -16.5753]  # Default to Gambia center
         zoom_level = 8
     
-    # Create base map
-    m = folium.Map(location=center_location, zoom_start=zoom_level)
+    # Create base map with OpenStreetMap tiles - use default tiles for better compatibility
+    try:
+        m = folium.Map(
+            location=center_location, 
+            zoom_start=zoom_level,
+            prefer_canvas=True,
+            max_zoom=18
+        )
+        print(f"DEBUG: Map created successfully centered at {center_location}")
+    except Exception as e:
+        print(f"DEBUG: Error creating map: {e}")
+        # Fallback to simple map without custom tiles
+        m = folium.Map(location=center_location, zoom_start=zoom_level)
 
-    # Add optional tile layers with attribution
-    folium.TileLayer(
-        tiles='cartodb positron',
-        name='CartoDB',
-        attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'
-    ).add_to(m)
+    # Add additional tile layers with attribution
+    try:
+        folium.TileLayer(
+            tiles='cartodb positron',
+            name='CartoDB Light',
+            attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'
+        ).add_to(m)
+        
+        # Add satellite view option
+        folium.TileLayer(
+            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            name='Satellite',
+            attr='Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        ).add_to(m)
+    except Exception as e:
+        print(f"DEBUG: Error adding tile layers: {e}")
+        # Continue with basic map
     
     # Group markers by project
     project_groups = defaultdict(lambda: folium.FeatureGroup(name=None, show=True))
@@ -305,8 +330,14 @@ def index(request):
     #     legend_html += '</div>'
     #     m.get_root().html.add_child(folium.Element(legend_html))
 
-    # Map HTML
-    map_html = m._repr_html_()
+    # Map HTML - use get_root().render() instead of _repr_html_() for better web compatibility
+    try:
+        map_html = m.get_root().render()
+        print("DEBUG: Map HTML generated successfully")
+    except Exception as e:
+        print(f"DEBUG: Error generating map HTML: {e}")
+        # Fallback to _repr_html_
+        map_html = m._repr_html_()
 
     total_communities = project_communities.count()
     total_households = project_communities.aggregate(total=Sum('Total_No_of_Households'))['total'] or 0
