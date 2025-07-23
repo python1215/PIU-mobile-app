@@ -116,8 +116,8 @@
                                                 {% endif %}
                                                 <button type="button" class="btn btn-outline-info btn-sm" 
                                                         onclick="viewDetails({{ mapping.pk }})"
-                                                        title="View Details">
-                                                    <i class="bi bi-eye"></i>
+                                                        title="View on Interactive Map">
+                                                    <i class="bi bi-map-fill"></i>
                                                 </button>
                                                 <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" 
                                                    class="btn btn-outline-success btn-sm" 
@@ -276,7 +276,24 @@ function viewOnMap(lat, lng, mappingId = null) {
 }
 
 function viewDetails(mappingId) {
-    // Redirect to detail view
+    // Get the mapping row to extract coordinates
+    const mappingRow = document.querySelector(`button[onclick="viewDetails(${mappingId})"]`).closest('tr');
+    const coordinates = mappingRow.querySelector('td:nth-child(8) small').textContent.trim();
+    
+    if (coordinates && coordinates !== 'No coordinates') {
+        // Extract lat and lng from the coordinates text
+        const coords = coordinates.split(', ');
+        if (coords.length === 2) {
+            const lat = parseFloat(coords[0]);
+            const lng = parseFloat(coords[1]);
+            
+            // Redirect to interactive map with focused coordinates
+            window.location.href = `{% url 'PIU_Mapping_project_Sites:index' %}?lat=${lat}&lng=${lng}&mapping_id=${mappingId}`;
+            return;
+        }
+    }
+    
+    // Fallback: redirect to detail view if coordinates are not available
     window.location.href = `{% url 'PIU_Mapping_project_Sites:mapping-detail' '0' %}`.replace('0', mappingId);
 }
 
