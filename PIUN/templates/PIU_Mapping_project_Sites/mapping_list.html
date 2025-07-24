@@ -114,11 +114,7 @@
                                                         <i class="bi bi-geo-alt"></i>
                                                     </button>
                                                 {% endif %}
-                                                <button type="button" class="btn btn-outline-info btn-sm" 
-                                                        onclick="viewDetails({{ mapping.pk }})"
-                                                        title="View on Interactive Map">
-                                                    <i class="bi bi-map-fill"></i>
-                                                </button>
+
                                                 <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" 
                                                    class="btn btn-outline-success btn-sm" 
                                                    title="Edit Mapping">
