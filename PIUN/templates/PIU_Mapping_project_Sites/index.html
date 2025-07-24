@@ -220,12 +220,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     try {
         const projectData = {{ project_data_json|safe }};
-        const centerLat = {{ center_lat|default:"13.4544" }};
-        const centerLng = {{ center_lng|default:"-16.5753" }};
-        const zoomLevel = {{ zoom_level|default:"8" }};
+        
+        // Check for URL parameters to center on specific location
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramLat = urlParams.get('lat');
+        const paramLng = urlParams.get('lng');
+        const paramZoom = urlParams.get('zoom');
+        const mappingId = urlParams.get('mappingId');
+        
+        // Use URL parameters if available, otherwise use defaults
+        const centerLat = paramLat ? parseFloat(paramLat) : {{ center_lat|default:"13.4544" }};
+        const centerLng = paramLng ? parseFloat(paramLng) : {{ center_lng|default:"-16.5753" }};
+        const zoomLevel = paramZoom ? parseInt(paramZoom) : {{ zoom_level|default:"8" }};
         
         console.log('Project data loaded:', projectData.length, 'locations');
         console.log('Map center:', [centerLat, centerLng], 'zoom:', zoomLevel);
+        
+        if (paramLat && paramLng) {
+            console.log('Centering map on specific location from URL parameters');
+            document.getElementById('debug-info').innerHTML = '<small><i class="bi bi-geo-alt-fill me-1"></i>Map centered on selected project site location</small>';
+            document.getElementById('debug-info').className = 'alert alert-info';
+        }
         
         // Check if the map container exists
         const mapContainer = document.getElementById('project-map');
@@ -510,21 +525,60 @@ document.addEventListener('DOMContentLoaded', function() {
         // Log color assignment for debugging
         console.log(`Project: "${projectName}" assigned color: ${iconColor}`);
         
-        // Create marker
+        // Check if this is the highlighted location from URL parameters
+        const isHighlighted = paramLat && paramLng && 
+                              Math.abs(lat - parseFloat(paramLat)) < 0.0001 && 
+                              Math.abs(lng - parseFloat(paramLng)) < 0.0001;
+        
+        // Create marker with special highlighting for selected location
         const marker = L.circleMarker([lat, lng], {
-            radius: project.is_focused ? 12 : 8,
-            fillColor: iconColor,
-            color: project.is_focused ? '#000' : '#333',
-            weight: project.is_focused ? 3 : 2,
+            radius: isHighlighted ? 15 : (project.is_focused ? 12 : 8),
+            fillColor: isHighlighted ? '#FF1744' : iconColor,
+            color: isHighlighted ? '#FFFFFF' : (project.is_focused ? '#000' : '#333'),
+            weight: isHighlighted ? 4 : (project.is_focused ? 3 : 2),
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: isHighlighted ? 1.0 : 0.8
         }).addTo(map);
         
-        // Create popup content
+        // If this is the highlighted marker, add a pulsing effect
+        if (isHighlighted) {
+            const pulseMarker = L.circleMarker([lat, lng], {
+                radius: 25,
+                fillColor: '#FF1744',
+                color: '#FF1744',
+                weight: 2,
+                opacity: 0.0,
+                fillOpacity: 0.0
+            }).addTo(map);
+            
+            // Animate the pulse effect
+            let pulseRadius = 15;
+            let pulseDirection = 1;
+            setInterval(() => {
+                pulseRadius += pulseDirection * 2;
+                if (pulseRadius >= 25) pulseDirection = -1;
+                if (pulseRadius <= 15) pulseDirection = 1;
+                
+                pulseMarker.setRadius(pulseRadius);
+                pulseMarker.setStyle({
+                    opacity: 0.3 - (pulseRadius - 15) / 40,
+                    fillOpacity: 0.2 - (pulseRadius - 15) / 50
+                });
+            }, 100);
+            
+            console.log('Added highlighted marker with pulse effect at:', lat, lng);
+        }
+        
+        // Create popup content with highlighting indicator
         const popupContent = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                ${isHighlighted ? `
+                    <div style="background: linear-gradient(45deg, #FF1744, #E91E63); color: white; padding: 6px 10px; margin: -8px -10px 10px -10px; text-align: center; font-size: 12px; font-weight: 600;">
+                        <i class="bi bi-bullseye me-1"></i>SELECTED LOCATION
+                    </div>
+                ` : ''}
                 <h6 style="margin: 0 0 8px 0; color: #333; font-weight: 600;">
-                    <i class="bi bi-geo-alt-fill me-1" style="color: ${iconColor};"></i>
+                    <i class="bi bi-geo-alt-fill me-1" style="color: ${isHighlighted ? '#FF1744' : iconColor};"></i>
                     ${project.settlement}
                 </h6>
                 <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
@@ -571,8 +625,8 @@ document.addEventListener('DOMContentLoaded', function() {
             className: 'custom-popup'
         });
         
-        // Open popup for focused marker
-        if (project.is_focused) {
+        // Open popup for focused marker or highlighted marker from URL
+        if (project.is_focused || isHighlighted) {
             marker.openPopup();
             map.setView([lat, lng], Math.max(zoomLevel, 12));
         }

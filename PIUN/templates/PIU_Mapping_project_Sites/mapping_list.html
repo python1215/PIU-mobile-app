@@ -215,60 +215,9 @@ let currentCoords = null;
 let currentMappingId = null;
 
 function viewOnMap(lat, lng, mappingId = null) {
-    currentCoords = { lat: lat, lng: lng };
-    currentMappingId = mappingId;
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('quickMapModal'));
-    modal.show();
-    
-    // Update coordinates display
-    document.getElementById('modalCoordinates').textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    
-    // Create offline coordinate display instead of loading external map libraries
-    const mapContainer = document.getElementById('quickLocationMap');
-    mapContainer.innerHTML = `
-        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
-            <div class="text-center p-4">
-                <div class="mb-4">
-                    <i class="bi bi-geo-alt-fill text-danger" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="mb-3">Project Site Location</h5>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="card bg-primary text-white mb-2">
-                            <div class="card-body text-center py-2">
-                                <h6 class="card-title mb-1">Latitude</h6>
-                                <small class="card-text">${lat.toFixed(6)}</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card bg-success text-white mb-2">
-                            <div class="card-body text-center py-2">
-                                <h6 class="card-title mb-1">Longitude</h6>
-                                <small class="card-text">${lng.toFixed(6)}</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="alert alert-info py-2">
-                    <small><i class="bi bi-info-circle me-1"></i>Click "View Details" button for complete location information</small>
-                </div>
-                <div class="text-center mt-2">
-                    <button class="btn btn-sm btn-primary" onclick="editFromPopup()">
-                        <i class="bi bi-pencil me-1"></i>Edit Details
-                    </button>
-                </div>
-                <div class="mt-2">
-                    <small class="text-muted">
-                        <i class="bi bi-wifi-off me-1"></i>
-                        Offline Mode: External map services unavailable
-                    </small>
-                </div>
-            </div>
-        </div>
-    `;
+    // Navigate to the interactive map with specific coordinates
+    const mapUrl = `/PIU_Mapping_project_Sites/index/?lat=${lat}&lng=${lng}&mappingId=${mappingId}&zoom=16`;
+    window.open(mapUrl, '_blank');
 }
 
 function viewDetails(mappingId) {
