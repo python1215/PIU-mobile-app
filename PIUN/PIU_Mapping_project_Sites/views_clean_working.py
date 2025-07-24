@@ -84,7 +84,7 @@ def index(request):
                     'projects': project_names,
                     'total_households': community.Total_No_of_Households or 0,
                     'connected_households': community.no_of_connected_household or 0,
-                    'access_type': community.access.access_type if community.access else 'Unknown',
+                    'access_type': community.access.name if community.access else 'Unknown',
                     'profile_year': community.profile_year.year if community.profile_year else 'Unknown',
                     'is_focused': is_focused
                 })
