@@ -110,8 +110,8 @@ def index(request):
 
 
 def mapping_dashboard(request):
-    """Mapping dashboard placeholder"""
-    return redirect('PIU_Mapping_project_Sites:index')
+    """Mapping dashboard - route to main map view"""
+    return index(request)
 
 def indexl(request):
     """Leaflet map placeholder"""
