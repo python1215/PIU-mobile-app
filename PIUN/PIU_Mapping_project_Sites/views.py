@@ -85,7 +85,7 @@ def index(request):
                     'total_households': community.Total_No_of_Households or 0,
                     'connected_households': community.no_of_connected_household or 0,
                     'access_type': community.access.access_type if community.access else 'Unknown',
-                    'profile_year': community.profile_year.year if community.profile_year else 'Unknown',
+                    'profile_year': community.profile_year.profile_year if community.profile_year else 'Unknown',
                     'is_focused': is_focused
                 })
         except Exception as e:
