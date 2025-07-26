@@ -66,8 +66,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectData = {{ project_data_json|safe }};
     console.log('Project data:', projectData);
     
-    // Initialize map centered on The Gambia
-    const map = L.map('project-map').setView([13.4667, -15.3100], 9);
+    // Check for URL parameters for focused view
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusLat = urlParams.get('lat');
+    const focusLng = urlParams.get('lng');
+    const zoom = urlParams.get('zoom');
+    const mappingId = urlParams.get('mappingId');
+    
+    // Set map center and zoom
+    const centerLat = focusLat ? parseFloat(focusLat) : 13.4667;
+    const centerLng = focusLng ? parseFloat(focusLng) : -15.3100;
+    const zoomLevel = zoom ? parseInt(zoom) : 9;
+    
+    // Initialize map
+    const map = L.map('project-map').setView([centerLat, centerLng], zoomLevel);
     
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -75,20 +87,47 @@ document.addEventListener('DOMContentLoaded', function() {
         maxZoom: 18
     }).addTo(map);
     
+    // Fix marker icon paths
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    });
+    
     // Add markers for each project location
     projectData.forEach(function(location, index) {
-        const marker = L.marker([location.latitude, location.longitude])
-            .addTo(map)
-            .bindPopup(`
-                <div style="min-width: 200px;">
-                    <h6><strong>${location.settlement}</strong></h6>
-                    <p><strong>Region:</strong> ${location.region}<br>
-                    <strong>District:</strong> ${location.district}<br>
-                    <strong>Projects:</strong> ${location.projects.join(', ')}<br>
-                    <strong>Households:</strong> ${location.total_households}<br>
-                    <strong>Connected:</strong> ${location.connected_households}</p>
+        // Check if this is the focused location
+        const isFocused = mappingId && mappingId == location.id;
+        
+        // Create marker with different styling for focused location
+        const marker = L.marker([location.latitude, location.longitude], {
+            title: location.settlement
+        }).addTo(map);
+        
+        // Create popup content
+        const popupContent = `
+            <div style="min-width: 200px;">
+                ${isFocused ? '<div style="background: linear-gradient(45deg, #ff4444, #ff6666); color: white; padding: 5px; margin: -8px -12px 8px -12px; text-align: center; font-weight: bold;">📍 SELECTED LOCATION</div>' : ''}
+                <h6><strong>${location.settlement}</strong></h6>
+                <p><strong>Region:</strong> ${location.region}<br>
+                <strong>District:</strong> ${location.district}<br>
+                <strong>Projects:</strong> ${location.projects.join(', ')}<br>
+                <strong>Households:</strong> ${location.total_households}<br>
+                <strong>Connected:</strong> ${location.connected_households}</p>
+                <div style="margin-top: 10px;">
+                    <a href="/PIU_Mapping_project_Sites/mapping/${location.id}/" class="btn btn-sm btn-primary">View Details</a>
+                    <a href="/PIU_Mapping_project_Sites/update-mapping/${location.id}/" class="btn btn-sm btn-success">Edit</a>
                 </div>
-            `);
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        
+        // Auto-open popup for focused location
+        if (isFocused) {
+            marker.openPopup();
+        }
     });
     
     console.log('Map initialized with', projectData.length, 'markers');
