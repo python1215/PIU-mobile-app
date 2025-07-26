@@ -507,7 +507,7 @@ def add_mapping(request):
             mapping.save()
             form.save_m2m()
             messages.success(request, 'Mapping added successfully!')
-            return redirect('PIU_Mapping_project_Sites:mapping_list')
+            return redirect('PIU_Mapping_project_Sites:mapping-list')
     else:
         form = MappingForm()
     
@@ -535,7 +535,7 @@ def update_mapping(request, pk):
                     'message': 'Mapping updated successfully! Returning to map...'
                 })
             
-            return redirect('PIU_Mapping_project_Sites:mapping_list')
+            return redirect('PIU_Mapping_project_Sites:mapping-list')
     else:
         form = MappingForm(instance=mapping)
     
@@ -556,7 +556,7 @@ def delete_mapping(request, pk):
     if request.method == 'POST':
         mapping.delete()
         messages.success(request, 'Mapping deleted successfully!')
-        return redirect('PIU_Mapping_project_Sites:mapping_list')
+        return redirect('PIU_Mapping_project_Sites:mapping-list')
     
     context = {
         'mapping': mapping,
