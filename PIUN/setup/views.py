@@ -20,6 +20,10 @@ def setup_dashboard(request):
         'total_kpi_contracts': 0,  # Moved to PIU_Financial_mgt
         'total_quarters': Quarter.objects.count(),
         'total_measurement_units': Measurement_Unit.objects.count(),
+        'total_regions': Regions.objects.count(),
+        'total_districts': Districts.objects.count(),
+        'total_settlements': Settlement.objects.count(),
+        'total_lgas': LGA.objects.count(),
         
         # Recent items
         'recent_donors': list(Donor.objects.order_by('-donorID')[:5]),
@@ -467,6 +471,256 @@ def measurement_unit_delete(request, pk):
     
     context = {'unit': unit}
     return render(request, 'setup/measurement_units/measurement_unit_confirm_delete.html', context)
+
+# ============ GEOGRAPHIC CRUD OPERATIONS ============
+
+# Regions CRUD
+@login_required
+def regions_list(request):
+    regions = Regions.objects.all().order_by('region_name')
+    paginator = Paginator(regions, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'regions': page_obj,
+        'total_regions': Regions.objects.count(),
+    }
+    return render(request, 'setup/geographic/regions_list.html', context)
+
+@login_required
+def regions_create(request):
+    if request.method == 'POST':
+        form = RegionsForm(request.POST)
+        if form.is_valid():
+            region = form.save(commit=False)
+            region.loginUser = request.user
+            region.save()
+            messages.success(request, 'Region created successfully!')
+            return redirect('setup:regions_list')
+    else:
+        form = RegionsForm()
+    
+    context = {'form': form, 'title': 'Add New Region'}
+    return render(request, 'setup/geographic/regions_form.html', context)
+
+@login_required
+def regions_detail(request, pk):
+    region = get_object_or_404(Regions, pk=pk)
+    context = {'region': region}
+    return render(request, 'setup/geographic/regions_detail.html', context)
+
+@login_required
+def regions_update(request, pk):
+    region = get_object_or_404(Regions, pk=pk)
+    if request.method == 'POST':
+        form = RegionsForm(request.POST, instance=region)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Region updated successfully!')
+            return redirect('setup:regions_detail', pk=region.pk)
+    else:
+        form = RegionsForm(instance=region)
+    
+    context = {'form': form, 'region': region, 'title': 'Edit Region'}
+    return render(request, 'setup/geographic/regions_form.html', context)
+
+@login_required
+def regions_delete(request, pk):
+    region = get_object_or_404(Regions, pk=pk)
+    if request.method == 'POST':
+        region.delete()
+        messages.success(request, 'Region deleted successfully!')
+        return redirect('setup:regions_list')
+    
+    context = {'region': region}
+    return render(request, 'setup/geographic/regions_confirm_delete.html', context)
+
+# Districts CRUD
+@login_required
+def districts_list(request):
+    districts = Districts.objects.all().select_related('region_code').order_by('district_name')
+    paginator = Paginator(districts, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'districts': page_obj,
+        'total_districts': Districts.objects.count(),
+    }
+    return render(request, 'setup/geographic/districts_list.html', context)
+
+@login_required
+def districts_create(request):
+    if request.method == 'POST':
+        form = DistrictsForm(request.POST)
+        if form.is_valid():
+            district = form.save(commit=False)
+            district.loginUser = request.user
+            district.save()
+            messages.success(request, 'District created successfully!')
+            return redirect('setup:districts_list')
+    else:
+        form = DistrictsForm()
+    
+    context = {'form': form, 'title': 'Add New District'}
+    return render(request, 'setup/geographic/districts_form.html', context)
+
+@login_required
+def districts_detail(request, pk):
+    district = get_object_or_404(Districts, pk=pk)
+    context = {'district': district}
+    return render(request, 'setup/geographic/districts_detail.html', context)
+
+@login_required
+def districts_update(request, pk):
+    district = get_object_or_404(Districts, pk=pk)
+    if request.method == 'POST':
+        form = DistrictsForm(request.POST, instance=district)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'District updated successfully!')
+            return redirect('setup:districts_detail', pk=district.pk)
+    else:
+        form = DistrictsForm(instance=district)
+    
+    context = {'form': form, 'district': district, 'title': 'Edit District'}
+    return render(request, 'setup/geographic/districts_form.html', context)
+
+@login_required
+def districts_delete(request, pk):
+    district = get_object_or_404(Districts, pk=pk)
+    if request.method == 'POST':
+        district.delete()
+        messages.success(request, 'District deleted successfully!')
+        return redirect('setup:districts_list')
+    
+    context = {'district': district}
+    return render(request, 'setup/geographic/districts_confirm_delete.html', context)
+
+# Settlements CRUD
+@login_required
+def settlement_list(request):
+    settlements = Settlement.objects.all().select_related('district_code').order_by('settlement_name')
+    paginator = Paginator(settlements, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'settlements': page_obj,
+        'total_settlements': Settlement.objects.count(),
+    }
+    return render(request, 'setup/geographic/settlements_list.html', context)
+
+@login_required
+def settlement_create(request):
+    if request.method == 'POST':
+        form = SettlementForm(request.POST)
+        if form.is_valid():
+            settlement = form.save(commit=False)
+            settlement.loginUser = request.user
+            settlement.save()
+            messages.success(request, 'Settlement created successfully!')
+            return redirect('setup:settlement_list')
+    else:
+        form = SettlementForm()
+    
+    context = {'form': form, 'title': 'Add New Settlement'}
+    return render(request, 'setup/geographic/settlements_form.html', context)
+
+@login_required
+def settlement_detail(request, pk):
+    settlement = get_object_or_404(Settlement, pk=pk)
+    context = {'settlement': settlement}
+    return render(request, 'setup/geographic/settlements_detail.html', context)
+
+@login_required
+def settlement_update(request, pk):
+    settlement = get_object_or_404(Settlement, pk=pk)
+    if request.method == 'POST':
+        form = SettlementForm(request.POST, instance=settlement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Settlement updated successfully!')
+            return redirect('setup:settlement_detail', pk=settlement.pk)
+    else:
+        form = SettlementForm(instance=settlement)
+    
+    context = {'form': form, 'settlement': settlement, 'title': 'Edit Settlement'}
+    return render(request, 'setup/geographic/settlements_form.html', context)
+
+@login_required
+def settlement_delete(request, pk):
+    settlement = get_object_or_404(Settlement, pk=pk)
+    if request.method == 'POST':
+        settlement.delete()
+        messages.success(request, 'Settlement deleted successfully!')
+        return redirect('setup:settlement_list')
+    
+    context = {'settlement': settlement}
+    return render(request, 'setup/geographic/settlements_confirm_delete.html', context)
+
+# LGA CRUD
+@login_required
+def lga_list(request):
+    lgas = LGA.objects.all().select_related('region_code').order_by('lga_name')
+    paginator = Paginator(lgas, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'lgas': page_obj,
+        'total_lgas': LGA.objects.count(),
+    }
+    return render(request, 'setup/geographic/lga_list.html', context)
+
+@login_required
+def lga_create(request):
+    if request.method == 'POST':
+        form = LGAForm(request.POST)
+        if form.is_valid():
+            lga = form.save(commit=False)
+            lga.loginUser = request.user
+            lga.save()
+            messages.success(request, 'LGA created successfully!')
+            return redirect('setup:lga_list')
+    else:
+        form = LGAForm()
+    
+    context = {'form': form, 'title': 'Add New LGA'}
+    return render(request, 'setup/geographic/lga_form.html', context)
+
+@login_required
+def lga_detail(request, pk):
+    lga = get_object_or_404(LGA, pk=pk)
+    context = {'lga': lga}
+    return render(request, 'setup/geographic/lga_detail.html', context)
+
+@login_required
+def lga_update(request, pk):
+    lga = get_object_or_404(LGA, pk=pk)
+    if request.method == 'POST':
+        form = LGAForm(request.POST, instance=lga)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'LGA updated successfully!')
+            return redirect('setup:lga_detail', pk=lga.pk)
+    else:
+        form = LGAForm(instance=lga)
+    
+    context = {'form': form, 'lga': lga, 'title': 'Edit LGA'}
+    return render(request, 'setup/geographic/lga_form.html', context)
+
+@login_required
+def lga_delete(request, pk):
+    lga = get_object_or_404(LGA, pk=pk)
+    if request.method == 'POST':
+        lga.delete()
+        messages.success(request, 'LGA deleted successfully!')
+        return redirect('setup:lga_list')
+    
+    context = {'lga': lga}
+    return render(request, 'setup/geographic/lga_confirm_delete.html', context)
 
 # ============ PROJECT ACTIVITY MONITORING CRUD OPERATIONS ============
 

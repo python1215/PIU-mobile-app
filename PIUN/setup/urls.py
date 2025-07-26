@@ -56,6 +56,35 @@ urlpatterns = [
     path('measurement-units/<int:pk>/edit/', views.measurement_unit_update, name='measurement_unit_update'),
     path('measurement-units/<int:pk>/delete/', views.measurement_unit_delete, name='measurement_unit_delete'),
     
+    # Geographic URLs
+    # Regions
+    path('regions/', views.regions_list, name='regions_list'),
+    path('regions/add/', views.regions_create, name='regions_create'),
+    path('regions/<str:pk>/', views.regions_detail, name='regions_detail'),
+    path('regions/<str:pk>/edit/', views.regions_update, name='regions_update'),
+    path('regions/<str:pk>/delete/', views.regions_delete, name='regions_delete'),
+    
+    # Districts
+    path('districts/', views.districts_list, name='districts_list'),
+    path('districts/add/', views.districts_create, name='districts_create'),
+    path('districts/<str:pk>/', views.districts_detail, name='districts_detail'),
+    path('districts/<str:pk>/edit/', views.districts_update, name='districts_update'),
+    path('districts/<str:pk>/delete/', views.districts_delete, name='districts_delete'),
+    
+    # Settlements
+    path('settlements/', views.settlement_list, name='settlement_list'),
+    path('settlements/add/', views.settlement_create, name='settlement_create'),
+    path('settlements/<str:pk>/', views.settlement_detail, name='settlement_detail'),
+    path('settlements/<str:pk>/edit/', views.settlement_update, name='settlement_update'),
+    path('settlements/<str:pk>/delete/', views.settlement_delete, name='settlement_delete'),
+    
+    # LGAs
+    path('lgas/', views.lga_list, name='lga_list'),
+    path('lgas/add/', views.lga_create, name='lga_create'),
+    path('lgas/<str:pk>/', views.lga_detail, name='lga_detail'),
+    path('lgas/<str:pk>/edit/', views.lga_update, name='lga_update'),
+    path('lgas/<str:pk>/delete/', views.lga_delete, name='lga_delete'),
+
     # Project Activity Monitoring URLs
     path('project-activity-monitoring/', views.project_activity_monitoring_list, name='project_activity_monitoring_list'),
     path('project-activity-monitoring/add/', views.project_activity_monitoring_create, name='project_activity_monitoring_create'),

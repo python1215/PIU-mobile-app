@@ -1,0 +1,130 @@
+{% extends "setup/base.html" %}
+{% load static %}
+
+{% block title %}LGAs - System Setup{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-pin-map me-2" style="color: #6f42c1;"></i>LGAs Management
+                    </h1>
+                    <p class="text-muted mb-0">Manage Local Government Areas</p>
+                </div>
+                <div>
+                    <a href="{% url 'setup:lga_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add New LGA
+                    </a>
+                    <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Setup
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_lgas }}</h3>
+                            <p class="mb-0 small">Total LGAs</p>
+                        </div>
+                        <i class="bi bi-pin-map fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LGAs Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">LGAs List</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>LGA Code</th>
+                            <th>LGA Name</th>
+                            <th>Region</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lga in lgas %}
+                        <tr>
+                            <td>{{ lga.lga_code }}</td>
+                            <td>{{ lga.lga_name }}</td>
+                            <td>{{ lga.region_code.region_name|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'setup:lga_detail' lga.pk %}" class="btn btn-sm btn-outline-info" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'setup:lga_update' lga.pk %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'setup:lga_delete' lga.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No LGAs found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if lgas.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if lgas.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ lgas.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in lgas.paginator.page_range %}
+                        {% if lgas.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if lgas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ lgas.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+    border: none;
+}
+</style>
+{% endblock %}

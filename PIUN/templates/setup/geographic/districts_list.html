@@ -1,0 +1,132 @@
+{% extends "setup/base.html" %}
+{% load static %}
+
+{% block title %}Districts - System Setup{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-building me-2" style="color: #6f42c1;"></i>Districts Management
+                    </h1>
+                    <p class="text-muted mb-0">Manage district areas</p>
+                </div>
+                <div>
+                    <a href="{% url 'setup:districts_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add New District
+                    </a>
+                    <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Setup
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_districts }}</h3>
+                            <p class="mb-0 small">Total Districts</p>
+                        </div>
+                        <i class="bi bi-building fs-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Districts Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Districts List</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>District Code</th>
+                            <th>District Name</th>
+                            <th>Region</th>
+                            <th>LGA</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for district in districts %}
+                        <tr>
+                            <td>{{ district.district_code }}</td>
+                            <td>{{ district.district_name }}</td>
+                            <td>{{ district.region_code.region_name|default:"N/A" }}</td>
+                            <td>{{ district.lga_code.lga_name|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'setup:districts_detail' district.pk %}" class="btn btn-sm btn-outline-info" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'setup:districts_update' district.pk %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'setup:districts_delete' district.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No districts found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if districts.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if districts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ districts.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in districts.paginator.page_range %}
+                        {% if districts.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if districts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ districts.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    background: linear-gradient(135deg, #6f42c1 0%, #8b5fbf 100%);
+    border: none;
+}
+</style>
+{% endblock %}
