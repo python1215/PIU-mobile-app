@@ -1,6 +1,7 @@
 from django.db import models
-from PIU_Financial_mgt .models import Project, Donor
-from setup.models import Regions, Districts,  Settlement, YEAR, Access
+from PIU_Financial_mgt.models import Project, Donor
+from setup.models import Regions, Districts, YEAR, Access
+from social_and_env.models import Settlement
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
