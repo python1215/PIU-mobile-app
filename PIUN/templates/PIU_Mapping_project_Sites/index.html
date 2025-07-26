@@ -4,11 +4,12 @@
 {% block title %}Project Site Mapping - NAWEC PIU{% endblock %}
 
 {% block extra_css %}
-<!-- Leaflet CSS with fallback -->
+<!-- Leaflet CSS with multiple fallbacks -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-      crossorigin="" 
-      onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';" />
+      crossorigin="" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .map-container {
         width: 100%;
@@ -161,11 +162,53 @@
     </div>
 </div>
 
-<!-- Leaflet JavaScript with fallback -->
+<!-- Leaflet JavaScript with multiple fallbacks -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
         crossorigin=""
-        onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';"></script>
+        onerror="loadLeafletFallback()"></script>
+<script>
+function loadLeafletFallback() {
+    console.log('Loading Leaflet fallback...');
+    const fallbacks = [
+        'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js',
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'
+    ];
+    
+    let fallbackIndex = 0;
+    function tryNextFallback() {
+        if (fallbackIndex < fallbacks.length) {
+            const script = document.createElement('script');
+            script.src = fallbacks[fallbackIndex];
+            script.onerror = tryNextFallback;
+            script.onload = function() {
+                console.log('Leaflet loaded from fallback:', fallbacks[fallbackIndex]);
+                initializeMapNow();
+            };
+            document.head.appendChild(script);
+            fallbackIndex++;
+        } else {
+            console.error('All Leaflet fallbacks failed');
+            showMapError();
+        }
+    }
+    tryNextFallback();
+}
+
+function showMapError() {
+    document.getElementById('debug-info').innerHTML = '<small><i class="bi bi-exclamation-triangle me-1"></i>Map library failed to load. Please refresh the page.</small>';
+    document.getElementById('debug-info').className = 'alert alert-danger';
+    document.getElementById('project-map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 500px; background: #f8f9fa; border: 2px dashed #ddd; border-radius: 6px;"><div class="text-center"><i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i><h5>Map Loading Error</h5><p class="text-muted">Unable to load map libraries. Please refresh the page.</p><button onclick="location.reload()" class="btn btn-primary">Refresh Page</button></div></div>';
+}
+
+function initializeMapNow() {
+    if (typeof L !== 'undefined') {
+        initializeProjectMap();
+    } else {
+        setTimeout(initializeMapNow, 100);
+    }
+}
+</script>
 
 <script>
 function refreshMap() {
@@ -192,7 +235,7 @@ function forceOfflineMap() {
 }
 
 // Initialize the project map with real data
-document.addEventListener('DOMContentLoaded', function() {
+function initializeProjectMap() {
     console.log('DOM loaded, starting map initialization...');
     
     // Check if Leaflet is loaded
@@ -660,6 +703,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show fallback message
         document.getElementById('project-map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border: 2px dashed #ddd; border-radius: 6px;"><div class="text-center"><i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i><h5>Map Loading Error</h5><p class="text-muted">Unable to load the interactive map. Please refresh the page or try again later.</p><button onclick="location.reload()" class="btn btn-primary">Refresh Page</button></div></div>';
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof L !== 'undefined') {
+        initializeProjectMap();
+    } else {
+        // Wait for Leaflet to load
+        setTimeout(function() {
+            if (typeof L !== 'undefined') {
+                initializeProjectMap();
+            } else {
+                console.log('Leaflet still not loaded, trying manual initialization...');
+                initializeMapNow();
+            }
+        }, 500);
     }
 });
 
