@@ -57,8 +57,7 @@ def working_map(request):
     for community in project_communities:
         try:
             if community.Latitude and community.Longitude:
-                projects = community.project.all()
-                project_names = [str(p.project) for p in projects]
+                project_names = [str(community.project.project)] if community.project else ['No Project']
                 
                 # Check if this is the focused location from URL parameters
                 is_focused = False
@@ -119,8 +118,7 @@ def simple_map(request):
     for community in project_communities:
         try:
             if community.Latitude and community.Longitude:
-                projects = community.project.all()
-                project_names = [str(p.project) for p in projects]
+                project_names = [str(community.project.project)] if community.project else ['No Project']
                 
                 project_data.append({
                     'id': community.id,
@@ -325,7 +323,7 @@ def mapping_detail(request, pk):
     
     context = {
         'mapping': mapping,
-        'projects': mapping.project.all(),
+        'projects': [mapping.project] if mapping.project else [],
         'donors': mapping.donor.all(),
     }
     
@@ -367,7 +365,7 @@ def export_mappings_excel(mappings_queryset):
     
     # Write data
     for row, mapping in enumerate(mappings_queryset, 2):
-        projects = ', '.join([str(p.project) for p in mapping.project.all()])
+        projects = str(mapping.project.project) if mapping.project else 'No Project'
         donors = ', '.join([str(d.name) for d in mapping.donor.all()])
         connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 2)
         
@@ -455,7 +453,7 @@ def export_mappings_pdf(mappings_queryset):
     ]
     
     for mapping in mappings_queryset:
-        projects = ', '.join([str(p.project)[:20] + '...' if len(str(p.project)) > 20 else str(p.project) for p in mapping.project.all()])
+        projects = str(mapping.project.project)[:20] + '...' if mapping.project and len(str(mapping.project.project)) > 20 else str(mapping.project.project) if mapping.project else 'No Project'
         connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 1)
         
         table_data.append([

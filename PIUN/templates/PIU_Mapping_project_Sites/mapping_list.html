@@ -246,17 +246,10 @@
                                         <td>{{ mapping.district.district_name|default:"N/A" }}</td>
                                         <td>{{ mapping.settlement.settlement_name|default:"N/A" }}</td>
                                         <td>
-                                            {% if mapping.project.all %}
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    {% for project in mapping.project.all|slice:":3" %}
-                                                        <span class="badge badge-primary">{{ project.project|truncatechars:20 }}</span>
-                                                    {% endfor %}
-                                                    {% if mapping.project.count > 3 %}
-                                                        <span class="badge badge-secondary">+{{ mapping.project.count|add:"-3" }} more</span>
-                                                    {% endif %}
-                                                </div>
+                                            {% if mapping.project %}
+                                                <span class="badge badge-primary">{{ mapping.project.project|truncatechars:20 }}</span>
                                             {% else %}
-                                                <span class="text-muted">No projects</span>
+                                                <span class="text-muted">No project</span>
                                             {% endif %}
                                         </td>
                                         <td>
