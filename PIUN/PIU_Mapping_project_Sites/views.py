@@ -452,6 +452,15 @@ def export_mappings_pdf(mappings_queryset):
     elements.append(export_info)
     elements.append(Spacer(1, 15))
     
+    # Create paragraph style for table data
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=6,
+        alignment=1,  # Center alignment
+        leading=7,  # Line spacing
+    )
+    
     # Table data with all fields
     table_data = [
         ['Region', 'District', 'Settlement', 'Project', 'Donors', 'Year', 'Access Type', 
@@ -465,20 +474,21 @@ def export_mappings_pdf(mappings_queryset):
             donors += f' +{mapping.donor.count()-2}'
         connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 1)
         
+        # Wrap text content in Paragraph objects for proper wrapping
         table_data.append([
-            mapping.region.region_name[:12] if mapping.region else '',
-            mapping.district.district_name[:12] if mapping.district else '',
-            mapping.settlement.settlement_name[:15] if mapping.settlement else '',
-            projects,  # Full project name without truncation
-            donors[:20] + '...' if len(donors) > 20 else donors,
-            mapping.profile_year.profile_year if mapping.profile_year else '',
-            mapping.access.access_type[:10] if mapping.access else '',
-            str(mapping.Total_No_of_Households or 0),
-            str(mapping.no_of_connected_household or 0),
-            str(mapping.no_of_customer_connections or 0),
-            f"{connection_rate}%",
-            f"{mapping.Latitude:.4f}" if mapping.Latitude else '',
-            f"{mapping.Longitude:.4f}" if mapping.Longitude else ''
+            Paragraph(mapping.region.region_name if mapping.region else '', cell_style),
+            Paragraph(mapping.district.district_name if mapping.district else '', cell_style),
+            Paragraph(mapping.settlement.settlement_name if mapping.settlement else '', cell_style),
+            Paragraph(projects, cell_style),  # Full project name with wrapping
+            Paragraph(donors, cell_style),
+            Paragraph(mapping.profile_year.profile_year if mapping.profile_year else '', cell_style),
+            Paragraph(mapping.access.access_type if mapping.access else '', cell_style),
+            Paragraph(str(mapping.Total_No_of_Households or 0), cell_style),
+            Paragraph(str(mapping.no_of_connected_household or 0), cell_style),
+            Paragraph(str(mapping.no_of_customer_connections or 0), cell_style),
+            Paragraph(f"{connection_rate}%", cell_style),
+            Paragraph(f"{mapping.Latitude:.4f}" if mapping.Latitude else '', cell_style),
+            Paragraph(f"{mapping.Longitude:.4f}" if mapping.Longitude else '', cell_style)
         ])
     
     # Create table with wider project column to accommodate full project names
@@ -494,7 +504,8 @@ def export_mappings_pdf(mappings_queryset):
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 6),  # Reduced data font size
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Changed to TOP for better text wrapping
+        ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),  # Enable word wrapping
     ]))
     
     elements.append(table)
