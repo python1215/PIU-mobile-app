@@ -188,20 +188,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to make element draggable
     function makeDraggable(element) {
+        if (!element) return;
+        
         let isDragging = false;
         let startX, startY, startLeft, startTop;
         
         const header = element.querySelector('.legend-header');
+        if (!header) return;
         
         header.addEventListener('mousedown', function(e) {
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
-            startLeft = parseInt(element.style.left || getComputedStyle(element).left);
-            startTop = parseInt(element.style.top || getComputedStyle(element).top);
+            
+            const rect = element.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
             
             element.style.cursor = 'grabbing';
             header.style.cursor = 'grabbing';
+            element.style.position = 'fixed';
+            element.style.zIndex = '9999';
         });
         
         document.addEventListener('mousemove', function(e) {
@@ -212,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             element.style.left = (startLeft + dx) + 'px';
             element.style.top = (startTop + dy) + 'px';
-            element.style.right = 'auto'; // Remove right positioning
+            element.style.right = 'auto';
         });
         
         document.addEventListener('mouseup', function() {
@@ -224,8 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initialize draggable legend panel
-    makeDraggable(document.getElementById('legend-panel'));
+    // Initialize draggable legend panel after DOM is ready
+    setTimeout(function() {
+        makeDraggable(document.getElementById('legend-panel'));
+    }, 100);
     
     // Create checkboxes and markers for each project
     Array.from(allProjects).forEach(function(project) {
