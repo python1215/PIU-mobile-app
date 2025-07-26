@@ -117,7 +117,12 @@
                             <!-- Coordinates -->
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude</label>
-                                {{ form.Latitude|add_class:"form-control" }}
+                                <div class="input-group">
+                                    {{ form.Latitude|add_class:"form-control" }}
+                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>Current Location
+                                    </button>
+                                </div>
                                 {% if form.Latitude.errors %}
                                     <div class="text-danger small">{{ form.Latitude.errors }}</div>
                                 {% endif %}
@@ -237,6 +242,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Geolocation function for current location
+    window.getCurrentLocation = function() {
+        const locationBtn = document.getElementById('locationBtn');
+        const latitudeField = document.getElementById('id_Latitude');
+        const longitudeField = document.getElementById('id_Longitude');
+        
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by this browser.');
+            return;
+        }
+        
+        // Show loading state
+        locationBtn.disabled = true;
+        locationBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Getting Location...';
+        
+        // Get current position
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success - populate the fields
+                const latitude = position.coords.latitude.toFixed(6);
+                const longitude = position.coords.longitude.toFixed(6);
+                
+                latitudeField.value = latitude;
+                longitudeField.value = longitude;
+                
+                // Reset button state
+                locationBtn.disabled = false;
+                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+                successMsg.innerHTML = `
+                    <i class="bi bi-check-circle me-1"></i>
+                    Location detected: ${latitude}, ${longitude}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                // Insert after longitude field
+                longitudeField.parentNode.parentNode.appendChild(successMsg);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (successMsg.parentNode) {
+                        successMsg.remove();
+                    }
+                }, 5000);
+            },
+            function(error) {
+                // Error handling
+                let errorMessage = 'Unable to get your location. ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Location access was denied.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Location request timed out.';
+                        break;
+                    default:
+                        errorMessage += 'An unknown error occurred.';
+                        break;
+                }
+                
+                alert(errorMessage);
+                
+                // Reset button state
+                locationBtn.disabled = false;
+                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    };
+
     // Handle form submission for popup mode
     {% if from_popup %}
     document.getElementById('mappingForm').addEventListener('submit', function(e) {
@@ -307,4 +393,27 @@ function closePopupForm() {
     }
 }
 </script>
+
+<style>
+/* Spinning animation for loading state */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Ensure input group styling */
+.input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+</style>
 {% endblock %}
