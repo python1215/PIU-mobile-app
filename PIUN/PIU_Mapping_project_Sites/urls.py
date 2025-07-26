@@ -7,6 +7,7 @@ app_name = 'PIU_Mapping_project_Sites'
 urlpatterns = [
     path('', views.working_map, name='mapping-dashboard'),
     path('index/', views.working_map, name='index'),
+    path('working-map/', views.working_map, name='working_map'),  # Added missing working_map pattern
     path('complex/', views.index, name='complex-index'),
     path('leafletmap/', views.indexl, name='leafletmap'),
     path('offline-map/', views.offline_map, name='offline-map'),
