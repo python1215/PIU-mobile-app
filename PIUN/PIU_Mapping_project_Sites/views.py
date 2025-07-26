@@ -570,15 +570,15 @@ def delete_mapping(request, pk):
 def load_districts(request):
     """Load districts based on selected region"""
     region_id = request.GET.get('region_id')
-    districts = Districts.objects.filter(region_code=region_id).order_by('district_name')
-    return JsonResponse({'districts': [{'id': d.district_code, 'name': d.district_name} for d in districts]})
+    districts = Districts.objects.filter(region_code_id=region_id).order_by('district_name')
+    return JsonResponse({'districts': [{'district_code': d.district_code, 'district_name': d.district_name} for d in districts]})
 
 
 def load_settlement(request):
     """Load settlements based on selected district"""
     district_id = request.GET.get('district_id')
-    settlements = Settlement.objects.filter(district_code=district_id).order_by('settlement_name')
-    return JsonResponse({'settlements': [{'id': s.settlement_code, 'name': s.settlement_name} for s in settlements]})
+    settlements = Settlement.objects.filter(district_code_id=district_id).order_by('settlement_name')
+    return JsonResponse({'settlements': [{'settlement_code': s.settlement_code, 'settlement_name': s.settlement_name} for s in settlements]})
 
 
 # Placeholder functions for compatibility
