@@ -290,11 +290,11 @@
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {% if mapping.Latitude and mapping.Longitude %}
-                                                    <a href="{% url 'PIU_Mapping_project_Sites:working_map' %}?lat={{ mapping.Latitude }}&lng={{ mapping.Longitude }}&mappingId={{ mapping.pk }}&zoom=16" 
-                                                       target="_blank" class="btn btn-outline-primary btn-sm" 
-                                                       title="View on Map">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                            onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }}, {{ mapping.pk }})"
+                                                            title="View on Map">
                                                         <i class="bi bi-geo-alt"></i>
-                                                    </a>
+                                                    </button>
                                                 {% endif %}
 
                                                 <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" 
@@ -374,72 +374,16 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="openFullMap()">
-                    <i class="bi bi-arrows-fullscreen"></i> View Full Map
-                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// View on Map functionality
-let quickMap;
-let currentMapping = null;
-
 function viewOnMap(lat, lng, mappingId) {
-    currentMapping = {lat: lat, lng: lng, id: mappingId};
-    
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('quickMapModal'));
-    modal.show();
-    
-    // Initialize map when modal is shown
-    document.getElementById('quickMapModal').addEventListener('shown.bs.modal', function() {
-        if (!quickMap) {
-            initQuickMap();
-        }
-        showLocationOnMap(lat, lng);
-    });
-}
-
-function initQuickMap() {
-    quickMap = L.map('quickLocationMap').setView([13.4667, -15.3100], 8);
-    
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(quickMap);
-}
-
-function showLocationOnMap(lat, lng) {
-    if (quickMap) {
-        // Clear existing markers
-        quickMap.eachLayer(function(layer) {
-            if (layer instanceof L.Marker) {
-                quickMap.removeLayer(layer);
-            }
-        });
-        
-        // Add new marker
-        const marker = L.marker([lat, lng]).addTo(quickMap);
-        marker.bindPopup(`<strong>Selected Location</strong><br>Lat: ${lat}<br>Lng: ${lng}`).openPopup();
-        
-        // Center map on location
-        quickMap.setView([lat, lng], 14);
-        
-        // Resize map to ensure proper display
-        setTimeout(() => {
-            quickMap.invalidateSize();
-        }, 100);
-    }
-}
-
-function openFullMap() {
-    if (currentMapping) {
-        const url = `{% url 'PIU_Mapping_project_Sites:working_map' %}?lat=${currentMapping.lat}&lng=${currentMapping.lng}&zoom=14&mappingId=${currentMapping.id}`;
-        window.open(url, '_blank');
-    }
+    // Navigate to the working map with focus parameters in the same tab
+    var mapUrl = "{% url 'PIU_Mapping_project_Sites:working_map' %}?lat=" + lat + "&lng=" + lng + "&mappingId=" + mappingId + "&zoom=16";
+    window.location.href = mapUrl;
 }
 
 // Filter form enhancements
