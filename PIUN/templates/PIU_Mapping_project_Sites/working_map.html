@@ -30,6 +30,21 @@
     </div>
 </div>
 
+<!-- Draggable Legend Panel -->
+<div id="legend-panel" class="legend-panel">
+    <div class="legend-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;">Color Legend</h6>
+            <span style="font-size: 10px; color: #999;">⋮⋮ Drag</span>
+        </div>
+    </div>
+    <div class="legend-content">
+        <div id="legend-items" style="font-size: 11px; line-height: 1.6;">
+            <!-- Legend items will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -57,6 +72,40 @@
     }
     .popup-header:hover {
         background: #e9ecef !important;
+    }
+    
+    /* Legend panel styles */
+    .legend-panel {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 200px;
+        max-width: 250px;
+        cursor: move;
+    }
+    
+    .legend-header {
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        cursor: move;
+        user-select: none;
+    }
+    
+    .legend-header:hover {
+        background: #e9ecef;
+    }
+    
+    .legend-content {
+        padding: 10px 12px;
+        max-height: 300px;
+        overflow-y: auto;
     }
 </style>
 
@@ -137,19 +186,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add separator
     layerControls.appendChild(document.createElement('hr'));
     
-    // Create legend section
-    var legendDiv = document.createElement('div');
-    legendDiv.innerHTML = `
-        <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
-            <h6 style="margin-bottom: 8px; font-size: 12px; color: #666; font-weight: bold;">Color Legend</h6>
-            <div id="legend-items" style="font-size: 11px; line-height: 1.6;">
-                <!-- Legend items will be populated below -->
-            </div>
-        </div>
-    `;
+    // Function to make element draggable
+    function makeDraggable(element) {
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        const header = element.querySelector('.legend-header');
+        
+        header.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(element.style.left || getComputedStyle(element).left);
+            startTop = parseInt(element.style.top || getComputedStyle(element).top);
+            
+            element.style.cursor = 'grabbing';
+            header.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            element.style.left = (startLeft + dx) + 'px';
+            element.style.top = (startTop + dy) + 'px';
+            element.style.right = 'auto'; // Remove right positioning
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                element.style.cursor = 'move';
+                header.style.cursor = 'move';
+            }
+        });
+    }
     
-    // Append legend div to layer controls
-    layerControls.appendChild(legendDiv);
+    // Initialize draggable legend panel
+    makeDraggable(document.getElementById('legend-panel'));
     
     // Create checkboxes and markers for each project
     Array.from(allProjects).forEach(function(project) {
@@ -171,13 +247,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         layerControls.appendChild(projectDiv);
         
-        // Add to legend
+        // Add to separate legend panel
         var legendItem = document.createElement('div');
-        legendItem.style.marginBottom = '4px';
+        legendItem.style.marginBottom = '6px';
         legendItem.innerHTML = `
             <div style="display: flex; align-items: center;">
                 <div style="width: 18px; height: 18px; background-color: ${color}; border-radius: 50%; margin-right: 8px; flex-shrink: 0; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-                <span style="font-size: 10px; color: #555; font-weight: 500;">${project}</span>
+                <span style="font-size: 11px; color: #333; font-weight: 500;">${project}</span>
             </div>
         `;
         document.getElementById('legend-items').appendChild(legendItem);
