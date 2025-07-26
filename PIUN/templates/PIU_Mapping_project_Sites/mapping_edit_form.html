@@ -13,32 +13,26 @@
                 <div>
                     <h1 class="h3 mb-2" style="color: white;">
                         <i class="bi bi-pencil-square me-2"></i>
-                        {{ title }}
+                        Edit Project Mapping
                     </h1>
-                    <p class="text-muted">
-                        Edit project site mapping details and coordinates
-                    </p>
+                    <p class="text-muted">Update project site mapping information</p>
                 </div>
                 <div>
-                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary me-2">
+                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Back to List
-                    </a>
-                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-detail' mapping.pk %}" class="btn btn-info">
-                        <i class="bi bi-eye"></i> View Details
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="row g-4">
-        <!-- Edit Form Section -->
+    <!-- Form Section -->
+    <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold" style="color: white;">
-                        <i class="bi bi-pencil-square me-2"></i>Edit Mapping Information
+                        <i class="bi bi-form me-2"></i>Mapping Information
                     </h6>
                 </div>
                 <div class="card-body">
@@ -56,256 +50,196 @@
                         {% endfor %}
                     {% endif %}
 
-                    <form method="post" id="mappingEditForm" novalidate>
+                    <form method="post" id="mappingEditForm">
                         {% csrf_token %}
                         {% if from_popup %}
                             <input type="hidden" name="from_popup" value="1">
                         {% endif %}
                         
-                        <!-- Project & Year Information -->
-                        <div class="row g-3 mb-4">
+                        <!-- Project Information -->
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-primary ps-3">
-                                    <label for="{{ form.project.id_for_label }}" class="form-label text-muted mb-1">Project *</label>
-                                    {{ form.project|add_class:"form-select fw-bold" }}
-                                    {% if form.project.errors %}
-                                        <div class="text-danger small mt-1">{{ form.project.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.project.id_for_label }}" class="form-label">Project *</label>
+                                {{ form.project|add_class:"form-select" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small">{{ form.project.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-info ps-3">
-                                    <label for="{{ form.profile_year.id_for_label }}" class="form-label text-muted mb-1">Profile Year *</label>
-                                    {{ form.profile_year|add_class:"form-select fw-bold" }}
-                                    {% if form.profile_year.errors %}
-                                        <div class="text-danger small mt-1">{{ form.profile_year.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.profile_year.id_for_label }}" class="form-label">Profile Year *</label>
+                                {{ form.profile_year|add_class:"form-select" }}
+                                {% if form.profile_year.errors %}
+                                    <div class="text-danger small">{{ form.profile_year.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <!-- Location Information -->
-                        <div class="row g-3 mb-4">
+                        <!-- Location -->
+                        <div class="row mb-3">
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-primary ps-3">
-                                    <label for="{{ form.region.id_for_label }}" class="form-label text-muted mb-1">Region *</label>
-                                    {{ form.region|add_class:"form-select fw-bold" }}
-                                    {% if form.region.errors %}
-                                        <div class="text-danger small mt-1">{{ form.region.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.region.id_for_label }}" class="form-label">Region *</label>
+                                {{ form.region|add_class:"form-select" }}
+                                {% if form.region.errors %}
+                                    <div class="text-danger small">{{ form.region.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-success ps-3">
-                                    <label for="{{ form.district.id_for_label }}" class="form-label text-muted mb-1">District *</label>
-                                    {{ form.district|add_class:"form-select fw-bold" }}
-                                    {% if form.district.errors %}
-                                        <div class="text-danger small mt-1">{{ form.district.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.district.id_for_label }}" class="form-label">District *</label>
+                                {{ form.district|add_class:"form-select" }}
+                                {% if form.district.errors %}
+                                    <div class="text-danger small">{{ form.district.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-warning ps-3">
-                                    <label for="{{ form.settlement.id_for_label }}" class="form-label text-muted mb-1">Settlement *</label>
-                                    {{ form.settlement|add_class:"form-select fw-bold" }}
-                                    {% if form.settlement.errors %}
-                                        <div class="text-danger small mt-1">{{ form.settlement.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.settlement.id_for_label }}" class="form-label">Settlement *</label>
+                                {{ form.settlement|add_class:"form-select" }}
+                                {% if form.settlement.errors %}
+                                    <div class="text-danger small">{{ form.settlement.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
                         <!-- Coordinates -->
-                        <div class="row g-3 mb-4">
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-danger ps-3">
-                                    <label for="{{ form.Latitude.id_for_label }}" class="form-label text-muted mb-1">Latitude *</label>
-                                    <div class="input-group">
-                                        {{ form.Latitude|add_class:"form-control fw-bold" }}
-                                        <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn" title="Get current GPS coordinates">
-                                            <i class="bi bi-geo-alt-fill"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="showLocationHelp()" title="Location help">
-                                            <i class="bi bi-question-circle"></i>
-                                        </button>
-                                    </div>
-                                    {% if form.Latitude.errors %}
-                                        <div class="text-danger small mt-1">{{ form.Latitude.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted">Decimal degrees (e.g., 13.4567)</small>
+                                <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude *</label>
+                                <div class="input-group">
+                                    {{ form.Latitude|add_class:"form-control" }}
+                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" title="Get current location">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </button>
                                 </div>
+                                {% if form.Latitude.errors %}
+                                    <div class="text-danger small">{{ form.Latitude.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-danger ps-3">
-                                    <label for="{{ form.Longitude.id_for_label }}" class="form-label text-muted mb-1">Longitude *</label>
-                                    {{ form.Longitude|add_class:"form-control fw-bold" }}
-                                    {% if form.Longitude.errors %}
-                                        <div class="text-danger small mt-1">{{ form.Longitude.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted">Decimal degrees (e.g., -15.3101)</small>
-                                </div>
+                                <label for="{{ form.Longitude.id_for_label }}" class="form-label">Longitude *</label>
+                                {{ form.Longitude|add_class:"form-control" }}
+                                {% if form.Longitude.errors %}
+                                    <div class="text-danger small">{{ form.Longitude.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <!-- Household Statistics -->
-                        <div class="row g-3 mb-4">
+                        <!-- Household Data -->
+                        <div class="row mb-3">
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-secondary ps-3">
-                                    <label for="{{ form.Total_No_of_Households.id_for_label }}" class="form-label text-muted mb-1">Total Households *</label>
-                                    {{ form.Total_No_of_Households|add_class:"form-control fw-bold" }}
-                                    {% if form.Total_No_of_Households.errors %}
-                                        <div class="text-danger small mt-1">{{ form.Total_No_of_Households.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.Total_No_of_Households.id_for_label }}" class="form-label">Total Households *</label>
+                                {{ form.Total_No_of_Households|add_class:"form-control" }}
+                                {% if form.Total_No_of_Households.errors %}
+                                    <div class="text-danger small">{{ form.Total_No_of_Households.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-secondary ps-3">
-                                    <label for="{{ form.no_of_customer_connections.id_for_label }}" class="form-label text-muted mb-1">Customer Connections *</label>
-                                    {{ form.no_of_customer_connections|add_class:"form-control fw-bold" }}
-                                    {% if form.no_of_customer_connections.errors %}
-                                        <div class="text-danger small mt-1">{{ form.no_of_customer_connections.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.no_of_customer_connections.id_for_label }}" class="form-label">Customer Connections *</label>
+                                {{ form.no_of_customer_connections|add_class:"form-control" }}
+                                {% if form.no_of_customer_connections.errors %}
+                                    <div class="text-danger small">{{ form.no_of_customer_connections.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-4">
-                                <div class="border-start border-3 border-secondary ps-3">
-                                    <label for="{{ form.no_of_connected_household.id_for_label }}" class="form-label text-muted mb-1">Connected Households *</label>
-                                    {{ form.no_of_connected_household|add_class:"form-control fw-bold" }}
-                                    {% if form.no_of_connected_household.errors %}
-                                        <div class="text-danger small mt-1">{{ form.no_of_connected_household.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.no_of_connected_household.id_for_label }}" class="form-label">Connected Households *</label>
+                                {{ form.no_of_connected_household|add_class:"form-control" }}
+                                {% if form.no_of_connected_household.errors %}
+                                    <div class="text-danger small">{{ form.no_of_connected_household.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <!-- Access Information -->
-                        <div class="row g-3 mb-4">
+                        <!-- Access Type -->
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-success ps-3">
-                                    <label for="{{ form.access.id_for_label }}" class="form-label text-muted mb-1">Access Type *</label>
-                                    {{ form.access|add_class:"form-select fw-bold" }}
-                                    {% if form.access.errors %}
-                                        <div class="text-danger small mt-1">{{ form.access.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.access.id_for_label }}" class="form-label">Access Type *</label>
+                                {{ form.access|add_class:"form-select" }}
+                                {% if form.access.errors %}
+                                    <div class="text-danger small">{{ form.access.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-info ps-3">
-                                    <label for="{{ form.donor.id_for_label }}" class="form-label text-muted mb-1">Donor(s)</label>
-                                    {{ form.donor|add_class:"form-select fw-bold" }}
-                                    <small class="text-muted">Hold Ctrl/Cmd for multiple</small>
-                                    {% if form.donor.errors %}
-                                        <div class="text-danger small mt-1">{{ form.donor.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.donor.id_for_label }}" class="form-label">Donor(s)</label>
+                                {{ form.donor|add_class:"form-select" }}
+                                {% if form.donor.errors %}
+                                    <div class="text-danger small">{{ form.donor.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
                         <!-- Optional Fields -->
-                        <div class="row g-3 mb-4">
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-light ps-3">
-                                    <label for="{{ form.households_with_electricity_access.id_for_label }}" class="form-label text-muted mb-1">Electricity Access</label>
-                                    {{ form.households_with_electricity_access|add_class:"form-control" }}
-                                    {% if form.households_with_electricity_access.errors %}
-                                        <div class="text-danger small mt-1">{{ form.households_with_electricity_access.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.households_with_electricity_access.id_for_label }}" class="form-label">Electricity Access</label>
+                                {{ form.households_with_electricity_access|add_class:"form-control" }}
+                                {% if form.households_with_electricity_access.errors %}
+                                    <div class="text-danger small">{{ form.households_with_electricity_access.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <div class="border-start border-3 border-light ps-3">
-                                    <label for="{{ form.households_with_water_access.id_for_label }}" class="form-label text-muted mb-1">Water Access</label>
-                                    {{ form.households_with_water_access|add_class:"form-control" }}
-                                    {% if form.households_with_water_access.errors %}
-                                        <div class="text-danger small mt-1">{{ form.households_with_water_access.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                <label for="{{ form.households_with_water_access.id_for_label }}" class="form-label">Water Access</label>
+                                {{ form.households_with_water_access|add_class:"form-control" }}
+                                {% if form.households_with_water_access.errors %}
+                                    <div class="text-danger small">{{ form.households_with_water_access.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                            <div>
-                                <a href="{% url 'PIU_Mapping_project_Sites:mapping-detail' mapping.pk %}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-eye me-1"></i>View Details
-                                </a>
-                            </div>
-                            <div>
-                                <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
-                                    <i class="bi bi-arrow-clockwise me-1"></i>Reset
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle me-1"></i>Update Mapping
-                                </button>
-                            </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>Update Mapping
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-
-        <!-- Quick Actions Sidebar -->
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold" style="color: white;">
-                        <i class="bi bi-lightning-fill me-2"></i>Quick Actions
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-detail' mapping.pk %}" class="btn btn-outline-primary">
-                            <i class="bi bi-eye me-2"></i>View Full Details
-                        </a>
-                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-list me-2"></i>Back to Mapping List
-                        </a>
-                        <a href="{% url 'PIU_Mapping_project_Sites:working_map' %}?lat={{ mapping.Latitude }}&lng={{ mapping.Longitude }}&zoom=16&mappingId={{ mapping.pk }}" class="btn btn-outline-success" target="_blank">
-                            <i class="bi bi-geo-alt me-2"></i>View on Interactive Map
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Current Values Display -->
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold" style="color: white;">
-                        <i class="bi bi-info-circle me-2"></i>Current Values
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="border-start border-3 border-primary ps-3">
-                            <h6 class="text-muted mb-1">Settlement</h6>
-                            <p class="fw-bold mb-0">{{ mapping.settlement.settlement_name }}</p>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="border-start border-3 border-success ps-3">
-                            <h6 class="text-muted mb-1">Location</h6>
-                            <p class="fw-bold mb-0">{{ mapping.region.region_name }}</p>
-                            <small class="text-muted">{{ mapping.district.district_name }}</small>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="border-start border-3 border-danger ps-3">
-                            <h6 class="text-muted mb-1">Coordinates</h6>
-                            <p class="fw-bold mb-0">{{ mapping.Latitude }}, {{ mapping.Longitude }}</p>
-                        </div>
-                    </div>
-                    <div class="mb-0">
-                        <div class="border-start border-3 border-warning ps-3">
-                            <h6 class="text-muted mb-1">Households</h6>
-                            <p class="fw-bold mb-0">{{ mapping.Total_No_of_Households }} Total</p>
-                            <small class="text-muted">{{ mapping.no_of_connected_household }} Connected</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+
+<script>
+function getCurrentLocation() {
+    const locationBtn = document.getElementById('locationBtn');
+    const latitudeField = document.getElementById('{{ form.Latitude.id_for_label }}');
+    const longitudeField = document.getElementById('{{ form.Longitude.id_for_label }}');
+    
+    if (navigator.geolocation) {
+        locationBtn.disabled = true;
+        locationBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                latitudeField.value = position.coords.latitude.toFixed(6);
+                longitudeField.value = position.coords.longitude.toFixed(6);
+                locationBtn.disabled = false;
+                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill"></i>';
+                alert('Location updated successfully!');
+            },
+            function(error) {
+                locationBtn.disabled = false;
+                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill"></i>';
+                alert('Unable to get your location. Please enter coordinates manually.');
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by this browser.');
+    }
+}
+</script>
+
+<style>
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
