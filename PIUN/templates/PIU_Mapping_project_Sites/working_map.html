@@ -12,14 +12,36 @@
     </div>
     
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-9">
             <div id="map" style="height: 600px; width: 100%; border: 1px solid #ccc;"></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-layers"></i> Project Layers</h6>
+                </div>
+                <div class="card-body">
+                    <div id="layer-controls">
+                        <!-- Layer controls will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    .custom-marker {
+        background: transparent !important;
+        border: none !important;
+    }
+    .form-check-input:indeterminate {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+</style>
 
 <script>
 // Wait for DOM to be ready
@@ -48,32 +70,159 @@ document.addEventListener('DOMContentLoaded', function() {
         map.setView([parseFloat(focusLat), parseFloat(focusLng)], focusZoom ? parseInt(focusZoom) : 16);
     }
     
-    // Add markers
+    // Project colors mapping
+    var projectColors = {
+        'ECOWAS Regional Electricity Access Project': '#2E7D32',
+        'Gambia Electricity Restoration and Modernization Project': '#F57C00', 
+        'Gambia Electricity Access Project': '#1976D2',
+        'The Gambia Electricity System Rehabilitation and Expansion Project': '#D32F2F',
+        'No Project': '#757575'
+    };
+    
+    // Group locations by project
+    var projectGroups = {};
+    var allProjects = new Set();
+    
     locations.forEach(function(location) {
-        var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+        location.projects.forEach(function(project) {
+            if (!projectGroups[project]) {
+                projectGroups[project] = [];
+            }
+            projectGroups[project].push(location);
+            allProjects.add(project);
+        });
         
-        var popupContent = '<div style="min-width: 200px;">';
-        
-        // Highlight focused location
-        if (focusId == location.id) {
-            popupContent += '<div style="background: #ff4444; color: white; padding: 5px; text-align: center; margin-bottom: 5px;"><strong>📍 SELECTED LOCATION</strong></div>';
-        }
-        
-        popupContent += '<h6><strong>' + location.settlement + '</strong></h6>';
-        popupContent += '<p><strong>Region:</strong> ' + location.region + '<br>';
-        popupContent += '<strong>District:</strong> ' + location.district + '<br>';
-        popupContent += '<strong>Projects:</strong> ' + location.projects.join(', ') + '<br>';
-        popupContent += '<strong>Households:</strong> ' + location.total_households + '<br>';
-        popupContent += '<strong>Connected:</strong> ' + location.connected_households + '</p>';
-        popupContent += '</div>';
-        
-        marker.bindPopup(popupContent);
-        
-        // Auto-open popup for focused location
-        if (focusId == location.id) {
-            marker.openPopup();
+        // Handle locations with no projects
+        if (location.projects.length === 0) {
+            if (!projectGroups['No Project']) {
+                projectGroups['No Project'] = [];
+            }
+            projectGroups['No Project'].push(location);
+            allProjects.add('No Project');
         }
     });
+    
+    // Create layer groups for each project
+    var layerGroups = {};
+    var layerControls = document.getElementById('layer-controls');
+    
+    // Create "Select All" checkbox
+    var selectAllDiv = document.createElement('div');
+    selectAllDiv.className = 'form-check mb-2';
+    selectAllDiv.innerHTML = `
+        <input class="form-check-input" type="checkbox" id="select-all" checked>
+        <label class="form-check-label fw-bold" for="select-all">
+            <span style="color: #666;">All Projects</span>
+        </label>
+    `;
+    layerControls.appendChild(selectAllDiv);
+    
+    // Add separator
+    layerControls.appendChild(document.createElement('hr'));
+    
+    // Create checkboxes and markers for each project
+    Array.from(allProjects).forEach(function(project) {
+        var color = projectColors[project] || '#666666';
+        layerGroups[project] = L.layerGroup().addTo(map);
+        
+        // Create project checkbox
+        var projectDiv = document.createElement('div');
+        projectDiv.className = 'form-check mb-2';
+        
+        var checkboxId = 'project-' + project.replace(/[^a-zA-Z0-9]/g, '-');
+        
+        projectDiv.innerHTML = `
+            <input class="form-check-input project-checkbox" type="checkbox" id="${checkboxId}" checked data-project="${project}">
+            <label class="form-check-label" for="${checkboxId}">
+                <span style="color: ${color}; font-weight: bold;">●</span> ${project}
+            </label>
+        `;
+        
+        layerControls.appendChild(projectDiv);
+        
+        // Add markers for this project
+        projectGroups[project].forEach(function(location) {
+            // Create custom colored marker
+            var customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${color}; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [25, 25],
+                iconAnchor: [12, 12]
+            });
+            
+            var marker = L.marker([location.latitude, location.longitude], {
+                icon: customIcon
+            }).addTo(layerGroups[project]);
+            
+            var popupContent = '<div style="min-width: 200px;">';
+            
+            // Highlight focused location
+            if (focusId == location.id) {
+                popupContent += '<div style="background: #ff4444; color: white; padding: 5px; text-align: center; margin-bottom: 5px;"><strong>📍 SELECTED LOCATION</strong></div>';
+            }
+            
+            popupContent += '<h6><strong>' + location.settlement + '</strong></h6>';
+            popupContent += '<p><strong>Region:</strong> ' + location.region + '<br>';
+            popupContent += '<strong>District:</strong> ' + location.district + '<br>';
+            popupContent += '<strong>Project:</strong> <span style="color: ' + color + '; font-weight: bold;">' + project + '</span><br>';
+            popupContent += '<strong>Households:</strong> ' + location.total_households + '<br>';
+            popupContent += '<strong>Connected:</strong> ' + location.connected_households + '</p>';
+            popupContent += '</div>';
+            
+            marker.bindPopup(popupContent);
+            
+            // Auto-open popup for focused location
+            if (focusId == location.id) {
+                marker.openPopup();
+            }
+        });
+    });
+    
+    // Handle individual project checkbox changes
+    document.querySelectorAll('.project-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            var project = this.dataset.project;
+            if (this.checked) {
+                map.addLayer(layerGroups[project]);
+            } else {
+                map.removeLayer(layerGroups[project]);
+            }
+            
+            // Update "Select All" checkbox state
+            updateSelectAllState();
+        });
+    });
+    
+    // Handle "Select All" checkbox
+    document.getElementById('select-all').addEventListener('change', function() {
+        var checked = this.checked;
+        document.querySelectorAll('.project-checkbox').forEach(function(checkbox) {
+            checkbox.checked = checked;
+            var project = checkbox.dataset.project;
+            if (checked) {
+                map.addLayer(layerGroups[project]);
+            } else {
+                map.removeLayer(layerGroups[project]);
+            }
+        });
+    });
+    
+    // Function to update "Select All" state
+    function updateSelectAllState() {
+        var allCheckboxes = document.querySelectorAll('.project-checkbox');
+        var checkedCheckboxes = document.querySelectorAll('.project-checkbox:checked');
+        var selectAllCheckbox = document.getElementById('select-all');
+        
+        if (checkedCheckboxes.length === 0) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = false;
+        } else if (checkedCheckboxes.length === allCheckboxes.length) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = true;
+        } else {
+            selectAllCheckbox.indeterminate = true;
+        }
+    }
     
     console.log('Map loaded with', locations.length, 'locations');
 });
