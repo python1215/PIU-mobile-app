@@ -73,6 +73,17 @@
     .popup-header {
         user-select: none;
     }
+    
+    .highlighted-marker {
+        animation: pulse 2s infinite;
+        transform-origin: center;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
     .popup-header:hover {
         background: #e9ecef !important;
     }
@@ -226,7 +237,12 @@
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize map
-    var map = L.map('map').setView([13.4667, -15.3100], 9);
+    // Get map center and zoom from Django context
+    var centerLat = {{ center_lat|default:"13.4667" }};
+    var centerLng = {{ center_lng|default:"-15.3100" }};
+    var zoomLevel = {{ zoom_level|default:"9" }};
+    
+    var map = L.map('map').setView([centerLat, centerLng], zoomLevel);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -237,16 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Project data from Django
     var locations = {{ project_data_json|safe }};
     
-    // Check URL parameters
-    var urlParams = new URLSearchParams(window.location.search);
-    var focusLat = urlParams.get('lat');
-    var focusLng = urlParams.get('lng');
-    var focusZoom = urlParams.get('zoom');
-    var focusId = urlParams.get('mappingId');
-    
-    // If focusing on specific location, update map view
-    if (focusLat && focusLng) {
-        map.setView([parseFloat(focusLat), parseFloat(focusLng)], focusZoom ? parseInt(focusZoom) : 16);
+    // Focus mapping ID from Django context
+    var focusMappingId = "{{ focus_mapping_id|default:'' }}";
+    console.log('Map initialized with center:', [centerLat, centerLng], 'zoom:', zoomLevel);
+    if (focusMappingId) {
+        console.log('Focusing on mapping ID:', focusMappingId);
     }
     
     // Comprehensive color palette for automatic assignment
@@ -517,14 +528,20 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add markers for this project
         projectGroups[project].forEach(function(location) {
+            // Check if this location should be highlighted (focused)
+            var isHighlighted = location.is_focused || (focusMappingId && location.id.toString() === focusMappingId);
+            var markerColor = isHighlighted ? '#FF0000' : color; // Red for highlighted, project color otherwise
+            var markerSize = isHighlighted ? '40' : '30'; // Larger for highlighted
+            var markerHeight = isHighlighted ? '55' : '45'; // Taller for highlighted
+            
             // Create custom house icon marker with pin shape
             var customIcon = L.divIcon({
                 className: 'custom-house-marker',
                 html: `
-                    <div class="house-pin-marker">
-                        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+                    <div class="house-pin-marker ${isHighlighted ? 'highlighted-marker' : ''}">
+                        <svg width="${markerSize}" height="${markerHeight}" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
                             <!-- Pin shape background -->
-                            <path fill="${color}" stroke="#fff" stroke-width="2" 
+                            <path fill="${markerColor}" stroke="#fff" stroke-width="2" 
                                   d="M15 0C6.716 0 0 6.716 0 15c0 9.75 15 30 15 30s15-20.25 15-30C30 6.716 23.284 0 15 0z"/>
                             <!-- House icon inside -->
                             <g transform="translate(9, 7)">
@@ -532,12 +549,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                                 </svg>
                             </g>
+                            ${isHighlighted ? '<circle cx="15" cy="15" r="10" fill="none" stroke="#FF0000" stroke-width="3" opacity="0.8"><animate attributeName="r" values="10;15;10" dur="2s" repeatCount="indefinite"/></circle>' : ''}
                         </svg>
                     </div>
                 `,
-                iconSize: [30, 45],
-                iconAnchor: [15, 45],
-                popupAnchor: [0, -45]
+                iconSize: [parseInt(markerSize), parseInt(markerHeight)],
+                iconAnchor: [parseInt(markerSize)/2, parseInt(markerHeight)],
+                popupAnchor: [0, -parseInt(markerHeight)]
             });
             
             var marker = L.marker([location.latitude, location.longitude], {
@@ -552,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function() {
             popupContent += '<h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;">' + location.settlement + '</h6>';
             popupContent += '<span style="color: #999; font-size: 10px;">⋮⋮</span>';
             popupContent += '</div>';
-            if (focusId == location.id) {
-                popupContent += '<small style="color: #ff4444; font-weight: bold; font-size: 9px;">📍 SELECTED</small>';
+            if (isHighlighted) {
+                popupContent += '<small style="color: #ff4444; font-weight: bold; font-size: 9px;">📍 SELECTED LOCATION</small>';
             }
             popupContent += '</div>';
             
@@ -598,8 +616,10 @@ document.addEventListener('DOMContentLoaded', function() {
             marker.bindPopup(popup);
             
             // Auto-open popup for focused location
-            if (focusId == location.id) {
-                marker.openPopup();
+            if (isHighlighted) {
+                setTimeout(function() {
+                    marker.openPopup();
+                }, 500); // Small delay to ensure map is fully loaded
             }
         });
     });

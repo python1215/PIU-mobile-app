@@ -25,7 +25,7 @@ from datetime import datetime
 
 
 def working_map(request):
-    """Working map implementation"""
+    """Working map implementation with location focusing"""
     
     project_communities = projectMapping.objects.select_related(
         'region', 'district', 'settlement', 'profile_year', 'access'
@@ -34,12 +34,47 @@ def working_map(request):
         Longitude__isnull=False
     ).all()
     
+    # Check for coordinate parameters to focus on specific location
+    focus_lat = request.GET.get('lat')
+    focus_lng = request.GET.get('lng')
+    mapping_id = request.GET.get('mappingId')
+    
+    if focus_lat and focus_lng:
+        try:
+            center_lat = float(focus_lat)
+            center_lng = float(focus_lng)
+            zoom_level = 16  # Zoom in when focusing on specific location
+        except (ValueError, TypeError):
+            center_lat = 13.4667  # Default to Gambia center
+            center_lng = -15.3100
+            zoom_level = 9
+    else:
+        center_lat = 13.4667  # Default to Gambia center
+        center_lng = -15.3100
+        zoom_level = 9
+    
     project_data = []
     for community in project_communities:
         try:
             if community.Latitude and community.Longitude:
                 projects = community.project.all()
                 project_names = [str(p.project) for p in projects]
+                
+                # Check if this is the focused location from URL parameters
+                is_focused = False
+                if focus_lat and focus_lng:
+                    try:
+                        focus_lat_f = float(focus_lat)
+                        focus_lng_f = float(focus_lng)
+                        # Check if coordinates match (within small tolerance)
+                        if abs(float(community.Latitude) - focus_lat_f) < 0.0001 and abs(float(community.Longitude) - focus_lng_f) < 0.0001:
+                            is_focused = True
+                    except (ValueError, TypeError):
+                        pass
+                
+                # Also check mapping ID match for precise highlighting
+                if mapping_id and str(community.id) == str(mapping_id):
+                    is_focused = True
                 
                 project_data.append({
                     'id': community.id,
@@ -53,6 +88,7 @@ def working_map(request):
                     'connected_households': community.no_of_connected_household or 0,
                     'access_type': community.access.access_type if community.access else 'Unknown',
                     'year': community.profile_year.profile_year if community.profile_year else 'Unknown',
+                    'is_focused': is_focused
                 })
         except Exception as e:
             continue
@@ -60,6 +96,10 @@ def working_map(request):
     context = {
         'total_communities': project_communities.count(),
         'project_data_json': json.dumps(project_data),
+        'center_lat': center_lat,
+        'center_lng': center_lng,
+        'zoom_level': zoom_level,
+        'focus_mapping_id': mapping_id
     }
     
     return render(request, 'PIU_Mapping_project_Sites/working_map.html', context)

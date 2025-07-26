@@ -290,11 +290,11 @@
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {% if mapping.Latitude and mapping.Longitude %}
-                                                    <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                            onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }}, {{ mapping.pk }})"
-                                                            title="View on Map">
+                                                    <a href="{% url 'PIU_Mapping_project_Sites:working_map' %}?lat={{ mapping.Latitude }}&lng={{ mapping.Longitude }}&mappingId={{ mapping.pk }}&zoom=16" 
+                                                       target="_blank" class="btn btn-outline-primary btn-sm" 
+                                                       title="View on Map">
                                                         <i class="bi bi-geo-alt"></i>
-                                                    </button>
+                                                    </a>
                                                 {% endif %}
 
                                                 <a href="{% url 'PIU_Mapping_project_Sites:update-mapping' mapping.pk %}" 
