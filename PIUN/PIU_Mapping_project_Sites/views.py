@@ -419,17 +419,17 @@ def export_mappings_pdf(mappings_queryset):
     
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), 
-                          rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18)
+                          rightMargin=20, leftMargin=20, topMargin=25, bottomMargin=15)
     
     # Styles
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=16,
+        fontSize=14,  # Reduced title font size
         textColor=colors.HexColor('#366092'),
         alignment=1,  # Center alignment
-        spaceAfter=20
+        spaceAfter=15  # Reduced spacing
     )
     
     # Build PDF content
@@ -438,47 +438,61 @@ def export_mappings_pdf(mappings_queryset):
     # Title
     title = Paragraph("Project Mapping Export Report", title_style)
     elements.append(title)
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1, 8))
     
-    # Export info
-    export_info = Paragraph(f"<b>Export Date:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}<br/>"
-                           f"<b>Total Records:</b> {mappings_queryset.count()}", styles['Normal'])
+    # Export info with smaller font
+    export_info_style = ParagraphStyle(
+        'ExportInfo',
+        parent=styles['Normal'],
+        fontSize=9,  # Smaller font for export info
+        alignment=1,  # Center alignment
+    )
+    export_info = Paragraph(f"<b>Export Date:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')} | "
+                           f"<b>Total Records:</b> {mappings_queryset.count()}", export_info_style)
     elements.append(export_info)
-    elements.append(Spacer(1, 20))
+    elements.append(Spacer(1, 15))
     
-    # Table data
+    # Table data with all fields
     table_data = [
-        ['Region', 'District', 'Settlement', 'Projects', 'Access Type', 
-         'Total HH', 'Connected HH', 'Connection %']
+        ['Region', 'District', 'Settlement', 'Project', 'Donors', 'Year', 'Access Type', 
+         'Total HH', 'Connected HH', 'Customer Conn', 'Connection %', 'Latitude', 'Longitude']
     ]
     
     for mapping in mappings_queryset:
-        projects = str(mapping.project.project)[:20] + '...' if mapping.project and len(str(mapping.project.project)) > 20 else str(mapping.project.project) if mapping.project else 'No Project'
+        projects = str(mapping.project.project)[:18] + '...' if mapping.project and len(str(mapping.project.project)) > 18 else str(mapping.project.project) if mapping.project else 'No Project'
+        donors = ', '.join([str(d.name)[:15] for d in mapping.donor.all()[:2]])  # Limit to 2 donors
+        if mapping.donor.count() > 2:
+            donors += f' +{mapping.donor.count()-2}'
         connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 1)
         
         table_data.append([
-            mapping.region.region_name[:15] if mapping.region else '',
-            mapping.district.district_name[:15] if mapping.district else '',
-            mapping.settlement.settlement_name[:20] if mapping.settlement else '',
-            projects[:25] + '...' if len(projects) > 25 else projects,
-            mapping.access.access_type[:15] if mapping.access else '',
+            mapping.region.region_name[:12] if mapping.region else '',
+            mapping.district.district_name[:12] if mapping.district else '',
+            mapping.settlement.settlement_name[:15] if mapping.settlement else '',
+            projects[:18] + '...' if len(projects) > 18 else projects,
+            donors[:20] + '...' if len(donors) > 20 else donors,
+            mapping.profile_year.profile_year if mapping.profile_year else '',
+            mapping.access.access_type[:10] if mapping.access else '',
             str(mapping.Total_No_of_Households or 0),
             str(mapping.no_of_connected_household or 0),
-            f"{connection_rate}%"
+            str(mapping.no_of_customer_connections or 0),
+            f"{connection_rate}%",
+            f"{mapping.Latitude:.4f}" if mapping.Latitude else '',
+            f"{mapping.Longitude:.4f}" if mapping.Longitude else ''
         ])
     
-    # Create table
-    table = Table(table_data, colWidths=[1*inch, 1*inch, 1.2*inch, 1.5*inch, 1*inch, 0.7*inch, 0.8*inch, 0.8*inch])
+    # Create table with smaller column widths for landscape fit
+    table = Table(table_data, colWidths=[0.7*inch, 0.7*inch, 0.8*inch, 1.0*inch, 0.9*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.6*inch, 0.6*inch])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 0), (-1, 0), 7),  # Reduced header font size
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('FONTSIZE', (0, 1), (-1, -1), 6),  # Reduced data font size
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
