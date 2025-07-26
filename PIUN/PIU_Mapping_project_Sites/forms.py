@@ -31,30 +31,47 @@ class MappingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # For new forms (from POST data)
+        # Show all districts and settlements initially - cascading will filter them
+        # This ensures dropdowns are populated even for new forms
+        
+        # For forms with POST data (form submission)
         if 'region' in self.data:
             try:
-                region_code = self.data.get('region')
-                self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_code)
+                region_id = self.data.get('region')
+                if region_id:
+                    # Filter districts by region for cascading
+                    self.fields['district'].queryset = Districts.objects.filter(region_code_id=region_id)
+                else:
+                    self.fields['district'].queryset = Districts.objects.all()
             except (ValueError, TypeError):
-                pass
+                self.fields['district'].queryset = Districts.objects.all()
 
         if 'district' in self.data:
             try:
-                district_code = self.data.get('district')
-                self.fields['settlement'].queryset = Settlement.objects.filter(district_code_id=district_code)
+                district_id = self.data.get('district')
+                if district_id:
+                    # Filter settlements by district for cascading
+                    self.fields['settlement'].queryset = Settlement.objects.filter(district_code_id=district_id)
+                else:
+                    self.fields['settlement'].queryset = Settlement.objects.all()
             except (ValueError, TypeError):
-                pass
+                self.fields['settlement'].queryset = Settlement.objects.all()
         
         # For edit forms (when instance is provided)
         elif self.instance and self.instance.pk:
-            # Populate district dropdown based on selected region
+            # Keep all districts and settlements available for editing
+            # The JavaScript will handle cascading if user changes region/district
             if self.instance.region:
-                self.fields['district'].queryset = Districts.objects.filter(region_code_id=self.instance.region.region_code)
+                # Optionally filter districts by region for consistency
+                related_districts = Districts.objects.filter(region_code_id=self.instance.region.region_code)
+                if related_districts.exists():
+                    self.fields['district'].queryset = related_districts
             
-            # Populate settlement dropdown based on selected district
             if self.instance.district:
-                self.fields['settlement'].queryset = Settlement.objects.filter(district_code_id=self.instance.district.district_code)
+                # Optionally filter settlements by district for consistency  
+                related_settlements = Settlement.objects.filter(district_code_id=self.instance.district.district_code)
+                if related_settlements.exists():
+                    self.fields['settlement'].queryset = related_settlements
 
     def clean(self):
         cleaned_data = super().clean()
