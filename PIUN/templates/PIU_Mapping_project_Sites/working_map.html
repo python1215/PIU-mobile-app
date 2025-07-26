@@ -137,6 +137,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add separator
     layerControls.appendChild(document.createElement('hr'));
     
+    // Create legend section
+    var legendDiv = document.createElement('div');
+    legendDiv.innerHTML = `
+        <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
+            <h6 style="margin-bottom: 8px; font-size: 12px; color: #666; font-weight: bold;">Color Legend</h6>
+            <div id="legend-items" style="font-size: 11px; line-height: 1.6;">
+                <!-- Legend items will be populated below -->
+            </div>
+        </div>
+    `;
+    
+    // Append legend div to layer controls
+    layerControls.appendChild(legendDiv);
+    
     // Create checkboxes and markers for each project
     Array.from(allProjects).forEach(function(project) {
         var color = projectColors[project] || '#666666';
@@ -156,6 +170,17 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         layerControls.appendChild(projectDiv);
+        
+        // Add to legend
+        var legendItem = document.createElement('div');
+        legendItem.style.marginBottom = '4px';
+        legendItem.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <div style="width: 18px; height: 18px; background-color: ${color}; border-radius: 50%; margin-right: 8px; flex-shrink: 0; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+                <span style="font-size: 10px; color: #555; font-weight: 500;">${project}</span>
+            </div>
+        `;
+        document.getElementById('legend-items').appendChild(legendItem);
         
         // Add markers for this project
         projectGroups[project].forEach(function(location) {
