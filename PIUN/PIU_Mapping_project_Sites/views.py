@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import F, Prefetch, Sum, Count
 import json
 from .models import projectMapping, settlementwithCoordinates, Access, nawecinfrastructure
 from .forms import MappingForm, NAWECInfrastructureForm, settlementwithCoordinatesForm
+from .filters import ProjectMappingFilter
 from django.contrib import messages
 from PIU_Financial_mgt.models import Project, Donor
 from social_and_env.models import Settlement, Regions
@@ -12,6 +13,15 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.units import inch
+from io import BytesIO
+from datetime import datetime
 
 
 def working_map(request):
@@ -200,19 +210,42 @@ def mapping_dashboard(request):
 
 @login_required
 def mapping_list(request):
-    """List view of all project mappings"""
-    mappings = projectMapping.objects.select_related(
+    """List view of all project mappings with filtering and export functionality"""
+    
+    # Get all mappings with related fields
+    mappings_queryset = projectMapping.objects.select_related(
         'region', 'district', 'settlement', 'profile_year', 'access'
     ).prefetch_related('project', 'donor').order_by('region__region_name', 'district__district_name', 'settlement__settlement_name')
     
+    # Apply filters
+    mapping_filter = ProjectMappingFilter(request.GET, queryset=mappings_queryset)
+    filtered_mappings = mapping_filter.qs
+    
+    # Handle export requests
+    export_format = request.GET.get('export')
+    if export_format == 'excel':
+        return export_mappings_excel(filtered_mappings)
+    elif export_format == 'pdf':
+        return export_mappings_pdf(filtered_mappings)
+    
     # Add pagination
-    paginator = Paginator(mappings, 25)
+    paginator = Paginator(filtered_mappings, 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
+    # Statistics for filtered data
+    total_mappings = filtered_mappings.count()
+    total_households = sum(mapping.Total_No_of_Households or 0 for mapping in filtered_mappings)
+    total_connected = sum(mapping.no_of_connected_household or 0 for mapping in filtered_mappings)
+    
     context = {
         'page_obj': page_obj,
-        'mappings': page_obj.object_list
+        'mappings': page_obj.object_list,
+        'filter': mapping_filter,
+        'total_mappings': total_mappings,
+        'total_households': total_households,
+        'total_connected': total_connected,
+        'connection_rate': round((total_connected / total_households * 100) if total_households > 0 else 0, 2)
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_list.html', context)
@@ -229,6 +262,171 @@ def mapping_detail(request, pk):
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_detail.html', context)
+
+
+def export_mappings_excel(mappings_queryset):
+    """Export filtered project mappings to Excel"""
+    
+    # Create workbook and worksheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Project Mapping Export"
+    
+    # Define styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = [
+        'Region', 'District', 'Settlement', 'Projects', 'Donors', 'Year',
+        'Access Type', 'Total Households', 'Connected Households', 'Customer Connections',
+        'Connection Rate (%)', 'Latitude', 'Longitude'
+    ]
+    
+    # Write headers
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = border
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+    
+    # Write data
+    for row, mapping in enumerate(mappings_queryset, 2):
+        projects = ', '.join([str(p.project) for p in mapping.project.all()])
+        donors = ', '.join([str(d.name) for d in mapping.donor.all()])
+        connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 2)
+        
+        row_data = [
+            mapping.region.region_name if mapping.region else '',
+            mapping.district.district_name if mapping.district else '',
+            mapping.settlement.settlement_name if mapping.settlement else '',
+            projects,
+            donors,
+            mapping.profile_year.profile_year if mapping.profile_year else '',
+            mapping.access.access_type if mapping.access else '',
+            mapping.Total_No_of_Households or 0,
+            mapping.no_of_connected_household or 0,
+            mapping.no_of_customer_connections or 0,
+            connection_rate,
+            mapping.Latitude or 0,
+            mapping.Longitude or 0,
+        ]
+        
+        for col, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = border
+            if isinstance(value, (int, float)) and col >= 8:  # Numeric columns
+                cell.alignment = Alignment(horizontal='right')
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="project_mappings_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+    
+    wb.save(response)
+    return response
+
+
+def export_mappings_pdf(mappings_queryset):
+    """Export filtered project mappings to PDF"""
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), 
+                          rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.HexColor('#366092'),
+        alignment=1,  # Center alignment
+        spaceAfter=20
+    )
+    
+    # Build PDF content
+    elements = []
+    
+    # Title
+    title = Paragraph("Project Mapping Export Report", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 12))
+    
+    # Export info
+    export_info = Paragraph(f"<b>Export Date:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}<br/>"
+                           f"<b>Total Records:</b> {mappings_queryset.count()}", styles['Normal'])
+    elements.append(export_info)
+    elements.append(Spacer(1, 20))
+    
+    # Table data
+    table_data = [
+        ['Region', 'District', 'Settlement', 'Projects', 'Access Type', 
+         'Total HH', 'Connected HH', 'Connection %']
+    ]
+    
+    for mapping in mappings_queryset:
+        projects = ', '.join([str(p.project)[:20] + '...' if len(str(p.project)) > 20 else str(p.project) for p in mapping.project.all()])
+        connection_rate = round((mapping.no_of_connected_household / mapping.Total_No_of_Households * 100) if mapping.Total_No_of_Households > 0 else 0, 1)
+        
+        table_data.append([
+            mapping.region.region_name[:15] if mapping.region else '',
+            mapping.district.district_name[:15] if mapping.district else '',
+            mapping.settlement.settlement_name[:20] if mapping.settlement else '',
+            projects[:25] + '...' if len(projects) > 25 else projects,
+            mapping.access.access_type[:15] if mapping.access else '',
+            str(mapping.Total_No_of_Households or 0),
+            str(mapping.no_of_connected_household or 0),
+            f"{connection_rate}%"
+        ])
+    
+    # Create table
+    table = Table(table_data, colWidths=[1*inch, 1*inch, 1.2*inch, 1.5*inch, 1*inch, 0.7*inch, 0.8*inch, 0.8*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    
+    elements.append(table)
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="project_mappings_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    
+    return response
 
 
 def add_mapping(request):
