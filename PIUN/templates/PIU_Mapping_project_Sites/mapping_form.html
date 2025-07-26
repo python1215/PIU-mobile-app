@@ -117,15 +117,7 @@
                             <!-- Coordinates -->
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude</label>
-                                <div class="input-group">
-                                    {{ form.Latitude|add_class:"form-control" }}
-                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn" title="Get your current GPS coordinates">
-                                        <i class="bi bi-geo-alt-fill me-1"></i>Current Location
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="showLocationHelp()" title="Location troubleshooting help">
-                                        <i class="bi bi-question-circle"></i>
-                                    </button>
-                                </div>
+                                {{ form.Latitude|add_class:"form-control" }}
                                 {% if form.Latitude.errors %}
                                     <div class="text-danger small">{{ form.Latitude.errors }}</div>
                                 {% endif %}
@@ -145,12 +137,12 @@
                         <div class="row">
                             <!-- Projects -->
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.project.id_for_label }}" class="form-label">Associated Projects</label>
+                                <label for="{{ form.project.id_for_label }}" class="form-label">projects</label>
                                 {{ form.project|add_class:"form-control" }}
                                 {% if form.project.errors %}
                                     <div class="text-danger small">{{ form.project.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">Hold Ctrl/Cmd to select multiple projects</div>
+                                <div class="form-text">Select a project for this mapping</div>
                             </div>
                             
                             <!-- Donors -->
