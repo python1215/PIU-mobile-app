@@ -519,34 +519,49 @@ def add_mapping(request):
     return render(request, 'PIU_Mapping_project_Sites/mapping_form.html', context)
 
 
+
+
 def update_mapping(request, pk):
-    """Update mapping view"""
+    """Update mapping view with dedicated edit template"""
     mapping = get_object_or_404(projectMapping, pk=pk)
     
-    if request.method == 'POST':
+    if request.method == "POST":
         form = MappingForm(request.POST, instance=mapping)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Mapping updated successfully!')
-            
-            # Check if this was opened from a popup (from_popup parameter)
-            if request.GET.get('from_popup'):
-                return render(request, 'PIU_Mapping_project_Sites/popup_close.html', {
-                    'message': 'Mapping updated successfully! Returning to map...'
-                })
-            
-            return redirect('PIU_Mapping_project_Sites:mapping-list')
+            try:
+                # Save the mapping
+                updated_mapping = form.save(commit=False)
+                updated_mapping.loginUser = request.user if hasattr(request, "user") and request.user.is_authenticated else None
+                updated_mapping.save()
+                form.save_m2m()  # Save many-to-many relationships
+                
+                messages.success(request, "Mapping updated successfully!")
+                
+                # Check if this was opened from a popup (from_popup parameter)
+                if request.GET.get("from_popup"):
+                    return render(request, "PIU_Mapping_project_Sites/popup_close.html", {
+                        "message": "Mapping updated successfully! Returning to map..."
+                    })
+                
+                return redirect("PIU_Mapping_project_Sites:mapping-list")
+                
+            except Exception as e:
+                messages.error(request, f"Error updating mapping: {str(e)}")
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = MappingForm(instance=mapping)
     
+    # Add additional context for template
     context = {
-        'form': form,
-        'mapping': mapping,
-        'title': 'Update Mapping',
-        'from_popup': request.GET.get('from_popup', False)
+        "form": form,
+        "mapping": mapping,
+        "title": "Edit Project Mapping",
+        "from_popup": request.GET.get("from_popup", False)
     }
     
-    return render(request, 'PIU_Mapping_project_Sites/mapping_form.html', context)
+    return render(request, "PIU_Mapping_project_Sites/mapping_edit_form.html", context)
+
 
 
 def delete_mapping(request, pk):

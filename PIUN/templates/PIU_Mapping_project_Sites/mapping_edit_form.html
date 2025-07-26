@@ -1,0 +1,624 @@
+{% extends "PIU_Mapping_project_Sites/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }} - Project Mapping{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                        {{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Edit project site mapping details and coordinates</p>
+                </div>
+                <div>
+                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Mapping Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {% if message.tags == 'success' %}
+                                    <i class="bi bi-check-circle me-2"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="mappingEditForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Project Information Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="bi bi-folder me-1"></i>Project Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Project -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.project.id_for_label }}" class="form-label required">Project</label>
+                                {{ form.project|add_class:"form-select" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small">{{ form.project.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Profile Year -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.profile_year.id_for_label }}" class="form-label required">Profile Year</label>
+                                {{ form.profile_year|add_class:"form-select" }}
+                                {% if form.profile_year.errors %}
+                                    <div class="text-danger small">{{ form.profile_year.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Donor -->
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.donor.id_for_label }}" class="form-label">Donor(s)</label>
+                                {{ form.donor|add_class:"form-select" }}
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple donors</div>
+                                {% if form.donor.errors %}
+                                    <div class="text-danger small">{{ form.donor.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Location Information Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="bi bi-geo me-1"></i>Location Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Region -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.region.id_for_label }}" class="form-label required">Region</label>
+                                {{ form.region|add_class:"form-select" }}
+                                {% if form.region.errors %}
+                                    <div class="text-danger small">{{ form.region.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- District -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.district.id_for_label }}" class="form-label required">District</label>
+                                {{ form.district|add_class:"form-select" }}
+                                {% if form.district.errors %}
+                                    <div class="text-danger small">{{ form.district.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Settlement -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.settlement.id_for_label }}" class="form-label required">Settlement</label>
+                                {{ form.settlement|add_class:"form-select" }}
+                                {% if form.settlement.errors %}
+                                    <div class="text-danger small">{{ form.settlement.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Coordinates Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="bi bi-pin-map me-1"></i>Coordinates
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Latitude -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Latitude.id_for_label }}" class="form-label required">Latitude</label>
+                                <div class="input-group">
+                                    {{ form.Latitude|add_class:"form-control" }}
+                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn" title="Get your current GPS coordinates">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>Current Location
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="showLocationHelp()" title="Location troubleshooting help">
+                                        <i class="bi bi-question-circle"></i>
+                                    </button>
+                                </div>
+                                {% if form.Latitude.errors %}
+                                    <div class="text-danger small">{{ form.Latitude.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Decimal degrees format (e.g., 13.4567)</div>
+                            </div>
+                            
+                            <!-- Longitude -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.Longitude.id_for_label }}" class="form-label required">Longitude</label>
+                                {{ form.Longitude|add_class:"form-control" }}
+                                {% if form.Longitude.errors %}
+                                    <div class="text-danger small">{{ form.Longitude.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Decimal degrees format (e.g., -15.3101)</div>
+                            </div>
+                        </div>
+
+                        <!-- Household Information Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="bi bi-house me-1"></i>Household Statistics
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Total Households -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.Total_No_of_Households.id_for_label }}" class="form-label required">Total Number of Households</label>
+                                {{ form.Total_No_of_Households|add_class:"form-control" }}
+                                {% if form.Total_No_of_Households.errors %}
+                                    <div class="text-danger small">{{ form.Total_No_of_Households.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Total Households (Alt field) -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.total_households.id_for_label }}" class="form-label">Total Households (Alternative)</label>
+                                {{ form.total_households|add_class:"form-control" }}
+                                {% if form.total_households.errors %}
+                                    <div class="text-danger small">{{ form.total_households.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Customer Connections -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.no_of_customer_connections.id_for_label }}" class="form-label required">Number of Customer Connections</label>
+                                {{ form.no_of_customer_connections|add_class:"form-control" }}
+                                {% if form.no_of_customer_connections.errors %}
+                                    <div class="text-danger small">{{ form.no_of_customer_connections.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Connected Households -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.no_of_connected_household.id_for_label }}" class="form-label required">Number of Connected Households</label>
+                                {{ form.no_of_connected_household|add_class:"form-control" }}
+                                {% if form.no_of_connected_household.errors %}
+                                    <div class="text-danger small">{{ form.no_of_connected_household.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Electricity Access -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.households_with_electricity_access.id_for_label }}" class="form-label">Households with Electricity Access</label>
+                                {{ form.households_with_electricity_access|add_class:"form-control" }}
+                                {% if form.households_with_electricity_access.errors %}
+                                    <div class="text-danger small">{{ form.households_with_electricity_access.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Water Access -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.households_with_water_access.id_for_label }}" class="form-label">Households with Water Access</label>
+                                {{ form.households_with_water_access|add_class:"form-control" }}
+                                {% if form.households_with_water_access.errors %}
+                                    <div class="text-danger small">{{ form.households_with_water_access.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Access Type Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="bi bi-lightning me-1"></i>Access Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Access Type -->
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.access.id_for_label }}" class="form-label required">Access Type</label>
+                                {{ form.access|add_class:"form-select" }}
+                                {% if form.access.errors %}
+                                    <div class="text-danger small">{{ form.access.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle me-1"></i>Update Mapping
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Region change handler for cascading dropdown
+    document.getElementById('id_region').addEventListener('change', function() {
+        const regionId = this.value;
+        if (regionId) {
+            fetch(`/PIU_Mapping_project_Sites/load_districts/?region_id=${regionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const districtSelect = document.getElementById('id_district');
+                    districtSelect.innerHTML = '<option value="">---------</option>';
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.district_code;
+                        option.textContent = district.district_name;
+                        districtSelect.appendChild(option);
+                    });
+                    // Clear settlement dropdown
+                    document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+                })
+                .catch(error => {
+                    console.error('Error loading districts:', error);
+                });
+        } else {
+            document.getElementById('id_district').innerHTML = '<option value="">---------</option>';
+            document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+        }
+    });
+
+    // District change handler for cascading settlements
+    document.getElementById('id_district').addEventListener('change', function() {
+        const districtId = this.value;
+        if (districtId) {
+            fetch(`/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const settlementSelect = document.getElementById('id_settlement');
+                    settlementSelect.innerHTML = '<option value="">---------</option>';
+                    data.settlements.forEach(settlement => {
+                        const option = document.createElement('option');
+                        option.value = settlement.settlement_code;
+                        option.textContent = settlement.settlement_name;
+                        settlementSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading settlements:', error);
+                });
+        } else {
+            document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+        }
+    });
+
+    // Geolocation function for current location
+    window.getCurrentLocation = function() {
+        const locationBtn = document.getElementById('locationBtn');
+        const latitudeField = document.getElementById('id_Latitude');
+        const longitudeField = document.getElementById('id_Longitude');
+        
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+            showLocationError('Geolocation is not supported by this browser.');
+            return;
+        }
+        
+        // Show loading state
+        locationBtn.disabled = true;
+        locationBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Getting Location...';
+        
+        // First try with high accuracy
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success - populate the fields
+                const latitude = position.coords.latitude.toFixed(6);
+                const longitude = position.coords.longitude.toFixed(6);
+                const accuracy = position.coords.accuracy ? Math.round(position.coords.accuracy) : 'Unknown';
+                
+                latitudeField.value = latitude;
+                longitudeField.value = longitude;
+                
+                // Reset button state
+                locationBtn.disabled = false;
+                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                
+                // Show success message with accuracy info
+                showLocationSuccess(`Location detected: ${latitude}, ${longitude}<br><small>Accuracy: ±${accuracy} meters</small>`);
+            },
+            function(error) {
+                // If high accuracy fails, try with lower accuracy
+                console.log('High accuracy failed, trying low accuracy...', error);
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Success with lower accuracy
+                        const latitude = position.coords.latitude.toFixed(6);
+                        const longitude = position.coords.longitude.toFixed(6);
+                        
+                        latitudeField.value = latitude;
+                        longitudeField.value = longitude;
+                        
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                        
+                        showLocationSuccess(`Location detected: ${latitude}, ${longitude}<br><small>Low accuracy mode</small>`);
+                    },
+                    function(secondError) {
+                        // Both attempts failed
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                        
+                        let errorMessage = getLocationErrorMessage(secondError);
+                        showLocationError(errorMessage + '<br><small>Try enabling location services in your browser settings.</small>');
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 15000,
+                        maximumAge: 300000
+                    }
+                );
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    };
+    
+    function getLocationErrorMessage(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                return 'Location access was denied. Please allow location access in your browser.';
+            case error.POSITION_UNAVAILABLE:
+                return 'Location information is unavailable. Check your GPS/network connection.';
+            case error.TIMEOUT:
+                return 'Location request timed out. Please try again.';
+            default:
+                return 'An unknown error occurred while getting location.';
+        }
+    }
+    
+    function showLocationSuccess(message) {
+        const longitudeField = document.getElementById('id_Longitude');
+        const successMsg = document.createElement('div');
+        successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+        successMsg.innerHTML = `
+            <i class="bi bi-check-circle me-1"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Remove any existing alerts
+        const existingAlert = longitudeField.parentNode.parentNode.querySelector('.alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Insert after longitude field
+        longitudeField.parentNode.parentNode.appendChild(successMsg);
+        
+        // Auto-dismiss after 7 seconds
+        setTimeout(() => {
+            if (successMsg.parentNode) {
+                successMsg.remove();
+            }
+        }, 7000);
+    }
+    
+    function showLocationError(message) {
+        const longitudeField = document.getElementById('id_Longitude');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'alert alert-warning alert-dismissible fade show mt-2';
+        errorMsg.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Remove any existing alerts
+        const existingAlert = longitudeField.parentNode.parentNode.querySelector('.alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Insert after longitude field
+        longitudeField.parentNode.parentNode.appendChild(errorMsg);
+        
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+            if (errorMsg.parentNode) {
+                errorMsg.remove();
+            }
+        }, 10000);
+    }
+    
+    // Location help function
+    window.showLocationHelp = function() {
+        const helpContent = `
+            <div class="modal fade" id="locationHelpModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-geo-alt me-2"></i>Location Services Help</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6><i class="bi bi-exclamation-triangle text-warning me-2"></i>Common Issues & Solutions:</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong>1. Browser Permission:</strong><br>
+                                    <small class="text-muted">Click the location icon in your browser's address bar and allow location access.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>2. HTTPS Required:</strong><br>
+                                    <small class="text-muted">Location services work best on secure (HTTPS) connections.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>3. GPS/Network:</strong><br>
+                                    <small class="text-muted">Ensure GPS is enabled on your device and you have internet connectivity.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>4. Browser Settings:</strong><br>
+                                    <small class="text-muted">Check browser settings → Privacy & Security → Location Services.</small>
+                                </li>
+                            </ul>
+                            <hr>
+                            <h6><i class="bi bi-lightbulb text-info me-2"></i>Manual Entry:</h6>
+                            <p class="small text-muted mb-2">If location detection fails, you can manually enter coordinates:</p>
+                            <ul class="small text-muted">
+                                <li>For The Gambia: Latitude 13.0-13.8, Longitude -13.8 to -16.8</li>
+                                <li>Use decimal degrees format (e.g., 13.4667, -15.3101)</li>
+                                <li>You can find coordinates using Google Maps or GPS apps</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="tryLocationAgain()" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('locationHelpModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to document
+        document.body.insertAdjacentHTML('beforeend', helpContent);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('locationHelpModal'));
+        modal.show();
+    };
+    
+    // Try location again function
+    window.tryLocationAgain = function() {
+        getCurrentLocation();
+    };
+
+    // Reset form function
+    window.resetForm = function() {
+        if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
+            document.getElementById('mappingEditForm').reset();
+            // Clear any alerts
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => alert.remove());
+        }
+    };
+});
+</script>
+
+<style>
+/* Spinning animation for loading state */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Required field indicator */
+.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Input group styling */
+.input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Form styling improvements */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+</style>
+{% endblock %}
