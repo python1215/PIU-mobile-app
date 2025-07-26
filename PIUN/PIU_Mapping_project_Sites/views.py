@@ -290,6 +290,12 @@ def mapping_list(request):
     all_donors = Donor.objects.all().order_by('name')
     all_years = YEAR.objects.all().order_by('profile_year')
     all_access_types = Access.objects.all().order_by('access_type')
+    all_districts = Districts.objects.all().order_by('district_name')
+    all_settlements = Settlement.objects.all().order_by('settlement_name')
+    all_projects = Project.objects.all().order_by('project')
+    all_donors = Donor.objects.all().order_by('name')
+    all_years = YEAR.objects.all().order_by('profile_year')
+    all_access_types = Access.objects.all().order_by('access_type')
     
     context = {
         'page_obj': page_obj,
