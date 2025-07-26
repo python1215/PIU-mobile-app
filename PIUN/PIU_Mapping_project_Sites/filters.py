@@ -13,7 +13,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Region filter
     region = django_filters.ModelChoiceFilter(
-        queryset=Regions.objects.all(),
+        queryset=Regions.objects.all().order_by('region_name'),
         field_name='region',
         empty_label="All Regions",
         widget=forms.Select(attrs={
@@ -24,7 +24,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # District filter
     district = django_filters.ModelChoiceFilter(
-        queryset=Districts.objects.all(),
+        queryset=Districts.objects.all().order_by('district_name'),
         field_name='district',
         empty_label="All Districts",
         widget=forms.Select(attrs={
@@ -35,7 +35,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Settlement filter
     settlement = django_filters.ModelChoiceFilter(
-        queryset=Settlement.objects.all(),
+        queryset=Settlement.objects.all().order_by('settlement_name'),
         field_name='settlement',
         empty_label="All Settlements",
         widget=forms.Select(attrs={
@@ -46,7 +46,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Project filter (ManyToMany relationship)
     project = django_filters.ModelChoiceFilter(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.all().order_by('project'),
         field_name='project',
         empty_label="All Projects",
         widget=forms.Select(attrs={
@@ -57,7 +57,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Donor Profile filter (ManyToMany relationship)
     donor = django_filters.ModelChoiceFilter(
-        queryset=Donor.objects.all(),
+        queryset=Donor.objects.all().order_by('name'),
         field_name='donor',
         empty_label="All Donors",
         widget=forms.Select(attrs={
@@ -68,7 +68,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Year filter
     profile_year = django_filters.ModelChoiceFilter(
-        queryset=YEAR.objects.all(),
+        queryset=YEAR.objects.all().order_by('profile_year'),
         field_name='profile_year',
         empty_label="All Years",
         widget=forms.Select(attrs={
@@ -79,7 +79,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     # Access Type filter
     access = django_filters.ModelChoiceFilter(
-        queryset=Access.objects.all(),
+        queryset=Access.objects.all().order_by('access_type'),
         field_name='access',
         empty_label="All Access Types",
         widget=forms.Select(attrs={
