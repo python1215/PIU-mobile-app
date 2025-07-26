@@ -238,6 +238,19 @@ def mapping_list(request):
     total_households = sum(mapping.Total_No_of_Households or 0 for mapping in filtered_mappings)
     total_connected = sum(mapping.no_of_connected_household or 0 for mapping in filtered_mappings)
     
+    # Get all dropdown data directly from models
+    from setup.models import Regions, Districts, YEAR, Access
+    from social_and_env.models import Settlement
+    from PIU_Financial_mgt.models import Project, Donor
+    
+    all_regions = Regions.objects.all().order_by('region_name')
+    all_districts = Districts.objects.all().order_by('district_name')
+    all_settlements = Settlement.objects.all().order_by('settlement_name')
+    all_projects = Project.objects.all().order_by('project')
+    all_donors = Donor.objects.all().order_by('name')
+    all_years = YEAR.objects.all().order_by('profile_year')
+    all_access_types = Access.objects.all().order_by('access_type')
+    
     context = {
         'page_obj': page_obj,
         'mappings': page_obj.object_list,
@@ -245,7 +258,15 @@ def mapping_list(request):
         'total_mappings': total_mappings,
         'total_households': total_households,
         'total_connected': total_connected,
-        'connection_rate': round((total_connected / total_households * 100) if total_households > 0 else 0, 2)
+        'connection_rate': round((total_connected / total_households * 100) if total_households > 0 else 0, 2),
+        # Add dropdown data to context
+        'all_regions': all_regions,
+        'all_districts': all_districts,
+        'all_settlements': all_settlements,
+        'all_projects': all_projects,
+        'all_donors': all_donors,
+        'all_years': all_years,
+        'all_access_types': all_access_types,
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_list.html', context)

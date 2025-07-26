@@ -111,7 +111,7 @@
                             <label for="region-filter" class="form-label small font-weight-bold">Region</label>
                             <select name="region" class="form-select form-select-sm" id="region-filter">
                                 <option value="">All Regions</option>
-                                {% for region in filter.region.field.queryset %}
+                                {% for region in all_regions %}
                                     <option value="{{ region.pk }}" {% if request.GET.region == region.pk %}selected{% endif %}>
                                         {{ region.region_name }}
                                     </option>
@@ -122,7 +122,7 @@
                             <label for="district-filter" class="form-label small font-weight-bold">District</label>
                             <select name="district" class="form-select form-select-sm" id="district-filter">
                                 <option value="">All Districts</option>
-                                {% for district in filter.district.field.queryset %}
+                                {% for district in all_districts %}
                                     <option value="{{ district.pk }}" {% if request.GET.district == district.pk %}selected{% endif %}>
                                         {{ district.district_name }}
                                     </option>
@@ -133,7 +133,7 @@
                             <label for="settlement-filter" class="form-label small font-weight-bold">Settlement</label>
                             <select name="settlement" class="form-select form-select-sm" id="settlement-filter">
                                 <option value="">All Settlements</option>
-                                {% for settlement in filter.settlement.field.queryset %}
+                                {% for settlement in all_settlements %}
                                     <option value="{{ settlement.pk }}" {% if request.GET.settlement == settlement.pk %}selected{% endif %}>
                                         {{ settlement.settlement_name }}
                                     </option>
@@ -144,7 +144,7 @@
                             <label for="project-filter" class="form-label small font-weight-bold">Project</label>
                             <select name="project" class="form-select form-select-sm" id="project-filter">
                                 <option value="">All Projects</option>
-                                {% for project in filter.project.field.queryset %}
+                                {% for project in all_projects %}
                                     <option value="{{ project.pk }}" {% if request.GET.project == project.pk %}selected{% endif %}>
                                         {{ project.project }}
                                     </option>
@@ -155,7 +155,7 @@
                             <label for="donor-filter" class="form-label small font-weight-bold">Donor</label>
                             <select name="donor" class="form-select form-select-sm" id="donor-filter">
                                 <option value="">All Donors</option>
-                                {% for donor in filter.donor.field.queryset %}
+                                {% for donor in all_donors %}
                                     <option value="{{ donor.pk }}" {% if request.GET.donor == donor.pk %}selected{% endif %}>
                                         {{ donor.name }}
                                     </option>
@@ -166,7 +166,7 @@
                             <label for="year-filter" class="form-label small font-weight-bold">Year</label>
                             <select name="profile_year" class="form-select form-select-sm" id="year-filter">
                                 <option value="">All Years</option>
-                                {% for year in filter.profile_year.field.queryset %}
+                                {% for year in all_years %}
                                     <option value="{{ year.pk }}" {% if request.GET.profile_year == year.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ year.profile_year }}
                                     </option>
@@ -177,7 +177,7 @@
                             <label for="access-filter" class="form-label small font-weight-bold">Access Type</label>
                             <select name="access" class="form-select form-select-sm" id="access-filter">
                                 <option value="">All Access Types</option>
-                                {% for access in filter.access.field.queryset %}
+                                {% for access in all_access_types %}
                                     <option value="{{ access.pk }}" {% if request.GET.access == access.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ access.access_type }}
                                     </option>
