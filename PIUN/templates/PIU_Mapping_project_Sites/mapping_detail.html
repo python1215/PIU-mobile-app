@@ -33,7 +33,44 @@
 
     <!-- Main Content -->
     <div class="row g-4">
+        <!-- Location Information -->
         <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-map me-2"></i>Location Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-primary ps-3">
+                                <h6 class="text-muted mb-1">Region</h6>
+                                <p class="fw-bold mb-0">{{ mapping.region.region_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-success ps-3">
+                                <h6 class="text-muted mb-1">District</h6>
+                                <p class="fw-bold mb-0">{{ mapping.district.district_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-warning ps-3">
+                                <h6 class="text-muted mb-1">Settlement</h6>
+                                <p class="fw-bold mb-0">{{ mapping.settlement.settlement_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-start border-3 border-info ps-3">
+                                <h6 class="text-muted mb-1">Profile Year</h6>
+                                <p class="fw-bold mb-0">{{ mapping.profile_year.profile_year }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Coordinates & Access -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
