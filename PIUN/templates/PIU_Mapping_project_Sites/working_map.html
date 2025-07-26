@@ -186,55 +186,58 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add separator
     layerControls.appendChild(document.createElement('hr'));
     
-    // Function to make element draggable
-    function makeDraggable(element) {
-        if (!element) return;
+    // Initialize draggable legend functionality after all content is loaded
+    function initializeDraggableLegend() {
+        const legendPanel = document.getElementById('legend-panel');
+        const legendHeader = document.querySelector('.legend-header');
+        
+        if (!legendPanel || !legendHeader) {
+            console.log('Legend elements not found, retrying...');
+            setTimeout(initializeDraggableLegend, 200);
+            return;
+        }
         
         let isDragging = false;
         let startX, startY, startLeft, startTop;
         
-        const header = element.querySelector('.legend-header');
-        if (!header) return;
-        
-        header.addEventListener('mousedown', function(e) {
+        legendHeader.onmousedown = function(e) {
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
             
-            const rect = element.getBoundingClientRect();
+            const rect = legendPanel.getBoundingClientRect();
             startLeft = rect.left;
             startTop = rect.top;
             
-            element.style.cursor = 'grabbing';
-            header.style.cursor = 'grabbing';
-            element.style.position = 'fixed';
-            element.style.zIndex = '9999';
-        });
+            legendPanel.style.cursor = 'grabbing';
+            legendHeader.style.cursor = 'grabbing';
+            legendPanel.style.position = 'fixed';
+            legendPanel.style.zIndex = '9999';
+            
+            e.preventDefault();
+        };
         
-        document.addEventListener('mousemove', function(e) {
+        document.onmousemove = function(e) {
             if (!isDragging) return;
             
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             
-            element.style.left = (startLeft + dx) + 'px';
-            element.style.top = (startTop + dy) + 'px';
-            element.style.right = 'auto';
-        });
+            legendPanel.style.left = (startLeft + dx) + 'px';
+            legendPanel.style.top = (startTop + dy) + 'px';
+            legendPanel.style.right = 'auto';
+        };
         
-        document.addEventListener('mouseup', function() {
+        document.onmouseup = function() {
             if (isDragging) {
                 isDragging = false;
-                element.style.cursor = 'move';
-                header.style.cursor = 'move';
+                legendPanel.style.cursor = 'move';
+                legendHeader.style.cursor = 'move';
             }
-        });
+        };
+        
+        console.log('Legend drag functionality initialized');
     }
-    
-    // Initialize draggable legend panel after DOM is ready
-    setTimeout(function() {
-        makeDraggable(document.getElementById('legend-panel'));
-    }, 100);
     
     // Create checkboxes and markers for each project
     Array.from(allProjects).forEach(function(project) {
@@ -401,6 +404,9 @@ document.addEventListener('DOMContentLoaded', function() {
             selectAllCheckbox.indeterminate = true;
         }
     }
+    
+    // Initialize draggable legend after all markers are created
+    initializeDraggableLegend();
     
     console.log('Map loaded with', locations.length, 'locations');
     
