@@ -9,12 +9,16 @@ class MappingForm(forms.ModelForm):
     )
 
     district = forms.ModelChoiceField(
-        queryset=Districts.objects.none(),
+        queryset=Districts.objects.all(),
         widget=forms.Select(),
+        required=False,
+        empty_label="Select District"
     )
 
     settlement = forms.ModelChoiceField(
-        queryset=Settlement.objects.none(),
+        queryset=Settlement.objects.all(),
+        required=False,
+        empty_label="Select Settlement"
     )
 
     class Meta:
