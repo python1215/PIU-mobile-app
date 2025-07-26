@@ -37,15 +37,8 @@
         background: transparent !important;
         border: none !important;
     }
-    .house-marker {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        border: 2px solid white;
+    .house-pin-marker {
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
     }
     .form-check-input:indeterminate {
         background-color: #6c757d;
@@ -156,19 +149,27 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add markers for this project
         projectGroups[project].forEach(function(location) {
-            // Create custom house icon marker
+            // Create custom house icon marker with pin shape
             var customIcon = L.divIcon({
                 className: 'custom-house-marker',
                 html: `
-                    <div class="house-marker" style="background-color: ${color};">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    <div class="house-pin-marker">
+                        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Pin shape background -->
+                            <path fill="${color}" stroke="#fff" stroke-width="2" 
+                                  d="M15 0C6.716 0 0 6.716 0 15c0 9.75 15 30 15 30s15-20.25 15-30C30 6.716 23.284 0 15 0z"/>
+                            <!-- House icon inside -->
+                            <g transform="translate(9, 7)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                                </svg>
+                            </g>
                         </svg>
                     </div>
                 `,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14],
-                popupAnchor: [0, -20]
+                iconSize: [30, 45],
+                iconAnchor: [15, 45],
+                popupAnchor: [0, -45]
             });
             
             var marker = L.marker([location.latitude, location.longitude], {
