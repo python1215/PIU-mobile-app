@@ -16,13 +16,13 @@ class projectMapping(models.Model):
     Latitude = models.FloatField()
     Longitude = models.FloatField()
     access = models.ForeignKey(Access, on_delete=models.CASCADE, related_name='site_mappings')
-    project = models.ManyToManyField(Project, related_name='site_mappings')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='site_mappings')
     donor = models.ManyToManyField(Donor, related_name='site_mappings')
    
     #Note if access to electricity and water is True load another form to regist NAWEC infrastructure in the village
     def __str__(self):
-        projects = ', '.join([project.project for project in self.project.all()])  # Replace 'name' with the field you want
-        return f" {self.region}, {projects} , {self.settlement},  {self.Longitude}, {self.Latitude}"
+        # Now project is a single field, not ManyToMany
+        return f" {self.region}, {self.project.project} , {self.settlement},  {self.Longitude}, {self.Latitude}"
    
 class nawecinfrastructure(models.Model):
     scode = models.CharField(max_length=50)
