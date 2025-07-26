@@ -123,9 +123,11 @@
                             <select name="district" class="form-select form-select-sm" id="district-filter">
                                 <option value="">All Districts</option>
                                 {% for district in all_districts %}
-                                    <option value="{{ district.pk }}" {% if request.GET.district == district.pk %}selected{% endif %}>
+                                    <option value="{{ district.pk }}" {% if request.GET.district == district.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ district.district_name }}
                                     </option>
+                                {% empty %}
+                                    <option value="" disabled>No districts available</option>
                                 {% endfor %}
                             </select>
                         </div>
