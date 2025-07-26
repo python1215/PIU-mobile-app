@@ -170,19 +170,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: customIcon
             }).addTo(layerGroups[project]);
             
-            var popupContent = '<div style="min-width: 200px;">';
+            var popupContent = '<div style="min-width: 250px; font-family: Arial, sans-serif;">';
             
-            // Highlight focused location
+            // Settlement name as title
+            popupContent += '<div style="background: #f8f9fa; padding: 8px; margin: -8px -12px 12px -12px; border-bottom: 1px solid #dee2e6;">';
+            popupContent += '<h6 style="margin: 0; font-weight: bold; color: #333;">' + location.settlement + '</h6>';
             if (focusId == location.id) {
-                popupContent += '<div style="background: #ff4444; color: white; padding: 5px; text-align: center; margin-bottom: 5px;"><strong>📍 SELECTED LOCATION</strong></div>';
+                popupContent += '<small style="color: #ff4444; font-weight: bold;">📍 SELECTED LOCATION</small>';
             }
+            popupContent += '</div>';
             
-            popupContent += '<h6><strong>' + location.settlement + '</strong></h6>';
-            popupContent += '<p><strong>Region:</strong> ' + location.region + '<br>';
-            popupContent += '<strong>District:</strong> ' + location.district + '<br>';
-            popupContent += '<strong>Project:</strong> <span style="color: ' + color + '; font-weight: bold;">' + project + '</span><br>';
-            popupContent += '<strong>Households:</strong> ' + location.total_households + '<br>';
-            popupContent += '<strong>Connected:</strong> ' + location.connected_households + '</p>';
+            // Project information
+            popupContent += '<div style="margin-bottom: 8px;">';
+            popupContent += '<strong style="color: #666; font-size: 12px;">Project:</strong><br>';
+            popupContent += '<span style="color: ' + color + '; font-weight: bold; font-size: 14px;">' + project + '</span>';
+            popupContent += '</div>';
+            
+            // Location details
+            popupContent += '<div style="font-size: 13px; line-height: 1.4;">';
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Region:</strong> ' + location.region + '</div>';
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">District:</strong> ' + location.district + '</div>';
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Donor:</strong> World Bank</div>';
+            
+            // Household statistics
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Households:</strong> ' + location.total_households + '</div>';
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Connected:</strong> ' + location.connected_households + '</div>';
+            
+            // Access rate calculation
+            var accessRate = location.total_households > 0 ? 
+                ((location.connected_households / location.total_households) * 100).toFixed(1) : '0.0';
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Access Rate:</strong> ' + accessRate + '%</div>';
+            
+            // Access type and year
+            popupContent += '<div style="margin-bottom: 4px;"><strong style="color: #666;">Access Type:</strong> Electricity Only</div>';
+            popupContent += '<div style="margin-bottom: 8px;"><strong style="color: #666;">Year:</strong> 2019</div>';
+            
+            // Coordinates
+            popupContent += '<div style="font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">';
+            popupContent += '<strong>Coordinates:</strong> ' + location.latitude.toFixed(4) + ', ' + location.longitude.toFixed(4);
+            popupContent += '</div>';
+            
             popupContent += '</div>';
             
             marker.bindPopup(popupContent);
