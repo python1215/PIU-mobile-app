@@ -16,7 +16,7 @@ class projectMapping(models.Model):
     Latitude = models.FloatField()
     Longitude = models.FloatField()
     access = models.ForeignKey(Access, on_delete=models.CASCADE, related_name='site_mappings')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='site_mappings')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='site_mappings', null=True, blank=True)
     donor = models.ManyToManyField(Donor, related_name='site_mappings')
    
     #Note if access to electricity and water is True load another form to regist NAWEC infrastructure in the village
