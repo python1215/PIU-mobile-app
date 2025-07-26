@@ -127,9 +127,13 @@
                                         {{ district.district_name }}
                                     </option>
                                 {% empty %}
-                                    <option value="" disabled>No districts available</option>
+                                    <option value="" disabled>No districts available (Debug: {{ all_districts.count }} total)</option>
                                 {% endfor %}
                             </select>
+                            <!-- Debug info -->
+                            {% if user.is_authenticated %}
+                                <small class="text-muted">Districts loaded: {{ all_districts.count }}</small>
+                            {% endif %}
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
                             <label for="settlement-filter" class="form-label small font-weight-bold">Settlement</label>

@@ -301,15 +301,20 @@ def mapping_list(request):
         'total_households': total_households,
         'total_connected': total_connected,
         'connection_rate': round((total_connected / total_households * 100) if total_households > 0 else 0, 2),
-        # Add dropdown data to context
-        'all_regions': all_regions,
-        'all_districts': all_districts,
-        'all_settlements': all_settlements,
-        'all_projects': all_projects,
-        'all_donors': all_donors,
-        'all_years': all_years,
-        'all_access_types': all_access_types,
+        # Add dropdown data to context - convert QuerySets to lists to prevent consumption issues
+        'all_regions': list(all_regions),
+        'all_districts': list(all_districts),
+        'all_settlements': list(all_settlements),
+        'all_projects': list(all_projects),
+        'all_donors': list(all_donors),
+        'all_years': list(all_years),
+        'all_access_types': list(all_access_types),
     }
+    
+    # Debug: Print context data to verify it's being passed
+    print(f"DEBUG: Context all_districts count: {len(context['all_districts'])}")
+    for district in context['all_districts'][:3]:
+        print(f"DEBUG: District in context: {district.pk} - {district.district_name}")
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_list.html', context)
 
