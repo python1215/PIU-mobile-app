@@ -459,7 +459,7 @@ def export_mappings_pdf(mappings_queryset):
     ]
     
     for mapping in mappings_queryset:
-        projects = str(mapping.project.project)[:18] + '...' if mapping.project and len(str(mapping.project.project)) > 18 else str(mapping.project.project) if mapping.project else 'No Project'
+        projects = str(mapping.project.project) if mapping.project else 'No Project'
         donors = ', '.join([str(d.name)[:15] for d in mapping.donor.all()[:2]])  # Limit to 2 donors
         if mapping.donor.count() > 2:
             donors += f' +{mapping.donor.count()-2}'
@@ -469,7 +469,7 @@ def export_mappings_pdf(mappings_queryset):
             mapping.region.region_name[:12] if mapping.region else '',
             mapping.district.district_name[:12] if mapping.district else '',
             mapping.settlement.settlement_name[:15] if mapping.settlement else '',
-            projects[:18] + '...' if len(projects) > 18 else projects,
+            projects,  # Full project name without truncation
             donors[:20] + '...' if len(donors) > 20 else donors,
             mapping.profile_year.profile_year if mapping.profile_year else '',
             mapping.access.access_type[:10] if mapping.access else '',
@@ -481,8 +481,8 @@ def export_mappings_pdf(mappings_queryset):
             f"{mapping.Longitude:.4f}" if mapping.Longitude else ''
         ])
     
-    # Create table with smaller column widths for landscape fit
-    table = Table(table_data, colWidths=[0.7*inch, 0.7*inch, 0.8*inch, 1.0*inch, 0.9*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.6*inch, 0.6*inch])
+    # Create table with wider project column to accommodate full project names
+    table = Table(table_data, colWidths=[0.7*inch, 0.7*inch, 0.8*inch, 1.3*inch, 0.8*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.6*inch, 0.6*inch])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
