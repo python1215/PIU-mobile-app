@@ -249,14 +249,77 @@ document.addEventListener('DOMContentLoaded', function() {
         map.setView([parseFloat(focusLat), parseFloat(focusLng)], focusZoom ? parseInt(focusZoom) : 16);
     }
     
-    // Project colors mapping
-    var projectColors = {
-        'ECOWAS Regional Electricity Access Project': '#2E7D32',
-        'Gambia Electricity Restoration and Modernization Project': '#F57C00', 
-        'Gambia Electricity Access Project': '#1976D2',
-        'The Gambia Electricity System Rehabilitation and Expansion Project': '#D32F2F',
-        'No Project': '#757575'
-    };
+    // Comprehensive color palette for automatic assignment
+    var colorPalette = [
+        '#2E7D32', // Green - Used for ECOWAS
+        '#F57C00', // Orange - Used for Restoration
+        '#1976D2', // Blue - Used for Access
+        '#D32F2F', // Red - Used for Rehabilitation
+        '#7B1FA2', // Purple
+        '#00796B', // Teal
+        '#5D4037', // Brown
+        '#FF5722', // Deep Orange
+        '#3F51B5', // Indigo
+        '#E91E63', // Pink
+        '#009688', // Cyan
+        '#FF9800', // Amber
+        '#4CAF50', // Light Green
+        '#9C27B0', // Violet
+        '#607D8B', // Blue Grey
+        '#795548', // Dark Brown
+        '#8BC34A', // Lime
+        '#00BCD4', // Light Blue
+        '#FFC107', // Yellow
+        '#9E9E9E', // Grey - Reserved for 'No Project'
+        '#757575'  // Dark Grey - Fallback
+    ];
+    
+    // Function to get unique color for project
+    function getProjectColor(projectName, existingColors) {
+        // Predefined colors for known projects
+        var knownProjects = {
+            'ECOWAS Regional Electricity Access Project': '#2E7D32',
+            'Gambia Electricity Restoration and Modernization Project': '#F57C00', 
+            'Gambia Electricity Access Project': '#1976D2',
+            'The Gambia Electricity System Rehabilitation and Expansion Project': '#D32F2F',
+            'No Project': '#757575'
+        };
+        
+        // Return known color if project exists
+        if (knownProjects[projectName]) {
+            return knownProjects[projectName];
+        }
+        
+        // Find next available color for new projects
+        for (var i = 0; i < colorPalette.length; i++) {
+            var color = colorPalette[i];
+            if (!existingColors.includes(color)) {
+                return color;
+            }
+        }
+        
+        // Fallback: generate color based on project name hash
+        return generateHashColor(projectName);
+    }
+    
+    // Generate color based on string hash for infinite unique colors
+    function generateHashColor(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        // Generate HSL color with good saturation and lightness
+        var hue = Math.abs(hash) % 360;
+        var saturation = 60 + (Math.abs(hash) % 30); // 60-90%
+        var lightness = 35 + (Math.abs(hash) % 25);  // 35-60%
+        
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+    
+    // Build project colors dynamically
+    var projectColors = {};
+    var usedColors = [];
     
     // Group locations by project
     var projectGroups = {};
@@ -412,9 +475,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(panelName + ' drag functionality initialized');
     }
     
+    // Assign unique colors to all projects
+    Array.from(allProjects).forEach(function(project) {
+        var color = getProjectColor(project, usedColors);
+        projectColors[project] = color;
+        usedColors.push(color);
+    });
+    
+    console.log('Project color assignments:', projectColors);
+    
     // Create checkboxes and markers for each project
     Array.from(allProjects).forEach(function(project) {
-        var color = projectColors[project] || '#666666';
+        var color = projectColors[project];
         layerGroups[project] = L.layerGroup().addTo(map);
         
         // Create project checkbox
