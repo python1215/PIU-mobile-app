@@ -119,8 +119,11 @@
                                 <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude</label>
                                 <div class="input-group">
                                     {{ form.Latitude|add_class:"form-control" }}
-                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn">
+                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()" id="locationBtn" title="Get your current GPS coordinates">
                                         <i class="bi bi-geo-alt-fill me-1"></i>Current Location
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="showLocationHelp()" title="Location troubleshooting help">
+                                        <i class="bi bi-question-circle"></i>
                                     </button>
                                 </div>
                                 {% if form.Latitude.errors %}
@@ -250,7 +253,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check if geolocation is supported
         if (!navigator.geolocation) {
-            alert('Geolocation is not supported by this browser.');
+            showLocationError('Geolocation is not supported by this browser.');
+            return;
+        }
+        
+        // Check if page is served over HTTPS (required for accurate geolocation)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            showLocationError('Location services require HTTPS connection. Please enable location permissions or use HTTPS.');
             return;
         }
         
@@ -258,12 +267,13 @@ document.addEventListener('DOMContentLoaded', function() {
         locationBtn.disabled = true;
         locationBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Getting Location...';
         
-        // Get current position
+        // First try with high accuracy
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 // Success - populate the fields
                 const latitude = position.coords.latitude.toFixed(6);
                 const longitude = position.coords.longitude.toFixed(6);
+                const accuracy = position.coords.accuracy ? Math.round(position.coords.accuracy) : 'Unknown';
                 
                 latitudeField.value = latitude;
                 longitudeField.value = longitude;
@@ -272,48 +282,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 locationBtn.disabled = false;
                 locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
                 
-                // Show success message
-                const successMsg = document.createElement('div');
-                successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
-                successMsg.innerHTML = `
-                    <i class="bi bi-check-circle me-1"></i>
-                    Location detected: ${latitude}, ${longitude}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                
-                // Insert after longitude field
-                longitudeField.parentNode.parentNode.appendChild(successMsg);
-                
-                // Auto-dismiss after 5 seconds
-                setTimeout(() => {
-                    if (successMsg.parentNode) {
-                        successMsg.remove();
-                    }
-                }, 5000);
+                // Show success message with accuracy info
+                showLocationSuccess(`Location detected: ${latitude}, ${longitude}<br><small>Accuracy: ±${accuracy} meters</small>`);
             },
             function(error) {
-                // Error handling
-                let errorMessage = 'Unable to get your location. ';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage += 'Location access was denied.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage += 'Location information is unavailable.';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage += 'Location request timed out.';
-                        break;
-                    default:
-                        errorMessage += 'An unknown error occurred.';
-                        break;
-                }
+                // If high accuracy fails, try with lower accuracy
+                console.log('High accuracy failed, trying low accuracy...', error);
                 
-                alert(errorMessage);
-                
-                // Reset button state
-                locationBtn.disabled = false;
-                locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Success with lower accuracy
+                        const latitude = position.coords.latitude.toFixed(6);
+                        const longitude = position.coords.longitude.toFixed(6);
+                        
+                        latitudeField.value = latitude;
+                        longitudeField.value = longitude;
+                        
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                        
+                        showLocationSuccess(`Location detected: ${latitude}, ${longitude}<br><small>Low accuracy mode</small>`);
+                    },
+                    function(secondError) {
+                        // Both attempts failed
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Current Location';
+                        
+                        let errorMessage = getLocationErrorMessage(secondError);
+                        showLocationError(errorMessage + '<br><small>Try enabling location services in your browser settings.</small>');
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 15000,
+                        maximumAge: 300000
+                    }
+                );
             },
             {
                 enableHighAccuracy: true,
@@ -321,6 +324,142 @@ document.addEventListener('DOMContentLoaded', function() {
                 maximumAge: 60000
             }
         );
+    };
+    
+    function getLocationErrorMessage(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                return 'Location access was denied. Please allow location access in your browser.';
+            case error.POSITION_UNAVAILABLE:
+                return 'Location information is unavailable. Check your GPS/network connection.';
+            case error.TIMEOUT:
+                return 'Location request timed out. Please try again.';
+            default:
+                return 'An unknown error occurred while getting location.';
+        }
+    }
+    
+    function showLocationSuccess(message) {
+        const longitudeField = document.getElementById('id_Longitude');
+        const successMsg = document.createElement('div');
+        successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+        successMsg.innerHTML = `
+            <i class="bi bi-check-circle me-1"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Remove any existing alerts
+        const existingAlert = longitudeField.parentNode.parentNode.querySelector('.alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Insert after longitude field
+        longitudeField.parentNode.parentNode.appendChild(successMsg);
+        
+        // Auto-dismiss after 7 seconds
+        setTimeout(() => {
+            if (successMsg.parentNode) {
+                successMsg.remove();
+            }
+        }, 7000);
+    }
+    
+    function showLocationError(message) {
+        const longitudeField = document.getElementById('id_Longitude');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'alert alert-warning alert-dismissible fade show mt-2';
+        errorMsg.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Remove any existing alerts
+        const existingAlert = longitudeField.parentNode.parentNode.querySelector('.alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Insert after longitude field
+        longitudeField.parentNode.parentNode.appendChild(errorMsg);
+        
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+            if (errorMsg.parentNode) {
+                errorMsg.remove();
+            }
+        }, 10000);
+    }
+    
+    // Location help function
+    window.showLocationHelp = function() {
+        const helpContent = `
+            <div class="modal fade" id="locationHelpModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-geo-alt me-2"></i>Location Services Help</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6><i class="bi bi-exclamation-triangle text-warning me-2"></i>Common Issues & Solutions:</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong>1. Browser Permission:</strong><br>
+                                    <small class="text-muted">Click the location icon in your browser's address bar and allow location access.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>2. HTTPS Required:</strong><br>
+                                    <small class="text-muted">Location services work best on secure (HTTPS) connections.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>3. GPS/Network:</strong><br>
+                                    <small class="text-muted">Ensure GPS is enabled on your device and you have internet connectivity.</small>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>4. Browser Settings:</strong><br>
+                                    <small class="text-muted">Check browser settings → Privacy & Security → Location Services.</small>
+                                </li>
+                            </ul>
+                            <hr>
+                            <h6><i class="bi bi-lightbulb text-info me-2"></i>Manual Entry:</h6>
+                            <p class="small text-muted mb-2">If location detection fails, you can manually enter coordinates:</p>
+                            <ul class="small text-muted">
+                                <li>For The Gambia: Latitude 13.0-13.8, Longitude -13.8 to -16.8</li>
+                                <li>Use decimal degrees format (e.g., 13.4667, -15.3101)</li>
+                                <li>You can find coordinates using Google Maps or GPS apps</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="tryLocationAgain()" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('locationHelpModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to document
+        document.body.insertAdjacentHTML('beforeend', helpContent);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('locationHelpModal'));
+        modal.show();
+    };
+    
+    // Try location again function
+    window.tryLocationAgain = function() {
+        getCurrentLocation();
     };
 
     // Handle form submission for popup mode
