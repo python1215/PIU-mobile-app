@@ -14,6 +14,46 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 
 
+def simple_map(request):
+    """Simplified map view with basic Leaflet implementation"""
+    
+    project_communities = projectMapping.objects.select_related(
+        'region', 'district', 'settlement', 'profile_year', 'access'
+    ).prefetch_related('project', 'donor').filter(
+        Latitude__isnull=False,
+        Longitude__isnull=False
+    ).all()
+    
+    # Generate simple project data for JavaScript
+    project_data = []
+    for community in project_communities:
+        try:
+            if community.Latitude and community.Longitude:
+                projects = community.project.all()
+                project_names = [str(p.project) for p in projects]
+                
+                project_data.append({
+                    'id': community.id,
+                    'latitude': float(community.Latitude),
+                    'longitude': float(community.Longitude),
+                    'settlement': community.settlement.settlement_name if community.settlement else 'Unknown',
+                    'region': community.region.region_name if community.region else 'Unknown', 
+                    'district': community.district.district_name if community.district else 'Unknown',
+                    'projects': project_names,
+                    'total_households': community.Total_No_of_Households or 0,
+                    'connected_households': community.no_of_connected_household or 0,
+                })
+        except Exception as e:
+            print(f"Error processing community {community.id}: {str(e)}")
+            continue
+    
+    context = {
+        'total_communities': project_communities.count(),
+        'project_data_json': json.dumps(project_data),
+    }
+    
+    return render(request, 'PIU_Mapping_project_Sites/simple_map.html', context)
+
 def index(request):
     """Main mapping view displaying authentic NAWEC PIU project coordinates"""
     

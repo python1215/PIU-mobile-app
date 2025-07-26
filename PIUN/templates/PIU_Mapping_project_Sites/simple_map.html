@@ -1,0 +1,97 @@
+{% extends 'PIU_Mapping_project_Sites/base.html' %}
+{% load static %}
+
+{% block title %}Project Site Mapping - NAWEC PIU{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<style>
+    .map-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    #project-map {
+        width: 100%;
+        height: 500px;
+        background: #f8f9fa;
+    }
+    
+    .leaflet-container {
+        background: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block mapping_content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        Interactive Project Sites Map
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Displaying {{ total_communities|default:0 }} project locations across The Gambia
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="row">
+        <div class="col-12">
+            <div class="map-container">
+                <div id="project-map"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing simple map...');
+    
+    // Project data from Django
+    const projectData = {{ project_data_json|safe }};
+    console.log('Project data:', projectData);
+    
+    // Initialize map centered on The Gambia
+    const map = L.map('project-map').setView([13.4667, -15.3100], 9);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    // Add markers for each project location
+    projectData.forEach(function(location, index) {
+        const marker = L.marker([location.latitude, location.longitude])
+            .addTo(map)
+            .bindPopup(`
+                <div style="min-width: 200px;">
+                    <h6><strong>${location.settlement}</strong></h6>
+                    <p><strong>Region:</strong> ${location.region}<br>
+                    <strong>District:</strong> ${location.district}<br>
+                    <strong>Projects:</strong> ${location.projects.join(', ')}<br>
+                    <strong>Households:</strong> ${location.total_households}<br>
+                    <strong>Connected:</strong> ${location.connected_households}</p>
+                </div>
+            `);
+    });
+    
+    console.log('Map initialized with', projectData.length, 'markers');
+});
+</script>
+{% endblock %}
