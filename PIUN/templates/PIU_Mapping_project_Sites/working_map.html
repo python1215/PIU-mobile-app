@@ -12,19 +12,22 @@
     </div>
     
     <div class="row">
-        <div class="col-md-9">
-            <div id="map" style="height: 600px; width: 100%; border: 1px solid #ccc;"></div>
+        <div class="col-12">
+            <div id="map" style="height: calc(100vh - 150px); width: 100%; border: 1px solid #ccc;"></div>
         </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h6><i class="bi bi-layers"></i> Project Layers</h6>
-                </div>
-                <div class="card-body">
-                    <div id="layer-controls">
-                        <!-- Layer controls will be populated by JavaScript -->
-                    </div>
-                </div>
+    </div>
+    
+    <!-- Draggable Project Layers Panel -->
+    <div id="layers-panel" class="layers-panel">
+        <div class="layers-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;"><i class="bi bi-layers"></i> Project Layers</h6>
+                <span style="font-size: 10px; color: #999;">⋮⋮ Drag</span>
+            </div>
+        </div>
+        <div class="layers-content">
+            <div id="layer-controls">
+                <!-- Layer controls will be populated by JavaScript -->
             </div>
         </div>
     </div>
@@ -107,6 +110,40 @@
         max-height: 300px;
         overflow-y: auto;
     }
+    
+    /* Layers panel styles */
+    .layers-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 250px;
+        max-width: 300px;
+        cursor: move;
+    }
+    
+    .layers-header {
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        cursor: move;
+        user-select: none;
+    }
+    
+    .layers-header:hover {
+        background: #e9ecef;
+    }
+    
+    .layers-content {
+        padding: 10px 12px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
 </style>
 
 <script>
@@ -172,6 +209,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var layerGroups = {};
     var layerControls = document.getElementById('layer-controls');
     
+    if (!layerControls) {
+        console.error('Layer controls container not found');
+        return;
+    }
+    
     // Create "Select All" checkbox
     var selectAllDiv = document.createElement('div');
     selectAllDiv.className = 'form-check mb-2';
@@ -186,57 +228,69 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add separator
     layerControls.appendChild(document.createElement('hr'));
     
-    // Initialize draggable legend functionality after all content is loaded
-    function initializeDraggableLegend() {
+    // Initialize draggable panels functionality
+    function initializeDraggablePanels() {
+        // Initialize legend panel
         const legendPanel = document.getElementById('legend-panel');
         const legendHeader = document.querySelector('.legend-header');
         
-        if (!legendPanel || !legendHeader) {
-            console.log('Legend elements not found, retrying...');
-            setTimeout(initializeDraggableLegend, 200);
-            return;
+        if (legendPanel && legendHeader) {
+            makePanelDraggable(legendPanel, legendHeader, 'Legend');
         }
         
+        // Initialize layers panel
+        const layersPanel = document.getElementById('layers-panel');
+        const layersHeader = document.querySelector('.layers-header');
+        
+        if (layersPanel && layersHeader) {
+            makePanelDraggable(layersPanel, layersHeader, 'Layers');
+        } else {
+            console.log('Layers elements not found, retrying...');
+            setTimeout(initializeDraggablePanels, 200);
+        }
+    }
+    
+    function makePanelDraggable(panel, header, panelName) {
         let isDragging = false;
         let startX, startY, startLeft, startTop;
         
-        legendHeader.onmousedown = function(e) {
+        header.onmousedown = function(e) {
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
             
-            const rect = legendPanel.getBoundingClientRect();
+            const rect = panel.getBoundingClientRect();
             startLeft = rect.left;
             startTop = rect.top;
             
-            legendPanel.style.cursor = 'grabbing';
-            legendHeader.style.cursor = 'grabbing';
-            legendPanel.style.position = 'fixed';
-            legendPanel.style.zIndex = '9999';
+            panel.style.cursor = 'grabbing';
+            header.style.cursor = 'grabbing';
+            panel.style.position = 'fixed';
+            panel.style.zIndex = '9999';
             
             e.preventDefault();
         };
         
-        document.onmousemove = function(e) {
+        document.addEventListener('mousemove', function(e) {
             if (!isDragging) return;
             
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             
-            legendPanel.style.left = (startLeft + dx) + 'px';
-            legendPanel.style.top = (startTop + dy) + 'px';
-            legendPanel.style.right = 'auto';
-        };
+            panel.style.left = (startLeft + dx) + 'px';
+            panel.style.top = (startTop + dy) + 'px';
+            if (panel.style.right) panel.style.right = 'auto';
+        });
         
-        document.onmouseup = function() {
+        document.addEventListener('mouseup', function() {
             if (isDragging) {
                 isDragging = false;
-                legendPanel.style.cursor = 'move';
-                legendHeader.style.cursor = 'move';
+                panel.style.cursor = 'move';
+                header.style.cursor = 'move';
             }
-        };
+        });
         
-        console.log('Legend drag functionality initialized');
+        console.log(panelName + ' drag functionality initialized');
     }
     
     // Create checkboxes and markers for each project
@@ -405,8 +459,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initialize draggable legend after all markers are created
-    initializeDraggableLegend();
+    // Initialize draggable panels after all markers are created
+    initializeDraggablePanels();
     
     console.log('Map loaded with', locations.length, 'locations');
     
