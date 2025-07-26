@@ -108,77 +108,77 @@
                 <div class="card-body">
                     <form method="get" class="row g-3" id="filter-form">
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.region.field.id_for_label }}" class="form-label small font-weight-bold">Region</label>
-                            <select name="{{ filter.region.name }}" class="form-select form-select-sm" id="region-filter">
+                            <label for="region-filter" class="form-label small font-weight-bold">Region</label>
+                            <select name="region" class="form-select form-select-sm" id="region-filter">
                                 <option value="">All Regions</option>
                                 {% for region in filter.region.field.queryset %}
-                                    <option value="{{ region.pk }}" {% if filter.region.value == region.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ region.pk }}" {% if request.GET.region == region.pk %}selected{% endif %}>
                                         {{ region.region_name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.district.field.id_for_label }}" class="form-label small font-weight-bold">District</label>
-                            <select name="{{ filter.district.name }}" class="form-select form-select-sm" id="district-filter">
+                            <label for="district-filter" class="form-label small font-weight-bold">District</label>
+                            <select name="district" class="form-select form-select-sm" id="district-filter">
                                 <option value="">All Districts</option>
                                 {% for district in filter.district.field.queryset %}
-                                    <option value="{{ district.pk }}" {% if filter.district.value == district.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ district.pk }}" {% if request.GET.district == district.pk %}selected{% endif %}>
                                         {{ district.district_name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.settlement.field.id_for_label }}" class="form-label small font-weight-bold">Settlement</label>
-                            <select name="{{ filter.settlement.name }}" class="form-select form-select-sm" id="settlement-filter">
+                            <label for="settlement-filter" class="form-label small font-weight-bold">Settlement</label>
+                            <select name="settlement" class="form-select form-select-sm" id="settlement-filter">
                                 <option value="">All Settlements</option>
                                 {% for settlement in filter.settlement.field.queryset %}
-                                    <option value="{{ settlement.pk }}" {% if filter.settlement.value == settlement.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ settlement.pk }}" {% if request.GET.settlement == settlement.pk %}selected{% endif %}>
                                         {{ settlement.settlement_name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.project.field.id_for_label }}" class="form-label small font-weight-bold">Project</label>
-                            <select name="{{ filter.project.name }}" class="form-select form-select-sm" id="project-filter">
+                            <label for="project-filter" class="form-label small font-weight-bold">Project</label>
+                            <select name="project" class="form-select form-select-sm" id="project-filter">
                                 <option value="">All Projects</option>
                                 {% for project in filter.project.field.queryset %}
-                                    <option value="{{ project.pk }}" {% if filter.project.value == project.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ project.pk }}" {% if request.GET.project == project.pk %}selected{% endif %}>
                                         {{ project.project }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.donor.field.id_for_label }}" class="form-label small font-weight-bold">Donor</label>
-                            <select name="{{ filter.donor.name }}" class="form-select form-select-sm" id="donor-filter">
+                            <label for="donor-filter" class="form-label small font-weight-bold">Donor</label>
+                            <select name="donor" class="form-select form-select-sm" id="donor-filter">
                                 <option value="">All Donors</option>
                                 {% for donor in filter.donor.field.queryset %}
-                                    <option value="{{ donor.pk }}" {% if filter.donor.value == donor.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ donor.pk }}" {% if request.GET.donor == donor.pk %}selected{% endif %}>
                                         {{ donor.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.profile_year.field.id_for_label }}" class="form-label small font-weight-bold">Year</label>
-                            <select name="{{ filter.profile_year.name }}" class="form-select form-select-sm" id="year-filter">
+                            <label for="year-filter" class="form-label small font-weight-bold">Year</label>
+                            <select name="profile_year" class="form-select form-select-sm" id="year-filter">
                                 <option value="">All Years</option>
                                 {% for year in filter.profile_year.field.queryset %}
-                                    <option value="{{ year.pk }}" {% if filter.profile_year.value == year.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ year.pk }}" {% if request.GET.profile_year == year.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ year.profile_year }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-4 col-sm-6">
-                            <label for="{{ filter.access.field.id_for_label }}" class="form-label small font-weight-bold">Access Type</label>
-                            <select name="{{ filter.access.name }}" class="form-select form-select-sm" id="access-filter">
+                            <label for="access-filter" class="form-label small font-weight-bold">Access Type</label>
+                            <select name="access" class="form-select form-select-sm" id="access-filter">
                                 <option value="">All Access Types</option>
                                 {% for access in filter.access.field.queryset %}
-                                    <option value="{{ access.pk }}" {% if filter.access.value == access.pk|stringformat:"s" %}selected{% endif %}>
+                                    <option value="{{ access.pk }}" {% if request.GET.access == access.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ access.access_type }}
                                     </option>
                                 {% endfor %}
