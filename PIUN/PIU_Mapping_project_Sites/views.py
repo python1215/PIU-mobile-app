@@ -38,13 +38,13 @@ def index(request):
             center_lng = float(focus_lng)
             zoom_level = 16  # Zoom in when focusing on specific location
         except (ValueError, TypeError):
-            center_lat = 13.4544  # Default to Gambia center
-            center_lng = -16.5753
-            zoom_level = 8
+            center_lat = 13.4667  # Default to Gambia center
+            center_lng = -15.3100
+            zoom_level = 9
     else:
-        center_lat = 13.4544  # Default to Gambia center
-        center_lng = -16.5753
-        zoom_level = 8
+        center_lat = 13.4667  # Default to Gambia center
+        center_lng = -15.3100
+        zoom_level = 9
     
     print(f"DEBUG: Map created successfully centered at [{center_lat}, {center_lng}]")
 

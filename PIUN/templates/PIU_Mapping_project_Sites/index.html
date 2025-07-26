@@ -257,9 +257,9 @@ function initializeProjectMap() {
         const mappingId = urlParams.get('mappingId');
         
         // Use URL parameters if available, otherwise use defaults
-        const centerLat = paramLat ? parseFloat(paramLat) : {{ center_lat|default:"13.4544" }};
-        const centerLng = paramLng ? parseFloat(paramLng) : {{ center_lng|default:"-16.5753" }};
-        const zoomLevel = paramZoom ? parseInt(paramZoom) : {{ zoom_level|default:"8" }};
+        const centerLat = paramLat ? parseFloat(paramLat) : {{ center_lat|default:"13.4667" }};
+        const centerLng = paramLng ? parseFloat(paramLng) : {{ center_lng|default:"-15.3100" }};
+        const zoomLevel = paramZoom ? parseInt(paramZoom) : {{ zoom_level|default:"9" }};
         
         console.log('Project data loaded:', projectData.length, 'locations');
         console.log('Map center:', [centerLat, centerLng], 'zoom:', zoomLevel);
