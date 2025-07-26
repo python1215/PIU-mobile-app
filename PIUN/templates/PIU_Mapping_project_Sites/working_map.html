@@ -33,13 +33,20 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-    .custom-marker {
+    .custom-pin-marker {
         background: transparent !important;
         border: none !important;
+    }
+    .pin-marker {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     }
     .form-check-input:indeterminate {
         background-color: #6c757d;
         border-color: #6c757d;
+    }
+    .leaflet-div-icon {
+        background: transparent;
+        border: none;
     }
 </style>
 
@@ -142,12 +149,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add markers for this project
         projectGroups[project].forEach(function(location) {
-            // Create custom colored marker
+            // Create custom colored pin marker
             var customIcon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background-color: ${color}; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                iconSize: [25, 25],
-                iconAnchor: [12, 12]
+                className: 'custom-pin-marker',
+                html: `
+                    <div class="pin-marker" style="color: ${color};">
+                        <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="currentColor" stroke="#fff" stroke-width="1" 
+                                  d="M12.5 0C5.596 0 0 5.596 0 12.5c0 8.13 12.5 28.5 12.5 28.5s12.5-20.37 12.5-28.5C25 5.596 19.404 0 12.5 0z"/>
+                            <circle fill="#fff" cx="12.5" cy="12.5" r="4"/>
+                        </svg>
+                    </div>
+                `,
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
             });
             
             var marker = L.marker([location.latitude, location.longitude], {
