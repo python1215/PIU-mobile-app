@@ -1,0 +1,81 @@
+{% extends 'PIU_Mapping_project_Sites/base.html' %}
+
+{% block title %}Project Site Mapping{% endblock %}
+
+{% block mapping_content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h2>Interactive Project Sites Map</h2>
+            <p>Showing {{ total_communities }} project locations in The Gambia</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div id="map" style="height: 600px; width: 100%; border: 1px solid #ccc;"></div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map
+    var map = L.map('map').setView([13.4667, -15.3100], 9);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+    
+    // Project data from Django
+    var locations = {{ project_data_json|safe }};
+    
+    // Check URL parameters
+    var urlParams = new URLSearchParams(window.location.search);
+    var focusLat = urlParams.get('lat');
+    var focusLng = urlParams.get('lng');
+    var focusZoom = urlParams.get('zoom');
+    var focusId = urlParams.get('mappingId');
+    
+    // If focusing on specific location, update map view
+    if (focusLat && focusLng) {
+        map.setView([parseFloat(focusLat), parseFloat(focusLng)], focusZoom ? parseInt(focusZoom) : 16);
+    }
+    
+    // Add markers
+    locations.forEach(function(location) {
+        var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+        
+        var popupContent = '<div style="min-width: 200px;">';
+        
+        // Highlight focused location
+        if (focusId == location.id) {
+            popupContent += '<div style="background: #ff4444; color: white; padding: 5px; text-align: center; margin-bottom: 5px;"><strong>📍 SELECTED LOCATION</strong></div>';
+        }
+        
+        popupContent += '<h6><strong>' + location.settlement + '</strong></h6>';
+        popupContent += '<p><strong>Region:</strong> ' + location.region + '<br>';
+        popupContent += '<strong>District:</strong> ' + location.district + '<br>';
+        popupContent += '<strong>Projects:</strong> ' + location.projects.join(', ') + '<br>';
+        popupContent += '<strong>Households:</strong> ' + location.total_households + '<br>';
+        popupContent += '<strong>Connected:</strong> ' + location.connected_households + '</p>';
+        popupContent += '</div>';
+        
+        marker.bindPopup(popupContent);
+        
+        // Auto-open popup for focused location
+        if (focusId == location.id) {
+            marker.openPopup();
+        }
+    });
+    
+    console.log('Map loaded with', locations.length, 'locations');
+});
+</script>
+{% endblock %}

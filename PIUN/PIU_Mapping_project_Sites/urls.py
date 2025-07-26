@@ -5,8 +5,8 @@ from . import views
 app_name = 'PIU_Mapping_project_Sites'
 
 urlpatterns = [
-    path('', views.simple_map, name='mapping-dashboard'),
-    path('index/', views.simple_map, name='index'),
+    path('', views.working_map, name='mapping-dashboard'),
+    path('index/', views.working_map, name='index'),
     path('complex/', views.index, name='complex-index'),
     path('leafletmap/', views.indexl, name='leafletmap'),
     path('offline-map/', views.offline_map, name='offline-map'),
