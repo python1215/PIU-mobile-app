@@ -220,6 +220,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var accessRate = location.total_households > 0 ? 
                 ((location.connected_households / location.total_households) * 100).toFixed(1) : '0.0';
             popupContent += '<div><strong>Access Rate:</strong> ' + accessRate + '%</div>';
+            popupContent += '<div><strong>Access Type:</strong> ' + (location.access_type || 'Unknown') + '</div>';
+            popupContent += '<div><strong>Year:</strong> ' + (location.year || 'Unknown') + '</div>';
             popupContent += '</div>';
             
             // Compact coordinates
