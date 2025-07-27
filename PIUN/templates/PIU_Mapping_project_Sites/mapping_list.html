@@ -86,6 +86,75 @@
         </div>
     </div>
 
+    <!-- Active Filters Display -->
+    {% if request.GET.region or request.GET.district or request.GET.project or request.GET.settlement or request.GET.donor or request.GET.profile_year or request.GET.access or request.GET.settlement_search %}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Active Filters (AND Logic Applied):</strong>
+                    <div class="ms-3">
+                        {% if request.GET.region %}
+                            {% for region in all_regions %}
+                                {% if region.pk|stringformat:"s" == request.GET.region %}
+                                    <span class="badge bg-primary me-1">Region: {{ region.region_name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.district %}
+                            {% for district in all_districts %}
+                                {% if district.pk|stringformat:"s" == request.GET.district %}
+                                    <span class="badge bg-success me-1">District: {{ district.district_name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.project %}
+                            {% for project in all_projects %}
+                                {% if project.pk|stringformat:"s" == request.GET.project %}
+                                    <span class="badge bg-warning text-dark me-1">Project: {{ project.project }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.settlement %}
+                            {% for settlement in all_settlements %}
+                                {% if settlement.pk|stringformat:"s" == request.GET.settlement %}
+                                    <span class="badge bg-info me-1">Settlement: {{ settlement.settlement_name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.donor %}
+                            {% for donor in all_donors %}
+                                {% if donor.pk|stringformat:"s" == request.GET.donor %}
+                                    <span class="badge bg-secondary me-1">Donor: {{ donor.name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.profile_year %}
+                            {% for year in all_years %}
+                                {% if year.pk|stringformat:"s" == request.GET.profile_year %}
+                                    <span class="badge bg-dark me-1">Year: {{ year.profile_year }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.access %}
+                            {% for access in all_access_types %}
+                                {% if access.pk|stringformat:"s" == request.GET.access %}
+                                    <span class="badge bg-danger me-1">Access: {{ access.access_type }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if request.GET.settlement_search %}
+                            <span class="badge bg-light text-dark me-1">Search: "{{ request.GET.settlement_search }}"</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-outline-secondary btn-sm ms-auto">
+                        <i class="bi bi-x-circle"></i> Clear All Filters
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- Filter Form -->
     <div class="row mb-4">
         <div class="col-12">
@@ -93,6 +162,7 @@
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold" style="color: white;">
                         <i class="bi bi-funnel"></i> Filter & Export Options
+                        <small class="text-muted ms-2">(Combine multiple filters for precise results)</small>
                     </h6>
                     <div class="btn-group" role="group">
                         <a href="?export=excel{% for key, value in request.GET.items %}{% if key != 'export' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 

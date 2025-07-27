@@ -44,7 +44,7 @@ class ProjectMappingFilter(django_filters.FilterSet):
         })
     )
     
-    # Project filter (ManyToMany relationship)
+    # Project filter (ForeignKey relationship)
     project = django_filters.ModelChoiceFilter(
         queryset=Project.objects.all().order_by('project'),
         field_name='project',
