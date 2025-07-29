@@ -1823,11 +1823,16 @@ async function useSimpleROAResult() {
                 console.log(`✅ ROA achieved value set: ${formattedValue}`);
             }
             
-            // Clear all popup form fields and memory
-            document.getElementById('simpleNetProfit').value = '';
-            document.getElementById('simpleTotalAssets').value = '';
-            document.getElementById('roaCompensationAmount').value = '0';
-            document.getElementById('simpleQuarter').value = '';
+            // Clear all popup form fields and memory with null checks
+            const simpleNetProfitField = document.getElementById('simpleNetProfit');
+            const simpleTotalAssetsField = document.getElementById('simpleTotalAssets');
+            const roaCompensationAmountField = document.getElementById('roaCompensationAmount');
+            const simpleQuarterField = document.getElementById('simpleQuarter');
+            
+            if (simpleNetProfitField) simpleNetProfitField.value = '';
+            if (simpleTotalAssetsField) simpleTotalAssetsField.value = '';
+            if (roaCompensationAmountField) roaCompensationAmountField.value = '0';
+            if (simpleQuarterField) simpleQuarterField.value = '';
             
             // Clear stored result from memory
             window.simpleROAResult = null;
@@ -2102,11 +2107,16 @@ async function useNPMResult() {
                 console.log(`✅ NPM achieved value set: ${formattedValue}`);
             }
             
-            // Clear all popup form fields and memory
-            document.getElementById('npmNetProfit').value = '';
-            document.getElementById('npmTotalRevenueTurnover').value = '';
-            document.getElementById('npmCompensationAmount').value = '0';
-            document.getElementById('npmQuarter').value = '';
+            // Clear all popup form fields and memory with null checks
+            const npmNetProfitField = document.getElementById('npmNetProfit');
+            const npmTotalRevenueTurnoverField = document.getElementById('npmTotalRevenueTurnover');
+            const npmCompensationAmountField = document.getElementById('npmCompensationAmount');
+            const npmQuarterField = document.getElementById('npmQuarter');
+            
+            if (npmNetProfitField) npmNetProfitField.value = '';
+            if (npmTotalRevenueTurnoverField) npmTotalRevenueTurnoverField.value = '';
+            if (npmCompensationAmountField) npmCompensationAmountField.value = '0';
+            if (npmQuarterField) npmQuarterField.value = '';
             
             // Clear stored result from memory
             window.simpleNPMResult = null;
@@ -2131,11 +2141,16 @@ async function useNPMResult() {
 }
 
 function resetNPMForm() {
-    // Clear all input fields
-    document.getElementById('npmNetProfit').value = '';
-    document.getElementById('npmTotalRevenueTurnover').value = '';
-    document.getElementById('npmCompensationAmount').value = '0';
-    document.getElementById('npmQuarter').value = '';
+    // Clear all input fields with null checks
+    const npmNetProfitField = document.getElementById('npmNetProfit');
+    const npmTotalRevenueTurnoverField = document.getElementById('npmTotalRevenueTurnover');
+    const npmCompensationAmountField = document.getElementById('npmCompensationAmount');
+    const npmQuarterField = document.getElementById('npmQuarter');
+    
+    if (npmNetProfitField) npmNetProfitField.value = '';
+    if (npmTotalRevenueTurnoverField) npmTotalRevenueTurnoverField.value = '';
+    if (npmCompensationAmountField) npmCompensationAmountField.value = '0';
+    if (npmQuarterField) npmQuarterField.value = '';
     
     // Hide the result section
     const resultDiv = document.getElementById('npmResult');
@@ -2147,7 +2162,9 @@ function resetNPMForm() {
     window.simpleNPMResult = null;
     
     // Focus on first input
-    document.getElementById('npmNetProfit').focus();
+    if (npmNetProfitField) {
+        npmNetProfitField.focus();
+    }
 }
 
 function closeNPMPopup() {
@@ -2655,11 +2672,16 @@ async function useDSCRResult() {
                 console.log(`✅ DSCR achieved value set: ${formattedValue}`);
             }
             
-            // Clear all popup form fields and memory
-            document.getElementById('dscrNetIncome').value = '';
-            document.getElementById('dscrDebtService').value = '';
-            document.getElementById('dscrCompensationAmount').value = '0';
-            document.getElementById('dscrQuarter').value = '';
+            // Clear all popup form fields and memory with null checks
+            const dscrNetIncomeField = document.getElementById('dscrNetIncome');
+            const dscrDebtServiceField = document.getElementById('dscrDebtService');
+            const dscrCompensationAmountField = document.getElementById('dscrCompensationAmount');
+            const dscrQuarterField = document.getElementById('dscrQuarter');
+            
+            if (dscrNetIncomeField) dscrNetIncomeField.value = '';
+            if (dscrDebtServiceField) dscrDebtServiceField.value = '';
+            if (dscrCompensationAmountField) dscrCompensationAmountField.value = '0';
+            if (dscrQuarterField) dscrQuarterField.value = '';
             
             // Clear stored result from memory
             window.simpleDSCRResult = null;
@@ -2684,11 +2706,16 @@ async function useDSCRResult() {
 }
 
 function resetDSCRForm() {
-    // Clear all input fields
-    document.getElementById('dscrNetIncome').value = '';
-    document.getElementById('dscrDebtService').value = '';
-    document.getElementById('dscrCompensationAmount').value = '0';
-    document.getElementById('dscrQuarter').value = '';
+    // Clear all input fields with null checks
+    const dscrNetIncomeField = document.getElementById('dscrNetIncome');
+    const dscrDebtServiceField = document.getElementById('dscrDebtService');
+    const dscrCompensationAmountField = document.getElementById('dscrCompensationAmount');
+    const dscrQuarterField = document.getElementById('dscrQuarter');
+    
+    if (dscrNetIncomeField) dscrNetIncomeField.value = '';
+    if (dscrDebtServiceField) dscrDebtServiceField.value = '';
+    if (dscrCompensationAmountField) dscrCompensationAmountField.value = '0';
+    if (dscrQuarterField) dscrQuarterField.value = '';
     
     // Hide the result section
     const resultDiv = document.getElementById('dscrResult');
@@ -2700,7 +2727,9 @@ function resetDSCRForm() {
     window.simpleDSCRResult = null;
     
     // Focus on first input field
-    document.getElementById('dscrNetIncome').focus();
+    if (dscrNetIncomeField) {
+        dscrNetIncomeField.focus();
+    }
 }
 
 function closeDSCRPopup() {
