@@ -29,8 +29,8 @@
             }
             
             /* Tighter column widths for print */
-            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 18% !important; }
-            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8% !important; }
+            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 16% !important; }
+            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 10% !important; }
             .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5% !important; }
             .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5% !important; }
             .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6% !important; }
@@ -87,14 +87,17 @@
             text-align: center;
         }
         
-        /* Left align the Indicator column for better readability */
+        /* Left align the Indicator and PDO columns for better readability */
         .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) {
+            text-align: left !important;
+        }
+        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) {
             text-align: left !important;
         }
         
         /* Column width controls for A4 portrait */
-        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 20%; } /* Indicator - increased for full text */
-        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8%; }  /* PDO */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 18%; } /* Indicator - increased for full text */
+        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 12%; }  /* PDO - increased for full text */
         .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5%; }  /* Baseline */
         .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5%; }  /* Target */
         .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6%; }  /* Achieved */
@@ -266,7 +269,7 @@
                                 <div>{{ entry.indicator_description }}</div>
                                 <small class="text-muted">{{ entry.indicator_type }}</small>
                             </td>
-                            <td title="{{ entry.pdo }}">{{ entry.pdo|truncatechars:10|default:"N/A" }}</td>
+                            <td>{{ entry.pdo|default:"N/A" }}</td>
                             <td>{{ entry.baseline_value|floatformat:1 }}</td>
                             <td>{{ entry.End_Target_Value|floatformat:1 }}</td>
                             <td class="fw-bold">{{ entry.achieved_value|floatformat:1 }}</td>
