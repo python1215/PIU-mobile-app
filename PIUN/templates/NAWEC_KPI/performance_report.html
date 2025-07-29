@@ -254,7 +254,7 @@
                         {% for entry in report_entries %}
                         <tr>
                             <td>
-                                <div>{{ entry.indicator_description }}</div>
+                                <div>{{ entry.indicator_description.indicator_description }}</div>
                                 <small class="text-muted">{{ entry.indicator_type }}</small>
                             </td>
                             <td>{{ entry.pdo|default:"N/A" }}</td>
@@ -279,13 +279,13 @@
                             <td class="text-center">
                                 {% if entry.performance_calculated is not None %}
                                     <!-- Special logic for Debtor Days - Achieved > Target = Not Achieve -->
-                                    {% if "Debtor Days" in entry.indicator_description or "DD" in entry.indicator_description %}
+                                    {% if "Debtor Days" in entry.indicator_description.indicator_description or "DD" in entry.indicator_description.indicator_description %}
                                         {% if entry.achieved_value > entry.End_Target_Value %}
                                             <span class="badge bg-danger rounded-pill">Not Achieve</span>
                                         {% else %}
                                             <span class="badge bg-success rounded-pill">Achieve</span>
                                         {% endif %}
-                                    {% elif "Total Losses Electricity" in entry.indicator_description or "Non-Revenue Water" in entry.indicator_description or "NRW" in entry.indicator_description or "New Water Connection Days" in entry.indicator_description or "NWCD" in entry.indicator_description or "New Electricity Connection Days" in entry.indicator_description or "NECD" in entry.indicator_description %}
+                                    {% elif "Total Losses Electricity" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
                                         <!-- For loss indicators, lower achieved value is better -->
                                         {% if entry.achieved_value < entry.End_Target_Value %}
                                             <span class="badge bg-success rounded-pill">Achieve</span>
