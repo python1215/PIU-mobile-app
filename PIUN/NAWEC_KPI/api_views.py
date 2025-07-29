@@ -11,10 +11,10 @@ from django.views import View
 import json
 from .models import (
     CalculateROA, CalculateNPM, CalculateDSCR, CalculateMWh,
-    CalculateGAF, CalculateTDE, CalculateATC, CalculateNECD,
+    CalculateGAF, CalculateTMH, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC,
     CalculateWQCB, CalculateNRW, CalculateDD,
-    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, Month
 )
 from setup.models import Quarter, YEAR
 
@@ -31,7 +31,7 @@ class SaveKPICalculationView(View):
         'MWh': CalculateMWh,
         'EI': CalculateMWh,  # Energy Injection uses MWh model
         'GAF': CalculateGAF,
-        'TDE': CalculateTDE,
+        'TDE': CalculateTMH,
         'ATC': CalculateATC,
         'NECD': CalculateNECD,
         'NWCD': CalculateNWCD,

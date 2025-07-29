@@ -488,9 +488,45 @@ class CalculateGAF(models.Model):
         verbose_name_plural = "Generation Availability Factor (GAF) Calculations"
 
 
-class CalculateTDE(models.Model):
-    """KPI-06: Training Days per Employee Calculation Model
-    Formula: TDE = total_training_days_conducted / total_number_of_employees
+class Month(models.Model):
+    """Month model for Training Man Hours calculations"""
+    MONTH_CHOICES = [
+        (1, 'January'),
+        (2, 'February'),
+        (3, 'March'),
+        (4, 'April'),
+        (5, 'May'),
+        (6, 'June'),
+        (7, 'July'),
+        (8, 'August'),
+        (9, 'September'),
+        (10, 'October'),
+        (11, 'November'),
+        (12, 'December'),
+    ]
+    
+    month_number = models.IntegerField(choices=MONTH_CHOICES, unique=True)
+    month_name = models.CharField(max_length=20)
+    
+    def save(self, *args, **kwargs):
+        # Auto-set month_name based on month_number
+        if self.month_number:
+            month_dict = dict(self.MONTH_CHOICES)
+            self.month_name = month_dict.get(self.month_number, '')
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.month_name
+    
+    class Meta:
+        verbose_name = "Month"
+        verbose_name_plural = "Months"
+        ordering = ['month_number']
+
+
+class CalculateTMH(models.Model):
+    """KPI-06: Training Man Hours Calculation Model
+    Formula: TMH = training_sessions / total_number_of_employees
     """
     # KPI tracking fields
     baseline_value = models.FloatField(
@@ -499,7 +535,7 @@ class CalculateTDE(models.Model):
         null=True, blank=True, help_text="End target value to achieve")
     achieved_value = models.FloatField(null=True,
                                        blank=True,
-                                       help_text="Calculated result")
+                                       help_text="Calculated training man hours result")
     
     # Progress calculation fields
     progress_from_baseline = models.FloatField(
@@ -508,10 +544,17 @@ class CalculateTDE(models.Model):
         null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
-    total_training_days_conducted = models.FloatField(
-        null=True, blank=True, help_text="Total training days conducted")
+    training_sessions = models.FloatField(
+        null=True, blank=True, help_text="Total training sessions conducted")
     total_number_of_employees = models.FloatField(
         null=True, blank=True, help_text="Total number of employees")
+
+    # Month selection field
+    month = models.ForeignKey(Month,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True,
+                             help_text="Month for training data")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -528,12 +571,12 @@ class CalculateTDE(models.Model):
                                   blank=True)
 
     def save(self, *args, **kwargs):
-        # Auto-calculate TDE
-        if (self.total_training_days_conducted is not None
+        # Auto-calculate TMH
+        if (self.training_sessions is not None
                 and self.total_number_of_employees is not None
                 and self.total_number_of_employees > 0):
             self.achieved_value = float(
-                self.total_training_days_conducted) / float(
+                self.training_sessions) / float(
                     self.total_number_of_employees)
         
         # Calculate progress using KPI-06 formula
@@ -547,11 +590,11 @@ class CalculateTDE(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"TDE Calculation - {self.achieved_value} days/employee ({self.year}/{self.quarter})"
+        return f"TMH Calculation - {self.achieved_value} sessions/employee ({self.month}/{self.year})"
 
     class Meta:
-        verbose_name = "Training Days per Employee (TDE) Calculation"
-        verbose_name_plural = "Training Days per Employee (TDE) Calculations"
+        verbose_name = "Training Man Hours (TMH) Calculation"
+        verbose_name_plural = "Training Man Hours (TMH) Calculations"
 
 
 class CalculateATC(models.Model):

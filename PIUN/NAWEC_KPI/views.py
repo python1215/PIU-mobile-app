@@ -7,9 +7,9 @@ from django.db.models import Q, Avg, Sum, Count
 from django.core.paginator import Paginator
 from .models import (
     KPIIndicator, NAWEC_KPI_Monitoring, CalculateROA, CalculateNPM, CalculateMWh, 
-    CalculateGAF, CalculateDSCR, CalculateTDE, CalculateATC, CalculateNECD,
+    CalculateGAF, CalculateDSCR, CalculateTMH, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC, CalculateWQCB, CalculateNRW, CalculateDD,
-    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, Month
 )
 from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, CalculateNPMForm
 
@@ -1509,7 +1509,7 @@ def calculate_gaf_edit(request, calc_id):
 @login_required
 def calculate_tde_list(request):
     """List all TDE calculations"""
-    calculations = CalculateTDE.objects.select_related('loginUser', 'year', 'quarter').order_by('-date_created')
+    calculations = CalculateTMH.objects.select_related('loginUser', 'year', 'quarter').order_by('-date_created')
     
     search_query = request.GET.get('search')
     if search_query:
@@ -1526,21 +1526,21 @@ def calculate_tde_list(request):
         'calculations': page_obj,
         'total_calculations': calculations.count(),
         'search_query': search_query,
-        'calculation_type': 'TDE'
+        'calculation_type': 'TMH'
     }
     return render(request, 'NAWEC_KPI/calculate_tde_list.html', context)
 
 @login_required
 def calculate_tde_detail(request, calc_id):
-    """View detailed TDE calculation"""
-    calculation = get_object_or_404(CalculateTDE, id=calc_id)
+    """View detailed TMH calculation"""
+    calculation = get_object_or_404(CalculateTMH, id=calc_id)
     
     # Performance analysis
     performance_status = "excellent" if calculation.achieved_value >= 5 else "good" if calculation.achieved_value >= 3 else "needs_improvement"
     
     context = {
         'calculation': calculation,
-        'calculation_type': 'TDE',
+        'calculation_type': 'TMH',
         'performance_status': performance_status,
         'efficiency_percentage': min((calculation.achieved_value / 5) * 100, 100) if calculation.achieved_value else 0
     }
@@ -1548,40 +1548,45 @@ def calculate_tde_detail(request, calc_id):
 
 @login_required
 def calculate_tde_edit(request, calc_id):
-    """Edit TDE calculation"""
-    calculation = get_object_or_404(CalculateTDE, id=calc_id)
+    """Edit TMH calculation"""
+    calculation = get_object_or_404(CalculateTMH, id=calc_id)
     
     if request.method == 'POST':
-        total_training_days_conducted = float(request.POST.get('total_training_days_conducted', 0))
+        training_sessions = float(request.POST.get('training_sessions', 0))
         total_number_of_employees = float(request.POST.get('total_number_of_employees', 0))
         year_id = request.POST.get('year')
         quarter_id = request.POST.get('quarter')
+        month_id = request.POST.get('month')
         
-        # Calculate TDE: TDE = Total Training Days Conducted ÷ Total Number of Employees
-        achieved_value = (total_training_days_conducted / total_number_of_employees) if total_number_of_employees > 0 else 0
+        # Calculate TMH: TMH = Training Sessions ÷ Total Number of Employees
+        achieved_value = (training_sessions / total_number_of_employees) if total_number_of_employees > 0 else 0
         
         # Update calculation
-        calculation.total_training_days_conducted = total_training_days_conducted
+        calculation.training_sessions = training_sessions
         calculation.total_number_of_employees = total_number_of_employees
         calculation.achieved_value = achieved_value
         if year_id:
             calculation.year_id = year_id
         if quarter_id:
             calculation.quarter_id = quarter_id
+        if month_id:
+            calculation.month_id = month_id
         calculation.save()
         
-        messages.success(request, 'TDE calculation updated successfully!')
+        messages.success(request, 'TMH calculation updated successfully!')
         return redirect('NAWEC_KPI:calculate_tde_detail', calc_id=calculation.id)
     
-    # Get years and quarters for dropdowns
+    # Get years, quarters, and months for dropdowns
     years = YEAR.objects.all().order_by('-profile_year')
     quarters = Quarter.objects.all().order_by('quarter')
+    months = Month.objects.all().order_by('month_number')
     
     context = {
         'calculation': calculation,
         'years': years,
         'quarters': quarters,
-        'calculation_type': 'TDE'
+        'months': months,
+        'calculation_type': 'TMH'
     }
     return render(request, 'NAWEC_KPI/calculate_tde_edit.html', context)
 
@@ -3131,18 +3136,28 @@ class SaveKPICalculationView(View):
                 calculation.save()
                 
             elif kpi_type == 'TDE':
-                # TDE calculation
-                training_days = input_values.get('training_days', 0)
+                # TMH calculation
+                training_sessions = input_values.get('training_sessions', 0)
                 employees = input_values.get('employees', 0)
+                month_id = input_values.get('month')
                 
-                # Calculate TDE value: Training Days ÷ Employees
-                tde_value = (training_days / employees) if employees > 0 else 0
+                # Get Month object if provided
+                month = None
+                if month_id:
+                    try:
+                        month = Month.objects.get(month_number=month_id)
+                    except Month.DoesNotExist:
+                        print(f"[DEBUG] Month with ID {month_id} not found")
                 
-                calculation = CalculateTDE(
-                    total_training_days_conducted=training_days,
+                # Calculate TMH value: Training Sessions ÷ Employees
+                tmh_value = (training_sessions / employees) if employees > 0 else 0
+                
+                calculation = CalculateTMH(
+                    training_sessions=training_sessions,
                     total_number_of_employees=employees,
-                    achieved_value=tde_value,
+                    achieved_value=tmh_value,
                     quarter=quarter,
+                    month=month,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3202,7 +3217,7 @@ class DeleteKPICalculationView(View):
             elif kpi_type == 'ATC':
                 CalculateATC.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TDE':
-                CalculateTDE.objects.filter(id=calc_id).delete()
+                CalculateTMH.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             

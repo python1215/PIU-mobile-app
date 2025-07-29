@@ -3625,7 +3625,7 @@ function showTDEPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-mortarboard"></i> TDE Calculation (Training Days per Employee)
+                    <i class="bi bi-mortarboard"></i> TMH Calculation (Training Man Hours per Employee)
                 </h5>
                 <span style="color: #e9ecef; font-size: 0.9rem;">KPI-06</span>
             </div>
@@ -3633,14 +3633,14 @@ function showTDEPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #20c997; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: TDE = Total Training Days Conducted ÷ Total Number of Employees
+                    <i class="bi bi-info-circle"></i> Formula: TMH = Training Sessions ÷ Total Number of Employees
                 </h6>
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Training Days Conducted:</label>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Training Sessions:</label>
                     <input type="number" id="tdeTrainingDays" step="0.01" min="0"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter total training days conducted">
+                           placeholder="Enter number of training sessions">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
@@ -3648,6 +3648,25 @@ function showTDEPopup() {
                     <input type="number" id="tdeEmployees" step="1" min="1"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                            placeholder="Enter total number of employees">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Month: <span style="color: red;">*</span></label>
+                    <select id="tdeMonth" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Select Month *</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
                 </div>
                 
                 <div style="margin-bottom: 15px;">
@@ -3663,11 +3682,11 @@ function showTDEPopup() {
                 
                 <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #20c997;">
                     <small style="color: #6c757d;">
-                        <strong>TDE Performance Benchmarks:</strong><br>
-                        • TDE ≥ 5.0 days: Excellent training investment<br>
-                        • TDE 3.0-4.9 days: Good training coverage<br>
-                        • TDE 1.0-2.9 days: Adequate training<br>
-                        • TDE < 1.0 days: Insufficient training - needs improvement
+                        <strong>TMH Performance Benchmarks:</strong><br>
+                        • TMH ≥ 5.0 sessions: Excellent training investment<br>
+                        • TMH 3.0-4.9 sessions: Good training coverage<br>
+                        • TMH 1.0-2.9 sessions: Adequate training<br>
+                        • TMH < 1.0 sessions: Insufficient training - needs improvement
                     </small>
                 </div>
             </div>
@@ -3697,7 +3716,7 @@ function showTDEPopup() {
                     <button onclick="calculateTDE()" 
                             style="background: #20c997; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        <i class="bi bi-calculator"></i> Calculate TDE
+                        <i class="bi bi-calculator"></i> Calculate TMH
                     </button>
                     <button onclick="useTDEResult()" 
                             style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
@@ -3713,9 +3732,16 @@ function showTDEPopup() {
 }
 
 function calculateTDE() {
-    const trainingDays = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
+    const trainingSessions = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
     const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
+    const month = document.getElementById('tdeMonth').value;
     const quarter = document.getElementById('tdeQuarter').value;
+    
+    if (!month) {
+        alert('Please select a month. Month selection is mandatory.');
+        document.getElementById('tdeMonth').focus();
+        return;
+    }
     
     if (!quarter) {
         alert('Please select a quarter. Quarter selection is mandatory.');
@@ -3723,8 +3749,8 @@ function calculateTDE() {
         return;
     }
     
-    if (!trainingDays || !employees) {
-        alert('Please enter both Total Training Days and Total Number of Employees');
+    if (!trainingSessions || !employees) {
+        alert('Please enter both Training Sessions and Total Number of Employees');
         return;
     }
     
@@ -3733,20 +3759,20 @@ function calculateTDE() {
         return;
     }
     
-    // Calculate TDE
-    const tde = trainingDays / employees;
+    // Calculate TMH
+    const tmh = trainingSessions / employees;
     
     // Determine performance level and color
     let performanceText = '';
     let performanceColor = '';
     
-    if (tde >= 5.0) {
+    if (tmh >= 5.0) {
         performanceText = 'Excellent training investment';
         performanceColor = '#28a745';
-    } else if (tde >= 3.0) {
+    } else if (tmh >= 3.0) {
         performanceText = 'Good training coverage';
         performanceColor = '#20c997';
-    } else if (tde >= 1.0) {
+    } else if (tmh >= 1.0) {
         performanceText = 'Adequate training';
         performanceColor = '#ffc107';
     } else {
@@ -3759,9 +3785,9 @@ function calculateTDE() {
     const resultValue = document.getElementById('tdeResultValue');
     
     resultValue.innerHTML = `
-        <div>TDE = ${trainingDays.toLocaleString()} ÷ ${employees.toLocaleString()}</div>
+        <div>TMH = ${trainingSessions.toLocaleString()} ÷ ${employees.toLocaleString()}</div>
         <div style="margin-top: 10px; font-size: 1.5rem; color: #20c997;">
-            TDE = ${tde.toFixed(2)} days per employee
+            TMH = ${tmh.toFixed(2)} sessions per employee
         </div>
         <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
             <i class="bi bi-mortarboard-fill"></i> ${performanceText}
@@ -3771,11 +3797,18 @@ function calculateTDE() {
     resultDiv.style.display = 'block';
     
     // Store the result
-    window.simpleTDEResult = tde.toFixed(2);
+    window.simpleTDEResult = tmh.toFixed(2);
 }
 
 async function useTDEResult() {
+    const month = document.getElementById('tdeMonth').value;
     const quarter = document.getElementById('tdeQuarter').value;
+    
+    if (!month) {
+        alert('Please select a month before using the result. Month selection is mandatory.');
+        document.getElementById('tdeMonth').focus();
+        return;
+    }
     
     if (!quarter) {
         alert('Please select a quarter before using the result. Quarter selection is mandatory.');
@@ -3784,19 +3817,20 @@ async function useTDEResult() {
     }
     
     if (!window.simpleTDEResult) {
-        alert('Please calculate TDE first');
+        alert('Please calculate TMH first');
         return;
     }
     
     // Prepare data for saving to database
-    const trainingDays = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
+    const trainingSessions = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
     const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
     
     const data = {
         kpi_type: 'TDE',
         input_values: {
-            training_days: trainingDays,
+            training_sessions: trainingSessions,
             employees: employees,
+            month: month,
             quarter: quarter,
             achieved_value: parseFloat(window.simpleTDEResult)
         }
@@ -3829,13 +3863,13 @@ async function useTDEResult() {
             // Close the popup
             closeTDEPopup();
             
-            alert('TDE calculation saved successfully and value applied to form!');
+            alert('TMH calculation saved successfully and value applied to form!');
         } else {
-            alert('Error saving TDE calculation: ' + result.error);
+            alert('Error saving TMH calculation: ' + result.error);
         }
     } catch (error) {
-        console.error('Error saving TDE calculation:', error);
-        alert('Error saving TDE calculation: ' + error.message);
+        console.error('Error saving TMH calculation:', error);
+        alert('Error saving TMH calculation: ' + error.message);
     }
 }
 
@@ -3843,6 +3877,7 @@ function resetTDEForm() {
     // Clear all input fields
     document.getElementById('tdeTrainingDays').value = '';
     document.getElementById('tdeEmployees').value = '';
+    document.getElementById('tdeMonth').value = '';
     document.getElementById('tdeQuarter').value = '';
     
     // Hide the result section

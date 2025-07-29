@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}TDE Calculations - NAWEC KPI{% endblock %}
+{% block title %}TMH Calculations - NAWEC KPI{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -11,7 +11,7 @@
                 <div class="card-header bg-warning text-dark">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
-                            <i class="bi bi-people"></i> Training Days per Employee (TDE) Calculations
+                            <i class="bi bi-people"></i> Training Man Hours per Employee (TMH) Calculations
                         </h4>
                         <div class="d-flex gap-2">
                             <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary btn-sm">
@@ -50,10 +50,11 @@
                             <thead class="table-warning">
                                 <tr>
                                     
-                                    <th>Training Days Conducted</th>
+                                    <th>Training Sessions</th>
                                     <th>Number of Employees</th>
-                                    <th>TDE Value</th>
+                                    <th>TMH Value</th>
                                     <th>Year</th>
+                                    <th>Month</th>
                                     <th>Quarter</th>
                                     <th>Created By</th>
                                     <th>Date Created</th>
@@ -64,7 +65,7 @@
                                 {% for calculation in calculations %}
                                 <tr>
                                     
-                                    <td>{{ calculation.total_training_days_conducted|floatformat:0 }}</td>
+                                    <td>{{ calculation.training_sessions|floatformat:0 }}</td>
                                     <td>{{ calculation.total_number_of_employees|floatformat:0 }}</td>
                                     <td>
                                         <span class="badge bg-success">
@@ -72,6 +73,7 @@
                                         </span>
                                     </td>
                                     <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}2025{% endif %}</td>
+                                    <td>{% if calculation.month %}{{ calculation.month.month_name }}{% else %}-{% endif %}</td>
                                     <td>{% if calculation.quarter %}Q{{ calculation.quarter.quarter }}{% else %}Q1{% endif %}</td>
                                     <td>{{ calculation.loginUser.username|default:"System" }}</td>
                                     <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
