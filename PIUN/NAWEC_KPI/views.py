@@ -418,6 +418,7 @@ def performance_analysis(request):
 def data_entry(request):
     """NAWEC KPI monitoring data entry form using NAWEC_KPI_Monitoring model - CREATE operation"""
     if request.method == 'POST':
+        print(f'[DEBUG] POST data received: {dict(request.POST)}')
         form = KPIMonitoringDataForm(request.POST)
         
         # Set proper querysets based on POST data before validation
@@ -432,13 +433,21 @@ def data_entry(request):
         if outcome_id:
             form.fields['project_result'].queryset = ProjectResult.objects.filter(project_outcome_id=outcome_id)
         
+        print(f'[DEBUG] Form is_valid: {form.is_valid()}')
         if form.is_valid():
-            monitoring_entry = form.save(commit=False)
-            monitoring_entry.loginUser = request.user
-            monitoring_entry.save()
-            messages.success(request, 'KPI monitoring data saved successfully!')
-            return redirect('NAWEC_KPI:data_entry_list')
+            print('[DEBUG] Form is valid, attempting to save...')
+            try:
+                monitoring_entry = form.save(commit=False)
+                monitoring_entry.loginUser = request.user
+                monitoring_entry.save()
+                print(f'[DEBUG] Successfully saved monitoring entry with ID: {monitoring_entry.pk}')
+                messages.success(request, 'KPI monitoring data saved successfully!')
+                return redirect('NAWEC_KPI:data_entry_list')
+            except Exception as save_error:
+                print(f'[DEBUG] Error saving monitoring entry: {save_error}')
+                messages.error(request, f'Error saving data: {str(save_error)}')
         else:
+            print(f'[DEBUG] Form validation errors: {form.errors}')
             # Add form errors to messages for debugging
             for field, errors in form.errors.items():
                 for error in errors:
