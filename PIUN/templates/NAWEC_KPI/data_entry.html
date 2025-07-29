@@ -723,6 +723,9 @@
 <script>
 // Automatic field population when KPI indicator is selected
 document.addEventListener('DOMContentLoaded', function() {
+    // Set step attribute and rounding for all numeric input fields
+    setupNumericFieldRounding();
+    
     // KPI selection auto-population
     const kpiSelect = document.getElementById('id_indicator_description');
     if (kpiSelect) {
@@ -806,6 +809,50 @@ function clearCompensationTargetStyling() {
     window.compensationAmount = null;
     
     console.log('🧹 All calculation memory variables cleared');
+}
+
+// Setup numeric field rounding to 2 decimal places
+function setupNumericFieldRounding() {
+    // List of numeric field IDs that need 2 decimal place rounding
+    const numericFieldIds = [
+        'id_baseline_value',
+        'id_End_Target_Value', 
+        'id_achieved_value',
+        'id_Percentage_progress_from_baseline',
+        'id_Percentage_progress_towards_end_target',
+        'id_Targeted_Achieved_weight'
+    ];
+    
+    numericFieldIds.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            // Set step attribute for better input control
+            field.setAttribute('step', '0.01');
+            
+            // Add event listener to round values on blur (when user finishes typing)
+            field.addEventListener('blur', function() {
+                if (this.value && !isNaN(this.value)) {
+                    const roundedValue = parseFloat(this.value).toFixed(2);
+                    this.value = roundedValue;
+                    console.log(`✅ Rounded ${fieldId} to: ${roundedValue}`);
+                }
+            });
+            
+            // Also round values on input for real-time feedback
+            field.addEventListener('input', function() {
+                if (this.value && !isNaN(this.value)) {
+                    // Only round if the value has more than 2 decimal places
+                    const numValue = parseFloat(this.value);
+                    if (numValue.toString().includes('.') && this.value.split('.')[1] && this.value.split('.')[1].length > 2) {
+                        const roundedValue = numValue.toFixed(2);
+                        this.value = roundedValue;
+                    }
+                }
+            });
+            
+            console.log(`✅ Setup 2-decimal rounding for field: ${fieldId}`);
+        }
+    });
 }
 
 function clearFormAndMemory() {
@@ -909,19 +956,23 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
             if (data.success) {
                 // Populate form fields with fetched data
                 if (baselineField) {
-                    baselineField.value = data.data.baseline_value || '';
+                    const baselineValue = data.data.baseline_value || '';
+                    baselineField.value = baselineValue ? parseFloat(baselineValue).toFixed(2) : '';
                     baselineField.style.backgroundColor = '#e8f5e8';
-                    console.log('Baseline value set:', data.data.baseline_value);
+                    console.log('Baseline value set:', baselineValue, '→', baselineField.value);
                 }
                 if (targetField) {
-                    targetField.value = data.data.End_Target_Value || '';
+                    const targetValue = data.data.End_Target_Value || '';
+                    targetField.value = targetValue ? parseFloat(targetValue).toFixed(2) : '';
                     
                     // If compensation_end_target is available, show it was applied
                     if (data.data.compensation_end_target !== null && data.data.compensation_end_target !== undefined) {
+                        const compensationValue = parseFloat(data.data.compensation_end_target).toFixed(2);
+                        targetField.value = compensationValue;
                         targetField.style.backgroundColor = '#ffe8e8 !important';
                         targetField.style.border = '2px solid #ff9999';
-                        targetField.title = `Updated with compensation end target: ${data.data.compensation_end_target}%`;
-                        console.log('📊 Compensation End Target applied:', data.data.compensation_end_target);
+                        targetField.title = `Updated with compensation end target: ${compensationValue}%`;
+                        console.log('📊 Compensation End Target applied:', data.data.compensation_end_target, '→', compensationValue);
                         console.log('Target value replaced with compensation end target:', data.data.End_Target_Value);
                         
                         // Remove any existing badges first
@@ -945,13 +996,14 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                     } else {
                         targetField.style.backgroundColor = '#e8f5e8';
                         targetField.style.border = '';
-                        console.log('Target value set:', data.data.End_Target_Value);
+                        console.log('Target value set:', targetValue, '→', targetField.value);
                     }
                 }
                 if (weightField) {
-                    weightField.value = data.data.targeted_weight_value || '';
+                    const weightValue = data.data.targeted_weight_value || '';
+                    weightField.value = weightValue ? parseFloat(weightValue).toFixed(2) : '';
                     weightField.style.backgroundColor = '#e8f5e8';
-                    console.log('Weight value set:', data.data.targeted_weight_value);
+                    console.log('Weight value set:', weightValue, '→', weightField.value);
                 }
                 
                 // Reset background colors after a delay, but keep compensation indicators
@@ -1264,17 +1316,17 @@ function fetchKPIValues(kpiCode) {
             // Populate baseline value field
             const baselineField = document.getElementById('id_baseline_value');
             if (baselineField && data.data.baseline_value !== null) {
-                baselineField.value = data.data.baseline_value;
+                baselineField.value = parseFloat(data.data.baseline_value).toFixed(2);
                 baselineField.style.backgroundColor = '#e7f3ff';
-                console.log(`✅ Baseline value set: ${data.data.baseline_value}`);
+                console.log(`✅ Baseline value set: ${data.data.baseline_value} → ${baselineField.value}`);
             }
             
             // Populate end target value field
             const targetField = document.getElementById('id_End_Target_Value');
             if (targetField && data.data.End_Target_Value !== null) {
-                targetField.value = data.data.End_Target_Value;
+                targetField.value = parseFloat(data.data.End_Target_Value).toFixed(2);
                 targetField.style.backgroundColor = '#e7f3ff';
-                console.log(`✅ Target value set: ${data.data.End_Target_Value}`);
+                console.log(`✅ Target value set: ${data.data.End_Target_Value} → ${targetField.value}`);
             }
             
             // Show success notification
