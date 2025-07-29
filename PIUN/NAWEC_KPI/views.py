@@ -2175,17 +2175,35 @@ def performance_report(request):
     quarter_filter = request.GET.get('quarter')
     format_type = request.GET.get('format', 'html')  # Default to HTML report
     
-    # Base queryset for monitoring entries
+    # Base queryset for monitoring entries - show all KPI data for comprehensive reporting
     entries_queryset = NAWEC_KPI_Monitoring.objects.select_related(
         'project', 'pdo', 'project_outcome', 'project_result', 
         'indicator_type', 'year', 'quarter', 'loginUser'
-    ).filter(loginUser=request.user)
+    )
     
     # Apply filters if provided
     if year_filter:
         entries_queryset = entries_queryset.filter(year_id=year_filter)
     if quarter_filter:
-        entries_queryset = entries_queryset.filter(quarter_id=quarter_filter)
+        # Handle numeric quarter values (1, 2, 3, 4) with correct mapping
+        if quarter_filter in ['1', '2', '3', '4']:
+            # Map numeric quarters to actual Quarter database IDs
+            quarter_mapping = {
+                '1': 6,  # Quarter 1 (ID: 6)
+                '2': 3,  # Quarter 2 (ID: 3) 
+                '3': 4,  # Quarter 3 (ID: 4)
+                '4': 5   # Quarter 4 (ID: 5)
+            }
+            quarter_id = quarter_mapping.get(quarter_filter)
+            if quarter_id:
+                try:
+                    quarter_obj = Quarter.objects.get(id=quarter_id)
+                    entries_queryset = entries_queryset.filter(quarter=quarter_obj)
+                except Quarter.DoesNotExist:
+                    pass
+        else:
+            # Fallback for direct ID filtering
+            entries_queryset = entries_queryset.filter(quarter_id=quarter_filter)
     
     # Get filtered data with calculations
     report_entries = []
