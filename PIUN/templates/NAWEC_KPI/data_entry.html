@@ -6722,7 +6722,7 @@ function showDERPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-graph-up"></i> DER - Debt to Equity Ratio
+                    <i class="bi bi-graph-up"></i> DER - Debt to Equity Ratio (%)
                 </h5>
                 <span style="color: #ffddcc; font-size: 0.9rem;">KPI-18</span>
             </div>
@@ -6762,7 +6762,7 @@ function showDERPopup() {
                                            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
                     <h6 style="color: #155724; margin-bottom: 10px;">Calculation Result:</h6>
                     <p id="derCalculationDetails" style="margin-bottom: 10px; color: #155724;"></p>
-                    <h5 style="color: #155724; margin: 0;">Debt to Equity Ratio: <span id="derFinalResult"></span></h5>
+                    <h5 style="color: #155724; margin: 0;">Debt to Equity Ratio (%): <span id="derFinalResult"></span></h5>
                 </div>
             </div>
             
@@ -6814,7 +6814,7 @@ function calculateDER() {
         return;
     }
     
-    const der = totalDebt / totalEquity;
+    const der = (totalDebt / totalEquity) * 100;
     
     // Show result
     const resultDiv = document.getElementById('derResult');
@@ -6824,9 +6824,9 @@ function calculateDER() {
     detailsP.innerHTML = `
         Total Debt: GMD ${totalDebt.toLocaleString()}<br>
         Total Equity: GMD ${totalEquity.toLocaleString()}<br>
-        Calculation: ${totalDebt.toLocaleString()} ÷ ${totalEquity.toLocaleString()}
+        Calculation: (${totalDebt.toLocaleString()} ÷ ${totalEquity.toLocaleString()}) × 100
     `;
-    finalResultSpan.textContent = der.toFixed(2);
+    finalResultSpan.textContent = der.toFixed(2) + '%';
     resultDiv.style.display = 'block';
     
     window.simpleDERResult = der.toFixed(2);

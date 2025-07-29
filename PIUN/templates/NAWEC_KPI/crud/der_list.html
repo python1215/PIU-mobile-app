@@ -32,7 +32,7 @@
                             <th>ID</th>
                             <th>Total Debt</th>
                             <th>Total Equity</th>
-                            <th>DER Ratio</th>
+                            <th>DER Ratio (%)</th>
                             <th>Year</th>
                             <th>Quarter</th>
                             <th>Created By</th>
@@ -48,7 +48,7 @@
                             <td>${{ calculation.total_equity|floatformat:2|default:"0" }}</td>
                             <td>
                                 <span class="badge bg-info calculation-value">
-                                    {{ calculation.achieved_value|floatformat:2|default:"0" }}
+                                    {{ calculation.achieved_value|floatformat:2|default:"0" }}%
                                 </span>
                             </td>
                             <td>{{ calculation.year.profile_year|default:"N/A" }}</td>
