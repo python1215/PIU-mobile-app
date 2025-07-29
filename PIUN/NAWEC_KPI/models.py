@@ -526,7 +526,7 @@ class Month(models.Model):
 
 class CalculateTMH(models.Model):
     """KPI-06: Training Man Hours Calculation Model
-    Formula: TMH = participants × duration (in hours)
+    Formula: TMH = number_of_days × hours_per_day × number_of_participants
     """
     # KPI tracking fields
     baseline_value = models.FloatField(
@@ -543,20 +543,26 @@ class CalculateTMH(models.Model):
     progress_towards_end_target = models.FloatField(
         null=True, blank=True, help_text="Percentage progress towards end target")
 
-    # Calculation input fields
-    total_training_days_conducted = models.FloatField(
-        null=True, blank=True, help_text="Total training days conducted")
-    total_number_of_employees = models.FloatField(
-        null=True, blank=True, help_text="Total number of employees")
-    participants = models.FloatField(null=True, blank=True, help_text="Number of participants")
-    duration = models.FloatField(null=True, blank=True, help_text="Duration of training sessions in hours")
+    # Training details
+    title = models.CharField(max_length=200, default='Training Session')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    hours_per_day = models.FloatField(default=8.0)
+    number_of_participants = models.PositiveIntegerField(default=1)
 
-    # Month selection field
-    month = models.ForeignKey(Month,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True,
-                             help_text="Month for training data")
+    @property
+    def number_of_days(self):
+        if self.start_date and self.end_date:
+            return (self.end_date - self.start_date).days + 1
+        return 0
+
+    @property
+    def total_duration_hours(self):
+        return self.number_of_days * self.hours_per_day
+
+    @property
+    def total_man_hours(self):
+        return self.total_duration_hours * self.number_of_participants
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,
@@ -573,10 +579,8 @@ class CalculateTMH(models.Model):
                                   blank=True)
 
     def save(self, *args, **kwargs):
-        # Auto-calculate TMH
-        if (self.participants is not None
-                and self.duration is not None):
-            self.achieved_value = float(self.participants) * float(self.duration)
+        # Auto-calculate TMH using the total_man_hours property
+        self.achieved_value = self.total_man_hours
         
         # Calculate progress using KPI-06 formula
         if self.achieved_value is not None and self.baseline_value is not None:
@@ -589,7 +593,7 @@ class CalculateTMH(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"TMH Calculation - {self.achieved_value} man-hours ({self.month}/{self.year})"
+        return self.title
 
     class Meta:
         verbose_name = "Training Man Hours (TMH) Calculation"
