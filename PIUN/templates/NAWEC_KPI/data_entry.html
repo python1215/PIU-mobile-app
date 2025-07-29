@@ -1358,7 +1358,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'DSCR';
     } else if (selectedText.includes('energy injection')) {
         kpiType = 'EI';
-    } else if (selectedText.includes('monthly water hours')) {
+    } else if (selectedText.includes('local production') || selectedText.includes('total electricity generated') || selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
         kpiType = 'GAF';
@@ -3098,7 +3098,7 @@ function showMWhPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-lightning-fill"></i> MW Calculation (Power Injection)
+                    <i class="bi bi-lightning-fill"></i> Local Production (Total Electricity Generated) Calculation
                 </h5>
                 <span style="color: #e9ecef; font-size: 0.9rem;">KPI-04</span>
             </div>
@@ -3106,15 +3106,15 @@ function showMWhPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #dc3545; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: P_total = Σ(Ai / Bi) where A=Energy Injected (MWH), B=Time Duration (h)
+                    <i class="bi bi-info-circle"></i> Formula: LP_total = Σ(Ai / Bi) where A=Energy Generated (MWH), B=Time Duration (h)
                 </h6>
                 
                 <div id="powerSourcesContainer">
                     <div class="power-source" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
-                        <h6 style="margin-bottom: 10px; color: #dc3545;">Power Source 1</h6>
+                        <h6 style="margin-bottom: 10px; color: #dc3545;">Energy Source 1</h6>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy Injected (MWH):</label>
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Energy Generated (MWH):</label>
                                 <input type="number" class="mwh-power" step="0.01" 
                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                                        placeholder="Enter energy in MWH">
@@ -3132,7 +3132,7 @@ function showMWhPopup() {
                 <button onclick="addPowerSource()" 
                         style="background: #17a2b8; color: white; border: none; padding: 8px 15px; 
                                border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
-                    <i class="bi bi-plus-circle"></i> Add Another Power Source
+                    <i class="bi bi-plus-circle"></i> Add Another Energy Source
                 </button>
                 
                 <div style="margin-bottom: 15px;">
@@ -3172,7 +3172,7 @@ function showMWhPopup() {
                     <button onclick="calculateMWh()" 
                             style="background: #dc3545; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        <i class="bi bi-calculator"></i> Calculate MW
+                        <i class="bi bi-calculator"></i> Calculate LP
                     </button>
                     <button onclick="useMWhResult()" 
                             style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
@@ -3283,7 +3283,7 @@ function calculateMWh() {
         </div>
         <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 4px;">
             <div style="font-size: 1.5rem; color: #dc3545; font-weight: bold;">
-                Total Energy Injected = ${totalEnergy.toFixed(2)} MW
+                Total Local Production (Electricity Generated) = ${totalEnergy.toFixed(2)} MW
             </div>
         </div>
     `;
@@ -3304,7 +3304,7 @@ function useMWhResult() {
     }
     
     if (!window.simpleMWhResult) {
-        alert('Please calculate MW first');
+        alert('Please calculate Local Production first');
         return;
     }
     
@@ -3321,7 +3321,7 @@ function useMWhResult() {
     // Close the popup
     closeMWhPopup();
     
-    alert('MW value applied to form successfully!');
+    alert('Local Production value applied to form successfully!');
 }
 
 function resetMWhForm() {
