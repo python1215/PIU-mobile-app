@@ -131,7 +131,7 @@ class KPITriggerSystem {
             },
             {
                 type: 'MWh',
-                patterns: ['energy injection', 'mwh', 'energy generation', 'kpi-04', 'kpi04', 'energy', 'injection', 'power', 'megawatt']
+                patterns: ['energy injection', 'mwh', 'local production', 'total electricity generated', 'kpi-04', 'kpi04', 'energy', 'injection', 'power', 'megawatt']
             },
             {
                 type: 'GAF',

@@ -1,0 +1,1 @@
+- July 29, 2025. UPDATED NAWEC KPI terminology: changed all instances of "Energy Generation" to "Local Production (Total electricity generated)" across dashboard templates, calculation list pages, model verbose names, docstrings, and JavaScript trigger patterns without modifying calculation logic or functionality

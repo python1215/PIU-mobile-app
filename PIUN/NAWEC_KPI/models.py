@@ -355,7 +355,7 @@ class CalculateDSCR(models.Model):
 
 
 class CalculateMWh(models.Model):
-    """KPI-04: Energy Generation Calculation Model
+    """KPI-04: Local Production (Total electricity generated) Calculation Model
     Formula: Ejtotal = Σ(Ai×Bi) where A=power_injected, B=time_duration, C=number_of_sources
     """
     # KPI tracking fields
@@ -420,8 +420,8 @@ class CalculateMWh(models.Model):
         return f"MWh Calculation - {self.achieved_value} MWh ({self.year}/{self.quarter})"
 
     class Meta:
-        verbose_name = "Energy Generation (MWh) Calculation"
-        verbose_name_plural = "Energy Generation (MWh) Calculations"
+        verbose_name = "Local Production (Total electricity generated) (MWh) Calculation"
+        verbose_name_plural = "Local Production (Total electricity generated) (MWh) Calculations"
 
 
 class CalculateGAF(models.Model):

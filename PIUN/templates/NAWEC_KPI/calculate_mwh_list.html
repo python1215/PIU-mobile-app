@@ -11,7 +11,7 @@
                 <div class="card-header bg-warning text-dark">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
-                            <i class="bi bi-lightning-charge"></i> Energy Generation (MWh) Calculations
+                            <i class="bi bi-lightning-charge"></i> Local Production (Total electricity generated) (MWh) Calculations
                         </h4>
                         <div class="d-flex gap-2">
                             <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary btn-sm">
@@ -143,7 +143,7 @@
                     <div class="text-center py-5">
                         <i class="bi bi-lightning-charge display-1 text-muted"></i>
                         <h5 class="mt-3">No MWh calculations found</h5>
-                        <p class="text-muted">Start by creating your first energy generation calculation.</p>
+                        <p class="text-muted">Start by creating your first local production calculation.</p>
                         <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> Create MWh Calculation
                         </a>
