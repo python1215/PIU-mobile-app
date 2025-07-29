@@ -1064,7 +1064,7 @@ class CalculateNRW(models.Model):
 
 class CalculateDD(models.Model):
     """Model for Debtor Days calculation (KPI-15)
-    Formula: DD = (Trade Receivables ÷ Total Credit Sales) * 100
+    Formula: DD = (Trade Receivables ÷ Total Credit Sales) * 365
     """
     # KPI tracking fields
     baseline_value = models.FloatField(
@@ -1109,11 +1109,11 @@ class CalculateDD(models.Model):
         verbose_name_plural = "Calculate DD"
 
     def save(self, *args, **kwargs):
-        # Auto-calculate Debtor Days: DD = (Trade Receivables ÷ Total Credit Sales) * 100
+        # Auto-calculate Debtor Days: DD = (Trade Receivables ÷ Total Credit Sales) * 365
         if (self.trade_receivables is not None
                 and self.total_credit_sales is not None
                 and self.total_credit_sales != 0):
-            self.achieved_value = (self.trade_receivables / self.total_credit_sales) * 100
+            self.achieved_value = (self.trade_receivables / self.total_credit_sales) * 365
         
         # Calculate progress using KPI-15 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
@@ -1124,7 +1124,7 @@ class CalculateDD(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"DD - {self.achieved_value} GMD (ID: {self.pk})"
+        return f"DD - {self.achieved_value} days (ID: {self.pk})"
 
 class CalculateAO(models.Model):
     """KPI-17: Audit Opinion Calculation"""

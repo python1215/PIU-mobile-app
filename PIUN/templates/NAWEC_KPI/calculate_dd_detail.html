@@ -83,10 +83,10 @@
                     <div class="text-center mb-4">
                         <h6 class="text-muted mb-2">Formula Applied</h6>
                         <div class="alert alert-info">
-                            <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 100</strong>
+                            <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 365</strong>
                         </div>
                         <div class="fs-6">
-                            DD = ({{ calculation.trade_receivables|floatformat:2 }} ÷ {{ calculation.total_credit_sales|floatformat:2 }}) × 100
+                            DD = ({{ calculation.trade_receivables|floatformat:2 }} ÷ {{ calculation.total_credit_sales|floatformat:2 }}) × 365
                         </div>
                     </div>
 
@@ -97,7 +97,7 @@
                             {% elif calculation.achieved_value <= 45 %}performance-good
                             {% elif calculation.achieved_value <= 60 %}performance-acceptable
                             {% else %}performance-poor{% endif %}">
-                            {{ calculation.achieved_value|floatformat:2 }}%
+                            {{ calculation.achieved_value|floatformat:2 }} days
                         </div>
                     </div>
                 </div>
@@ -121,15 +121,15 @@
                             
                             <h6 class="mb-2">Performance Benchmarks:</h6>
                             <ul class="list-unstyled">
-                                <li><span class="badge bg-success me-2">≤ 30%</span> Excellent - Outstanding debt collection ratio</li>
-                                <li><span class="badge bg-primary me-2">31-45%</span> Good - Strong debt collection performance</li>
-                                <li><span class="badge bg-warning me-2">46-60%</span> Acceptable - Standard debt collection ratio</li>
-                                <li><span class="badge bg-danger me-2">> 60%</span> Poor - Requires immediate attention</li>
+                                <li><span class="badge bg-success me-2">≤ 30 days</span> Excellent - Outstanding debt collection speed</li>
+                                <li><span class="badge bg-primary me-2">31-45 days</span> Good - Strong debt collection performance</li>
+                                <li><span class="badge bg-warning me-2">46-60 days</span> Acceptable - Standard debt collection timing</li>
+                                <li><span class="badge bg-danger me-2">> 60 days</span> Poor - Requires immediate attention</li>
                             </ul>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="progress-circle bg-{{ performance_color }} mx-auto">
-                                {{ calculation.achieved_value|floatformat:0 }}%
+                                {{ calculation.achieved_value|floatformat:0 }} days
                             </div>
                         </div>
                     </div>
