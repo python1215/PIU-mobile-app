@@ -581,7 +581,7 @@ class CalculateATC(models.Model):
     collection_efficiency = models.FloatField(
         null=True,
         blank=True,
-        help_text="Collection efficiency as percentage (0-100)")
+        help_text="Collection efficiency as percentage (≥0)")
 
     year = models.ForeignKey(YEAR,
                              on_delete=models.CASCADE,

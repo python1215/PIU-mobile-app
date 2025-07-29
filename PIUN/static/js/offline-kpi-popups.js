@@ -29,7 +29,7 @@ function showATCCalculationPopup() {
             </div>
             <div>
                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">Collection Efficiency (%):</label>
-                <input type="number" id="atcCollection" step="0.01" min="0" max="100"
+                <input type="number" id="atcCollection" step="0.01" min="0"
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" 
                        placeholder="Enter collection efficiency">
             </div>
