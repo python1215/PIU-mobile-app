@@ -209,7 +209,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{% url 'NAWEC_KPI:calculate_dd_edit' calculation.pk %}" class="btn btn-warning">
+                        <a href="{% url 'NAWEC_KPI:calculate_dd_edit' calculation.id %}" class="btn btn-warning">
                             <i class="bi bi-pencil"></i> Edit Calculation
                         </a>
                         <button type="button" class="btn btn-danger" onclick="deleteCalculation()">
@@ -242,7 +242,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="post" action="{% url 'NAWEC_KPI:calculate_dd_delete' calculation.pk %}" class="d-inline">
+                <form method="post" action="{% url 'NAWEC_KPI:calculate_dd_delete' calculation.id %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>

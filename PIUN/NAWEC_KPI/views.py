@@ -2721,9 +2721,9 @@ def calculate_dd_list(request):
 
 
 @login_required
-def calculate_dd_detail(request, pk):
+def calculate_dd_detail(request, calc_id):
     """View DD calculation details"""
-    calculation = get_object_or_404(CalculateDD, pk=pk)
+    calculation = get_object_or_404(CalculateDD, pk=calc_id)
     
     # Performance analysis
     if calculation.achieved_value:
@@ -2759,9 +2759,9 @@ def calculate_dd_detail(request, pk):
 
 
 @login_required
-def calculate_dd_edit(request, pk):
+def calculate_dd_edit(request, calc_id):
     """Edit DD calculation"""
-    calculation = get_object_or_404(CalculateDD, pk=pk)
+    calculation = get_object_or_404(CalculateDD, pk=calc_id)
     
     if request.method == 'POST':
         # Get form data
@@ -2802,9 +2802,9 @@ def calculate_dd_edit(request, pk):
 
 
 @login_required
-def calculate_dd_delete(request, pk):
+def calculate_dd_delete(request, calc_id):
     """Delete DD calculation"""
-    calculation = get_object_or_404(CalculateDD, pk=pk)
+    calculation = get_object_or_404(CalculateDD, pk=calc_id)
     
     if request.method == 'POST':
         calculation.delete()

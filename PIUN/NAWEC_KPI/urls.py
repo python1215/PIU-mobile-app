@@ -112,9 +112,9 @@ urlpatterns = [
     
     # DD calculations
     path('dd-calculations/', views.calculate_dd_list, name='calculate_dd_list'),
-    path('dd-calculations/<int:pk>/', views.calculate_dd_detail, name='calculate_dd_detail'),
-    path('dd-calculations/<int:pk>/edit/', views.calculate_dd_edit, name='calculate_dd_edit'),
-    path('dd-calculations/<int:pk>/delete/', views.calculate_dd_delete, name='calculate_dd_delete'),
+    path('dd-calculations/<int:calc_id>/', views.calculate_dd_detail, name='calculate_dd_detail'),
+    path('dd-calculations/<int:calc_id>/edit/', views.calculate_dd_edit, name='calculate_dd_edit'),
+    path('dd-calculations/<int:calc_id>/delete/', views.calculate_dd_delete, name='calculate_dd_delete'),
 
     
     # API endpoints
