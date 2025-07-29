@@ -6824,7 +6824,7 @@ function calculateDER() {
     detailsP.innerHTML = `
         Total Debt: GMD ${totalDebt.toLocaleString()}<br>
         Total Equity: GMD ${totalEquity.toLocaleString()}<br>
-        Calculation: (${totalDebt.toLocaleString()} ÷ ${totalEquity.toLocaleString()}) × 100
+        Calculation: (${totalDebt.toLocaleString()} ÷ ${totalEquity.toLocaleString()}) × 100 = ${der.toFixed(2)}%
     `;
     finalResultSpan.textContent = der.toFixed(2) + '%';
     resultDiv.style.display = 'block';
