@@ -2113,7 +2113,7 @@ function showDDPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #ffc107; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: DD = (Trade Receivables ÷ Total Credit Sales)
+                    <i class="bi bi-info-circle"></i> Formula: DD = (Trade Receivables ÷ Total Credit Sales) × 100
                 </h6>
                 
                 <div style="margin-bottom: 15px;">
@@ -2145,7 +2145,7 @@ function showDDPopup() {
                                            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
                     <h6 style="color: #155724; margin-bottom: 10px;">Calculation Result:</h6>
                     <p id="ddCalculationDetails" style="margin-bottom: 10px; color: #155724;"></p>
-                    <h5 style="color: #155724; margin: 0;">Debtor Days: <span id="ddFinalResult"></span> days</h5>
+                    <h5 style="color: #155724; margin: 0;">Debtor Days: <span id="ddFinalResult"></span>%</h5>
                 </div>
             </div>
             
@@ -2196,8 +2196,8 @@ function calculateDD() {
         return;
     }
     
-    // Calculate Debtor Days: (Trade Receivables ÷ Total Credit Sales)
-    const dd = (tradeReceivables / totalCreditSales);
+    // Calculate Debtor Days: (Trade Receivables ÷ Total Credit Sales) × 100
+    const dd = (tradeReceivables / totalCreditSales) * 100;
     
     // Show result
     const resultDiv = document.getElementById('ddResult');
@@ -2207,7 +2207,7 @@ function calculateDD() {
     detailsP.innerHTML = `
         Trade Receivables: GMD ${tradeReceivables.toLocaleString()}<br>
         Total Credit Sales: GMD ${totalCreditSales.toLocaleString()}<br>
-        Calculation: (${tradeReceivables.toLocaleString()} ÷ ${totalCreditSales.toLocaleString()})
+        Calculation: (${tradeReceivables.toLocaleString()} ÷ ${totalCreditSales.toLocaleString()}) × 100
     `;
     finalResultSpan.textContent = dd.toFixed(2);
     resultDiv.style.display = 'block';

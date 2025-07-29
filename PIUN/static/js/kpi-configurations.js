@@ -576,8 +576,8 @@ const KPIConfigurations = {
         type: 'DD',
         title: 'Calculate Debtor Days (DD) - KPI-15',
         color: '#ffc107',
-        formula: 'DD = (Trade Receivables ÷ Total Credit Sales) × 365',
-        unit: 'days',
+        formula: 'DD = (Trade Receivables ÷ Total Credit Sales) × 100',
+        unit: '%',
         fields: [
             {
                 name: 'trade_receivables',
