@@ -280,10 +280,10 @@ def performance_dashboard(request):
         if quarter_filter in ['1', '2', '3', '4']:
             # Map numeric quarters to actual Quarter database IDs
             quarter_mapping = {
-                '1': 6,  # Quarter 1 (ID: 6) - FIXED
-                '2': 3,  # Quarter 2 (ID: 3) 
-                '3': 4,  # Quarter 3 (ID: 4)
-                '4': 5   # Quarter 4 (ID: 5)
+                '1': 10022,  # Quarter 1 (ID: 10022)
+                '2': 10023,  # Quarter 2 (ID: 10023)
+                '3': 10024,  # Quarter 3 (ID: 10024)
+                '4': 10025   # Quarter 4 (ID: 10025)
             }
             quarter_id = quarter_mapping.get(quarter_filter)
             if quarter_id:
@@ -2189,10 +2189,10 @@ def performance_report(request):
         if quarter_filter in ['1', '2', '3', '4']:
             # Map numeric quarters to actual Quarter database IDs
             quarter_mapping = {
-                '1': 6,  # Quarter 1 (ID: 6)
-                '2': 3,  # Quarter 2 (ID: 3) 
-                '3': 4,  # Quarter 3 (ID: 4)
-                '4': 5   # Quarter 4 (ID: 5)
+                '1': 10022,  # Quarter 1 (ID: 10022)
+                '2': 10023,  # Quarter 2 (ID: 10023)
+                '3': 10024,  # Quarter 3 (ID: 10024)
+                '4': 10025   # Quarter 4 (ID: 10025)
             }
             quarter_id = quarter_mapping.get(quarter_filter)
             if quarter_id:

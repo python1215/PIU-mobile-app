@@ -120,15 +120,16 @@ class SaveKPICalculationView(View):
                         # Convert quarter number to Quarter model instance
                         # Map numeric quarters to existing Quarter records
                         quarter_mapping = {
-                            '1': 'Quarter 1',
-                            '2': 'Monthly',  # Use existing Monthly record for Q2
-                            '3': 'Quarter 3',
-                            '4': 'Quarter 4'
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
                         }
-                        quarter_name = quarter_mapping.get(str(quarter_value), f'Quarter {quarter_value}')
-                        quarter_instance = Quarter.objects.get(quarter=quarter_name)
-                        create_data['quarter'] = quarter_instance
-                        print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> {quarter_name} -> {quarter_instance}')
+                        quarter_id = quarter_mapping.get(str(quarter_value))
+                        if quarter_id:
+                            quarter_instance = Quarter.objects.get(id=quarter_id)
+                            create_data['quarter'] = quarter_instance
+                            print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
                     except Quarter.DoesNotExist:
                         # Try alternative mapping
                         try:
