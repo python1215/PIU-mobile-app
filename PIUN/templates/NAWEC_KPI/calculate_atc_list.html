@@ -206,7 +206,7 @@ function deleteCalculation(calcId, type) {
     if (confirm('Are you sure you want to delete this ' + type + ' calculation?')) {
         // Get CSRF token
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (!csrfToken) {
+        if (!csrfToken || !csrfToken.value) {
             alert('CSRF token not found. Please refresh the page.');
             return;
         }
