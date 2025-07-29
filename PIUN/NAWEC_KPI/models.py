@@ -526,7 +526,7 @@ class Month(models.Model):
 
 class CalculateTMH(models.Model):
     """KPI-06: Training Man Hours Calculation Model
-    Formula: TMH = total_training_days_conducted / total_number_of_employees
+    Formula: TMH = participants × duration (in hours)
     """
     # KPI tracking fields
     baseline_value = models.FloatField(
@@ -574,12 +574,9 @@ class CalculateTMH(models.Model):
 
     def save(self, *args, **kwargs):
         # Auto-calculate TMH
-        if (self.total_training_days_conducted is not None
-                and self.total_number_of_employees is not None
-                and self.total_number_of_employees > 0):
-            self.achieved_value = float(
-                self.total_training_days_conducted) / float(
-                    self.total_number_of_employees)
+        if (self.participants is not None
+                and self.duration is not None):
+            self.achieved_value = float(self.participants) * float(self.duration)
         
         # Calculate progress using KPI-06 formula
         if self.achieved_value is not None and self.baseline_value is not None:
@@ -592,7 +589,7 @@ class CalculateTMH(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"TMH Calculation - {self.achieved_value} days/employee ({self.month}/{self.year})"
+        return f"TMH Calculation - {self.achieved_value} man-hours ({self.month}/{self.year})"
 
     class Meta:
         verbose_name = "Training Man Hours (TMH) Calculation"
