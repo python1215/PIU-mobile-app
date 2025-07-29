@@ -526,7 +526,7 @@ class Month(models.Model):
 
 class CalculateTMH(models.Model):
     """KPI-06: Training Man Hours Calculation Model
-    Formula: TMH = training_sessions / total_number_of_employees
+    Formula: TMH = total_training_days_conducted / total_number_of_employees
     """
     # KPI tracking fields
     baseline_value = models.FloatField(
@@ -544,10 +544,12 @@ class CalculateTMH(models.Model):
         null=True, blank=True, help_text="Percentage progress towards end target")
 
     # Calculation input fields
-    training_sessions = models.FloatField(
-        null=True, blank=True, help_text="Total training sessions conducted")
+    total_training_days_conducted = models.FloatField(
+        null=True, blank=True, help_text="Total training days conducted")
     total_number_of_employees = models.FloatField(
         null=True, blank=True, help_text="Total number of employees")
+    participants = models.FloatField(null=True, blank=True, help_text="Number of participants")
+    duration = models.FloatField(null=True, blank=True, help_text="Duration of training sessions in hours")
 
     # Month selection field
     month = models.ForeignKey(Month,
@@ -572,11 +574,11 @@ class CalculateTMH(models.Model):
 
     def save(self, *args, **kwargs):
         # Auto-calculate TMH
-        if (self.training_sessions is not None
+        if (self.total_training_days_conducted is not None
                 and self.total_number_of_employees is not None
                 and self.total_number_of_employees > 0):
             self.achieved_value = float(
-                self.training_sessions) / float(
+                self.total_training_days_conducted) / float(
                     self.total_number_of_employees)
         
         # Calculate progress using KPI-06 formula
@@ -590,7 +592,7 @@ class CalculateTMH(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"TMH Calculation - {self.achieved_value} sessions/employee ({self.month}/{self.year})"
+        return f"TMH Calculation - {self.achieved_value} days/employee ({self.month}/{self.year})"
 
     class Meta:
         verbose_name = "Training Man Hours (TMH) Calculation"
