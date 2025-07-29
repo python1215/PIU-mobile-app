@@ -1446,7 +1446,7 @@ function triggerKPICalculationPopup() {
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
         kpiType = 'GAF';
     } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training man hours')) {
-        kpiType = 'TDE';
+        kpiType = 'TMH';
     } else if (selectedText.includes('average time to connect') || selectedText.includes('total losses electricity')) {
         kpiType = 'ATC';
     } else if (selectedText.includes('new electricity connection')) {
@@ -1499,7 +1499,7 @@ function triggerKPICalculationPopup() {
         case 'GAF':
             showGAFPopup();
             break;
-        case 'TDE':
+        case 'TMH':
             showTDEPopup();
             break;
         case 'ATC':
@@ -3731,7 +3731,7 @@ function showTDEPopup() {
         existingPopup.remove();
     }
     
-    // Create TDE popup
+    // Create TMH popup
     const popup = document.createElement('div');
     popup.id = 'simpleKPIPopup';
     popup.innerHTML = `
@@ -3946,7 +3946,7 @@ async function useTDEResult() {
     const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
     
     const data = {
-        kpi_type: 'TDE',
+        kpi_type: 'TMH',
         input_values: {
             training_sessions: trainingSessions,
             employees: employees,
@@ -6247,7 +6247,7 @@ function calculatePercentages() {
         percentageTowardsTarget = 100 - percentageFromBaseline;
         
     } else {
-        // Default formulas for ROA, NPM, DSCR, MWh, GAF, TDE, DD
+        // Default formulas for ROA, NPM, DSCR, MWh, GAF, TMH, DD
         console.log('✅ Using default percentage formulas for KPI:', kpiType);
         
         // Percentage_progress_from_baseline = ((achieved_value - baseline_value)/(baseline_value))*100
@@ -6378,7 +6378,7 @@ function detectKPIType(indicatorText) {
     } else if (text.includes('gaf') || text.includes('generation availability')) {
         return 'GAF';
     } else if (text.includes('tde') || text.includes('training days per employee')) {
-        return 'TDE';
+        return 'TMH';
     } else if (text.includes('atc') || text.includes('total losses electricity')) {
         return 'ATC';
     } else if (text.includes('necd') || text.includes('new electricity connection')) {

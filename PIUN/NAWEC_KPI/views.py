@@ -1030,7 +1030,7 @@ def get_kpi_indicator_data(request, kpi_code):
             'DSCR': 'KPI-03',   # Debt Service Coverage Ratio
             'MWH': 'KPI-04',    # Monthly Water Hours
             'GAF': 'KPI-05',    # Grid Availability Factor
-            'TDE': 'KPI-06',    # Total Debt to Equity
+            'TMH': 'KPI-06',    # Training Man Hours
             'ATC': 'KPI-07',    # Average Time to Connect
             'NECD': 'KPI-08',   # New Electricity Connection Delivered
             'NWCD': 'KPI-09',   # New Water Connection Delivered
@@ -1516,8 +1516,8 @@ def calculate_gaf_edit(request, calc_id):
     return render(request, 'NAWEC_KPI/calculate_gaf_edit.html', context)
 
 @login_required
-def calculate_tde_list(request):
-    """List all TDE calculations"""
+def calculate_tmh_list(request):
+    """List all TMH calculations"""
     calculations = CalculateTMH.objects.select_related('loginUser', 'year', 'quarter').order_by('-date_created')
     
     search_query = request.GET.get('search')
@@ -1537,10 +1537,10 @@ def calculate_tde_list(request):
         'search_query': search_query,
         'calculation_type': 'TMH'
     }
-    return render(request, 'NAWEC_KPI/calculate_tde_list.html', context)
+    return render(request, 'NAWEC_KPI/calculate_tmh_list.html', context)
 
 @login_required
-def calculate_tde_detail(request, calc_id):
+def calculate_tmh_detail(request, calc_id):
     """View detailed TMH calculation"""
     calculation = get_object_or_404(CalculateTMH, id=calc_id)
     
@@ -1553,10 +1553,10 @@ def calculate_tde_detail(request, calc_id):
         'performance_status': performance_status,
         'efficiency_percentage': min((calculation.achieved_value / 5) * 100, 100) if calculation.achieved_value else 0
     }
-    return render(request, 'NAWEC_KPI/calculate_tde_detail.html', context)
+    return render(request, 'NAWEC_KPI/calculate_tmh_detail.html', context)
 
 @login_required
-def calculate_tde_edit(request, calc_id):
+def calculate_tmh_edit(request, calc_id):
     """Edit TMH calculation"""
     calculation = get_object_or_404(CalculateTMH, id=calc_id)
     
@@ -1583,7 +1583,7 @@ def calculate_tde_edit(request, calc_id):
         calculation.save()
         
         messages.success(request, 'TMH calculation updated successfully!')
-        return redirect('NAWEC_KPI:calculate_tde_detail', calc_id=calculation.id)
+        return redirect('NAWEC_KPI:calculate_tmh_detail', calc_id=calculation.id)
     
     # Get years, quarters, and months for dropdowns
     years = YEAR.objects.all().order_by('-profile_year')
@@ -1597,7 +1597,7 @@ def calculate_tde_edit(request, calc_id):
         'months': months,
         'calculation_type': 'TMH'
     }
-    return render(request, 'NAWEC_KPI/calculate_tde_edit.html', context)
+    return render(request, 'NAWEC_KPI/calculate_tmh_edit.html', context)
 
 @login_required
 def calculate_atc_list(request):
@@ -3187,7 +3187,7 @@ class SaveKPICalculationView(View):
                 )
                 calculation.save()
                 
-            elif kpi_type == 'TDE':
+            elif kpi_type == 'TMH':
                 # TMH calculation
                 training_sessions = input_values.get('training_sessions', 0)
                 employees = input_values.get('employees', 0)
@@ -3271,7 +3271,7 @@ class DeleteKPICalculationView(View):
                 CalculateTPS.objects.filter(id=calc_id).delete()
             elif kpi_type == 'ATC':
                 CalculateATC.objects.filter(id=calc_id).delete()
-            elif kpi_type == 'TDE':
+            elif kpi_type == 'TMH':
                 CalculateTMH.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})

@@ -604,7 +604,7 @@ window.testAllKPIPopups = function() {
         { name: 'DSCR', func: showDSCRCalculationPopup },
         { name: 'MWh', func: showMWhCalculationPopup },
         { name: 'GAF', func: showGAFCalculationPopup },
-        { name: 'TDE', func: showTDECalculationPopup },
+        { name: 'TMH', func: showTDECalculationPopup },
         { name: 'ATC', func: showATCCalculationPopup },
         { name: 'NECD', func: showNECDCalculationPopup },
         { name: 'NWCD', func: showNWCDCalculationPopup },

@@ -104,8 +104,8 @@ class KPITriggerSystem {
             indicatorText.toLowerCase().includes('training') || 
             indicatorText.toLowerCase().includes('tde') ||
             indicatorText.toLowerCase().includes('employee')) {
-            console.log('🔴 FORCED KPI-06 TDE Override Triggered for:', indicatorText);
-            return 'TDE';
+            console.log('🔴 FORCED KPI-06 TMH Override Triggered for:', indicatorText);
+            return 'TMH';
         }
         
         // Force KPI-04 (Local Production - Total Electricity Generated)
@@ -140,7 +140,7 @@ class KPITriggerSystem {
                 patterns: ['generation availability factor', 'gaf', 'grid availability', 'kpi-05', 'kpi05', 'generation', 'availability', 'factor']
             },
             {
-                type: 'TDE',
+                type: 'TMH',
                 patterns: ['training days efficiency', 'tde', 'training efficiency', 'kpi-06', 'kpi06', 'training', 'days', 'efficiency', 'employee training']
             },
             {

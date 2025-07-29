@@ -210,12 +210,12 @@ const KPIConfigurations = {
         }
     },
 
-    TDE: {
+    TMH: {
         key: 'tde',
-        type: 'TDE',
+        type: 'TMH',
         title: 'Calculate Training Man Hours (TDE) - KPI-06',
         color: '#6f42c1',
-        formula: 'TDE = Total Training Days ÷ Total Number of Employees',
+        formula: 'TMH = Total Training Days ÷ Total Number of Employees',
         unit: 'days/employee',
         fields: [
             {

@@ -51,9 +51,9 @@ const KPI_CONFIGS = {
         ],
         calculate: (data) => (parseFloat(data.total_available_hours) / parseFloat(data.total_period_hours)) * 100
     },
-    'TDE': {
+    'TMH': {
         name: 'Training Man Hours (TDE)',
-        formula: 'TDE = Total Training Days / Total Employees',
+        formula: 'TMH = Total Training Days / Total Employees',
         fields: [
             { id: 'total_training_days_conducted', label: 'Total Training Days', type: 'number', placeholder: 'Enter training days' },
             { id: 'total_number_of_employees', label: 'Total Employees', type: 'number', placeholder: 'Enter number of employees' }
@@ -171,7 +171,7 @@ function detectKPIType(indicatorText) {
     if (text.includes('debt service coverage') || text.includes('dscr')) return 'DSCR';
     if (text.includes('energy injection') || text.includes('mwh')) return 'MWh';
     if (text.includes('generation availability') || text.includes('gaf')) return 'GAF';
-    if (text.includes('training man hours') || text.includes('tde')) return 'TDE';
+    if (text.includes('training man hours') || text.includes('tde')) return 'TMH';
     if (text.includes('atc&c') || text.includes('total losses electricity')) return 'ATC';
     if (text.includes('new electricity connections') || text.includes('necd')) return 'NECD';
     if (text.includes('new water connections') || text.includes('nwcd')) return 'NWCD';

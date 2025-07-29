@@ -65,10 +65,10 @@ urlpatterns = [
     path('gaf-calculations/<int:calc_id>/', views.calculate_gaf_detail, name='calculate_gaf_detail'),
     path('gaf-calculations/<int:calc_id>/edit/', views.calculate_gaf_edit, name='calculate_gaf_edit'),
     
-    # TDE calculations
-    path('tde-calculations/', views.calculate_tde_list, name='calculate_tde_list'),
-    path('tde-calculations/<int:calc_id>/', views.calculate_tde_detail, name='calculate_tde_detail'),
-    path('tde-calculations/<int:calc_id>/edit/', views.calculate_tde_edit, name='calculate_tde_edit'),
+    # TMH calculations
+    path('tmh-calculations/', views.calculate_tmh_list, name='calculate_tmh_list'),
+    path('tmh-calculations/<int:calc_id>/', views.calculate_tmh_detail, name='calculate_tmh_detail'),
+    path('tmh-calculations/<int:calc_id>/edit/', views.calculate_tmh_edit, name='calculate_tmh_edit'),
     
     # ATC calculations
     path('atc-calculations/', views.calculate_atc_list, name='calculate_atc_list'),

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Edit TDE Calculation - NAWEC KPI{% endblock %}
+{% block title %}Edit TMH Calculation - NAWEC KPI{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -14,10 +14,10 @@
                             <i class="bi bi-pencil"></i> Edit Training Man Hours (TDE) Calculation
                         </h4>
                         <div class="d-flex gap-2">
-                            <a href="{% url 'NAWEC_KPI:calculate_tde_detail' calculation.id %}" class="btn btn-info btn-sm">
+                            <a href="{% url 'NAWEC_KPI:calculate_tmh_detail' calculation.id %}" class="btn btn-info btn-sm">
                                 <i class="bi bi-eye"></i> View Details
                             </a>
-                            <a href="{% url 'NAWEC_KPI:calculate_tde_list' %}" class="btn btn-secondary btn-sm">
+                            <a href="{% url 'NAWEC_KPI:calculate_tmh_list' %}" class="btn btn-secondary btn-sm">
                                 <i class="bi bi-arrow-left"></i> Back to List
                             </a>
                         </div>
@@ -35,7 +35,7 @@
                                     <h6 class="fw-bold">
                                         <i class="bi bi-calculator"></i> Training Man Hours Formula
                                     </h6>
-                                    <p class="mb-2"><strong>TDE = Total Training Days Conducted ÷ Total Number of Employees</strong></p>
+                                    <p class="mb-2"><strong>TMH = Total Training Days Conducted ÷ Total Number of Employees</strong></p>
                                     <small class="text-muted">
                                         Training Man Hours measures training efficiency
                                     </small>
@@ -115,10 +115,10 @@
                                         </h6>
                                         <div id="calculationPreview">
                                             <p class="mb-2">
-                                                <strong>TDE = <span id="previewDays">{{ calculation.total_training_days_conducted|floatformat:2 }}</span> days ÷ <span id="previewEmployees">{{ calculation.total_number_of_employees|floatformat:0 }}</span> employees</strong>
+                                                <strong>TMH = <span id="previewDays">{{ calculation.total_training_days_conducted|floatformat:2 }}</span> days ÷ <span id="previewEmployees">{{ calculation.total_number_of_employees|floatformat:0 }}</span> employees</strong>
                                             </p>
                                             <h5 class="text-success mb-0">
-                                                <strong>TDE = <span id="previewResult">{{ calculation.calculated_value|floatformat:2 }}</span> days per employee</strong>
+                                                <strong>TMH = <span id="previewResult">{{ calculation.calculated_value|floatformat:2 }}</span> days per employee</strong>
                                             </h5>
                                         </div>
                                     </div>
