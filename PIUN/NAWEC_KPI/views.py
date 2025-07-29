@@ -1330,7 +1330,7 @@ def calculate_dscr_list(request):
     search_query = request.GET.get('search')
     if search_query:
         calculations = calculations.filter(
-            Q(calculated_value__icontains=search_query) |
+            Q(achieved_value__icontains=search_query) |
             Q(loginUser__username__icontains=search_query)
         )
     

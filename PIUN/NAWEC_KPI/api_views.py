@@ -222,6 +222,19 @@ class SaveKPICalculationView(View):
                 # Get the primary key - handle both 'id' and 'unique_id' fields
                 pk_value = getattr(instance, 'unique_id', getattr(instance, 'id', instance.pk))
                 print(f'[DEBUG] API - Successfully created {kpi_type} instance: ID={pk_value}')
+                
+                # Force database commit to ensure the record is saved
+                from django.db import transaction
+                transaction.commit()
+                print(f'[DEBUG] API - Database transaction committed for {kpi_type} ID={pk_value}')
+                
+                # Verify the record exists in database
+                if hasattr(instance, 'unique_id'):
+                    exists = model_class.objects.filter(unique_id=pk_value).exists()
+                else:
+                    exists = model_class.objects.filter(id=pk_value).exists()
+                print(f'[DEBUG] API - Record exists in database: {exists}')
+                
             except Exception as save_error:
                 print(f'[DEBUG] API - Error saving {kpi_type}: {save_error}')
                 return JsonResponse({
