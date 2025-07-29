@@ -6586,21 +6586,21 @@ function showDERPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #fd7e14; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: DER = Total Debt ÷ Total Equity
+                    <i class="bi bi-info-circle"></i> Formula: DER = Total Debt ÷ Total Equity (negative values allowed)
                 </h6>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Debt (GMD):</label>
                     <input type="number" id="derTotalDebt" step="0.01"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter total debt amount">
+                           placeholder="Enter total debt amount (negative values allowed)">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Equity (GMD):</label>
                     <input type="number" id="derTotalEquity" step="0.01"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter total equity amount">
+                           placeholder="Enter total equity amount (negative values allowed)">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
@@ -6665,8 +6665,8 @@ function calculateDER() {
     const totalDebt = parseFloat(document.getElementById('derTotalDebt').value) || 0;
     const totalEquity = parseFloat(document.getElementById('derTotalEquity').value) || 0;
     
-    if (totalDebt <= 0 || totalEquity <= 0) {
-        alert('Please enter valid positive values for both Total Debt and Total Equity.');
+    if (totalDebt === 0 || totalEquity === 0) {
+        alert('Please enter non-zero values for both Total Debt and Total Equity. Negative values are allowed.');
         return;
     }
     

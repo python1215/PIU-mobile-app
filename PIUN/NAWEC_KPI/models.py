@@ -1186,7 +1186,9 @@ class CalculateAO(models.Model):
 
 
 class CalculateDER(models.Model):
-    """KPI-18: Debt to Equity Ratio Calculation"""
+    """KPI-18: Debt to Equity Ratio Calculation
+    Formula: DER = Total Debt ÷ Total Equity (negative values allowed)
+    """
     # KPI tracking fields
     baseline_value = models.FloatField(
         null=True, blank=True, help_text="Baseline value for comparison")
@@ -1225,7 +1227,7 @@ class CalculateDER(models.Model):
     def save(self, *args, **kwargs):
         if (self.total_debt is not None
                 and self.total_equity is not None
-                and self.total_equity > 0):
+                and self.total_equity != 0):
             self.achieved_value = (float(self.total_debt) /
                                    float(self.total_equity))
         
