@@ -838,14 +838,32 @@ function setupNumericFieldRounding() {
                 }
             });
             
-            // Also round values on input for real-time feedback
+            // Also round values on input for real-time feedback with delay
             field.addEventListener('input', function() {
                 if (this.value && !isNaN(this.value)) {
-                    // Only round if the value has more than 2 decimal places
-                    const numValue = parseFloat(this.value);
-                    if (numValue.toString().includes('.') && this.value.split('.')[1] && this.value.split('.')[1].length > 2) {
+                    // Clear any existing timeout
+                    clearTimeout(this.roundingTimeout);
+                    
+                    // Set timeout to round after user stops typing
+                    this.roundingTimeout = setTimeout(() => {
+                        const numValue = parseFloat(this.value);
                         const roundedValue = numValue.toFixed(2);
+                        if (this.value !== roundedValue) {
+                            this.value = roundedValue;
+                            console.log(`⏱️ Auto-rounded ${fieldId} to: ${roundedValue}`);
+                        }
+                    }, 800); // 0.8 second delay
+                }
+            });
+            
+            // Add focus event to ensure proper formatting when field is selected
+            field.addEventListener('focus', function() {
+                if (this.value && !isNaN(this.value)) {
+                    const numValue = parseFloat(this.value);
+                    const roundedValue = numValue.toFixed(2);
+                    if (this.value !== roundedValue) {
                         this.value = roundedValue;
+                        console.log(`🎯 Focus-rounded ${fieldId} to: ${roundedValue}`);
                     }
                 }
             });
@@ -1793,14 +1811,16 @@ async function useSimpleROAResult() {
         const result = await response.json();
         
         if (result.success) {
-            // Set the achieved value in the main form
+            // Set the achieved value in the main form with proper 2 decimal formatting
             const achievedValueField = document.getElementById('id_achieved_value');
             if (achievedValueField) {
-                achievedValueField.value = window.simpleROAResult;
+                const formattedValue = parseFloat(window.simpleROAResult).toFixed(2);
+                achievedValueField.value = formattedValue;
                 achievedValueField.style.backgroundColor = '#e7f3ff';
                 
                 // Trigger percentage calculations
                 calculatePercentages();
+                console.log(`✅ ROA achieved value set: ${formattedValue}`);
             }
             
             // Clear all popup form fields and memory
@@ -2070,14 +2090,16 @@ async function useNPMResult() {
         const result = await response.json();
         
         if (result.success) {
-            // Set the achieved value in the main form
+            // Set the achieved value in the main form with proper 2 decimal formatting
             const achievedValueField = document.getElementById('id_achieved_value');
             if (achievedValueField) {
-                achievedValueField.value = window.simpleNPMResult;
+                const formattedValue = parseFloat(window.simpleNPMResult).toFixed(2);
+                achievedValueField.value = formattedValue;
                 achievedValueField.style.backgroundColor = '#e7f3ff';
                 
                 // Trigger percentage calculations
                 calculatePercentages();
+                console.log(`✅ NPM achieved value set: ${formattedValue}`);
             }
             
             // Clear all popup form fields and memory
@@ -2621,14 +2643,16 @@ async function useDSCRResult() {
         const result = await response.json();
         
         if (result.success) {
-            // Set the achieved value in the main form
+            // Set the achieved value in the main form with proper 2 decimal formatting
             const achievedValueField = document.getElementById('id_achieved_value');
             if (achievedValueField) {
-                achievedValueField.value = window.simpleDSCRResult;
+                const formattedValue = parseFloat(window.simpleDSCRResult).toFixed(2);
+                achievedValueField.value = formattedValue;
                 achievedValueField.style.backgroundColor = '#e7f3ff';
                 
                 // Trigger percentage calculations
                 calculatePercentages();
+                console.log(`✅ DSCR achieved value set: ${formattedValue}`);
             }
             
             // Clear all popup form fields and memory
@@ -3614,14 +3638,16 @@ function useGAFResult() {
         return;
     }
     
-    // Set the achieved value in the main form
+    // Set the achieved value in the main form with proper 2 decimal formatting
     const achievedValueField = document.getElementById('id_achieved_value');
     if (achievedValueField) {
-        achievedValueField.value = window.simpleGAFResult;
+        const formattedValue = parseFloat(window.simpleGAFResult).toFixed(2);
+        achievedValueField.value = formattedValue;
         achievedValueField.style.backgroundColor = '#e7f3ff';
         
         // Trigger percentage calculations
         calculatePercentages();
+        console.log(`✅ GAF achieved value set: ${formattedValue}`);
     }
     
     // Close the popup
@@ -6040,11 +6066,13 @@ function useROAResult() {
     if (window.calculatedROAValue) {
         const achievedValueField = document.getElementById('id_achieved_value');
         if (achievedValueField) {
-            achievedValueField.value = window.calculatedROAValue;
+            const formattedValue = parseFloat(window.calculatedROAValue).toFixed(2);
+            achievedValueField.value = formattedValue;
             achievedValueField.style.backgroundColor = '#e7f3ff';
             
             // Trigger percentage calculations after setting achieved value
             calculatePercentages();
+            console.log(`✅ ROA achieved value set: ${formattedValue}`);
         }
         
         // Close modal using our custom function
