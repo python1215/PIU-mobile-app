@@ -1445,7 +1445,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
         kpiType = 'GAF';
-    } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training man hours')) {
+    } else if (selectedText.includes('training man hours') || selectedText.includes('training days per employee') || selectedText.includes('tde') || selectedText.includes('training') || selectedText.includes('employee training')) {
         kpiType = 'TMH';
     } else if (selectedText.includes('average time to connect') || selectedText.includes('total losses electricity')) {
         kpiType = 'ATC';
@@ -3852,10 +3852,7 @@ function showTDEPopup() {
     document.body.appendChild(popup);
 }
 
-// Alias function for backward compatibility
-function showTMHPopup() {
-    showTDEPopup();
-}
+// Remove this duplicate function since showTDEPopup is now the main TMH popup function
 
 function calculateTMH() {
     const title = document.getElementById('tmhTitle').value || 'Training Session';
