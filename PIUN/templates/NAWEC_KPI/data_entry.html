@@ -6343,7 +6343,8 @@ function updateDDStatusBadge(kpiType, achieved, target) {
         statusText.className = `badge badge-sm ${badgeClass}`;
         statusBadge.style.display = 'block';
         
-        console.log(`📊 DD Status: Achieved=${achieved} vs Target=${target} → ${status}`);
+        console.log(`📊 DD Status Debug: Achieved=${achieved} (type: ${typeof achieved}) vs Target=${target} (type: ${typeof target}) → ${status}`);
+        console.log(`📊 DD Logic Check: ${achieved} > ${target} = ${achieved > target}`);
     } else {
         // Hide badge for non-DD KPIs or when no values
         statusBadge.style.display = 'none';
