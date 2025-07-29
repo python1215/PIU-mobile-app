@@ -1,0 +1,91 @@
+Page not found (404)
+No CalculateDD matches the given query.
+Request Method:	POST
+Request URL:	http://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev/NAWEC_KPI/dd-calculations/4/delete/
+Raised by:	NAWEC_KPI.views.calculate_dd_delete
+Using the URLconf defined in piu_project.urls, Django tried these URL patterns, in this order:
+
+admin-panel/
+[name='main_dashboard']
+dashboard/ [name='dashboard-alt']
+user-accounts/
+accounts/
+accounts/profile/ [name='profile']
+setup/
+PIU_Financial_mgt/
+project_actions/
+monitoring/
+social_and_env/
+PIU_Mapping_project_Sites/
+NAWEC_KPI/ [name='dashboard']
+NAWEC_KPI/ kpi-dashboard/ [name='kpi_dashboard']
+NAWEC_KPI/ kpi-management/ [name='kpi_management']
+NAWEC_KPI/ performance-dashboard/ [name='performance_dashboard']
+NAWEC_KPI/ performance-report/ [name='performance_report']
+NAWEC_KPI/ indicators/ [name='indicator_list']
+NAWEC_KPI/ indicators/create/ [name='indicator_create']
+NAWEC_KPI/ indicators/<int:pk>/ [name='indicator_detail']
+NAWEC_KPI/ indicators/<int:pk>/edit/ [name='indicator_edit']
+NAWEC_KPI/ indicators/<int:pk>/delete/ [name='indicator_delete']
+NAWEC_KPI/ data-entry/ [name='data_entry']
+NAWEC_KPI/ data-entry/list/ [name='data_entry_list']
+NAWEC_KPI/ data-entry/export/ [name='data_entry_export']
+NAWEC_KPI/ data-entry/<int:pk>/ [name='data_entry_detail']
+NAWEC_KPI/ data-entry/<int:pk>/edit/ [name='data_entry_edit']
+NAWEC_KPI/ data-entry/<int:pk>/delete/ [name='data_entry_delete']
+NAWEC_KPI/ monitoring/ [name='monitoring_list']
+NAWEC_KPI/ analysis/ [name='performance_analysis']
+NAWEC_KPI/ calculate-roa/ [name='calculate_roa_popup']
+NAWEC_KPI/ calculate-npm/ [name='calculate_npm_popup']
+NAWEC_KPI/ api/save-kpi/ [name='save_kpi_calculation']
+NAWEC_KPI/ api/delete-calculation/ [name='delete_kpi_calculation']
+NAWEC_KPI/ api/delete-kpi/ [name='delete_kpi_alternative']
+NAWEC_KPI/ roa-calculations/ [name='calculate_roa_list']
+NAWEC_KPI/ roa-calculations/<int:calc_id>/ [name='calculate_roa_detail']
+NAWEC_KPI/ roa-calculations/<int:calc_id>/edit/ [name='calculate_roa_edit']
+NAWEC_KPI/ npm-calculations/ [name='calculate_npm_list']
+NAWEC_KPI/ npm-calculations/<int:calc_id>/ [name='calculate_npm_detail']
+NAWEC_KPI/ npm-calculations/<int:calc_id>/edit/ [name='calculate_npm_edit']
+NAWEC_KPI/ dscr-calculations/ [name='calculate_dscr_list']
+NAWEC_KPI/ dscr-calculations/<int:calc_id>/ [name='calculate_dscr_detail']
+NAWEC_KPI/ dscr-calculations/<int:calc_id>/edit/ [name='calculate_dscr_edit']
+NAWEC_KPI/ mwh-calculations/ [name='calculate_mwh_list']
+NAWEC_KPI/ mwh-calculations/<int:calc_id>/ [name='calculate_mwh_detail']
+NAWEC_KPI/ mwh-calculations/<int:calc_id>/edit/ [name='calculate_mwh_edit']
+NAWEC_KPI/ gaf-calculations/ [name='calculate_gaf_list']
+NAWEC_KPI/ gaf-calculations/<int:calc_id>/ [name='calculate_gaf_detail']
+NAWEC_KPI/ gaf-calculations/<int:calc_id>/edit/ [name='calculate_gaf_edit']
+NAWEC_KPI/ tde-calculations/ [name='calculate_tde_list']
+NAWEC_KPI/ tde-calculations/<int:calc_id>/ [name='calculate_tde_detail']
+NAWEC_KPI/ tde-calculations/<int:calc_id>/edit/ [name='calculate_tde_edit']
+NAWEC_KPI/ atc-calculations/ [name='calculate_atc_list']
+NAWEC_KPI/ atc-calculations/<int:calc_id>/ [name='calculate_atc_detail']
+NAWEC_KPI/ atc-calculations/<int:calc_id>/edit/ [name='calculate_atc_edit']
+NAWEC_KPI/ necd-calculations/ [name='calculate_necd_list']
+NAWEC_KPI/ necd-calculations/<int:calc_id>/ [name='calculate_necd_detail']
+NAWEC_KPI/ necd-calculations/<int:calc_id>/edit/ [name='calculate_necd_edit']
+NAWEC_KPI/ nwcd-calculations/ [name='calculate_nwcd_list']
+NAWEC_KPI/ nwcd-calculations/<int:calc_id>/ [name='calculate_nwcd_detail']
+NAWEC_KPI/ nwcd-calculations/<int:calc_id>/edit/ [name='calculate_nwcd_edit']
+NAWEC_KPI/ tps-calculations/ [name='calculate_tps_list']
+NAWEC_KPI/ tps-calculations/<int:calc_id>/ [name='calculate_tps_detail']
+NAWEC_KPI/ tps-calculations/<int:calc_id>/edit/ [name='calculate_tps_edit']
+NAWEC_KPI/ ttp-calculations/ [name='calculate_ttp_list']
+NAWEC_KPI/ ttp-calculations/<int:calc_id>/ [name='calculate_ttp_detail']
+NAWEC_KPI/ ttp-calculations/<int:calc_id>/edit/ [name='calculate_ttp_edit']
+NAWEC_KPI/ wqcc-calculations/ [name='calculate_wqcc_list']
+NAWEC_KPI/ wqcc-calculations/<int:calc_id>/ [name='calculate_wqcc_detail']
+NAWEC_KPI/ wqcc-calculations/<int:calc_id>/edit/ [name='calculate_wqcc_edit']
+NAWEC_KPI/ wqcb-calculations/ [name='calculate_wqcb_list']
+NAWEC_KPI/ wqcb-calculations/<int:calc_id>/ [name='calculate_wqcb_detail']
+NAWEC_KPI/ wqcb-calculations/<int:calc_id>/edit/ [name='calculate_wqcb_edit']
+NAWEC_KPI/ nrw-calculations/ [name='calculate_nrw_list']
+NAWEC_KPI/ nrw-calculations/<int:calc_id>/ [name='calculate_nrw_detail']
+NAWEC_KPI/ nrw-calculations/<int:calc_id>/edit/ [name='calculate_nrw_edit']
+NAWEC_KPI/ dd-calculations/ [name='calculate_dd_list']
+NAWEC_KPI/ dd-calculations/<int:calc_id>/ [name='calculate_dd_detail']
+NAWEC_KPI/ dd-calculations/<int:calc_id>/edit/ [name='calculate_dd_edit']
+NAWEC_KPI/ dd-calculations/<int:calc_id>/delete/ [name='calculate_dd_delete']
+The current path, NAWEC_KPI/dd-calculations/4/delete/, matched the last one.
+
+You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
