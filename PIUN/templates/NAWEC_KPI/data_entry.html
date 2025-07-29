@@ -2670,7 +2670,7 @@ function showEIPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #28a745; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: Energy Injection (MW) = Energy (MWH) / Time (H)
+                    <i class="bi bi-info-circle"></i> Formula: Local Production (Total Electricity Generated) (MW) = Energy (MWH) / Time (H)
                 </h6>
                 
                 <!-- Energy Sources Container -->
@@ -2731,12 +2731,12 @@ function showEIPopup() {
                 
                 <!-- Performance Standards Section -->
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                    <h6 style="color: #28a745; margin: 0 0 10px 0;">Energy Injection Performance Standards:</h6>
+                    <h6 style="color: #28a745; margin: 0 0 10px 0;">Local Production Performance Standards:</h6>
                     <div style="font-size: 0.9rem; color: #6c757d;">
-                        • EI ≥ 50 MW: Excellent energy injection capacity<br>
-                        • EI 30-49 MW: Good energy injection capacity<br>
-                        • EI 15-29 MW: Moderate energy injection capacity<br>
-                        • EI < 15 MW: Low energy injection capacity
+                        • LP ≥ 50 MW: Excellent local production capacity<br>
+                        • LP 30-49 MW: Good local production capacity<br>
+                        • LP 15-29 MW: Moderate local production capacity<br>
+                        • LP < 15 MW: Low local production capacity
                     </div>
                 </div>
             </div>
@@ -2767,7 +2767,7 @@ function showEIPopup() {
                     <button onclick="calculateEI()" 
                             style="background: #28a745; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        <i class="bi bi-calculator"></i> Calculate EI
+                        <i class="bi bi-calculator"></i> Calculate LP
                     </button>
                     <button onclick="useEIResult()" 
                             style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
@@ -2888,16 +2888,16 @@ function calculateEI() {
     let performanceColor = '';
     
     if (totalEI >= 50) {
-        performanceText = 'Excellent energy injection capacity';
+        performanceText = 'Excellent local production capacity';
         performanceColor = '#28a745';
     } else if (totalEI >= 30) {
-        performanceText = 'Good energy injection capacity';
+        performanceText = 'Good local production capacity';
         performanceColor = '#20c997';
     } else if (totalEI >= 15) {
-        performanceText = 'Moderate energy injection capacity';
+        performanceText = 'Moderate local production capacity';
         performanceColor = '#ffc107';
     } else {
-        performanceText = 'Low energy injection capacity';
+        performanceText = 'Low local production capacity';
         performanceColor = '#dc3545';
     }
     
@@ -2911,7 +2911,7 @@ function calculateEI() {
             ${energyBreakdown.join('<br>')}
         </div>
         <div style="margin-top: 10px; font-size: 1.5rem; color: #28a745;">
-            Total Energy Injection = ${totalEI.toFixed(2)} MW
+            Total Local Production (Total Electricity Generated) = ${totalEI.toFixed(2)} MW
         </div>
         <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
             <i class="bi bi-lightning-charge-fill"></i> ${performanceText}
@@ -2934,7 +2934,7 @@ async function useEIResult() {
     }
     
     if (!window.simpleEIResult) {
-        alert('Please calculate Energy Injection first');
+        alert('Please calculate Local Production (Total Electricity Generated) first');
         return;
     }
     
@@ -3000,13 +3000,13 @@ async function useEIResult() {
             // Close the popup
             closeEIPopup();
             
-            alert('Energy Injection calculation saved successfully and value applied to form!');
+            alert('Local Production (Total Electricity Generated) calculation saved successfully and value applied to form!');
         } else {
-            alert('Error saving Energy Injection calculation: ' + result.error);
+            alert('Error saving Local Production (Total Electricity Generated) calculation: ' + result.error);
         }
     } catch (error) {
-        console.error('Error saving Energy Injection calculation:', error);
-        alert('Error saving Energy Injection calculation: ' + error.message);
+        console.error('Error saving Local Production (Total Electricity Generated) calculation:', error);
+        alert('Error saving Local Production (Total Electricity Generated) calculation: ' + error.message);
     }
 }
 
@@ -6175,7 +6175,7 @@ function detectKPIType(indicatorText) {
         return 'NPM';
     } else if (text.includes('dscr') || text.includes('debt service coverage')) {
         return 'DSCR';
-    } else if (text.includes('mwh') || text.includes('energy injection')) {
+    } else if (text.includes('mwh') || text.includes('local production') || text.includes('total electricity generated') || text.includes('energy injection')) {
         return 'MWh';
     } else if (text.includes('gaf') || text.includes('generation availability')) {
         return 'GAF';

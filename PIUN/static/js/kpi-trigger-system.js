@@ -108,8 +108,10 @@ class KPITriggerSystem {
             return 'TDE';
         }
         
-        // Force KPI-04 (Energy Injection)
-        if (indicatorText.toLowerCase().includes('energy injection') ||
+        // Force KPI-04 (Local Production - Total Electricity Generated)
+        if (indicatorText.toLowerCase().includes('local production') ||
+            indicatorText.toLowerCase().includes('total electricity generated') ||
+            indicatorText.toLowerCase().includes('energy injection') ||
             indicatorText.toLowerCase().includes('kpi-04') ||
             indicatorText.toLowerCase().includes('kpi04')) {
             console.log('🔴 FORCED KPI-04 MWh Override Triggered for:', indicatorText);
@@ -131,7 +133,7 @@ class KPITriggerSystem {
             },
             {
                 type: 'MWh',
-                patterns: ['energy injection', 'mwh', 'local production', 'total electricity generated', 'kpi-04', 'kpi04', 'energy', 'injection', 'power', 'megawatt']
+                patterns: ['local production', 'total electricity generated', 'energy injection', 'mwh', 'kpi-04', 'kpi04', 'energy', 'injection', 'power', 'megawatt']
             },
             {
                 type: 'GAF',

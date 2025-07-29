@@ -128,7 +128,7 @@ const KPIConfigurations = {
     MWh: {
         key: 'mwh',
         type: 'MWh',
-        title: 'Calculate Energy Injection (MWh) - KPI-04',
+        title: 'Calculate Local Production (Total Electricity Generated) (MWh) - KPI-04',
         color: '#ffc107',
         formula: 'E_total = Σ(Power × Time) for all sources',
         unit: 'MWh',
