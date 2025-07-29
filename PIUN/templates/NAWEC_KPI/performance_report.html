@@ -28,20 +28,16 @@
                 table-layout: fixed !important;
             }
             
-            /* Tighter column widths for print */
-            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 16% !important; }
-            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 10% !important; }
-            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5% !important; }
-            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5% !important; }
-            .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6% !important; }
-            .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6% !important; }
-            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 5% !important; }
-            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 6% !important; }
-            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 6% !important; }
-            .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 6% !important; }
-            .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 6% !important; }
-            .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 5% !important; }
-            .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 6% !important; }
+            /* Tighter column widths for print - 9 columns total */
+            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 20% !important; }
+            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 15% !important; }
+            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8% !important; }
+            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 8% !important; }
+            .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 10% !important; }
+            .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 10% !important; }
+            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 8% !important; }
+            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 8% !important; }
+            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 13% !important; }
         }
         
         .report-header {
@@ -95,20 +91,16 @@
             text-align: left !important;
         }
         
-        /* Column width controls for A4 portrait */
-        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 18%; } /* Indicator - increased for full text */
-        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 12%; }  /* PDO - increased for full text */
-        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5%; }  /* Baseline */
-        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5%; }  /* Target */
-        .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6%; }  /* Achieved */
-        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6%; }  /* Performance */
-        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 5%; }  /* Variance */
-        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 6%; }  /* Target Weight */
-        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 6%; }  /* Achieved Weight */
-        .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 6%; } /* Target GIR */
-        .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 6%; } /* Actual GIR */
-        .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 5%; } /* Year */
-        .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 6%; } /* Status */
+        /* Column width controls for A4 portrait - 9 columns total */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 22%; } /* Indicator */
+        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 15%; } /* PDO */
+        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8%; }  /* Baseline */
+        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 8%; }  /* Target */
+        .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 10%; } /* Achieved */
+        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 10%; } /* Performance */
+        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 8%; }  /* Variance */
+        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 8%; }  /* Year */
+        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 11%; } /* Status */
         
         .performance-good { color: #28a745; font-weight: bold; }
         .performance-warning { color: #ffc107; font-weight: bold; }
@@ -254,10 +246,6 @@
                             <th>Achieved</th>
                             <th>Perf %</th>
                             <th>Var</th>
-                            <th>T.Wgt</th>
-                            <th>A.Wgt</th>
-                            <th>T.GIR</th>
-                            <th>A.GIR</th>
                             <th>Year</th>
                             <th>Status</th>
                         </tr>
@@ -287,21 +275,11 @@
                                     N/A
                                 {% endif %}
                             </td>
-                            <td class="text-primary fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
-                            <td class="text-success fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
-                            <td class="text-info fw-bold">{{ entry.Targeted_Achieved_weight|floatformat:1|default:"N/A" }}</td>
-                            <td class="text-warning fw-bold">
-                                {% if entry.actual_gir_calculated is not None %}
-                                    {{ entry.actual_gir_calculated|floatformat:1 }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
                             <td>{{ entry.year.profile_year|default:"N/A" }}</td>
                             <td class="text-center">
                                 {% if entry.performance_calculated is not None %}
-                                    {% if "Total Losses Electricity" in entry.indicator_description or "Non-Revenue Water" in entry.indicator_description or "NRW" in entry.indicator_description or "New Water Connection Days" in entry.indicator_description or "NWCD" in entry.indicator_description or "New Electricity Connection Days" in entry.indicator_description or "NECD" in entry.indicator_description %}
-                                        <!-- For loss indicators, lower achieved value is better -->
+                                    {% if "Total Losses Electricity" in entry.indicator_description or "Non-Revenue Water" in entry.indicator_description or "NRW" in entry.indicator_description or "New Water Connection Days" in entry.indicator_description or "NWCD" in entry.indicator_description or "New Electricity Connection Days" in entry.indicator_description or "NECD" in entry.indicator_description or "Debtor Days" in entry.indicator_description or "DD" in entry.indicator_description %}
+                                        <!-- For loss indicators and DD, lower achieved value is better -->
                                         {% if entry.achieved_value < entry.End_Target_Value %}
                                             <span class="badge bg-success rounded-pill">Achieve</span>
                                         {% else %}
