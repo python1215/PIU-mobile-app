@@ -278,8 +278,15 @@
                             <td>{{ entry.year.profile_year|default:"N/A" }}</td>
                             <td class="text-center">
                                 {% if entry.performance_calculated is not None %}
-                                    {% if "Total Losses Electricity" in entry.indicator_description or "Non-Revenue Water" in entry.indicator_description or "NRW" in entry.indicator_description or "New Water Connection Days" in entry.indicator_description or "NWCD" in entry.indicator_description or "New Electricity Connection Days" in entry.indicator_description or "NECD" in entry.indicator_description or "Debtor Days" in entry.indicator_description or "DD" in entry.indicator_description %}
-                                        <!-- For loss indicators and DD, lower achieved value is better -->
+                                    <!-- Special logic for Debtor Days - Achieved > Target = Not Achieve -->
+                                    {% if "Debtor Days" in entry.indicator_description or "DD" in entry.indicator_description %}
+                                        {% if entry.achieved_value > entry.End_Target_Value %}
+                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                        {% else %}
+                                            <span class="badge bg-success rounded-pill">Achieve</span>
+                                        {% endif %}
+                                    {% elif "Total Losses Electricity" in entry.indicator_description or "Non-Revenue Water" in entry.indicator_description or "NRW" in entry.indicator_description or "New Water Connection Days" in entry.indicator_description or "NWCD" in entry.indicator_description or "New Electricity Connection Days" in entry.indicator_description or "NECD" in entry.indicator_description %}
+                                        <!-- For loss indicators, lower achieved value is better -->
                                         {% if entry.achieved_value < entry.End_Target_Value %}
                                             <span class="badge bg-success rounded-pill">Achieve</span>
                                         {% else %}
