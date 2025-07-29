@@ -41,19 +41,14 @@ const KPIConfigurations = {
             }
         ],
         calculateFunction: (values) => {
-            console.log('ROA calculation called with values:', values);
             const netProfit = parseFloat(values.net_profit_after_tax);
             const totalAssets = parseFloat(values.total_assets);
             
-            console.log('Parsed values - netProfit:', netProfit, 'totalAssets:', totalAssets);
-            
             if (isNaN(netProfit) || isNaN(totalAssets) || totalAssets === 0) {
-                console.error('Invalid values for ROA calculation');
                 return NaN;
             }
             
             const result = (netProfit / totalAssets) * 100;
-            console.log('ROA calculation result:', result);
             return result;
         }
     },
