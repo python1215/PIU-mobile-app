@@ -238,11 +238,17 @@ document.getElementById('confirmDelete').addEventListener('click', async functio
     if (!deleteCalculationId) return;
     
     try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken || !csrfToken.value) {
+            alert('CSRF token not found. Please refresh the page.');
+            return;
+        }
+        
         const response = await fetch(`/NAWEC_KPI/api/delete-kpi/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': csrfToken.value
             },
             body: JSON.stringify({
                 kpi_type: 'DD',

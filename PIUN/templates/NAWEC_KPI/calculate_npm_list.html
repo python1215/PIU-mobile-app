@@ -233,11 +233,17 @@ function editCalculation(calcId) {
 
 function deleteCalculation(calcId, calcType) {
     if (confirm(`Are you sure you want to delete this ${calcType} calculation? This action cannot be undone.`)) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken || !csrfToken.value) {
+            alert('CSRF token not found. Please refresh the page.');
+            return;
+        }
+        
         fetch(`/NAWEC_KPI/api/delete-calculation/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': csrfToken.value
             },
             body: JSON.stringify({
                 calc_id: calcId,
