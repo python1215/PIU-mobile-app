@@ -442,7 +442,15 @@
                 <div class="flex items-center justify-between mb-6 header-responsive">
                     <div>
                         <h2 class="text-2xl font-bold text-white">NAWEC KPI Performance Dashboard</h2>
-                        <p class="text-sm text-white opacity-70"> KPI monitoring entries</p>
+                        <p class="text-sm text-white opacity-70">
+                            {% if year_filter or quarter_filter %}
+                                Filtered Results: {{ filtered_entries_count }} entries
+                                {% if year_filter %} • Year: {{ year_filter }}{% endif %}
+                                {% if quarter_filter %} • Quarter: {{ quarter_filter }}{% endif %}
+                            {% else %}
+                                Showing all {{ filtered_entries_count }} KPI monitoring entries
+                            {% endif %}
+                        </p>
                     </div>
                     <div class="flex gap-3 header-buttons">
                         <a href="{% url 'NAWEC_KPI:kpi_dashboard' %}" class="btn btn-outline btn-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-white border-white hover:bg-white hover:text-blue-600">
@@ -462,6 +470,27 @@
         <div class="centered-content-wrapper">
             <!-- Filter and Data Section -->
             <div class="performance-card p-6">
+
+        <!-- Active Filters Info -->
+        {% if year_filter or quarter_filter %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="bi bi-funnel-fill text-blue-600 mr-2"></i>
+                        <span class="text-sm font-medium text-blue-800">Active Filters:</span>
+                        {% if year_filter %}
+                            <span class="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-full">Year: {{ year_filter }}</span>
+                        {% endif %}
+                        {% if quarter_filter %}
+                            <span class="ml-2 px-2 py-1 bg-indigo-600 text-white text-xs rounded-full">Quarter: {{ quarter_filter }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'NAWEC_KPI:performance_dashboard' %}" class="text-blue-600 hover:text-blue-800 text-xs">
+                        <i class="bi bi-x-circle mr-1"></i>Clear All
+                    </a>
+                </div>
+            </div>
+        {% endif %}
 
         <!-- Filter Form and Stats Cards -->
         <div class="bg-gray-50 p-4 rounded-lg mb-6">

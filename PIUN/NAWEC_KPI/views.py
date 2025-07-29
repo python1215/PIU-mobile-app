@@ -372,6 +372,9 @@ def performance_dashboard(request):
         'overall_target_gir': round(overall_target_gir, 2),
         'overall_actual_gir': round(overall_actual_gir, 2),
         'overall_achievement_rate': round(overall_achievement_rate, 2),
+        'year_filter': year_filter,
+        'quarter_filter': quarter_filter,
+        'filtered_entries_count': len(recent_entries),
     }
     
     return render(request, 'NAWEC_KPI/performance_dashboard.html', context)
