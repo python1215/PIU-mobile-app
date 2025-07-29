@@ -29,19 +29,19 @@
             }
             
             /* Tighter column widths for print */
-            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 12% !important; }
+            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 18% !important; }
             .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8% !important; }
-            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 6% !important; }
-            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 6% !important; }
+            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5% !important; }
+            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5% !important; }
             .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6% !important; }
-            .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 7% !important; }
-            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 6% !important; }
-            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 7% !important; }
-            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 7% !important; }
-            .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 7% !important; }
-            .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 7% !important; }
-            .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 6% !important; }
-            .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 7% !important; }
+            .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6% !important; }
+            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 5% !important; }
+            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 6% !important; }
+            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 6% !important; }
+            .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 6% !important; }
+            .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 6% !important; }
+            .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 5% !important; }
+            .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 6% !important; }
         }
         
         .report-header {
@@ -87,20 +87,25 @@
             text-align: center;
         }
         
+        /* Left align the Indicator column for better readability */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) {
+            text-align: left !important;
+        }
+        
         /* Column width controls for A4 portrait */
-        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 14%; } /* Indicator */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 20%; } /* Indicator - increased for full text */
         .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8%; }  /* PDO */
-        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 6%; }  /* Baseline */
-        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 6%; }  /* Target */
+        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 5%; }  /* Baseline */
+        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 5%; }  /* Target */
         .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 6%; }  /* Achieved */
-        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 7%; }  /* Performance */
-        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 6%; }  /* Variance */
-        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 7%; }  /* Target Weight */
-        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 7%; }  /* Achieved Weight */
-        .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 7%; } /* Target GIR */
-        .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 7%; } /* Actual GIR */
-        .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 6%; } /* Year */
-        .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 7%; } /* Status */
+        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 6%; }  /* Performance */
+        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 5%; }  /* Variance */
+        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 6%; }  /* Target Weight */
+        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 6%; }  /* Achieved Weight */
+        .kpi-table th:nth-child(10), .kpi-table td:nth-child(10) { width: 6%; } /* Target GIR */
+        .kpi-table th:nth-child(11), .kpi-table td:nth-child(11) { width: 6%; } /* Actual GIR */
+        .kpi-table th:nth-child(12), .kpi-table td:nth-child(12) { width: 5%; } /* Year */
+        .kpi-table th:nth-child(13), .kpi-table td:nth-child(13) { width: 6%; } /* Status */
         
         .performance-good { color: #28a745; font-weight: bold; }
         .performance-warning { color: #ffc107; font-weight: bold; }
@@ -258,8 +263,8 @@
                         {% for entry in report_entries %}
                         <tr>
                             <td>
-                                <div title="{{ entry.indicator_description }}">{{ entry.indicator_description|truncatechars:20 }}</div>
-                                <small class="text-muted">{{ entry.indicator_type|truncatechars:8 }}</small>
+                                <div>{{ entry.indicator_description }}</div>
+                                <small class="text-muted">{{ entry.indicator_type }}</small>
                             </td>
                             <td title="{{ entry.pdo }}">{{ entry.pdo|truncatechars:10|default:"N/A" }}</td>
                             <td>{{ entry.baseline_value|floatformat:1 }}</td>
