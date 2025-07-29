@@ -104,9 +104,20 @@ class SaveKPICalculationView(View):
                 quarter_value = input_values.get('quarter')
                 if quarter_value:
                     try:
-                        quarter_instance = Quarter.objects.get(quarter=quarter_value)
-                        create_data['quarter'] = quarter_instance
+                        # Map quarter string to actual database IDs
+                        quarter_mapping = {
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
+                        }
+                        quarter_id = quarter_mapping.get(str(quarter_value))
+                        if quarter_id:
+                            quarter_instance = Quarter.objects.get(id=quarter_id)
+                            create_data['quarter'] = quarter_instance
+                            print(f'[DEBUG] API - EI Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
                     except Quarter.DoesNotExist:
+                        print(f'[DEBUG] API - EI Quarter mapping failed for: {quarter_value}')
                         pass
                         
             else:
