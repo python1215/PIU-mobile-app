@@ -606,7 +606,7 @@ const KPIConfigurations = {
             }
         ],
         calculateFunction: (values) => {
-            return (values.trade_receivables / values.total_credit_sales) * 365;
+            return (values.trade_receivables / values.total_credit_sales) * 100;
         }
     }
 };

@@ -133,13 +133,13 @@
                         <div class="calculation-preview text-center" id="calculationPreview">
                             <h6 class="text-muted mb-3">Live Calculation Preview</h6>
                             <div class="alert alert-info">
-                                <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 365</strong>
+                                <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 100</strong>
                             </div>
                             <div id="calculationBreakdown" class="mb-3">
-                                DD = ({{ calculation.trade_receivables|floatformat:2 }} ÷ {{ calculation.total_credit_sales|floatformat:2 }}) × 365
+                                DD = ({{ calculation.trade_receivables|floatformat:2 }} ÷ {{ calculation.total_credit_sales|floatformat:2 }}) × 100
                             </div>
                             <div class="live-calculation" id="liveResult">
-                                {{ calculation.achieved_value|floatformat:2 }} days
+                                {{ calculation.achieved_value|floatformat:2 }}%
                             </div>
                             <div class="performance-indicator" id="performanceIndicator">
                                 <!-- Performance status will be updated via JavaScript -->
@@ -177,7 +177,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <small class="text-muted">Current DD:</small>
-                        <div class="fw-bold fs-5">{{ calculation.achieved_value|floatformat:2 }} days</div>
+                        <div class="fw-bold fs-5">{{ calculation.achieved_value|floatformat:2 }}%</div>
                     </div>
                     <div class="mb-3">
                         <small class="text-muted">Trade Receivables:</small>
@@ -206,19 +206,19 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2">
-                        <span class="badge bg-success me-2">≤ 30 days</span>
+                        <span class="badge bg-success me-2">≤ 30%</span>
                         <small>Excellent</small>
                     </div>
                     <div class="mb-2">
-                        <span class="badge bg-primary me-2">31-45 days</span>
+                        <span class="badge bg-primary me-2">31-45%</span>
                         <small>Good</small>
                     </div>
                     <div class="mb-2">
-                        <span class="badge bg-warning me-2">46-60 days</span>
+                        <span class="badge bg-warning me-2">46-60%</span>
                         <small>Acceptable</small>
                     </div>
                     <div class="mb-2">
-                        <span class="badge bg-danger me-2">> 60 days</span>
+                        <span class="badge bg-danger me-2">> 60%</span>
                         <small>Needs Improvement</small>
                     </div>
                 </div>
@@ -234,10 +234,10 @@
                 <div class="card-body">
                     <div class="text-center">
                         <div class="alert alert-light mb-2">
-                            <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 365</strong>
+                            <strong>DD = (Trade Receivables ÷ Total Credit Sales) × 100</strong>
                         </div>
                         <small class="text-muted">
-                            Debtor Days measures the average number of days it takes to collect receivables.
+                            Debtor Days measures the percentage ratio of trade receivables to total credit sales.
                         </small>
                     </div>
                 </div>
@@ -253,14 +253,14 @@ function updateCalculation() {
     const totalCreditSales = parseFloat(document.getElementById('total_credit_sales').value) || 0;
     
     if (tradeReceivables > 0 && totalCreditSales > 0) {
-        const dd = (tradeReceivables / totalCreditSales) * 365;
+        const dd = (tradeReceivables / totalCreditSales) * 100;
         
         // Update breakdown
         document.getElementById('calculationBreakdown').innerHTML = 
-            `DD = (${tradeReceivables.toLocaleString()} ÷ ${totalCreditSales.toLocaleString()}) × 365`;
+            `DD = (${tradeReceivables.toLocaleString()} ÷ ${totalCreditSales.toLocaleString()}) × 100`;
         
         // Update result
-        document.getElementById('liveResult').textContent = dd.toFixed(2) + ' days';
+        document.getElementById('liveResult').textContent = dd.toFixed(2) + '%';
         
         // Update performance indicator
         const indicator = document.getElementById('performanceIndicator');
@@ -278,7 +278,7 @@ function updateCalculation() {
             indicator.textContent = 'Needs Improvement';
         }
     } else {
-        document.getElementById('liveResult').textContent = '0.00 days';
+        document.getElementById('liveResult').textContent = '0.00%';
         document.getElementById('performanceIndicator').className = 'performance-indicator bg-secondary text-white';
         document.getElementById('performanceIndicator').textContent = 'Enter values to calculate';
     }
