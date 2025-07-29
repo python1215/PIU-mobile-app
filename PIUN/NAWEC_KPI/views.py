@@ -1557,44 +1557,41 @@ def calculate_tmh_detail(request, calc_id):
 
 @login_required
 def calculate_tmh_edit(request, calc_id):
-    """Edit TMH calculation"""
+    """Edit TMH calculation with new field structure"""
     calculation = get_object_or_404(CalculateTMH, id=calc_id)
     
     if request.method == 'POST':
-        training_sessions = float(request.POST.get('training_sessions', 0))
-        total_number_of_employees = float(request.POST.get('total_number_of_employees', 0))
-        year_id = request.POST.get('year')
+        title = request.POST.get('title', 'Training Session')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        hours_per_day = float(request.POST.get('hours_per_day', 8.0))
+        number_of_participants = int(request.POST.get('number_of_participants', 1))
         quarter_id = request.POST.get('quarter')
-        month_id = request.POST.get('month')
         
-        # Calculate TMH: TMH = Training Sessions ÷ Total Number of Employees
-        achieved_value = (training_sessions / total_number_of_employees) if total_number_of_employees > 0 else 0
+        # Update calculation with new fields
+        calculation.title = title
+        calculation.start_date = start_date
+        calculation.end_date = end_date
+        calculation.hours_per_day = hours_per_day
+        calculation.number_of_participants = number_of_participants
         
-        # Update calculation
-        calculation.training_sessions = training_sessions
-        calculation.total_number_of_employees = total_number_of_employees
-        calculation.achieved_value = achieved_value
-        if year_id:
-            calculation.year_id = year_id
         if quarter_id:
             calculation.quarter_id = quarter_id
-        if month_id:
-            calculation.month_id = month_id
+            
+        # The save method will automatically calculate total_man_hours using the computed properties
         calculation.save()
         
         messages.success(request, 'TMH calculation updated successfully!')
         return redirect('NAWEC_KPI:calculate_tmh_detail', calc_id=calculation.id)
     
-    # Get years, quarters, and months for dropdowns
+    # Get years and quarters for dropdowns
     years = YEAR.objects.all().order_by('-profile_year')
     quarters = Quarter.objects.all().order_by('quarter')
-    months = Month.objects.all().order_by('month_number')
     
     context = {
         'calculation': calculation,
         'years': years,
         'quarters': quarters,
-        'months': months,
         'calculation_type': 'TMH'
     }
     return render(request, 'NAWEC_KPI/calculate_tmh_edit.html', context)
@@ -3188,34 +3185,30 @@ class SaveKPICalculationView(View):
                 calculation.save()
                 
             elif kpi_type == 'TMH':
-                # TMH calculation
-                training_sessions = input_values.get('training_sessions', 0)
-                employees = input_values.get('employees', 0)
-                month_id = input_values.get('month')
-                
-                # Get Month object if provided
-                month = None
-                if month_id:
-                    try:
-                        month = Month.objects.get(month_number=month_id)
-                    except Month.DoesNotExist:
-                        print(f"[DEBUG] Month with ID {month_id} not found")
-                
-                # Calculate TMH value: Training Sessions ÷ Employees
-                tmh_value = (training_sessions / employees) if employees > 0 else 0
+                # TMH calculation with new model fields
+                title = input_values.get('title', 'Training Session')
+                start_date = input_values.get('start_date')
+                end_date = input_values.get('end_date')
+                hours_per_day = input_values.get('hours_per_day', 8.0)
+                number_of_participants = input_values.get('number_of_participants', 1)
+                achieved_value = input_values.get('achieved_value', 0)
                 
                 # Get Quarter object with proper mapping
                 quarter_obj = self.get_quarter_object(quarter, 'TMH')
                 
+                # Create CalculateTMH with new field structure
                 calculation = CalculateTMH(
-                    training_sessions=training_sessions,
-                    total_number_of_employees=employees,
-                    achieved_value=tmh_value,
+                    title=title,
+                    start_date=start_date,
+                    end_date=end_date,
+                    hours_per_day=hours_per_day,
+                    number_of_participants=number_of_participants,
+                    achieved_value=achieved_value,
                     quarter=quarter_obj,
-                    month=month,
                     loginUser=request.user
                 )
                 calculation.save()
+                print(f"[DEBUG] TMH calculation saved: {achieved_value} man-hours for '{title}'")
                 
             else:
                 print(f"[DEBUG] SaveKPICalculationView - Unhandled KPI type: '{kpi_type}'")

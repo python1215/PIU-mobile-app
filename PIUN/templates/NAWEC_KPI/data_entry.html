@@ -3731,13 +3731,13 @@ function showTDEPopup() {
         existingPopup.remove();
     }
     
-    // Create TMH popup
+    // Create TMH popup with new fields structure
     const popup = document.createElement('div');
     popup.id = 'simpleKPIPopup';
     popup.innerHTML = `
         <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                     background: white; border: 3px solid #20c997; border-radius: 8px; 
-                    width: 600px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    width: 650px; max-height: 85vh; overflow-y: auto; z-index: 10000; 
                     padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
             
             <!-- Header -->
@@ -3745,7 +3745,7 @@ function showTDEPopup() {
                         padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
                         justify-content: space-between; align-items: center;">
                 <h5 style="margin: 0; font-size: 1.2rem;">
-                    <i class="bi bi-mortarboard"></i> TMH Calculation (Training Man Hours per Employee)
+                    <i class="bi bi-mortarboard-fill"></i> TMH Calculation (Training Man Hours)
                 </h5>
                 <span style="color: #e9ecef; font-size: 0.9rem;">KPI-06</span>
             </div>
@@ -3753,45 +3753,47 @@ function showTDEPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #20c997; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: TMH = Training Sessions ÷ Total Number of Employees
+                    <i class="bi bi-info-circle"></i> Formula: TMH = Number of Days × Hours per Day × Number of Participants
                 </h6>
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Training Sessions:</label>
-                    <input type="number" id="tdeTrainingDays" step="0.01" min="0"
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Training Title:</label>
+                    <input type="text" id="tmhTitle" 
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter number of training sessions">
+                           placeholder="Enter training session title" value="Training Session">
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Total Number of Employees:</label>
-                    <input type="number" id="tdeEmployees" step="1" min="1"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter total number of employees">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Start Date: <span style="color: red;">*</span></label>
+                        <input type="date" id="tmhStartDate" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">End Date: <span style="color: red;">*</span></label>
+                        <input type="date" id="tmhEndDate" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Month: <span style="color: red;">*</span></label>
-                    <select id="tdeMonth" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
-                        <option value="">Select Month *</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Hours per Day:</label>
+                        <input type="number" id="tmhHoursPerDay" step="0.5" value="8.0" min="1" max="24"
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                               placeholder="Hours per training day">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Number of Participants:</label>
+                        <input type="number" id="tmhParticipants" step="1" value="1" min="1"
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                               placeholder="Total participants">
+                    </div>
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
-                    <select id="tdeQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    <select id="tmhQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                         <option value="">Select Quarter *</option>
                         <option value="1">Q1 (January - March)</option>
                         <option value="2">Q2 (April - June)</option>
@@ -3800,45 +3802,44 @@ function showTDEPopup() {
                     </select>
                 </div>
                 
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #20c997;">
-                    <small style="color: #6c757d;">
-                        <strong>TMH Performance Benchmarks:</strong><br>
-                        • TMH ≥ 5.0 sessions: Excellent training investment<br>
-                        • TMH 3.0-4.9 sessions: Good training coverage<br>
-                        • TMH 1.0-2.9 sessions: Adequate training<br>
-                        • TMH < 1.0 sessions: Insufficient training - needs improvement
+                <div style="margin-top: 10px; padding: 12px; background: #e8f5e8; border-radius: 4px; font-size: 0.85rem; color: #20c997;">
+                    <strong><i class="bi bi-lightbulb-fill"></i> Training Man Hours Calculation:</strong><br>
+                    <small>
+                        • Days will be calculated automatically from start and end dates<br>
+                        • TMH = Training Days × Hours per Day × Number of Participants<br>
+                        • Example: 3 days × 8 hours × 25 participants = 600 man-hours
                     </small>
                 </div>
             </div>
 
             <!-- Result Section -->
-            <div id="tdeResult" style="display: none; background: #f8f9fa; padding: 15px; 
+            <div id="tmhResult" style="display: none; background: #f8f9fa; padding: 15px; 
                                       border-radius: 5px; margin: 15px 0; border-left: 4px solid #20c997;">
                 <h6 style="color: #20c997; margin-bottom: 10px;">Calculation Result:</h6>
-                <div id="tdeResultValue"></div>
+                <div id="tmhResultValue"></div>
             </div>
 
             <!-- Buttons -->
             <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="resetTDEForm()" 
+                    <button onclick="resetTMHForm()" 
                             style="background: #ffc107; color: #000; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
                         <i class="bi bi-arrow-clockwise"></i> Reset
                     </button>
-                    <button onclick="closeTDEPopup()" 
+                    <button onclick="closeTMHPopup()" 
                             style="background: #6c757d; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
                         <i class="bi bi-x-lg"></i> Close
                     </button>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="calculateTDE()" 
+                    <button onclick="calculateTMH()" 
                             style="background: #20c997; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
                         <i class="bi bi-calculator"></i> Calculate TMH
                     </button>
-                    <button onclick="useTDEResult()" 
+                    <button onclick="useTMHResult()" 
                             style="background: #17a2b8; color: white; border: none; padding: 10px 20px; 
                                    border-radius: 5px; cursor: pointer; font-weight: bold;">
                         <i class="bi bi-check-lg"></i> Use Result
@@ -3851,63 +3852,82 @@ function showTDEPopup() {
     document.body.appendChild(popup);
 }
 
-function calculateTDE() {
-    const trainingSessions = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
-    const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
-    const month = document.getElementById('tdeMonth').value;
-    const quarter = document.getElementById('tdeQuarter').value;
-    
-    if (!month) {
-        alert('Please select a month. Month selection is mandatory.');
-        document.getElementById('tdeMonth').focus();
-        return;
-    }
+// Alias function for backward compatibility
+function showTMHPopup() {
+    showTDEPopup();
+}
+
+function calculateTMH() {
+    const title = document.getElementById('tmhTitle').value || 'Training Session';
+    const startDate = document.getElementById('tmhStartDate').value;
+    const endDate = document.getElementById('tmhEndDate').value;
+    const hoursPerDay = parseFloat(document.getElementById('tmhHoursPerDay').value) || 8.0;
+    const participants = parseFloat(document.getElementById('tmhParticipants').value) || 1;
+    const quarter = document.getElementById('tmhQuarter').value;
     
     if (!quarter) {
         alert('Please select a quarter. Quarter selection is mandatory.');
-        document.getElementById('tdeQuarter').focus();
+        document.getElementById('tmhQuarter').focus();
         return;
     }
     
-    if (!trainingSessions || !employees) {
-        alert('Please enter both Training Sessions and Total Number of Employees');
+    if (!startDate || !endDate) {
+        alert('Please select both start date and end date');
         return;
     }
     
-    if (employees === 0) {
-        alert('Total Number of Employees cannot be zero');
+    // Calculate number of days
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
+    
+    if (numberOfDays <= 0) {
+        alert('End date must be on or after start date');
         return;
     }
     
-    // Calculate TMH
-    const tmh = trainingSessions / employees;
+    if (hoursPerDay <= 0 || participants <= 0) {
+        alert('Hours per day and participants must be greater than zero');
+        return;
+    }
     
-    // Determine performance level and color
+    // Calculate TMH = Number of Days × Hours per Day × Number of Participants
+    const tmh = numberOfDays * hoursPerDay * participants;
+    
+    // Determine performance level and color based on total man-hours
     let performanceText = '';
     let performanceColor = '';
     
-    if (tmh >= 5.0) {
-        performanceText = 'Excellent training investment';
+    if (tmh >= 500) {
+        performanceText = 'Excellent comprehensive training program';
         performanceColor = '#28a745';
-    } else if (tmh >= 3.0) {
+    } else if (tmh >= 200) {
         performanceText = 'Good training coverage';
         performanceColor = '#20c997';
-    } else if (tmh >= 1.0) {
-        performanceText = 'Adequate training';
+    } else if (tmh >= 50) {
+        performanceText = 'Adequate training program';
         performanceColor = '#ffc107';
     } else {
-        performanceText = 'Insufficient training - needs improvement';
+        performanceText = 'Limited training scope - consider expansion';
         performanceColor = '#dc3545';
     }
     
     // Display result
-    const resultDiv = document.getElementById('tdeResult');
-    const resultValue = document.getElementById('tdeResultValue');
+    const resultDiv = document.getElementById('tmhResult');
+    const resultValue = document.getElementById('tmhResultValue');
     
     resultValue.innerHTML = `
-        <div>TMH = ${trainingSessions.toLocaleString()} ÷ ${employees.toLocaleString()}</div>
-        <div style="margin-top: 10px; font-size: 1.5rem; color: #20c997;">
-            TMH = ${tmh.toFixed(2)} sessions per employee
+        <div><strong>Training Details:</strong></div>
+        <div>• Title: ${title}</div>
+        <div>• Duration: ${numberOfDays} days (${startDate} to ${endDate})</div>
+        <div>• Hours per day: ${hoursPerDay}</div>
+        <div>• Participants: ${participants}</div>
+        <div style="margin-top: 15px; font-size: 1.1rem;">
+            <strong>Formula:</strong> TMH = ${numberOfDays} days × ${hoursPerDay} hours × ${participants} participants
+        </div>
+        <div style="margin-top: 10px; font-size: 1.5rem; color: #20c997; font-weight: bold;">
+            Total Man Hours = ${tmh.toLocaleString()} hours
         </div>
         <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
             <i class="bi bi-mortarboard-fill"></i> ${performanceText}
@@ -3916,43 +3936,49 @@ function calculateTDE() {
     
     resultDiv.style.display = 'block';
     
-    // Store the result
-    window.simpleTDEResult = tmh.toFixed(2);
+    // Store the result and related data
+    window.simpleTMHResult = tmh;
+    window.tmhCalculationData = {
+        title: title,
+        startDate: startDate,
+        endDate: endDate,
+        hoursPerDay: hoursPerDay,
+        participants: participants,
+        numberOfDays: numberOfDays,
+        totalManHours: tmh
+    };
 }
 
-async function useTDEResult() {
-    const month = document.getElementById('tdeMonth').value;
-    const quarter = document.getElementById('tdeQuarter').value;
-    
-    if (!month) {
-        alert('Please select a month before using the result. Month selection is mandatory.');
-        document.getElementById('tdeMonth').focus();
-        return;
-    }
+// Alias function for backward compatibility
+function calculateTDE() {
+    calculateTMH();
+}
+
+async function useTMHResult() {
+    const quarter = document.getElementById('tmhQuarter').value;
     
     if (!quarter) {
         alert('Please select a quarter before using the result. Quarter selection is mandatory.');
-        document.getElementById('tdeQuarter').focus();
+        document.getElementById('tmhQuarter').focus();
         return;
     }
     
-    if (!window.simpleTDEResult) {
+    if (!window.simpleTMHResult || !window.tmhCalculationData) {
         alert('Please calculate TMH first');
         return;
     }
     
-    // Prepare data for saving to database
-    const trainingSessions = parseFloat(document.getElementById('tdeTrainingDays').value) || 0;
-    const employees = parseFloat(document.getElementById('tdeEmployees').value) || 0;
-    
+    // Prepare data for saving to database with new TMH model fields
     const data = {
         kpi_type: 'TMH',
         input_values: {
-            training_sessions: trainingSessions,
-            employees: employees,
-            month: month,
+            title: window.tmhCalculationData.title,
+            start_date: window.tmhCalculationData.startDate,
+            end_date: window.tmhCalculationData.endDate,
+            hours_per_day: window.tmhCalculationData.hoursPerDay,
+            number_of_participants: window.tmhCalculationData.participants,
             quarter: quarter,
-            achieved_value: parseFloat(window.simpleTDEResult)
+            achieved_value: parseFloat(window.simpleTMHResult)
         }
     };
     
@@ -3970,20 +3996,47 @@ async function useTDEResult() {
         const result = await response.json();
         
         if (result.success) {
-            // Set the achieved value in the main form
+            // Set the achieved value in the main form with proper formatting
             const achievedValueField = document.getElementById('id_achieved_value');
             if (achievedValueField) {
-                achievedValueField.value = window.simpleTDEResult;
+                const formattedValue = parseFloat(window.simpleTMHResult).toFixed(2);
+                achievedValueField.value = formattedValue;
                 achievedValueField.style.backgroundColor = '#e7f3ff';
                 
                 // Trigger percentage calculations
                 calculatePercentages();
+                console.log(`✅ TMH achieved value set: ${formattedValue} man-hours`);
+            }
+            
+            // Clear all popup form fields and memory with null checks
+            const tmhTitleField = document.getElementById('tmhTitle');
+            const tmhStartDateField = document.getElementById('tmhStartDate');
+            const tmhEndDateField = document.getElementById('tmhEndDate');
+            const tmhHoursPerDayField = document.getElementById('tmhHoursPerDay');
+            const tmhParticipantsField = document.getElementById('tmhParticipants');
+            const tmhQuarterField = document.getElementById('tmhQuarter');
+            
+            if (tmhTitleField) tmhTitleField.value = 'Training Session';
+            if (tmhStartDateField) tmhStartDateField.value = '';
+            if (tmhEndDateField) tmhEndDateField.value = '';
+            if (tmhHoursPerDayField) tmhHoursPerDayField.value = '8.0';
+            if (tmhParticipantsField) tmhParticipantsField.value = '1';
+            if (tmhQuarterField) tmhQuarterField.value = '';
+            
+            // Clear stored results from memory
+            window.simpleTMHResult = null;
+            window.tmhCalculationData = null;
+            
+            // Hide the result section
+            const resultDiv = document.getElementById('tmhResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
             }
             
             // Close the popup
-            closeTDEPopup();
+            closeTMHPopup();
             
-            alert('TMH calculation saved successfully and value applied to form!');
+            alert('TMH calculation saved to database successfully! All form fields cleared.');
         } else {
             alert('Error saving TMH calculation: ' + result.error);
         }
@@ -3993,31 +4046,55 @@ async function useTDEResult() {
     }
 }
 
-function resetTDEForm() {
-    // Clear all input fields
-    document.getElementById('tdeTrainingDays').value = '';
-    document.getElementById('tdeEmployees').value = '';
-    document.getElementById('tdeMonth').value = '';
-    document.getElementById('tdeQuarter').value = '';
+// Alias function for backward compatibility
+async function useTDEResult() {
+    await useTMHResult();
+}
+
+function resetTMHForm() {
+    // Clear all input fields with null checks
+    const tmhTitleField = document.getElementById('tmhTitle');
+    const tmhStartDateField = document.getElementById('tmhStartDate');
+    const tmhEndDateField = document.getElementById('tmhEndDate');
+    const tmhHoursPerDayField = document.getElementById('tmhHoursPerDay');
+    const tmhParticipantsField = document.getElementById('tmhParticipants');
+    const tmhQuarterField = document.getElementById('tmhQuarter');
+    
+    if (tmhTitleField) tmhTitleField.value = 'Training Session';
+    if (tmhStartDateField) tmhStartDateField.value = '';
+    if (tmhEndDateField) tmhEndDateField.value = '';
+    if (tmhHoursPerDayField) tmhHoursPerDayField.value = '8.0';
+    if (tmhParticipantsField) tmhParticipantsField.value = '1';
+    if (tmhQuarterField) tmhQuarterField.value = '';
     
     // Hide the result section
-    const resultDiv = document.getElementById('tdeResult');
+    const resultDiv = document.getElementById('tmhResult');
     if (resultDiv) {
         resultDiv.style.display = 'none';
     }
     
-    // Clear stored result
-    window.simpleTDEResult = null;
+    // Clear stored results
+    window.simpleTMHResult = null;
+    window.tmhCalculationData = null;
     
     // Focus on first input field
-    document.getElementById('tdeTrainingDays').focus();
+    if (tmhTitleField) tmhTitleField.focus();
 }
 
-function closeTDEPopup() {
+function closeTMHPopup() {
     const popup = document.getElementById('simpleKPIPopup');
     if (popup) {
         popup.remove();
     }
+}
+
+// Alias functions for backward compatibility
+function resetTDEForm() {
+    resetTMHForm();
+}
+
+function closeTDEPopup() {
+    closeTMHPopup();
 }
 
 function showATCPopup() {

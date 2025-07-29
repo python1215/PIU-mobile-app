@@ -50,12 +50,13 @@
                         <table class="table table-striped table-hover">
                             <thead class="table-warning">
                                 <tr>
-                                    
-                                    <th>Training Sessions</th>
-                                    <th>Number of Employees</th>
-                                    <th>TMH Value</th>
-                                    <th>Year</th>
-                                    <th>Month</th>
+                                    <th>Training Title</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Duration</th>
+                                    <th>Hours/Day</th>
+                                    <th>Participants</th>
+                                    <th>Total Man Hours</th>
                                     <th>Quarter</th>
                                     <th>Created By</th>
                                     <th>Date Created</th>
@@ -65,16 +66,25 @@
                             <tbody>
                                 {% for calculation in calculations %}
                                 <tr>
-                                    
-                                    <td>{{ calculation.training_sessions|floatformat:0 }}</td>
-                                    <td>{{ calculation.total_number_of_employees|floatformat:0 }}</td>
                                     <td>
-                                        <span class="badge bg-success">
-                                            {{ calculation.achieved_value|floatformat:2 }}
+                                        <strong>{{ calculation.title|default:"Training Session" }}</strong>
+                                    </td>
+                                    <td>{{ calculation.start_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>{{ calculation.end_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>
+                                        {% if calculation.number_of_days %}
+                                            <span class="badge bg-info">{{ calculation.number_of_days }} day{{ calculation.number_of_days|pluralize }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ calculation.hours_per_day|floatformat:1 }} hrs</td>
+                                    <td>{{ calculation.number_of_participants|floatformat:0 }} people</td>
+                                    <td>
+                                        <span class="badge bg-success fs-6">
+                                            {{ calculation.total_man_hours|floatformat:0|default:calculation.achieved_value|floatformat:0 }} hrs
                                         </span>
                                     </td>
-                                    <td>{% if calculation.year %}{{ calculation.year.profile_year }}{% else %}2025{% endif %}</td>
-                                    <td>{% if calculation.month %}{{ calculation.month.month_name }}{% else %}-{% endif %}</td>
                                     <td>{% if calculation.quarter %}Q{{ calculation.quarter.quarter }}{% else %}Q1{% endif %}</td>
                                     <td>{{ calculation.loginUser.username|default:"System" }}</td>
                                     <td>{{ calculation.date_created|date:"M d, Y H:i" }}</td>
