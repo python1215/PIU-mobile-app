@@ -219,7 +219,9 @@ class SaveKPICalculationView(View):
             # Create the instance (save method will auto-calculate achieved_value and percentages)
             try:
                 instance = model_class.objects.create(**create_data)
-                print(f'[DEBUG] API - Successfully created {kpi_type} instance: ID={instance.id}')
+                # Get the primary key - handle both 'id' and 'unique_id' fields
+                pk_value = getattr(instance, 'unique_id', getattr(instance, 'id', instance.pk))
+                print(f'[DEBUG] API - Successfully created {kpi_type} instance: ID={pk_value}')
             except Exception as save_error:
                 print(f'[DEBUG] API - Error saving {kpi_type}: {save_error}')
                 return JsonResponse({
