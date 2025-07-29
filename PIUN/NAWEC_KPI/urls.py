@@ -40,6 +40,7 @@ urlpatterns = [
     # API endpoints for saving KPI calculations
     path('api/save-kpi/', SaveKPICalculationView.as_view(), name='save_kpi_calculation'),
     path('api/delete-calculation/', DeleteKPICalculationView.as_view(), name='delete_kpi_calculation'),
+    path('api/delete-kpi/', views.DeleteKPICalculationView.as_view(), name='delete_kpi_alternative'),
     
     # Calculation lists
     path('roa-calculations/', views.calculate_roa_list, name='calculate_roa_list'),

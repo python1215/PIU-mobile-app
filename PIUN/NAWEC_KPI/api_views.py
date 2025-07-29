@@ -261,7 +261,7 @@ class SaveKPICalculationView(View):
             }, status=500)
 
 
-@method_decorator([csrf_exempt, login_required], name='dispatch')
+@method_decorator([login_required], name='dispatch')
 class DeleteKPICalculationView(View):
     """Enhanced view for deleting KPI calculations"""
     
@@ -290,25 +290,28 @@ class DeleteKPICalculationView(View):
             
             model_class = self.KPI_MODEL_MAP[kpi_type]
             
-            # Handle different primary key fields
-            if kpi_type == 'DSCR':
-                instance = model_class.objects.get(unique_id=record_id)
-            else:
-                instance = model_class.objects.get(id=record_id)
-            
-            instance.delete()
-            
-            return JsonResponse({
-                'success': True,
-                'message': f'{kpi_type} calculation deleted successfully'
-            })
-            
-        except model_class.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'error': 'Record not found'
-            }, status=404)
+            try:
+                # Handle different primary key fields
+                if kpi_type == 'DSCR':
+                    instance = model_class.objects.get(unique_id=record_id)
+                else:
+                    instance = model_class.objects.get(id=record_id)
+                
+                instance.delete()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'{kpi_type} calculation deleted successfully'
+                })
+                
+            except model_class.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Record not found'
+                }, status=404)
+                
         except Exception as e:
+            print(f'[DEBUG] Delete API - Exception: {str(e)}')
             return JsonResponse({
                 'success': False,
                 'error': str(e)

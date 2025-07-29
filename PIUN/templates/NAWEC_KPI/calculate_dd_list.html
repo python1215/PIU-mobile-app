@@ -245,14 +245,14 @@ document.getElementById('confirmDelete').addEventListener('click', async functio
         }
         
         const response = await fetch(`/NAWEC_KPI/api/delete-kpi/`, {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken.value
             },
             body: JSON.stringify({
                 kpi_type: 'DD',
-                calculation_id: deleteCalculationId
+                calc_id: deleteCalculationId
             })
         });
         
