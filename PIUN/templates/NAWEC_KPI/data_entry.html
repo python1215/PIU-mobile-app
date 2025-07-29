@@ -6315,8 +6315,10 @@ function calculatePercentages() {
         values: { baseline, achieved, target }
     });
     
-    // Show DD status badge for Debtor Days KPI
-    updateDDStatusBadge(kpiType, achieved, target);
+    // Show DD status badge for Debtor Days KPI - get target from form field
+    const targetFieldValue = document.getElementById('id_End_Target_Value')?.value;
+    const targetFromForm = targetFieldValue ? parseFloat(targetFieldValue) : target;
+    updateDDStatusBadge(kpiType, achieved, targetFromForm);
 }
 
 // Function to update DD status badge
@@ -6328,10 +6330,14 @@ function updateDDStatusBadge(kpiType, achieved, target) {
     
     // Only show badge for DD (Debtor Days) KPI
     if (kpiType === 'DD' && achieved > 0 && target > 0) {
+        // Convert to numbers to ensure proper comparison
+        const achievedNum = parseFloat(achieved);
+        const targetNum = parseFloat(target);
+        
         // For DD: achieved > target = "Not Achieve", achieved <= target = "Achieve"
         let status, badgeClass;
         
-        if (achieved > target) {
+        if (achievedNum > targetNum) {
             status = 'Not Achieve';
             badgeClass = 'badge-error';
         } else {
@@ -6343,11 +6349,11 @@ function updateDDStatusBadge(kpiType, achieved, target) {
         statusText.className = `badge badge-sm ${badgeClass}`;
         statusBadge.style.display = 'block';
         
-        console.log(`📊 DD Status Debug: Achieved=${achieved} (type: ${typeof achieved}) vs Target=${target} (type: ${typeof target}) → ${status}`);
-        console.log(`📊 DD Logic Check: ${achieved} > ${target} = ${achieved > target}`);
+        console.log(`📊 DD Status Final: Achieved=${achievedNum} vs Target=${targetNum} → Logic: ${achievedNum} > ${targetNum} = ${achievedNum > targetNum} → Status: ${status}`);
     } else {
         // Hide badge for non-DD KPIs or when no values
         statusBadge.style.display = 'none';
+        console.log(`📊 DD Badge Hidden: kpiType=${kpiType}, achieved=${achieved}, target=${target}`);
     }
 }
 
