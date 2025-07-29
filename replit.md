@@ -342,4 +342,6 @@ The PIUN directory contains specialized modules:
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Simple, everyday language.- July 29, 2025. RESOLVED performance report data display issue: removed loginUser filter from performance_report function to show all KPI monitoring data instead of just current user's entries, eliminating 'No Data Available' message and providing comprehensive reporting
+- July 29, 2025. Applied correct quarter mapping logic to performance report filtering: implemented Q1=ID:6, Q2=ID:3, Q3=ID:4, Q4=ID:5 mapping for consistent filtering across dashboard and report views
+- July 29, 2025. Updated performance report table structure: removed 'Project' and 'Qtr' columns, added 'Status' column with intelligent status determination logic for regular indicators (achieved >= target = Achieve) and loss indicators (achieved < target = Achieve for ATC&C, NRW, NWCD, NECD), enhanced table with Bootstrap badge styling for visual status indication
