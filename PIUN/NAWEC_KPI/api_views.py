@@ -106,10 +106,10 @@ class SaveKPICalculationView(View):
                     try:
                         # Map quarter string to actual database IDs
                         quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
+                            '1': 6,  # Quarter 1 (ID: 6)
+                            '2': 3,  # Quarter 2 (ID: 3)
+                            '3': 4,  # Quarter 3 (ID: 4)
+                            '4': 5   # Quarter 4 (ID: 5)
                         }
                         quarter_id = quarter_mapping.get(str(quarter_value))
                         if quarter_id:
@@ -136,19 +136,23 @@ class SaveKPICalculationView(View):
                             '3': 10024,  # Quarter 3 (ID: 10024)
                             '4': 10025   # Quarter 4 (ID: 10025)
                         }
+                        print(f'[DEBUG] API - Looking for quarter mapping: {quarter_value} -> {quarter_mapping.get(str(quarter_value))}')
                         quarter_id = quarter_mapping.get(str(quarter_value))
                         if quarter_id:
                             quarter_instance = Quarter.objects.get(id=quarter_id)
                             create_data['quarter'] = quarter_instance
                             print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
-                    except Quarter.DoesNotExist:
+                        else:
+                            print(f'[DEBUG] API - No mapping found for quarter: {quarter_value}')
+                    except Quarter.DoesNotExist as e:
+                        print(f'[DEBUG] API - Quarter DoesNotExist: {e}')
                         # Try alternative mapping
                         try:
                             quarter_instance = Quarter.objects.get(id=int(quarter_value))
                             create_data['quarter'] = quarter_instance
                             print(f'[DEBUG] API - Quarter mapped by ID: {quarter_value} -> {quarter_instance}')
-                        except (Quarter.DoesNotExist, ValueError):
-                            print(f'[DEBUG] API - Quarter mapping failed for: {quarter_value}')
+                        except (Quarter.DoesNotExist, ValueError) as e2:
+                            print(f'[DEBUG] API - Quarter mapping failed for: {quarter_value}, Error: {e2}')
                             pass
                 
                 # Special field mapping for popup forms
