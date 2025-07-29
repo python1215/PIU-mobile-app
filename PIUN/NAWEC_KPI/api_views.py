@@ -213,8 +213,19 @@ class SaveKPICalculationView(View):
                 except YEAR.DoesNotExist:
                     pass
             
+            # Debug: Print create_data before saving
+            print(f'[DEBUG] API - Creating {kpi_type} with data: {create_data}')
+            
             # Create the instance (save method will auto-calculate achieved_value and percentages)
-            instance = model_class.objects.create(**create_data)
+            try:
+                instance = model_class.objects.create(**create_data)
+                print(f'[DEBUG] API - Successfully created {kpi_type} instance: ID={instance.id}')
+            except Exception as save_error:
+                print(f'[DEBUG] API - Error saving {kpi_type}: {save_error}')
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Failed to save {kpi_type} calculation: {str(save_error)}'
+                }, status=500)
             
             # Get unique identifier
             unique_id = getattr(instance, 'unique_id', instance.pk)
