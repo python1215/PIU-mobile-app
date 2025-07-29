@@ -220,7 +220,7 @@
                                             </td>
                                             <td>
                                                 {% if entry.achieved_value and entry.End_Target_Value %}
-                                                    {% if "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
+                                                    {% if "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description or "Debtor Days" in entry.indicator_description.indicator_description or "DD" in entry.indicator_description.indicator_description %}
                                                         {% if entry.achieved_value < entry.End_Target_Value %}
                                                             <span class="badge bg-success rounded-pill">Achieve</span>
                                                         {% else %}
