@@ -2880,13 +2880,25 @@ class SaveKPICalculationView(View):
                 total_assets = input_values.get('total_assets', 0)
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
-                # Get Quarter object
+                # Get Quarter object with proper mapping
                 quarter_obj = None
                 if quarter:
                     try:
-                        quarter_obj = Quarter.objects.get(id=quarter)
+                        # Map quarter string to actual database IDs
+                        quarter_mapping = {
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
+                        }
+                        quarter_id = quarter_mapping.get(str(quarter))
+                        if quarter_id:
+                            quarter_obj = Quarter.objects.get(id=quarter_id)
+                            print(f"[DEBUG] ROA - Quarter mapped successfully: {quarter} -> {quarter_id}")
+                        else:
+                            print(f"[DEBUG] ROA - Quarter mapping failed for: {quarter}")
                     except Quarter.DoesNotExist:
-                        pass
+                        print(f"[DEBUG] ROA - Quarter ID {quarter_id} not found in database")
                 
                 calculation = CalculateROA(
                     net_profit_after_tax=net_profit_after_tax,
@@ -2904,13 +2916,25 @@ class SaveKPICalculationView(View):
                 total_revenues_turnover = input_values.get('total_revenues_turnover', 0)
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
-                # Get Quarter object
+                # Get Quarter object with proper mapping
                 quarter_obj = None
                 if quarter:
                     try:
-                        quarter_obj = Quarter.objects.get(id=quarter)
+                        # Map quarter string to actual database IDs
+                        quarter_mapping = {
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
+                        }
+                        quarter_id = quarter_mapping.get(str(quarter))
+                        if quarter_id:
+                            quarter_obj = Quarter.objects.get(id=quarter_id)
+                            print(f"[DEBUG] NPM - Quarter mapped successfully: {quarter} -> {quarter_id}")
+                        else:
+                            print(f"[DEBUG] NPM - Quarter mapping failed for: {quarter}")
                     except Quarter.DoesNotExist:
-                        pass
+                        print(f"[DEBUG] NPM - Quarter ID {quarter_id} not found in database")
                 
                 calculation = CalculateNPM(
                     netprofit=netprofit,
@@ -2928,13 +2952,25 @@ class SaveKPICalculationView(View):
                 total_debt_service = input_values.get('total_debt_service', 0)
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
-                # Get Quarter object
+                # Get Quarter object with proper mapping
                 quarter_obj = None
                 if quarter:
                     try:
-                        quarter_obj = Quarter.objects.get(id=quarter)
+                        # Map quarter string to actual database IDs
+                        quarter_mapping = {
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
+                        }
+                        quarter_id = quarter_mapping.get(str(quarter))
+                        if quarter_id:
+                            quarter_obj = Quarter.objects.get(id=quarter_id)
+                            print(f"[DEBUG] DSCR - Quarter mapped successfully: {quarter} -> {quarter_id}")
+                        else:
+                            print(f"[DEBUG] DSCR - Quarter mapping failed for: {quarter}")
                     except Quarter.DoesNotExist:
-                        pass
+                        print(f"[DEBUG] DSCR - Quarter ID {quarter_id} not found in database")
                 
                 calculation = CalculateDSCR(
                     net_operating_income=net_operating_income,
