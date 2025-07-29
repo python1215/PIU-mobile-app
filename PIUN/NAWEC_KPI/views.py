@@ -2851,6 +2851,28 @@ import json
 class SaveKPICalculationView(View):
     """API endpoint to save KPI calculations from popup forms"""
     
+    def get_quarter_object(self, quarter, kpi_type):
+        """Helper method to map quarter string to Quarter object"""
+        quarter_obj = None
+        if quarter:
+            try:
+                # Map quarter string to actual database IDs
+                quarter_mapping = {
+                    '1': 10022,  # Quarter 1 (ID: 10022)
+                    '2': 10023,  # Quarter 2 (ID: 10023)
+                    '3': 10024,  # Quarter 3 (ID: 10024)
+                    '4': 10025   # Quarter 4 (ID: 10025)
+                }
+                quarter_id = quarter_mapping.get(str(quarter))
+                if quarter_id:
+                    quarter_obj = Quarter.objects.get(id=quarter_id)
+                    print(f"[DEBUG] {kpi_type} - Quarter mapped successfully: {quarter} -> {quarter_id}")
+                else:
+                    print(f"[DEBUG] {kpi_type} - Quarter mapping failed for: {quarter}")
+            except Quarter.DoesNotExist:
+                print(f"[DEBUG] {kpi_type} - Quarter ID {quarter_id} not found in database")
+        return quarter_obj
+    
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -2881,24 +2903,7 @@ class SaveKPICalculationView(View):
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
                 # Get Quarter object with proper mapping
-                quarter_obj = None
-                if quarter:
-                    try:
-                        # Map quarter string to actual database IDs
-                        quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
-                        }
-                        quarter_id = quarter_mapping.get(str(quarter))
-                        if quarter_id:
-                            quarter_obj = Quarter.objects.get(id=quarter_id)
-                            print(f"[DEBUG] ROA - Quarter mapped successfully: {quarter} -> {quarter_id}")
-                        else:
-                            print(f"[DEBUG] ROA - Quarter mapping failed for: {quarter}")
-                    except Quarter.DoesNotExist:
-                        print(f"[DEBUG] ROA - Quarter ID {quarter_id} not found in database")
+                quarter_obj = self.get_quarter_object(quarter, 'ROA')
                 
                 calculation = CalculateROA(
                     net_profit_after_tax=net_profit_after_tax,
@@ -2917,24 +2922,7 @@ class SaveKPICalculationView(View):
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
                 # Get Quarter object with proper mapping
-                quarter_obj = None
-                if quarter:
-                    try:
-                        # Map quarter string to actual database IDs
-                        quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
-                        }
-                        quarter_id = quarter_mapping.get(str(quarter))
-                        if quarter_id:
-                            quarter_obj = Quarter.objects.get(id=quarter_id)
-                            print(f"[DEBUG] NPM - Quarter mapped successfully: {quarter} -> {quarter_id}")
-                        else:
-                            print(f"[DEBUG] NPM - Quarter mapping failed for: {quarter}")
-                    except Quarter.DoesNotExist:
-                        print(f"[DEBUG] NPM - Quarter ID {quarter_id} not found in database")
+                quarter_obj = self.get_quarter_object(quarter, 'NPM')
                 
                 calculation = CalculateNPM(
                     netprofit=netprofit,
@@ -2953,24 +2941,7 @@ class SaveKPICalculationView(View):
                 compensation_amount = input_values.get('compensation_amount', 0)
                 
                 # Get Quarter object with proper mapping
-                quarter_obj = None
-                if quarter:
-                    try:
-                        # Map quarter string to actual database IDs
-                        quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
-                        }
-                        quarter_id = quarter_mapping.get(str(quarter))
-                        if quarter_id:
-                            quarter_obj = Quarter.objects.get(id=quarter_id)
-                            print(f"[DEBUG] DSCR - Quarter mapped successfully: {quarter} -> {quarter_id}")
-                        else:
-                            print(f"[DEBUG] DSCR - Quarter mapping failed for: {quarter}")
-                    except Quarter.DoesNotExist:
-                        print(f"[DEBUG] DSCR - Quarter ID {quarter_id} not found in database")
+                quarter_obj = self.get_quarter_object(quarter, 'DSCR')
                 
                 calculation = CalculateDSCR(
                     net_operating_income=net_operating_income,
@@ -2987,10 +2958,13 @@ class SaveKPICalculationView(View):
                 total_debt = input_values.get('total_debt', 0)
                 total_equity = input_values.get('total_equity', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'DER')
+                
                 calculation = CalculateDER(
                     total_debt=total_debt,
                     total_equity=total_equity,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3000,10 +2974,13 @@ class SaveKPICalculationView(View):
                 current_assets = input_values.get('current_assets', 0)
                 current_liabilities = input_values.get('current_liabilities', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'CR')
+                
                 calculation = CalculateCR(
                     current_assets=current_assets,
                     current_liabilities=current_liabilities,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3012,9 +2989,12 @@ class SaveKPICalculationView(View):
                 # AO calculation
                 audit_opinion = input_values.get('audit_opinion')
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'AO')
+                
                 calculation = CalculateAO(
                     audit_opinion=audit_opinion,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3024,10 +3004,13 @@ class SaveKPICalculationView(View):
                 total_recommendations = input_values.get('total_recommendations', 0)
                 total_implemented = input_values.get('total_implemented', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'PARI')
+                
                 calculation = CalculatePARI(
                     total_recommendations=total_recommendations,
                     total_implemented=total_implemented,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3037,10 +3020,13 @@ class SaveKPICalculationView(View):
                 due_date = input_values.get('due_date', 0)
                 actual_date = input_values.get('actual_date', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'TSQR')
+                
                 calculation = CalculateTSQR(
                     due_date=due_date,
                     actual_date=actual_date,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3050,10 +3036,13 @@ class SaveKPICalculationView(View):
                 trade_receivables = input_values.get('trade_receivables', 0)
                 total_credit_sales = input_values.get('total_credit_sales', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'DD')
+                
                 calculation = CalculateDD(
                     trade_receivables=trade_receivables,
                     total_credit_sales=total_credit_sales,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3063,10 +3052,13 @@ class SaveKPICalculationView(View):
                 compliant_samples = input_values.get('compliant_samples', 0)
                 total_samples = input_values.get('total_samples', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'WQCB')
+                
                 calculation = CalculateWQCB(
                     compliant_samples=compliant_samples,
                     total_samples=total_samples,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3076,10 +3068,13 @@ class SaveKPICalculationView(View):
                 compliant_samples = input_values.get('compliant_samples', 0)
                 total_samples = input_values.get('total_samples', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'WQCC')
+                
                 calculation = CalculateWQCC(
                     compliant_samples=compliant_samples,
                     total_samples=total_samples,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3116,11 +3111,14 @@ class SaveKPICalculationView(View):
                 if total_energy <= 0:
                     return JsonResponse({'success': False, 'error': 'No valid energy sources provided'})
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'EI')
+                
                 calculation = CalculateMWh(
                     power_injected=total_energy,  # Use total energy as power injected
                     time_duration=1,  # Set as 1 hour for MW calculation
                     number_of_sources=max(source_count, 1),  # Number of actual energy sources
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3130,10 +3128,13 @@ class SaveKPICalculationView(View):
                 on_time_payments = input_values.get('on_time_payments', 0)
                 total_payments = input_values.get('total_payments', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'TTP')
+                
                 calculation = CalculateTTP(
                     on_time_payments=on_time_payments,
                     total_payments=total_payments,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3143,10 +3144,13 @@ class SaveKPICalculationView(View):
                 on_time_payments = input_values.get('on_time_payments', 0)
                 total_payments = input_values.get('total_payments', 0)
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'TPS')
+                
                 calculation = CalculateTPS(
                     on_time_payments=on_time_payments,
                     total_payments=total_payments,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3162,11 +3166,14 @@ class SaveKPICalculationView(View):
                 collection_decimal = collection_efficiency / 100
                 atc_value = (1 - (billing_decimal * collection_decimal)) * 100
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'ATC')
+                
                 calculation = CalculateATC(
                     billing_efficiency=billing_efficiency,
                     collection_efficiency=collection_efficiency,
                     achieved_value=atc_value,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     loginUser=request.user
                 )
                 calculation.save()
@@ -3188,11 +3195,14 @@ class SaveKPICalculationView(View):
                 # Calculate TMH value: Training Sessions ÷ Employees
                 tmh_value = (training_sessions / employees) if employees > 0 else 0
                 
+                # Get Quarter object with proper mapping
+                quarter_obj = self.get_quarter_object(quarter, 'TMH')
+                
                 calculation = CalculateTMH(
                     training_sessions=training_sessions,
                     total_number_of_employees=employees,
                     achieved_value=tmh_value,
-                    quarter=quarter,
+                    quarter=quarter_obj,
                     month=month,
                     loginUser=request.user
                 )
