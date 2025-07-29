@@ -577,7 +577,7 @@ class CalculateATC(models.Model):
     billing_efficiency = models.FloatField(
         null=True,
         blank=True,
-        help_text="Billing efficiency as percentage (0-100)")
+        help_text="Billing efficiency as percentage (≥0)")
     collection_efficiency = models.FloatField(
         null=True,
         blank=True,

@@ -3899,9 +3899,9 @@ function showATCPopup() {
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Billing Efficiency (%):</label>
-                    <input type="number" id="atcBillingEfficiency" step="0.01" min="0" max="100"
+                    <input type="number" id="atcBillingEfficiency" step="0.01" min="0"
                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter billing efficiency percentage (0-100)">
+                           placeholder="Enter billing efficiency percentage (≥0)">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
@@ -3989,8 +3989,8 @@ function calculateATC() {
         return;
     }
     
-    if (billingEfficiency < 0 || billingEfficiency > 100) {
-        alert('Billing Efficiency must be between 0 and 100 percent');
+    if (billingEfficiency < 0) {
+        alert('Billing Efficiency must be greater than or equal to 0 percent');
         return;
     }
     

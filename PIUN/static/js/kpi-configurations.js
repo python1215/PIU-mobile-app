@@ -264,7 +264,6 @@ const KPIConfigurations = {
                 placeholder: 'Enter billing efficiency (%)',
                 step: '0.01',
                 min: '0',
-                max: '100',
                 unit: '%'
             },
             {

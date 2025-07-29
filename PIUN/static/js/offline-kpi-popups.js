@@ -23,7 +23,7 @@ function showATCCalculationPopup() {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
             <div>
                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">Billing Efficiency (%):</label>
-                <input type="number" id="atcBilling" step="0.01" min="0" max="100" 
+                <input type="number" id="atcBilling" step="0.01" min="0" 
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" 
                        placeholder="Enter billing efficiency">
             </div>
