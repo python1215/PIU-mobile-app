@@ -473,6 +473,13 @@
                                         <label class="label py-1">
                                             <span class="label-text-alt text-xs opacity-70">Use calculator popup to set value</span>
                                         </label>
+                                        <!-- Status Badge for DD KPI -->
+                                        <div id="dd-status-badge" class="mt-2" style="display: none;">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs opacity-70">Performance Status:</span>
+                                                <span id="dd-status-text" class="badge badge-sm"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1054,6 +1061,12 @@ function fetchKPIIndicatorData(kpiIndicatorId) {
                 
                 console.log('✅ KPI data loaded successfully for indicator:', kpiIndicatorId);
                 console.log('🧹 Achieved value and progress fields cleared');
+                
+                // Hide DD badge when new indicator is selected (will show again when achieved value is entered)
+                const statusBadge = document.getElementById('dd-status-badge');
+                if (statusBadge) {
+                    statusBadge.style.display = 'none';
+                }
                 
                 // Do NOT trigger percentage calculations here - only when achieved value is entered
                 // Remove any automatic percentage calculation triggers
@@ -6301,6 +6314,40 @@ function calculatePercentages() {
         formulaType: formulaType,
         values: { baseline, achieved, target }
     });
+    
+    // Show DD status badge for Debtor Days KPI
+    updateDDStatusBadge(kpiType, achieved, target);
+}
+
+// Function to update DD status badge
+function updateDDStatusBadge(kpiType, achieved, target) {
+    const statusBadge = document.getElementById('dd-status-badge');
+    const statusText = document.getElementById('dd-status-text');
+    
+    if (!statusBadge || !statusText) return;
+    
+    // Only show badge for DD (Debtor Days) KPI
+    if (kpiType === 'DD' && achieved > 0 && target > 0) {
+        // For DD: achieved > target = "Not Achieve", achieved <= target = "Achieve"
+        let status, badgeClass;
+        
+        if (achieved > target) {
+            status = 'Not Achieve';
+            badgeClass = 'badge-error';
+        } else {
+            status = 'Achieve';
+            badgeClass = 'badge-success';
+        }
+        
+        statusText.textContent = status;
+        statusText.className = `badge badge-sm ${badgeClass}`;
+        statusBadge.style.display = 'block';
+        
+        console.log(`📊 DD Status: Achieved=${achieved} vs Target=${target} → ${status}`);
+    } else {
+        // Hide badge for non-DD KPIs or when no values
+        statusBadge.style.display = 'none';
+    }
 }
 
 // Helper function to detect KPI type from indicator text
