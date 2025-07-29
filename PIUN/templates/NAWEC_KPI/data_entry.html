@@ -1274,7 +1274,7 @@ function handleKPIModelSelection() {
             showDDPopup();
             break;
         case 'tde':
-            console.log('✅ Triggering TDE (Training Days per Employee) popup');
+            console.log('✅ Triggering TDE (Training Man Hours) popup');
             showTDEPopup();
             break;
         case 'necd':
@@ -1445,7 +1445,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
         kpiType = 'GAF';
-    } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training days per employee')) {
+    } else if (selectedText.includes('total debt to equity') || selectedText.includes('trainings days_per_employee') || selectedText.includes('training man hours')) {
         kpiType = 'TDE';
     } else if (selectedText.includes('average time to connect') || selectedText.includes('total losses electricity')) {
         kpiType = 'ATC';

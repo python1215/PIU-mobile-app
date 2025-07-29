@@ -98,7 +98,7 @@ class KPITriggerSystem {
             return 'ATC';
         }
         
-        // Force KPI-06 (Training Days per Employee) 
+        // Force KPI-06 (Training Man Hours) 
         if (indicatorValue === '6' || 
             indicatorText.includes('6') || 
             indicatorText.toLowerCase().includes('training') || 

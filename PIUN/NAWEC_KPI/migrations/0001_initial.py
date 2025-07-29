@@ -222,8 +222,8 @@ class Migration(migrations.Migration):
                 ('year', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='setup.year')),
             ],
             options={
-                'verbose_name': 'Training Days per Employee (TDE) Calculation',
-                'verbose_name_plural': 'Training Days per Employee (TDE) Calculations',
+                'verbose_name': 'Training Man Hours (TDE) Calculation',
+                'verbose_name_plural': 'Training Man Hours (TDE) Calculations',
             },
         ),
         migrations.CreateModel(

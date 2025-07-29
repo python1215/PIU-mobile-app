@@ -213,7 +213,7 @@ const KPIConfigurations = {
     TDE: {
         key: 'tde',
         type: 'TDE',
-        title: 'Calculate Training Days per Employee (TDE) - KPI-06',
+        title: 'Calculate Training Man Hours (TDE) - KPI-06',
         color: '#6f42c1',
         formula: 'TDE = Total Training Days ÷ Total Number of Employees',
         unit: 'days/employee',
