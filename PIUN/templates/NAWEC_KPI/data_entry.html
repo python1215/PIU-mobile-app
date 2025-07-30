@@ -7179,6 +7179,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Load indicator details but DO NOT calculate percentages
             populateFieldsFromIndicator(this.value);
             // Percentage calculations will only happen when achieved value is entered
+            
+            // Auto-trigger popup for selected indicator
+            setTimeout(() => {
+                triggerKPICalculationPopup();
+            }, 500); // Small delay to ensure fields are populated first
         });
     }
     
