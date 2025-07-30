@@ -3185,52 +3185,90 @@ class SaveKPICalculationView(View):
                 calculation.save()
                 
             elif kpi_type == 'TMH':
-                # TMH calculation with multi-session support
-                sessions = input_values.get('sessions', [])
-                total_sessions = input_values.get('total_sessions', 1)
-                achieved_value = input_values.get('achieved_value', 0)
-                
-                # Get Quarter object with proper mapping
-                quarter_obj = self.get_quarter_object(quarter, 'TMH')
-                
-                # For multi-session TMH, create a single record with aggregated data
-                if sessions and len(sessions) > 0:
-                    # Use first session for main record, combine data in title
-                    first_session = sessions[0]
-                    title = f"Multi-Session Training ({total_sessions} sessions)"
+                print(f"[DEBUG] TMH - Starting TMH calculation processing")
+                try:
+                    # TMH calculation with multi-session support
+                    sessions = input_values.get('sessions', [])
+                    total_sessions = input_values.get('total_sessions', 1)
+                    achieved_value = input_values.get('achieved_value', 0)
                     
-                    # Aggregate session data for summary
-                    total_participants = sum(session.get('number_of_participants', 0) for session in sessions)
-                    total_days = sum(session.get('number_of_days', 0) for session in sessions)
-                    avg_hours_per_day = sum(session.get('hours_per_day', 0) for session in sessions) / len(sessions)
+                    print(f"[DEBUG] TMH - Sessions data: {sessions}")
+                    print(f"[DEBUG] TMH - Total sessions: {total_sessions}")
+                    print(f"[DEBUG] TMH - Achieved value: {achieved_value}")
                     
-                    # Create CalculateTMH with aggregated multi-session data
-                    calculation = CalculateTMH(
-                        title=title,
-                        start_date=first_session.get('start_date'),
-                        end_date=sessions[-1].get('end_date'),  # Last session end date
-                        hours_per_day=avg_hours_per_day,
-                        number_of_participants=total_participants,
-                        achieved_value=achieved_value,
-                        quarter=quarter_obj,
-                        loginUser=request.user
-                    )
-                    calculation.save()
-                    print(f"[DEBUG] Multi-session TMH calculation saved: {achieved_value} man-hours for {total_sessions} sessions")
-                else:
-                    # Fallback for single session or missing data
-                    calculation = CalculateTMH(
-                        title="Training Session",
-                        start_date=None,
-                        end_date=None,
-                        hours_per_day=8.0,
-                        number_of_participants=1,
-                        achieved_value=achieved_value,
-                        quarter=quarter_obj,
-                        loginUser=request.user
-                    )
-                    calculation.save()
-                    print(f"[DEBUG] Single TMH calculation saved: {achieved_value} man-hours")
+                    # Get Quarter object with proper mapping
+                    quarter_obj = self.get_quarter_object(quarter, 'TMH')
+                    print(f"[DEBUG] TMH - Quarter object: {quarter_obj}")
+                    
+                    # For multi-session TMH, create a single record with aggregated data
+                    if sessions and len(sessions) > 0:
+                        print(f"[DEBUG] TMH - Processing multi-session data")
+                        # Use first session for main record, combine data in title
+                        first_session = sessions[0]
+                        title = f"Multi-Session Training ({total_sessions} sessions)"
+                        
+                        # Aggregate session data for summary
+                        total_participants = sum(session.get('number_of_participants', 0) for session in sessions)
+                        total_days = sum(session.get('number_of_days', 0) for session in sessions)
+                        avg_hours_per_day = sum(session.get('hours_per_day', 0) for session in sessions) / len(sessions)
+                        
+                        print(f"[DEBUG] TMH - Aggregated data: participants={total_participants}, days={total_days}, avg_hours={avg_hours_per_day}")
+                        
+                        # Handle date parsing safely
+                        start_date = first_session.get('start_date')
+                        end_date = sessions[-1].get('end_date')
+                        
+                        # Convert string dates to date objects if needed
+                        from datetime import datetime
+                        if isinstance(start_date, str):
+                            try:
+                                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                                print(f"[DEBUG] TMH - Parsed start_date: {start_date}")
+                            except ValueError as e:
+                                print(f"[DEBUG] TMH - Start date parsing error: {e}")
+                                start_date = None
+                        
+                        if isinstance(end_date, str):
+                            try:
+                                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                                print(f"[DEBUG] TMH - Parsed end_date: {end_date}")
+                            except ValueError as e:
+                                print(f"[DEBUG] TMH - End date parsing error: {e}")
+                                end_date = None
+                        
+                        # Create CalculateTMH with aggregated multi-session data
+                        calculation = CalculateTMH(
+                            title=title,
+                            start_date=start_date,
+                            end_date=end_date,
+                            hours_per_day=float(avg_hours_per_day),
+                            number_of_participants=int(total_participants),
+                            achieved_value=float(achieved_value),
+                            quarter=quarter_obj,
+                            loginUser=request.user
+                        )
+                        calculation.save()
+                        print(f"[DEBUG] Multi-session TMH calculation saved: ID={calculation.id}, {achieved_value} man-hours for {total_sessions} sessions")
+                    else:
+                        print(f"[DEBUG] TMH - Processing single session fallback")
+                        # Fallback for single session or missing data
+                        calculation = CalculateTMH(
+                            title="Training Session",
+                            start_date=None,
+                            end_date=None,
+                            hours_per_day=8.0,
+                            number_of_participants=1,
+                            achieved_value=float(achieved_value),
+                            quarter=quarter_obj,
+                            loginUser=request.user
+                        )
+                        calculation.save()
+                        print(f"[DEBUG] Single TMH calculation saved: ID={calculation.id}, {achieved_value} man-hours")
+                except Exception as tmh_error:
+                    print(f"[DEBUG] TMH - Exception occurred: {tmh_error}")
+                    import traceback
+                    print(f"[DEBUG] TMH - Traceback: {traceback.format_exc()}")
+                    raise tmh_error
                 
             else:
                 print(f"[DEBUG] SaveKPICalculationView - Unhandled KPI type: '{kpi_type}'")
