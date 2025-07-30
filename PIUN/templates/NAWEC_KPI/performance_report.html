@@ -268,9 +268,9 @@
     <div class="report-header text-center">
         <h1 class="mb-3">NAWEC KPI PERFORMANCE REPORT</h1>
         <p class="mb-1">Generated: {{ report_date }}</p>
-        <p class="mb-0">
-            {% if filter_info %}{{ filter_info }}{% else %}All Data (No Filters Applied){% endif %}
-        </p>
+        {% if filter_info %}
+        <p class="mb-0">{{ filter_info }}</p>
+        {% endif %}
     </div>
 
     <div class="container-fluid">
