@@ -6981,6 +6981,17 @@ function calculatePercentages() {
         // Percentage_progress_towards_end_target = 100 - Percentage_progress_from_baseline
         percentageTowardsTarget = 100 - percentageFromBaseline;
         
+    } else if (['IMPORTS', 'IPP'].includes(kpiType)) {
+        // IMPORTS and IPP: Special formula for MW calculations
+        console.log('✅ Using IMPORTS/IPP percentage formulas for KPI:', kpiType);
+        
+        // Percentage_progress_from_baseline = (baseline_value/achieved_value)*100
+        // Percentage_progress_towards_end_target = (baseline_value/achieved_value)*100
+        if (achieved !== 0 && baseline !== 0) {
+            percentageFromBaseline = (baseline / achieved) * 100;
+            percentageTowardsTarget = (baseline / achieved) * 100;
+        }
+        
     } else {
         // Default formulas for ROA, NPM, DSCR, MWh, GAF, TMH, DD
         console.log('✅ Using default percentage formulas for KPI:', kpiType);
