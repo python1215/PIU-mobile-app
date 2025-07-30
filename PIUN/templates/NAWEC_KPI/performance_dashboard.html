@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+th{% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
 
@@ -773,16 +773,16 @@
                                 {% if "Total Losses Electricity" in entry.indicator_description.indicator_description or "ATC&C" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description or "Debtor Days" in entry.indicator_description.indicator_description or "DD" in entry.indicator_description.indicator_description %}
                                     <!-- For ATC&C, NRW, NWCD, NECD, and Debtor Days, lower is better -->
                                     {% if entry.achieved_value <= entry.End_Target_Value %}
-                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieve</span>
+                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieved</span>
                                     {% else %}
-                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieve</span>
+                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieved</span>
                                     {% endif %}
                                 {% else %}
                                     <!-- For other indicators, higher is better -->
                                     {% if entry.achieved_value >= entry.End_Target_Value %}
-                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieve</span>
+                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill">Achieved</span>
                                     {% else %}
-                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieve</span>
+                                        <span class="badge bg-danger text-white px-3 py-1 rounded-pill">Not Achieved</span>
                                     {% endif %}
                                 {% endif %}
                             {% else %}

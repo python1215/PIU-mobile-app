@@ -343,15 +343,15 @@
                                         <!-- Special status logic for loss indicators -->
                                         {% if "Total Losses Electricity" in indicator_name or "ATC&C" in indicator_name or "Non-Revenue Water" in indicator_name or "NRW" in indicator_name or "New Water Connection Days" in indicator_name or "NWCD" in indicator_name or "New Electricity Connection Days" in indicator_name or "NECD" in indicator_name or "Debtor Days" in indicator_name or "DD" in indicator_name %}
                                             {% if kpi_data.quarters.Q1.achieved_value <= kpi_data.quarters.Q1.target_value %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                                <span class="badge bg-success rounded-pill">Achieved</span>
                                             {% else %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                <span class="badge bg-danger rounded-pill">Not Achieved</span>
                                             {% endif %}
                                         {% else %}
                                             {% if kpi_data.quarters.Q1.achieved_value >= kpi_data.quarters.Q1.target_value %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                                <span class="badge bg-success rounded-pill">Achieved</span>
                                             {% else %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                <span class="badge bg-danger rounded-pill">Not Achieved</span>
                                             {% endif %}
                                         {% endif %}
                                     {% else %}
@@ -406,15 +406,15 @@
                                         <!-- Special status logic for loss indicators -->
                                         {% if "Total Losses Electricity" in indicator_name or "ATC&C" in indicator_name or "Non-Revenue Water" in indicator_name or "NRW" in indicator_name or "New Water Connection Days" in indicator_name or "NWCD" in indicator_name or "New Electricity Connection Days" in indicator_name or "NECD" in indicator_name or "Debtor Days" in indicator_name or "DD" in indicator_name %}
                                             {% if kpi_data.quarters.Q2.achieved_value <= kpi_data.quarters.Q2.target_value %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                                <span class="badge bg-success rounded-pill">Achieved</span>
                                             {% else %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                <span class="badge bg-danger rounded-pill">Not Achieved</span>
                                             {% endif %}
                                         {% else %}
                                             {% if kpi_data.quarters.Q2.achieved_value >= kpi_data.quarters.Q2.target_value %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                                <span class="badge bg-success rounded-pill">Achieved</span>
                                             {% else %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                <span class="badge bg-danger rounded-pill">Not Achieved</span>
                                             {% endif %}
                                         {% endif %}
                                     {% else %}
