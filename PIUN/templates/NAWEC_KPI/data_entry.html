@@ -3476,14 +3476,18 @@ function closeImportsPopup() {
 }
 
 function showIPPPopup() {
+    console.log('🚀 showIPPPopup() function called');
+    
     // Remove any existing popup
     const existingPopup = document.getElementById('simpleKPIPopup');
     if (existingPopup) {
+        console.log('🗑️ Removing existing popup');
         existingPopup.remove();
     }
 
     // Get current End Target Value from main form
-    const currentEndTarget = document.getElementById('End_Target_Value').value || 0;
+    const currentEndTarget = document.getElementById('id_End_Target_Value')?.value || 0;
+    console.log('📊 Current End Target Value:', currentEndTarget);
 
     // Create popup HTML
     const popupHTML = `
@@ -3570,10 +3574,14 @@ function showIPPPopup() {
     `;
 
     // Add popup to page
+    console.log('📝 Adding popup HTML to page');
     document.body.insertAdjacentHTML('beforeend', popupHTML);
     
     // Focus on first input
+    console.log('🎯 Focusing on ippQuarter input');
     document.getElementById('ippQuarter').focus();
+    
+    console.log('✅ showIPPPopup() completed successfully');
 }
 
 function calculateIPP() {
