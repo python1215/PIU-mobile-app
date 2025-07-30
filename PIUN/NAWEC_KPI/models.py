@@ -1519,12 +1519,17 @@ class CalculateIMPORTS(models.Model):
         if self.End_Target_Value is not None and self.add_value is not None:
             self.achieved_value = float(self.End_Target_Value) * float(self.add_value)
         
-        # Calculate progress using requested formulas:
+        # Calculate progress only when achieved_value is not empty (not None and not zero)
         # Percentage_progress_from_baseline = (baseline_value/achieved_value)*100
         # Percentage_progress_towards_end_target = (baseline_value/achieved_value)*100
-        if self.achieved_value is not None and self.baseline_value is not None and self.achieved_value != 0:
+        if (self.achieved_value is not None and self.achieved_value != 0 and 
+            self.baseline_value is not None and self.baseline_value != 0):
             self.progress_from_baseline = (float(self.baseline_value) / float(self.achieved_value)) * 100
             self.progress_towards_end_target = (float(self.baseline_value) / float(self.achieved_value)) * 100
+        else:
+            # Clear progress values if achieved_value is empty
+            self.progress_from_baseline = None
+            self.progress_towards_end_target = None
 
         super().save(*args, **kwargs)
 
@@ -1580,12 +1585,17 @@ class CalculateIPP(models.Model):
         if self.End_Target_Value is not None and self.add_value is not None:
             self.achieved_value = float(self.End_Target_Value) * float(self.add_value)
         
-        # Calculate progress using requested formulas:
+        # Calculate progress only when achieved_value is not empty (not None and not zero)
         # Percentage_progress_from_baseline = (baseline_value/achieved_value)*100
         # Percentage_progress_towards_end_target = (baseline_value/achieved_value)*100
-        if self.achieved_value is not None and self.baseline_value is not None and self.achieved_value != 0:
+        if (self.achieved_value is not None and self.achieved_value != 0 and 
+            self.baseline_value is not None and self.baseline_value != 0):
             self.progress_from_baseline = (float(self.baseline_value) / float(self.achieved_value)) * 100
             self.progress_towards_end_target = (float(self.baseline_value) / float(self.achieved_value)) * 100
+        else:
+            # Clear progress values if achieved_value is empty
+            self.progress_from_baseline = None
+            self.progress_towards_end_target = None
 
         super().save(*args, **kwargs)
 
