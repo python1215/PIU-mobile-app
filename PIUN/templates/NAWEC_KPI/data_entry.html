@@ -1430,6 +1430,12 @@ function triggerKPICalculationPopup() {
     
     console.log('Selected KPI ID:', selectedKPI);
     console.log('Selected KPI Text:', selectedText);
+    console.log('🔍 IPP Detection Check:', {
+        'contains_independent_power_plants': selectedText.includes('independent power plants'),
+        'contains_ipp': selectedText.includes('ipp'),
+        'contains_independent_power_plants_mw': selectedText.includes('independent power plants (mw)'),
+        'full_text': selectedText
+    });
     
     // Determine KPI type based on indicator description text
     let kpiType = '';
@@ -1443,7 +1449,7 @@ function triggerKPICalculationPopup() {
         kpiType = 'EI';
     } else if (selectedText.includes('imports') && selectedText.includes('mw')) {
         kpiType = 'IMPORTS';
-    } else if (selectedText.includes('independent power plants') || selectedText.includes('ipp')) {
+    } else if (selectedText.includes('independent power plants') || selectedText.includes('ipp') || selectedText.includes('independent power plants (mw)')) {
         kpiType = 'IPP';
     } else if (selectedText.includes('local production') || selectedText.includes('total electricity generated') || selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
@@ -1482,6 +1488,12 @@ function triggerKPICalculationPopup() {
     }
     
     console.log('Detected KPI Type:', kpiType);
+    
+    if (kpiType === 'IPP') {
+        console.log('✅ IPP detected - should trigger showIPPPopup()');
+    } else {
+        console.log('❌ IPP not detected, detected type:', kpiType);
+    }
     
     // Show appropriate KPI calculation popup based on detected type
     switch(kpiType) {
