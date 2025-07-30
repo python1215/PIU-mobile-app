@@ -12,25 +12,73 @@
             .no-print { display: none !important; }
             .page-break { page-break-before: always; }
             
-            /* A4 Portrait Optimizations */
-            body { font-size: 10px !important; }
-            .container-fluid { max-width: 100% !important; margin: 0 !important; padding: 0.5rem !important; }
-            .report-header { margin-bottom: 1rem !important; padding: 1rem !important; }
-            .performance-summary { margin: 1rem 0 !important; padding: 1rem !important; }
-            .kpi-table { font-size: 0.7rem !important; }
-            .kpi-table th, .kpi-table td { padding: 0.2rem 0.1rem !important; }
+            /* Print-specific color adjustments */
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
             
-            /* Force table to fit page width */
-            .table-responsive { overflow: visible !important; }
+            /* A4 Portrait Optimizations */
+            body { 
+                font-size: 10px !important; 
+                line-height: 1.2 !important;
+                margin: 0 !important;
+            }
+            .container-fluid { 
+                max-width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0.5rem !important; 
+            }
+            .report-header { 
+                margin-bottom: 1rem !important; 
+                padding: 1rem !important;
+                background: #1F4E79 !important;
+                color: white !important;
+            }
+            .performance-summary { 
+                margin: 1rem 0 !important; 
+                padding: 1rem !important; 
+                background: #f8f9fa !important;
+            }
+            
+            /* Enhanced table formatting for print */
             .kpi-table { 
+                font-size: 0.75rem !important;
+                border-collapse: collapse !important;
+                border: 2px solid #000 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 table-layout: fixed !important;
             }
             
-            /* Tighter column widths for print - 9 columns total */
-            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 20% !important; }
-            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 15% !important; }
+            .kpi-table th {
+                background-color: #1F4E79 !important;
+                color: white !important;
+                font-weight: bold !important;
+                font-size: 0.8rem !important;
+                padding: 0.4rem 0.2rem !important;
+                border: 1px solid #000 !important;
+                text-align: center !important;
+                vertical-align: middle !important;
+            }
+            
+            .kpi-table td {
+                padding: 0.3rem 0.2rem !important;
+                border: 1px solid #000 !important;
+                vertical-align: middle !important;
+                text-align: center !important;
+            }
+            
+            /* Force table to fit page width */
+            .table-responsive { overflow: visible !important; }
+            
+            /* Optimized column widths for print - 9 columns total */
+            .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { 
+                width: 20% !important; 
+                text-align: left !important;
+            }
+            .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { 
+                width: 15% !important; 
+                text-align: left !important;
+            }
             .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8% !important; }
             .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 8% !important; }
             .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 10% !important; }
@@ -38,6 +86,19 @@
             .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 8% !important; }
             .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 8% !important; }
             .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 13% !important; }
+            
+            /* Ensure badge styling is visible in print */
+            .badge {
+                background-color: #6c757d !important;
+                color: white !important;
+                padding: 0.2rem 0.4rem !important;
+                border-radius: 0.25rem !important;
+                font-size: 0.7rem !important;
+                font-weight: bold !important;
+            }
+            
+            .bg-success { background-color: #28a745 !important; }
+            .bg-danger { background-color: #dc3545 !important; }
         }
         
         .report-header {
@@ -65,22 +126,28 @@
             font-size: 0.75rem;
             table-layout: fixed;
             width: 100%;
+            border-collapse: collapse !important;
+            border: 2px solid #1F4E79 !important;
         }
         
         .kpi-table th {
             background-color: #1F4E79;
             color: white;
-            font-weight: 600;
-            padding: 0.4rem 0.2rem;
+            font-weight: bold !important;
+            font-size: 0.8rem !important;
+            padding: 0.6rem 0.3rem;
             text-align: center;
+            border: 1px solid #1F4E79 !important;
+            vertical-align: middle;
             word-wrap: break-word;
         }
         
         .kpi-table td {
-            padding: 0.3rem 0.2rem;
-            border-bottom: 1px solid #dee2e6;
+            padding: 0.4rem 0.3rem;
+            border: 1px solid #dee2e6 !important;
             word-wrap: break-word;
             text-align: center;
+            vertical-align: middle;
         }
         
         /* Left align the Indicator and PDO columns for better readability */
