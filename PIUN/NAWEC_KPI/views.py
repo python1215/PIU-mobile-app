@@ -2216,8 +2216,9 @@ def performance_report(request):
             # Fallback for direct ID filtering
             entries_queryset = entries_queryset.filter(quarter_id=quarter_filter)
     
-    # Get filtered data with calculations
+    # Get filtered data with calculations and group by indicator
     report_entries = []
+    grouped_report_entries = {}
     overall_target_gir = 0
     overall_actual_gir = 0
     
@@ -2244,6 +2245,13 @@ def performance_report(request):
         entry.actual_gir_calculated = actual_gir_calculated
         
         report_entries.append(entry)
+        
+        # Group entries by indicator description for side-by-side quarter display
+        if hasattr(entry, 'indicator_description') and entry.indicator_description:
+            indicator_name = entry.indicator_description.indicator_description
+            if indicator_name not in grouped_report_entries:
+                grouped_report_entries[indicator_name] = []
+            grouped_report_entries[indicator_name].append(entry)
     
     # Calculate Overall Achievement Rate
     overall_achievement_rate = 0
@@ -2282,6 +2290,7 @@ def performance_report(request):
             'overall_achievement_rate': overall_achievement_rate,
             'needle_angle': needle_angle,
             'report_entries': report_entries,
+            'grouped_report_entries': grouped_report_entries,
         }
         
         return render(request, 'NAWEC_KPI/performance_report.html', context)

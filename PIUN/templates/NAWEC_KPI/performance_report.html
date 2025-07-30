@@ -70,22 +70,21 @@
             /* Force table to fit page width */
             .table-responsive { overflow: visible !important; }
             
-            /* Optimized column widths for print - 9 columns total */
+            /* Optimized column widths for print - 8 columns total */
             .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { 
-                width: 20% !important; 
+                width: 30% !important; 
                 text-align: left !important;
             }
             .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { 
-                width: 15% !important; 
-                text-align: left !important;
+                width: 8% !important; 
+                text-align: center !important;
             }
-            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8% !important; }
-            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 8% !important; }
+            .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 9% !important; }
+            .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 9% !important; }
             .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 10% !important; }
             .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 10% !important; }
-            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 8% !important; }
-            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 8% !important; }
-            .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 13% !important; }
+            .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 9% !important; }
+            .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 15% !important; }
             
             /* Ensure badge styling is visible in print */
             .badge {
@@ -150,24 +149,20 @@
             vertical-align: middle;
         }
         
-        /* Left align the Indicator and PDO columns for better readability */
+        /* Left align the Indicator column for better readability */
         .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) {
             text-align: left !important;
         }
-        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) {
-            text-align: left !important;
-        }
         
-        /* Column width controls for A4 portrait - 9 columns total */
-        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 22%; } /* Indicator */
-        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 15%; } /* PDO */
-        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 8%; }  /* Baseline */
-        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 8%; }  /* Target */
+        /* Column width controls for A4 portrait - 8 columns total */
+        .kpi-table th:nth-child(1), .kpi-table td:nth-child(1) { width: 30%; text-align: left; } /* Indicator */
+        .kpi-table th:nth-child(2), .kpi-table td:nth-child(2) { width: 8%; text-align: center; } /* Quarter */
+        .kpi-table th:nth-child(3), .kpi-table td:nth-child(3) { width: 9%; }  /* Base */
+        .kpi-table th:nth-child(4), .kpi-table td:nth-child(4) { width: 9%; }  /* Target */
         .kpi-table th:nth-child(5), .kpi-table td:nth-child(5) { width: 10%; } /* Achieved */
-        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 10%; } /* Performance */
-        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 8%; }  /* Variance */
-        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 8%; }  /* Year */
-        .kpi-table th:nth-child(9), .kpi-table td:nth-child(9) { width: 11%; } /* Status */
+        .kpi-table th:nth-child(6), .kpi-table td:nth-child(6) { width: 10%; } /* Perf% */
+        .kpi-table th:nth-child(7), .kpi-table td:nth-child(7) { width: 9%; }  /* Var */
+        .kpi-table th:nth-child(8), .kpi-table td:nth-child(8) { width: 15%; } /* Status */
         
         .performance-good { color: #28a745; font-weight: bold; }
         .performance-warning { color: #ffc107; font-weight: bold; }
@@ -301,77 +296,87 @@
         <div class="mb-4">
             <h3 class="mb-3">Detailed KPI Performance Data</h3>
             
-            {% if report_entries %}
+            {% if grouped_report_entries %}
             <div class="table-responsive">
                 <table class="table table-striped table-bordered kpi-table">
                     <thead>
                         <tr>
-                            <th>Indicator</th>
-                            <th>PDO</th>
-                            <th>Base</th>
-                            <th>Target</th>
-                            <th>Achieved</th>
-                            <th>Perf %</th>
-                            <th>Var</th>
-                            <th>Year</th>
-                            <th>Status</th>
+                            <th rowspan="2">Indicator</th>
+                            <th rowspan="2">Quarter</th>
+                            <th rowspan="2">Base</th>
+                            <th rowspan="2">Target</th>
+                            <th rowspan="2">Achieved</th>
+                            <th rowspan="2">Perf%</th>
+                            <th rowspan="2">Var</th>
+                            <th rowspan="2">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for entry in report_entries %}
-                        <tr>
-                            <td>
-                                <div>{{ entry.indicator_description.indicator_description }}</div>
-                                <small class="text-muted">{{ entry.indicator_type }}</small>
-                            </td>
-                            <td>{{ entry.pdo|default:"N/A" }}</td>
-                            <td>{{ entry.baseline_value|floatformat:1 }}</td>
-                            <td>{{ entry.End_Target_Value|floatformat:1 }}</td>
-                            <td class="fw-bold">{{ entry.achieved_value|floatformat:1 }}</td>
-                            <td class="{% if entry.performance_calculated >= 75 %}performance-good{% elif entry.performance_calculated >= 50 %}performance-warning{% else %}performance-danger{% endif %}">
-                                {% if entry.performance_calculated is not None %}
-                                    {{ entry.performance_calculated|floatformat:0 }}%
-                                {% else %}
-                                    N/A
+                        {% for indicator, quarters in grouped_report_entries.items %}
+                            {% for quarter_data in quarters %}
+                            <tr>
+                                {% if forloop.first %}
+                                    <td rowspan="{{ quarters|length }}" style="vertical-align: middle; text-align: left;">
+                                        <div><strong>{{ indicator }}</strong></div>
+                                    </td>
                                 {% endif %}
-                            </td>
-                            <td class="{% if entry.variance_calculated >= 0 %}performance-good{% else %}performance-danger{% endif %}">
-                                {% if entry.variance_calculated is not None %}
-                                    {{ entry.variance_calculated|floatformat:1 }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>{{ entry.year.profile_year|default:"N/A" }}</td>
-                            <td class="text-center">
-                                {% if entry.performance_calculated is not None %}
-                                    <!-- Special logic for Debtor Days - Achieved > Target = Not Achieve -->
-                                    {% if "Debtor Days" in entry.indicator_description.indicator_description or "DD" in entry.indicator_description.indicator_description %}
-                                        {% if entry.achieved_value > entry.End_Target_Value %}
-                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
-                                        {% else %}
-                                            <span class="badge bg-success rounded-pill">Achieve</span>
+                                <td class="text-center">
+                                    <strong>
+                                        {% if quarter_data.quarter.id == 10022 %}Q1
+                                        {% elif quarter_data.quarter.id == 10023 %}Q2
+                                        {% elif quarter_data.quarter.id == 10024 %}Q3
+                                        {% elif quarter_data.quarter.id == 10025 %}Q4
+                                        {% else %}Q{{ quarter_data.quarter.id }}
                                         {% endif %}
-                                    {% elif "Total Losses Electricity" in entry.indicator_description.indicator_description or "Non-Revenue Water" in entry.indicator_description.indicator_description or "NRW" in entry.indicator_description.indicator_description or "New Water Connection Days" in entry.indicator_description.indicator_description or "NWCD" in entry.indicator_description.indicator_description or "New Electricity Connection Days" in entry.indicator_description.indicator_description or "NECD" in entry.indicator_description.indicator_description %}
-                                        <!-- For loss indicators, lower achieved value is better -->
-                                        {% if entry.achieved_value < entry.End_Target_Value %}
-                                            <span class="badge bg-success rounded-pill">Achieve</span>
+                                    </strong>
+                                </td>
+                                <td class="text-center">{{ quarter_data.baseline_value|floatformat:1 }}</td>
+                                <td class="text-center">{{ quarter_data.End_Target_Value|floatformat:1 }}</td>
+                                <td class="text-center fw-bold">{{ quarter_data.achieved_value|floatformat:1 }}</td>
+                                <td class="text-center {% if quarter_data.performance_calculated >= 75 %}performance-good{% elif quarter_data.performance_calculated >= 50 %}performance-warning{% else %}performance-danger{% endif %}">
+                                    {% if quarter_data.performance_calculated is not None %}
+                                        {{ quarter_data.performance_calculated|floatformat:0 }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="text-center {% if quarter_data.variance_calculated >= 0 %}performance-good{% else %}performance-danger{% endif %}">
+                                    {% if quarter_data.variance_calculated is not None %}
+                                        {{ quarter_data.variance_calculated|floatformat:1 }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if quarter_data.performance_calculated is not None %}
+                                        <!-- Special logic for Debtor Days - Achieved > Target = Not Achieve -->
+                                        {% if "Debtor Days" in quarter_data.indicator_description.indicator_description or "DD" in quarter_data.indicator_description.indicator_description %}
+                                            {% if quarter_data.achieved_value > quarter_data.End_Target_Value %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% endif %}
+                                        {% elif "Total Losses Electricity" in quarter_data.indicator_description.indicator_description or "Non-Revenue Water" in quarter_data.indicator_description.indicator_description or "NRW" in quarter_data.indicator_description.indicator_description or "New Water Connection Days" in quarter_data.indicator_description.indicator_description or "NWCD" in quarter_data.indicator_description.indicator_description or "New Electricity Connection Days" in quarter_data.indicator_description.indicator_description or "NECD" in quarter_data.indicator_description.indicator_description %}
+                                            <!-- For loss indicators, lower achieved value is better -->
+                                            {% if quarter_data.achieved_value < quarter_data.End_Target_Value %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            <!-- For normal indicators, higher achieved value is better -->
+                                            {% if quarter_data.achieved_value >= quarter_data.End_Target_Value %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% endif %}
                                         {% endif %}
                                     {% else %}
-                                        <!-- For normal indicators, higher achieved value is better -->
-                                        {% if entry.achieved_value >= entry.End_Target_Value %}
-                                            <span class="badge bg-success rounded-pill">Achieve</span>
-                                        {% else %}
-                                            <span class="badge bg-danger rounded-pill">Not Achieve</span>
-                                        {% endif %}
+                                        <span class="badge bg-secondary rounded-pill">N/A</span>
                                     {% endif %}
-                                {% else %}
-                                    <span class="badge bg-secondary rounded-pill">N/A</span>
-                                {% endif %}
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
+                            {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>
