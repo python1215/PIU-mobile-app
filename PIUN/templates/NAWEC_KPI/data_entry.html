@@ -468,9 +468,6 @@
                                             <button type="button" class="btn btn-warning btn-sm join-item btn-hover" onclick="triggerKPICalculationPopup();" title="Open KPI Calculator">
                                                 <i class="bi bi-calculator"></i>
                                             </button>
-                                            <button type="button" class="btn btn-info btn-sm join-item btn-hover" onclick="showIPPPopup();" title="Test IPP Popup">
-                                                IPP Test
-                                            </button>
 
                                         </div>
                                         <label class="label py-1">
@@ -3660,7 +3657,10 @@ async function useIPPResult() {
         
         if (result.success) {
             // Set the achieved value in the main form
-            document.getElementById('achieved_value').value = window.simpleIPPResult.result.toFixed(2);
+            const achievedField = document.getElementById('id_achieved_value');
+            if (achievedField) {
+                achievedField.value = window.simpleIPPResult.result.toFixed(2);
+            }
             
             // Trigger calculation update in main form
             calculatePercentages();
