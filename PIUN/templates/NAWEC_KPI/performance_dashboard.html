@@ -624,7 +624,7 @@
                     <div class="card bg-white shadow-lg min-w-80 gauge-card-responsive">
                         <div class="card-body p-3">
                             <div class="text-center mb-2">
-                                <h3 class="text-sm font-bold text-gray-800">NAWEC {% if request.GET.quarter %}Q{{ request.GET.quarter }}{% else %}Q1{% endif %} {% if request.GET.year and years %}{{ years.0.profile_year }}{% else %}2025{% endif %}</h3>
+                                <h3 class="text-sm font-bold text-gray-800">NAWEC {% if request.GET.quarter %}Q{{ request.GET.quarter }}{% else %}Q1{% endif %} {% if request.GET.year %}{{ request.GET.year }}{% else %}2025{% endif %}</h3>
                                 <p class="text-xs text-gray-600">Global Indicator Rating Achievement</p>
                             </div>
                             
