@@ -1535,3 +1535,65 @@ class CalculateIMPORTS(models.Model):
     class Meta:
         verbose_name = "Imports (MW) Calculation"
         verbose_name_plural = "Imports (MW) Calculations"
+
+
+class CalculateIPP(models.Model):
+    """Independent Power Plants (MW) Calculation Model
+    Formula: Independent Power Plants (MW) = End_Target_Value * add_value
+    """
+    # KPI tracking fields
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Baseline value for comparison")
+    End_Target_Value = models.FloatField(
+        null=True, blank=True, help_text="End target value from database")
+    achieved_value = models.FloatField(null=True,
+                                       blank=True,
+                                       help_text="Calculated Independent Power Plants value in MW")
+    
+    # Progress calculation fields
+    progress_from_baseline = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress from baseline")
+    progress_towards_end_target = models.FloatField(
+        null=True, blank=True, help_text="Percentage progress towards end target")
+
+    # Calculation input fields
+    add_value = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Multiplier value for Independent Power Plants calculation")
+
+    year = models.ForeignKey(YEAR,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    quarter = models.ForeignKey(Quarter,
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate Independent Power Plants (MW) = End_Target_Value * add_value
+        if self.End_Target_Value is not None and self.add_value is not None:
+            self.achieved_value = float(self.End_Target_Value) * float(self.add_value)
+        
+        # Calculate progress using standard KPI formula
+        if self.achieved_value is not None and self.baseline_value is not None:
+            if self.baseline_value != 0:
+                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            
+            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
+                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Independent Power Plants (MW) Calculation - {self.achieved_value} MW ({self.year}/{self.quarter})"
+
+    class Meta:
+        verbose_name = "Independent Power Plants (MW) Calculation"
+        verbose_name_plural = "Independent Power Plants (MW) Calculations"

@@ -1443,6 +1443,8 @@ function triggerKPICalculationPopup() {
         kpiType = 'EI';
     } else if (selectedText.includes('imports') && selectedText.includes('mw')) {
         kpiType = 'IMPORTS';
+    } else if (selectedText.includes('independent power plants') || selectedText.includes('ipp')) {
+        kpiType = 'IPP';
     } else if (selectedText.includes('local production') || selectedText.includes('total electricity generated') || selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
@@ -1497,6 +1499,9 @@ function triggerKPICalculationPopup() {
             break;
         case 'IMPORTS':
             showImportsPopup();
+            break;
+        case 'IPP':
+            showIPPPopup();
             break;
         case 'MWH':
             showMWhPopup();
@@ -3448,6 +3453,226 @@ function closeImportsPopup() {
     
     // Clear stored result and memory variables
     window.simpleImportsResult = null;
+}
+
+function showIPPPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    // Get current End Target Value from main form
+    const currentEndTarget = document.getElementById('End_Target_Value').value || 0;
+
+    // Create popup HTML
+    const popupHTML = `
+        <div id="simpleKPIPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                                       background-color: rgba(0, 0, 0, 0.5); z-index: 10000; 
+                                       display: flex; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+                        width: 400px; max-width: 90%; max-height: 80%; overflow-y: auto;">
+                
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; 
+                        padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <h5 style="margin: 0; font-weight: bold;">
+                    <i class="bi bi-lightning-fill"></i> Independent Power Plants (MW)
+                </h5>
+                <span style="color: #e9ecef; font-size: 0.9rem;">KPI Calculation</span>
+            </div>
+
+            <!-- Form Content -->
+            <div>
+                <h6 style="color: #17a2b8; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 8px;">
+                    <i class="bi bi-info-circle"></i> Enter Calculation Details
+                </h6>
+                
+                <!-- Quarter Selection -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter:</label>
+                    <select id="ippQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Select Quarter</option>
+                        <option value="10022">Q1</option>
+                        <option value="10023">Q2</option>
+                        <option value="10024">Q3</option>
+                        <option value="10025">Q4</option>
+                    </select>
+                </div>
+                
+                <!-- End Target Value (Auto-populated) -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">End Target Value:</label>
+                    <input type="number" id="ippEndTarget" step="0.01" value="${currentEndTarget}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;"
+                           readonly placeholder="Auto-populated from form">
+                    <small style="color: #6c757d;">Auto-populated from End Target Value field</small>
+                </div>
+                
+                <!-- Add Value -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Add Value:</label>
+                    <input type="number" id="ippAddValue" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter additional value" oninput="calculateIPP()">
+                </div>
+
+                <!-- Result Display -->
+                <div id="ippResult" style="margin-top: 15px; padding: 15px; background: #e7f3ff; 
+                                                border-radius: 5px; border-left: 4px solid #17a2b8; display: none;">
+                    <h6 style="color: #17a2b8; margin-bottom: 10px;">
+                        <i class="bi bi-calculator"></i> Calculation Result
+                    </h6>
+                    <div id="ippResultText" style="font-weight: bold; font-size: 1.1rem;"></div>
+                    <div id="ippBreakdown" style="margin-top: 10px; font-size: 0.9rem; color: #666;"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="ippUseButton" onclick="useIPPResult()" 
+                        style="flex: 2; background: #28a745; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: none;">
+                    <i class="bi bi-check-lg"></i> Use Result
+                </button>
+                <button onclick="resetIPPForm()" 
+                        style="flex: 1; background: #ffc107; color: #212529; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeIPPPopup()" 
+                        style="flex: 1; background: #dc3545; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-x-lg"></i> Close
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Add popup to page
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+    
+    // Focus on first input
+    document.getElementById('ippQuarter').focus();
+}
+
+function calculateIPP() {
+    const endTarget = parseFloat(document.getElementById('ippEndTarget').value) || 0;
+    const addValue = parseFloat(document.getElementById('ippAddValue').value) || 0;
+    
+    if (endTarget > 0 && addValue > 0) {
+        const result = endTarget * addValue;
+        
+        // Store result globally for use
+        window.simpleIPPResult = {
+            endTarget: endTarget,
+            addValue: addValue,
+            result: result
+        };
+        
+        // Update result display
+        document.getElementById('ippResultText').textContent = result.toFixed(2) + ' MW';
+        document.getElementById('ippBreakdown').innerHTML = 
+            `<strong>Formula:</strong> Independent Power Plants (MW) = End Target Value × Add Value<br>
+             <strong>Calculation:</strong> ${endTarget.toFixed(2)} × ${addValue.toFixed(2)} = ${result.toFixed(2)} MW`;
+        
+        // Show result section and use button
+        document.getElementById('ippResult').style.display = 'block';
+        document.getElementById('ippUseButton').style.display = 'block';
+    } else {
+        // Hide result if inputs are invalid
+        document.getElementById('ippResult').style.display = 'none';
+        document.getElementById('ippUseButton').style.display = 'none';
+        window.simpleIPPResult = null;
+    }
+}
+
+async function useIPPResult() {
+    const quarter = document.getElementById('ippQuarter').value;
+    const endTarget = parseFloat(document.getElementById('ippEndTarget').value) || 0;
+    const addValue = parseFloat(document.getElementById('ippAddValue').value) || 0;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result. Quarter selection is mandatory.');
+        document.getElementById('ippQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleIPPResult) {
+        alert('Please calculate Independent Power Plants (MW) first');
+        return;
+    }
+    
+    const data = {
+        kpi_type: 'IPP',
+        End_Target_Value: endTarget,
+        add_value: addValue,
+        achieved_value: window.simpleIPPResult.result,
+        quarter: quarter,
+        year: document.getElementById('year').value
+    };
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            document.getElementById('achieved_value').value = window.simpleIPPResult.result.toFixed(2);
+            
+            // Trigger calculation update in main form
+            calculatePercentages();
+            
+            // Close popup and clear memory
+            closeIPPPopup();
+            
+            alert('Independent Power Plants (MW) calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving Independent Power Plants (MW) calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error saving calculation: ' + error.message);
+    }
+}
+
+function resetIPPForm() {
+    // Clear input fields
+    document.getElementById('ippQuarter').value = '';
+    document.getElementById('ippAddValue').value = '';
+    
+    // Hide the result section
+    const resultDiv = document.getElementById('ippResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    // Hide use button
+    document.getElementById('ippUseButton').style.display = 'none';
+    
+    // Clear stored result
+    window.simpleIPPResult = null;
+    
+    // Focus on first input field
+    document.getElementById('ippQuarter').focus();
+}
+
+function closeIPPPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+    
+    // Clear stored result and memory variables
+    window.simpleIPPResult = null;
 }
 
 function showMWhPopup() {

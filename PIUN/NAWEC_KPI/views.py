@@ -3328,6 +3328,8 @@ class DeleteKPICalculationView(View):
                 CalculateTMH.objects.filter(id=calc_id).delete()
             elif kpi_type == 'IMPORTS':
                 CalculateIMPORTS.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'IPP':
+                CalculateIPP.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -3459,6 +3461,94 @@ def calculate_imports_delete(request, pk):
     }
     
     return render(request, 'NAWEC_KPI/calculate_imports_delete.html', context)
+
+
+# Independent Power Plants (MW) CRUD Views
+@login_required
+def calculate_ipp_list(request):
+    """List view for Independent Power Plants (MW) calculations"""
+    calculations = CalculateIPP.objects.all().order_by('-date_created')
+    
+    # Pagination
+    paginator = Paginator(calculations, 10)  # 10 calculations per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'calculations': page_obj,
+        'page_obj': page_obj,
+        'title': 'Independent Power Plants (MW) Calculations'
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_ipp_list.html', context)
+
+
+@login_required
+def calculate_ipp_detail(request, pk):
+    """Detail view for Independent Power Plants (MW) calculation"""
+    try:
+        calculation = CalculateIPP.objects.get(pk=pk)
+    except CalculateIPP.DoesNotExist:
+        messages.error(request, f'Independent Power Plants (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_ipp_list')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_ipp_detail.html', context)
+
+
+@login_required
+def calculate_ipp_edit(request, pk):
+    """Edit view for Independent Power Plants (MW) calculation"""
+    try:
+        calculation = CalculateIPP.objects.get(pk=pk)
+    except CalculateIPP.DoesNotExist:
+        messages.error(request, f'Independent Power Plants (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_ipp_list')
+    
+    if request.method == 'POST':
+        try:
+            # Update calculation values
+            calculation.End_Target_Value = float(request.POST.get('End_Target_Value', 0))
+            calculation.add_value = float(request.POST.get('add_value', 0))
+            
+            # Recalculate the achieved value
+            calculation.achieved_value = calculation.End_Target_Value * calculation.add_value
+            
+            calculation.save()
+            messages.success(request, 'Independent Power Plants (MW) calculation updated successfully!')
+            return redirect('NAWEC_KPI:calculate_ipp_detail', pk=pk)
+        except (ValueError, TypeError) as e:
+            messages.error(request, f'Invalid input values: {str(e)}')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_ipp_edit.html', context)
+
+
+@login_required
+def calculate_ipp_delete(request, pk):
+    """Delete view for Independent Power Plants (MW) calculation"""
+    try:
+        calculation = CalculateIPP.objects.get(pk=pk)
+    except CalculateIPP.DoesNotExist:
+        messages.error(request, f'Independent Power Plants (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_ipp_list')
+    
+    if request.method == 'POST':
+        calculation.delete()
+        messages.success(request, 'Independent Power Plants (MW) calculation deleted successfully!')
+        return redirect('NAWEC_KPI:calculate_ipp_list')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_ipp_delete.html', context)
 
 
 

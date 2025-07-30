@@ -171,4 +171,10 @@ urlpatterns = [
     path('imports-calculations/<int:pk>/', views.calculate_imports_detail, name='calculate_imports_detail'),
     path('imports-calculations/<int:pk>/edit/', views.calculate_imports_edit, name='calculate_imports_edit'),
     path('imports-calculations/<int:pk>/delete/', views.calculate_imports_delete, name='calculate_imports_delete'),
+
+    # Independent Power Plants (MW) CRUD
+    path('ipp-calculations/', views.calculate_ipp_list, name='calculate_ipp_list'),
+    path('ipp-calculations/<int:pk>/', views.calculate_ipp_detail, name='calculate_ipp_detail'),
+    path('ipp-calculations/<int:pk>/edit/', views.calculate_ipp_edit, name='calculate_ipp_edit'),
+    path('ipp-calculations/<int:pk>/delete/', views.calculate_ipp_delete, name='calculate_ipp_delete'),
 ]

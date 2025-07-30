@@ -1,0 +1,245 @@
+{% extends 'NAWEC_KPI/base_nawec_kpi.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Independent Power Plants (MW) Calculations{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-lightning-fill text-info"></i> Independent Power Plants (MW) Calculations</h2>
+        <p class="text-muted mb-0">View and manage Independent Power Plants (MW) calculation records</p>
+    </div>
+    <div>
+        <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Calculation
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filter and Search Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Search calculations...">
+            </div>
+            <div class="col-md-3">
+                <label for="year" class="form-label">Year</label>
+                <select class="form-select" id="year" name="year">
+                    <option value="">All Years</option>
+                    {% for year in years %}
+                        <option value="{{ year.id }}" {% if year_filter == year.id|stringformat:"s" %}selected{% endif %}>
+                            {{ year.profile_year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="quarter" class="form-label">Quarter</label>
+                <select class="form-select" id="quarter" name="quarter">
+                    <option value="">All Quarters</option>
+                    {% for quarter in quarters %}
+                        <option value="{{ quarter.id }}" {% if quarter_filter == quarter.id|stringformat:"s" %}selected{% endif %}>
+                            Q{{ quarter.quarter }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+                <a href="{% url 'NAWEC_KPI:calculate_ipp_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_count }}</h4>
+                        <p class="card-text">Total Calculations</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-calculator fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calculations Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-table"></i> Independent Power Plants (MW) Calculation Records
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Year</th>
+                            <th>Quarter</th>
+                            <th>End Target Value</th>
+                            <th>Add Value</th>
+                            <th>IPP (MW)</th>
+                            <th>Calculated By</th>
+                            <th>Date Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for calculation in page_obj %}
+                            <tr>
+                                <td><strong>{{ calculation.id }}</strong></td>
+                                <td>
+                                    {% if calculation.year %}
+                                        <span class="badge bg-secondary">{{ calculation.year.profile_year }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.quarter %}
+                                        <span class="badge bg-primary">
+                                            {% if calculation.quarter.quarter == 1 %}Q1
+                                            {% elif calculation.quarter.quarter == 2 %}Q2
+                                            {% elif calculation.quarter.quarter == 3 %}Q3
+                                            {% elif calculation.quarter.quarter == 4 %}Q4
+                                            {% elif calculation.quarter.id == 10022 %}Q1
+                                            {% elif calculation.quarter.id == 10023 %}Q2
+                                            {% elif calculation.quarter.id == 10024 %}Q3
+                                            {% elif calculation.quarter.id == 10025 %}Q4
+                                            {% else %}{{ calculation.quarter.quarter }}{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.End_Target_Value %}
+                                        <strong>{{ calculation.End_Target_Value|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.add_value %}
+                                        <strong>{{ calculation.add_value|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.achieved_value %}
+                                        <span class="text-success fw-bold">{{ calculation.achieved_value|floatformat:2 }} MW</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.loginUser %}
+                                        <small class="text-muted">{{ calculation.loginUser.username }}</small>
+                                    {% else %}
+                                        <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.date_created %}
+                                        <small class="text-muted">{{ calculation.date_created|date:"M d, Y H:i" }}</small>
+                                    {% else %}
+                                        <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'NAWEC_KPI:calculate_ipp_detail' calculation.pk %}" 
+                                           class="btn btn-outline-info" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'NAWEC_KPI:calculate_ipp_edit' calculation.pk %}" 
+                                           class="btn btn-outline-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" title="Delete"
+                                                onclick="deleteCalculation({{ calculation.id }}, 'IPP')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="card-footer">
+                    {% include 'includes/pagination.html' %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-lightning-fill text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">No Calculations Found</h4>
+                <p class="text-muted">No Independent Power Plants (MW) calculations match your search criteria.</p>
+                <a href="{% url 'NAWEC_KPI:data_entry' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Create First Calculation
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Delete calculation function
+async function deleteCalculation(calcId, kpiType) {
+    if (!confirm('Are you sure you want to delete this Independent Power Plants (MW) calculation? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/NAWEC_KPI/api/delete-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                calc_id: calcId,
+                kpi_type: kpiType
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Independent Power Plants (MW) calculation deleted successfully!');
+            location.reload();
+        } else {
+            alert('Error deleting calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting calculation: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
