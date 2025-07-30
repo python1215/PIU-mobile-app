@@ -3753,45 +3753,11 @@ function showTDEPopup() {
             <!-- Form Content -->
             <div style="margin-bottom: 20px;">
                 <h6 style="color: #20c997; margin-bottom: 15px;">
-                    <i class="bi bi-info-circle"></i> Formula: TMH = Number of Days × Hours per Day × Number of Participants
+                    <i class="bi bi-info-circle"></i> Formula: TMH = Σ(Number of Days × Hours per Day × Number of Participants) for all sessions
                 </h6>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Training Title:</label>
-                    <input type="text" id="tmhTitle" 
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                           placeholder="Enter training session title" value="Training Session">
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Start Date: <span style="color: red;">*</span></label>
-                        <input type="date" id="tmhStartDate" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">End Date: <span style="color: red;">*</span></label>
-                        <input type="date" id="tmhEndDate" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Hours per Day:</label>
-                        <input type="number" id="tmhHoursPerDay" step="0.5" value="8.0" min="1" max="24"
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="Hours per training day">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Number of Participants:</label>
-                        <input type="number" id="tmhParticipants" step="1" value="1" min="1"
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="Total participants">
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
+                <!-- Quarter Selection -->
+                <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter: <span style="color: red;">*</span></label>
                     <select id="tmhQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                         <option value="">Select Quarter *</option>
@@ -3801,13 +3767,71 @@ function showTDEPopup() {
                         <option value="4">Q4 (October - December)</option>
                     </select>
                 </div>
+
+                <!-- Training Sessions Container -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h6 style="margin: 0; color: #20c997;">
+                            <i class="bi bi-journals"></i> Training Sessions
+                        </h6>
+                        <button onclick="addTrainingSession()" 
+                                style="background: #17a2b8; color: white; border: none; padding: 6px 12px; 
+                                       border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="bi bi-plus-lg"></i> Add Session
+                        </button>
+                    </div>
+                    
+                    <div id="trainingSessionsContainer">
+                        <div class="training-session" style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h6 style="margin: 0; color: #20c997; font-size: 14px;">Training Session 1</h6>
+                                <button onclick="removeTrainingSession(this)" style="display: none; background: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                            
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Training Title:</label>
+                                <input type="text" class="tmh-title" value="Training Session 1"
+                                       style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                                       placeholder="Enter training title">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Start Date:</label>
+                                    <input type="date" class="tmh-start-date"
+                                           style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">End Date:</label>
+                                    <input type="date" class="tmh-end-date"
+                                           style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Hours/Day:</label>
+                                    <input type="number" class="tmh-hours-per-day" min="0.5" step="0.5" value="8.0"
+                                           style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                                           placeholder="Hours per day">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Participants:</label>
+                                <input type="number" class="tmh-participants" min="1" value="1"
+                                       style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                                       placeholder="Number of participants">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <div style="margin-top: 10px; padding: 12px; background: #e8f5e8; border-radius: 4px; font-size: 0.85rem; color: #20c997;">
-                    <strong><i class="bi bi-lightbulb-fill"></i> Training Man Hours Calculation:</strong><br>
+                    <strong><i class="bi bi-lightbulb-fill"></i> Multi-Session TMH Calculation:</strong><br>
                     <small>
-                        • Days will be calculated automatically from start and end dates<br>
-                        • TMH = Training Days × Hours per Day × Number of Participants<br>
-                        • Example: 3 days × 8 hours × 25 participants = 600 man-hours
+                        • Days will be calculated automatically from start and end dates for each session<br>
+                        • Total TMH = Sum of all sessions (Days × Hours per Day × Participants)<br>
+                        • Example: Session 1 (3 days × 8 hours × 25 = 600) + Session 2 (5 days × 6 hours × 15 = 450) = 1,050 total man-hours
                     </small>
                 </div>
             </div>
@@ -3852,14 +3876,100 @@ function showTDEPopup() {
     document.body.appendChild(popup);
 }
 
-// Remove this duplicate function since showTDEPopup is now the main TMH popup function
+function addTrainingSession() {
+    const container = document.getElementById('trainingSessionsContainer');
+    const sessionCount = container.children.length + 1;
+    
+    const newSession = document.createElement('div');
+    newSession.className = 'training-session';
+    newSession.style.cssText = 'border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;';
+    
+    newSession.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h6 style="margin: 0; color: #20c997; font-size: 14px;">Training Session ${sessionCount}</h6>
+            <button onclick="removeTrainingSession(this)" 
+                    style="background: #dc3545; color: white; border: none; padding: 3px 8px; 
+                           border-radius: 3px; cursor: pointer; font-size: 11px;">
+                <i class="bi bi-trash"></i> Remove
+            </button>
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Training Title:</label>
+            <input type="text" class="tmh-title" value="Training Session ${sessionCount}"
+                   style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                   placeholder="Enter training title">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div>
+                <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Start Date:</label>
+                <input type="date" class="tmh-start-date"
+                       style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">End Date:</label>
+                <input type="date" class="tmh-end-date"
+                       style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Hours/Day:</label>
+                <input type="number" class="tmh-hours-per-day" min="0.5" step="0.5" value="8.0"
+                       style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                       placeholder="Hours per day">
+            </div>
+        </div>
+        
+        <div>
+            <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Participants:</label>
+            <input type="number" class="tmh-participants" min="1" value="1"
+                   style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                   placeholder="Number of participants">
+        </div>
+    `;
+    
+    container.appendChild(newSession);
+    
+    // Show remove buttons on all sessions when there are multiple sessions
+    updateRemoveButtonVisibility();
+}
+
+function updateRemoveButtonVisibility() {
+    const container = document.getElementById('trainingSessionsContainer');
+    const sessions = container.querySelectorAll('.training-session');
+    const showRemoveButtons = sessions.length > 1;
+    
+    sessions.forEach(session => {
+        const removeButton = session.querySelector('button[onclick^="removeTrainingSession"]');
+        if (removeButton) {
+            removeButton.style.display = showRemoveButtons ? 'block' : 'none';
+        }
+    });
+}
+
+function removeTrainingSession(button) {
+    const container = document.getElementById('trainingSessionsContainer');
+    if (container.children.length > 1) {
+        button.closest('.training-session').remove();
+        // Renumber remaining sessions
+        Array.from(container.children).forEach((session, index) => {
+            const header = session.querySelector('h6');
+            const titleInput = session.querySelector('.tmh-title');
+            if (header) {
+                header.textContent = `Training Session ${index + 1}`;
+            }
+            if (titleInput && titleInput.value.startsWith('Training Session')) {
+                titleInput.value = `Training Session ${index + 1}`;
+            }
+        });
+        // Update remove button visibility
+        updateRemoveButtonVisibility();
+    } else {
+        alert('At least one training session is required');
+    }
+}
 
 function calculateTMH() {
-    const title = document.getElementById('tmhTitle').value || 'Training Session';
-    const startDate = document.getElementById('tmhStartDate').value;
-    const endDate = document.getElementById('tmhEndDate').value;
-    const hoursPerDay = parseFloat(document.getElementById('tmhHoursPerDay').value) || 8.0;
-    const participants = parseFloat(document.getElementById('tmhParticipants').value) || 1;
     const quarter = document.getElementById('tmhQuarter').value;
     
     if (!quarter) {
@@ -3868,42 +3978,70 @@ function calculateTMH() {
         return;
     }
     
-    if (!startDate || !endDate) {
-        alert('Please select both start date and end date');
-        return;
+    // Get all training sessions
+    const sessions = document.querySelectorAll('.training-session');
+    const sessionDetails = [];
+    let totalTMH = 0;
+    let hasValidSession = false;
+    
+    for (let i = 0; i < sessions.length; i++) {
+        const session = sessions[i];
+        const title = session.querySelector('.tmh-title').value || `Training Session ${i + 1}`;
+        const startDate = session.querySelector('.tmh-start-date').value;
+        const endDate = session.querySelector('.tmh-end-date').value;
+        const hoursPerDay = parseFloat(session.querySelector('.tmh-hours-per-day').value) || 8.0;
+        const participants = parseFloat(session.querySelector('.tmh-participants').value) || 1;
+        
+        if (startDate && endDate && hoursPerDay > 0 && participants > 0) {
+            hasValidSession = true;
+            
+            // Calculate number of days
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const diffTime = Math.abs(end - start);
+            const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
+            
+            if (numberOfDays <= 0) {
+                alert(`Session ${i + 1}: End date must be on or after start date`);
+                return;
+            }
+            
+            // Calculate TMH for this session
+            const sessionTMH = numberOfDays * hoursPerDay * participants;
+            totalTMH += sessionTMH;
+            
+            sessionDetails.push({
+                title: title,
+                startDate: startDate,
+                endDate: endDate,
+                numberOfDays: numberOfDays,
+                hoursPerDay: hoursPerDay,
+                participants: participants,
+                sessionTMH: sessionTMH
+            });
+        }
     }
     
-    // Calculate number of days
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end - start);
-    const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
-    
-    if (numberOfDays <= 0) {
-        alert('End date must be on or after start date');
+    if (!hasValidSession) {
+        alert('Please complete at least one training session with all required fields (start date, end date, hours per day, participants)');
         return;
     }
-    
-    if (hoursPerDay <= 0 || participants <= 0) {
-        alert('Hours per day and participants must be greater than zero');
-        return;
-    }
-    
-    // Calculate TMH = Number of Days × Hours per Day × Number of Participants
-    const tmh = numberOfDays * hoursPerDay * participants;
     
     // Determine performance level and color based on total man-hours
     let performanceText = '';
     let performanceColor = '';
     
-    if (tmh >= 500) {
-        performanceText = 'Excellent comprehensive training program';
+    if (totalTMH >= 1000) {
+        performanceText = 'Outstanding multi-session training program';
         performanceColor = '#28a745';
-    } else if (tmh >= 200) {
-        performanceText = 'Good training coverage';
+    } else if (totalTMH >= 500) {
+        performanceText = 'Excellent comprehensive training coverage';
         performanceColor = '#20c997';
-    } else if (tmh >= 50) {
-        performanceText = 'Adequate training program';
+    } else if (totalTMH >= 200) {
+        performanceText = 'Good training program scope';
+        performanceColor = '#17a2b8';
+    } else if (totalTMH >= 50) {
+        performanceText = 'Adequate training coverage';
         performanceColor = '#ffc107';
     } else {
         performanceText = 'Limited training scope - consider expansion';
@@ -3914,17 +4052,29 @@ function calculateTMH() {
     const resultDiv = document.getElementById('tmhResult');
     const resultValue = document.getElementById('tmhResultValue');
     
+    let sessionBreakdown = '';
+    sessionDetails.forEach((session, index) => {
+        sessionBreakdown += `
+            <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #20c997;">
+                <strong>${session.title}</strong><br>
+                <small>
+                    Duration: ${session.numberOfDays} days (${session.startDate} to ${session.endDate})<br>
+                    ${session.numberOfDays} days × ${session.hoursPerDay} hours × ${session.participants} participants = <strong>${session.sessionTMH.toLocaleString()} hours</strong>
+                </small>
+            </div>
+        `;
+    });
+    
     resultValue.innerHTML = `
-        <div><strong>Training Details:</strong></div>
-        <div>• Title: ${title}</div>
-        <div>• Duration: ${numberOfDays} days (${startDate} to ${endDate})</div>
-        <div>• Hours per day: ${hoursPerDay}</div>
-        <div>• Participants: ${participants}</div>
-        <div style="margin-top: 15px; font-size: 1.1rem;">
-            <strong>Formula:</strong> TMH = ${numberOfDays} days × ${hoursPerDay} hours × ${participants} participants
-        </div>
-        <div style="margin-top: 10px; font-size: 1.5rem; color: #20c997; font-weight: bold;">
-            Total Man Hours = ${tmh.toLocaleString()} hours
+        <div><strong>Training Sessions Breakdown:</strong></div>
+        ${sessionBreakdown}
+        <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 4px; border-left: 4px solid #20c997;">
+            <div style="font-size: 1.1rem;">
+                <strong>Total Sessions:</strong> ${sessionDetails.length}
+            </div>
+            <div style="font-size: 1.5rem; color: #20c997; font-weight: bold; margin-top: 5px;">
+                Total Training Man Hours = ${totalTMH.toLocaleString()} hours
+            </div>
         </div>
         <div style="margin-top: 10px; padding: 8px; border-radius: 4px; background: ${performanceColor}20; color: ${performanceColor}; font-weight: bold;">
             <i class="bi bi-mortarboard-fill"></i> ${performanceText}
@@ -3934,15 +4084,11 @@ function calculateTMH() {
     resultDiv.style.display = 'block';
     
     // Store the result and related data
-    window.simpleTMHResult = tmh;
+    window.simpleTMHResult = totalTMH;
     window.tmhCalculationData = {
-        title: title,
-        startDate: startDate,
-        endDate: endDate,
-        hoursPerDay: hoursPerDay,
-        participants: participants,
-        numberOfDays: numberOfDays,
-        totalManHours: tmh
+        sessions: sessionDetails,
+        totalSessions: sessionDetails.length,
+        totalManHours: totalTMH
     };
 }
 
@@ -4049,20 +4195,54 @@ async function useTDEResult() {
 }
 
 function resetTMHForm() {
-    // Clear all input fields with null checks
-    const tmhTitleField = document.getElementById('tmhTitle');
-    const tmhStartDateField = document.getElementById('tmhStartDate');
-    const tmhEndDateField = document.getElementById('tmhEndDate');
-    const tmhHoursPerDayField = document.getElementById('tmhHoursPerDay');
-    const tmhParticipantsField = document.getElementById('tmhParticipants');
+    // Clear quarter selection
     const tmhQuarterField = document.getElementById('tmhQuarter');
-    
-    if (tmhTitleField) tmhTitleField.value = 'Training Session';
-    if (tmhStartDateField) tmhStartDateField.value = '';
-    if (tmhEndDateField) tmhEndDateField.value = '';
-    if (tmhHoursPerDayField) tmhHoursPerDayField.value = '8.0';
-    if (tmhParticipantsField) tmhParticipantsField.value = '1';
     if (tmhQuarterField) tmhQuarterField.value = '';
+    
+    // Reset to single session
+    const container = document.getElementById('trainingSessionsContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="training-session" style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 5px; background: #f8f9fa;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h6 style="margin: 0; color: #20c997; font-size: 14px;">Training Session 1</h6>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Training Title:</label>
+                    <input type="text" class="tmh-title" value="Training Session 1"
+                           style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                           placeholder="Enter training title">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Start Date:</label>
+                        <input type="date" class="tmh-start-date"
+                               style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">End Date:</label>
+                        <input type="date" class="tmh-end-date"
+                               style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Hours/Day:</label>
+                        <input type="number" class="tmh-hours-per-day" min="0.5" step="0.5" value="8.0"
+                               style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                               placeholder="Hours per day">
+                    </div>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 3px; font-weight: bold; font-size: 13px;">Participants:</label>
+                    <input type="number" class="tmh-participants" min="1" value="1"
+                           style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" 
+                           placeholder="Number of participants">
+                </div>
+            </div>
+        `;
+    }
     
     // Hide the result section
     const resultDiv = document.getElementById('tmhResult');
@@ -4074,8 +4254,8 @@ function resetTMHForm() {
     window.simpleTMHResult = null;
     window.tmhCalculationData = null;
     
-    // Focus on first input field
-    if (tmhTitleField) tmhTitleField.focus();
+    // Focus on quarter selection
+    if (tmhQuarterField) tmhQuarterField.focus();
 }
 
 function closeTMHPopup() {
