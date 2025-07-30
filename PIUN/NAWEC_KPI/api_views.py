@@ -32,6 +32,7 @@ class SaveKPICalculationView(View):
         'EI': CalculateMWh,  # Energy Injection uses MWh model
         'GAF': CalculateGAF,
         'TDE': CalculateTMH,
+        'TMH': CalculateTMH,  # Training Man Hours
         'ATC': CalculateATC,
         'NECD': CalculateNECD,
         'NWCD': CalculateNWCD,
@@ -70,8 +71,81 @@ class SaveKPICalculationView(View):
             # Prepare data for model creation
             create_data = {}
             
+            # Special handling for TMH (Training Man Hours) - multi-session support
+            if kpi_type == 'TMH':
+                sessions = input_values.get('sessions', [])
+                total_sessions = input_values.get('total_sessions', 1)
+                achieved_value = input_values.get('achieved_value', 0)
+                
+                print(f'[DEBUG] API - TMH Sessions data: {sessions}')
+                print(f'[DEBUG] API - TMH Total sessions: {total_sessions}')
+                print(f'[DEBUG] API - TMH Achieved value: {achieved_value}')
+                
+                # Handle multi-session TMH data
+                if sessions and len(sessions) > 0:
+                    first_session = sessions[0]
+                    title = f"Multi-Session Training ({total_sessions} sessions)"
+                    
+                    # Aggregate session data
+                    total_participants = sum(session.get('number_of_participants', 0) for session in sessions)
+                    avg_hours_per_day = sum(session.get('hours_per_day', 0) for session in sessions) / len(sessions)
+                    
+                    # Handle date parsing
+                    start_date = first_session.get('start_date')
+                    end_date = sessions[-1].get('end_date')
+                    
+                    from datetime import datetime
+                    if isinstance(start_date, str) and start_date:
+                        try:
+                            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                        except ValueError:
+                            start_date = None
+                    
+                    if isinstance(end_date, str) and end_date:
+                        try:
+                            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()  
+                        except ValueError:
+                            end_date = None
+                    
+                    # Set TMH model fields
+                    create_data['title'] = title
+                    create_data['start_date'] = start_date
+                    create_data['end_date'] = end_date
+                    create_data['hours_per_day'] = float(avg_hours_per_day)
+                    create_data['number_of_participants'] = int(total_participants)
+                    create_data['achieved_value'] = float(achieved_value)
+                    
+                    print(f'[DEBUG] API - TMH Create data: {create_data}')
+                else:
+                    # Fallback for single session
+                    create_data['title'] = "Training Session"
+                    create_data['start_date'] = None
+                    create_data['end_date'] = None
+                    create_data['hours_per_day'] = 8.0
+                    create_data['number_of_participants'] = 1
+                    create_data['achieved_value'] = float(achieved_value)
+                
+                # Handle quarter for TMH
+                quarter_value = input_values.get('quarter')
+                if quarter_value:
+                    try:
+                        quarter_mapping = {
+                            '1': 10022,  # Quarter 1 (ID: 10022)
+                            '2': 10023,  # Quarter 2 (ID: 10023)
+                            '3': 10024,  # Quarter 3 (ID: 10024)
+                            '4': 10025   # Quarter 4 (ID: 10025)
+                        }
+                        quarter_id = quarter_mapping.get(str(quarter_value))
+                        if quarter_id:
+                            quarter_instance = Quarter.objects.get(id=quarter_id)
+                            create_data['quarter'] = quarter_instance
+                            print(f'[DEBUG] API - TMH Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
+                    except Quarter.DoesNotExist:
+                        print(f'[DEBUG] API - TMH Quarter mapping failed for: {quarter_value}')
+                        pass
+                        
             # Special handling for EI (Energy Injection) - aggregate energy sources
-            if kpi_type == 'EI':
+            elif kpi_type == 'EI':
                 # Calculate total energy from all energy sources
                 total_energy = 0
                 source_count = 0
