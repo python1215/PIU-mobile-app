@@ -296,95 +296,156 @@
         <div class="mb-4">
             <h3 class="mb-3">Detailed KPI Performance Data</h3>
             
-            {% if grouped_report_entries %}
+            {% if comprehensive_kpi_data %}
             <div class="table-responsive">
                 <table class="table table-striped table-bordered kpi-table">
                     <thead>
                         <tr>
-                            <th rowspan="2">Indicator</th>
-                            <th rowspan="2">Quarter</th>
-                            <th rowspan="2">Base</th>
-                            <th rowspan="2">Target</th>
-                            <th rowspan="2">Achieved</th>
-                            <th rowspan="2">Perf%</th>
-                            <th rowspan="2">Var</th>
-                            <th rowspan="2">Status</th>
+                            <th>Indicator</th>
+                            <th>Quarter</th>
+                            <th>Base</th>
+                            <th>Target</th>
+                            <th>Achieved</th>
+                            <th>Perf%</th>
+                            <th>Var</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for indicator, quarters in grouped_report_entries.items %}
-                            {% for quarter_data in quarters %}
+                        {% for indicator_name, kpi_data in comprehensive_kpi_data.items %}
+                            <!-- Q1 Row -->
                             <tr>
-                                {% if forloop.first %}
-                                    <td rowspan="{{ quarters|length }}" style="vertical-align: middle; text-align: left;">
-                                        <div><strong>{{ indicator }}</strong></div>
-                                    </td>
-                                {% endif %}
+                                <td style="text-align: left; vertical-align: middle;">
+                                    <strong>{{ indicator_name }}</strong>
+                                </td>
+                                <td class="text-center"><strong>Q1</strong></td>
                                 <td class="text-center">
-                                    <strong>
-                                        {% if quarter_data.quarter.id == 10022 %}Q1
-                                        {% elif quarter_data.quarter.id == 10023 %}Q2
-                                        {% elif quarter_data.quarter.id == 10024 %}Q3
-                                        {% elif quarter_data.quarter.id == 10025 %}Q4
-                                        {% else %}Q{{ quarter_data.quarter.id }}
-                                        {% endif %}
-                                    </strong>
-                                </td>
-                                <td class="text-center">{{ quarter_data.baseline_value|floatformat:1 }}</td>
-                                <td class="text-center">{{ quarter_data.End_Target_Value|floatformat:1 }}</td>
-                                <td class="text-center fw-bold">{{ quarter_data.achieved_value|floatformat:1 }}</td>
-                                <td class="text-center {% if quarter_data.performance_calculated >= 75 %}performance-good{% elif quarter_data.performance_calculated >= 50 %}performance-warning{% else %}performance-danger{% endif %}">
-                                    {% if quarter_data.performance_calculated is not None %}
-                                        {{ quarter_data.performance_calculated|floatformat:0 }}%
+                                    {% if kpi_data.quarters.Q1 %}
+                                        {{ kpi_data.quarters.Q1.baseline_value|default:kpi_data.baseline_value|floatformat:1 }}
                                     {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
-                                <td class="text-center {% if quarter_data.variance_calculated >= 0 %}performance-good{% else %}performance-danger{% endif %}">
-                                    {% if quarter_data.variance_calculated is not None %}
-                                        {{ quarter_data.variance_calculated|floatformat:1 }}
-                                    {% else %}
-                                        N/A
+                                        {{ kpi_data.baseline_value|floatformat:1 }}
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                    {% if quarter_data.performance_calculated is not None %}
-                                        <!-- Special logic for Debtor Days - Achieved > Target = Not Achieve -->
-                                        {% if "Debtor Days" in quarter_data.indicator_description.indicator_description or "DD" in quarter_data.indicator_description.indicator_description %}
-                                            {% if quarter_data.achieved_value > quarter_data.End_Target_Value %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
-                                            {% else %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
-                                            {% endif %}
-                                        {% elif "Total Losses Electricity" in quarter_data.indicator_description.indicator_description or "Non-Revenue Water" in quarter_data.indicator_description.indicator_description or "NRW" in quarter_data.indicator_description.indicator_description or "New Water Connection Days" in quarter_data.indicator_description.indicator_description or "NWCD" in quarter_data.indicator_description.indicator_description or "New Electricity Connection Days" in quarter_data.indicator_description.indicator_description or "NECD" in quarter_data.indicator_description.indicator_description %}
-                                            <!-- For loss indicators, lower achieved value is better -->
-                                            {% if quarter_data.achieved_value < quarter_data.End_Target_Value %}
+                                    {% if kpi_data.quarters.Q1 %}
+                                        {{ kpi_data.quarters.Q1.target_value|default:kpi_data.target_value|floatformat:1 }}
+                                    {% else %}
+                                        {{ kpi_data.target_value|floatformat:1 }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center fw-bold">
+                                    {% if kpi_data.quarters.Q1 %}
+                                        {{ kpi_data.quarters.Q1.achieved_value|floatformat:1 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q1 and kpi_data.quarters.Q1.performance_calculated %}
+                                        {{ kpi_data.quarters.Q1.performance_calculated|floatformat:0 }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q1 and kpi_data.quarters.Q1.variance_calculated %}
+                                        {{ kpi_data.quarters.Q1.variance_calculated|floatformat:1 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q1 and kpi_data.quarters.Q1.performance_calculated %}
+                                        <!-- Special status logic for loss indicators -->
+                                        {% if "Total Losses Electricity" in indicator_name or "ATC&C" in indicator_name or "Non-Revenue Water" in indicator_name or "NRW" in indicator_name or "New Water Connection Days" in indicator_name or "NWCD" in indicator_name or "New Electricity Connection Days" in indicator_name or "NECD" in indicator_name or "Debtor Days" in indicator_name or "DD" in indicator_name %}
+                                            {% if kpi_data.quarters.Q1.achieved_value <= kpi_data.quarters.Q1.target_value %}
                                                 <span class="badge bg-success rounded-pill">Achieve</span>
                                             {% else %}
                                                 <span class="badge bg-danger rounded-pill">Not Achieve</span>
                                             {% endif %}
                                         {% else %}
-                                            <!-- For normal indicators, higher achieved value is better -->
-                                            {% if quarter_data.achieved_value >= quarter_data.End_Target_Value %}
+                                            {% if kpi_data.quarters.Q1.achieved_value >= kpi_data.quarters.Q1.target_value %}
                                                 <span class="badge bg-success rounded-pill">Achieve</span>
                                             {% else %}
                                                 <span class="badge bg-danger rounded-pill">Not Achieve</span>
                                             {% endif %}
                                         {% endif %}
                                     {% else %}
-                                        <span class="badge bg-secondary rounded-pill">N/A</span>
+                                        <span class="badge bg-secondary rounded-pill">-</span>
                                     {% endif %}
                                 </td>
                             </tr>
-                            {% endfor %}
+                            
+                            <!-- Q2 Row -->
+                            <tr>
+                                <td style="text-align: left; vertical-align: middle; color: #888;">
+                                    <!-- Empty for Q2 row to show it belongs to same indicator -->
+                                </td>
+                                <td class="text-center"><strong>Q2</strong></td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q2 %}
+                                        {{ kpi_data.quarters.Q2.baseline_value|default:kpi_data.baseline_value|floatformat:1 }}
+                                    {% else %}
+                                        {{ kpi_data.baseline_value|floatformat:1 }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q2 %}
+                                        {{ kpi_data.quarters.Q2.target_value|default:kpi_data.target_value|floatformat:1 }}
+                                    {% else %}
+                                        {{ kpi_data.target_value|floatformat:1 }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center fw-bold">
+                                    {% if kpi_data.quarters.Q2 %}
+                                        {{ kpi_data.quarters.Q2.achieved_value|floatformat:1 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q2 and kpi_data.quarters.Q2.performance_calculated %}
+                                        {{ kpi_data.quarters.Q2.performance_calculated|floatformat:0 }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q2 and kpi_data.quarters.Q2.variance_calculated %}
+                                        {{ kpi_data.quarters.Q2.variance_calculated|floatformat:1 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if kpi_data.quarters.Q2 and kpi_data.quarters.Q2.performance_calculated %}
+                                        <!-- Special status logic for loss indicators -->
+                                        {% if "Total Losses Electricity" in indicator_name or "ATC&C" in indicator_name or "Non-Revenue Water" in indicator_name or "NRW" in indicator_name or "New Water Connection Days" in indicator_name or "NWCD" in indicator_name or "New Electricity Connection Days" in indicator_name or "NECD" in indicator_name or "Debtor Days" in indicator_name or "DD" in indicator_name %}
+                                            {% if kpi_data.quarters.Q2.achieved_value <= kpi_data.quarters.Q2.target_value %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if kpi_data.quarters.Q2.achieved_value >= kpi_data.quarters.Q2.target_value %}
+                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary rounded-pill">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
             {% else %}
             <div class="alert alert-info text-center">
-                <h5>No Data Available</h5>
-                <p>No KPI monitoring entries found for the selected filters.</p>
+                <h5>No KPI Indicators Available</h5>
+                <p>No KPI indicators are configured in the system.</p>
             </div>
             {% endif %}
         </div>

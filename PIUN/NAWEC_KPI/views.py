@@ -2216,12 +2216,26 @@ def performance_report(request):
             # Fallback for direct ID filtering
             entries_queryset = entries_queryset.filter(quarter_id=quarter_filter)
     
-    # Get filtered data with calculations and group by indicator
+    # Get all KPI indicators to ensure comprehensive reporting
+    all_kpi_indicators = KPIIndicator.objects.all().order_by('indicator_no')
+    
+    # Get filtered data with calculations and create comprehensive KPI report structure
     report_entries = []
-    grouped_report_entries = {}
+    comprehensive_kpi_data = {}
     overall_target_gir = 0
     overall_actual_gir = 0
     
+    # Initialize comprehensive structure with all KPIs
+    for kpi_indicator in all_kpi_indicators:
+        indicator_name = kpi_indicator.indicator_description
+        comprehensive_kpi_data[indicator_name] = {
+            'indicator_no': kpi_indicator.indicator_no,
+            'baseline_value': kpi_indicator.baseline_value,
+            'target_value': kpi_indicator.End_Target_Value,
+            'quarters': {}
+        }
+    
+    # Process monitoring entries and organize by indicator and quarter
     for entry in entries_queryset:
         # Calculate Performance, Variance, and Actual GIR
         performance_calculated = None
@@ -2246,12 +2260,29 @@ def performance_report(request):
         
         report_entries.append(entry)
         
-        # Group entries by indicator description for side-by-side quarter display
+        # Group entries by indicator and quarter for comprehensive display
         if hasattr(entry, 'indicator_description') and entry.indicator_description:
             indicator_name = entry.indicator_description.indicator_description
-            if indicator_name not in grouped_report_entries:
-                grouped_report_entries[indicator_name] = []
-            grouped_report_entries[indicator_name].append(entry)
+            quarter_key = f"Q{entry.quarter.id}"
+            
+            # Map quarter IDs to standard Q1, Q2, Q3, Q4 format
+            quarter_mapping = {
+                10022: 'Q1',  # Quarter 1
+                10023: 'Q2',  # Quarter 2  
+                10024: 'Q3',  # Quarter 3
+                10025: 'Q4'   # Quarter 4
+            }
+            quarter_display = quarter_mapping.get(entry.quarter.id, f"Q{entry.quarter.id}")
+            
+            if indicator_name in comprehensive_kpi_data:
+                comprehensive_kpi_data[indicator_name]['quarters'][quarter_display] = {
+                    'baseline_value': entry.baseline_value,
+                    'target_value': entry.End_Target_Value,
+                    'achieved_value': entry.achieved_value,
+                    'performance_calculated': performance_calculated,
+                    'variance_calculated': variance_calculated,
+                    'status': entry
+                }
     
     # Calculate Overall Achievement Rate
     overall_achievement_rate = 0
@@ -2290,7 +2321,7 @@ def performance_report(request):
             'overall_achievement_rate': overall_achievement_rate,
             'needle_angle': needle_angle,
             'report_entries': report_entries,
-            'grouped_report_entries': grouped_report_entries,
+            'comprehensive_kpi_data': comprehensive_kpi_data,
         }
         
         return render(request, 'NAWEC_KPI/performance_report.html', context)
