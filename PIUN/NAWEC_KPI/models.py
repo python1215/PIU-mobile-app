@@ -1519,13 +1519,12 @@ class CalculateIMPORTS(models.Model):
         if self.End_Target_Value is not None and self.add_value is not None:
             self.achieved_value = float(self.End_Target_Value) * float(self.add_value)
         
-        # Calculate progress using standard KPI formula
-        if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
-            
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+        # Calculate progress using requested formulas:
+        # Percentage_progress_from_baseline = (baseline_value/achieved_value)*100
+        # Percentage_progress_towards_end_target = (baseline_value/achieved_value)*100
+        if self.achieved_value is not None and self.baseline_value is not None and self.achieved_value != 0:
+            self.progress_from_baseline = (float(self.baseline_value) / float(self.achieved_value)) * 100
+            self.progress_towards_end_target = (float(self.baseline_value) / float(self.achieved_value)) * 100
 
         super().save(*args, **kwargs)
 
@@ -1581,13 +1580,12 @@ class CalculateIPP(models.Model):
         if self.End_Target_Value is not None and self.add_value is not None:
             self.achieved_value = float(self.End_Target_Value) * float(self.add_value)
         
-        # Calculate progress using standard KPI formula
-        if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
-            
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+        # Calculate progress using requested formulas:
+        # Percentage_progress_from_baseline = (baseline_value/achieved_value)*100
+        # Percentage_progress_towards_end_target = (baseline_value/achieved_value)*100
+        if self.achieved_value is not None and self.baseline_value is not None and self.achieved_value != 0:
+            self.progress_from_baseline = (float(self.baseline_value) / float(self.achieved_value)) * 100
+            self.progress_towards_end_target = (float(self.baseline_value) / float(self.achieved_value)) * 100
 
         super().save(*args, **kwargs)
 

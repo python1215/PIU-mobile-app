@@ -146,6 +146,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- Progress Calculations -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> Progress Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="bi bi-graph-up"></i> Progress from Baseline</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                {% if calculation.progress_from_baseline %}
+                                    <h4 class="text-info">{{ calculation.progress_from_baseline|floatformat:2 }}%</h4>
+                                    <small class="text-muted">Formula: (baseline_value / achieved_value) × 100</small>
+                                {% else %}
+                                    <p class="text-muted">No data available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="bi bi-target"></i> Progress to Target</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                {% if calculation.progress_towards_end_target %}
+                                    <h4 class="text-success">{{ calculation.progress_towards_end_target|floatformat:2 }}%</h4>
+                                    <small class="text-muted">Formula: (baseline_value / achieved_value) × 100</small>
+                                {% else %}
+                                    <p class="text-muted">No data available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Actions -->

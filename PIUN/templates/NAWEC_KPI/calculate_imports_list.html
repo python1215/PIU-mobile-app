@@ -99,6 +99,8 @@
                             <th>End Target Value</th>
                             <th>Add Value</th>
                             <th>Imports (MW)</th>
+                            <th>Progress from Baseline (%)</th>
+                            <th>Progress to Target (%)</th>
                             <th>Calculated By</th>
                             <th>Date Created</th>
                             <th>Actions</th>
@@ -149,6 +151,20 @@
                                 <td>
                                     {% if calculation.achieved_value %}
                                         <span class="text-success fw-bold">{{ calculation.achieved_value|floatformat:2 }} MW</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.progress_from_baseline %}
+                                        <span class="badge bg-info">{{ calculation.progress_from_baseline|floatformat:2 }}%</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calculation.progress_towards_end_target %}
+                                        <span class="badge bg-success">{{ calculation.progress_towards_end_target|floatformat:2 }}%</span>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
