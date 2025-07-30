@@ -41,30 +41,38 @@
             
             /* Enhanced table formatting for print */
             .kpi-table { 
-                font-size: 0.75rem !important;
+                font-size: 0.85rem !important;
                 border-collapse: collapse !important;
-                border: 2px solid #000 !important;
+                border: 3px solid #000 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 table-layout: fixed !important;
+                background-color: white !important;
             }
             
             .kpi-table th {
                 background-color: #1F4E79 !important;
                 color: white !important;
                 font-weight: bold !important;
-                font-size: 0.8rem !important;
-                padding: 0.4rem 0.2rem !important;
-                border: 1px solid #000 !important;
+                font-size: 0.9rem !important;
+                padding: 0.5rem 0.3rem !important;
+                border: 2px solid #000 !important;
                 text-align: center !important;
                 vertical-align: middle !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
             }
             
             .kpi-table td {
-                padding: 0.3rem 0.2rem !important;
-                border: 1px solid #000 !important;
+                padding: 0.4rem 0.3rem !important;
+                border: 2px solid #000 !important;
                 vertical-align: middle !important;
                 text-align: center !important;
+                color: black !important;
+                font-weight: normal !important;
+                background-color: white !important;
+                font-size: 0.85rem !important;
+                line-height: 1.3 !important;
             }
             
             /* Force table to fit page width */
@@ -90,14 +98,77 @@
             .badge {
                 background-color: #6c757d !important;
                 color: white !important;
-                padding: 0.2rem 0.4rem !important;
+                padding: 0.3rem 0.5rem !important;
                 border-radius: 0.25rem !important;
-                font-size: 0.7rem !important;
+                font-size: 0.75rem !important;
                 font-weight: bold !important;
+                border: 2px solid #000 !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
             }
             
-            .bg-success { background-color: #28a745 !important; }
-            .bg-danger { background-color: #dc3545 !important; }
+            .bg-success { 
+                background-color: #28a745 !important; 
+                color: white !important;
+                border-color: #1e7e34 !important;
+            }
+            .bg-danger { 
+                background-color: #dc3545 !important; 
+                color: white !important;
+                border-color: #bd2130 !important;
+            }
+            .bg-secondary { 
+                background-color: #6c757d !important; 
+                color: white !important;
+                border-color: #545b62 !important;
+            }
+            
+            /* Enhanced text visibility */
+            .kpi-table td:first-child {
+                text-align: left !important;
+                font-weight: bold !important;
+                color: black !important;
+            }
+            
+            .fw-bold {
+                font-weight: bold !important;
+                color: black !important;
+            }
+            
+            /* Ensure all text is black and visible */
+            * {
+                color: black !important;
+                text-shadow: none !important;
+            }
+            
+            /* Override any inherited styles */
+            .kpi-table * {
+                color: black !important;
+            }
+            
+            /* Page layout optimizations */
+            @page {
+                size: A4 portrait;
+                margin: 0.5in;
+            }
+            
+            /* Prevent orphaned rows */
+            .kpi-table tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Enhanced contrast for grid lines */
+            .table-bordered > :not(caption) > * > * {
+                border-width: 2px !important;
+                border-color: #000 !important;
+            }
+            
+            /* Force high contrast printing */
+            html {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
         }
         
         .report-header {
