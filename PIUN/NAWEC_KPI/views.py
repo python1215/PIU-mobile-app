@@ -3185,30 +3185,52 @@ class SaveKPICalculationView(View):
                 calculation.save()
                 
             elif kpi_type == 'TMH':
-                # TMH calculation with new model fields
-                title = input_values.get('title', 'Training Session')
-                start_date = input_values.get('start_date')
-                end_date = input_values.get('end_date')
-                hours_per_day = input_values.get('hours_per_day', 8.0)
-                number_of_participants = input_values.get('number_of_participants', 1)
+                # TMH calculation with multi-session support
+                sessions = input_values.get('sessions', [])
+                total_sessions = input_values.get('total_sessions', 1)
                 achieved_value = input_values.get('achieved_value', 0)
                 
                 # Get Quarter object with proper mapping
                 quarter_obj = self.get_quarter_object(quarter, 'TMH')
                 
-                # Create CalculateTMH with new field structure
-                calculation = CalculateTMH(
-                    title=title,
-                    start_date=start_date,
-                    end_date=end_date,
-                    hours_per_day=hours_per_day,
-                    number_of_participants=number_of_participants,
-                    achieved_value=achieved_value,
-                    quarter=quarter_obj,
-                    loginUser=request.user
-                )
-                calculation.save()
-                print(f"[DEBUG] TMH calculation saved: {achieved_value} man-hours for '{title}'")
+                # For multi-session TMH, create a single record with aggregated data
+                if sessions and len(sessions) > 0:
+                    # Use first session for main record, combine data in title
+                    first_session = sessions[0]
+                    title = f"Multi-Session Training ({total_sessions} sessions)"
+                    
+                    # Aggregate session data for summary
+                    total_participants = sum(session.get('number_of_participants', 0) for session in sessions)
+                    total_days = sum(session.get('number_of_days', 0) for session in sessions)
+                    avg_hours_per_day = sum(session.get('hours_per_day', 0) for session in sessions) / len(sessions)
+                    
+                    # Create CalculateTMH with aggregated multi-session data
+                    calculation = CalculateTMH(
+                        title=title,
+                        start_date=first_session.get('start_date'),
+                        end_date=sessions[-1].get('end_date'),  # Last session end date
+                        hours_per_day=avg_hours_per_day,
+                        number_of_participants=total_participants,
+                        achieved_value=achieved_value,
+                        quarter=quarter_obj,
+                        loginUser=request.user
+                    )
+                    calculation.save()
+                    print(f"[DEBUG] Multi-session TMH calculation saved: {achieved_value} man-hours for {total_sessions} sessions")
+                else:
+                    # Fallback for single session or missing data
+                    calculation = CalculateTMH(
+                        title="Training Session",
+                        start_date=None,
+                        end_date=None,
+                        hours_per_day=8.0,
+                        number_of_participants=1,
+                        achieved_value=achieved_value,
+                        quarter=quarter_obj,
+                        loginUser=request.user
+                    )
+                    calculation.save()
+                    print(f"[DEBUG] Single TMH calculation saved: {achieved_value} man-hours")
                 
             else:
                 print(f"[DEBUG] SaveKPICalculationView - Unhandled KPI type: '{kpi_type}'")

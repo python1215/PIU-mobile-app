@@ -4111,15 +4111,23 @@ async function useTMHResult() {
         return;
     }
     
-    // Prepare data for saving to database with new TMH model fields
+    // Prepare session data for saving to database
+    const sessionData = window.tmhCalculationData.sessions.map(session => ({
+        title: session.title,
+        start_date: session.startDate,
+        end_date: session.endDate,
+        hours_per_day: session.hoursPerDay,
+        number_of_participants: session.participants,
+        number_of_days: session.numberOfDays,
+        session_tmh: session.sessionTMH
+    }));
+    
+    // Prepare data for saving to database with multi-session TMH model fields
     const data = {
         kpi_type: 'TMH',
         input_values: {
-            title: window.tmhCalculationData.title,
-            start_date: window.tmhCalculationData.startDate,
-            end_date: window.tmhCalculationData.endDate,
-            hours_per_day: window.tmhCalculationData.hoursPerDay,
-            number_of_participants: window.tmhCalculationData.participants,
+            sessions: sessionData,
+            total_sessions: window.tmhCalculationData.totalSessions,
             quarter: quarter,
             achieved_value: parseFloat(window.simpleTMHResult)
         }
@@ -4151,30 +4159,12 @@ async function useTMHResult() {
                 console.log(`✅ TMH achieved value set: ${formattedValue} man-hours`);
             }
             
-            // Clear all popup form fields and memory with null checks
-            const tmhTitleField = document.getElementById('tmhTitle');
-            const tmhStartDateField = document.getElementById('tmhStartDate');
-            const tmhEndDateField = document.getElementById('tmhEndDate');
-            const tmhHoursPerDayField = document.getElementById('tmhHoursPerDay');
-            const tmhParticipantsField = document.getElementById('tmhParticipants');
-            const tmhQuarterField = document.getElementById('tmhQuarter');
-            
-            if (tmhTitleField) tmhTitleField.value = 'Training Session';
-            if (tmhStartDateField) tmhStartDateField.value = '';
-            if (tmhEndDateField) tmhEndDateField.value = '';
-            if (tmhHoursPerDayField) tmhHoursPerDayField.value = '8.0';
-            if (tmhParticipantsField) tmhParticipantsField.value = '1';
-            if (tmhQuarterField) tmhQuarterField.value = '';
+            // Clear all popup form fields and memory - reset to single session
+            resetTMHForm();
             
             // Clear stored results from memory
             window.simpleTMHResult = null;
             window.tmhCalculationData = null;
-            
-            // Hide the result section
-            const resultDiv = document.getElementById('tmhResult');
-            if (resultDiv) {
-                resultDiv.style.display = 'none';
-            }
             
             // Close the popup
             closeTMHPopup();
