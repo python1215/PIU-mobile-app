@@ -1,0 +1,110 @@
+{% extends 'NAWEC_KPI/base_nawec_kpi.html' %}
+
+{% block title %}Delete Imports (MW) Calculation{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-trash text-danger"></i> Delete Imports (MW) Calculation</h2>
+        <p class="text-muted mb-0">Confirm deletion of calculation #{{ calculation.id }}</p>
+    </div>
+    <div>
+        <a href="{% url 'NAWEC_KPI:calculate_imports_detail' calculation.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Details
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h6><i class="bi bi-exclamation-triangle-fill"></i> Warning</h6>
+                    <p class="mb-0">You are about to permanently delete this Imports (MW) calculation. This action cannot be undone.</p>
+                </div>
+
+                <!-- Calculation Summary -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Calculation Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Calculation ID:</strong> #{{ calculation.id }}<br>
+                                <strong>Year:</strong> 
+                                {% if calculation.year %}
+                                    {{ calculation.year.profile_year }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}<br>
+                                <strong>Quarter:</strong> 
+                                {% if calculation.quarter %}
+                                    {% if calculation.quarter.quarter == 1 %}Q1
+                                    {% elif calculation.quarter.quarter == 2 %}Q2
+                                    {% elif calculation.quarter.quarter == 3 %}Q3
+                                    {% elif calculation.quarter.quarter == 4 %}Q4
+                                    {% elif calculation.quarter.id == 10022 %}Q1
+                                    {% elif calculation.quarter.id == 10023 %}Q2
+                                    {% elif calculation.quarter.id == 10024 %}Q3
+                                    {% elif calculation.quarter.id == 10025 %}Q4
+                                    {% else %}{{ calculation.quarter.quarter }}{% endif %}
+                                {% else %}
+                                    Not specified
+                                {% endif %}<br>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>End Target Value:</strong> {{ calculation.End_Target_Value|default:"0.00"|floatformat:2 }}<br>
+                                <strong>Add Value:</strong> {{ calculation.add_value|default:"0.00"|floatformat:2 }}<br>
+                                <strong>Imports (MW):</strong> 
+                                <span class="text-success fw-bold">{{ calculation.achieved_value|default:"0.00"|floatformat:2 }} MW</span><br>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <strong>Created By:</strong> 
+                                {% if calculation.loginUser %}
+                                    {{ calculation.loginUser.username }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}<br>
+                                <strong>Date Created:</strong> {{ calculation.date_created|date:"F d, Y at H:i" }}<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deletion Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Yes, Delete Calculation
+                        </button>
+                        <a href="{% url 'NAWEC_KPI:calculate_imports_detail' calculation.pk %}" 
+                           class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Additional Information -->
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        After deletion, you will be redirected to the calculations list.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,7 +14,7 @@ from .models import (
     CalculateGAF, CalculateTMH, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC,
     CalculateWQCB, CalculateNRW, CalculateDD,
-    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, Month
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, CalculateIMPORTS, Month
 )
 from setup.models import Quarter, YEAR
 
@@ -47,6 +47,7 @@ class SaveKPICalculationView(View):
         'CR': CalculateCR,
         'PARI': CalculatePARI,
         'TSQR': CalculateTSQR,
+        'IMPORTS': CalculateIMPORTS,
     }
     
     def post(self, request):
@@ -241,6 +242,7 @@ class SaveKPICalculationView(View):
                     'total_revenue': 'total_revenues_turnover',  # NPM popup uses 'total_revenue'
                     'net_operating_income': 'net_operating_income',
                     'total_debt_service': 'total_debt_service',
+                    'add_value': 'add_value',  # IMPORTS popup uses 'add_value'
                 }
                 
                 # Map popup form fields to model fields

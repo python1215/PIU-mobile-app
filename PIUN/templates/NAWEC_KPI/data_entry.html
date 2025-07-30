@@ -1441,6 +1441,8 @@ function triggerKPICalculationPopup() {
         kpiType = 'DSCR';
     } else if (selectedText.includes('energy injection')) {
         kpiType = 'EI';
+    } else if (selectedText.includes('imports') && selectedText.includes('mw')) {
+        kpiType = 'IMPORTS';
     } else if (selectedText.includes('local production') || selectedText.includes('total electricity generated') || selectedText.includes('monthly water hours')) {
         kpiType = 'MWH';
     } else if (selectedText.includes('grid availability factor') || selectedText.includes('generation availability factor')) {
@@ -1492,6 +1494,9 @@ function triggerKPICalculationPopup() {
             break;
         case 'EI':
             showEIPopup();
+            break;
+        case 'IMPORTS':
+            showImportsPopup();
             break;
         case 'MWH':
             showMWhPopup();
@@ -3193,6 +3198,256 @@ function closeEIPopup() {
     if (popup) {
         popup.remove();
     }
+}
+
+function showImportsPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('simpleKPIPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Get current End Target Value from the form
+    const endTargetField = document.getElementById('id_End_Target_Value');
+    const currentEndTarget = endTargetField ? parseFloat(endTargetField.value) || 0 : 0;
+    
+    // Create Imports popup
+    const popup = document.createElement('div');
+    popup.id = 'simpleKPIPopup';
+    popup.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; border: 3px solid #17a2b8; border-radius: 8px; 
+                    width: 500px; max-height: 80vh; overflow-y: auto; z-index: 10000; 
+                    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: #17a2b8; color: white; margin: -20px -20px 20px -20px; 
+                        padding: 15px 20px; border-radius: 5px 5px 0 0; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; font-size: 1.2rem;">
+                    <i class="bi bi-arrow-up-circle"></i> Imports (MW) Calculation
+                </h5>
+                <span style="color: #e9ecef; font-size: 0.9rem;">KPI Calculation</span>
+            </div>
+
+            <!-- Form Content -->
+            <div style="margin-bottom: 20px;">
+                <h6 style="color: #17a2b8; margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> Formula: Imports (MW) = End_Target_Value × Add_Value
+                </h6>
+                
+                <!-- Quarter Selection -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Quarter:</label>
+                    <select id="importsQuarter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Select Quarter</option>
+                        <option value="10022">Q1</option>
+                        <option value="10023">Q2</option>
+                        <option value="10024">Q3</option>
+                        <option value="10025">Q4</option>
+                    </select>
+                </div>
+                
+                <!-- End Target Value (Auto-populated) -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">End Target Value:</label>
+                    <input type="number" id="importsEndTarget" step="0.01" value="${currentEndTarget}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;"
+                           readonly placeholder="Auto-populated from form">
+                    <small style="color: #6c757d;">Auto-populated from End Target Value field</small>
+                </div>
+                
+                <!-- Add Value -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Add Value:</label>
+                    <input type="number" id="importsAddValue" step="0.01"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter additional value">
+                </div>
+
+                <!-- Result Display -->
+                <div id="importsResult" style="margin-top: 15px; padding: 15px; background: #e7f3ff; 
+                                                border-radius: 5px; border-left: 4px solid #17a2b8; display: none;">
+                    <h6 style="color: #17a2b8; margin-bottom: 10px;">
+                        <i class="bi bi-calculator"></i> Calculation Result
+                    </h6>
+                    <div id="importsResultText" style="font-weight: bold; font-size: 1.1rem;"></div>
+                    <div id="importsBreakdown" style="margin-top: 10px; font-size: 0.9rem; color: #666;"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px;">
+                <button onclick="calculateImports()" 
+                        style="flex: 1; background: #17a2b8; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-calculator"></i> Calculate
+                </button>
+                <button onclick="resetImportsForm()" 
+                        style="flex: 1; background: #6c757d; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                <button onclick="closeImportsPopup()" 
+                        style="flex: 1; background: #dc3545; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-x-lg"></i> Close
+                </button>
+            </div>
+            
+            <!-- Use Result Button (Hidden initially) -->
+            <div id="importsUseButton" style="margin-top: 10px; display: none;">
+                <button onclick="useImportsResult()" 
+                        style="width: 100%; background: #28a745; color: white; border: none; 
+                               padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    <i class="bi bi-check-lg"></i> Use Result
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+}
+
+function calculateImports() {
+    const quarter = document.getElementById('importsQuarter').value;
+    const endTarget = parseFloat(document.getElementById('importsEndTarget').value) || 0;
+    const addValue = parseFloat(document.getElementById('importsAddValue').value) || 0;
+    
+    if (!quarter) {
+        alert('Please select a quarter. Quarter selection is mandatory.');
+        document.getElementById('importsQuarter').focus();
+        return;
+    }
+    
+    if (endTarget === 0) {
+        alert('End Target Value cannot be 0. Please ensure the End Target Value is set in the main form.');
+        return;
+    }
+    
+    if (addValue === 0) {
+        alert('Please enter an Add Value greater than 0.');
+        document.getElementById('importsAddValue').focus();
+        return;
+    }
+    
+    // Calculate Imports (MW)
+    const importsResult = endTarget * addValue;
+    
+    // Display result
+    const resultDiv = document.getElementById('importsResult');
+    const resultText = document.getElementById('importsResultText');
+    const breakdown = document.getElementById('importsBreakdown');
+    
+    resultText.innerHTML = `<span style="color: #17a2b8;">${importsResult.toFixed(2)} MW</span>`;
+    breakdown.innerHTML = `Formula: ${endTarget.toFixed(2)} × ${addValue.toFixed(2)} = ${importsResult.toFixed(2)} MW`;
+    
+    resultDiv.style.display = 'block';
+    
+    // Show use button
+    document.getElementById('importsUseButton').style.display = 'block';
+    
+    // Store the result
+    window.simpleImportsResult = importsResult.toFixed(2);
+}
+
+async function useImportsResult() {
+    const quarter = document.getElementById('importsQuarter').value;
+    const endTarget = parseFloat(document.getElementById('importsEndTarget').value) || 0;
+    const addValue = parseFloat(document.getElementById('importsAddValue').value) || 0;
+    
+    if (!quarter) {
+        alert('Please select a quarter before using the result. Quarter selection is mandatory.');
+        document.getElementById('importsQuarter').focus();
+        return;
+    }
+    
+    if (!window.simpleImportsResult) {
+        alert('Please calculate Imports (MW) first');
+        return;
+    }
+    
+    const data = {
+        kpi_type: 'IMPORTS',
+        input_values: {
+            quarter: quarter,
+            End_Target_Value: endTarget,
+            add_value: addValue,
+            achieved_value: parseFloat(window.simpleImportsResult)
+        }
+    };
+    
+    console.log('[DEBUG] IMPORTS - Data being sent:', data);
+    
+    try {
+        // Save calculation to database
+        const response = await fetch('/NAWEC_KPI/api/save-kpi/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        console.log('[DEBUG] IMPORTS - Response status:', response.status);
+        
+        const result = await response.json();
+        console.log('[DEBUG] IMPORTS - API response:', result);
+        
+        if (result.success) {
+            // Set the achieved value in the main form
+            const achievedValueField = document.getElementById('id_achieved_value');
+            if (achievedValueField) {
+                achievedValueField.value = window.simpleImportsResult;
+                achievedValueField.style.backgroundColor = '#e7f3ff';
+                
+                // Trigger percentage calculations
+                calculatePercentages();
+            }
+            
+            // Close the popup
+            closeImportsPopup();
+            
+            alert('Imports (MW) calculation saved successfully and value applied to form!');
+        } else {
+            alert('Error saving Imports (MW) calculation: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error saving Imports (MW) calculation:', error);
+        alert('Error saving Imports (MW) calculation: ' + error.message);
+    }
+}
+
+function resetImportsForm() {
+    // Clear input fields
+    document.getElementById('importsQuarter').value = '';
+    document.getElementById('importsAddValue').value = '';
+    
+    // Hide the result section
+    const resultDiv = document.getElementById('importsResult');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
+    }
+    
+    // Hide use button
+    document.getElementById('importsUseButton').style.display = 'none';
+    
+    // Clear stored result
+    window.simpleImportsResult = null;
+    
+    // Focus on first input field
+    document.getElementById('importsQuarter').focus();
+}
+
+function closeImportsPopup() {
+    const popup = document.getElementById('simpleKPIPopup');
+    if (popup) {
+        popup.remove();
+    }
+    
+    // Clear stored result and memory variables
+    window.simpleImportsResult = null;
 }
 
 function showMWhPopup() {

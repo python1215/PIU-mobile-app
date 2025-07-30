@@ -3326,6 +3326,8 @@ class DeleteKPICalculationView(View):
                 CalculateATC.objects.filter(id=calc_id).delete()
             elif kpi_type == 'TMH':
                 CalculateTMH.objects.filter(id=calc_id).delete()
+            elif kpi_type == 'IMPORTS':
+                CalculateIMPORTS.objects.filter(id=calc_id).delete()
             else:
                 return JsonResponse({'success': False, 'error': f'KPI type {kpi_type} not supported'})
             
@@ -3336,6 +3338,127 @@ class DeleteKPICalculationView(View):
             
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+
+
+# Imports (MW) Calculation Views
+@login_required
+def calculate_imports_list(request):
+    """List view for Imports (MW) calculations with search and filtering"""
+    search_query = request.GET.get('search', '')
+    year_filter = request.GET.get('year', '')
+    quarter_filter = request.GET.get('quarter', '')
+    
+    # Base queryset
+    calculations = CalculateIMPORTS.objects.all().order_by('-date_created')
+    
+    # Apply filters
+    if search_query:
+        calculations = calculations.filter(
+            Q(End_Target_Value__icontains=search_query) |
+            Q(add_value__icontains=search_query) |
+            Q(achieved_value__icontains=search_query) |
+            Q(loginUser__username__icontains=search_query)
+        )
+    
+    if year_filter:
+        calculations = calculations.filter(year_id=year_filter)
+    
+    if quarter_filter:
+        calculations = calculations.filter(quarter_id=quarter_filter)
+    
+    # Pagination
+    paginator = Paginator(calculations, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get filter options
+    years = YEAR.objects.all().order_by('-profile_year')
+    quarters = Quarter.objects.filter(id__in=[10022, 10023, 10024, 10025]).order_by('id')
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'year_filter': year_filter,
+        'quarter_filter': quarter_filter,
+        'years': years,
+        'quarters': quarters,
+        'total_count': calculations.count(),
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_imports_list.html', context)
+
+
+@login_required
+def calculate_imports_detail(request, pk):
+    """Detail view for specific Imports (MW) calculation"""
+    try:
+        calculation = CalculateIMPORTS.objects.get(pk=pk)
+    except CalculateIMPORTS.DoesNotExist:
+        messages.error(request, f'Imports (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_imports_list')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_imports_detail.html', context)
+
+
+@login_required
+def calculate_imports_edit(request, pk):
+    """Edit view for Imports (MW) calculation"""
+    try:
+        calculation = CalculateIMPORTS.objects.get(pk=pk)
+    except CalculateIMPORTS.DoesNotExist:
+        messages.error(request, f'Imports (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_imports_list')
+    
+    if request.method == 'POST':
+        # Update calculation fields
+        try:
+            end_target = float(request.POST.get('End_Target_Value', 0))
+            add_value = float(request.POST.get('add_value', 0))
+            
+            calculation.End_Target_Value = end_target
+            calculation.add_value = add_value
+            
+            # Recalculate achieved value
+            calculation.achieved_value = end_target * add_value
+            
+            calculation.save()
+            
+            messages.success(request, 'Imports (MW) calculation updated successfully!')
+            return redirect('NAWEC_KPI:calculate_imports_detail', pk=pk)
+            
+        except (ValueError, TypeError) as e:
+            messages.error(request, f'Invalid input values: {str(e)}')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_imports_edit.html', context)
+
+
+@login_required
+def calculate_imports_delete(request, pk):
+    """Delete view for Imports (MW) calculation"""
+    try:
+        calculation = CalculateIMPORTS.objects.get(pk=pk)
+    except CalculateIMPORTS.DoesNotExist:
+        messages.error(request, f'Imports (MW) calculation with ID {pk} does not exist.')
+        return redirect('NAWEC_KPI:calculate_imports_list')
+    
+    if request.method == 'POST':
+        calculation.delete()
+        messages.success(request, 'Imports (MW) calculation deleted successfully!')
+        return redirect('NAWEC_KPI:calculate_imports_list')
+    
+    context = {
+        'calculation': calculation,
+    }
+    
+    return render(request, 'NAWEC_KPI/calculate_imports_delete.html', context)
 
 
 

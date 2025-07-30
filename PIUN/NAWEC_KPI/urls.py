@@ -165,4 +165,10 @@ urlpatterns = [
     path('tsqr/<int:pk>/', crud_views.tsqr_detail, name='tsqr_detail'),
     path('tsqr/<int:pk>/edit/', crud_views.tsqr_update, name='tsqr_update'),
     path('tsqr/<int:pk>/delete/', crud_views.tsqr_delete, name='tsqr_delete'),
+
+    # Imports (MW) CRUD
+    path('imports-calculations/', views.calculate_imports_list, name='calculate_imports_list'),
+    path('imports-calculations/<int:pk>/', views.calculate_imports_detail, name='calculate_imports_detail'),
+    path('imports-calculations/<int:pk>/edit/', views.calculate_imports_edit, name='calculate_imports_edit'),
+    path('imports-calculations/<int:pk>/delete/', views.calculate_imports_delete, name='calculate_imports_delete'),
 ]
