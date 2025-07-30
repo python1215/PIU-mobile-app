@@ -3372,13 +3372,18 @@ async function useImportsResult() {
         return;
     }
     
+    // Get baseline value from the main form
+    const baselineField = document.getElementById('id_baseline_value');
+    const baselineValue = baselineField ? parseFloat(baselineField.value) || 0 : 0;
+    
     const data = {
         kpi_type: 'IMPORTS',
         input_values: {
             quarter: quarter,
             End_Target_Value: endTarget,
             add_value: addValue,
-            achieved_value: parseFloat(window.simpleImportsResult)
+            achieved_value: parseFloat(window.simpleImportsResult),
+            baseline_value: baselineValue
         }
     };
     
@@ -3603,13 +3608,19 @@ async function useIPPResult() {
         return;
     }
     
+    // Get baseline value from the main form
+    const baselineField = document.getElementById('id_baseline_value');
+    const baselineValue = baselineField ? parseFloat(baselineField.value) || 0 : 0;
+    
     const data = {
         kpi_type: 'IPP',
-        End_Target_Value: endTarget,
-        add_value: addValue,
-        achieved_value: window.simpleIPPResult.result,
-        quarter: quarter,
-        year: document.getElementById('year').value
+        input_values: {
+            quarter: quarter,
+            End_Target_Value: endTarget,
+            add_value: addValue,
+            achieved_value: window.simpleIPPResult.result,
+            baseline_value: baselineValue
+        }
     };
     
     try {
