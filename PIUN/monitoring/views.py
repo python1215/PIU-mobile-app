@@ -277,6 +277,13 @@ def enhanced_results_monitoring_list(request):
             
             # Convert QuerySet to list for reliable template evaluation
             monitoring_records = list(monitoring_records_qs)
+            
+            # Debug: Check if records have proper primary keys
+            print(f"Enhanced Results Monitoring List - Total records: {len(monitoring_records)}")
+            for record in monitoring_records:
+                print(f"Record ID: {record.id}, PK: {record.pk}, Description: {record.indicator_description}")
+                if not record.pk:
+                    print(f"WARNING: Record {record.id} has empty PK!")
         
         context = {
             'monitoring_records': monitoring_records,

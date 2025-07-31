@@ -120,15 +120,19 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" class="btn btn-outline-info btn-sm" title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" class="btn btn-outline-danger btn-sm" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
+                                            {% if record.pk %}
+                                                <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" class="btn btn-outline-info btn-sm" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">No actions available</span>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
