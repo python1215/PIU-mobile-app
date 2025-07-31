@@ -247,55 +247,34 @@ def add_results_monitoring(request):
 
 @login_required
 def enhanced_results_monitoring_list(request):
-    """Enhanced list view for Results Oriented Monitoring records with dual-mode support"""
-    from utils.database_utils import is_sql_server_mode
-    
+    """Enhanced list view for Results Oriented Monitoring records with offline compatibility"""
     try:
-        if is_sql_server_mode():
-            # Use raw SQL for SQL Server mode
-            from django.db import connection
-            with connection.cursor() as cursor:
-                table_name = "[piuprod3].[dbo].[monitoring_results_oriented_monitoring]"
-                cursor.execute(f"SELECT * FROM {table_name} ORDER BY date_created DESC")
-                raw_records = cursor.fetchall()
-                
-                # Create mock objects for template compatibility
-                class MockMonitoringRecord:
-                    def __init__(self, data):
-                        self.id = data[0] if len(data) > 0 else None
-                        self.indicator_description = data[1] if len(data) > 1 else ""
-                        self.date_created = data[2] if len(data) > 2 else None
-                        
-                monitoring_records = [MockMonitoringRecord(record) for record in raw_records]
-        else:
-            # Use Django ORM for SQLite mode - convert to list to prevent template issues
-            monitoring_records_qs = Results_Oriented_Monitoring.objects.all().select_related(
-                'project', 'pdo', 'project_outcome', 'project_result', 
-                'indicator_type', 'measurement_unit', 'collection_frequency',
-                'year', 'quarter', 'loginUser'
-            ).order_by('-date_created')
-            
-            # Convert QuerySet to list for reliable template evaluation
-            monitoring_records = list(monitoring_records_qs)
-            
-            # Debug: Check if records have proper primary keys
-            print(f"Enhanced Results Monitoring List - Total records: {len(monitoring_records)}")
-            for record in monitoring_records:
-                print(f"Record ID: {record.id}, PK: {record.pk}, Description: {record.indicator_description}")
-                if not record.pk:
-                    print(f"WARNING: Record {record.id} has empty PK!")
+        # Always use Django ORM for offline compatibility - use simple query first
+        monitoring_records_qs = Results_Oriented_Monitoring.objects.all().order_by('-date_created')
+        
+        # Convert QuerySet to list for reliable template evaluation
+        monitoring_records = list(monitoring_records_qs)
+        
+        # Ensure all records have proper primary keys
+        valid_records = []
+        for record in monitoring_records:
+            if record.pk and record.id:
+                valid_records.append(record)
+            else:
+                print(f"WARNING: Skipping record with missing PK - ID: {record.id}")
         
         context = {
-            'monitoring_records': monitoring_records,
+            'monitoring_records': valid_records,
             'title': 'Enhanced Results Monitoring List'
         }
         
     except Exception as e:
-        # Error handling
-        monitoring_records = []
+        print(f"Error in enhanced_results_monitoring_list: {str(e)}")
+        # Error handling - provide empty list for template
         context = {
-            'monitoring_records': monitoring_records,
-            'title': 'Enhanced Results Monitoring List'
+            'monitoring_records': [],
+            'title': 'Enhanced Results Monitoring List',
+            'error_message': f"Error loading monitoring records: {str(e)}"
         }
     
     return render(request, 'monitoring/results_monitoring/enhanced_results_monitoring_list.html', context)
