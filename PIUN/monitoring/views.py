@@ -218,13 +218,7 @@ def delete_indicator_description(request, pk):
 @login_required
 def add_results_monitoring(request):
     if request.method == 'POST':
-        # Debug submitted data
-        print("POST data:", dict(request.POST))
         form = Results_Oriented_MonitoringForm(request.POST)
-        
-        # Debug form queryset for project_outcome
-        print("project_outcome queryset:", form.fields['project_outcome'].queryset)
-        print("Available project_outcome IDs:", [obj.id for obj in form.fields['project_outcome'].queryset])
         
         if form.is_valid():
             instance = form.save(commit=False)
@@ -233,10 +227,6 @@ def add_results_monitoring(request):
             messages.success(request, "Results Monitoring record saved successfully!")
             return redirect('monitoring:enhanced-results-monitoring-list')
         else:
-            # Debug form errors
-            print("Form validation errors:", form.errors)
-            for field, errors in form.errors.items():
-                print(f"Field '{field}': {errors}")
             messages.error(request, "Please correct the errors below.")
     else:
         form = Results_Oriented_MonitoringForm()
@@ -247,32 +237,23 @@ def add_results_monitoring(request):
 
 @login_required
 def enhanced_results_monitoring_list(request):
-    """Enhanced list view for Results Oriented Monitoring records with offline compatibility"""
+    """Enhanced list view for Results Oriented Monitoring records using Django ORM"""
     try:
-        # Always use Django ORM for offline compatibility - use simple query first
-        monitoring_records_qs = Results_Oriented_Monitoring.objects.all().order_by('-date_created')
-        
-        # Convert QuerySet to list for reliable template evaluation
-        monitoring_records = list(monitoring_records_qs)
-        
-        # Ensure all records have proper primary keys
-        valid_records = []
-        for record in monitoring_records:
-            if record.pk and record.id:
-                valid_records.append(record)
-            else:
-                print(f"WARNING: Skipping record with missing PK - ID: {record.id}")
+        # Use Django ORM exclusively
+        monitoring_records = Results_Oriented_Monitoring.objects.select_related(
+            'project', 'pdo', 'project_outcome', 'project_result', 
+            'indicator_type', 'measurement_unit', 'collection_frequency',
+            'year', 'quarter', 'loginUser'
+        ).order_by('-date_created')
         
         context = {
-            'monitoring_records': valid_records,
+            'monitoring_records': monitoring_records,
             'title': 'Enhanced Results Monitoring List'
         }
         
     except Exception as e:
-        print(f"Error in enhanced_results_monitoring_list: {str(e)}")
-        # Error handling - provide empty list for template
         context = {
-            'monitoring_records': [],
+            'monitoring_records': Results_Oriented_Monitoring.objects.none(),
             'title': 'Enhanced Results Monitoring List',
             'error_message': f"Error loading monitoring records: {str(e)}"
         }
