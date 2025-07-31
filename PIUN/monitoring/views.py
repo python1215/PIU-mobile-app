@@ -87,7 +87,8 @@ def get_indicator_descriptions(request):
 def load_project_PDO(request):
     project_id = request.GET.get("project")
     print("Received project:", project_id)
-    pdos = PDO.objects.filter(project_id=project_id)
+    # Fix: Use project instead of project_id since PDO links to Project via ForeignKey 'project'
+    pdos = PDO.objects.filter(project__projectID=project_id)
         
     print("pdos:", pdos)
     return render(request, "monitoring/result_oriented_monitoring/get_pdo.html", {"pdos": pdos})
@@ -96,7 +97,8 @@ def load_project_PDO(request):
 def load_project_Outcome(request):
     pdo_id = request.GET.get("pdo")
     print("Received PDO:", pdo_id)
-    project_outcomes = ProjectOutCome.objects.filter(pdo_id=pdo_id)
+    # Fix: Use pdo instead of pdo_id since ProjectOutCome links to PDO via ForeignKey 'pdo'
+    project_outcomes = ProjectOutCome.objects.filter(pdo__id=pdo_id)
     
     print("project_outcomes:", project_outcomes)
     return render(request, "monitoring/get_project_outcome.html", {"project_outcomes": project_outcomes})
@@ -106,7 +108,8 @@ def load_project_Outcome(request):
 def load_project_Result(request):
     project_outcome_id = request.GET.get("project_outcome")
     print("Received Project Result:", project_outcome_id)
-    projectResults = ProjectResult.objects.filter(project_outcome_id=project_outcome_id)
+    # Fix: Use project_outcome instead of project_outcome_id since ProjectResult links via ForeignKey 'project_outcome'
+    projectResults = ProjectResult.objects.filter(project_outcome__id=project_outcome_id)
    
     print("projectResults:", projectResults)
     return render(request, "monitoring/result_oriented_monitoring/get_projectResult.html", {"projectResults": projectResults})
