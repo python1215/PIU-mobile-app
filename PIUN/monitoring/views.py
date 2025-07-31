@@ -239,22 +239,26 @@ def add_results_monitoring(request):
 def enhanced_results_monitoring_list(request):
     """Enhanced list view for Results Oriented Monitoring records using Django ORM"""
     try:
-        # Use Django ORM exclusively
-        monitoring_records = Results_Oriented_Monitoring.objects.select_related(
+        # Use Django ORM exclusively - force evaluation
+        monitoring_records = list(Results_Oriented_Monitoring.objects.select_related(
             'project', 'pdo', 'project_outcome', 'project_result', 
             'indicator_type', 'measurement_unit', 'collection_frequency',
             'year', 'quarter', 'loginUser'
-        ).order_by('-date_created')
+        ).order_by('-date_created'))
+        
+        # Records successfully retrieved
         
         context = {
             'monitoring_records': monitoring_records,
-            'title': 'Enhanced Results Monitoring List'
+            'title': 'Enhanced Results Monitoring List',
+            'total_count': len(monitoring_records)
         }
         
     except Exception as e:
         context = {
-            'monitoring_records': Results_Oriented_Monitoring.objects.none(),
+            'monitoring_records': [],
             'title': 'Enhanced Results Monitoring List',
+            'total_count': 0,
             'error_message': f"Error loading monitoring records: {str(e)}"
         }
     
