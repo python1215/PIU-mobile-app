@@ -28,4 +28,5 @@ urlpatterns = [
     # Export Views
     path('export-indicator-descriptions/', views.export_indicator_descriptions_excel, name='export-indicator-descriptions'),
     path('export-results-monitoring/', views.export_results_monitoring_excel, name='export-results-monitoring'),
+    path('export-results-monitoring-pdf/', views.export_results_monitoring_pdf, name='export-results-monitoring-pdf'),
 ]

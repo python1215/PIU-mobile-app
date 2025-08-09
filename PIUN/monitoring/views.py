@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Results_Oriented_Monitoring
 from django.contrib import messages
@@ -16,6 +16,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 
+
+# PDF Export imports
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from datetime import datetime
+import io
 
 # Create your views here.
 
@@ -580,4 +589,231 @@ def export_results_monitoring_excel(request):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=results_monitoring.xlsx'
     wb.save(response)
+    return response
+
+
+@login_required
+def export_results_monitoring_pdf(request):
+    """Export Enhanced Results Monitoring to PDF in A4 landscape format"""
+    from django.db import models
+    from PIU_Financial_mgt.models import Project
+    from setup.models import YEAR, Quarter
+    
+    # Create a buffer to hold PDF content
+    buffer = io.BytesIO()
+    
+    # Create the PDF object using A4 landscape
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=0.75*inch,
+        bottomMargin=0.5*inch
+    )
+    
+    # Get all filter parameters from GET request
+    project_filter = request.GET.get('project')
+    year_filter = request.GET.get('year') 
+    quarter_filter = request.GET.get('quarter')
+    indicator_type_filter = request.GET.get('indicator_type')
+    pdo_filter = request.GET.get('pdo')
+    project_outcome_filter = request.GET.get('project_outcome')
+    project_result_filter = request.GET.get('project_result')
+    measurement_unit_filter = request.GET.get('measurement_unit')
+    collection_frequency_filter = request.GET.get('collection_frequency')
+    search_filter = request.GET.get('search')
+    
+    # Apply same filtering logic as the list view
+    monitoring_qs = Results_Oriented_Monitoring.objects.select_related(
+        'project', 'year', 'quarter', 'pdo', 'project_outcome', 
+        'project_result', 'indicator_type', 'measurement_unit', 
+        'collection_frequency', 'loginUser'
+    ).all()
+    
+    # Apply filters
+    if project_filter:
+        monitoring_qs = monitoring_qs.filter(project__projectID=project_filter)
+    if year_filter:
+        monitoring_qs = monitoring_qs.filter(year__id=year_filter)
+    if quarter_filter:
+        monitoring_qs = monitoring_qs.filter(quarter__id=quarter_filter)
+    if indicator_type_filter:
+        monitoring_qs = monitoring_qs.filter(indicator_type__id=indicator_type_filter)
+    if pdo_filter:
+        monitoring_qs = monitoring_qs.filter(pdo__id=pdo_filter)
+    if project_outcome_filter:
+        monitoring_qs = monitoring_qs.filter(project_outcome__id=project_outcome_filter)
+    if project_result_filter:
+        monitoring_qs = monitoring_qs.filter(project_result__id=project_result_filter)
+    if measurement_unit_filter:
+        monitoring_qs = monitoring_qs.filter(measurement_unit__id=measurement_unit_filter)
+    if collection_frequency_filter:
+        monitoring_qs = monitoring_qs.filter(collection_frequency__id=collection_frequency_filter)
+    if search_filter:
+        monitoring_qs = monitoring_qs.filter(
+            models.Q(indicator_description__icontains=search_filter) |
+            models.Q(remarks__icontains=search_filter)
+        )
+    
+    monitoring_qs = monitoring_qs.order_by('-date_created')
+    
+    # Container for the story
+    story = []
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=20,
+        alignment=1,  # Center alignment
+        textColor=colors.darkblue
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=15,
+        alignment=1,  # Center alignment
+        textColor=colors.grey
+    )
+    
+    # Add title
+    title = Paragraph("Enhanced Results Monitoring Report", title_style)
+    story.append(title)
+    
+    # Add generation date and filters
+    filter_info = f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}"
+    if any([project_filter, year_filter, quarter_filter, indicator_type_filter, 
+            pdo_filter, project_outcome_filter, project_result_filter,
+            measurement_unit_filter, collection_frequency_filter, search_filter]):
+        filter_info += " | Filtered Results"
+    
+    subtitle = Paragraph(filter_info, subtitle_style)
+    story.append(subtitle)
+    story.append(Spacer(1, 20))
+    
+    # Prepare table data with wrapped text
+    data = []
+    
+    # Headers
+    headers = [
+        'Year', 'Quarter', 'Project', 'PDO', 'Outcome', 'Result', 
+        'Indicator Type', 'Description', 'Unit', 'Frequency',
+        'Baseline', 'Achieved', 'Target', '% vs Base', '% vs Target', 
+        'Remarks', 'Created By', 'Date'
+    ]
+    data.append(headers)
+    
+    # Data rows with text wrapping
+    for record in monitoring_qs:
+        # Helper function to safely get attribute values with truncation
+        def safe_get(obj, attr, max_length=20):
+            try:
+                value = getattr(obj, attr, 'N/A')
+                if value is None:
+                    return 'N/A'
+                str_value = str(value)
+                return str_value[:max_length] + '...' if len(str_value) > max_length else str_value
+            except:
+                return 'N/A'
+        
+        def safe_get_nested(obj, attr_chain, max_length=20):
+            try:
+                value = obj
+                for attr in attr_chain.split('.'):
+                    value = getattr(value, attr, None)
+                    if value is None:
+                        return 'N/A'
+                str_value = str(value)
+                return str_value[:max_length] + '...' if len(str_value) > max_length else str_value
+            except:
+                return 'N/A'
+        
+        row = [
+            safe_get_nested(record, 'year.profile_year', 10),
+            safe_get_nested(record, 'quarter.quarter', 10),
+            safe_get_nested(record, 'project.project', 15),
+            safe_get_nested(record, 'pdo.pdo_statement', 20),
+            safe_get_nested(record, 'project_outcome.project_outcome', 15),
+            safe_get_nested(record, 'project_result.project_result', 15),
+            safe_get_nested(record, 'indicator_type.indicator_type', 12),
+            safe_get(record, 'indicator_description', 25),
+            safe_get_nested(record, 'measurement_unit.unit', 10),
+            safe_get_nested(record, 'collection_frequency.frequency', 12),
+            f"{record.baseline_value:.1f}" if record.baseline_value else 'N/A',
+            f"{record.achieved_value:.1f}" if record.achieved_value else 'N/A',
+            f"{record.End_Target_Value:.1f}" if record.End_Target_Value else 'N/A',
+            f"{record.percentage_achieved_vs_baseline:.1f}%" if record.percentage_achieved_vs_baseline else 'N/A',
+            f"{record.percentage_achieved_vs_end_target:.1f}%" if record.percentage_achieved_vs_end_target else 'N/A',
+            safe_get(record, 'remarks', 20),
+            safe_get_nested(record, 'loginUser.username', 12),
+            record.date_created.strftime('%m/%d/%Y') if record.date_created else 'N/A'
+        ]
+        data.append(row)
+    
+    if len(data) == 1:  # Only headers, no data
+        data.append(['No records found matching the specified criteria'] + [''] * (len(headers) - 1))
+    
+    # Create table with proper column widths for landscape A4
+    col_widths = [0.4*inch, 0.5*inch, 0.8*inch, 1.0*inch, 0.8*inch, 0.8*inch, 
+                  0.6*inch, 1.2*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.5*inch, 
+                  0.5*inch, 0.5*inch, 0.5*inch, 1.0*inch, 0.6*inch, 0.6*inch]
+    
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+    
+    # Table style
+    table.setStyle(TableStyle([
+        # Header row styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data rows styling
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        
+        # Grid styling
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.darkblue),
+        
+        # Alternating row colors
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        
+        # Cell padding
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+    ]))
+    
+    story.append(table)
+    
+    # Add footer with record count
+    story.append(Spacer(1, 20))
+    footer_text = f"Total Records: {len(data) - 1} | NAWEC PIU Enhanced Results Monitoring System"
+    footer = Paragraph(footer_text, subtitle_style)
+    story.append(footer)
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Get the value of the BytesIO buffer and return response
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Enhanced_Results_Monitoring_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response.write(pdf)
+    
     return response
