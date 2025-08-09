@@ -317,7 +317,7 @@ def enhanced_results_monitoring_list(request):
         pdos = PDO.objects.all().order_by('pdo_statement')
         project_outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
         project_results = ProjectResult.objects.all().order_by('project_result')
-        measurement_units = Measurement_Unit.objects.all().order_by('measurement_unit')
+        measurement_units = Measurement_Unit.objects.all().order_by('unit')
         collection_frequencies = Data_Collection_Frequency.objects.all().order_by('data_collection_frequency')
         
         # Pagination - 10 records per page

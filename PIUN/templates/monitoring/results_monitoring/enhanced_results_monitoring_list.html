@@ -198,7 +198,7 @@
                             <option value="">All Units</option>
                             {% for unit in measurement_units %}
                                 <option value="{{ unit.pk }}" {% if request.GET.measurement_unit == unit.pk|stringformat:"s" %}selected{% endif %}>
-                                    {{ unit.measurement_unit }}
+                                    {{ unit.unit }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -306,7 +306,7 @@
                                     </td>
                                     <td>{{ record.indicator_description|truncatechars:35 }}</td>
                                     <td>
-                                        <span class="badge bg-info">{{ record.measurement_unit.measurement_unit }}</span>
+                                        <span class="badge bg-info">{{ record.measurement_unit.unit }}</span>
                                     </td>
                                     <td>{{ record.collection_frequency.data_collection_frequency }}</td>
                                     <td>
