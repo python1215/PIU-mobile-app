@@ -1189,6 +1189,10 @@ def export_projects_excel(request):
     from PIU_Financial_mgt.models import Currency
     import datetime
     
+    print(f"Excel export accessed by user: {request.user}")
+    print(f"Request method: {request.method}")
+    print(f"GET parameters: {request.GET}")
+    
     # Apply same filtering logic as projects view
     projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
     
@@ -1311,6 +1315,10 @@ def export_projects_pdf(request):
     from reportlab.lib.units import inch
     from setup.models import Donor
     import datetime
+    
+    print(f"PDF export accessed by user: {request.user}")
+    print(f"Request method: {request.method}")
+    print(f"GET parameters: {request.GET}")
     
     # Apply same filtering logic as projects view
     projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
