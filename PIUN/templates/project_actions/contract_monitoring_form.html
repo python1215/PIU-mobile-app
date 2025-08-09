@@ -489,6 +489,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const projectId = projectSelect.value;
         const contractType = contractTypeSelect.value;
         
+        console.log('Contract selection clicked:', { projectId, contractType });
+        
         if (!projectId || !contractType) {
             alert('Please select both a project and contract type first.');
             return;
@@ -498,23 +500,34 @@ document.addEventListener('DOMContentLoaded', function() {
         selectContractBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
         selectContractBtn.disabled = true;
         
+        const url = `/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`;
+        console.log('Fetching contracts from:', url);
+        
         // Fetch contracts by project and type
-        fetch(`/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${projectId}&contract_type=${contractType}`)
-            .then(response => response.json())
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
+                
                 // Reset button state
                 selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
                 selectContractBtn.disabled = false;
                 
                 if (data.error) {
+                    console.error('Server error:', data.error);
                     alert('Error loading contracts: ' + data.error);
                     return;
                 }
                 
                 if (data.contracts && data.contracts.length > 0) {
+                    console.log(`Found ${data.contracts.length} contracts`);
                     showContractSelectionModal(data.contracts, contractType);
                 } else {
-                    alert('No contracts found for the selected project and contract type.');
+                    console.warn('No contracts found for project:', projectId, 'type:', contractType);
+                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nPlease check if contracts exist for this combination.`);
                 }
             })
             .catch(error => {

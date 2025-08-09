@@ -1820,9 +1820,9 @@ def get_contracts_by_project_and_type(request):
         contracts = []
         
         if contract_type == 'works_contract':
-            # Fetch Works contracts
+            # Fetch Works contracts - projectID is a ForeignKey, so use __pk lookup
             works_contracts = Contract_Profiling_works.objects.filter(
-                projectID=project_id
+                projectID__pk=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in works_contracts:
@@ -1840,9 +1840,9 @@ def get_contracts_by_project_and_type(request):
                 })
                 
         elif contract_type == 'goods_services':
-            # Fetch Goods & Services contracts
+            # Fetch Goods & Services contracts - projectID is a ForeignKey, so use __pk lookup
             goods_contracts = Contract_Profiling_goods_services.objects.filter(
-                projectID=project_id
+                projectID__pk=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in goods_contracts:
