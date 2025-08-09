@@ -661,16 +661,28 @@ def component_detail(request, component_id):
 @login_required
 def edit_component(request, component_id):
     """Edit an existing component"""
+    from django.contrib import messages
     component = get_object_or_404(Component, compID=component_id)
     
     if request.method == 'POST':
+        print(f"=== EDIT COMPONENT DEBUG ===")
+        print(f"POST data: {request.POST}")
+        print(f"Component ID: {component_id}")
+        print(f"Current component: {component.Project_Components}")
+        
         form = addComponentForm(request.POST, instance=component)
+        print(f"Form is valid: {form.is_valid()}")
+        
         if form.is_valid():
             component = form.save(commit=False)
             component.loginUser = request.user
             component.save()
+            print(f"Component saved successfully: {component.Project_Components}")
             messages.success(request, 'Component updated successfully!')
             return redirect('PIU_Financial_mgt:components')
+        else:
+            print(f"Form errors: {form.errors}")
+            messages.error(request, f'Form validation failed: {form.errors}')
     else:
         form = addComponentForm(instance=component)
     
