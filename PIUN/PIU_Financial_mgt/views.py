@@ -674,12 +674,18 @@ def edit_component(request, component_id):
         print(f"Form is valid: {form.is_valid()}")
         
         if form.is_valid():
-            component = form.save(commit=False)
-            component.loginUser = request.user
-            component.save()
-            print(f"Component saved successfully: {component.Project_Components}")
-            messages.success(request, 'Component updated successfully!')
-            return redirect('PIU_Financial_mgt:components')
+            try:
+                component = form.save(commit=False)
+                component.loginUser = request.user
+                # Save without calling full_clean() to avoid strict validation
+                component.save()
+                print(f"Component saved successfully: {component.Project_Components}")
+                messages.success(request, 'Component updated successfully!')
+                return redirect('PIU_Financial_mgt:components')
+            except Exception as e:
+                print(f"Error saving component: {e}")
+                messages.error(request, f'Error saving component: {str(e)}')
+                # Continue to re-render form with error
         else:
             print(f"Form errors: {form.errors}")
             messages.error(request, f'Form validation failed: {form.errors}')

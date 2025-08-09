@@ -107,11 +107,20 @@ class Component(models.Model):
     def validate_component_allocation(self):
         """Validate that component allocation equals total subcomponents allocation"""
         total_subcomponents = self.get_total_subcomponents_allocation()
-        if self.allocation != total_subcomponents:
-            raise ValidationError(
-                f"Component allocation ({self.allocation} {self.currency}) must equal total subcomponents allocation "
-                f"({total_subcomponents} {self.currency}). Difference: {abs(self.allocation - total_subcomponents)}"
-            )
+        
+        # Only validate if there are subcomponents and the difference is significant
+        if total_subcomponents > 0:
+            difference = abs(self.allocation - total_subcomponents)
+            # Allow some reasonable variance (e.g., small rounding differences)
+            # Or if the component allocation is being adjusted to match planning
+            if difference > Decimal('0.01') and self.allocation < total_subcomponents:
+                # Only raise error if component allocation is significantly less than subcomponents
+                # This allows increasing component allocation during planning
+                raise ValidationError(
+                    f"Component allocation ({self.allocation} {self.currency}) cannot be significantly less than "
+                    f"total subcomponents allocation ({total_subcomponents} {self.currency}). "
+                    f"Consider adjusting subcomponents or increase component allocation."
+                )
     
     def validate_component_against_project_funding(self):
         """Validate that component allocation doesn't exceed project funding"""
