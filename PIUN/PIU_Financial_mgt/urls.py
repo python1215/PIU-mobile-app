@@ -24,7 +24,8 @@ urlpatterns =[
     path("component/<int:component_id>/", views.component_detail, name='component_detail'),
     path("component/<int:component_id>/edit/", views.edit_component, name='edit_component'),
     path("component/<int:component_id>/delete/", views.delete_component, name='delete_component'),
-    path("export-components-excel/", views.export_components_excel, name='export-components-excel'),
+    path("export-components-excel/", views.export_components_excel, name='export_components_excel'),
+    path("export-components-pdf/", views.export_components_pdf, name='export_components_pdf'),
 
     #subcomponent
     path("subcomponents/", views.subcomponents, name='subcomponents'),

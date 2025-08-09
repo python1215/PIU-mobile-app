@@ -645,6 +645,293 @@ def components(request):
     return render(request, 'PIU_Financial_mgt/components/enhanced_component_list.html', context)
 
 @login_required
+def export_components_excel(request):
+    """Export components to Excel with applied filters"""
+    from django.http import HttpResponse
+    from openpyxl import Workbook
+    from PIU_Financial_mgt.models import Currency
+    import datetime
+    
+    print(f"=== COMPONENTS EXCEL EXPORT DEBUG ===")
+    print(f"Excel export accessed by user: {request.user}")
+    print(f"GET parameters: {request.GET}")
+    print(f"======================================")
+    
+    # Apply same filtering logic as components view
+    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    
+    # Filter parameters (same as components view)
+    project_id = request.GET.get('project', '').strip()
+    component_name = request.GET.get('component', '').strip()
+    currency_id = request.GET.get('currency', '').strip()
+    allocation_min = request.GET.get('allocation_min', '').strip()
+    allocation_max = request.GET.get('allocation_max', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    
+    print(f"Filters applied - project: '{project_id}', component: '{component_name}', currency: '{currency_id}'")
+    
+    # Apply filters
+    if project_id and project_id != '':
+        components_qs = components_qs.filter(projectID__projectID=project_id)
+        print(f"Filtered by project ID: {project_id}")
+    if component_name and component_name != '':
+        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        print(f"Filtered by component name: {component_name}")
+    if currency_id and currency_id != '':
+        components_qs = components_qs.filter(currency__id=currency_id)
+        print(f"Filtered by currency ID: {currency_id}")
+    if allocation_min:
+        try:
+            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
+            print(f"Filtered by min allocation: {allocation_min}")
+        except ValueError:
+            pass
+    if allocation_max:
+        try:
+            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
+            print(f"Filtered by max allocation: {allocation_max}")
+        except ValueError:
+            pass
+    if date_from:
+        components_qs = components_qs.filter(date__gte=date_from)
+        print(f"Filtered by date from: {date_from}")
+    if date_to:
+        components_qs = components_qs.filter(date__lte=date_to)
+        print(f"Filtered by date to: {date_to}")
+    
+    print(f"Final component count for export: {components_qs.count()}")
+    
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Components"
+    
+    # Headers
+    headers = ['Component ID', 'Project ID', 'Project Name', 'Component Name', 'Description', 
+               'Currency', 'Allocation', 'Date Created', 'Created By']
+    ws.append(headers)
+    
+    # Set column widths for better readability
+    from openpyxl.utils import get_column_letter
+    column_widths = {
+        'A': 12,  # Component ID
+        'B': 15,  # Project ID
+        'C': 35,  # Project Name
+        'D': 30,  # Component Name
+        'E': 40,  # Description
+        'F': 12,  # Currency
+        'G': 15,  # Allocation
+        'H': 18,  # Date
+        'I': 15,  # Created By
+    }
+    
+    for col, width in column_widths.items():
+        ws.column_dimensions[col].width = width
+    
+    # Add data rows
+    for component in components_qs.order_by('-date'):
+        row_data = [
+            component.compID,
+            component.projectID.projectID if component.projectID else '',
+            component.projectID.project if component.projectID else '',
+            component.Project_Components or '',
+            component.component_Description or '',
+            component.currency.currency if component.currency else '',
+            component.allocation or 0,
+            component.date.strftime('%Y-%m-%d %H:%M') if component.date else '',
+            component.loginUser.username if component.loginUser else '',
+        ]
+        ws.append(row_data)
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    response['Content-Disposition'] = f'attachment; filename="components_export_{timestamp}.xlsx"'
+    
+    wb.save(response)
+    return response
+
+@login_required
+def export_components_pdf(request):
+    """Export components to PDF with A4 portrait layout"""
+    from django.http import HttpResponse
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.units import mm
+    from PIU_Financial_mgt.models import Currency
+    import datetime
+    
+    print(f"=== COMPONENTS PDF EXPORT DEBUG ===")
+    print(f"PDF export accessed by user: {request.user}")
+    print(f"GET parameters: {request.GET}")
+    print(f"====================================")
+    
+    # Apply same filtering logic as components view
+    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    
+    # Filter parameters (same as components view)
+    project_id = request.GET.get('project', '').strip()
+    component_name = request.GET.get('component', '').strip()
+    currency_id = request.GET.get('currency', '').strip()
+    allocation_min = request.GET.get('allocation_min', '').strip()
+    allocation_max = request.GET.get('allocation_max', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    
+    print(f"PDF filters applied - project: '{project_id}', component: '{component_name}', currency: '{currency_id}'")
+    
+    # Apply filters
+    if project_id and project_id != '':
+        components_qs = components_qs.filter(projectID__projectID=project_id)
+        print(f"Filtered by project ID: {project_id}")
+    if component_name and component_name != '':
+        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        print(f"Filtered by component name: {component_name}")
+    if currency_id and currency_id != '':
+        components_qs = components_qs.filter(currency__id=currency_id)
+        print(f"Filtered by currency ID: {currency_id}")
+    if allocation_min:
+        try:
+            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
+            print(f"Filtered by min allocation: {allocation_min}")
+        except ValueError:
+            pass
+    if allocation_max:
+        try:
+            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
+            print(f"Filtered by max allocation: {allocation_max}")
+        except ValueError:
+            pass
+    if date_from:
+        components_qs = components_qs.filter(date__gte=date_from)
+        print(f"Filtered by date from: {date_from}")
+    if date_to:
+        components_qs = components_qs.filter(date__lte=date_to)
+        print(f"Filtered by date to: {date_to}")
+    
+    print(f"Final component count for PDF export: {components_qs.count()}")
+    
+    # Create PDF
+    response = HttpResponse(content_type='application/pdf')
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    response['Content-Disposition'] = f'attachment; filename="components_export_{timestamp}.pdf"'
+    
+    # Create document with A4 size and 20mm margins
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=A4,
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=20*mm,
+        bottomMargin=20*mm
+    )
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=20,
+        textColor=colors.darkblue
+    )
+    title = Paragraph("Component Management Report", title_style)
+    elements.append(title)
+    
+    # Export info
+    export_info = f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>Total Components: {components_qs.count()}"
+    if any([project_id, component_name, currency_id, allocation_min, allocation_max, date_from, date_to]):
+        export_info += "<br/>Filters Applied: Yes"
+    else:
+        export_info += "<br/>Filters Applied: None (All Components)"
+    
+    info_para = Paragraph(export_info, styles['Normal'])
+    elements.append(info_para)
+    elements.append(Spacer(1, 20))
+    
+    # Prepare table data
+    data = []
+    
+    # Headers
+    headers = ['Comp ID', 'Project ID', 'Component Name', 'Currency', 'Allocation', 'Date']
+    data.append(headers)
+    
+    # Cell style for text wrapping
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+        wordWrap='LTR'
+    )
+    
+    # Add component data with text wrapping
+    for component in components_qs.order_by('-date'):
+        row = [
+            str(component.compID),
+            str(component.projectID.projectID if component.projectID else ''),
+            Paragraph(component.Project_Components or '', cell_style),
+            str(component.currency.currency if component.currency else ''),
+            f"{component.allocation:,.2f}" if component.allocation else '0.00',
+            component.date.strftime('%Y-%m-%d') if component.date else '',
+        ]
+        data.append(row)
+    
+    # Create table with optimized column widths for A4 (170mm available width)
+    table = Table(data, colWidths=[
+        15*mm,  # Comp ID
+        20*mm,  # Project ID  
+        70*mm,  # Component Name (largest for long names)
+        20*mm,  # Currency
+        25*mm,  # Allocation
+        20*mm,  # Date
+    ])
+    
+    # Apply table style
+    table.setStyle(TableStyle([
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        
+        # Data style
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        
+        # Text wrapping and cell height
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        
+        # Borders
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        
+        # Alignment for specific columns
+        ('ALIGN', (4, 1), (4, -1), 'RIGHT'),  # Allocation column right-aligned
+        ('ALIGN', (5, 1), (5, -1), 'CENTER'), # Date column center-aligned
+        
+        # Padding - reduced for better fit
+        ('TOPPADDING', (0, 1), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+    ]))
+    
+    elements.append(table)
+    
+    # Build PDF
+    doc.build(elements)
+    return response
+
+@login_required
 def component_detail(request, component_id):
     """View details of a specific component"""
     component = get_object_or_404(Component, compID=component_id)
