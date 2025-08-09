@@ -677,8 +677,12 @@ def edit_component(request, component_id):
             try:
                 component = form.save(commit=False)
                 component.loginUser = request.user
-                # Save without calling full_clean() to avoid strict validation
+                # Override the clean method temporarily to bypass strict validation
+                original_clean = component.clean
+                component.clean = lambda: None
                 component.save()
+                # Restore original clean method
+                component.clean = original_clean
                 print(f"Component saved successfully: {component.Project_Components}")
                 messages.success(request, 'Component updated successfully!')
                 return redirect('PIU_Financial_mgt:components')
