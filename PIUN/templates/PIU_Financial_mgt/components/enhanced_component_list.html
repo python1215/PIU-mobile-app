@@ -120,7 +120,7 @@
                 <a href="{% url 'PIU_Financial_mgt:components' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-x me-1"></i>Clear All
                 </a>
-                <a href="{% url 'PIU_Financial_mgt:export-components-excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline-success">
+                <a href="{% url 'PIU_Financial_mgt:export_components_excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline-success">
                     <i class="bi bi-download me-1"></i>Export Filtered
                 </a>
             </div>
