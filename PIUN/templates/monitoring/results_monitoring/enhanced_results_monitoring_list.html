@@ -210,7 +210,7 @@
                             <option value="">All Frequencies</option>
                             {% for frequency in collection_frequencies %}
                                 <option value="{{ frequency.pk }}" {% if request.GET.collection_frequency == frequency.pk|stringformat:"s" %}selected{% endif %}>
-                                    {{ frequency.data_collection_frequency }}
+                                    {{ frequency.frequency }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -308,7 +308,7 @@
                                     <td>
                                         <span class="badge bg-info">{{ record.measurement_unit.unit }}</span>
                                     </td>
-                                    <td>{{ record.collection_frequency.data_collection_frequency }}</td>
+                                    <td>{{ record.collection_frequency.frequency }}</td>
                                     <td>
                                         {% if record.baseline_value %}
                                             <span class="badge bg-light text-dark">{{ record.baseline_value|floatformat:2 }}</span>

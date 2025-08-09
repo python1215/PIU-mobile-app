@@ -318,7 +318,7 @@ def enhanced_results_monitoring_list(request):
         project_outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
         project_results = ProjectResult.objects.all().order_by('project_result')
         measurement_units = Measurement_Unit.objects.all().order_by('unit')
-        collection_frequencies = Data_Collection_Frequency.objects.all().order_by('data_collection_frequency')
+        collection_frequencies = Data_Collection_Frequency.objects.all().order_by('frequency')
         
         # Pagination - 10 records per page
         paginator = Paginator(monitoring_qs, 10)
