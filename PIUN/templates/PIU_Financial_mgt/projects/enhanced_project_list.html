@@ -25,7 +25,7 @@
                            onclick="console.log('Excel export clicked'); return true;">
                             <i class="bi bi-file-excel me-1"></i>Excel
                         </a>
-                        <a href="{% url 'PIU_Financial_mgt:export-projects-pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
+                        <a href="{% url 'PIU_Financial_mgt:export_projects_pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
                            class="btn btn-danger" 
                            onclick="console.log('PDF export clicked'); return true;">
                             <i class="bi bi-file-pdf me-1"></i>PDF
