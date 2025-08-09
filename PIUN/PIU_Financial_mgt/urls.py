@@ -46,6 +46,8 @@ urlpatterns =[
     path("activity/<int:activity_id>/", views.activity_detail, name='activity_detail'),
     path("activity/<int:activity_id>/edit/", views.edit_activity, name='edit_activity'),
     path("activity/<int:activity_id>/delete/", views.delete_activity, name='delete_activity'),
+    path("export-activities-excel/", views.export_activities_excel, name='export_activities_excel'),
+    path("export-activities-pdf/", views.export_activities_pdf, name='export_activities_pdf'),
 
     #budget summary
     path("budget-summary/", views.budget_summary, name='budget-summary'),

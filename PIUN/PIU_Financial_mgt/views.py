@@ -1605,6 +1605,311 @@ def activities(request):
     return render(request, 'PIU_Financial_mgt/activity/activities.html', context)
 
 
+@login_required
+def export_activities_excel(request):
+    """Export activities to Excel with professional formatting"""
+    import openpyxl
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+    from datetime import datetime
+    from PIU_Financial_mgt.models import Currency
+    
+    print("=== ACTIVITIES EXCEL EXPORT DEBUG ===")
+    print(f"Excel export accessed by user: {request.user.username}")
+    print(f"GET parameters: {request.GET}")
+    print("=" * 42)
+    
+    # Get filtered activities using same logic as list view
+    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
+    
+    # Apply same filters as main view
+    project_filter = request.GET.get('project', '')
+    component_filter = request.GET.get('component', '')
+    subcomponent_filter = request.GET.get('subcomponent', '')
+    currency_filter = request.GET.get('currency', '')
+    year_filter = request.GET.get('year', '')
+    search_filter = request.GET.get('search', '')
+    
+    print(f"Excel filters applied - project: '{project_filter}', component: '{component_filter}', subcomponent: '{subcomponent_filter}', currency: '{currency_filter}', year: '{year_filter}', search: '{search_filter}'")
+    
+    if project_filter:
+        activities_qs = activities_qs.filter(projectID__projectID=project_filter)
+        print(f"Filtered by project ID: {project_filter}")
+    
+    if component_filter:
+        activities_qs = activities_qs.filter(compID__compID=component_filter)
+        print(f"Filtered by component ID: {component_filter}")
+    
+    if subcomponent_filter:
+        activities_qs = activities_qs.filter(subcompID__subcompID=subcomponent_filter)
+        print(f"Filtered by subcomponent ID: {subcomponent_filter}")
+    
+    if currency_filter:
+        activities_qs = activities_qs.filter(currency__id=currency_filter)
+        print(f"Filtered by currency ID: {currency_filter}")
+    
+    if year_filter:
+        activities_qs = activities_qs.filter(year=year_filter)
+        print(f"Filtered by year: {year_filter}")
+    
+    if search_filter:
+        activities_qs = activities_qs.filter(activity__icontains=search_filter)
+        print(f"Filtered by search: {search_filter}")
+    
+    print(f"Final activity count for Excel export: {activities_qs.count()}")
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Activities"
+    
+    # Headers
+    headers = ['Activity ID', 'Project Name', 'Component Name', 'Subcomponent Name', 'Activity Name', 
+               'Description', 'Currency', 'Allocation', 'Year', 'Date Created', 'Created By']
+    ws.append(headers)
+    
+    # Set column widths for better readability
+    column_widths = {
+        'A': 12,  # Activity ID
+        'B': 30,  # Project Name
+        'C': 25,  # Component Name
+        'D': 25,  # Subcomponent Name
+        'E': 25,  # Activity Name
+        'F': 35,  # Description
+        'G': 10,  # Currency
+        'H': 15,  # Allocation
+        'I': 8,   # Year
+        'J': 18,  # Date
+        'K': 15,  # Created By
+    }
+    
+    for col, width in column_widths.items():
+        ws.column_dimensions[col].width = width
+    
+    # Add data rows
+    for activity in activities_qs.order_by('-year', '-date'):
+        row_data = [
+            activity.activityID,
+            activity.projectID.project if activity.projectID else '',
+            activity.compID.Project_Components if activity.compID else '',
+            activity.subcompID.subcomponent if activity.subcompID else '',
+            activity.activity or '',
+            activity.activity_Description or '',
+            activity.currency.currency if activity.currency else '',
+            activity.allocation or 0,
+            activity.year.profile_year if activity.year else '',
+            activity.date.strftime('%Y-%m-%d %H:%M') if activity.date else '',
+            activity.loginUser.username if activity.loginUser else '',
+        ]
+        ws.append(row_data)
+    
+    # Style the header row
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+    
+    # Add borders to all cells
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.border = thin_border
+            if cell.row > 1:  # Data rows
+                cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+    
+    # Prepare response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'activities_export_{timestamp}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    wb.save(response)
+    print(f"Excel export completed: {filename}")
+    
+    return response
+
+
+@login_required
+def export_activities_pdf(request):
+    """Export activities to PDF with professional A4 formatting"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from django.http import HttpResponse
+    from datetime import datetime
+    from PIU_Financial_mgt.models import Currency
+    
+    print("=== ACTIVITIES PDF EXPORT DEBUG ===")
+    print(f"PDF export accessed by user: {request.user.username}")
+    print(f"GET parameters: {request.GET}")
+    print("=" * 41)
+    
+    # Get filtered activities using same logic as list view
+    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
+    
+    # Apply same filters as main view
+    project_filter = request.GET.get('project', '')
+    component_filter = request.GET.get('component', '')
+    subcomponent_filter = request.GET.get('subcomponent', '')
+    currency_filter = request.GET.get('currency', '')
+    year_filter = request.GET.get('year', '')
+    search_filter = request.GET.get('search', '')
+    
+    print(f"PDF filters applied - project: '{project_filter}', component: '{component_filter}', subcomponent: '{subcomponent_filter}', currency: '{currency_filter}', year: '{year_filter}', search: '{search_filter}'")
+    
+    if project_filter:
+        activities_qs = activities_qs.filter(projectID__projectID=project_filter)
+        print(f"Filtered by project ID: {project_filter}")
+    
+    if component_filter:
+        activities_qs = activities_qs.filter(compID__compID=component_filter)
+        print(f"Filtered by component ID: {component_filter}")
+    
+    if subcomponent_filter:
+        activities_qs = activities_qs.filter(subcompID__subcompID=subcomponent_filter)
+        print(f"Filtered by subcomponent ID: {subcomponent_filter}")
+    
+    if currency_filter:
+        activities_qs = activities_qs.filter(currency__id=currency_filter)
+        print(f"Filtered by currency ID: {currency_filter}")
+    
+    if year_filter:
+        activities_qs = activities_qs.filter(year=year_filter)
+        print(f"Filtered by year: {year_filter}")
+    
+    if search_filter:
+        activities_qs = activities_qs.filter(activity__icontains=search_filter)
+        print(f"Filtered by search: {search_filter}")
+    
+    print(f"Final activity count for PDF export: {activities_qs.count()}")
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'activities_export_{timestamp}.pdf'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Create PDF document with A4 portrait page size
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, 
+                           topMargin=20*mm, bottomMargin=20*mm)
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    
+    # Create title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=20,
+        alignment=1,  # Center alignment
+    )
+    
+    title = Paragraph("Project Activities Report", title_style)
+    
+    # Prepare table data
+    data = []
+    
+    # Headers
+    headers = ['Activity ID', 'Project', 'Component', 'Subcomponent', 'Activity', 'Currency', 'Allocation', 'Year']
+    data.append(headers)
+    
+    # Cell style for text wrapping - optimized for A4 portrait
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=7,  # Smaller font for better fit
+        leading=8,   # Tighter line spacing
+        wordWrap='CJK',  # Better word wrapping
+        splitLongWords=True,  # Split long words if necessary
+        leftIndent=1,
+        rightIndent=1
+    )
+    
+    # Add activity data with text wrapping
+    for activity in activities_qs.order_by('-year', '-date'):
+        # Use project, component, subcomponent and activity names with text wrapping
+        project_name = activity.projectID.project if activity.projectID else ''
+        component_name = activity.compID.Project_Components if activity.compID else ''
+        subcomponent_name = activity.subcompID.subcomponent if activity.subcompID else ''
+        activity_name = activity.activity or ''
+        
+        row = [
+            str(activity.activityID),
+            Paragraph(project_name, cell_style),  # Project name with text wrapping
+            Paragraph(component_name, cell_style),  # Component name with text wrapping
+            Paragraph(subcomponent_name, cell_style),  # Subcomponent name with text wrapping
+            Paragraph(activity_name, cell_style),  # Activity name with text wrapping
+            str(activity.currency.currency if activity.currency else ''),
+            f"{activity.allocation:,.2f}" if activity.allocation else '0.00',
+            str(activity.year.profile_year if activity.year else ''),
+        ]
+        data.append(row)
+    
+    # Create table with optimized column widths for A4 portrait (170mm available width)
+    # Adjusted widths to prevent overflow and accommodate text wrapping
+    table = Table(data, colWidths=[
+        15*mm,  # Activity ID
+        35*mm,  # Project (adequate for long names)
+        25*mm,  # Component
+        25*mm,  # Subcomponent
+        30*mm,  # Activity
+        12*mm,  # Currency
+        18*mm,  # Allocation
+        10*mm,  # Year
+    ])
+    
+    # Apply table style
+    table.setStyle(TableStyle([
+        # Header styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        
+        # Data rows
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')]),
+        
+        # Borders
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#366092')),
+        
+        # Padding
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+    ]))
+    
+    # Build PDF
+    elements = [title, Spacer(1, 12), table]
+    doc.build(elements)
+    
+    print(f"PDF export completed: {filename}")
+    return response
+
+
 ############################################ Dashboard ############################################
 
 @login_required
