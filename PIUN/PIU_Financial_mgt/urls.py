@@ -35,6 +35,8 @@ urlpatterns =[
     path("subcomponent/<int:subcomponent_id>/delete/", views.delete_subcomponent, name='delete_subcomponent'),
     path("add-subcomponent/", views.add_subcomponent, name='add_subcomponent'),
     path("add-subcomponent-isolated/", views.add_subcomponent_isolated, name='add-subcomponent-isolated'),
+    path("export-subcomponents-excel/", views.export_subcomponents_excel, name='export_subcomponents_excel'),
+    path("export-subcomponents-pdf/", views.export_subcomponents_pdf, name='export_subcomponents_pdf'),
     path("load_project_components/", views.load_project_components, name='load_project_components'),
     path("load_project_subcomponents/", views.load_project_subcomponents, name='load_project_subcomponents'),
 

@@ -1071,8 +1071,9 @@ def addsubcomponent(request):
 
 @login_required
 def subcomponents(request):
-    """Enhanced subcomponents list with filtering and statistics"""
+    """Enhanced subcomponents list with filtering, pagination, and statistics"""
     from django.db.models import Sum, Count
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     from PIU_Financial_mgt.models import Currency
     
     # Get all subcomponents
@@ -1119,6 +1120,22 @@ def subcomponents(request):
         'unique_projects': unique_projects,
     }
     
+    # Order subcomponents
+    ordered_subcomponents = subcomponents_qs.order_by('-date')
+    
+    # Pagination - 6 records per page
+    paginator = Paginator(ordered_subcomponents, 6)
+    page = request.GET.get('page')
+    
+    try:
+        subcomponents = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        subcomponents = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page
+        subcomponents = paginator.page(paginator.num_pages)
+    
     # Get filter options
     projects = Project.objects.all()
     components = Component.objects.all()
@@ -1126,11 +1143,8 @@ def subcomponents(request):
     
     is_filtered = bool(project_filter or component_filter or currency_filter or search_filter)
     
-    # Ensure the QuerySet is properly evaluated for the template
-    final_subcomponents = subcomponents_qs.order_by('-date')
-    
     context = {
-        'subcomponents': list(final_subcomponents),  # Convert to list for reliable template evaluation
+        'subcomponents': subcomponents,  # Now a paginated object
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
@@ -1139,6 +1153,284 @@ def subcomponents(request):
     }
     
     return render(request, 'PIU_Financial_mgt/subcomponents/enhanced_subcomponent_list.html', context)
+
+
+@login_required
+def export_subcomponents_excel(request):
+    """Export subcomponents to Excel with professional formatting"""
+    import openpyxl
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+    from datetime import datetime
+    from PIU_Financial_mgt.models import Currency
+    
+    print("=== SUBCOMPONENTS EXCEL EXPORT DEBUG ===")
+    print(f"Excel export accessed by user: {request.user.username}")
+    print(f"GET parameters: {request.GET}")
+    print("=" * 45)
+    
+    # Get filtered subcomponents using same logic as list view
+    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    
+    # Apply same filters as main view
+    project_filter = request.GET.get('project', '')
+    component_filter = request.GET.get('component', '')
+    currency_filter = request.GET.get('currency', '')
+    search_filter = request.GET.get('search', '')
+    
+    print(f"Excel filters applied - project: '{project_filter}', component: '{component_filter}', currency: '{currency_filter}', search: '{search_filter}'")
+    
+    if project_filter:
+        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
+        print(f"Filtered by project ID: {project_filter}")
+    
+    if component_filter:
+        subcomponents_qs = subcomponents_qs.filter(compID__compID=component_filter)
+        print(f"Filtered by component ID: {component_filter}")
+    
+    if currency_filter:
+        subcomponents_qs = subcomponents_qs.filter(currency__id=currency_filter)
+        print(f"Filtered by currency ID: {currency_filter}")
+    
+    if search_filter:
+        subcomponents_qs = subcomponents_qs.filter(subcomponent__icontains=search_filter)
+        print(f"Filtered by search: {search_filter}")
+    
+    print(f"Final subcomponent count for Excel export: {subcomponents_qs.count()}")
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Subcomponents"
+    
+    # Headers
+    headers = ['Subcomponent ID', 'Project Name', 'Component Name', 'Subcomponent Name', 'Description', 
+               'Currency', 'Allocation', 'Date Created', 'Created By']
+    ws.append(headers)
+    
+    # Set column widths for better readability
+    column_widths = {
+        'A': 15,  # Subcomponent ID
+        'B': 35,  # Project Name
+        'C': 30,  # Component Name
+        'D': 30,  # Subcomponent Name
+        'E': 40,  # Description
+        'F': 12,  # Currency
+        'G': 15,  # Allocation
+        'H': 18,  # Date
+        'I': 15,  # Created By
+    }
+    
+    for col, width in column_widths.items():
+        ws.column_dimensions[col].width = width
+    
+    # Add data rows
+    for subcomponent in subcomponents_qs.order_by('-date'):
+        row_data = [
+            subcomponent.subcompID,
+            subcomponent.projectID.project if subcomponent.projectID else '',
+            subcomponent.compID.Project_Components if subcomponent.compID else '',
+            subcomponent.subcomponent or '',
+            subcomponent.subcomponent_Description or '',
+            subcomponent.currency.currency if subcomponent.currency else '',
+            subcomponent.allocation or 0,
+            subcomponent.date.strftime('%Y-%m-%d %H:%M') if subcomponent.date else '',
+            subcomponent.loginUser.username if subcomponent.loginUser else '',
+        ]
+        ws.append(row_data)
+    
+    # Style the header row
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+    
+    # Add borders to all cells
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.border = thin_border
+            if cell.row > 1:  # Data rows
+                cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+    
+    # Prepare response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'subcomponents_export_{timestamp}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    wb.save(response)
+    print(f"Excel export completed: {filename}")
+    
+    return response
+
+
+@login_required
+def export_subcomponents_pdf(request):
+    """Export subcomponents to PDF with professional A4 formatting"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from django.http import HttpResponse
+    from datetime import datetime
+    from PIU_Financial_mgt.models import Currency
+    
+    print("=== SUBCOMPONENTS PDF EXPORT DEBUG ===")
+    print(f"PDF export accessed by user: {request.user.username}")
+    print(f"GET parameters: {request.GET}")
+    print("=" * 44)
+    
+    # Get filtered subcomponents using same logic as list view
+    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    
+    # Apply same filters as main view
+    project_filter = request.GET.get('project', '')
+    component_filter = request.GET.get('component', '')
+    currency_filter = request.GET.get('currency', '')
+    search_filter = request.GET.get('search', '')
+    
+    print(f"PDF filters applied - project: '{project_filter}', component: '{component_filter}', currency: '{currency_filter}', search: '{search_filter}'")
+    
+    if project_filter:
+        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
+        print(f"Filtered by project ID: {project_filter}")
+    
+    if component_filter:
+        subcomponents_qs = subcomponents_qs.filter(compID__compID=component_filter)
+        print(f"Filtered by component ID: {component_filter}")
+    
+    if currency_filter:
+        subcomponents_qs = subcomponents_qs.filter(currency__id=currency_filter)
+        print(f"Filtered by currency ID: {currency_filter}")
+    
+    if search_filter:
+        subcomponents_qs = subcomponents_qs.filter(subcomponent__icontains=search_filter)
+        print(f"Filtered by search: {search_filter}")
+    
+    print(f"Final subcomponent count for PDF export: {subcomponents_qs.count()}")
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'subcomponents_export_{timestamp}.pdf'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Create PDF document with A4 portrait page size
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, 
+                           topMargin=20*mm, bottomMargin=20*mm)
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    
+    # Create title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=20,
+        alignment=1,  # Center alignment
+    )
+    
+    title = Paragraph("Project Subcomponents Report", title_style)
+    
+    # Prepare table data
+    data = []
+    
+    # Headers
+    headers = ['Sub ID', 'Project Name', 'Component', 'Subcomponent', 'Currency', 'Allocation', 'Date']
+    data.append(headers)
+    
+    # Cell style for text wrapping - optimized for A4 portrait
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=7,  # Smaller font for better fit
+        leading=8,   # Tighter line spacing
+        wordWrap='CJK',  # Better word wrapping
+        splitLongWords=True,  # Split long words if necessary
+        leftIndent=1,
+        rightIndent=1
+    )
+    
+    # Add subcomponent data with text wrapping
+    for subcomponent in subcomponents_qs.order_by('-date'):
+        # Use project and component names with text wrapping
+        project_name = subcomponent.projectID.project if subcomponent.projectID else ''
+        component_name = subcomponent.compID.Project_Components if subcomponent.compID else ''
+        subcomponent_name = subcomponent.subcomponent or ''
+        
+        row = [
+            str(subcomponent.subcompID),
+            Paragraph(project_name, cell_style),  # Project name with text wrapping
+            Paragraph(component_name, cell_style),  # Component name with text wrapping
+            Paragraph(subcomponent_name, cell_style),  # Subcomponent name with text wrapping
+            str(subcomponent.currency.currency if subcomponent.currency else ''),
+            f"{subcomponent.allocation:,.2f}" if subcomponent.allocation else '0.00',
+            subcomponent.date.strftime('%Y-%m-%d') if subcomponent.date else '',
+        ]
+        data.append(row)
+    
+    # Create table with optimized column widths for A4 portrait (170mm available width)
+    # Adjusted widths to prevent overflow and accommodate text wrapping
+    table = Table(data, colWidths=[
+        12*mm,  # Sub ID (reduced)
+        40*mm,  # Project Name (adequate for long names)
+        30*mm,  # Component (adequate)
+        35*mm,  # Subcomponent (adequate)
+        15*mm,  # Currency (reduced)
+        20*mm,  # Allocation (reduced)
+        18*mm,  # Date (reduced)
+    ])
+    
+    # Apply table style
+    table.setStyle(TableStyle([
+        # Header styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        
+        # Data rows
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')]),
+        
+        # Borders
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#366092')),
+        
+        # Padding
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+    ]))
+    
+    # Build PDF
+    elements = [title, Spacer(1, 12), table]
+    doc.build(elements)
+    
+    print(f"PDF export completed: {filename}")
+    return response
 
 @login_required
 def addactivity(request):
