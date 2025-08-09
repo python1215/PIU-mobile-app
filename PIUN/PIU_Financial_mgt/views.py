@@ -1203,7 +1203,7 @@ def export_projects_excel(request):
     # Filter parameters (same as projects view)
     project_id = request.GET.get('projectID', '')
     project_name = request.GET.get('project', '')
-    donor_id = request.GET.get('donors', '')
+    donor_id = request.GET.get('donor', '')  # Fixed to match template parameter name
     currency_id = request.GET.get('currency', '')
     funding_min = request.GET.get('funding_min', '')
     funding_max = request.GET.get('funding_max', '')
@@ -1334,20 +1334,25 @@ def export_projects_pdf(request):
     # Filter parameters (same as projects view)
     project_id = request.GET.get('projectID', '')
     project_name = request.GET.get('project', '')
-    donor_id = request.GET.get('donors', '')
+    donor_id = request.GET.get('donor', '')  # Fixed to match template parameter name
     currency_id = request.GET.get('currency', '')
     funding_min = request.GET.get('funding_min', '')
     funding_max = request.GET.get('funding_max', '')
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
     
+    print(f"PDF filters applied - project: '{project_name}', donor: '{donor_id}', currency: '{currency_id}'")
+    
     # Apply filters
     if project_id:
         projects_qs = projects_qs.filter(projectID__icontains=project_id)
+        print(f"Filtered by project ID: {project_id}")
     if project_name:
         projects_qs = projects_qs.filter(project__icontains=project_name)
+        print(f"Filtered by project name: {project_name}")
     if donor_id:
         projects_qs = projects_qs.filter(donors__id=donor_id)
+        print(f"Filtered by donor ID: {donor_id}")
     if currency_id:
         projects_qs = projects_qs.filter(currency__id=currency_id)
     if funding_min:
