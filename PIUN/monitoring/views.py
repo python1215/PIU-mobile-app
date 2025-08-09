@@ -789,11 +789,11 @@ def export_results_monitoring_pdf(request):
         data.append([Paragraph('No records found matching the specified criteria', cell_style)] + [Paragraph('', cell_style)] * (len(headers) - 1))
     
     # Create table with optimized column widths for A4 landscape with 1" margins
-    # Available width is approximately 9.3 inches (11.69 - 2 for margins)
-    # Removed Created By and Date columns, redistributed space
-    col_widths = [0.5*inch, 0.6*inch, 0.9*inch, 1.2*inch, 0.9*inch, 0.9*inch, 
-                  0.7*inch, 1.4*inch, 0.6*inch, 0.7*inch, 0.5*inch, 0.5*inch, 
-                  0.5*inch, 0.6*inch, 0.6*inch, 1.2*inch]
+    # Available width is approximately 9.69 inches (11.69 - 2 for margins)
+    # Adjusted to fit within page bounds - total should be ~9.6 inches
+    col_widths = [0.4*inch, 0.5*inch, 0.65*inch, 0.85*inch, 0.65*inch, 0.65*inch, 
+                  0.55*inch, 1.0*inch, 0.45*inch, 0.55*inch, 0.4*inch, 0.4*inch, 
+                  0.4*inch, 0.45*inch, 0.45*inch, 0.85*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
