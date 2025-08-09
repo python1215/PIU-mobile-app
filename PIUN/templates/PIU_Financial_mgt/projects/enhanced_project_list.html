@@ -121,7 +121,7 @@
                             <select class="form-select" id="donor_filter" name="donor">
                                 <option value="">All Donors</option>
                                 {% for donor in donors %}
-                                <option value="{{ donor.id }}" {% if request.GET.donor == donor.id|stringformat:"s" %}selected{% endif %}>
+                                <option value="{{ donor.donorID }}" {% if request.GET.donor == donor.donorID|stringformat:"s" %}selected{% endif %}>
                                     {{ donor.name }}
                                 </option>
                                 {% endfor %}

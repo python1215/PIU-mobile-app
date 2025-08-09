@@ -484,7 +484,7 @@ def projects(request):
         is_filtered = True
     
     if donor_id:
-        projects_qs = projects_qs.filter(donors__id=donor_id)
+        projects_qs = projects_qs.filter(donors__donorID=donor_id)
         is_filtered = True
     
     if currency_id:
@@ -1216,7 +1216,7 @@ def export_projects_excel(request):
     if project_name:
         projects_qs = projects_qs.filter(project__icontains=project_name)
     if donor_id:
-        projects_qs = projects_qs.filter(donors__id=donor_id)
+        projects_qs = projects_qs.filter(donors__donorID=donor_id)
     if currency_id:
         projects_qs = projects_qs.filter(currency__id=currency_id)
     if funding_min:
@@ -1351,7 +1351,7 @@ def export_projects_pdf(request):
         projects_qs = projects_qs.filter(project__icontains=project_name)
         print(f"Filtered by project name: {project_name}")
     if donor_id:
-        projects_qs = projects_qs.filter(donors__id=donor_id)
+        projects_qs = projects_qs.filter(donors__donorID=donor_id)
         print(f"Filtered by donor ID: {donor_id}")
     if currency_id:
         projects_qs = projects_qs.filter(currency__id=currency_id)
