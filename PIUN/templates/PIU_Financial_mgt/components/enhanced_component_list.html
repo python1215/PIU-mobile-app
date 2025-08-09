@@ -146,7 +146,7 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>projectID</th>
+                            <th>Project</th>
                             <th>Project_Components</th>
                             <th>component_Description</th>
                             <th>currency</th>
@@ -159,7 +159,7 @@
                     <tbody>
                         {% for component in components %}
                             <tr>
-                                <td>{{ component.projectID.projectID }}</td>
+                                <td>{{ component.projectID.project }}</td>
                                 <td>{{ component.Project_Components }}</td>
                                 <td>{{ component.component_Description }}</td>
                                 <td>{{ component.currency.currency }}</td>

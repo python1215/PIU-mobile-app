@@ -708,7 +708,7 @@ def export_components_excel(request):
     ws.title = "Components"
     
     # Headers
-    headers = ['Component ID', 'Project ID', 'Project Name', 'Component Name', 'Description', 
+    headers = ['Component ID', 'Project Name', 'Component Name', 'Description', 
                'Currency', 'Allocation', 'Date Created', 'Created By']
     ws.append(headers)
     
@@ -716,14 +716,13 @@ def export_components_excel(request):
     from openpyxl.utils import get_column_letter
     column_widths = {
         'A': 12,  # Component ID
-        'B': 15,  # Project ID
-        'C': 35,  # Project Name
-        'D': 30,  # Component Name
-        'E': 40,  # Description
-        'F': 12,  # Currency
-        'G': 15,  # Allocation
-        'H': 18,  # Date
-        'I': 15,  # Created By
+        'B': 35,  # Project Name
+        'C': 30,  # Component Name
+        'D': 40,  # Description
+        'E': 12,  # Currency
+        'F': 15,  # Allocation
+        'G': 18,  # Date
+        'H': 15,  # Created By
     }
     
     for col, width in column_widths.items():
@@ -733,7 +732,6 @@ def export_components_excel(request):
     for component in components_qs.order_by('-date'):
         row_data = [
             component.compID,
-            component.projectID.projectID if component.projectID else '',
             component.projectID.project if component.projectID else '',
             component.Project_Components or '',
             component.component_Description or '',
@@ -860,38 +858,46 @@ def export_components_pdf(request):
     data = []
     
     # Headers
-    headers = ['Comp ID', 'Project ID', 'Component Name', 'Currency', 'Allocation', 'Date']
+    headers = ['Comp ID', 'Project Name', 'Component Name', 'Currency', 'Allocation', 'Date']
     data.append(headers)
     
-    # Cell style for text wrapping
+    # Cell style for text wrapping - improved for A4 portrait
     cell_style = ParagraphStyle(
         'CellStyle',
         parent=styles['Normal'],
-        fontSize=8,
-        leading=10,
-        wordWrap='LTR'
+        fontSize=7,  # Smaller font for better fit
+        leading=8,   # Tighter line spacing
+        wordWrap='CJK',  # Better word wrapping
+        splitLongWords=True,  # Split long words if necessary
+        leftIndent=1,
+        rightIndent=1
     )
     
     # Add component data with text wrapping
     for component in components_qs.order_by('-date'):
+        # Use project name instead of project ID and wrap text properly
+        project_name = component.projectID.project if component.projectID else ''
+        component_name = component.Project_Components or ''
+        
         row = [
             str(component.compID),
-            str(component.projectID.projectID if component.projectID else ''),
-            Paragraph(component.Project_Components or '', cell_style),
+            Paragraph(project_name, cell_style),  # Project name with text wrapping
+            Paragraph(component_name, cell_style),  # Component name with text wrapping
             str(component.currency.currency if component.currency else ''),
             f"{component.allocation:,.2f}" if component.allocation else '0.00',
             component.date.strftime('%Y-%m-%d') if component.date else '',
         ]
         data.append(row)
     
-    # Create table with optimized column widths for A4 (170mm available width)
+    # Create table with optimized column widths for A4 portrait (170mm available width)
+    # Adjusted widths to prevent overflow and accommodate text wrapping
     table = Table(data, colWidths=[
-        15*mm,  # Comp ID
-        20*mm,  # Project ID  
-        70*mm,  # Component Name (largest for long names)
-        20*mm,  # Currency
-        25*mm,  # Allocation
-        20*mm,  # Date
+        12*mm,  # Comp ID (reduced)
+        45*mm,  # Project Name (increased for long project names)
+        55*mm,  # Component Name (reduced but still adequate)
+        18*mm,  # Currency (reduced)
+        22*mm,  # Allocation (reduced)
+        18*mm,  # Date (reduced)
     ])
     
     # Apply table style
