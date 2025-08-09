@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 def is_sql_server_mode():
     """Check if system is running in SQL Server mode"""
-    # Always return False to force SQLite/Django ORM mode
-    # This prevents the offline system from incorrectly detecting SQL Server mode
+    # ALWAYS return False to ensure platform independence
+    # This forces Django ORM usage across all modules regardless of database backend
     return False
     
     # Original logic kept for reference but disabled
