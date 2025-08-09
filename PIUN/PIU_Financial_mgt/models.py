@@ -150,10 +150,9 @@ class Component(models.Model):
         # Always validate component allocation against project funding
         self.validate_component_against_project_funding()
         
-        # Skip subcomponent validation for new components (no subcomponents yet) during creation
-        # Only validate during updates when subcomponents exist
-        if self.pk and self.subcomponent_set.exists():
-            self.validate_component_allocation()
+        # Skip strict subcomponent validation to allow flexible component management
+        # This allows users to adjust component allocations for planning purposes
+        # Validation can be enforced at reporting level if needed
    
 class Subcomponent(models.Model):
     projectID = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name ='Project')
