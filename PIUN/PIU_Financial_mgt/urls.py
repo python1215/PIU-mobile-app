@@ -15,8 +15,8 @@ urlpatterns =[
     path("project/<str:project_id>/edit/", views.edit_project, name='edit_project'),
     path("project/<str:project_id>/delete/", views.delete_project, name='delete_project'),
     path("add-project/", views.add_project, name='add-project'),
-    path("export-projects-excel/", views.export_projects_excel, name='export-projects-excel'),
-    path("export-projects-pdf/", views.export_projects_pdf, name='export-projects-pdf'),
+    path("export-projects-excel/", views.export_projects_excel, name='export_projects_excel'),
+    path("export-projects-pdf/", views.export_projects_pdf, name='export_projects_pdf'),
 
      #component
     path("components/", views.components, name='components'),
