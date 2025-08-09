@@ -602,14 +602,14 @@ def export_results_monitoring_pdf(request):
     # Create a buffer to hold PDF content
     buffer = io.BytesIO()
     
-    # Create the PDF object using A4 landscape with normal margins
+    # Create the PDF object using A4 landscape with standard margins
     doc = SimpleDocTemplate(
         buffer,
         pagesize=landscape(A4),
-        rightMargin=0.75*inch,
-        leftMargin=0.75*inch,
+        rightMargin=1*inch,
+        leftMargin=1*inch,
         topMargin=1*inch,
-        bottomMargin=0.75*inch
+        bottomMargin=1*inch
     )
     
     # Get all filter parameters from GET request
@@ -791,11 +791,11 @@ def export_results_monitoring_pdf(request):
         )
         data.append([Paragraph('No records found matching the specified criteria', cell_style)] + [Paragraph('', cell_style)] * (len(headers) - 1))
     
-    # Create table with optimized column widths for landscape A4 with normal margins
-    # Available width is approximately 9.5 inches (11 - 1.5 for margins)
-    col_widths = [0.5*inch, 0.6*inch, 0.9*inch, 1.1*inch, 0.9*inch, 0.9*inch, 
-                  0.7*inch, 1.3*inch, 0.6*inch, 0.7*inch, 0.5*inch, 0.5*inch, 
-                  0.5*inch, 0.6*inch, 0.6*inch, 1.1*inch, 0.7*inch, 0.6*inch]
+    # Create table with optimized column widths for A4 landscape with 1" margins
+    # Available width is approximately 9.3 inches (11.69 - 2 for margins)
+    col_widths = [0.45*inch, 0.55*inch, 0.8*inch, 1.0*inch, 0.8*inch, 0.8*inch, 
+                  0.65*inch, 1.2*inch, 0.5*inch, 0.65*inch, 0.45*inch, 0.45*inch, 
+                  0.45*inch, 0.55*inch, 0.55*inch, 1.0*inch, 0.65*inch, 0.55*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
