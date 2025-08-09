@@ -313,7 +313,7 @@ def enhanced_results_monitoring_list(request):
         projects = Project.objects.all().order_by('project')
         years = YEAR.objects.all().order_by('-profile_year')
         quarters = Quarter.objects.all().order_by('quarter')
-        indicator_types = Indicator_Type.objects.all().order_by('IndicatorType')
+        indicator_types = Indicator_Type.objects.all().order_by('indicator_type')
         pdos = PDO.objects.all().order_by('pdo_statement')
         project_outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
         project_results = ProjectResult.objects.all().order_by('project_result')
