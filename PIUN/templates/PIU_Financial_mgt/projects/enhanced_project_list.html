@@ -18,19 +18,18 @@
                     <a href="{% url 'PIU_Financial_mgt:add-project' %}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>Add Project
                     </a>
-                    <!-- Export Dropdown -->
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-download me-1"></i>Export
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                            <li><a class="dropdown-item" href="{% url 'PIU_Financial_mgt:export-projects-excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
-                                <i class="bi bi-file-excel me-2 text-success"></i>Excel Format (.xlsx)
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'PIU_Financial_mgt:export-projects-pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
-                                <i class="bi bi-file-pdf me-2 text-danger"></i>PDF Format (A4 Portrait)
-                            </a></li>
-                        </ul>
+                    <!-- Export Buttons - Direct Links for Testing -->
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'PIU_Financial_mgt:export-projects-excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
+                           class="btn btn-success" 
+                           onclick="console.log('Excel export clicked'); return true;">
+                            <i class="bi bi-file-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'PIU_Financial_mgt:export-projects-pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
+                           class="btn btn-danger" 
+                           onclick="console.log('PDF export clicked'); return true;">
+                            <i class="bi bi-file-pdf me-1"></i>PDF
+                        </a>
                     </div>
                 </div>
             </div>

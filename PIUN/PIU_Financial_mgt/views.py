@@ -1189,9 +1189,13 @@ def export_projects_excel(request):
     from PIU_Financial_mgt.models import Currency
     import datetime
     
+    print(f"=== EXCEL EXPORT DEBUG ===")
     print(f"Excel export accessed by user: {request.user}")
+    print(f"User authenticated: {request.user.is_authenticated}")
     print(f"Request method: {request.method}")
     print(f"GET parameters: {request.GET}")
+    print(f"Request path: {request.path}")
+    print(f"===========================")
     
     # Apply same filtering logic as projects view
     projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
@@ -1316,9 +1320,13 @@ def export_projects_pdf(request):
     from setup.models import Donor
     import datetime
     
+    print(f"=== PDF EXPORT DEBUG ===")
     print(f"PDF export accessed by user: {request.user}")
+    print(f"User authenticated: {request.user.is_authenticated}")
     print(f"Request method: {request.method}")
     print(f"GET parameters: {request.GET}")
+    print(f"Request path: {request.path}")
+    print(f"========================")
     
     # Apply same filtering logic as projects view
     projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
