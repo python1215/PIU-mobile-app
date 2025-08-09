@@ -148,7 +148,7 @@
                             <option value="">All Types</option>
                             {% for indicator_type in indicator_types %}
                                 <option value="{{ indicator_type.pk }}" {% if request.GET.indicator_type == indicator_type.pk|stringformat:"s" %}selected{% endif %}>
-                                    {{ indicator_type.IndicatorType }}
+                                    {{ indicator_type.indicator_type }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -302,7 +302,7 @@
                                     <td>{{ record.project_outcome.project_outcome|truncatechars:25 }}</td>
                                     <td>{{ record.project_result.project_result|truncatechars:25 }}</td>
                                     <td>
-                                        <span class="badge bg-primary">{{ record.indicator_type.IndicatorType }}</span>
+                                        <span class="badge bg-primary">{{ record.indicator_type.indicator_type }}</span>
                                     </td>
                                     <td>{{ record.indicator_description|truncatechars:35 }}</td>
                                     <td>
@@ -324,33 +324,33 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if record.target_value %}
-                                            <span class="badge bg-warning text-dark">{{ record.target_value|floatformat:2 }}</span>
+                                        {% if record.End_Target_Value %}
+                                            <span class="badge bg-warning text-dark">{{ record.End_Target_Value|floatformat:2 }}</span>
                                         {% else %}
                                             <span class="text-muted">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if record.percent_vs_baseline %}
-                                            {% if record.percent_vs_baseline >= 80 %}
-                                                <span class="badge bg-success">{{ record.percent_vs_baseline|floatformat:1 }}%</span>
-                                            {% elif record.percent_vs_baseline >= 60 %}
-                                                <span class="badge bg-warning text-dark">{{ record.percent_vs_baseline|floatformat:1 }}%</span>
+                                        {% if record.percentage_achieved_vs_baseline %}
+                                            {% if record.percentage_achieved_vs_baseline >= 80 %}
+                                                <span class="badge bg-success">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
+                                            {% elif record.percentage_achieved_vs_baseline >= 60 %}
+                                                <span class="badge bg-warning text-dark">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
                                             {% else %}
-                                                <span class="badge bg-danger">{{ record.percent_vs_baseline|floatformat:1 }}%</span>
+                                                <span class="badge bg-danger">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
                                             {% endif %}
                                         {% else %}
                                             <span class="text-muted">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if record.percent_vs_target %}
-                                            {% if record.percent_vs_target >= 80 %}
-                                                <span class="badge bg-success">{{ record.percent_vs_target|floatformat:1 }}%</span>
-                                            {% elif record.percent_vs_target >= 60 %}
-                                                <span class="badge bg-warning text-dark">{{ record.percent_vs_target|floatformat:1 }}%</span>
+                                        {% if record.percentage_achieved_vs_end_target %}
+                                            {% if record.percentage_achieved_vs_end_target >= 80 %}
+                                                <span class="badge bg-success">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
+                                            {% elif record.percentage_achieved_vs_end_target >= 60 %}
+                                                <span class="badge bg-warning text-dark">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
                                             {% else %}
-                                                <span class="badge bg-danger">{{ record.percent_vs_target|floatformat:1 }}%</span>
+                                                <span class="badge bg-danger">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
                                             {% endif %}
                                         {% else %}
                                             <span class="text-muted">N/A</span>
