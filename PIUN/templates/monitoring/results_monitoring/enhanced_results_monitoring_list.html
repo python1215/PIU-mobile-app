@@ -23,6 +23,42 @@
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card bg-primary text-white border-0">
+                <div class="card-body text-center py-3">
+                    <h4 class="mb-0 fw-bold">{{ total_count }}</h4>
+                    <small>Total Records</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card bg-success text-white border-0">
+                <div class="card-body text-center py-3">
+                    <h4 class="mb-0 fw-bold">{{ filtered_count|default:total_count }}</h4>
+                    <small>Showing Results</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card bg-info text-white border-0">
+                <div class="card-body text-center py-3">
+                    <h4 class="mb-0 fw-bold">{{ projects|length }}</h4>
+                    <small>Active Projects</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card bg-warning text-dark border-0">
+                <div class="card-body text-center py-3">
+                    <h4 class="mb-0 fw-bold">{{ indicator_types|length }}</h4>
+                    <small>Indicator Types</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Message -->
     {% if messages %}
         {% for message in messages %}
@@ -32,6 +68,143 @@
             </div>
         {% endfor %}
     {% endif %}
+
+    <!-- Advanced Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Advanced Filters
+                {% if is_filtered %}
+                    <span class="badge bg-primary ms-2">Active</span>
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="project" class="form-label">Project</label>
+                    <select class="form-select" id="project" name="project">
+                        <option value="">All Projects</option>
+                        {% for project in projects %}
+                            <option value="{{ project.projectID }}" {% if current_filters.project == project.projectID %}selected{% endif %}>
+                                {{ project.project|truncatechars:30 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="year" class="form-label">Year</label>
+                    <select class="form-select" id="year" name="year">
+                        <option value="">All Years</option>
+                        {% for year in years %}
+                            <option value="{{ year.id }}" {% if current_filters.year == year.id|stringformat:'s' %}selected{% endif %}>
+                                {{ year.profile_year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="quarter" class="form-label">Quarter</label>
+                    <select class="form-select" id="quarter" name="quarter">
+                        <option value="">All Quarters</option>
+                        {% for quarter in quarters %}
+                            <option value="{{ quarter.id }}" {% if current_filters.quarter == quarter.id|stringformat:'s' %}selected{% endif %}>
+                                {{ quarter.quarter }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="indicator_type" class="form-label">Indicator Type</label>
+                    <select class="form-select" id="indicator_type" name="indicator_type">
+                        <option value="">All Types</option>
+                        {% for type in indicator_types %}
+                            <option value="{{ type.id }}" {% if current_filters.indicator_type == type.id|stringformat:'s' %}selected{% endif %}>
+                                {{ type.IndicatorType }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="pdo" class="form-label">PDO</label>
+                    <select class="form-select" id="pdo" name="pdo">
+                        <option value="">All PDOs</option>
+                        {% for pdo in pdos %}
+                            <option value="{{ pdo.id }}" {% if current_filters.pdo == pdo.id|stringformat:'s' %}selected{% endif %}>
+                                {{ pdo.pdo_statement|truncatechars:30 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="project_outcome" class="form-label">Project Outcome</label>
+                    <select class="form-select" id="project_outcome" name="project_outcome">
+                        <option value="">All Outcomes</option>
+                        {% for outcome in project_outcomes %}
+                            <option value="{{ outcome.id }}" {% if current_filters.project_outcome == outcome.id|stringformat:'s' %}selected{% endif %}>
+                                {{ outcome.project_outcome|truncatechars:25 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="project_result" class="form-label">Project Result</label>
+                    <select class="form-select" id="project_result" name="project_result">
+                        <option value="">All Results</option>
+                        {% for result in project_results %}
+                            <option value="{{ result.id }}" {% if current_filters.project_result == result.id|stringformat:'s' %}selected{% endif %}>
+                                {{ result.project_result|truncatechars:25 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="measurement_unit" class="form-label">Measurement Unit</label>
+                    <select class="form-select" id="measurement_unit" name="measurement_unit">
+                        <option value="">All Units</option>
+                        {% for unit in measurement_units %}
+                            <option value="{{ unit.id }}" {% if current_filters.measurement_unit == unit.id|stringformat:'s' %}selected{% endif %}>
+                                {{ unit.measurement_unit }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="collection_frequency" class="form-label">Collection Frequency</label>
+                    <select class="form-select" id="collection_frequency" name="collection_frequency">
+                        <option value="">All Frequencies</option>
+                        {% for frequency in collection_frequencies %}
+                            <option value="{{ frequency.id }}" {% if current_filters.collection_frequency == frequency.id|stringformat:'s' %}selected{% endif %}>
+                                {{ frequency.data_collection_frequency }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Search Description/Remarks</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ current_filters.search }}" 
+                           placeholder="Search in indicator description or remarks...">
+                </div>
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Apply Filters
+                        </button>
+                        <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </a>
+                        <div class="ms-auto">
+                            <a href="{% url 'monitoring:export-results-monitoring' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
+                               class="btn btn-success">
+                                <i class="fas fa-file-excel me-1"></i>Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Records Table -->
     <div class="card shadow border-0" style="border-radius: 15px;">
@@ -58,13 +231,19 @@
                                 <th>Quarter</th>
                                 <th>Project</th>
                                 <th>PDO</th>
+                                <th>Project Outcome</th>
+                                <th>Project Result</th>
                                 <th>Indicator Type</th>
                                 <th>Indicator Description</th>
+                                <th>Measurement Unit</th>
+                                <th>Collection Frequency</th>
                                 <th>Baseline</th>
                                 <th>Achieved</th>
                                 <th>Target</th>
                                 <th>% vs Baseline</th>
-                                <th>Status</th>
+                                <th>% vs Target</th>
+                                <th>Remarks</th>
+                                <th>Created By</th>
                                 <th>Date Created</th>
                                 <th>Actions</th>
                             </tr>
@@ -73,23 +252,28 @@
                             {% for record in monitoring_records %}
                                 <tr>
                                     <td>
-                                        <strong>{{ record.year|default:"N/A" }}</strong>
+                                        <strong>{{ record.year.profile_year|default:"N/A" }}</strong>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ record.quarter|default:"N/A" }}</span>
+                                        <span class="badge bg-secondary">{{ record.quarter.quarter|default:"N/A" }}</span>
                                     </td>
                                     <td>
                                         <strong>{{ record.project.project|truncatechars:20 }}</strong><br>
                                         <small class="text-muted">{{ record.project.projectID }}</small>
                                     </td>
-                                    <td>{{ record.pdo.pdo_statement|truncatechars:30 }}</td>
+                                    <td>{{ record.pdo.pdo_statement|truncatechars:25 }}</td>
+                                    <td>{{ record.project_outcome.project_outcome|truncatechars:25 }}</td>
+                                    <td>{{ record.project_result.project_result|truncatechars:25 }}</td>
                                     <td>
-                                        <span class="badge bg-primary">{{ record.indicator_type }}</span>
+                                        <span class="badge bg-primary">{{ record.indicator_type.IndicatorType }}</span>
                                     </td>
-                                    <td>{{ record.indicator_description|truncatechars:40 }}</td>
+                                    <td>{{ record.indicator_description|truncatechars:35 }}</td>
                                     <td>
-                                        <strong>{{ record.baseline_value|floatformat:1|default:"--" }}</strong><br>
-                                        <small class="text-muted">{{ record.measurement_unit }}</small>
+                                        <span class="badge bg-info">{{ record.measurement_unit.measurement_unit }}</span>
+                                    </td>
+                                    <td>{{ record.collection_frequency.data_collection_frequency }}</td>
+                                    <td>
+                                        <strong>{{ record.baseline_value|floatformat:1|default:"--" }}</strong>
                                     </td>
                                     <td>
                                         <strong class="text-success">{{ record.achieved_value|floatformat:1|default:"--" }}</strong>
@@ -111,30 +295,42 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if record.achieved_value and record.End_Target_Value %}
-                                            {% if record.achieved_value >= record.End_Target_Value %}
-                                                <span class="badge bg-success rounded-pill">Achieve</span>
+                                        {% if record.percentage_achieved_vs_end_target %}
+                                            {% if record.percentage_achieved_vs_end_target >= 100 %}
+                                                <span class="badge bg-success">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
+                                            {% elif record.percentage_achieved_vs_end_target >= 75 %}
+                                                <span class="badge bg-warning">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
                                             {% else %}
-                                                <span class="badge bg-danger rounded-pill">Not Achieve</span>
+                                                <span class="badge bg-danger">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}%</span>
                                             {% endif %}
                                         {% else %}
-                                            <span class="badge bg-secondary rounded-pill">N/A</span>
+                                            <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.remarks|truncatechars:30 }}</td>
+                                    <td>
+                                        {% if record.loginUser.first_name %}
+                                            {{ record.loginUser.first_name }} {{ record.loginUser.last_name }}
+                                        {% else %}
+                                            {{ record.loginUser.username }}
                                         {% endif %}
                                     </td>
                                     <td>
                                         <small>{{ record.date_created|date:"M d, Y" }}</small><br>
-                                        <small class="text-muted">{{ record.loginUser.username }}</small>
+                                        <small class="text-muted">{{ record.date_created|time:"H:i" }}</small>
                                     </td>
                                     <td>
-                                        <div class="btn-group" role="group">
+                                        <div class="btn-group btn-group-sm" role="group">
                                             {% if record.pk %}
-                                                <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" class="btn btn-outline-info btn-sm" title="View Details">
+                                                <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" class="btn btn-outline-info" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                                <a href="{% url 'monitoring:update-results-monitoring' record.pk %}" class="btn btn-outline-warning" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                <a href="{% url 'monitoring:delete-results-monitoring' record.pk %}" 
+                                                   class="btn btn-outline-danger" title="Delete"
+                                                   onclick="return confirm('Are you sure you want to delete this monitoring record?')">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             {% else %}
@@ -156,6 +352,90 @@
                         <i class="fas fa-plus me-2"></i>Add First Record
                     </a>
                 </div>
+                
+                <!-- Pagination -->
+                {% if monitoring_records.has_other_pages %}
+                <div class="d-flex justify-content-between align-items-center mt-4 px-3 pb-3">
+                    <div class="pagination-info">
+                        <small class="text-muted">
+                            Showing {{ monitoring_records.start_index }} to {{ monitoring_records.end_index }} 
+                            of {{ monitoring_records.paginator.count }} entries
+                        </small>
+                    </div>
+                    
+                    <nav aria-label="Monitoring records pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if monitoring_records.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ monitoring_records.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;&laquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in monitoring_records.paginator.page_range %}
+                                {% if monitoring_records.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > monitoring_records.number|add:'-3' and num < monitoring_records.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if monitoring_records.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ monitoring_records.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ monitoring_records.paginator.num_pages }}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No monitoring records found</h5>
+                    {% if is_filtered %}
+                        <p class="text-muted">No records match your current filters. Try adjusting your search criteria.</p>
+                        <a href="{% url 'monitoring:enhanced-results-monitoring-list' %}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Start by adding your first monitoring record.</p>
+                    {% endif %}
+                    <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add First Record
+                    </a>
+                </div>
             {% endif %}
         </div>
     </div>
@@ -166,12 +446,16 @@
         border-top: none;
         font-weight: 600;
         color: #495057;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
     }
     
     .table td {
         vertical-align: middle;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .btn-group .btn {

@@ -9,7 +9,7 @@ from .forms import Results_Oriented_MonitoringForm, updateResults_Oriented_Monit
 # Using standard forms from forms.py
 from django.contrib import messages
 
-from setup.models import Indicator_Type
+from setup.models import Indicator_Type, Measurement_Unit, Data_Collection_Frequency
 from PIU_Financial_mgt.models import ProjectOutCome, PDO, ProjectResult
 from monitoring.models import Indicator_Description
 from django.views.decorators.csrf import csrf_exempt
@@ -237,21 +237,130 @@ def add_results_monitoring(request):
 
 @login_required
 def enhanced_results_monitoring_list(request):
-    """Enhanced list view for Results Oriented Monitoring records using Django ORM"""
+    """Enhanced list view for Results Oriented Monitoring records with comprehensive filtering"""
+    from django.core.paginator import Paginator
+    from django.db import models
+    from PIU_Financial_mgt.models import Project
+    from setup.models import YEAR, Quarter
+    
     try:
-        # Use Django ORM exclusively - force evaluation
-        monitoring_records = list(Results_Oriented_Monitoring.objects.select_related(
+        # Get all monitoring records with related fields
+        monitoring_qs = Results_Oriented_Monitoring.objects.select_related(
             'project', 'pdo', 'project_outcome', 'project_result', 
             'indicator_type', 'measurement_unit', 'collection_frequency',
             'year', 'quarter', 'loginUser'
-        ).order_by('-date_created'))
+        )
         
-        # Records successfully retrieved
+        # Apply filters based on GET parameters
+        project_filter = request.GET.get('project', '')
+        year_filter = request.GET.get('year', '')
+        quarter_filter = request.GET.get('quarter', '')
+        indicator_type_filter = request.GET.get('indicator_type', '')
+        pdo_filter = request.GET.get('pdo', '')
+        project_outcome_filter = request.GET.get('project_outcome', '')
+        project_result_filter = request.GET.get('project_result', '')
+        measurement_unit_filter = request.GET.get('measurement_unit', '')
+        collection_frequency_filter = request.GET.get('collection_frequency', '')
+        search_filter = request.GET.get('search', '')
+        
+        # Filter by project
+        if project_filter:
+            monitoring_qs = monitoring_qs.filter(project__projectID=project_filter)
+        
+        # Filter by year
+        if year_filter:
+            monitoring_qs = monitoring_qs.filter(year__id=year_filter)
+        
+        # Filter by quarter
+        if quarter_filter:
+            monitoring_qs = monitoring_qs.filter(quarter__id=quarter_filter)
+        
+        # Filter by indicator type
+        if indicator_type_filter:
+            monitoring_qs = monitoring_qs.filter(indicator_type__id=indicator_type_filter)
+        
+        # Filter by PDO
+        if pdo_filter:
+            monitoring_qs = monitoring_qs.filter(pdo__id=pdo_filter)
+        
+        # Filter by project outcome
+        if project_outcome_filter:
+            monitoring_qs = monitoring_qs.filter(project_outcome__id=project_outcome_filter)
+        
+        # Filter by project result
+        if project_result_filter:
+            monitoring_qs = monitoring_qs.filter(project_result__id=project_result_filter)
+        
+        # Filter by measurement unit
+        if measurement_unit_filter:
+            monitoring_qs = monitoring_qs.filter(measurement_unit__id=measurement_unit_filter)
+        
+        # Filter by collection frequency
+        if collection_frequency_filter:
+            monitoring_qs = monitoring_qs.filter(collection_frequency__id=collection_frequency_filter)
+        
+        # Search filter for indicator description and remarks
+        if search_filter:
+            monitoring_qs = monitoring_qs.filter(
+                models.Q(indicator_description__icontains=search_filter) |
+                models.Q(remarks__icontains=search_filter)
+            )
+        
+        # Order by creation date (most recent first)
+        monitoring_qs = monitoring_qs.order_by('-date_created')
+        
+        # Get filter options for dropdown
+        projects = Project.objects.all().order_by('project')
+        years = YEAR.objects.all().order_by('-profile_year')
+        quarters = Quarter.objects.all().order_by('quarter')
+        indicator_types = Indicator_Type.objects.all().order_by('IndicatorType')
+        pdos = PDO.objects.all().order_by('pdo_statement')
+        project_outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
+        project_results = ProjectResult.objects.all().order_by('project_result')
+        measurement_units = Measurement_Unit.objects.all().order_by('measurement_unit')
+        collection_frequencies = Data_Collection_Frequency.objects.all().order_by('data_collection_frequency')
+        
+        # Pagination - 10 records per page
+        paginator = Paginator(monitoring_qs, 10)
+        page_number = request.GET.get('page')
+        monitoring_records = paginator.get_page(page_number)
+        
+        # Check if any filters are applied
+        is_filtered = any([
+            project_filter, year_filter, quarter_filter, indicator_type_filter,
+            pdo_filter, project_outcome_filter, project_result_filter,
+            measurement_unit_filter, collection_frequency_filter, search_filter
+        ])
         
         context = {
             'monitoring_records': monitoring_records,
             'title': 'Enhanced Results Monitoring List',
-            'total_count': len(monitoring_records)
+            'total_count': paginator.count,
+            'filtered_count': len(monitoring_records.object_list),
+            'is_filtered': is_filtered,
+            # Filter options
+            'projects': projects,
+            'years': years,
+            'quarters': quarters,
+            'indicator_types': indicator_types,
+            'pdos': pdos,
+            'project_outcomes': project_outcomes,
+            'project_results': project_results,
+            'measurement_units': measurement_units,
+            'collection_frequencies': collection_frequencies,
+            # Current filter values
+            'current_filters': {
+                'project': project_filter,
+                'year': year_filter,
+                'quarter': quarter_filter,
+                'indicator_type': indicator_type_filter,
+                'pdo': pdo_filter,
+                'project_outcome': project_outcome_filter,
+                'project_result': project_result_filter,
+                'measurement_unit': measurement_unit_filter,
+                'collection_frequency': collection_frequency_filter,
+                'search': search_filter,
+            }
         }
         
     except Exception as e:
@@ -259,7 +368,18 @@ def enhanced_results_monitoring_list(request):
             'monitoring_records': [],
             'title': 'Enhanced Results Monitoring List',
             'total_count': 0,
-            'error_message': f"Error loading monitoring records: {str(e)}"
+            'error_message': f"Error loading monitoring records: {str(e)}",
+            'projects': [],
+            'years': [],
+            'quarters': [],
+            'indicator_types': [],
+            'pdos': [],
+            'project_outcomes': [],
+            'project_results': [],
+            'measurement_units': [],
+            'collection_frequencies': [],
+            'current_filters': {},
+            'is_filtered': False,
         }
     
     return render(request, 'monitoring/results_monitoring/enhanced_results_monitoring_list.html', context)
