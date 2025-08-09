@@ -719,8 +719,7 @@ def export_results_monitoring_pdf(request):
         Paragraph('Unit', header_style), Paragraph('Frequency', header_style),
         Paragraph('Baseline', header_style), Paragraph('Achieved', header_style), 
         Paragraph('Target', header_style), Paragraph('% vs<br/>Base', header_style), 
-        Paragraph('% vs<br/>Target', header_style), Paragraph('Remarks', header_style), 
-        Paragraph('Created By', header_style), Paragraph('Date', header_style)
+        Paragraph('% vs<br/>Target', header_style), Paragraph('Remarks', header_style)
     ]
     data.append(headers)
     
@@ -774,9 +773,7 @@ def export_results_monitoring_pdf(request):
             Paragraph(f"{record.End_Target_Value:.1f}" if record.End_Target_Value else 'N/A', cell_style),
             Paragraph(f"{record.percentage_achieved_vs_baseline:.1f}%" if record.percentage_achieved_vs_baseline else 'N/A', cell_style),
             Paragraph(f"{record.percentage_achieved_vs_end_target:.1f}%" if record.percentage_achieved_vs_end_target else 'N/A', cell_style),
-            Paragraph(safe_get(record, 'remarks'), cell_style),
-            Paragraph(safe_get_nested(record, 'loginUser.username'), cell_style),
-            Paragraph(record.date_created.strftime('%m/%d/%Y') if record.date_created else 'N/A', cell_style)
+            Paragraph(safe_get(record, 'remarks'), cell_style)
         ]
         data.append(row)
     
@@ -793,9 +790,10 @@ def export_results_monitoring_pdf(request):
     
     # Create table with optimized column widths for A4 landscape with 1" margins
     # Available width is approximately 9.3 inches (11.69 - 2 for margins)
-    col_widths = [0.45*inch, 0.55*inch, 0.8*inch, 1.0*inch, 0.8*inch, 0.8*inch, 
-                  0.65*inch, 1.2*inch, 0.5*inch, 0.65*inch, 0.45*inch, 0.45*inch, 
-                  0.45*inch, 0.55*inch, 0.55*inch, 1.0*inch, 0.65*inch, 0.55*inch]
+    # Removed Created By and Date columns, redistributed space
+    col_widths = [0.5*inch, 0.6*inch, 0.9*inch, 1.2*inch, 0.9*inch, 0.9*inch, 
+                  0.7*inch, 1.4*inch, 0.6*inch, 0.7*inch, 0.5*inch, 0.5*inch, 
+                  0.5*inch, 0.6*inch, 0.6*inch, 1.2*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
