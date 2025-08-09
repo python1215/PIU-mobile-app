@@ -79,7 +79,7 @@
                     <option value="">All Projects</option>
                     {% for project in projects %}
                         <option value="{{ project.projectID }}" {% if request.GET.project == project.projectID %}selected{% endif %}>
-                            {{ project.projectID }} - {{ project.project|truncatechars:30 }}
+                            {{ project.project }}
                         </option>
                     {% endfor %}
                 </select>
