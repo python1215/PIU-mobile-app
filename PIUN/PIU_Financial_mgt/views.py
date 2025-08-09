@@ -1369,14 +1369,15 @@ def export_projects_pdf(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename=projects_export_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
     
-    # Create PDF document
+    # Create PDF document with standard A4 margins (20mm)
+    from reportlab.lib.units import mm
     doc = SimpleDocTemplate(
         response, 
         pagesize=A4,
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
-        topMargin=0.7*inch,
-        bottomMargin=0.5*inch
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=20*mm,
+        bottomMargin=20*mm
     )
     
     # Build content
@@ -1439,14 +1440,15 @@ def export_projects_pdf(request):
         ]
         data.append(row)
     
-    # Create table with optimized column widths for A4 portrait
+    # Create table with optimized column widths for A4 portrait with 20mm margins
+    # A4 width = 210mm, minus margins (40mm) = 170mm available
     col_widths = [
-        1.0*inch,   # Project ID
-        2.8*inch,   # Project Name (lengthier)
-        1.8*inch,   # Donors
-        0.8*inch,   # Currency
-        1.2*inch,   # Funding
-        0.8*inch,   # Status
+        25*mm,   # Project ID
+        70*mm,   # Project Name (wide for long names)
+        30*mm,   # Donors
+        15*mm,   # Currency
+        20*mm,   # Funding
+        15*mm    # Status
     ]
     
     table = Table(data, colWidths=col_widths)
@@ -1458,7 +1460,7 @@ def export_projects_pdf(request):
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         
         # Data styling
@@ -1466,7 +1468,7 @@ def export_projects_pdf(request):
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
         
         # Borders
