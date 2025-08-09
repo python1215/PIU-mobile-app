@@ -1667,7 +1667,7 @@ def export_activities_excel(request):
     
     # Headers
     headers = ['Activity ID', 'Project Name', 'Component Name', 'Subcomponent Name', 'Activity Name', 
-               'Description', 'Currency', 'Allocation', 'Year', 'Date Created', 'Created By']
+               'Currency', 'Allocation', 'Year', 'Date Created', 'Created By']
     ws.append(headers)
     
     # Set column widths for better readability
@@ -1676,13 +1676,12 @@ def export_activities_excel(request):
         'B': 30,  # Project Name
         'C': 25,  # Component Name
         'D': 25,  # Subcomponent Name
-        'E': 25,  # Activity Name
-        'F': 35,  # Description
-        'G': 10,  # Currency
-        'H': 15,  # Allocation
-        'I': 8,   # Year
-        'J': 18,  # Date
-        'K': 15,  # Created By
+        'E': 35,  # Activity Name
+        'F': 10,  # Currency
+        'G': 15,  # Allocation
+        'H': 8,   # Year
+        'I': 18,  # Date
+        'J': 15,  # Created By
     }
     
     for col, width in column_widths.items():
@@ -1696,7 +1695,6 @@ def export_activities_excel(request):
             activity.compID.Project_Components if activity.compID else '',
             activity.subcompID.subcomponent if activity.subcompID else '',
             activity.activity or '',
-            activity.activity_Description or '',
             activity.currency.currency if activity.currency else '',
             activity.allocation or 0,
             activity.year.profile_year if activity.year else '',
@@ -1870,7 +1868,7 @@ def export_activities_pdf(request):
         35*mm,  # Project (adequate for long names)
         25*mm,  # Component
         25*mm,  # Subcomponent
-        30*mm,  # Activity
+        40*mm,  # Activity (increased width for longer activity descriptions)
         12*mm,  # Currency
         18*mm,  # Allocation
         10*mm,  # Year
