@@ -1426,9 +1426,16 @@ def export_projects_pdf(request):
             else:
                 status = "Closing Soon"
         
-        # Create Paragraph objects for long text to enable text wrapping
-        project_name_para = Paragraph(str(project.project) if project.project else '', styles['Normal'])
-        donors_para = Paragraph(donors_list if donors_list else '', styles['Normal'])
+        # Create Paragraph objects for long text to enable text wrapping with smaller font
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=10,
+            wordWrap='LTR'
+        )
+        project_name_para = Paragraph(str(project.project) if project.project else '', cell_style)
+        donors_para = Paragraph(donors_list if donors_list else '', cell_style)
         
         row = [
             str(project.projectID) if project.projectID else '',
@@ -1443,13 +1450,13 @@ def export_projects_pdf(request):
     # Create table with optimized column widths for A4 portrait with 20mm margins
     # A4 width = 210mm, minus margins (40mm) = 170mm available
     col_widths = [
-        25*mm,   # Project ID
-        70*mm,   # Project Name (wide for long names)
-        30*mm,   # Donors
+        20*mm,   # Project ID
+        65*mm,   # Project Name (wide for long names)
+        25*mm,   # Donors
         15*mm,   # Currency
-        20*mm,   # Funding
-        15*mm    # Status
-    ]
+        25*mm,   # Funding
+        20*mm    # Status
+    ]  # Total: 170mm - fits exactly within available space
     
     table = Table(data, colWidths=col_widths)
     
@@ -1468,8 +1475,11 @@ def export_projects_pdf(request):
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        
+        # Text wrapping and cell height
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         
         # Borders
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
@@ -1478,14 +1488,11 @@ def export_projects_pdf(request):
         ('ALIGN', (4, 1), (4, -1), 'RIGHT'),  # Funding column right-aligned
         ('ALIGN', (5, 1), (5, -1), 'CENTER'), # Status column center-aligned
         
-        # Padding
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        
-        # Text wrapping by setting VALIGN to TOP
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        # Padding - reduced for better fit
+        ('TOPPADDING', (0, 1), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
     ]))
     
     elements.append(table)
