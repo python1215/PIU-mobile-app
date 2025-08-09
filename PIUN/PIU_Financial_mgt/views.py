@@ -1236,6 +1236,35 @@ def export_projects_excel(request):
                'Effectiveness Date', 'Closure Date', 'Last Disbursement Date', 'Created Date', 'Created By']
     ws.append(headers)
     
+    # Set column widths for better readability
+    from openpyxl.utils import get_column_letter
+    column_widths = {
+        'A': 15,  # Project ID
+        'B': 50,  # Project Name (lengthier cell)
+        'C': 30,  # Donors
+        'D': 30,  # Contributors
+        'E': 12,  # Currency
+        'F': 15,  # Funding
+        'G': 18,  # Effectiveness Date
+        'H': 15,  # Closure Date
+        'I': 20,  # Last Disbursement Date
+        'J': 15,  # Created Date
+        'K': 15,  # Created By
+    }
+    
+    for col, width in column_widths.items():
+        ws.column_dimensions[col].width = width
+    
+    # Style headers
+    from openpyxl.styles import Font, PatternFill, Alignment
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
     # Data rows
     for project in projects_qs.order_by('-date'):
         donors_list = ', '.join([donor.name for donor in project.donors.all()])
@@ -1255,12 +1284,203 @@ def export_projects_excel(request):
             project.loginUser.username if project.loginUser else ''
         ]
         ws.append(row)
+        
+        # Apply text wrapping for long content
+        row_num = ws.max_row
+        for col_num, cell in enumerate(ws[row_num], 1):
+            cell.alignment = Alignment(wrap_text=True, vertical="top", horizontal="left")
+            # Special formatting for funding column
+            if col_num == 6 and cell.value:  # Funding column
+                cell.number_format = '#,##0.00'
     
     # Prepare response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename=projects_export_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     
     wb.save(response)
+    return response
+
+@login_required
+def export_projects_pdf(request):
+    """Export projects to PDF with A4 portrait layout"""
+    from django.http import HttpResponse
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.units import inch
+    from setup.models import Donor
+    import datetime
+    
+    # Apply same filtering logic as projects view
+    projects_qs = Project.objects.all().select_related('currency').prefetch_related('donors', 'contributors')
+    
+    # Filter parameters (same as projects view)
+    project_id = request.GET.get('projectID', '')
+    project_name = request.GET.get('project', '')
+    donor_id = request.GET.get('donors', '')
+    currency_id = request.GET.get('currency', '')
+    funding_min = request.GET.get('funding_min', '')
+    funding_max = request.GET.get('funding_max', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Apply filters
+    if project_id:
+        projects_qs = projects_qs.filter(projectID__icontains=project_id)
+    if project_name:
+        projects_qs = projects_qs.filter(project__icontains=project_name)
+    if donor_id:
+        projects_qs = projects_qs.filter(donors__id=donor_id)
+    if currency_id:
+        projects_qs = projects_qs.filter(currency__id=currency_id)
+    if funding_min:
+        try:
+            projects_qs = projects_qs.filter(funding__gte=float(funding_min))
+        except ValueError:
+            pass
+    if funding_max:
+        try:
+            projects_qs = projects_qs.filter(funding__lte=float(funding_max))
+        except ValueError:
+            pass
+    if date_from:
+        projects_qs = projects_qs.filter(date__gte=date_from)
+    if date_to:
+        projects_qs = projects_qs.filter(date__lte=date_to)
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=projects_export_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+    
+    # Create PDF document
+    doc = SimpleDocTemplate(
+        response, 
+        pagesize=A4,
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=0.7*inch,
+        bottomMargin=0.5*inch
+    )
+    
+    # Build content
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        textColor=colors.HexColor('#366092'),
+        alignment=1  # Center alignment
+    )
+    title = Paragraph("PIU Financial Management - Projects Report", title_style)
+    elements.append(title)
+    
+    # Export date
+    date_style = ParagraphStyle(
+        'DateStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=20,
+        alignment=1
+    )
+    export_date = Paragraph(f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", date_style)
+    elements.append(export_date)
+    
+    # Table data
+    data = []
+    
+    # Headers with improved column distribution for A4 portrait
+    headers = ['Project ID', 'Project Name', 'Donors', 'Currency', 'Funding', 'Status']
+    data.append(headers)
+    
+    # Data rows
+    for project in projects_qs.order_by('-date'):
+        donors_list = ', '.join([donor.name for donor in project.donors.all()])
+        
+        # Determine project status
+        status = "Active"
+        if project.closure_Date:
+            if project.closure_Date < datetime.date.today():
+                status = "Closed"
+            else:
+                status = "Closing Soon"
+        
+        # Create Paragraph objects for long text to enable text wrapping
+        project_name_para = Paragraph(str(project.project) if project.project else '', styles['Normal'])
+        donors_para = Paragraph(donors_list if donors_list else '', styles['Normal'])
+        
+        row = [
+            str(project.projectID) if project.projectID else '',
+            project_name_para,  # Use Paragraph for text wrapping
+            donors_para,        # Use Paragraph for text wrapping
+            str(project.currency.currency) if project.currency else '',
+            f"{project.funding:,.2f}" if project.funding else '0.00',
+            status
+        ]
+        data.append(row)
+    
+    # Create table with optimized column widths for A4 portrait
+    col_widths = [
+        1.0*inch,   # Project ID
+        2.8*inch,   # Project Name (lengthier)
+        1.8*inch,   # Donors
+        0.8*inch,   # Currency
+        1.2*inch,   # Funding
+        0.8*inch,   # Status
+    ]
+    
+    table = Table(data, colWidths=col_widths)
+    
+    # Table styling
+    table.setStyle(TableStyle([
+        # Header styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data styling
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        
+        # Borders
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        
+        # Alignment for specific columns
+        ('ALIGN', (4, 1), (4, -1), 'RIGHT'),  # Funding column right-aligned
+        ('ALIGN', (5, 1), (5, -1), 'CENTER'), # Status column center-aligned
+        
+        # Padding
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        
+        # Text wrapping by setting VALIGN to TOP
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    
+    elements.append(table)
+    
+    # Add summary footer
+    elements.append(Spacer(1, 20))
+    summary_text = f"Total Projects: {projects_qs.count()}"
+    summary = Paragraph(summary_text, styles['Normal'])
+    elements.append(summary)
+    
+    # Build PDF
+    doc.build(elements)
+    
     return response
 
 @login_required
@@ -1328,6 +1548,14 @@ def export_components_excel(request):
             component.loginUser.username if component.loginUser else ''
         ]
         ws.append(row)
+        
+        # Apply text wrapping for long content
+        row_num = ws.max_row
+        for col_num, cell in enumerate(ws[row_num], 1):
+            cell.alignment = Alignment(wrap_text=True, vertical="top", horizontal="left")
+            # Special formatting for funding column
+            if col_num == 6 and cell.value:  # Funding column
+                cell.number_format = '#,##0.00'
     
     # Prepare response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

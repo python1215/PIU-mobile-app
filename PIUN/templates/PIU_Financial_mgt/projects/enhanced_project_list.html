@@ -18,9 +18,20 @@
                     <a href="{% url 'PIU_Financial_mgt:add-project' %}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>Add Project
                     </a>
-                    <a href="{% url 'PIU_Financial_mgt:export-projects-excel' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-file-excel me-1"></i>Export
-                    </a>
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i>Export
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <li><a class="dropdown-item" href="{% url 'PIU_Financial_mgt:export-projects-excel' %}">
+                                <i class="bi bi-file-excel me-2 text-success"></i>Excel Format (.xlsx)
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'PIU_Financial_mgt:export-projects-pdf' %}">
+                                <i class="bi bi-file-pdf me-2 text-danger"></i>PDF Format (A4 Portrait)
+                            </a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
