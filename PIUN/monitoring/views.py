@@ -602,14 +602,14 @@ def export_results_monitoring_pdf(request):
     # Create a buffer to hold PDF content
     buffer = io.BytesIO()
     
-    # Create the PDF object using A4 landscape
+    # Create the PDF object using A4 landscape with normal margins
     doc = SimpleDocTemplate(
         buffer,
         pagesize=landscape(A4),
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
-        topMargin=0.75*inch,
-        bottomMargin=0.5*inch
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
+        topMargin=1*inch,
+        bottomMargin=0.75*inch
     )
     
     # Get all filter parameters from GET request
@@ -699,73 +699,107 @@ def export_results_monitoring_pdf(request):
     # Prepare table data with wrapped text
     data = []
     
-    # Headers
+    # Header style for consistency
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+        alignment=1,
+        textColor=colors.whitesmoke,
+        fontName='Helvetica-Bold'
+    )
+    
+    # Headers as Paragraph objects for consistent formatting
     headers = [
-        'Year', 'Quarter', 'Project', 'PDO', 'Outcome', 'Result', 
-        'Indicator Type', 'Description', 'Unit', 'Frequency',
-        'Baseline', 'Achieved', 'Target', '% vs Base', '% vs Target', 
-        'Remarks', 'Created By', 'Date'
+        Paragraph('Year', header_style), Paragraph('Quarter', header_style), 
+        Paragraph('Project', header_style), Paragraph('PDO', header_style), 
+        Paragraph('Outcome', header_style), Paragraph('Result', header_style), 
+        Paragraph('Indicator<br/>Type', header_style), Paragraph('Description', header_style), 
+        Paragraph('Unit', header_style), Paragraph('Frequency', header_style),
+        Paragraph('Baseline', header_style), Paragraph('Achieved', header_style), 
+        Paragraph('Target', header_style), Paragraph('% vs<br/>Base', header_style), 
+        Paragraph('% vs<br/>Target', header_style), Paragraph('Remarks', header_style), 
+        Paragraph('Created By', header_style), Paragraph('Date', header_style)
     ]
     data.append(headers)
     
-    # Data rows with text wrapping
+    # Data rows with proper text wrapping using Paragraph objects
     for record in monitoring_qs:
-        # Helper function to safely get attribute values with truncation
-        def safe_get(obj, attr, max_length=20):
+        # Helper function to safely get attribute values without truncation
+        def safe_get(obj, attr):
             try:
                 value = getattr(obj, attr, 'N/A')
                 if value is None:
                     return 'N/A'
-                str_value = str(value)
-                return str_value[:max_length] + '...' if len(str_value) > max_length else str_value
+                return str(value)
             except:
                 return 'N/A'
         
-        def safe_get_nested(obj, attr_chain, max_length=20):
+        def safe_get_nested(obj, attr_chain):
             try:
                 value = obj
                 for attr in attr_chain.split('.'):
                     value = getattr(value, attr, None)
                     if value is None:
                         return 'N/A'
-                str_value = str(value)
-                return str_value[:max_length] + '...' if len(str_value) > max_length else str_value
+                return str(value)
             except:
                 return 'N/A'
         
+        # Create Paragraph objects for text wrapping
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=7,
+            leading=9,
+            alignment=1,  # Center alignment
+            wordWrap='CJK',
+            splitLongWords=True
+        )
+        
         row = [
-            safe_get_nested(record, 'year.profile_year', 10),
-            safe_get_nested(record, 'quarter.quarter', 10),
-            safe_get_nested(record, 'project.project', 15),
-            safe_get_nested(record, 'pdo.pdo_statement', 20),
-            safe_get_nested(record, 'project_outcome.project_outcome', 15),
-            safe_get_nested(record, 'project_result.project_result', 15),
-            safe_get_nested(record, 'indicator_type.indicator_type', 12),
-            safe_get(record, 'indicator_description', 25),
-            safe_get_nested(record, 'measurement_unit.unit', 10),
-            safe_get_nested(record, 'collection_frequency.frequency', 12),
-            f"{record.baseline_value:.1f}" if record.baseline_value else 'N/A',
-            f"{record.achieved_value:.1f}" if record.achieved_value else 'N/A',
-            f"{record.End_Target_Value:.1f}" if record.End_Target_Value else 'N/A',
-            f"{record.percentage_achieved_vs_baseline:.1f}%" if record.percentage_achieved_vs_baseline else 'N/A',
-            f"{record.percentage_achieved_vs_end_target:.1f}%" if record.percentage_achieved_vs_end_target else 'N/A',
-            safe_get(record, 'remarks', 20),
-            safe_get_nested(record, 'loginUser.username', 12),
-            record.date_created.strftime('%m/%d/%Y') if record.date_created else 'N/A'
+            Paragraph(safe_get_nested(record, 'year.profile_year'), cell_style),
+            Paragraph(safe_get_nested(record, 'quarter.quarter'), cell_style),
+            Paragraph(safe_get_nested(record, 'project.project'), cell_style),
+            Paragraph(safe_get_nested(record, 'pdo.pdo_statement'), cell_style),
+            Paragraph(safe_get_nested(record, 'project_outcome.project_outcome'), cell_style),
+            Paragraph(safe_get_nested(record, 'project_result.project_result'), cell_style),
+            Paragraph(safe_get_nested(record, 'indicator_type.indicator_type'), cell_style),
+            Paragraph(safe_get(record, 'indicator_description'), cell_style),
+            Paragraph(safe_get_nested(record, 'measurement_unit.unit'), cell_style),
+            Paragraph(safe_get_nested(record, 'collection_frequency.frequency'), cell_style),
+            Paragraph(f"{record.baseline_value:.1f}" if record.baseline_value else 'N/A', cell_style),
+            Paragraph(f"{record.achieved_value:.1f}" if record.achieved_value else 'N/A', cell_style),
+            Paragraph(f"{record.End_Target_Value:.1f}" if record.End_Target_Value else 'N/A', cell_style),
+            Paragraph(f"{record.percentage_achieved_vs_baseline:.1f}%" if record.percentage_achieved_vs_baseline else 'N/A', cell_style),
+            Paragraph(f"{record.percentage_achieved_vs_end_target:.1f}%" if record.percentage_achieved_vs_end_target else 'N/A', cell_style),
+            Paragraph(safe_get(record, 'remarks'), cell_style),
+            Paragraph(safe_get_nested(record, 'loginUser.username'), cell_style),
+            Paragraph(record.date_created.strftime('%m/%d/%Y') if record.date_created else 'N/A', cell_style)
         ]
         data.append(row)
     
     if len(data) == 1:  # Only headers, no data
-        data.append(['No records found matching the specified criteria'] + [''] * (len(headers) - 1))
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            leading=12,
+            alignment=1,
+            wordWrap='CJK'
+        )
+        data.append([Paragraph('No records found matching the specified criteria', cell_style)] + [Paragraph('', cell_style)] * (len(headers) - 1))
     
-    # Create table with proper column widths for landscape A4
-    col_widths = [0.4*inch, 0.5*inch, 0.8*inch, 1.0*inch, 0.8*inch, 0.8*inch, 
-                  0.6*inch, 1.2*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.5*inch, 
-                  0.5*inch, 0.5*inch, 0.5*inch, 1.0*inch, 0.6*inch, 0.6*inch]
+    # Create table with optimized column widths for landscape A4 with normal margins
+    # Available width is approximately 9.5 inches (11 - 1.5 for margins)
+    col_widths = [0.5*inch, 0.6*inch, 0.9*inch, 1.1*inch, 0.9*inch, 0.9*inch, 
+                  0.7*inch, 1.3*inch, 0.6*inch, 0.7*inch, 0.5*inch, 0.5*inch, 
+                  0.5*inch, 0.6*inch, 0.6*inch, 1.1*inch, 0.7*inch, 0.6*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
-    # Table style
+    # Table style optimized for text wrapping
     table.setStyle(TableStyle([
         # Header row styling
         ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
@@ -775,13 +809,11 @@ def export_results_monitoring_pdf(request):
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         
-        # Data rows styling
+        # Data rows styling for Paragraph objects
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 7),
         ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Top alignment for better text wrapping
         
         # Grid styling
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
@@ -790,11 +822,11 @@ def export_results_monitoring_pdf(request):
         # Alternating row colors
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
         
-        # Cell padding
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+        # Cell padding optimized for text wrapping
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
     ]))
     
     story.append(table)
