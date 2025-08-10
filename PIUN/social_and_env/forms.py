@@ -442,6 +442,14 @@ class OHSMonitoringForm(forms.ModelForm):
         required=False
     )
 
+    Kpi_description = forms.ModelChoiceField(
+        queryset=KPI_For_Contract.objects.none(),
+        empty_label="Select KPI Description",
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+        to_field_name='Kpi_description'
+    )
+
     class Meta:
         model = OHS_Monitoring
         fields = [
@@ -493,7 +501,7 @@ class OHSMonitoringForm(forms.ModelForm):
                 'min': '0',
                 'placeholder': 'Number of female youth'
             }),
-            'Kpi_description': forms.Select(attrs={'class': 'form-select'}),
+
             'picture': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
@@ -510,11 +518,17 @@ class OHSMonitoringForm(forms.ModelForm):
                 self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
                     project=project_id
                 )
+                # Also populate KPI descriptions for the selected project
+                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(
+                    project=project_id
+                ).distinct()
             except (ValueError, TypeError):
                 pass
         else:
             # For new forms, include all investment types to prevent validation errors
             self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
+            # Start with empty KPI descriptions queryset
+            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.none()
 
         if 'region' in self.data:
             try:

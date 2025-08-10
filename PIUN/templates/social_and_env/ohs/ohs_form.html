@@ -251,6 +251,39 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Project -> KPI Description cascade
+    const projectField = document.getElementById('id_project');
+    const kpiDescriptionField = document.getElementById('id_Kpi_description');
+    
+    if (projectField && kpiDescriptionField) {
+        projectField.addEventListener('change', function() {
+            const projectId = this.value;
+            
+            // Clear KPI description field
+            kpiDescriptionField.innerHTML = '<option value="">Select KPI Description</option>';
+            kpiDescriptionField.disabled = !projectId;
+            
+            if (projectId) {
+                // Load KPI descriptions for selected project
+                fetch(`{% url 'load_kpi_descriptions' %}?project_id=${projectId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.kpi_descriptions.forEach(kpi => {
+                            const option = document.createElement('option');
+                            option.value = kpi.id;
+                            option.textContent = kpi.description;
+                            kpiDescriptionField.appendChild(option);
+                        });
+                        kpiDescriptionField.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading KPI descriptions:', error);
+                        kpiDescriptionField.disabled = false;
+                    });
+            }
+        });
+    }
+    
     // Cascading Dropdowns: Region -> District -> Settlement
     const regionField = document.getElementById('id_region');
     const districtField = document.getElementById('id_district');

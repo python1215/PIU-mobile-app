@@ -46,4 +46,5 @@ urlpatterns = [
     # AJAX Cascading Dropdowns
     path('ajax/load-districts/', views.load_districts, name='load_districts'),
     path('ajax/load-settlements/', views.load_settlements, name='load_settlements'),
+    path('ajax/load-kpi-descriptions/', views.load_kpi_descriptions, name='load_kpi_descriptions'),
 ]

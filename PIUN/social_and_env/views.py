@@ -878,6 +878,19 @@ def load_settlements(request):
     return JsonResponse({'settlements': []})
 
 
+def load_kpi_descriptions(request):
+    """Load KPI descriptions based on selected project for AJAX requests"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    if project_id:
+        kpi_contracts = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        kpi_list = [{'id': kpi.monitoring_Type_Code, 'description': kpi.Kpi_description} for kpi in kpi_contracts if kpi.Kpi_description]
+        return JsonResponse({'kpi_descriptions': kpi_list})
+    return JsonResponse({'kpi_descriptions': []})
+
+
 @login_required
 def ohs_add(request):
     """Add new OHS record with improved form handling"""
