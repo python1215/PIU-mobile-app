@@ -223,87 +223,50 @@ def pap_list(request):
     from django.db.models import Sum, Count, Q
     
     try:
-        # Use Django ORM with raw SQL to get proper project descriptions
-        from django.db import connection
+        # Use Django ORM exclusively - back to simple approach
+        pap_queryset = PAP.objects.select_related(
+            'region', 'district', 'loginUser'
+        ).all()
         
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    pap.pap_identification_number,
-                    pap.pap_name,
-                    pap.project_id,
-                    COALESCE(p.project_description, pap.project_id) as project_display_name,
-                    pap.sex,
-                    pap.location_of_impact,
-                    pap.amount,
-                    pap.area,
-                    pap.pap_compensated,
-                    r.region_name,
-                    d.district_name
-                FROM social_and_env_pap pap
-                LEFT JOIN "PIU_Financial_mgt_project" p ON pap.project_id = p.project_name
-                LEFT JOIN setup_regions r ON pap.region_id = r.id
-                LEFT JOIN setup_districts d ON pap.district_id = d.id
-                ORDER BY pap.date_created DESC
-            """)
-            
-            pap_data = []
-            for row in cursor.fetchall():
-                pap_data.append({
-                    'pap_identification_number': row[0],
-                    'pap_name': row[1],
-                    'project_id': row[2],
-                    'project_display_name': row[3],
-                    'sex': row[4],
-                    'location_of_impact': row[5],
-                    'amount': row[6],
-                    'area': row[7],
-                    'pap_compensated': row[8],
-                    'region_name': row[9],
-                    'district_name': row[10]
-                })
-        
-        # Apply filters to the data
-        filtered_data = pap_data
-        
+        # Apply filters using Django ORM
         if request.GET.get('project'):
-            filtered_data = [pap for pap in filtered_data if request.GET.get('project') in pap['project_id']]
+            pap_queryset = pap_queryset.filter(project_id__icontains=request.GET.get('project'))
         
         if request.GET.get('gender'):
-            filtered_data = [pap for pap in filtered_data if pap['sex'] == request.GET.get('gender')]
+            pap_queryset = pap_queryset.filter(sex=request.GET.get('gender'))
         
         if request.GET.get('pap_compensated'):
-            filtered_data = [pap for pap in filtered_data if pap['pap_compensated'] == request.GET.get('pap_compensated')]
+            pap_queryset = pap_queryset.filter(pap_compensated=request.GET.get('pap_compensated'))
         
         if request.GET.get('pap_name'):
-            filtered_data = [pap for pap in filtered_data if request.GET.get('pap_name').lower() in pap['pap_name'].lower()]
+            pap_queryset = pap_queryset.filter(pap_name__icontains=request.GET.get('pap_name'))
         
         if request.GET.get('location_of_impact'):
-            filtered_data = [pap for pap in filtered_data if request.GET.get('location_of_impact').lower() in pap['location_of_impact'].lower()]
+            pap_queryset = pap_queryset.filter(location_of_impact__icontains=request.GET.get('location_of_impact'))
         
         if request.GET.get('amount_min'):
             try:
                 min_amount = float(request.GET.get('amount_min'))
-                filtered_data = [pap for pap in filtered_data if float(pap['amount']) >= min_amount]
+                pap_queryset = pap_queryset.filter(amount__gte=min_amount)
             except (ValueError, TypeError):
                 pass
         
         if request.GET.get('amount_max'):
             try:
                 max_amount = float(request.GET.get('amount_max'))
-                filtered_data = [pap for pap in filtered_data if float(pap['amount']) <= max_amount]
+                pap_queryset = pap_queryset.filter(amount__lte=max_amount)
             except (ValueError, TypeError):
                 pass
         
-        # Get statistics from filtered data
+        # Get statistics using Django ORM
         stats = {
-            'total_pap': len(pap_data),
-            'filtered_count': len(filtered_data),
-            'compensated': len([pap for pap in filtered_data if pap['pap_compensated'] == 'Y']),
-            'not_compensated': len([pap for pap in filtered_data if pap['pap_compensated'] == 'N']),
-            'total_compensation': sum(float(pap['amount']) for pap in filtered_data),
-            'male_count': len([pap for pap in filtered_data if pap['sex'] == 'M']),
-            'female_count': len([pap for pap in filtered_data if pap['sex'] == 'F']),
+            'total_pap': PAP.objects.count(),
+            'filtered_count': pap_queryset.count(),
+            'compensated': pap_queryset.filter(pap_compensated='Y').count(),
+            'not_compensated': pap_queryset.filter(pap_compensated='N').count(),
+            'total_compensation': pap_queryset.aggregate(Sum('amount'))['amount__sum'] or 0,
+            'male_count': pap_queryset.filter(sex='M').count(),
+            'female_count': pap_queryset.filter(sex='F').count(),
         }
         
         # Pagination
@@ -315,7 +278,7 @@ def pap_list(request):
         except (ValueError, TypeError):
             page_size = 10
         
-        paginator = Paginator(filtered_data, page_size)
+        paginator = Paginator(pap_queryset, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
