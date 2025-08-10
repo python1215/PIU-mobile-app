@@ -166,8 +166,8 @@
                                     {{ pap.pap_name }}
                                 </a>
                             </td>
-                            <td>{{ pap.project_id|truncatechars:25 }}</td>
-                            <td>{{ pap.region_id }}<br><small class="text-muted">{{ pap.district_id }}</small></td>
+                            <td>{{ pap.project.project_name|truncatechars:25 }}</td>
+                            <td>{{ pap.region.region_name }}<br><small class="text-muted">{{ pap.district.district_name }}</small></td>
                             <td>
                                 <span class="badge bg-{% if pap.sex == 'M' %}primary{% else %}info{% endif %}">
                                     {% if pap.sex == 'M' %}Male{% else %}Female{% endif %}
