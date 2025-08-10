@@ -411,12 +411,7 @@ class OHSMonitoringForm(forms.ModelForm):
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         empty_label="Select Project",
-        widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_investment_types_ohs"),
-            "hx-target": "#id_Type_of_Investment",
-            "hx-trigger": "change"
-        })
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     Type_of_Investment = forms.ModelChoiceField(
@@ -430,23 +425,13 @@ class OHSMonitoringForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
         empty_label="Select Region",
-        widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_districts_ohs"),
-            "hx-target": "#id_district",
-            "hx-trigger": "change"
-        })
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     district = forms.ModelChoiceField(
         queryset=Districts.objects.all(),
         empty_label="Select District",
-        widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_settlements_ohs"),
-            "hx-target": "#id_settlement",
-            "hx-trigger": "change"
-        }),
+        widget=forms.Select(attrs={"class": "form-select"}),
         required=False
     )
 
