@@ -416,9 +416,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const investmentField = document.getElementById('id_type_of_investment');
     
     if (projectField && investmentField) {
+        // Get CSRF token for AJAX requests
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
         // Load investment types immediately when project is selected or on page load
         function loadInvestmentTypes() {
-            fetch(`{% url 'load_investment_types_pap' %}`)
+            fetch(`{% url 'load_investment_types_pap' %}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
                 .then(response => response.json())
                 .then(data => {
                     investmentField.innerHTML = '<option value="">Select Investment Type</option>';
@@ -462,7 +486,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (regionId) {
                 // Load districts for selected region
-                fetch(`{% url 'load_districts' %}?region_id=${regionId}`)
+                fetch(`{% url 'load_districts' %}?region_id=${regionId}`, {
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data.districts && data.districts.length > 0) {

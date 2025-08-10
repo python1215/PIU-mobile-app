@@ -921,7 +921,7 @@ def load_kpi_descriptions(request):
     return JsonResponse({'kpi_descriptions': []})
 
 
-@csrf_exempt
+@login_required
 def load_investment_types_esia(request):
     """Load all available investment types for ESIA form"""
     from django.http import JsonResponse
@@ -939,9 +939,9 @@ def load_investment_types_esia(request):
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
-@csrf_exempt
+@login_required
 def load_investment_types_pap(request):
     """Load all available investment types for PAP form"""
     from django.http import JsonResponse
@@ -959,7 +959,7 @@ def load_investment_types_pap(request):
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
-@csrf_exempt
+@login_required
 def load_investment_types_ohs(request):
     """Load all available investment types for OHS form"""
     from django.http import JsonResponse
