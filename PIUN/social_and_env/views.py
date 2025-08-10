@@ -225,7 +225,7 @@ def pap_list(request):
     try:
         # Use Django ORM exclusively - back to simple approach
         pap_queryset = PAP.objects.select_related(
-            'region', 'district', 'loginUser'
+            'project', 'region', 'district', 'loginUser'
         ).all()
         
         # Apply filters using Django ORM
