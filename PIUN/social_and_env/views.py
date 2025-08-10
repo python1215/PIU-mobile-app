@@ -929,9 +929,9 @@ def load_investment_types_esia(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
             for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
@@ -947,9 +947,9 @@ def load_investment_types_pap(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
             for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
@@ -965,9 +965,9 @@ def load_investment_types_ohs(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
             for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
