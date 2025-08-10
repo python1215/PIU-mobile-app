@@ -884,10 +884,20 @@ def load_kpi_descriptions(request):
     from PIU_Financial_mgt.models import KPI_For_Contract
     
     project_id = request.GET.get('project_id')
+    # Remove debug output for production
+    
     if project_id:
-        # Use project=project_id since project is the ForeignKey field
-        kpi_contracts = KPI_For_Contract.objects.filter(project=project_id).distinct()
-        kpi_list = [{'id': kpi.monitoring_Type_Code, 'description': kpi.Kpi_description} for kpi in kpi_contracts if kpi.Kpi_description]
+        # Use project_id directly as foreign key lookup since project field expects the primary key
+        kpi_contracts = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        
+        kpi_list = []
+        for kpi in kpi_contracts:
+            if kpi.Kpi_description and kpi.Kpi_description.strip():
+                kpi_list.append({
+                    'id': kpi.monitoring_Type_Code, 
+                    'description': kpi.Kpi_description.strip()
+                })
+                
         return JsonResponse({'kpi_descriptions': kpi_list})
     return JsonResponse({'kpi_descriptions': []})
 

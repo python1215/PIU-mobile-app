@@ -265,15 +265,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (projectId) {
                 // Load KPI descriptions for selected project
+                console.log('Fetching KPI descriptions for project:', projectId);
                 fetch(`{% url 'load_kpi_descriptions' %}?project_id=${projectId}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
                     .then(data => {
-                        data.kpi_descriptions.forEach(kpi => {
-                            const option = document.createElement('option');
-                            option.value = kpi.id;
-                            option.textContent = kpi.description;
-                            kpiDescriptionField.appendChild(option);
-                        });
+                        console.log('Received KPI data:', data);
+                        if (data.kpi_descriptions && data.kpi_descriptions.length > 0) {
+                            data.kpi_descriptions.forEach(kpi => {
+                                const option = document.createElement('option');
+                                option.value = kpi.id;
+                                option.textContent = kpi.description;
+                                kpiDescriptionField.appendChild(option);
+                            });
+                            console.log(`Added ${data.kpi_descriptions.length} KPI options`);
+                        } else {
+                            console.log('No KPI descriptions found');
+                        }
                         kpiDescriptionField.disabled = false;
                     })
                     .catch(error => {
