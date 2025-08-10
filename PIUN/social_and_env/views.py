@@ -475,27 +475,46 @@ def pap_add(request):
 
 @login_required
 def pap_edit(request, pk):
-    """Edit PAP record"""
-    pap = get_object_or_404(PAP, pk=pk)
-    
-    if request.method == 'POST':
-        form = PAPForm(request.POST, instance=pap)
-        if form.is_valid():
-            try:
-                pap = form.save(commit=False)
-                pap.loginUser = request.user
-                pap.save()
-                messages.success(request, 'PAP record updated successfully.')
-                return redirect('pap_list')
-            except Exception as e:
-                messages.error(request, f'Error updating PAP record: {str(e)}')
-    else:
-        form = PAPForm(instance=pap)
-    
-    return render(request, 'social_and_env/pap/pap_form.html', {
-        'form': form,
-        'title': 'Edit PAP Record'
-    })
+    """Edit PAP record with dedicated edit template"""
+    try:
+        pap = get_object_or_404(PAP.objects.select_related(
+            'project', 'type_of_investment', 'region', 'district',
+            'pap_Current_Address', 'type_of_pap', 'pap_category',
+            'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
+            'loginUser'
+        ), pk=pk)
+        
+        if request.method == 'POST':
+            form = PAPForm(request.POST, instance=pap)
+            if form.is_valid():
+                try:
+                    updated_pap = form.save(commit=False)
+                    updated_pap.loginUser = request.user
+                    updated_pap.date_modified = timezone.now()
+                    updated_pap.save()
+                    messages.success(request, f'PAP record "{pap.pap_name}" updated successfully.')
+                    return redirect('pap_detail', pk=pap.pk)
+                except Exception as e:
+                    messages.error(request, f'Error updating PAP record: {str(e)}')
+            else:
+                # Display form validation errors
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+        else:
+            form = PAPForm(instance=pap)
+        
+        context = {
+            'form': form,
+            'pap': pap,
+            'title': f'Edit PAP Record - {pap.pap_name}',
+        }
+        
+        return render(request, 'social_and_env/pap/pap_edit.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Error loading PAP record for editing: {str(e)}')
+        return redirect('pap_list')
 
 
 @login_required
