@@ -416,34 +416,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const investmentField = document.getElementById('id_type_of_investment');
     
     if (projectField && investmentField) {
-        projectField.addEventListener('change', function() {
-            const projectId = this.value;
-            
-            // Clear investment type field
-            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-            investmentField.disabled = !projectId;
-            
-            if (projectId) {
-                // Load investment types for selected project
-                fetch(`{% url 'load_investment_types_pap' %}?project_id=${projectId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.investment_types && data.investment_types.length > 0) {
-                            data.investment_types.forEach(investment => {
-                                const option = document.createElement('option');
-                                option.value = investment.id;
-                                option.textContent = investment.name;
-                                investmentField.appendChild(option);
-                            });
-                        }
-                        investmentField.disabled = false;
-                    })
-                    .catch(error => {
-                        console.error('Error loading investment types:', error);
-                        investmentField.disabled = false;
-                    });
-            }
-        });
+        // Load investment types immediately when project is selected or on page load
+        function loadInvestmentTypes() {
+            fetch(`{% url 'load_investment_types_pap' %}`)
+                .then(response => response.json())
+                .then(data => {
+                    investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+                    if (data.investment_types && data.investment_types.length > 0) {
+                        data.investment_types.forEach(investment => {
+                            const option = document.createElement('option');
+                            option.value = investment.id;
+                            option.textContent = investment.name;
+                            investmentField.appendChild(option);
+                        });
+                    }
+                    investmentField.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading investment types:', error);
+                    investmentField.disabled = false;
+                });
+        }
+        
+        // Load investment types when project changes
+        projectField.addEventListener('change', loadInvestmentTypes);
+        
+        // Load investment types on page load if project is already selected
+        if (projectField.value) {
+            loadInvestmentTypes();
+        }
     }
     
     // Region -> District -> Settlement cascade

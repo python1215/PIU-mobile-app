@@ -921,52 +921,58 @@ def load_kpi_descriptions(request):
     return JsonResponse({'kpi_descriptions': []})
 
 
+@login_required
 def load_investment_types_esia(request):
-    """Load investment types based on selected project for ESIA form"""
+    """Load all available investment types for ESIA form"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
     
-    project_id = request.GET.get('project_id')
-    if project_id:
-        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+    try:
+        # Get all distinct investment types since they're not project-specific
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
-            for inv in investment_types if inv.type_of_investment
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
+            for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
-    return JsonResponse({'investment_types': []})
+    except Exception as e:
+        return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
+@login_required
 def load_investment_types_pap(request):
-    """Load investment types based on selected project for PAP form"""
+    """Load all available investment types for PAP form"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
     
-    project_id = request.GET.get('project_id')
-    if project_id:
-        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+    try:
+        # Get all distinct investment types since they're not project-specific
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
-            for inv in investment_types if inv.type_of_investment
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
+            for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
-    return JsonResponse({'investment_types': []})
+    except Exception as e:
+        return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
+@login_required
 def load_investment_types_ohs(request):
-    """Load investment types based on selected project for OHS form"""
+    """Load all available investment types for OHS form"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
     
-    project_id = request.GET.get('project_id')
-    if project_id:
-        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+    try:
+        # Get all distinct investment types since they're not project-specific
+        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
-            for inv in investment_types if inv.type_of_investment
+            {'id': inv['id'], 'name': inv['type_of_investment']} 
+            for inv in investment_types if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
-    return JsonResponse({'investment_types': []})
+    except Exception as e:
+        return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
 @login_required
