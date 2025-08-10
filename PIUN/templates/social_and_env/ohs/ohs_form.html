@@ -264,6 +264,25 @@ document.addEventListener('DOMContentLoaded', function() {
             kpiDescriptionField.disabled = !projectId;
             
             if (projectId) {
+                // Load investment types for selected project
+                fetch(`{% url 'load_investment_types_ohs' %}?project_id=${projectId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const investmentField = document.getElementById('id_Type_of_Investment');
+                        if (investmentField) {
+                            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+                            if (data.investment_types && data.investment_types.length > 0) {
+                                data.investment_types.forEach(investment => {
+                                    const option = document.createElement('option');
+                                    option.value = investment.id;
+                                    option.textContent = investment.name;
+                                    investmentField.appendChild(option);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error loading investment types:', error));
+                
                 // Load KPI descriptions for selected project
                 console.log('Fetching KPI descriptions for project:', projectId);
                 fetch(`{% url 'load_kpi_descriptions' %}?project_id=${projectId}`)

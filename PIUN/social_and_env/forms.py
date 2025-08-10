@@ -14,21 +14,13 @@ class ESIAForm(forms.ModelForm):
     project_name = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         empty_label="Select Project",
-        widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_investment_types_esia"),
-            "hx-target": "#id_type_of_investment",
-            "hx-trigger": "change",
-            "hx-indicator": "#loading-investment"
-        })
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     type_of_investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.all(),
+        queryset=KPI_For_Contract.objects.none(),
         empty_label="Select Investment Type",
-        widget=forms.Select(attrs={
-            "class": "form-select"
-        }),
+        widget=forms.Select(attrs={"class": "form-select"}),
         required=False,
         to_field_name='monitoring_Type_Code'
     )
@@ -71,6 +63,16 @@ class ESIAForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Set up dynamic querysets for investment types
+        if 'project_name' in self.data:
+            try:
+                project_id = int(self.data.get('project_name'))
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project_id=project_id
+                )
+            except (ValueError, TypeError):
+                pass
         
         # Make required fields (except cascading dropdowns)
         for field_name, field in self.fields.items():
@@ -120,7 +122,7 @@ class PAPForm(forms.ModelForm):
     )
 
     type_of_investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.all(),
+        queryset=KPI_For_Contract.objects.none(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False,
@@ -130,22 +132,18 @@ class PAPForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
         empty_label="Select Region",
-        widget=forms.Select(attrs={
-            "class": "form-select"
-        })
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     district = forms.ModelChoiceField(
-        queryset=Districts.objects.all(),
+        queryset=Districts.objects.none(),
         empty_label="Select District",
-        widget=forms.Select(attrs={
-            "class": "form-select"
-        }),
+        widget=forms.Select(attrs={"class": "form-select"}),
         required=False
     )
 
     pap_Current_Address = forms.ModelChoiceField(
-        queryset=Settlement.objects.all(),
+        queryset=Settlement.objects.none(),
         empty_label="Select Settlement",
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False
@@ -213,6 +211,34 @@ class PAPForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Set up dynamic querysets based on form data
+        if 'project' in self.data:
+            try:
+                project_id = int(self.data.get('project'))
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project_id=project_id
+                )
+            except (ValueError, TypeError):
+                pass
+        
+        if 'region' in self.data:
+            try:
+                region_id = int(self.data.get('region'))
+                self.fields['district'].queryset = Districts.objects.filter(
+                    region_code_id=region_id
+                )
+            except (ValueError, TypeError):
+                pass
+        
+        if 'district' in self.data:
+            try:
+                district_id = int(self.data.get('district'))
+                self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
+                    district_code_id=district_id
+                )
+            except (ValueError, TypeError):
+                pass
         
         # Make optional fields explicitly not required
         self.fields['area'].required = False
@@ -511,24 +537,37 @@ class OHSMonitoringForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set up dynamic querysets
+        # Set up dynamic querysets for project-based fields
         if 'project' in self.data:
             try:
                 project_id = int(self.data.get('project'))
                 self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
-                    project=project_id
+                    project_id=project_id
                 )
-                # Also populate KPI descriptions for the selected project
                 self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(
-                    project=project_id
+                    project_id=project_id
                 ).distinct()
             except (ValueError, TypeError):
                 pass
-        else:
-            # For new forms, include all investment types to prevent validation errors
-            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
-            # Start with empty KPI descriptions queryset
-            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.none()
+        
+        # Set up dynamic querysets for geographic cascading
+        if 'region' in self.data:
+            try:
+                region_id = int(self.data.get('region'))
+                self.fields['district'].queryset = Districts.objects.filter(
+                    region_code_id=region_id
+                )
+            except (ValueError, TypeError):
+                pass
+        
+        if 'district' in self.data:
+            try:
+                district_id = int(self.data.get('district'))
+                self.fields['settlement'].queryset = Settlement.objects.filter(
+                    district_code_id=district_id
+                )
+            except (ValueError, TypeError):
+                pass
 
         if 'region' in self.data:
             try:

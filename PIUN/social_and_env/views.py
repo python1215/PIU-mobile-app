@@ -902,6 +902,54 @@ def load_kpi_descriptions(request):
     return JsonResponse({'kpi_descriptions': []})
 
 
+def load_investment_types_esia(request):
+    """Load investment types based on selected project for ESIA form"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        investment_list = [
+            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
+            for inv in investment_types if inv.type_of_investment
+        ]
+        return JsonResponse({'investment_types': investment_list})
+    return JsonResponse({'investment_types': []})
+
+
+def load_investment_types_pap(request):
+    """Load investment types based on selected project for PAP form"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        investment_list = [
+            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
+            for inv in investment_types if inv.type_of_investment
+        ]
+        return JsonResponse({'investment_types': investment_list})
+    return JsonResponse({'investment_types': []})
+
+
+def load_investment_types_ohs(request):
+    """Load investment types based on selected project for OHS form"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    if project_id:
+        investment_types = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        investment_list = [
+            {'id': inv.monitoring_Type_Code, 'name': inv.type_of_investment} 
+            for inv in investment_types if inv.type_of_investment
+        ]
+        return JsonResponse({'investment_types': investment_list})
+    return JsonResponse({'investment_types': []})
+
+
 @login_required
 def ohs_add(request):
     """Add new OHS record with improved form handling"""

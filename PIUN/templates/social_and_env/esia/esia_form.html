@@ -181,6 +181,41 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Project -> Investment Type cascade
+    const projectField = document.getElementById('id_project_name');
+    const investmentField = document.getElementById('id_type_of_investment');
+    
+    if (projectField && investmentField) {
+        projectField.addEventListener('change', function() {
+            const projectId = this.value;
+            
+            // Clear investment type field
+            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            investmentField.disabled = !projectId;
+            
+            if (projectId) {
+                // Load investment types for selected project
+                fetch(`{% url 'load_investment_types_esia' %}?project_id=${projectId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.investment_types && data.investment_types.length > 0) {
+                            data.investment_types.forEach(investment => {
+                                const option = document.createElement('option');
+                                option.value = investment.id;
+                                option.textContent = investment.name;
+                                investmentField.appendChild(option);
+                            });
+                        }
+                        investmentField.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading investment types:', error);
+                        investmentField.disabled = false;
+                    });
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

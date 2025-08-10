@@ -47,4 +47,7 @@ urlpatterns = [
     path('ajax/load-districts/', views.load_districts, name='load_districts'),
     path('ajax/load-settlements/', views.load_settlements, name='load_settlements'),
     path('ajax/load-kpi-descriptions/', views.load_kpi_descriptions, name='load_kpi_descriptions'),
+    path('ajax/load-investment-types-esia/', views.load_investment_types_esia, name='load_investment_types_esia'),
+    path('ajax/load-investment-types-pap/', views.load_investment_types_pap, name='load_investment_types_pap'),
+    path('ajax/load-investment-types-ohs/', views.load_investment_types_ohs, name='load_investment_types_ohs'),
 ]
