@@ -719,46 +719,80 @@ def ohs_list(request):
     from django.db.models import Q
     
     try:
-        # Base queryset with optimized select_related
-        ohs_records = OHS_Monitoring.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 
-            'region', 'district', 'settlement', 'loginUser'
-        )
+        # Use raw SQL to get OHS records with proper joins
+        from django.db import connection
         
-        # Apply filters efficiently
-        filters = Q()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    ohs.ohs_id,
+                    ohs.project_id,
+                    ohs.date,
+                    ohs.quality_at_entry_requirement,
+                    ohs.working_environment,
+                    ohs.remarks,
+                    ohs.male,
+                    ohs.female,
+                    ohs.youth_male,
+                    ohs.youth_female,
+                    r.region_name,
+                    d.district_name,
+                    y.year_name,
+                    q.quarter_name
+                FROM social_and_env_ohs_monitoring ohs
+                LEFT JOIN setup_regions r ON ohs.region_id = r.id
+                LEFT JOIN setup_districts d ON ohs.district_id = d.id
+                LEFT JOIN setup_year y ON ohs.year_of_report_id = y.id
+                LEFT JOIN setup_quarter q ON ohs.quarter_id = q.id
+                ORDER BY ohs.date DESC, ohs.date_created DESC
+            """)
+            
+            ohs_data = []
+            for row in cursor.fetchall():
+                ohs_data.append({
+                    'ohs_id': row[0],
+                    'project_id': row[1],
+                    'date': row[2],
+                    'quality_at_entry_requirement': row[3],
+                    'working_environment': row[4],
+                    'remarks': row[5],
+                    'male': row[6],
+                    'female': row[7],
+                    'youth_male': row[8],
+                    'youth_female': row[9],
+                    'region_name': row[10],
+                    'district_name': row[11],
+                    'year_name': row[12],
+                    'quarter_name': row[13]
+                })
+        
+        # Apply filters to the data
+        filtered_data = ohs_data
         
         if request.GET.get('project'):
-            filters &= Q(project=request.GET.get('project'))
+            filtered_data = [ohs for ohs in filtered_data if request.GET.get('project') in str(ohs['project_id'])]
         
         if request.GET.get('region'):
-            filters &= Q(region=request.GET.get('region'))
+            filtered_data = [ohs for ohs in filtered_data if ohs['region_name'] and request.GET.get('region') in ohs['region_name']]
             
         if request.GET.get('district'):
-            filters &= Q(district=request.GET.get('district'))
+            filtered_data = [ohs for ohs in filtered_data if ohs['district_name'] and request.GET.get('district') in ohs['district_name']]
             
         if request.GET.get('year'):
-            filters &= Q(year_of_report=request.GET.get('year'))
+            filtered_data = [ohs for ohs in filtered_data if ohs['year_name'] and request.GET.get('year') in str(ohs['year_name'])]
             
         if request.GET.get('quarter'):
-            filters &= Q(quarter=request.GET.get('quarter'))
+            filtered_data = [ohs for ohs in filtered_data if ohs['quarter_name'] and request.GET.get('quarter') in str(ohs['quarter_name'])]
             
         # Apply search filter
         search_query = request.GET.get('search', '').strip()
         if search_query:
-            filters &= (
-                Q(project__project__icontains=search_query) |
-                Q(quality_at_entry_requirement__icontains=search_query) |
-                Q(working_environment__icontains=search_query) |
-                Q(remarks__icontains=search_query)
-            )
-        
-        # Apply all filters at once
-        if filters:
-            ohs_records = ohs_records.filter(filters)
-        
-        # Order by most recent first
-        ohs_records = ohs_records.order_by('-date', '-date_created')
+            filtered_data = [ohs for ohs in filtered_data if 
+                search_query.lower() in str(ohs['project_id']).lower() or
+                search_query.lower() in str(ohs['quality_at_entry_requirement']).lower() or
+                search_query.lower() in str(ohs['working_environment']).lower() or
+                search_query.lower() in str(ohs['remarks']).lower()
+            ]
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -769,31 +803,31 @@ def ohs_list(request):
         except (ValueError, TypeError):
             page_size = 10
         
-        paginator = Paginator(ohs_records, page_size)
+        paginator = Paginator(filtered_data, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        # Get statistics efficiently with aggregation
+        # Get statistics from filtered data
         stats = {
-            'total_ohs': OHS_Monitoring.objects.count(),
-            'filtered_count': ohs_records.count(),
-            'total_male_workers': ohs_records.aggregate(total=models.Sum('male'))['total'] or 0,
-            'total_female_workers': ohs_records.aggregate(total=models.Sum('female'))['total'] or 0,
-            'total_youth_male': ohs_records.aggregate(total=models.Sum('youth_male'))['total'] or 0,
-            'total_youth_female': ohs_records.aggregate(total=models.Sum('youth_female'))['total'] or 0,
+            'total_ohs': len(ohs_data),
+            'filtered_count': len(filtered_data),
+            'total_male_workers': sum(ohs.get('male', 0) or 0 for ohs in filtered_data),
+            'total_female_workers': sum(ohs.get('female', 0) or 0 for ohs in filtered_data),
+            'total_youth_male': sum(ohs.get('youth_male', 0) or 0 for ohs in filtered_data),
+            'total_youth_female': sum(ohs.get('youth_female', 0) or 0 for ohs in filtered_data),
         }
         
         # Calculate additional metrics
         stats['total_workers'] = stats['total_male_workers'] + stats['total_female_workers']
         stats['total_youth'] = stats['total_youth_male'] + stats['total_youth_female']
         
-        # Get filter choices for dropdowns - convert to lists for template evaluation
+        # Get filter choices for dropdowns - simplified for raw data
         filter_choices = {
-            'projects': list(Project.objects.all().values('projectID', 'project')),
-            'regions': list(Regions.objects.all().values('region_code', 'region_name')),
-            'districts': list(Districts.objects.all().values('district_code', 'district_name')),
-            'years': list(YEAR.objects.all().values('id', 'profile_year')),
-            'quarters': list(Quarter.objects.all().values('id', 'quarter')),
+            'projects': list(set(ohs['project_id'] for ohs in ohs_data if ohs['project_id'])),
+            'regions': list(set(ohs['region_name'] for ohs in ohs_data if ohs['region_name'])),
+            'districts': list(set(ohs['district_name'] for ohs in ohs_data if ohs['district_name'])),
+            'years': list(set(ohs['year_name'] for ohs in ohs_data if ohs['year_name'])),
+            'quarters': list(set(ohs['quarter_name'] for ohs in ohs_data if ohs['quarter_name'])),
         }
         
         # Remove debug output - issue resolved
