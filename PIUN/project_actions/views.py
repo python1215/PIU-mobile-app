@@ -170,11 +170,43 @@ def dashboard(request):
         recent_contracts.sort(key=lambda x: x.date, reverse=True)
         recent_contracts = recent_contracts[:5]
         
-        # Status statistics (simplified for now)
-        active_contracts = total_works_contracts + total_goods_services
-        completed_contracts = 0
-        pending_contracts = 0
-        onhold_contracts = 0
+        # Status statistics - calculate based on contract dates and current date
+        from datetime import date
+        today = date.today()
+        
+        # Calculate status for works contracts
+        works_active = Contract_Profiling_works.objects.filter(
+            contract_start_date__lte=today,
+            contract_end_date__gte=today
+        ).count()
+        
+        works_completed = Contract_Profiling_works.objects.filter(
+            contract_end_date__lt=today
+        ).count()
+        
+        works_pending = Contract_Profiling_works.objects.filter(
+            contract_start_date__gt=today
+        ).count()
+        
+        # Calculate status for goods/services contracts
+        goods_active = Contract_Profiling_goods_services.objects.filter(
+            contract_start_date__lte=today,
+            contract_end_date__gte=today
+        ).count()
+        
+        goods_completed = Contract_Profiling_goods_services.objects.filter(
+            contract_end_date__lt=today
+        ).count()
+        
+        goods_pending = Contract_Profiling_goods_services.objects.filter(
+            contract_start_date__gt=today
+        ).count()
+        
+        # Combine status counts
+        active_contracts = works_active + goods_active
+        completed_contracts = works_completed + goods_completed
+        pending_contracts = works_pending + goods_pending
+        onhold_contracts = 0  # No on-hold logic in current model
         
         context = {
             'page_title': 'Project Actions Dashboard',
