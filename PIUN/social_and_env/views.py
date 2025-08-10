@@ -921,7 +921,7 @@ def load_kpi_descriptions(request):
     return JsonResponse({'kpi_descriptions': []})
 
 
-@login_required
+@csrf_exempt
 def load_investment_types_esia(request):
     """Load all available investment types for ESIA form"""
     from django.http import JsonResponse
@@ -929,17 +929,19 @@ def load_investment_types_esia(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['id'], 'name': inv['type_of_investment']} 
-            for inv in investment_types if inv['type_of_investment']
+            {'id': inv['monitoring_Type_Code'] or f'inv_{idx}', 'name': inv['type_of_investment']} 
+            for idx, inv in enumerate(investment_types, 1) if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
     except Exception as e:
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
-@login_required
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
 def load_investment_types_pap(request):
     """Load all available investment types for PAP form"""
     from django.http import JsonResponse
@@ -947,17 +949,17 @@ def load_investment_types_pap(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['id'], 'name': inv['type_of_investment']} 
-            for inv in investment_types if inv['type_of_investment']
+            {'id': inv['monitoring_Type_Code'] or f'inv_{idx}', 'name': inv['type_of_investment']} 
+            for idx, inv in enumerate(investment_types, 1) if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
     except Exception as e:
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
-@login_required
+@csrf_exempt
 def load_investment_types_ohs(request):
     """Load all available investment types for OHS form"""
     from django.http import JsonResponse
@@ -965,10 +967,10 @@ def load_investment_types_ohs(request):
     
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('id', 'type_of_investment').distinct()
+        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
         investment_list = [
-            {'id': inv['id'], 'name': inv['type_of_investment']} 
-            for inv in investment_types if inv['type_of_investment']
+            {'id': inv['monitoring_Type_Code'] or f'inv_{idx}', 'name': inv['type_of_investment']} 
+            for idx, inv in enumerate(investment_types, 1) if inv['type_of_investment']
         ]
         return JsonResponse({'investment_types': investment_list})
     except Exception as e:
