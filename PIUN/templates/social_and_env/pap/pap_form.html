@@ -441,10 +441,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load investment types when project changes
         projectField.addEventListener('change', loadInvestmentTypes);
         
-        // Load investment types on page load if project is already selected
-        if (projectField.value) {
-            loadInvestmentTypes();
-        }
+        // Load investment types on page load regardless of project selection
+        loadInvestmentTypes();
     }
     
     // Region -> District -> Settlement cascade

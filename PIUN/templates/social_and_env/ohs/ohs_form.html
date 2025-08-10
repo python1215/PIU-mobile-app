@@ -264,8 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
             kpiDescriptionField.disabled = !projectId;
             
             if (projectId) {
-                // Load investment types for selected project
-                fetch(`{% url 'load_investment_types_ohs' %}?project_id=${projectId}`)
+                // Load investment types
+                fetch(`{% url 'load_investment_types_ohs' %}`)
                     .then(response => response.json())
                     .then(data => {
                         const investmentField = document.getElementById('id_Type_of_Investment');
