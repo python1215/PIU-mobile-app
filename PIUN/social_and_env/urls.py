@@ -43,17 +43,7 @@ urlpatterns = [
     path('community/<str:pk>/edit/', views.community_edit, name='community_edit'),
     path('community/<str:pk>/delete/', views.community_delete, name='community_delete'),
     
-    # AJAX Cascading Dropdowns (no authentication required)
+    # AJAX Cascading Dropdowns
     path('ajax/load-districts/', views.load_districts, name='load_districts'),
     path('ajax/load-settlements/', views.load_settlements, name='load_settlements'),
-    path('ajax/load-investment-types/', views.load_investment_types, name='load_investment_types'),
-    path('ajax/load-investment-types-esia/', views.load_investment_types_esia, name='load_investment_types_esia'),
-    path('ajax/load-investment-types-pap/', views.load_investment_types_pap, name='load_investment_types_pap'),
-    path('ajax/load-investment-types-grievance/', views.load_investment_types_grievance, name='load_investment_types_grievance'),
-    path('ajax/load-investment-types-ohs/', views.load_investment_types_ohs, name='load_investment_types_ohs'),
-    path('ajax/load-districts-ohs/', views.load_districts_ohs, name='load_districts_ohs'),
-    path('ajax/load-settlements-ohs/', views.load_settlements_ohs, name='load_settlements_ohs'),
-    
-    # Test endpoint for cascading dropdown validation
-    path('test-cascading/', views.test_cascading_dropdown, name='test_cascading_dropdown'),
 ]

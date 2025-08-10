@@ -851,6 +851,33 @@ def ohs_list(request):
         })
 
 
+# AJAX endpoints for cascading dropdowns
+def load_districts(request):
+    """Load districts based on selected region for AJAX requests"""
+    from django.http import JsonResponse
+    from setup.models import Districts
+    
+    region_id = request.GET.get('region_id')
+    if region_id:
+        districts = Districts.objects.filter(region_code_id=region_id).order_by('district_name')
+        district_list = [{'id': d.id, 'name': d.district_name} for d in districts]
+        return JsonResponse({'districts': district_list})
+    return JsonResponse({'districts': []})
+
+
+def load_settlements(request):
+    """Load settlements based on selected district for AJAX requests"""
+    from django.http import JsonResponse
+    from setup.models import Settlement
+    
+    district_id = request.GET.get('district_id')
+    if district_id:
+        settlements = Settlement.objects.filter(district_code_id=district_id).order_by('settlement_name')
+        settlement_list = [{'id': s.id, 'name': s.settlement_name} for s in settlements]
+        return JsonResponse({'settlements': settlement_list})
+    return JsonResponse({'settlements': []})
+
+
 @login_required
 def ohs_add(request):
     """Add new OHS record with improved form handling"""
