@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, and Social & Environmental Monitoring.
 - **Data Flow**: User interaction via web forms, data validation with Flask-WTF, persistence via SQLAlchemy, secure file storage, Chart.js for visualization, and system-generated reports.
-- **Database Strategy**: Dual-mode support for SQLite (development) and SQL Server (production) with environment-based selection and raw SQL query capabilities for performance and compatibility.
+- **Database Strategy**: Fully platform-independent using Django ORM exclusively. Compatible with any Django-supported database backend (PostgreSQL, MySQL, SQLite, etc.) without code changes.
 - **Deployment**: Configurable via environment variables for database URI, session secret, and upload folder. Includes provisions for secure production deployment with proxy fix and file size limits.
 - **Data Consistency**: Automated validation and error handling for data integrity (e.g., project funding vs. component allocation).
 - **Filtering & Search**: Comprehensive filtering options across modules (project, region, district, year, quarter, etc.) and text search.
@@ -57,7 +57,8 @@ Preferred communication style: Simple, everyday language.
 - Leaflet (for interactive maps)
 
 ### Infrastructure
-- SQLite database
-- SQL Server database
+- PostgreSQL database (primary)
+- SQLite database (development)
+- Platform-independent Django ORM
 - Local file system (for document storage)
 ```
