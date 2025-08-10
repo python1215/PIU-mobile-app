@@ -885,7 +885,8 @@ def load_kpi_descriptions(request):
     
     project_id = request.GET.get('project_id')
     if project_id:
-        kpi_contracts = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
+        # Use project=project_id since project is the ForeignKey field
+        kpi_contracts = KPI_For_Contract.objects.filter(project=project_id).distinct()
         kpi_list = [{'id': kpi.monitoring_Type_Code, 'description': kpi.Kpi_description} for kpi in kpi_contracts if kpi.Kpi_description]
         return JsonResponse({'kpi_descriptions': kpi_list})
     return JsonResponse({'kpi_descriptions': []})
