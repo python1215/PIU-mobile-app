@@ -490,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const contractType = contractTypeSelect.value;
         
         console.log('Contract selection clicked:', { projectId, contractType });
+        console.log('Project select element value:', projectSelect.value);
+        console.log('Contract type select element value:', contractTypeSelect.value);
         
         if (!projectId || !contractType) {
             alert('Please select both a project and contract type first.');
@@ -507,12 +509,15 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
             .then(response => {
                 console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 return response.json();
             })
             .then(data => {
                 console.log('Response data:', data);
                 
-                // Reset button state
+                // Always reset button state first
                 selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
                 selectContractBtn.disabled = false;
                 
@@ -527,16 +532,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     showContractSelectionModal(data.contracts, contractType);
                 } else {
                     console.warn('No contracts found for project:', projectId, 'type:', contractType);
-                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nPlease check if contracts exist for this combination.`);
+                    console.warn('Full response data:', data);
+                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nThis could be due to:\n1. No contracts exist for this project\n2. Contract type mismatch\n3. Project ID format issue\n\nCheck browser console for more details.`);
                 }
             })
             .catch(error => {
                 console.error('Error fetching contracts:', error);
-                alert('Error loading contracts. Please try again.');
                 
-                // Reset button state
+                // Always reset button state on error
                 selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
                 selectContractBtn.disabled = false;
+                
+                alert('Error loading contracts. Please check your connection and try again.');
             });
     });
     
