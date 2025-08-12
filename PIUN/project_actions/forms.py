@@ -408,6 +408,18 @@ class ContractProfilingGoodsServicesForm(forms.ModelForm):
 class SpecificContractMonitoringForm(forms.ModelForm):
     """Enhanced form for Specific Contract Monitoring"""
     
+    # Add type_of_contract field to help with contract selection
+    type_of_contract = forms.ChoiceField(
+        choices=[
+            ('', '-- Please select --'),
+            ('works_contract', 'Works Contract'),
+            ('goods_services', 'Goods & Services'),
+        ],
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_type_of_contract'}),
+        label='Select Type of Contract'
+    )
+    
     # Override cascading dropdown fields as CharFields to handle AJAX values
     Type_of_Investment = forms.CharField(
         max_length=200,
@@ -490,12 +502,54 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             # Set end date to tomorrow to avoid validation issues
             from datetime import timedelta
             self.fields['milestone_end_date'].initial = (timezone.now() + timedelta(days=1)).date()
+        else:
+            # For existing instances, determine contract type from contract reference
+            self._set_contract_type_from_existing_data()
         
         # Add help texts
         self.fields['contract_refNo'].help_text = 'Reference number of the contract being monitored'
+        self.fields['type_of_contract'].help_text = 'Select the type of contract to load available contracts'
+    
+    def _set_contract_type_from_existing_data(self):
+        """Determine and set contract type based on existing contract reference"""
+        if self.instance and self.instance.contract_refNo:
+            try:
+                from .models import Contract_Profiling_works, Contract_Profiling_goods_services
+                
+                # Check if contract exists in works contracts
+                works_exists = Contract_Profiling_works.objects.filter(
+                    contract_refNo=self.instance.contract_refNo
+                ).exists()
+                
+                if works_exists:
+                    self.fields['type_of_contract'].initial = 'works_contract'
+                    return
+                
+                # Check if contract exists in goods & services contracts
+                gs_exists = Contract_Profiling_goods_services.objects.filter(
+                    contract_refNo=self.instance.contract_refNo
+                ).exists()
+                
+                if gs_exists:
+                    self.fields['type_of_contract'].initial = 'goods_services'
+                    return
+                    
+                # If not found in either, leave empty but log for debugging
+                print(f"Warning: Contract {self.instance.contract_refNo} not found in either contract table")
+                
+            except Exception as e:
+                print(f"Error determining contract type: {e}")
+                # Leave field empty if we can't determine the type
+        
+        # Add additional help texts
         self.fields['picture_of_status'].help_text = 'Upload image showing current status (max 5MB)'
         self.fields['Target'].help_text = 'Describe the specific target for this milestone'
-        self.fields['Achieved_status'].help_text = 'Describe what has been achieved vs the target'
+    
+    def save(self, commit=True):
+        # Remove type_of_contract from cleaned_data since it's not a model field
+        if 'type_of_contract' in self.cleaned_data:
+            self.cleaned_data.pop('type_of_contract')
+        return super().save(commit=commit)
         
         self.helper.layout = Layout(
             HTML('<h4>Monitoring Information</h4>'),
