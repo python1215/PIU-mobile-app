@@ -485,41 +485,72 @@ document.addEventListener('DOMContentLoaded', function() {
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
     // Handle contract selection button click
-    selectContractBtn.addEventListener('click', function() {
-        const projectId = projectSelect.value;
-        const contractType = contractTypeSelect.value;
+    selectContractBtn.addEventListener('click', function(event) {
+        try {
+            // Prevent any default behavior that might cause issues
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Contract selection button clicked - starting process');
+            
+            const projectId = projectSelect.value;
+            const contractType = contractTypeSelect.value;
+            
+            console.log('Contract selection clicked:', { projectId, contractType });
+            console.log('Project select element value:', projectSelect.value);
+            console.log('Contract type select element value:', contractTypeSelect.value);
+            
+            if (!projectId || !contractType) {
+                alert('Please select both a project and contract type first.');
+                return;
+            }
+            
+            // Show loading state with error protection
+            try {
+                selectContractBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
+                selectContractBtn.disabled = true;
+            } catch (buttonError) {
+                console.error('Error updating button state:', buttonError);
+            }
+            
+            const url = `/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`;
+            console.log('Fetching contracts from:', url);
+            
+            // Add timeout for offline deployments
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                console.error('Request timed out');
+            }, 10000); // 10 second timeout
         
-        console.log('Contract selection clicked:', { projectId, contractType });
-        console.log('Project select element value:', projectSelect.value);
-        console.log('Contract type select element value:', contractTypeSelect.value);
-        
-        if (!projectId || !contractType) {
-            alert('Please select both a project and contract type first.');
-            return;
-        }
-        
-        // Show loading state
-        selectContractBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
-        selectContractBtn.disabled = true;
-        
-        const url = `/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`;
-        console.log('Fetching contracts from:', url);
-        
-        // Fetch contracts by project and type
-        fetch(url)
+            // Fetch contracts by project and type with comprehensive error handling
+            fetch(url, { 
+                signal: controller.signal,
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
             .then(response => {
-                console.log('Response status:', response.status);
+                clearTimeout(timeoutId);
+                console.log('Response received, status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Response data:', data);
+                console.log('Response data received:', data);
                 
                 // Always reset button state first
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
+                try {
+                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                    selectContractBtn.disabled = false;
+                } catch (resetError) {
+                    console.error('Error resetting button:', resetError);
+                }
                 
                 if (data.error) {
                     console.error('Server error:', data.error);
@@ -529,7 +560,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (data.contracts && data.contracts.length > 0) {
                     console.log(`Found ${data.contracts.length} contracts`);
-                    showContractSelectionModal(data.contracts, contractType);
+                    try {
+                        showContractSelectionModal(data.contracts, contractType);
+                    } catch (modalError) {
+                        console.error('Error showing modal:', modalError);
+                        alert('Error displaying contract selection. Please try again.');
+                    }
                 } else {
                     console.warn('No contracts found for project:', projectId, 'type:', contractType);
                     console.warn('Full response data:', data);
@@ -537,108 +573,178 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
+                clearTimeout(timeoutId);
                 console.error('Error fetching contracts:', error);
                 
                 // Always reset button state on error
+                try {
+                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                    selectContractBtn.disabled = false;
+                } catch (resetError) {
+                    console.error('Error resetting button on error:', resetError);
+                }
+                
+                if (error.name === 'AbortError') {
+                    alert('Request timed out. Please check your connection and try again.');
+                } else {
+                    alert('Error loading contracts. Please check your connection and try again.');
+                }
+            });
+            
+        } catch (mainError) {
+            console.error('Critical error in contract selection:', mainError);
+            
+            // Emergency button reset
+            try {
                 selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
                 selectContractBtn.disabled = false;
-                
-                alert('Error loading contracts. Please check your connection and try again.');
-            });
+            } catch (emergencyResetError) {
+                console.error('Emergency button reset failed:', emergencyResetError);
+            }
+            
+            alert('A critical error occurred. Please refresh the page and try again.');
+        }
     });
     
-    // Function to show contract selection modal
+    // Function to show contract selection modal with error handling
     function showContractSelectionModal(contracts, contractType) {
-        const modal = document.getElementById('contractSelectionModal');
-        const modalTitle = document.getElementById('contractModalTitle');
-        const modalBody = document.getElementById('contractModalBody');
-        
-        // Set modal title
-        const typeText = contractType === 'works_contract' ? 'Works Contracts' : 'Goods & Services Contracts';
-        modalTitle.textContent = `Select ${typeText}`;
-        
-        // Clear modal body
-        modalBody.innerHTML = '';
-        
-        // Create contract list
-        const contractList = document.createElement('div');
-        contractList.className = 'list-group';
-        
-        contracts.forEach(contract => {
-            const contractItem = document.createElement('div');
-            contractItem.className = 'list-group-item';
+        try {
+            console.log('Showing contract selection modal with', contracts.length, 'contracts');
             
-            // Get status badge class
-            let statusClass = 'bg-secondary';
-            if (contract.status === 'active') statusClass = 'bg-success';
-            else if (contract.status === 'pending') statusClass = 'bg-warning';
-            else if (contract.status === 'completed') statusClass = 'bg-secondary';
+            const modal = document.getElementById('contractSelectionModal');
+            const modalTitle = document.getElementById('contractModalTitle');
+            const modalBody = document.getElementById('contractModalBody');
             
-            contractItem.innerHTML = `
-                <div class="d-flex w-100 justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">${contract.contract_refNo}</h6>
-                        <p class="mb-1">
-                            <strong>Value:</strong> ${contract.currency} ${contract.contract_value.toLocaleString()}
-                        </p>
-                        <small class="text-muted">
-                            ${contractType === 'works_contract' ? 
-                                `Contractor: ${contract.contractor} | Consultant: ${contract.consultant}` :
-                                `Supplier: ${contract.supplier} | Consultant: ${contract.consultant}`
-                            }
-                        </small>
-                        <small class="text-muted d-block">
-                            Duration: ${contract.start_date} to ${contract.end_date}
-                        </small>
-                    </div>
-                    <div class="d-flex flex-column align-items-end">
-                        <span class="badge ${statusClass} mb-2">${contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}</span>
-                        <div class="btn-group-vertical" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-primary select-contract-btn" 
-                                data-contract-id="${contract.id}"
-                                data-contract-ref="${contract.contract_refNo}"
-                                data-contract-url="${contract.detail_url}"
-                                onclick="return false;">
-                                <i class="bi bi-check-circle me-1"></i>Select
-                            </button>
-                            <a href="${contract.detail_url}" target="_blank" class="btn btn-sm btn-outline-info">
-                                <i class="bi bi-eye me-1"></i>View Details
-                            </a>
+            if (!modal || !modalTitle || !modalBody) {
+                throw new Error('Modal elements not found in DOM');
+            }
+            
+            // Set modal title
+            const typeText = contractType === 'works_contract' ? 'Works Contracts' : 'Goods & Services Contracts';
+            modalTitle.textContent = `Select ${typeText}`;
+            
+            // Clear modal body
+            modalBody.innerHTML = '';
+            
+            // Create contract list
+            const contractList = document.createElement('div');
+            contractList.className = 'list-group';
+            
+            contracts.forEach((contract, index) => {
+                try {
+                    const contractItem = document.createElement('div');
+                    contractItem.className = 'list-group-item';
+                    
+                    // Get status badge class with null checks
+                    let statusClass = 'bg-secondary';
+                    if (contract.status === 'active') statusClass = 'bg-success';
+                    else if (contract.status === 'pending') statusClass = 'bg-warning';
+                    else if (contract.status === 'completed') statusClass = 'bg-secondary';
+                    
+                    // Safe data extraction with fallbacks
+                    const contractRef = contract.contract_refNo || 'N/A';
+                    const contractValue = contract.contract_value ? contract.contract_value.toLocaleString() : '0';
+                    const currency = contract.currency || 'USD';
+                    const contractor = contract.contractor || 'N/A';
+                    const supplier = contract.supplier || 'N/A';
+                    const consultant = contract.consultant || 'N/A';
+                    const startDate = contract.start_date || 'N/A';
+                    const endDate = contract.end_date || 'N/A';
+                    const status = contract.status || 'unknown';
+                    const contractId = contract.id || index;
+                    const detailUrl = contract.detail_url || '#';
+                    
+                    contractItem.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${contractRef}</h6>
+                                <p class="mb-1">
+                                    <strong>Value:</strong> ${currency} ${contractValue}
+                                </p>
+                                <small class="text-muted">
+                                    ${contractType === 'works_contract' ? 
+                                        `Contractor: ${contractor} | Consultant: ${consultant}` :
+                                        `Supplier: ${supplier} | Consultant: ${consultant}`
+                                    }
+                                </small>
+                                <small class="text-muted d-block">
+                                    Duration: ${startDate} to ${endDate}
+                                </small>
+                            </div>
+                            <div class="d-flex flex-column align-items-end">
+                                <span class="badge ${statusClass} mb-2">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                                <div class="btn-group-vertical" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-contract-btn" 
+                                        data-contract-id="${contractId}"
+                                        data-contract-ref="${contractRef}"
+                                        data-contract-url="${detailUrl}">
+                                        <i class="bi bi-check-circle me-1"></i>Select
+                                    </button>
+                                    <a href="${detailUrl}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye me-1"></i>View Details
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
             `;
             
-            contractList.appendChild(contractItem);
-        });
-        
-        modalBody.appendChild(contractList);
-        
-        // Add event delegation for Select buttons
-        contractList.addEventListener('click', function(e) {
-            if (e.target.closest('.select-contract-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-                const btn = e.target.closest('.select-contract-btn');
-                const contractRef = btn.dataset.contractRef;
-                const contractUrl = btn.dataset.contractUrl;
-                
-                // Find the contract data
-                const selectedContract = contracts.find(c => c.contract_refNo === contractRef);
-                if (selectedContract) {
-                    selectContract(selectedContract);
+                    contractList.appendChild(contractItem);
+                } catch (contractError) {
+                    console.error('Error creating contract item', index, ':', contractError);
+                    // Continue with next contract
                 }
-                return false; // Prevent any further event handling
+            });
+            
+            modalBody.appendChild(contractList);
+            
+            // Add event delegation for Select buttons with error handling
+            contractList.addEventListener('click', function(e) {
+                try {
+                    if (e.target.closest('.select-contract-btn')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const btn = e.target.closest('.select-contract-btn');
+                        const contractRef = btn.dataset.contractRef;
+                        const contractUrl = btn.dataset.contractUrl;
+                        
+                        console.log('Select button clicked for contract:', contractRef);
+                        
+                        // Find the contract data
+                        const selectedContract = contracts.find(c => c.contract_refNo === contractRef);
+                        if (selectedContract) {
+                            selectContract(selectedContract);
+                        } else {
+                            console.error('Contract not found:', contractRef);
+                            alert('Error: Selected contract not found in list');
+                        }
+                        return false;
+                    }
+                } catch (selectError) {
+                    console.error('Error in contract selection:', selectError);
+                    alert('Error selecting contract. Please try again.');
+                }
+            });
+            
+            // Show modal with error handling
+            try {
+                console.log('Attempting to show modal...');
+                const bootstrapModal = new bootstrap.Modal(modal);
+                bootstrapModal.show();
+                console.log('Modal shown successfully');
+            } catch (modalShowError) {
+                console.error('Error showing modal:', modalShowError);
+                alert('Error displaying contract selection modal. Please refresh the page and try again.');
             }
-        });
-        
-        // Show modal
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
+            
+        } catch (modalError) {
+            console.error('Error in showContractSelectionModal:', modalError);
+            alert('Error preparing contract selection. Please try again.');
+        }
     }
     
-    // Function to select a contract
+    // Function to select a contract with comprehensive error handling
     function selectContract(contract) {
+        try {
         console.log('Selecting contract:', contract);
         console.log('Contract reference input field:', contractRefInput);
         
@@ -685,7 +791,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Trigger change event on the input to ensure form validation updates
         contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
         
-        return false; // Prevent any navigation
+            return false; // Prevent any navigation
+        } catch (contractSelectError) {
+            console.error('Error in selectContract function:', contractSelectError);
+            
+            // Emergency fallback - at least try to set the contract reference
+            try {
+                if (contractRefInput && contract && contract.contract_refNo) {
+                    contractRefInput.value = contract.contract_refNo;
+                    alert('Contract selected, but some features may not work properly. Please verify the selection.');
+                } else {
+                    alert('Error selecting contract. Please try again or refresh the page.');
+                }
+            } catch (emergencyError) {
+                console.error('Emergency fallback also failed:', emergencyError);
+                alert('Critical error selecting contract. Please refresh the page and try again.');
+            }
+            
+            return false;
+        }
     }
     
     // Initialize button state on page load
