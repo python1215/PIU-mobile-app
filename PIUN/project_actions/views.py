@@ -1636,63 +1636,85 @@ def debug_cascading_dropdowns(request):
 @login_required
 def get_contracts_by_project_and_type(request):
     """AJAX endpoint to fetch contracts by project and contract type"""
+    import urllib.parse
+    
     project_id = request.GET.get('project_id')
     contract_type = request.GET.get('contract_type')
     
     if not project_id or not contract_type:
         return JsonResponse({'error': 'Project ID and contract type are required'}, status=400)
     
+    # Decode URL-encoded project ID
+    try:
+        project_id = urllib.parse.unquote(project_id)
+    except Exception:
+        pass
+    
     try:
         contracts = []
         
         if contract_type == 'works_contract':
-            # Fetch Works contracts - projectID is a ForeignKey, so use __pk lookup
+            # Fetch Works contracts using projectID field (which is a string field, not FK to pk)
             works_contracts = Contract_Profiling_works.objects.filter(
-                projectID__pk=project_id
+                projectID__projectID=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in works_contracts:
                 contracts.append({
                     'id': contract.id,
                     'contract_refNo': contract.contract_refNo,
-                    'contract_value': float(contract.contract_value),
+                    'contract_value': float(contract.contract_value) if contract.contract_value else 0,
                     'currency': contract.currency.currency if contract.currency else 'USD',
                     'contractor': contract.name_of_contractor or 'N/A',
                     'consultant': contract.name_of_consultant or 'N/A',
-                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
-                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
-                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
+                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
+                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
+                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date) if contract.contract_start_date and contract.contract_end_date else 'unknown',
                     'detail_url': f"/project_actions/contract-profiling-works/{contract.id}/"
                 })
                 
         elif contract_type == 'goods_services':
-            # Fetch Goods & Services contracts - projectID is a ForeignKey, so use __pk lookup
+            # Fetch Goods & Services contracts using projectID field
             goods_contracts = Contract_Profiling_goods_services.objects.filter(
-                projectID__pk=project_id
+                projectID__projectID=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in goods_contracts:
                 contracts.append({
                     'id': contract.id,
                     'contract_refNo': contract.contract_refNo,
-                    'contract_value': float(contract.contract_value),
+                    'contract_value': float(contract.contract_value) if contract.contract_value else 0,
                     'currency': contract.currency.currency if contract.currency else 'USD',
                     'supplier': contract.name_of_Supplier or 'N/A',
                     'consultant': contract.name_of_consultant or 'N/A',
-                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d'),
-                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d'),
-                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date),
+                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
+                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
+                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date) if contract.contract_start_date and contract.contract_end_date else 'unknown',
                     'detail_url': f"/project_actions/contract-profiling-goods-services/{contract.id}/"
                 })
         
         return JsonResponse({
             'contracts': contracts,
             'total_count': len(contracts),
-            'contract_type': contract_type
+            'contract_type': contract_type,
+            'project_id': project_id,
+            'debug_info': {
+                'original_project_id': request.GET.get('project_id'),
+                'decoded_project_id': project_id,
+                'query_time': timezone.now().isoformat()
+            }
         })
         
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({
+            'error': str(e), 
+            'project_id': project_id,
+            'contract_type': contract_type,
+            'debug_info': {
+                'original_project_id': request.GET.get('project_id'),
+                'error_time': timezone.now().isoformat()
+            }
+        }, status=500)
 
 
 def get_contract_status(start_date, end_date):
