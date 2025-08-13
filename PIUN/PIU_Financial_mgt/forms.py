@@ -50,14 +50,14 @@ class addComponentForm(forms.ModelForm):
 #######update subcomponent form ################################################333
 
 class updatesubcomponentForm(forms.ModelForm):
-    project = forms.ModelChoiceField(
+    projectID = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         widget=forms.Select(attrs={
             "hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'),
-            "hx-target": "#id_component"
+            "hx-target": "#id_compID"
         })
     )
-    component = forms.ModelChoiceField(queryset=Component.objects.none(), required=False)  # Allow null values
+    compID = forms.ModelChoiceField(queryset=Component.objects.none(), required=False)  # Allow null values
     
     # Fix currency field validation by explicitly setting queryset
     currency = forms.ModelChoiceField(
@@ -68,28 +68,28 @@ class updatesubcomponentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Ensure component field doesn't cause errors if missing
-        self.fields['component'].queryset = Component.objects.none()
+        # Ensure compID field doesn't cause errors if missing
+        self.fields['compID'].queryset = Component.objects.none()
 
         # Editing an existing subcomponent
         if self.instance and self.instance.pk:
-            if hasattr(self.instance, 'project') and self.instance.project:  # Ensure project exists
-                self.fields['component'].queryset = Component.objects.filter(project=self.instance.project)
+            if hasattr(self.instance, 'projectID') and self.instance.projectID:  # Ensure projectID exists
+                self.fields['compID'].queryset = Component.objects.filter(project=self.instance.projectID)
 
-            if hasattr(self.instance, 'component') and self.instance.component_id:  # Check using component_id to avoid errors
-                self.fields['component'].initial = self.instance.component
+            if hasattr(self.instance, 'compID') and self.instance.compID_id:  # Check using compID_id to avoid errors
+                self.fields['compID'].initial = self.instance.compID
 
-        # Handling dynamic updates when project is selected from the form
-        elif 'project' in self.data:
+        # Handling dynamic updates when projectID is selected from the form
+        elif 'projectID' in self.data:
             try:
-                project_id = int(self.data.get('project'))  # Convert to int safely
-                self.fields['component'].queryset = Component.objects.filter(project=project_id)
+                projectID = int(self.data.get('projectID'))  # Convert to int safely
+                self.fields['compID'].queryset = Component.objects.filter(project=projectID)
             except (ValueError, TypeError):
                 pass  # Handle invalid data gracefully
 
     class Meta:
         model = Subcomponent
-        fields = ['project', 'component', 'subcomponent', 'subcomponent_Description', 'currency', 'allocation']
+        fields = ['projectID', 'compID', 'subcomponent', 'subcomponent_Description', 'currency', 'allocation']
 
 
 # class updatesubcomponentForm(forms.ModelForm):

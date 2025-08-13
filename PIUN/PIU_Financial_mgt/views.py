@@ -87,12 +87,12 @@ def project_detail(request, project_id):
     # Get related data - convert to lists for template evaluation
     components = list(Component.objects.filter(project=project).order_by('-date'))
     subcomponents = list(Subcomponent.objects.filter(project=project).order_by('-date'))
-    recent_activities = list(Activities.objects.filter(projectID=project).order_by('-date')[:10])
+    recent_activities = list(Activities.objects.filter(project=project).order_by('-date')[:10])
     
     # Calculate statistics  
     components_count = len(components)
     subcomponents_count = len(subcomponents)
-    activities_count = Activities.objects.filter(projectID=project).count()
+    activities_count = Activities.objects.filter(project=project).count()
     total_allocation = sum(c.allocation for c in components if c.allocation) or 0
     
     context = {
@@ -174,7 +174,7 @@ def enhanced_project_dashboard(request, project_id=None):
         total_projects = 1
         total_components = Component.objects.filter(project=selected_project).count()
         total_subcomponents = Subcomponent.objects.filter(project=selected_project).count()
-        total_activities = Activities.objects.filter(projectID=selected_project).count()
+        total_activities = Activities.objects.filter(project=selected_project).count()
         total_funding = selected_project.funding or 0
         active_projects = 1 if not selected_project.closure_Date else 0
         total_disbursed = Component.objects.filter(project=selected_project).aggregate(Sum('allocation'))['allocation__sum'] or 0
@@ -205,7 +205,7 @@ def enhanced_project_dashboard(request, project_id=None):
     
     # Recent data - Use Django ORM for SQLite compatibility
     try:
-        recent_activities = list(Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5])
+        recent_activities = list(Activities.objects.select_related('project', 'compID', 'subcompID').order_by('-date')[:5])
         print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")
@@ -419,7 +419,7 @@ def load_project_components(request):
     
     if project_id:
         # Filter components by the selected project using the correct field reference
-        components = Component.objects.filter(projectID__projectID=project_id)
+        components = Component.objects.filter(project__projectID__icontains=project_id)
         print(f"Returning {components.count()} components for project {project_id}")
     else:
         # If no project selected, return empty queryset
@@ -428,7 +428,7 @@ def load_project_components(request):
     
     # Show component details for debugging
     for comp in components:
-        print(f"Component: {comp.Project_Components}, Project: {comp.projectID}")
+        print(f"Component: {comp.project_components}, Project: {comp.projectID}")
     
     return render(request, "htmx/project_components_dropdown.html", {"components": components})
 
@@ -573,7 +573,7 @@ def components(request):
     from PIU_Financial_mgt.models import Currency
     
     # Get all components
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    components_qs = Component.objects.all().select_related('project', 'currency', 'loginUser')
     
     # Filter parameters
     project_id = request.GET.get('project', '').strip()
@@ -588,11 +588,11 @@ def components(request):
     
     # Apply filters only if values are provided
     if project_id and project_id != '':
-        components_qs = components_qs.filter(projectID__projectID=project_id)
+        components_qs = components_qs.filter(project__projectID__icontains=project_id)
         is_filtered = True
     
     if component_name and component_name != '':
-        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        components_qs = components_qs.filter(project_components__icontains=component_name)
         is_filtered = True
     
     if currency_id and currency_id != '':
@@ -625,7 +625,7 @@ def components(request):
     total_components = Component.objects.count()
     filtered_count = components_qs.count()
     total_allocation = components_qs.aggregate(Sum('allocation'))['allocation__sum'] or 0
-    unique_projects = components_qs.values('projectID').distinct().count()
+    unique_projects = components_qs.values('project').distinct().count()
     
     stats = {
         'total_components': total_components,
@@ -665,7 +665,7 @@ def export_components_excel(request):
     print(f"======================================")
     
     # Apply same filtering logic as components view
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    components_qs = Component.objects.all().select_related('project', 'currency', 'loginUser')
     
     # Filter parameters (same as components view)
     project_id = request.GET.get('project', '').strip()
@@ -680,10 +680,10 @@ def export_components_excel(request):
     
     # Apply filters
     if project_id and project_id != '':
-        components_qs = components_qs.filter(projectID__projectID=project_id)
+        components_qs = components_qs.filter(project__projectID__icontains=project_id)
         print(f"Filtered by project ID: {project_id}")
     if component_name and component_name != '':
-        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        components_qs = components_qs.filter(project_components__icontains=component_name)
         print(f"Filtered by component name: {component_name}")
     if currency_id and currency_id != '':
         components_qs = components_qs.filter(currency__id=currency_id)
@@ -739,8 +739,8 @@ def export_components_excel(request):
     for component in components_qs.order_by('-date'):
         row_data = [
             component.compID,
-            component.projectID.project if component.projectID else '',
-            component.Project_Components or '',
+            component.project.project if component.project else '',
+            component.project_components or '',
             component.component_Description or '',
             component.currency.currency if component.currency else '',
             component.allocation or 0,
@@ -777,7 +777,7 @@ def export_components_pdf(request):
     print(f"====================================")
     
     # Apply same filtering logic as components view
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    components_qs = Component.objects.all().select_related('project', 'currency', 'loginUser')
     
     # Filter parameters (same as components view)
     project_id = request.GET.get('project', '').strip()
@@ -792,10 +792,10 @@ def export_components_pdf(request):
     
     # Apply filters
     if project_id and project_id != '':
-        components_qs = components_qs.filter(projectID__projectID=project_id)
+        components_qs = components_qs.filter(project__projectID__icontains=project_id)
         print(f"Filtered by project ID: {project_id}")
     if component_name and component_name != '':
-        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        components_qs = components_qs.filter(project_components__icontains=component_name)
         print(f"Filtered by component name: {component_name}")
     if currency_id and currency_id != '':
         components_qs = components_qs.filter(currency__id=currency_id)
@@ -883,8 +883,8 @@ def export_components_pdf(request):
     # Add component data with text wrapping
     for component in components_qs.order_by('-date'):
         # Use project name instead of project ID and wrap text properly
-        project_name = component.projectID.project if component.projectID else ''
-        component_name = component.Project_Components or ''
+        project_name = component.project.project if component.project else ''
+        component_name = component.project_components or ''
         
         row = [
             str(component.compID),
@@ -968,7 +968,7 @@ def edit_component(request, component_id):
         print(f"=== EDIT COMPONENT DEBUG ===")
         print(f"POST data: {request.POST}")
         print(f"Component ID: {component_id}")
-        print(f"Current component: {component.Project_Components}")
+        print(f"Current component: {component.project_components}")
         
         form = addComponentForm(request.POST, instance=component)
         print(f"Form is valid: {form.is_valid()}")
@@ -978,7 +978,7 @@ def edit_component(request, component_id):
                 component = form.save(commit=False)
                 component.loginUser = request.user
                 component.save()
-                print(f"Component saved successfully: {component.Project_Components}")
+                print(f"Component saved successfully: {component.project_components}")
                 messages.success(request, 'Component updated successfully!')
                 return redirect('PIU_Financial_mgt:components')
             except Exception as e:
@@ -1004,7 +1004,7 @@ def delete_component(request, component_id):
     component = get_object_or_404(Component, compID=component_id)
     
     if request.method == 'POST':
-        project_id = component.projectID.projectID
+        project_id = component.project.projectID
         component.delete()
         messages.success(request, 'Component deleted successfully!')
         return redirect('PIU_Financial_mgt:components')
@@ -1084,7 +1084,7 @@ def subcomponents(request):
     from PIU_Financial_mgt.models import Currency
     
     # Get all subcomponents
-    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    subcomponents_qs = Subcomponent.objects.all().select_related('project', 'compID', 'currency', 'loginUser')
     
     # Filter parameters
     project_filter = request.GET.get('project', '')
@@ -1094,7 +1094,7 @@ def subcomponents(request):
     
     # Apply filters with correct field references
     if project_filter:
-        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
+        subcomponents_qs = subcomponents_qs.filter(project__projectID__icontains=project_filter)
     
     if component_filter:
         subcomponents_qs = subcomponents_qs.filter(compID__compID=component_filter)
@@ -1115,7 +1115,7 @@ def subcomponents(request):
     
     # For project-specific filtering, calculate total for that project only
     if project_filter:
-        project_total = Subcomponent.objects.filter(projectID=project_filter).count()
+        project_total = Subcomponent.objects.filter(project=project_filter).count()
     else:
         project_total = overall_total
     
@@ -1179,7 +1179,7 @@ def export_subcomponents_excel(request):
     print("=" * 45)
     
     # Get filtered subcomponents using same logic as list view
-    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    subcomponents_qs = Subcomponent.objects.all().select_related('project', 'compID', 'currency', 'loginUser')
     
     # Apply same filters as main view
     project_filter = request.GET.get('project', '')
@@ -1190,7 +1190,7 @@ def export_subcomponents_excel(request):
     print(f"Excel filters applied - project: '{project_filter}', component: '{component_filter}', currency: '{currency_filter}', search: '{search_filter}'")
     
     if project_filter:
-        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
+        subcomponents_qs = subcomponents_qs.filter(project__projectID__icontains=project_filter)
         print(f"Filtered by project ID: {project_filter}")
     
     if component_filter:
@@ -1237,8 +1237,8 @@ def export_subcomponents_excel(request):
     for subcomponent in subcomponents_qs.order_by('-date'):
         row_data = [
             subcomponent.subcompID,
-            subcomponent.projectID.project if subcomponent.projectID else '',
-            subcomponent.compID.Project_Components if subcomponent.compID else '',
+            subcomponent.project.project if subcomponent.project else '',
+            subcomponent.compID.project_components if subcomponent.compID else '',
             subcomponent.subcomponent or '',
             subcomponent.subcomponent_Description or '',
             subcomponent.currency.currency if subcomponent.currency else '',
@@ -1305,7 +1305,7 @@ def export_subcomponents_pdf(request):
     print("=" * 44)
     
     # Get filtered subcomponents using same logic as list view
-    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    subcomponents_qs = Subcomponent.objects.all().select_related('project', 'compID', 'currency', 'loginUser')
     
     # Apply same filters as main view
     project_filter = request.GET.get('project', '')
@@ -1316,7 +1316,7 @@ def export_subcomponents_pdf(request):
     print(f"PDF filters applied - project: '{project_filter}', component: '{component_filter}', currency: '{currency_filter}', search: '{search_filter}'")
     
     if project_filter:
-        subcomponents_qs = subcomponents_qs.filter(projectID__projectID=project_filter)
+        subcomponents_qs = subcomponents_qs.filter(project__projectID__icontains=project_filter)
         print(f"Filtered by project ID: {project_filter}")
     
     if component_filter:
@@ -1379,8 +1379,8 @@ def export_subcomponents_pdf(request):
     # Add subcomponent data with text wrapping
     for subcomponent in subcomponents_qs.order_by('-date'):
         # Use project and component names with text wrapping
-        project_name = subcomponent.projectID.project if subcomponent.projectID else ''
-        component_name = subcomponent.compID.Project_Components if subcomponent.compID else ''
+        project_name = subcomponent.project.project if subcomponent.project else ''
+        component_name = subcomponent.compID.project_components if subcomponent.compID else ''
         subcomponent_name = subcomponent.subcomponent or ''
         
         row = [
@@ -1474,7 +1474,7 @@ def load_project_components(request):
     components = Component.objects.none()
     
     if project_id:
-        components = Component.objects.filter(projectID=project_id)
+        components = Component.objects.filter(project=project_id)
     
     return render(request, 'PIU_Financial_mgt/htmx/components_dropdown.html', {'components': components})
 
@@ -1527,7 +1527,7 @@ def activities(request):
     from PIU_Financial_mgt.models import Currency
     
     # Get all activities with proper field references
-    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
+    activities_qs = Activities.objects.all().select_related('project', 'compID', 'subcompID', 'currency')
     
     # Filter parameters
     project_filter = request.GET.get('project', '')
@@ -1539,7 +1539,7 @@ def activities(request):
     
     # Apply filters with correct field names
     if project_filter:
-        activities_qs = activities_qs.filter(projectID__projectID=project_filter)
+        activities_qs = activities_qs.filter(project__projectID__icontains=project_filter)
     
     if component_filter:
         activities_qs = activities_qs.filter(compID__compID=component_filter)
@@ -1629,7 +1629,7 @@ def export_activities_excel(request):
     print("=" * 42)
     
     # Get filtered activities using same logic as list view
-    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
+    activities_qs = Activities.objects.all().select_related('project', 'compID', 'subcompID', 'currency')
     
     # Apply same filters as main view
     project_filter = request.GET.get('project', '')
@@ -1642,7 +1642,7 @@ def export_activities_excel(request):
     print(f"Excel filters applied - project: '{project_filter}', component: '{component_filter}', subcomponent: '{subcomponent_filter}', currency: '{currency_filter}', year: '{year_filter}', search: '{search_filter}'")
     
     if project_filter:
-        activities_qs = activities_qs.filter(projectID__projectID=project_filter)
+        activities_qs = activities_qs.filter(project__projectID__icontains=project_filter)
         print(f"Filtered by project ID: {project_filter}")
     
     if component_filter:
@@ -1698,8 +1698,8 @@ def export_activities_excel(request):
     for activity in activities_qs.order_by('-year', '-date'):
         row_data = [
             activity.activityID,
-            activity.projectID.project if activity.projectID else '',
-            activity.compID.Project_Components if activity.compID else '',
+            activity.project.project if activity.projectID else '',
+            activity.compID.project_components if activity.compID else '',
             activity.subcompID.subcomponent if activity.subcompID else '',
             activity.activity or '',
             activity.currency.currency if activity.currency else '',
@@ -1767,7 +1767,7 @@ def export_activities_pdf(request):
     print("=" * 41)
     
     # Get filtered activities using same logic as list view
-    activities_qs = Activities.objects.all().select_related('projectID', 'compID', 'subcompID', 'currency')
+    activities_qs = Activities.objects.all().select_related('project', 'compID', 'subcompID', 'currency')
     
     # Apply same filters as main view
     project_filter = request.GET.get('project', '')
@@ -1780,7 +1780,7 @@ def export_activities_pdf(request):
     print(f"PDF filters applied - project: '{project_filter}', component: '{component_filter}', subcomponent: '{subcomponent_filter}', currency: '{currency_filter}', year: '{year_filter}', search: '{search_filter}'")
     
     if project_filter:
-        activities_qs = activities_qs.filter(projectID__projectID=project_filter)
+        activities_qs = activities_qs.filter(project__projectID__icontains=project_filter)
         print(f"Filtered by project ID: {project_filter}")
     
     if component_filter:
@@ -1851,8 +1851,8 @@ def export_activities_pdf(request):
     # Add activity data with text wrapping
     for activity in activities_qs.order_by('-year', '-date'):
         # Use project, component, subcomponent and activity names with text wrapping
-        project_name = activity.projectID.project if activity.projectID else ''
-        component_name = activity.compID.Project_Components if activity.compID else ''
+        project_name = activity.project.project if activity.projectID else ''
+        component_name = activity.compID.project_components if activity.compID else ''
         subcomponent_name = activity.subcompID.subcomponent if activity.subcompID else ''
         activity_name = activity.activity or ''
         
@@ -1949,7 +1949,7 @@ def budget_summary(request):
     if project_filter:
         try:
             project_id = int(project_filter)
-            projects = projects.filter(projectID=project_id)
+            projects = projects.filter(project=project_id)
         except (ValueError, TypeError):
             pass
     
@@ -2045,7 +2045,7 @@ def simple_financial_dashboard(request):
     
     # Recent activities (last 5) - Use Django ORM for SQLite compatibility - convert to list for template evaluation
     try:
-        recent_activities = list(Activities.objects.select_related('projectID', 'compID', 'subcompID').order_by('-date')[:5])
+        recent_activities = list(Activities.objects.select_related('project', 'compID', 'subcompID').order_by('-date')[:5])
         print(f"Successfully loaded {len(recent_activities)} recent activities using Django ORM")
     except Exception as e:
         print(f"Error loading recent activities: {e}")
@@ -2417,7 +2417,7 @@ def export_components_excel(request):
     import datetime
     
     # Apply same filtering logic as components view
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    components_qs = Component.objects.all().select_related('project', 'currency', 'loginUser')
     
     # Filter parameters (same as components view)
     project_id = request.GET.get('project', '')
@@ -2430,9 +2430,9 @@ def export_components_excel(request):
     
     # Apply filters
     if project_id:
-        components_qs = components_qs.filter(projectID__projectID=project_id)
+        components_qs = components_qs.filter(project__projectID__icontains=project_id)
     if component_name:
-        components_qs = components_qs.filter(Project_Components__icontains=component_name)
+        components_qs = components_qs.filter(project_components__icontains=component_name)
     if currency_id:
         components_qs = components_qs.filter(currency__currency=currency_id)
     if allocation_min:
@@ -2463,9 +2463,9 @@ def export_components_excel(request):
     # Data rows
     for component in components_qs.order_by('-date'):
         row = [
-            component.projectID.projectID if component.projectID else '',
-            component.projectID.project if component.projectID else '',
-            component.Project_Components,
+            component.project.projectID if component.project else '',
+            component.project.project if component.project else '',
+            component.project_components,
             component.component_Description,
             component.currency.currency if component.currency else '',
             float(component.allocation) if component.allocation else 0,
@@ -2925,7 +2925,7 @@ def edit_activity(request, activity_id):
     years = YEAR.objects.all()
     
     # For edit mode, get related components and subcomponents
-    components = Component.objects.filter(projectID=activity.projectID) if activity.projectID else Component.objects.none()
+    components = Component.objects.filter(project=activity.projectID) if activity.projectID else Component.objects.none()
     subcomponents = Subcomponent.objects.filter(compID=activity.compID) if activity.compID else Subcomponent.objects.none()
     
     context = {
