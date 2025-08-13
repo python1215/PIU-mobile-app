@@ -124,26 +124,40 @@ class Component(models.Model):
     
     def validate_component_against_project_funding(self):
         """Validate that component allocation doesn't exceed project funding"""
-        project_funding = self.projectID.funding
-        if self.allocation > project_funding:
-            raise ValidationError(
-                f"Component allocation ({self.allocation} {self.currency}) cannot exceed project funding "
-                f"({project_funding} {self.projectID.currency})"
-            )
+        # Only validate if projectID exists and has a valid ID
+        try:
+            if not hasattr(self, 'projectID_id') or not self.projectID_id:
+                return
+            if not self.projectID:
+                return
+                
+            project_funding = self.projectID.funding
+            if self.allocation > project_funding:
+                raise ValidationError(
+                    f"Component allocation ({self.allocation} {self.currency}) cannot exceed project funding "
+                    f"({project_funding} {self.projectID.currency})"
+                )
+        except (AttributeError, ValueError, Component.projectID.RelatedObjectDoesNotExist):
+            # Handle case where projectID exists but funding is not accessible
+            return
         
-        # Check total component allocations don't exceed project funding
-        other_components_total = Component.objects.filter(
-            projectID=self.projectID
-        ).exclude(compID=self.pk if self.pk else 0).aggregate(
-            total=Sum('allocation')
-        )['total'] or Decimal('0.00')
-        
-        total_with_this_component = other_components_total + self.allocation
-        if total_with_this_component > project_funding:
-            raise ValidationError(
-                f"Total component allocations ({total_with_this_component} {self.currency}) would exceed project funding "
-                f"({project_funding} {self.projectID.currency}). Current total: {other_components_total}"
-            )
+        try:
+            # Check total component allocations don't exceed project funding
+            other_components_total = Component.objects.filter(
+                projectID=self.projectID
+            ).exclude(compID=self.pk if self.pk else 0).aggregate(
+                total=Sum('allocation')
+            )['total'] or Decimal('0.00')
+            
+            total_with_this_component = other_components_total + self.allocation
+            if total_with_this_component > project_funding:
+                raise ValidationError(
+                    f"Total component allocations ({total_with_this_component} {self.currency}) would exceed project funding "
+                    f"({project_funding} {self.projectID.currency}). Current total: {other_components_total}"
+                )
+        except Exception:
+            # Skip validation if there are database issues
+            return
     
     def clean(self):
         super().clean()

@@ -270,17 +270,24 @@ def add_component(request):
         print("Form errors:", dict(form.errors))
         
         if form.is_valid():
-            print("Form valid - saving component")
-            component = form.save(commit=False)
-            component.loginUser = request.user
-            component.save()
-            messages.success(request, 'Component created successfully!')
-            print("Component saved successfully - redirecting")
-            return redirect('PIU_Financial_mgt:enhanced_project_dashboard')
+            try:
+                print("Form valid - saving component")
+                component = form.save(commit=False)
+                component.loginUser = request.user
+                component.save()
+                messages.success(request, 'Component created successfully!')
+                print("Component saved successfully - redirecting")
+                return redirect('PIU_Financial_mgt:enhanced_project_dashboard')
+            except Exception as e:
+                print(f"Error saving component: {e}")
+                messages.error(request, f'Error saving component: {str(e)}')
+                # Continue to re-render form with error
         else:
             print("Form validation failed:")
             for field, errors in form.errors.items():
                 print(f"Field {field}: {errors}")
+            # Add validation error message for user
+            messages.error(request, 'Please correct the errors below and try again.')
     else:
         print("=== ADD COMPONENT VIEW ===")
         print("Method: GET")
