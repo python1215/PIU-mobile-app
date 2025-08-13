@@ -44,7 +44,7 @@ class addProjectForm(forms.ModelForm):
 class addComponentForm(forms.ModelForm):
     class Meta:
         model = Component
-        fields = ['project','project_components','component_description','currency','allocation']
+        fields = ['projectID','project_components','component_description','currency','allocation']
 
 
 #######update subcomponent form ################################################333

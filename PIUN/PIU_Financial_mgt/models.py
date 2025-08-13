@@ -82,7 +82,7 @@ class Project(models.Model):
 
 class Component(models.Model):
     compID = models.AutoField(primary_key=True, verbose_name='Component')
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, verbose_name='Project')
+    projectID = models.ForeignKey('Project', on_delete=models.CASCADE, verbose_name='ProjectID')
     project_components = models.CharField(max_length=100)
     component_description = models.CharField(max_length=500)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
