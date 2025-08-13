@@ -1079,7 +1079,7 @@ def addsubcomponent(request):
 @login_required
 def subcomponents(request):
     """Enhanced subcomponents list with filtering, pagination, and statistics"""
-    from django.db.models import Sum, Count
+    from django.db.models import Sum, Count, Q
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     from PIU_Financial_mgt.models import Currency
     
@@ -1093,19 +1093,28 @@ def subcomponents(request):
     search_filter = request.GET.get('search', '')
     
     # Apply filters with correct field references
+    is_filtered = False
+    
     if project_filter:
         subcomponents_qs = subcomponents_qs.filter(projectID__projectID__icontains=project_filter)
+        is_filtered = True
     
     if component_filter:
-        subcomponents_qs = subcomponents_qs.filter(compID__compID=component_filter)
+        subcomponents_qs = subcomponents_qs.filter(compID__project_components__icontains=component_filter)
+        is_filtered = True
     
     if currency_filter:
         subcomponents_qs = subcomponents_qs.filter(currency__id=currency_filter)
+        is_filtered = True
     
     if search_filter:
         subcomponents_qs = subcomponents_qs.filter(
-            subcomponent__icontains=search_filter
+            Q(subcomponent__icontains=search_filter) |
+            Q(subcomponent_Description__icontains=search_filter) |
+            Q(projectID__project__icontains=search_filter) |
+            Q(compID__project_components__icontains=search_filter)
         )
+        is_filtered = True
     
     # Calculate statistics
     overall_total = Subcomponent.objects.count()
@@ -1115,7 +1124,7 @@ def subcomponents(request):
     
     # For project-specific filtering, calculate total for that project only
     if project_filter:
-        project_total = Subcomponent.objects.filter(projectID=project_filter).count()
+        project_total = Subcomponent.objects.filter(projectID__projectID__icontains=project_filter).count()
     else:
         project_total = overall_total
     
@@ -1130,8 +1139,8 @@ def subcomponents(request):
     # Order subcomponents
     ordered_subcomponents = subcomponents_qs.order_by('-date')
     
-    # Pagination - 6 records per page
-    paginator = Paginator(ordered_subcomponents, 6)
+    # Pagination - 10 records per page for better UX
+    paginator = Paginator(ordered_subcomponents, 10)
     page = request.GET.get('page')
     
     try:
@@ -1148,7 +1157,7 @@ def subcomponents(request):
     components = Component.objects.all()
     currencies = Currency.objects.all()
     
-    is_filtered = bool(project_filter or component_filter or currency_filter or search_filter)
+    # is_filtered already set above
     
     context = {
         'subcomponents': subcomponents,  # Now a paginated object

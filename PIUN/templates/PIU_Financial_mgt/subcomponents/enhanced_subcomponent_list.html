@@ -183,12 +183,12 @@
                             {% for subcomponent in subcomponents %}
                             <tr>
                                 <td>
-                                    <span class="badge bg-secondary">{{ subcomponent.projectIDID.projectID }}</span>
+                                    <span class="badge bg-secondary">{{ subcomponent.projectID.projectID }}</span>
                                 </td>
                                 <td>
-                                    <strong>{{ subcomponent.projectIDID.project }}</strong>
+                                    <strong>{{ subcomponent.projectID.project }}</strong>
                                 </td>
-                                <td>{{ subcomponent.compID.Project_Components }}</td>
+                                <td>{{ subcomponent.compID.project_components }}</td>
                                 <td><strong>{{ subcomponent.subcomponent }}</strong></td>
                                 <td>
                                     <div class="text-truncate" style="max-width: 200px;" title="{{ subcomponent.subcomponent_Description }}">
