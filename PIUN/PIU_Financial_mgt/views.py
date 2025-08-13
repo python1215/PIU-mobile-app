@@ -625,7 +625,7 @@ def components(request):
     total_components = Component.objects.count()
     filtered_count = components_qs.count()
     total_allocation = components_qs.aggregate(Sum('allocation'))['allocation__sum'] or 0
-    unique_projects = components_qs.values('project').distinct().count()
+    unique_projects = components_qs.values('projectID').distinct().count()
     
     stats = {
         'total_components': total_components,

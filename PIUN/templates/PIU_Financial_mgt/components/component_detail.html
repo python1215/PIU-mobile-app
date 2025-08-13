@@ -9,7 +9,7 @@
     <div>
         <h1 class="h2 mb-0">
             <i class="bi bi-diagram-3 me-2"></i>
-            {{ component.Project_Components }}
+            {{ component.project_components }}
         </h1>
         <p class="text-muted mb-0">Component details and related subcomponents</p>
     </div>
@@ -38,17 +38,17 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Project</label>
                             <div class="form-control-plaintext">
-                                <span class="badge bg-primary">{{ component.projectIDID.projectID }}</span>
-                                <div class="text-muted small mt-1">{{ component.projectIDID.project }}</div>
+                                <span class="badge bg-primary">{{ component.projectID.projectID }}</span>
+                                <div class="text-muted small mt-1">{{ component.projectID.project }}</div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Component Name</label>
-                            <div class="form-control-plaintext">{{ component.Project_Components }}</div>
+                            <div class="form-control-plaintext">{{ component.project_components }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Description</label>
-                            <div class="form-control-plaintext">{{ component.component_Description|default:"No description provided" }}</div>
+                            <div class="form-control-plaintext">{{ component.component_description|default:"No description provided" }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
