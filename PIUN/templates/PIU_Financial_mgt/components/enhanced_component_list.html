@@ -147,8 +147,8 @@
                     <thead class="table-light">
                         <tr>
                             <th>Project</th>
-                            <th>Project_Components</th>
-                            <th>component_Description</th>
+                            <th>Component Name</th>
+                            <th>Description</th>
                             <th>currency</th>
                             <th>allocation</th>
                             <th>date</th>
@@ -159,9 +159,9 @@
                     <tbody>
                         {% for component in components %}
                             <tr>
-                                <td>{{ component.projectID }}</td>
-                                <td>{{ component.Project_Components }}</td>
-                                <td>{{ component.component_Description }}</td>
+                                <td>{{ component.project }}</td>
+                                <td>{{ component.project_components }}</td>
+                                <td>{{ component.component_description }}</td>
                                 <td>{{ component.currency.currency }}</td>
                                 <td>{{ component.allocation }}</td>
                                 <td>{{ component.date|date:"Y-m-d H:i" }}</td>
