@@ -82,9 +82,9 @@ class Project(models.Model):
 
 class Component(models.Model):
     compID = models.AutoField(primary_key=True, verbose_name='Component')
-    projectID = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Project')
-    Project_Components = models.CharField(max_length = 100)
-    component_Description = models.CharField(max_length=500)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, verbose_name='Project')
+    project_components = models.CharField(max_length=100)
+    component_description = models.CharField(max_length=500)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
     allocation = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
@@ -98,7 +98,7 @@ class Component(models.Model):
         verbose_name_plural= ("Component")
     
     def __str__(self):
-        return str(self.Project_Components)
+        return self.project_components
     
     def get_total_subcomponents_allocation(self):
         """Calculate total allocation of all subcomponents for this component"""
@@ -124,27 +124,27 @@ class Component(models.Model):
     
     def validate_component_against_project_funding(self):
         """Validate that component allocation doesn't exceed project funding"""
-        # Only validate if projectID exists and has a valid ID
+        # Only validate if project exists and has a valid ID
         try:
-            if not hasattr(self, 'projectID_id') or not self.projectID_id:
+            if not hasattr(self, 'project_id') or not self.project_id:
                 return
-            if not self.projectID:
+            if not self.project:
                 return
                 
-            project_funding = self.projectID.funding
+            project_funding = self.project.funding
             if self.allocation > project_funding:
                 raise ValidationError(
                     f"Component allocation ({self.allocation} {self.currency}) cannot exceed project funding "
-                    f"({project_funding} {self.projectID.currency})"
+                    f"({project_funding} {self.project.currency})"
                 )
-        except (AttributeError, ValueError, Component.projectID.RelatedObjectDoesNotExist):
-            # Handle case where projectID exists but funding is not accessible
+        except (AttributeError, ValueError, Component.project.RelatedObjectDoesNotExist):
+            # Handle case where project exists but funding is not accessible
             return
         
         try:
             # Check total component allocations don't exceed project funding
             other_components_total = Component.objects.filter(
-                projectID=self.projectID
+                project=self.project
             ).exclude(compID=self.pk if self.pk else 0).aggregate(
                 total=Sum('allocation')
             )['total'] or Decimal('0.00')
@@ -153,7 +153,7 @@ class Component(models.Model):
             if total_with_this_component > project_funding:
                 raise ValidationError(
                     f"Total component allocations ({total_with_this_component} {self.currency}) would exceed project funding "
-                    f"({project_funding} {self.projectID.currency}). Current total: {other_components_total}"
+                    f"({project_funding} {self.project.currency}). Current total: {other_components_total}"
                 )
         except Exception:
             # Skip validation if there are database issues
@@ -205,7 +205,7 @@ class Subcomponent(models.Model):
     def validate_subcomponent_against_component_allocation(self):
         """Validate that subcomponent allocation doesn't exceed component allocation"""
         # Skip validation if component ID is not set (during form processing)
-        if not hasattr(self, 'compID_id') or not self.compID_id:
+        if not hasattr(self, 'component_id') or not self.component_id:
             return
             
         try:

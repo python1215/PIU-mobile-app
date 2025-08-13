@@ -91,27 +91,27 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.projectID.id_for_label }}" class="form-label">Project</label>
-                                {{ form.projectID|add_class:"form-select" }}
-                                {% if form.projectID.errors %}
-                                    <div class="text-danger small">{{ form.projectID.errors.0 }}</div>
+                                <label for="{{ form.project.id_for_label }}" class="form-label">Project</label>
+                                {{ form.project|add_class:"form-select" }}
+                                {% if form.project.errors %}
+                                    <div class="text-danger small">{{ form.project.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.Project_Components.id_for_label }}" class="form-label">Component Name</label>
-                                {{ form.Project_Components|add_class:"form-control" }}
-                                {% if form.Project_Components.errors %}
-                                    <div class="text-danger small">{{ form.Project_Components.errors.0 }}</div>
+                                <label for="{{ form.project_components.id_for_label }}" class="form-label">Component Name</label>
+                                {{ form.project_components|add_class:"form-control" }}
+                                {% if form.project_components.errors %}
+                                    <div class="text-danger small">{{ form.project_components.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.component_Description.id_for_label }}" class="form-label">Component Description</label>
-                            {{ form.component_Description|add_class:"form-control" }}
-                            {% if form.component_Description.errors %}
-                                <div class="text-danger small">{{ form.component_Description.errors.0 }}</div>
+                            <label for="{{ form.component_description.id_for_label }}" class="form-label">Component Description</label>
+                            {{ form.component_description|add_class:"form-control" }}
+                            {% if form.component_description.errors %}
+                                <div class="text-danger small">{{ form.component_description.errors.0 }}</div>
                             {% endif %}
                         </div>
 

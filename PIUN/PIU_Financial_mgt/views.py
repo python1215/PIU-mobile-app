@@ -85,8 +85,8 @@ def project_detail(request, project_id):
     project = get_object_or_404(Project, projectID=project_id)
     
     # Get related data - convert to lists for template evaluation
-    components = list(Component.objects.filter(projectID=project).order_by('-date'))
-    subcomponents = list(Subcomponent.objects.filter(projectID=project).order_by('-date'))
+    components = list(Component.objects.filter(project=project).order_by('-date'))
+    subcomponents = list(Subcomponent.objects.filter(project=project).order_by('-date'))
     recent_activities = list(Activities.objects.filter(projectID=project).order_by('-date')[:10])
     
     # Calculate statistics  
@@ -172,12 +172,12 @@ def enhanced_project_dashboard(request, project_id=None):
     if selected_project:
         # Project-specific statistics
         total_projects = 1
-        total_components = Component.objects.filter(projectID=selected_project).count()
-        total_subcomponents = Subcomponent.objects.filter(projectID=selected_project).count()
+        total_components = Component.objects.filter(project=selected_project).count()
+        total_subcomponents = Subcomponent.objects.filter(project=selected_project).count()
         total_activities = Activities.objects.filter(projectID=selected_project).count()
         total_funding = selected_project.funding or 0
         active_projects = 1 if not selected_project.closure_Date else 0
-        total_disbursed = Component.objects.filter(projectID=selected_project).aggregate(Sum('allocation'))['allocation__sum'] or 0
+        total_disbursed = Component.objects.filter(project=selected_project).aggregate(Sum('allocation'))['allocation__sum'] or 0
         
         # Social and Environmental data for selected project
         esia_records = ESIA.objects.filter(project_name=selected_project)
@@ -214,8 +214,8 @@ def enhanced_project_dashboard(request, project_id=None):
     # Other recent data (project-specific or overall) - convert to lists for template evaluation
     if selected_project:
         recent_projects = [selected_project]
-        recent_components = list(Component.objects.filter(projectID=selected_project).order_by('-date')[:5])
-        recent_subcomponents = list(Subcomponent.objects.filter(projectID=selected_project).order_by('-date')[:5])
+        recent_components = list(Component.objects.filter(project=selected_project).order_by('-date')[:5])
+        recent_subcomponents = list(Subcomponent.objects.filter(project=selected_project).order_by('-date')[:5])
     else:
         recent_projects = list(Project.objects.order_by('-date')[:5])
         recent_components = list(Component.objects.order_by('-date')[:5])
