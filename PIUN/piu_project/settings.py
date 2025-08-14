@@ -128,7 +128,7 @@ if USE_SQL_SERVER:
             'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
             'USER': os.environ.get('MSSQL_USER', 'nawec'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
-            'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost through SSH tunnel
+            'HOST': os.environ.get('MSSQL_HOST', '192.168.0.102'),  # Direct connection or tunnel
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
                 # Use FreeTDS or fallback drivers
