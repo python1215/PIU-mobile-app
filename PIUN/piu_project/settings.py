@@ -128,15 +128,16 @@ if USE_SQL_SERVER:
     # SQL Server configuration for connecting to local machine
     DATABASES = {
         'default': {
-            'ENGINE': 'custom_backends.sql_server_pymssql',  # Custom pymssql backend
+            'ENGINE': 'sql_server.pyodbc',  # Using django-mssql-backend
             'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
             'USER': os.environ.get('MSSQL_USER', 'nawec'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
             'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost for port forwarding/tunneling
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
-                # pymssql connection options
-                'charset': 'UTF-8',
+                # ODBC driver options
+                'driver': 'ODBC Driver 17 for SQL Server',
+                'extra_params': 'TrustServerCertificate=yes;',
             },
         }
     }
