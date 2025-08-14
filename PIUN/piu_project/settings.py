@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -128,7 +132,7 @@ if USE_SQL_SERVER:
             'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
             'USER': os.environ.get('MSSQL_USER', 'nawec'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
-            'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost through existing SSH tunnel
+            'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost for port forwarding/tunneling
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
                 # Use FreeTDS or fallback drivers
