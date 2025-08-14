@@ -128,12 +128,12 @@ if USE_SQL_SERVER:
             'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
             'USER': os.environ.get('MSSQL_USER', 'nawec'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
-            'HOST': os.environ.get('MSSQL_HOST', 'PGOMEZ\\PGOMEZ'),
+            'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost through SSH tunnel
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
-                # Try different driver options based on what's available
-                'driver': os.environ.get('MSSQL_DRIVER', 'ODBC Driver 17 for SQL Server'),
-                'extra_params': 'TrustServerCertificate=yes;Encrypt=yes',
+                # Use FreeTDS or fallback drivers
+                'driver': '{FreeTDS}',
+                'extra_params': 'TDS_Version=8.0;Port=1433;',
             },
         }
     }

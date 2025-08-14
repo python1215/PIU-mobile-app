@@ -24,4 +24,5 @@ dependencies = [
     "pandas>=2.3.0",
     "matplotlib>=3.10.3",
     "pyodbc>=5.2.0",
+    "pymssql>=2.3.7",
 ]
