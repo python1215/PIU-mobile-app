@@ -50,7 +50,7 @@ class KPIIndicator(models.Model):
         ordering = ['indicator_no']
 
     def __str__(self):
-        return str(self.indicator_description)
+        return str(self.indicator_description or "")
 
 
 class NAWEC_KPI_Monitoring(models.Model):
@@ -151,20 +151,20 @@ class CalculateROA(models.Model):
     def save(self, *args, **kwargs):
         # Auto-calculate ROA percentage
         if self.net_profit_after_tax is not None and self.total_assets is not None and self.total_assets != 0:
-            self.achieved_value = (self.net_profit_after_tax /
-                                   self.total_assets) * 100
+            self.achieved_value = (float(self.net_profit_after_tax) / float(self.total_assets)) * 100
         
         # Calculate compensation_end_target based on compensation_amount
         if self.compensation_amount is not None:
-            if self.compensation_amount == 0:
+            comp_amount = float(self.compensation_amount)
+            if comp_amount == 0:
                 self.compensation_end_target = -12.0
-            elif self.compensation_amount >= 2000000000:
+            elif comp_amount >= 2000000000:
                 self.compensation_end_target = 6.0
-            elif 1 <= self.compensation_amount <= 1999999999:
+            elif 1 <= comp_amount <= 1999999999:
                 # Pro rata calculation: 
                 # compensation_end_target = -12 + (18 * (compensation_amount - 1) / (2000000000 - 1))
                 # Range: -12% to 6% (total range of 18%)
-                ratio = (self.compensation_amount - 1) / (2000000000 - 1)
+                ratio = (comp_amount - 1) / (2000000000 - 1)
                 self.compensation_end_target = -12.0 + (18.0 * ratio)
             else:
                 # For values less than 1 or invalid, default to -12%
@@ -172,11 +172,14 @@ class CalculateROA(models.Model):
         
         # Calculate progress using KPI-01 formula
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+            achieved = float(self.achieved_value)
+            baseline = float(self.baseline_value)
+            if baseline != 0:
+                self.progress_from_baseline = ((achieved - baseline) / baseline) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != baseline:
+                end_target = float(self.End_Target_Value)
+                self.progress_towards_end_target = ((achieved - baseline) / (end_target - baseline)) * 100
 
         super().save(*args, **kwargs)
 
@@ -238,19 +241,22 @@ class CalculateNPM(models.Model):
         if (self.total_revenues_turnover is not None
                 and self.netprofit is not None
                 and self.total_revenues_turnover > 0):
-            self.achieved_value = (self.netprofit / self.total_revenues_turnover) * 100
+            revenue = float(self.total_revenues_turnover)
+            profit = float(self.netprofit)
+            self.achieved_value = (profit / revenue) * 100
         
         # Calculate compensation_end_target based on compensation_amount (NPM specific logic)
         if self.compensation_amount is not None:
-            if self.compensation_amount == 0:
+            comp_amount = float(self.compensation_amount)
+            if comp_amount == 0:
                 self.compensation_end_target = -15.0
-            elif self.compensation_amount >= 2000000000:
+            elif comp_amount >= 2000000000:
                 self.compensation_end_target = 10.0
-            elif 1 <= self.compensation_amount <= 1999999999:
+            elif 1 <= comp_amount <= 1999999999:
                 # Pro rata calculation: 
                 # compensation_end_target = -15 + (25 * (compensation_amount - 1) / (2000000000 - 1))
                 # Range: -15% to 10% (total range of 25%)
-                ratio = (self.compensation_amount - 1) / (2000000000 - 1)
+                ratio = (comp_amount - 1) / (2000000000 - 1)
                 self.compensation_end_target = -15.0 + (25.0 * ratio)
             else:
                 # For values less than 1 or invalid, default to -15%
@@ -259,10 +265,10 @@ class CalculateNPM(models.Model):
         # Calculate progress using KPI-02 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -339,10 +345,10 @@ class CalculateDSCR(models.Model):
         # Calculate progress using KPI-03 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -409,10 +415,10 @@ class CalculateMWh(models.Model):
         # Calculate progress using KPI-04 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -473,10 +479,10 @@ class CalculateGAF(models.Model):
         # Calculate progress using KPI-05 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -516,7 +522,7 @@ class Month(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.month_name
+        return str(self.month_name)
     
     class Meta:
         verbose_name = "Month"
@@ -553,7 +559,7 @@ class CalculateTMH(models.Model):
     @property
     def number_of_days(self):
         if self.start_date and self.end_date:
-            return (self.end_date - self.start_date).days + 1
+            return (float(self.end_date) - float(self.start_date)).days + 1
         return 0
 
     @property
@@ -585,15 +591,15 @@ class CalculateTMH(models.Model):
         # Calculate progress using KPI-06 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     class Meta:
         verbose_name = "Training Man Hours (TMH) Calculation"
@@ -655,8 +661,8 @@ class CalculateATC(models.Model):
         
         # Calculate progress using KPI-07 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -716,8 +722,8 @@ class CalculateNECD(models.Model):
         
         # Calculate progress using KPI-08 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -779,8 +785,8 @@ class CalculateNWCD(models.Model):
         
         # Calculate progress using KPI-09 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -841,10 +847,10 @@ class CalculateTPS(models.Model):
         # Calculate progress using KPI-10 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value)))
 
         super().save(*args, **kwargs)
 
@@ -903,10 +909,10 @@ class CalculateTTP(models.Model):
         # Calculate progress using KPI-11 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value)))
 
         super().save(*args, **kwargs)
 
@@ -968,10 +974,10 @@ class CalculateWQCC(models.Model):
         # Calculate progress using KPI-12 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value)))
 
         super().save(*args, **kwargs)
 
@@ -1033,10 +1039,10 @@ class CalculateWQCB(models.Model):
         # Calculate progress using KPI-13 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value))
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value)))
 
         super().save(*args, **kwargs)
 
@@ -1094,8 +1100,8 @@ class CalculateNRW(models.Model):
         
         # Calculate progress using KPI-14 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -1159,12 +1165,12 @@ class CalculateDD(models.Model):
         if (self.trade_receivables is not None
                 and self.total_credit_sales is not None
                 and self.total_credit_sales != 0):
-            self.achieved_value = (self.trade_receivables / self.total_credit_sales) * 365
+            self.achieved_value = (float(self.trade_receivables) / float(self.total_credit_sales)) * 365
         
         # Calculate progress using KPI-15 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -1216,8 +1222,8 @@ class CalculateAO(models.Model):
         
         # Calculate progress using KPI-17 formula (special case for binary value)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -1279,8 +1285,8 @@ class CalculateDER(models.Model):
         
         # Calculate progress using KPI-18 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
@@ -1340,10 +1346,10 @@ class CalculateCR(models.Model):
         # Calculate progress using KPI-19 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -1402,10 +1408,10 @@ class CalculatePARI(models.Model):
         # Calculate progress using KPI-20 formula
         if self.achieved_value is not None and self.baseline_value is not None:
             if self.baseline_value != 0:
-                self.progress_from_baseline = ((self.achieved_value - self.baseline_value) / self.baseline_value) * 100
+                self.progress_from_baseline = ((float(self.achieved_value) - float(self.baseline_value)) / self.baseline_value) * 100
             
-            if self.End_Target_Value is not None and self.End_Target_Value != self.baseline_value:
-                self.progress_towards_end_target = ((self.achieved_value - self.baseline_value) / (self.End_Target_Value - self.baseline_value)) * 100
+            if self.End_Target_Value is not None and float(self.End_Target_Value) != float(self.baseline_value):
+                self.progress_towards_end_target = ((float(self.achieved_value) - float(self.baseline_value)) / (float(self.End_Target_Value) - float(self.baseline_value))) * 100
 
         super().save(*args, **kwargs)
 
@@ -1461,8 +1467,8 @@ class CalculateTSQR(models.Model):
         
         # Calculate progress using KPI-21 formula (reverse calculation)
         if self.achieved_value is not None and self.baseline_value is not None:
-            if self.baseline_value != self.End_Target_Value:
-                self.progress_from_baseline = ((self.baseline_value - self.achieved_value) / (self.baseline_value - self.End_Target_Value)) * 100
+            if float(self.baseline_value) != float(self.End_Target_Value):
+                self.progress_from_baseline = ((float(self.baseline_value) - float(self.achieved_value)) / (float(self.baseline_value) - float(self.End_Target_Value))) * 100
                 self.progress_towards_end_target = 100 - self.progress_from_baseline
 
         super().save(*args, **kwargs)
