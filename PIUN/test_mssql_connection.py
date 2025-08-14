@@ -17,8 +17,9 @@ def test_basic_connectivity():
     import socket
     from contextlib import closing
     
-    host = '127.0.0.1'
-    port = 14330  # VS Code forwarded port
+    # Connection parameters from environment
+    host = os.environ.get('MSSQL_HOST', '127.0.0.1')
+    port = int(os.environ.get('MSSQL_PORT', '14330'))
     
     print(f"=== Testing Network Connectivity ===")
     print(f"Target: {host}:{port}")
@@ -71,8 +72,10 @@ def test_raw_connection():
     try:
         import pyodbc
         
-        # Connection parameters from .env
-        server = '127.0.0.1,14330'  # Include port in server string
+        # Connection parameters from environment
+        host = os.environ.get('MSSQL_HOST', '127.0.0.1')
+        port = os.environ.get('MSSQL_PORT', '14330')
+        server = f'{host},{port}'  # Include port in server string
         database = 'piuprod3'
         username = 'nawec' 
         password = 'password'
