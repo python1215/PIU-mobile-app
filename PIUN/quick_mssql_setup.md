@@ -10,7 +10,7 @@ Look for your IPv4 Address (e.g., 192.168.1.100)
 ## Step 2: Create SSH Tunnel
 From Replit Shell:
 ```bash
-ssh -L 1433:localhost:1433 pgomez@YOUR_IP_ADDRESS
+ssh -L 1433:localhost:1433 pgomez@192.168.0.102
 ```
 Example:
 ```bash
