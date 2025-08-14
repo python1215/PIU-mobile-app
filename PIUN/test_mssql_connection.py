@@ -32,6 +32,13 @@ def test_connection():
     print(f"MSSQL_HOST: {os.environ.get('MSSQL_HOST', 'Not set')}")
     print(f"MSSQL_PORT: {os.environ.get('MSSQL_PORT', 'Not set')}")
     
+    # Expected values
+    print("\nExpected Configuration:")
+    print("Database: piuprod3")
+    print("User: nawec") 
+    print("Host: PGOMEZ\\PGOMEZ")
+    print("Port: 1433")
+    
     print("\nDjango Database Configuration:")
     print(f"Database Engine: {settings.DATABASES['default']['ENGINE']}")
     print(f"Database Host: {settings.DATABASES['default'].get('HOST', 'Not set')}")
