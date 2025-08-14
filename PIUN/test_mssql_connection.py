@@ -24,6 +24,20 @@ from django.db import connection
 def test_connection():
     print("=== MS SQL Server Connection Test ===\n")
     
+    # Set environment variables if not already set
+    env_vars = {
+        'USE_SQL_SERVER': 'true',
+        'MSSQL_DATABASE': 'piuprod3',
+        'MSSQL_USER': 'nawec', 
+        'MSSQL_PASSWORD': 'password',
+        'MSSQL_HOST': 'PGOMEZ\\PGOMEZ',
+        'MSSQL_PORT': '1433'
+    }
+    
+    for key, value in env_vars.items():
+        if key not in os.environ:
+            os.environ[key] = value
+    
     # Check environment variables
     print("Environment Variables:")
     print(f"USE_SQL_SERVER: {os.environ.get('USE_SQL_SERVER', 'Not set')}")

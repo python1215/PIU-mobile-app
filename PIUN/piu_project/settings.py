@@ -131,7 +131,9 @@ if USE_SQL_SERVER:
             'HOST': os.environ.get('MSSQL_HOST', 'PGOMEZ\\PGOMEZ'),
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
+                # Try different driver options based on what's available
+                'driver': os.environ.get('MSSQL_DRIVER', 'ODBC Driver 17 for SQL Server'),
+                'extra_params': 'TrustServerCertificate=yes;Encrypt=yes',
             },
         }
     }
