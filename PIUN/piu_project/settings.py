@@ -135,9 +135,9 @@ if USE_SQL_SERVER:
             'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost for port forwarding/tunneling
             'PORT': os.environ.get('MSSQL_PORT', '1433'),
             'OPTIONS': {
-                # ODBC driver options
-                'driver': 'ODBC Driver 17 for SQL Server',
-                'extra_params': 'TrustServerCertificate=yes;',
+                # Use FreeTDS driver (available in Replit)
+                'driver': '{FreeTDS}',
+                'extra_params': 'TDS_Version=8.0;',
             },
         }
     }
