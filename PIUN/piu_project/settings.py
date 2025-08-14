@@ -124,7 +124,7 @@ if USE_SQL_SERVER:
     # SQL Server configuration for connecting to local machine via SSH tunnel
     DATABASES = {
         'default': {
-            'ENGINE': 'mssql',
+            'ENGINE': 'mssql',  # Using django-mssql-backend
             'NAME': os.environ.get('MSSQL_DATABASE', 'your_database_name'),
             'USER': os.environ.get('MSSQL_USER', 'your_sql_username'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'your_sql_password'),
