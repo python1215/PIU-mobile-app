@@ -740,8 +740,8 @@ def export_components_excel(request):
         row_data = [
             component.compID,
             component.projectIDID.project if component.projectID else '',
-            component.projectID_components or '',
-            component.component_Description or '',
+            component.project_components or '',
+            component.component_description or '',
             component.currency.currency if component.currency else '',
             component.allocation or 0,
             component.date.strftime('%Y-%m-%d %H:%M') if component.date else '',
@@ -884,7 +884,7 @@ def export_components_pdf(request):
     for component in components_qs.order_by('-date'):
         # Use project name instead of project ID and wrap text properly
         project_name = component.projectIDID.project if component.projectID else ''
-        component_name = component.projectID_components or ''
+        component_name = component.project_components or ''
         
         row = [
             str(component.compID),
@@ -968,17 +968,22 @@ def edit_component(request, component_id):
         print(f"=== EDIT COMPONENT DEBUG ===")
         print(f"POST data: {request.POST}")
         print(f"Component ID: {component_id}")
-        print(f"Current component: {component.projectID_components}")
+        print(f"Current component: {component.project_components}")
         
-        form = addComponentForm(request.POST, instance=component)
+        # Create a mutable copy of POST data and add the projectID
+        post_data = request.POST.copy()
+        post_data['projectID'] = component.projectID.pk
+        
+        form = addComponentForm(post_data, instance=component)
         print(f"Form is valid: {form.is_valid()}")
+        print(f"Form errors: {form.errors}")
         
         if form.is_valid():
             try:
                 component = form.save(commit=False)
                 component.loginUser = request.user
                 component.save()
-                print(f"Component saved successfully: {component.projectID_components}")
+                print(f"Component saved successfully: {component.project_components}")
                 messages.success(request, 'Component updated successfully!')
                 return redirect('PIU_Financial_mgt:components')
             except Exception as e:
@@ -2474,8 +2479,8 @@ def export_components_excel(request):
         row = [
             component.projectIDID.projectID if component.projectID else '',
             component.projectIDID.project if component.projectID else '',
-            component.projectID_components,
-            component.component_Description,
+            component.project_components,
+            component.component_description,
             component.currency.currency if component.currency else '',
             float(component.allocation) if component.allocation else 0,
             component.date.strftime('%Y-%m-%d') if component.date else '',
