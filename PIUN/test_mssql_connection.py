@@ -28,9 +28,9 @@ def test_connection():
     env_vars = {
         'USE_SQL_SERVER': 'true',
         'MSSQL_DATABASE': 'piuprod3',
-        'MSSQL_USER': 'nawec', 
+        'MSSQL_USER': 'nawec',
         'MSSQL_PASSWORD': 'password',
-        'MSSQL_HOST': 'PGOMEZ\\PGOMEZ',
+        'MSSQL_HOST': '127.0.0.1',
         'MSSQL_PORT': '1433'
     }
     
