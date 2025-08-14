@@ -1,79 +1,84 @@
-# Troubleshoot SQL Server Connection
+# SQL Server Connection Troubleshooting
 
-VS Code port forwarding is active but SQL Server connection is still failing.
+## Current Status
+- **Windows SQL Server**: ✅ Running and accessible (Test-NetConnection successful)
+- **VS Code Port Forwarding**: ⚠️ UI shows active but connection failing
+- **Replit Connection**: ❌ Error 111 (Connection refused)
 
-## Current Status:
-- ✅ VS Code shows port 1433 forwarded
-- ❌ Port 1433 not accessible from Replit
-- ❌ SQL Server connection refused
+## Root Cause Analysis
+VS Code port forwarding interface shows port 1433 as forwarded, but traffic is not reaching the Windows machine. This is a common VS Code Remote tunneling issue.
 
-## Likely Issue:
-The SQL Server on your Windows machine is not configured to accept connections, even locally.
+## Solutions (Try in order)
 
-## Required Actions on Windows Machine:
+### 1. Refresh VS Code Port Forwarding
 
-### 1. Check SQL Server Status
-```cmd
-# Open Command Prompt as Administrator
-services.msc
-# Look for "SQL Server (MSSQLSERVER)" - should be "Running"
-```
+**Method A - Remove and Re-add:**
+1. VS Code → Ports panel (bottom)
+2. Right-click port 1433 → "Remove Port"
+3. Click "+" → "Forward a Port" 
+4. Enter: `1433`
+5. Select: `127.0.0.1:1433`
 
-### 2. Enable SQL Server TCP/IP
-```
-1. Run: SQLServerManager15.msc (or your version)
-2. SQL Server Network Configuration → Protocols for MSSQLSERVER
-3. Right-click "TCP/IP" → Enable
-4. Right-click "TCP/IP" → Properties → IP Addresses
-5. Find "IPALL" section → Set "TCP Port" to 1433
-6. Restart SQL Server service
-```
+**Method B - Command Palette:**
+1. `Ctrl+Shift+P`
+2. Type: `Remote-Tunnels: Forward Port from Active Host`
+3. Port: `1433`
+4. Address: `127.0.0.1:1433`
 
-### 3. Test Local Connection on Windows
-```cmd
-# On your Windows machine, test if SQL Server responds locally:
-telnet localhost 1433
-# Should connect if SQL Server is properly configured
-```
+### 2. Alternative Port Numbers
 
-### 4. Check SQL Server Authentication
-```
-1. Open SQL Server Management Studio
-2. Connect to PGOMEZ\PGOMEZ
-3. Right-click server → Properties → Security
-4. Select "SQL Server and Windows Authentication mode"
-5. Restart SQL Server service
-```
+Try forwarding a different port:
+1. Forward port `14330` to `127.0.0.1:1433`
+2. Update Replit connection to use port 14330
 
-### 5. Verify User Exists
-```sql
--- In SSMS, run these queries:
-SELECT name FROM sys.sql_logins WHERE name = 'nawec'
--- If no results, create the user:
-CREATE LOGIN nawec WITH PASSWORD = 'password'
-USE piuprod3
-CREATE USER nawec FOR LOGIN nawec
-ALTER ROLE db_owner ADD MEMBER nawec
-```
+### 3. SSH Tunnel Alternative
 
-## Quick Test Commands:
+If VS Code forwarding continues to fail, set up direct SSH:
 
-**On Windows (Command Prompt):**
-```cmd
-netstat -an | findstr 1433
-# Should show: TCP 0.0.0.0:1433 LISTENING
-```
-
-**After Configuration:**
+**Windows (if SSH server enabled):**
 ```bash
-# In Replit, test again:
-python test_after_config.py
+ssh -L 1433:localhost:1433 username@your-windows-ip
 ```
 
-## Alternative: Use Different Port
-If port 1433 is problematic, try:
-1. Configure SQL Server to use port 1434
-2. Update VS Code port forwarding to 1434
-3. Update Django settings to use port 1434
+### 4. Verify SQL Server Configuration
 
-The port forwarding is working, but SQL Server needs to be configured to accept connections.
+**On Windows, confirm:**
+1. **SQL Server Configuration Manager**:
+   - SQL Server Services → SQL Server (MSSQLSERVER) → Status: Running
+   - SQL Server Network Configuration → Protocols → TCP/IP: Enabled
+
+2. **Test Local Connection**:
+   ```cmd
+   sqlcmd -S localhost -U nawec -P password -d piuprod3
+   ```
+
+3. **Create SQL Login** (if authentication fails):
+   ```sql
+   CREATE LOGIN nawec WITH PASSWORD = 'password';
+   USE piuprod3;
+   CREATE USER nawec FOR LOGIN nawec;
+   ALTER ROLE db_owner ADD MEMBER nawec;
+   ```
+
+## Verification Commands
+
+**From Replit (when working):**
+```bash
+python test_and_activate_sql.py
+```
+
+**Expected Success Output:**
+```
+✅ Connected to SQL Server database: piuprod3
+🎉 SQL Server connection successful!
+```
+
+## Current Workaround
+Django is running with SQLite (`db.sqlite3`) with full functionality. The system will automatically switch to SQL Server once the connection works.
+
+## Next Steps After Connection Works
+1. `python manage.py migrate` - Apply migrations to SQL Server
+2. `python manage.py createsuperuser` - Create admin user
+3. Import existing data from SQLite if needed
+
+The Django configuration is complete - only the network connection needs to be established.
