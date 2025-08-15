@@ -7,7 +7,7 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
-- **August 15, 2025**: MS SQL Server connection configured but blocked by FreeTDS driver issues and VS Code port forwarding tunnel not active. System restored to SQLite mode for stable operation.
+- **August 15, 2025**: Converted to SQLite-only database configuration. Removed all MS SQL Server dependencies and configurations per user request.
 
 ## System Architecture
 
@@ -38,7 +38,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, and Social & Environmental Monitoring.
 - **Data Flow**: User interaction via web forms, data validation with Flask-WTF, persistence via SQLAlchemy, secure file storage, Chart.js for visualization, and system-generated reports.
-- **Database Strategy**: Fully platform-independent using Django ORM exclusively. Compatible with any Django-supported database backend (PostgreSQL, MySQL, SQLite, etc.) without code changes.
+- **Database Strategy**: SQLite database using Django ORM exclusively for simplicity and reliability.
 - **Deployment**: Configurable via environment variables for database URI, session secret, and upload folder. Includes provisions for secure production deployment with proxy fix and file size limits.
 - **Data Consistency**: Automated validation and error handling for data integrity (e.g., project funding vs. component allocation).
 - **Filtering & Search**: Comprehensive filtering options across modules (project, region, district, year, quarter, etc.) and text search.
@@ -60,8 +60,7 @@ Preferred communication style: Simple, everyday language.
 - Leaflet (for interactive maps)
 
 ### Infrastructure
-- PostgreSQL database (primary)
-- SQLite database (development)
-- Platform-independent Django ORM
+- SQLite database (primary)
+- Django ORM
 - Local file system (for document storage)
 ```

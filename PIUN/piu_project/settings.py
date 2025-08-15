@@ -112,43 +112,13 @@ WSGI_APPLICATION = 'piu_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Database Configuration - Dual Mode Support
-# Development: SQLite with Django ORM for full functionality
-# Production: SQL Server with raw queries for offline LAN deployment
-
-# Environment variable to control database mode
-USE_SQL_SERVER = os.environ.get('USE_SQL_SERVER', 'False').lower() == 'true'
-
-if USE_SQL_SERVER:
-    # SQL Server configuration for connecting to local machine
-    DATABASES = {
-        'default': {
-            'ENGINE': 'sql_server.pyodbc',  # Using django-mssql-backend
-            'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
-            'USER': os.environ.get('MSSQL_USER', 'nawec'),
-            'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
-            'HOST': os.environ.get(
-                'MSSQL_HOST',
-                '127.0.0.1'),  # Use localhost for port forwarding/tunneling
-            'PORT': os.environ.get('MSSQL_PORT', '14331'),
-            'OPTIONS': {
-                # Use FreeTDS driver with dynamic path detection
-                'driver': 'FreeTDS',
-                'extra_params': 'TDS_Version=8.0;',
-                'autocommit': True,
-            },
-        }
+# Database Configuration - SQLite Only
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-    DATABASE_MODE = 'mssql'
-else:
-    # Default SQLite configuration for development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-    DATABASE_MODE = 'sqlite'
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
