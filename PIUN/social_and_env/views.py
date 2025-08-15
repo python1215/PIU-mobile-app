@@ -356,18 +356,59 @@ def export_pap_excel(request):
 
 @login_required
 def pap_add(request):
-    """Add new PAP record"""
+    """Add new PAP record with improved error handling"""
     if request.method == 'POST':
         form = PAPForm(request.POST)
         if form.is_valid():
             try:
                 pap = form.save(commit=False)
                 pap.loginUser = request.user
+                
+                # Import required models
+                from PIU_Financial_mgt.models import KPI_For_Contract
+                from setup.models import (
+                    Districts, Settlement, TypeOfPAP, PAPCategory, 
+                    VulnerabilityCategory, TypeOfImpact, NatureOfSettlement
+                )
+                
+                # Ensure all required fields have values
+                if not pap.type_of_investment and pap.project:
+                    pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
+                
+                if not pap.district and pap.region:
+                    pap.district = Districts.objects.filter(region_code=pap.region).first()
+                
+                if not pap.pap_Current_Address and pap.district:
+                    pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+                
+                # Set defaults for required lookup fields
+                if not pap.type_of_pap:
+                    pap.type_of_pap = TypeOfPAP.objects.first()
+                if not pap.pap_category:
+                    pap.pap_category = PAPCategory.objects.first()
+                if not pap.vulnerability_category:
+                    pap.vulnerability_category = VulnerabilityCategory.objects.first()
+                if not pap.type_of_impact:
+                    pap.type_of_impact = TypeOfImpact.objects.first()
+                if not pap.nature_of_compensation:
+                    pap.nature_of_compensation = NatureOfSettlement.objects.first()
+                
+                # Set defaults for required text fields
+                if not pap.area:
+                    pap.area = '0'
+                if not pap.pap_compensated:
+                    pap.pap_compensated = 'N'
+                if not pap.pre_project_situation:
+                    pap.pre_project_situation = 'Information not provided'
+                
                 pap.save()
-                messages.success(request, 'PAP record added successfully.')
+                messages.success(request, f'PAP record {pap.pap_identification_number} added successfully.')
                 return redirect('pap_list')
+                
             except Exception as e:
                 messages.error(request, f'Error saving PAP record: {str(e)}')
+                import traceback
+                print(f'PAP Save Error: {traceback.format_exc()}')
         else:
             # Display form errors to user
             for field, errors in form.errors.items():

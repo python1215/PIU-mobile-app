@@ -253,10 +253,9 @@ class PAPForm(forms.ModelForm):
         self.fields['district'].required = False
         self.fields['pap_Current_Address'].required = False
         
-        # Make required fields (except cascading dropdowns and optional fields)
+        # Set required=False for all form fields - we'll handle validation in clean() method
         for field_name, field in self.fields.items():
-            if field_name not in ['type_of_investment', 'district', 'pap_Current_Address', 'area', 'compensation_RefNo', 'compensation_date']:
-                field.required = True
+            field.required = False
     
     def clean_type_of_investment(self):
         """Custom validation for type_of_investment field"""
@@ -276,30 +275,57 @@ class PAPForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
-        # Provide default value for area if not provided
-        if not cleaned_data.get('area'):
-            cleaned_data['area'] = '0.0'
+        # Handle cascading dropdowns and required fields with defaults
+        project = cleaned_data.get('project')
+        region = cleaned_data.get('region')
         
-        # Provide default value for compensation_RefNo if not provided
-        if not cleaned_data.get('compensation_RefNo'):
-            cleaned_data['compensation_RefNo'] = 'N/A'
+        # Auto-select investment type if not provided
+        if project and not cleaned_data.get('type_of_investment'):
+            first_investment = KPI_For_Contract.objects.filter(project=project).first()
+            if first_investment:
+                cleaned_data['type_of_investment'] = first_investment
         
-        # Handle cascading dropdowns - provide defaults if not selected
-        if not cleaned_data.get('district') and cleaned_data.get('region'):
-            # Get the first district for the selected region
-            from setup.models import Districts
-            region = cleaned_data.get('region')
+        # Auto-select district if not provided
+        if region and not cleaned_data.get('district'):
             first_district = Districts.objects.filter(region_code=region).first()
             if first_district:
                 cleaned_data['district'] = first_district
         
-        if not cleaned_data.get('pap_Current_Address') and cleaned_data.get('district'):
-            # Get the first settlement for the selected district
-            from setup.models import Settlement
-            district = cleaned_data.get('district')
+        # Auto-select settlement if not provided
+        district = cleaned_data.get('district')
+        if district and not cleaned_data.get('pap_Current_Address'):
             first_settlement = Settlement.objects.filter(district_code=district).first()
             if first_settlement:
                 cleaned_data['pap_Current_Address'] = first_settlement
+        
+        # Ensure required lookup fields have defaults
+        if not cleaned_data.get('type_of_pap'):
+            cleaned_data['type_of_pap'] = TypeOfPAP.objects.first()
+            
+        if not cleaned_data.get('pap_category'):
+            cleaned_data['pap_category'] = PAPCategory.objects.first()
+            
+        if not cleaned_data.get('vulnerability_category'):
+            cleaned_data['vulnerability_category'] = VulnerabilityCategory.objects.first()
+            
+        if not cleaned_data.get('type_of_impact'):
+            cleaned_data['type_of_impact'] = TypeOfImpact.objects.first()
+            
+        if not cleaned_data.get('nature_of_compensation'):
+            cleaned_data['nature_of_compensation'] = NatureOfSettlement.objects.first()
+        
+        # Set default values for required text/choice fields
+        if not cleaned_data.get('area'):
+            cleaned_data['area'] = '0'
+            
+        if not cleaned_data.get('pap_compensated'):
+            cleaned_data['pap_compensated'] = 'N'
+            
+        if not cleaned_data.get('pre_project_situation'):
+            cleaned_data['pre_project_situation'] = 'Information not provided'
+            
+        if not cleaned_data.get('compensation_RefNo'):
+            cleaned_data['compensation_RefNo'] = ''
         
         return cleaned_data
 
