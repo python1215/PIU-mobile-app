@@ -835,9 +835,9 @@ def load_districts(request):
         from setup.models import Regions
         try:
             region = Regions.objects.get(pk=region_id)
-            # Districts store full region names, so use region_name for filtering
+            # Districts store region codes or full names, check both patterns
             districts = Districts.objects.filter(
-                region_code=region.region_name
+                region_code__in=[region.region_code, region.region_name]
             ).values_list('district_code', 'district_name').order_by('district_name')
         except Regions.DoesNotExist:
             districts = []
