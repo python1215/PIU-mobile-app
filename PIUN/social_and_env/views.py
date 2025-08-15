@@ -218,133 +218,42 @@ def esia_export_excel(request):
 # ======================== PAP Views ========================
 @login_required
 def pap_list(request):
-    """Enhanced PAP list view with filtering and pagination - Using Django ORM Only"""
-    from django.core.paginator import Paginator
-    from django.db.models import Sum, Count, Q
-    
-    try:
-        # Use Django ORM exclusively - back to simple approach
-        pap_queryset = PAP.objects.select_related(
-            'project', 'region', 'district', 'loginUser'
-        ).all()
-        
-        # Apply filters using Django ORM
-        if request.GET.get('project'):
-            pap_queryset = pap_queryset.filter(project_id__icontains=request.GET.get('project'))
-        
-        if request.GET.get('gender'):
-            pap_queryset = pap_queryset.filter(sex=request.GET.get('gender'))
-        
-        if request.GET.get('pap_compensated'):
-            pap_queryset = pap_queryset.filter(pap_compensated=request.GET.get('pap_compensated'))
-        
-        if request.GET.get('pap_name'):
-            pap_queryset = pap_queryset.filter(pap_name__icontains=request.GET.get('pap_name'))
-        
-        if request.GET.get('location_of_impact'):
-            pap_queryset = pap_queryset.filter(location_of_impact__icontains=request.GET.get('location_of_impact'))
-        
-        if request.GET.get('amount_min'):
-            try:
-                min_amount = float(request.GET.get('amount_min'))
-                pap_queryset = pap_queryset.filter(amount__gte=min_amount)
-            except (ValueError, TypeError):
-                pass
-        
-        if request.GET.get('amount_max'):
-            try:
-                max_amount = float(request.GET.get('amount_max'))
-                pap_queryset = pap_queryset.filter(amount__lte=max_amount)
-            except (ValueError, TypeError):
-                pass
-        
-        # Get statistics using Django ORM
-        stats = {
-            'total_pap': PAP.objects.count(),
-            'filtered_count': pap_queryset.count(),
-            'compensated': pap_queryset.filter(pap_compensated='Y').count(),
-            'not_compensated': pap_queryset.filter(pap_compensated='N').count(),
-            'total_compensation': pap_queryset.aggregate(Sum('amount'))['amount__sum'] or 0,
-            'male_count': pap_queryset.filter(sex='M').count(),
-            'female_count': pap_queryset.filter(sex='F').count(),
-        }
-        
-        # Pagination
-        page_size = request.GET.get('page_size', 10)
-        try:
-            page_size = int(page_size)
-            if page_size not in [10, 15, 25, 50, 100]:
-                page_size = 10
-        except (ValueError, TypeError):
-            page_size = 10
-        
-        paginator = Paginator(pap_queryset, page_size)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        
-        # Create filter object for template
-        class PAPFilter:
-            def __init__(self):
-                self.form = type('Form', (), {
-                    'project': request.GET.get('project', ''),
-                    'gender': request.GET.get('gender', ''),
-                    'pap_compensated': request.GET.get('pap_compensated', ''),
-                    'pap_name': request.GET.get('pap_name', ''),
-                    'location_of_impact': request.GET.get('location_of_impact', ''),
-                    'amount_min': request.GET.get('amount_min', ''),
-                    'amount_max': request.GET.get('amount_max', ''),
-                })()
-        
-        filter_obj = PAPFilter()
-        
-        # Check if any filters are applied
-        is_filtered = any([
-            request.GET.get('project'),
-            request.GET.get('gender'),
-            request.GET.get('pap_compensated'),
-            request.GET.get('pap_name'),
-            request.GET.get('location_of_impact'),
-            request.GET.get('amount_min'),
-            request.GET.get('amount_max'),
-        ])
-        
-        context = {
-            'page_obj': page_obj,
-            'filter': filter_obj,
-            'stats': stats,
-            'is_filtered': is_filtered,
-        }
-        
-        return render(request, 'social_and_env/pap/pap_list.html', context)
-        
-    except Exception as e:
-        # Handle any errors gracefully with detailed logging
-        from django.contrib import messages
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f'PAP List View Error: {str(e)}', exc_info=True)
-        
-        # More specific error message for debugging
-        messages.error(request, f'Error loading PAP data: {str(e)}')
-        
-        # Return empty context
-        context = {
-            'page_obj': None,
-            'filter': None,
-            'stats': {
-                'total_pap': 0,
-                'filtered_count': 0,
-                'compensated': 0,
-                'not_compensated': 0,
-                'total_compensation': 0,
-                'male_count': 0,
-                'female_count': 0,
-            },
-            'is_filtered': False,
-            'error': str(e),
-        }
-        
-        return render(request, 'social_and_env/pap/pap_list.html', context)
+    """Enhanced PAP list view with filtering and pagination"""
+    pap_list = PAP.objects.select_related(
+        'project', 'type_of_investment', 'region', 'district',
+        'pap_Current_Address', 'type_of_pap', 'pap_category',
+        'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
+        'loginUser'
+    ).all()
+
+    # Apply filters
+    pap_filter = PAPFilter(request.GET, queryset=pap_list)
+    filtered_pap = pap_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_pap, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistics
+    stats = {
+        'total_pap': pap_list.count(),
+        'filtered_count': filtered_pap.count(),
+        'compensated': filtered_pap.filter(pap_compensated='Y').count(),
+        'not_compensated': filtered_pap.filter(pap_compensated='N').count(),
+        'total_compensation': filtered_pap.aggregate(Sum('amount'))['amount__sum'] or 0,
+        'male_count': filtered_pap.filter(sex='M').count(),
+        'female_count': filtered_pap.filter(sex='F').count(),
+    }
+
+    context = {
+        'page_obj': page_obj,
+        'filter': pap_filter,
+        'stats': stats,
+        'is_filtered': bool(request.GET),
+    }
+
+    return render(request, 'social_and_env/pap/pap_list.html', context)
 
 
 @login_required
