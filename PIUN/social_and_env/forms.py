@@ -221,6 +221,11 @@ class PAPForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
+        elif self.instance and self.instance.pk and self.instance.project:
+            # For editing existing PAP records, populate investment types for the selected project
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                project=self.instance.project
+            )
         
         if 'region' in self.data:
             try:
@@ -686,15 +691,32 @@ class PAPUpdateForm(PAPForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             # Pre-populate dependent fields
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project=self.instance.project
-            )
-            self.fields['district'].queryset = Districts.objects.filter(
-                region_code_id=self.instance.region_id
-            )
-            self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                district_code_id=self.instance.district_id
-            )
+            if self.instance.project:
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project=self.instance.project
+                )
+            else:
+                # If no project, show all investment types
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+                
+            if self.instance.region:
+                self.fields['district'].queryset = Districts.objects.filter(
+                    region_code_id=self.instance.region.region_code
+                )
+            else:
+                self.fields['district'].queryset = Districts.objects.all()
+                
+            if self.instance.district:
+                self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
+                    district_code_id=self.instance.district.district_code
+                )
+            else:
+                self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
+        else:
+            # For new forms (shouldn't happen in update form but safety measure)
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+            self.fields['district'].queryset = Districts.objects.all()
+            self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
 
 
 class GrievianceUpdateForm(GrievianceMonitoringLogForm):
