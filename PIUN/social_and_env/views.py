@@ -922,14 +922,14 @@ def load_investment_types_ohs(request):
     
     try:
         if project_id:
-            # Get investment types for specific project
+            # Get investment types for specific project (using projectID field)
             investment_types = KPI_For_Contract.objects.filter(
-                project_id=project_id
+                project__projectID=project_id
             ).values('monitoring_Type_Code', 'type_of_investment').distinct()
             
             # Get KPI descriptions for the project  
             kpi_descriptions = KPI_For_Contract.objects.filter(
-                project_id=project_id
+                project__projectID=project_id
             ).values('monitoring_Type_Code', 'kpi_description').distinct()
             
             investment_list = [
@@ -1007,7 +1007,7 @@ def load_kpi_descriptions_ohs(request):
         if project_id:
             # Get KPI descriptions for the project  
             kpi_descriptions = KPI_For_Contract.objects.filter(
-                project_id=project_id
+                project__projectID=project_id
             ).values('monitoring_Type_Code', 'kpi_description').distinct()
             
             kpi_list = [

@@ -271,31 +271,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (projectId) {
+                console.log('Project selected:', projectId);
+                console.log('Investment field found:', !!investmentField);
+                console.log('KPI field found:', !!kpiDescriptionField);
+                
                 // Load both investment types and KPI descriptions for selected project
-                fetch(`{% url 'load_investment_types_ohs' %}?project_id=${projectId}`)
-                    .then(response => response.json())
+                const url = `{% url 'load_investment_types_ohs' %}?project_id=${projectId}`;
+                console.log('Fetching from URL:', url);
+                
+                fetch(url)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         console.log('Loaded project data:', data);
                         
                         // Populate investment types
-                        if (investmentField && data.investment_types && data.investment_types.length > 0) {
-                            data.investment_types.forEach(investment => {
-                                const option = document.createElement('option');
-                                option.value = investment.id;
-                                option.textContent = investment.name;
-                                investmentField.appendChild(option);
-                            });
+                        if (investmentField) {
+                            console.log('Investment types count:', data.investment_types ? data.investment_types.length : 0);
+                            if (data.investment_types && data.investment_types.length > 0) {
+                                data.investment_types.forEach(investment => {
+                                    const option = document.createElement('option');
+                                    option.value = investment.id;
+                                    option.textContent = investment.name;
+                                    investmentField.appendChild(option);
+                                });
+                                console.log('Investment types populated successfully');
+                            }
                             investmentField.disabled = false;
                         }
                         
                         // Populate KPI descriptions
-                        if (kpiDescriptionField && data.kpi_descriptions && data.kpi_descriptions.length > 0) {
-                            data.kpi_descriptions.forEach(kpi => {
-                                const option = document.createElement('option');
-                                option.value = kpi.id;
-                                option.textContent = kpi.name;
-                                kpiDescriptionField.appendChild(option);
-                            });
+                        if (kpiDescriptionField) {
+                            console.log('KPI descriptions count:', data.kpi_descriptions ? data.kpi_descriptions.length : 0);
+                            if (data.kpi_descriptions && data.kpi_descriptions.length > 0) {
+                                data.kpi_descriptions.forEach(kpi => {
+                                    const option = document.createElement('option');
+                                    option.value = kpi.id;
+                                    option.textContent = kpi.name;
+                                    kpiDescriptionField.appendChild(option);
+                                });
+                                console.log('KPI descriptions populated successfully');
+                            }
                             kpiDescriptionField.disabled = false;
                         }
                     })
