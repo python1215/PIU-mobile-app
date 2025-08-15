@@ -917,8 +917,11 @@ def load_investment_types_ohs(request):
     """Load investment types and KPI descriptions for OHS form based on selected project"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
+    import logging
     
+    logger = logging.getLogger(__name__)
     project_id = request.GET.get('project_id')
+    logger.debug(f"OHS AJAX called with project_id: {project_id}")
     
     try:
         if project_id:
@@ -942,15 +945,21 @@ def load_investment_types_ohs(request):
                 for kpi in kpi_descriptions if kpi['Kpi_description']
             ]
             
-            return JsonResponse({
+            logger.debug(f"Found {len(investment_list)} investments, {len(kpi_list)} KPIs")
+            
+            response_data = {
                 'investment_types': investment_list,
                 'kpi_descriptions': kpi_list
-            })
+            }
+            logger.debug(f"Returning JSON response: {response_data}")
+            return JsonResponse(response_data)
         else:
             # No project selected - return empty lists
+            logger.debug("No project_id provided, returning empty lists")
             return JsonResponse({'investment_types': [], 'kpi_descriptions': []})
             
     except Exception as e:
+        logger.error(f"Error in load_investment_types_ohs: {str(e)}")
         return JsonResponse({'investment_types': [], 'kpi_descriptions': [], 'error': str(e)})
 
 
@@ -1585,28 +1594,7 @@ def load_investment_types_grievance(request):
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
-@login_required
-def load_investment_types_ohs(request):
-    """Load investment types for OHS based on selected project"""
-    from django.http import HttpResponse
-    
-    project_id = request.GET.get('project')
-    if not project_id:
-        return HttpResponse('<option value="">Select Investment Type</option>')
-    
-    try:
-        investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).values_list('type_of_investment', flat=True).distinct().order_by('type_of_investment')
-        
-        options = '<option value="">Select Investment Type</option>'
-        for investment_type in investment_types:
-            options += f'<option value="{investment_type}">{investment_type}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+
 
 
 @login_required
