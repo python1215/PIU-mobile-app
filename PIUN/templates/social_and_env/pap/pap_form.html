@@ -288,94 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleCompensationFields(); // Initial call
     }
     
-    // Cascading dropdown functionality
-    const projectField = document.getElementById('id_project');
-    const investmentField = document.getElementById('id_type_of_investment');
-    const regionField = document.getElementById('id_region');
-    const districtField = document.getElementById('id_district');
-    const settlementField = document.getElementById('id_pap_Current_Address');
-    
-    // Handle project change to load investment types
-    if (projectField) {
-        projectField.addEventListener('change', function() {
-            const projectId = this.value;
-            
-            // Clear investment type field
-            if (investmentField) investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-            
-            if (projectId) {
-                console.log('Loading investment types for project:', projectId);
-                
-                fetch(`/social_and_env/ajax/load-investment-types-pap/?project=${projectId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        if (investmentField) {
-                            investmentField.innerHTML = html;
-                            console.log('Investment types loaded successfully');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading investment types:', error);
-                        if (investmentField) investmentField.innerHTML = '<option value="">Error loading investment types</option>';
-                    });
-            }
-        });
-    }
-    
-    // Handle region change
-    if (regionField) {
-        regionField.addEventListener('change', function() {
-            const regionId = this.value;
-            
-            // Clear district and settlement fields
-            if (districtField) districtField.innerHTML = '<option value="">Select District</option>';
-            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
-            
-            if (regionId) {
-                console.log('Loading districts for region:', regionId);
-                
-                fetch(`/social_and_env/ajax/load-districts/?region=${regionId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        if (districtField) {
-                            districtField.innerHTML = html;
-                            console.log('Districts loaded successfully');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading districts:', error);
-                        if (districtField) districtField.innerHTML = '<option value="">Error loading districts</option>';
-                    });
-            }
-        });
-    }
-    
-    // Handle district change
-    if (districtField) {
-        districtField.addEventListener('change', function() {
-            const districtId = this.value;
-            
-            // Clear settlement field
-            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
-            
-            if (districtId) {
-                console.log('Loading settlements for district:', districtId);
-                
-                fetch(`/social_and_env/ajax/load-settlements/?district=${districtId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        if (settlementField) {
-                            settlementField.innerHTML = html;
-                            console.log('Settlements loaded successfully');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading settlements:', error);
-                        if (settlementField) settlementField.innerHTML = '<option value="">Error loading settlements</option>';
-                    });
-            }
-        });
-    }
+    // Form validation and UI improvements
     
     // Form validation - only validate truly required fields
     if (form) {
@@ -411,62 +324,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Project -> Investment Type cascade
+    // Cascading dropdown functionality
     const projectField = document.getElementById('id_project');
     const investmentField = document.getElementById('id_type_of_investment');
+    const regionField = document.getElementById('id_region');
+    const districtField = document.getElementById('id_district');
+    const settlementField = document.getElementById('id_pap_Current_Address');
     
-    if (projectField && investmentField) {
-        // Get CSRF token for AJAX requests
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    // Get CSRF token for AJAX requests
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-        const csrftoken = getCookie('csrftoken');
-        
-        // Load investment types immediately when project is selected or on page load
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    
+    // Project -> Investment Type cascade
+    if (projectField && investmentField) {
         function loadInvestmentTypes() {
-            fetch(`{% url 'load_investment_types_pap' %}`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-                    if (data.investment_types && data.investment_types.length > 0) {
-                        data.investment_types.forEach(investment => {
-                            const option = document.createElement('option');
-                            option.value = investment.id;
-                            option.textContent = investment.name;
-                            investmentField.appendChild(option);
-                        });
-                    }
-                    investmentField.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error loading investment types:', error);
-                    investmentField.disabled = false;
-                });
+            const projectId = projectField.value;
+            console.log('Loading investment types for project:', projectId);
+            
+            // Clear investment type field
+            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            
+            if (projectId) {
+                fetch(`/social_and_env/ajax/load-investment-types-pap/?project=${projectId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        investmentField.innerHTML = html;
+                        console.log('Investment types loaded successfully');
+                    })
+                    .catch(error => {
+                        console.error('Error loading investment types:', error);
+                        investmentField.innerHTML = '<option value="">Error loading investment types</option>';
+                    });
+            }
         }
         
         // Load investment types when project changes
         projectField.addEventListener('change', loadInvestmentTypes);
-        
-        // Load investment types on page load regardless of project selection
-        loadInvestmentTypes();
     }
     
     // Region -> District -> Settlement cascade
