@@ -1,5 +1,6 @@
 from django import forms
 from django.urls import reverse_lazy
+from django.core.exceptions import ValidationError
 from .models import ESIA, PAP, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
 from setup.models import (
     Regions, Districts, Settlement, TypeOfPAP, 
@@ -472,7 +473,7 @@ class OHSMonitoringForm(forms.ModelForm):
     )
 
     Type_of_Investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.all(),
+        queryset=KPI_For_Contract.objects.none(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
         to_field_name='monitoring_Type_Code',
@@ -486,21 +487,21 @@ class OHSMonitoringForm(forms.ModelForm):
     )
 
     district = forms.ModelChoiceField(
-        queryset=Districts.objects.all(),
+        queryset=Districts.objects.none(),
         empty_label="Select District",
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False
     )
 
     settlement = forms.ModelChoiceField(
-        queryset=Settlement.objects.all(),
+        queryset=Settlement.objects.none(),
         empty_label="Select Settlement",
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False
     )
 
     Kpi_description = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.all(),
+        queryset=KPI_For_Contract.objects.none(),
         empty_label="Select KPI Description",
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False
@@ -591,8 +592,10 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
-        else:
-            self.fields['district'].queryset = Districts.objects.all()
+        elif self.instance and self.instance.pk and hasattr(self.instance, 'region') and self.instance.region:
+            self.fields['district'].queryset = Districts.objects.filter(
+                region_code_id=self.instance.region.region_code
+            )
         
         if 'district' in self.data:
             try:
@@ -602,8 +605,65 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
-        else:
-            self.fields['settlement'].queryset = Settlement.objects.all()
+        elif self.instance and self.instance.pk and hasattr(self.instance, 'district') and self.instance.district:
+            self.fields['settlement'].queryset = Settlement.objects.filter(
+                district_code_id=self.instance.district.district_code
+            )
+        
+        # Auto-select cascade defaults for new forms to prevent validation errors
+        self._auto_select_cascade_defaults()
+    
+    def _auto_select_cascade_defaults(self):
+        """Auto-select first available options for required cascade fields"""
+        # Auto-select first investment type if project is selected but no investment type
+        if not self.data.get('Type_of_Investment') and self.data.get('project'):
+            first_investment = self.fields['Type_of_Investment'].queryset.first()
+            if first_investment and hasattr(self, 'data') and hasattr(self.data, '_mutable'):
+                if self.data._mutable:
+                    self.data['Type_of_Investment'] = str(first_investment.monitoring_Type_Code)
+        
+        # Auto-select first KPI description if project is selected but no KPI selected
+        if not self.data.get('Kpi_description') and self.data.get('project'):
+            first_kpi = self.fields['Kpi_description'].queryset.first()
+            if first_kpi and hasattr(self, 'data') and hasattr(self.data, '_mutable'):
+                if self.data._mutable:
+                    self.data['Kpi_description'] = str(first_kpi.monitoring_Type_Code)
+        
+        # Auto-select first district if region is selected but no district
+        if not self.data.get('district') and self.data.get('region'):
+            first_district = self.fields['district'].queryset.first()
+            if first_district and hasattr(self, 'data') and hasattr(self.data, '_mutable'):
+                if self.data._mutable:
+                    self.data['district'] = str(first_district.district_code)
+        
+        # Auto-select first settlement if district is selected but no settlement
+        if not self.data.get('settlement') and self.data.get('district'):
+            first_settlement = self.fields['settlement'].queryset.first()
+            if first_settlement and hasattr(self, 'data') and hasattr(self.data, '_mutable'):
+                if self.data._mutable:
+                    self.data['settlement'] = str(first_settlement.settlement_code)
+    
+    def clean_Type_of_Investment(self):
+        """Auto-select first investment type if none provided"""
+        investment_type = self.cleaned_data.get('Type_of_Investment')
+        if not investment_type:
+            project = self.cleaned_data.get('project')
+            if project:
+                first_investment = KPI_For_Contract.objects.filter(project=project).first()
+                if first_investment:
+                    return first_investment
+        return investment_type
+    
+    def clean_Kpi_description(self):
+        """Auto-select first KPI description if none provided"""
+        kpi_description = self.cleaned_data.get('Kpi_description')
+        if not kpi_description:
+            project = self.cleaned_data.get('project')
+            if project:
+                first_kpi = KPI_For_Contract.objects.filter(project=project).first()
+                if first_kpi:
+                    return first_kpi
+        return kpi_description
 
 
 class CommunityEngagementForm(forms.ModelForm):

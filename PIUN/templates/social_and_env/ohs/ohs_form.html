@@ -251,67 +251,170 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Project -> KPI Description cascade
+    // Project -> Investment Type and KPI Description cascade
     const projectField = document.getElementById('id_project');
+    const investmentField = document.getElementById('id_Type_of_Investment');
     const kpiDescriptionField = document.getElementById('id_Kpi_description');
     
-    if (projectField && kpiDescriptionField) {
+    if (projectField) {
         projectField.addEventListener('change', function() {
             const projectId = this.value;
             
-            // Clear KPI description field
-            kpiDescriptionField.innerHTML = '<option value="">Select KPI Description</option>';
-            kpiDescriptionField.disabled = !projectId;
+            // Clear and disable dependent fields
+            if (investmentField) {
+                investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+                investmentField.disabled = !projectId;
+            }
+            if (kpiDescriptionField) {
+                kpiDescriptionField.innerHTML = '<option value="">Select KPI Description</option>';
+                kpiDescriptionField.disabled = !projectId;
+            }
             
             if (projectId) {
-                // Load investment types
-                fetch(`{% url 'load_investment_types_ohs' %}`)
+                // Load both investment types and KPI descriptions for selected project
+                fetch(`{% url 'load_investment_types_ohs' %}?project_id=${projectId}`)
                     .then(response => response.json())
                     .then(data => {
-                        const investmentField = document.getElementById('id_Type_of_Investment');
-                        if (investmentField) {
-                            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-                            if (data.investment_types && data.investment_types.length > 0) {
-                                data.investment_types.forEach(investment => {
-                                    const option = document.createElement('option');
-                                    option.value = investment.id;
-                                    option.textContent = investment.name;
-                                    investmentField.appendChild(option);
-                                });
-                            }
+                        console.log('Loaded project data:', data);
+                        
+                        // Populate investment types
+                        if (investmentField && data.investment_types && data.investment_types.length > 0) {
+                            data.investment_types.forEach(investment => {
+                                const option = document.createElement('option');
+                                option.value = investment.id;
+                                option.textContent = investment.name;
+                                investmentField.appendChild(option);
+                            });
+                            investmentField.disabled = false;
                         }
-                    })
-                    .catch(error => console.error('Error loading investment types:', error));
-                
-                // Load KPI descriptions for selected project
-                console.log('Fetching KPI descriptions for project:', projectId);
-                fetch(`{% url 'load_kpi_descriptions' %}?project_id=${projectId}`)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Received KPI data:', data);
-                        if (data.kpi_descriptions && data.kpi_descriptions.length > 0) {
+                        
+                        // Populate KPI descriptions
+                        if (kpiDescriptionField && data.kpi_descriptions && data.kpi_descriptions.length > 0) {
                             data.kpi_descriptions.forEach(kpi => {
                                 const option = document.createElement('option');
                                 option.value = kpi.id;
-                                option.textContent = kpi.description;
+                                option.textContent = kpi.name;
                                 kpiDescriptionField.appendChild(option);
                             });
-                            console.log(`Added ${data.kpi_descriptions.length} KPI options`);
-                        } else {
-                            console.log('No KPI descriptions found');
+                            kpiDescriptionField.disabled = false;
                         }
-                        kpiDescriptionField.disabled = false;
                     })
                     .catch(error => {
-                        console.error('Error loading KPI descriptions:', error);
-                        kpiDescriptionField.disabled = false;
+                        console.error('Error loading project data:', error);
+                        if (investmentField) investmentField.disabled = false;
+                        if (kpiDescriptionField) kpiDescriptionField.disabled = false;
                     });
             }
         });
     }
+    
+    // Region -> District -> Settlement cascade
+    const regionField = document.getElementById('id_region');
+    const districtField = document.getElementById('id_district');
+    const settlementField = document.getElementById('id_settlement');
+    
+    if (regionField && districtField) {
+        regionField.addEventListener('change', function() {
+            const regionId = this.value;
+            
+            // Clear district and settlement fields
+            districtField.innerHTML = '<option value="">Select District</option>';
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            districtField.disabled = !regionId;
+            if (settlementField) settlementField.disabled = true;
+            
+            if (regionId) {
+                fetch(`{% url 'load_districts' %}?region_id=${regionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.districts && data.districts.length > 0) {
+                            data.districts.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district.id;
+                                option.textContent = district.name;
+                                districtField.appendChild(option);
+                            });
+                        }
+                        districtField.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading districts:', error);
+                        districtField.disabled = false;
+                    });
+            }
+        });
+    }
+    
+    if (districtField && settlementField) {
+        districtField.addEventListener('change', function() {
+            const districtId = this.value;
+            
+            settlementField.innerHTML = '<option value="">Select Settlement</option>';
+            settlementField.disabled = !districtId;
+            
+            if (districtId) {
+                fetch(`{% url 'load_settlements' %}?district_id=${districtId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.settlements && data.settlements.length > 0) {
+                            data.settlements.forEach(settlement => {
+                                const option = document.createElement('option');
+                                option.value = settlement.id;
+                                option.textContent = settlement.name;
+                                settlementField.appendChild(option);
+                            });
+                        }
+                        settlementField.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading settlements:', error);
+                        settlementField.disabled = false;
+                    });
+            }
+        });
+    }
+    
+    // Auto-calculate worker totals
+    function calculateTotals() {
+        const maleField = document.getElementById('id_male');
+        const femaleField = document.getElementById('id_female');
+        const youthMaleField = document.getElementById('id_youth_male');
+        const youthFemaleField = document.getElementById('id_youth_female');
+        
+        const male = maleField ? parseInt(maleField.value) || 0 : 0;
+        const female = femaleField ? parseInt(femaleField.value) || 0 : 0;
+        const youthMale = youthMaleField ? parseInt(youthMaleField.value) || 0 : 0;
+        const youthFemale = youthFemaleField ? parseInt(youthFemaleField.value) || 0 : 0;
+        
+        const totalWorkers = male + female;
+        const totalYouth = youthMale + youthFemale;
+        const totalMale = male + youthMale;
+        const totalFemale = female + youthFemale;
+        
+        const totalWorkersEl = document.getElementById('total-workers');
+        const totalYouthEl = document.getElementById('total-youth');
+        const totalMaleEl = document.getElementById('total-male');
+        const totalFemaleEl = document.getElementById('total-female');
+        
+        if (totalWorkersEl) totalWorkersEl.textContent = totalWorkers;
+        if (totalYouthEl) totalYouthEl.textContent = totalYouth;
+        if (totalMaleEl) totalMaleEl.textContent = totalMale;
+        if (totalFemaleEl) totalFemaleEl.textContent = totalFemale;
+    }
+    
+    // Add event listeners to worker count fields
+    ['id_male', 'id_female', 'id_youth_male', 'id_youth_female'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', calculateTotals);
+        }
+    });
+    
+    // Initial calculation on page load
+    calculateTotals();
+});
+</script>
+{% endblock %}
     
     // Cascading Dropdowns: Region -> District -> Settlement
     const regionField = document.getElementById('id_region');
@@ -414,112 +517,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial calculation
     calculateTotals();
-    
-    // Cascading dropdown functionality
-    const regionField = document.getElementById('id_region');
-    const districtField = document.getElementById('id_district');
-    const settlementField = document.getElementById('id_settlement');
-    
-    // Handle region change
-    if (regionField) {
-        regionField.addEventListener('change', function() {
-            const regionId = this.value;
-            
-            // Clear district and settlement fields
-            if (districtField) districtField.innerHTML = '<option value="">Select District</option>';
-            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
-            
-            if (regionId) {
-                console.log('Loading districts for region:', regionId);
-                
-                // Try the test endpoint first
-                fetch(`/social_and_env/test-cascading/?region=${regionId}&type=districts`)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        return response.text();
-                    })
-                    .then(html => {
-                        console.log('Response HTML:', html.substring(0, 200));
-                        
-                        // Extract just the select options from the test response
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const select = doc.querySelector('select');
-                        if (select && districtField) {
-                            districtField.innerHTML = select.innerHTML;
-                            console.log('Districts loaded successfully');
-                        } else if (districtField) {
-                            console.log('No select element found, using raw HTML');
-                            districtField.innerHTML = html;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading districts:', error);
-                        if (districtField) districtField.innerHTML = '<option value="">Error loading districts</option>';
-                    });
-            }
-        });
-    }
-    
-    // Handle district change
-    if (districtField) {
-        districtField.addEventListener('change', function() {
-            const districtId = this.value;
-            
-            // Clear settlement field
-            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
-            
-            if (districtId) {
-                console.log('Loading settlements for district:', districtId);
-                
-                fetch(`/social_and_env/test-cascading/?district=${districtId}&type=settlements`)
-                    .then(response => {
-                        console.log('Settlement response status:', response.status);
-                        return response.text();
-                    })
-                    .then(html => {
-                        console.log('Settlement response HTML:', html.substring(0, 200));
-                        
-                        // Extract just the select options from the test response
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const select = doc.querySelector('select');
-                        if (select && settlementField) {
-                            settlementField.innerHTML = select.innerHTML;
-                            console.log('Settlements loaded successfully');
-                        } else if (settlementField) {
-                            console.log('No select element found, using raw HTML');
-                            settlementField.innerHTML = html;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading settlements:', error);
-                        if (settlementField) settlementField.innerHTML = '<option value="">Error loading settlements</option>';
-                    });
-            }
-        });
-    }
-    
-    // Form validation
-    const form = document.getElementById('ohs-form');
-    form.addEventListener('submit', function(event) {
-        let isValid = true;
-        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                isValid = false;
-                field.classList.add('is-invalid');
-            } else {
-                field.classList.remove('is-invalid');
-            }
-        });
-        
-        if (!isValid) {
-            event.preventDefault();
-            document.querySelector('.is-invalid').focus();
-        }
-    });
 });
 </script>
 {% endblock %}
