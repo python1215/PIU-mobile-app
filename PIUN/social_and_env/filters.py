@@ -1,10 +1,14 @@
 import django_filters
-from .models import GrievianceMonitoringLog, Project, KPI_For_Contract, DecisionOutcome
 from django_filters import FilterSet, ModelChoiceFilter
-from .models import OHS_Monitoring, Project, KPI_For_Contract, YEAR, Quarter, Regions, Districts, \
-      Settlement, ESIA
 
-from .models import PAP, Project, KPI_For_Contract, TypeOfPAP, Regions, Districts, Settlement, PAPCategory, VulnerabilityCategory, TypeOfImpact, NatureOfSettlement, CommunityConsult_Engagement, TypeOfStakeholderEngagement, YEAR
+# Import all required models from their respective modules
+from .models import GrievianceMonitoringLog, OHS_Monitoring, PAP, ESIA, CommunityConsult_Engagement
+from PIU_Financial_mgt.models import Project, KPI_For_Contract
+from setup.models import (
+    YEAR, Quarter, Regions, Districts, Settlement,
+    DecisionOutcome, TypeOfPAP, PAPCategory, VulnerabilityCategory, 
+    TypeOfImpact, NatureOfSettlement, TypeOfStakeholderEngagement
+)
 
 
 
@@ -188,7 +192,7 @@ class PAPFilter(django_filters.FilterSet):
             'project', 'type_of_investment', 'type_of_pap',
             'region', 'district', 'pap_Current_Address', 'pap_category',
             'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
-            'sex', 'pap_compensated', 'compensation_date', 'remarks'
+            'sex', 'pap_compensated', 'compensation_date_after', 'compensation_date_before', 'remarks'
         ]
 
 
