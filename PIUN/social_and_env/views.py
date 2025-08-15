@@ -493,7 +493,7 @@ def pap_edit(request, pk):
                     # Note: date_modified field doesn't exist in PAP model, removed to avoid error
                     updated_pap.save()
                     messages.success(request, f'PAP record "{pap.pap_name}" updated successfully.')
-                    return redirect('pap_detail', pk=pap.pk)
+                    return redirect('pap_list')
                 except Exception as e:
                     messages.error(request, f'Error updating PAP record: {str(e)}')
             else:
