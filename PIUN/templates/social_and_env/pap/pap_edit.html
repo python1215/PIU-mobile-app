@@ -484,8 +484,19 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('input', checkForChanges);
     form.addEventListener('change', checkForChanges);
     
+    // Track if form is being submitted to avoid preventing legitimate submissions
+    let formSubmitting = false;
+    form.addEventListener('submit', function() {
+        formSubmitting = true;
+    });
+    
     // Confirm before leaving with unsaved changes
     window.addEventListener('beforeunload', function(e) {
+        // Don't prevent navigation if form is being submitted
+        if (formSubmitting) {
+            return;
+        }
+        
         const currentFormData = new FormData(form);
         let hasChanges = false;
         

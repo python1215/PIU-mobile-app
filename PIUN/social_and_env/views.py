@@ -485,12 +485,12 @@ def pap_edit(request, pk):
         ), pk=pk)
         
         if request.method == 'POST':
-            form = PAPForm(request.POST, instance=pap)
+            form = PAPUpdateForm(request.POST, instance=pap)
             if form.is_valid():
                 try:
                     updated_pap = form.save(commit=False)
                     updated_pap.loginUser = request.user
-                    updated_pap.date_modified = timezone.now()
+                    # Note: date_modified field doesn't exist in PAP model, removed to avoid error
                     updated_pap.save()
                     messages.success(request, f'PAP record "{pap.pap_name}" updated successfully.')
                     return redirect('pap_detail', pk=pap.pk)
@@ -502,7 +502,7 @@ def pap_edit(request, pk):
                     for error in errors:
                         messages.error(request, f'{field}: {error}')
         else:
-            form = PAPForm(instance=pap)
+            form = PAPUpdateForm(instance=pap)
         
         context = {
             'form': form,
