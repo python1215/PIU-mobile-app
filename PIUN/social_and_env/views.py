@@ -927,10 +927,10 @@ def load_investment_types_ohs(request):
                 project__projectID=project_id
             ).values('monitoring_Type_Code', 'type_of_investment').distinct()
             
-            # Get KPI descriptions for the project  
+            # Get KPI descriptions for the project (using correct field name: Kpi_description)
             kpi_descriptions = KPI_For_Contract.objects.filter(
                 project__projectID=project_id
-            ).values('monitoring_Type_Code', 'kpi_description').distinct()
+            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
             
             investment_list = [
                 {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
@@ -938,8 +938,8 @@ def load_investment_types_ohs(request):
             ]
             
             kpi_list = [
-                {'id': kpi['monitoring_Type_Code'], 'name': kpi['kpi_description']} 
-                for kpi in kpi_descriptions if kpi['kpi_description']
+                {'id': kpi['monitoring_Type_Code'], 'name': kpi['Kpi_description']} 
+                for kpi in kpi_descriptions if kpi['Kpi_description']
             ]
             
             return JsonResponse({
@@ -1005,14 +1005,14 @@ def load_kpi_descriptions_ohs(request):
     
     try:
         if project_id:
-            # Get KPI descriptions for the project  
+            # Get KPI descriptions for the project (using correct field name: Kpi_description)
             kpi_descriptions = KPI_For_Contract.objects.filter(
                 project__projectID=project_id
-            ).values('monitoring_Type_Code', 'kpi_description').distinct()
+            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
             
             kpi_list = [
-                {'id': kpi['monitoring_Type_Code'], 'name': kpi['kpi_description']} 
-                for kpi in kpi_descriptions if kpi['kpi_description']
+                {'id': kpi['monitoring_Type_Code'], 'name': kpi['Kpi_description']} 
+                for kpi in kpi_descriptions if kpi['Kpi_description']
             ]
             
             return JsonResponse({'kpi_descriptions': kpi_list})
