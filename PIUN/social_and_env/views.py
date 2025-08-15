@@ -823,48 +823,57 @@ def ohs_list(request):
 # AJAX endpoints for cascading dropdowns
 def load_districts(request):
     """Load districts based on selected region"""
-    from django.http import HttpResponse
+    from django.http import JsonResponse
     from setup.models import Districts
     
-    region_id = request.GET.get('region')
+    region_id = request.GET.get('region_id') or request.GET.get('region')
     if not region_id:
-        return HttpResponse('<option value="">Select District</option>')
+        return JsonResponse({'districts': []})
     
     try:
-        districts = Districts.objects.filter(
-            region_code=region_id
-        ).values_list('district_code', 'district_name').order_by('district_name')
+        # Get districts by region code - direct match with stored values
+        from setup.models import Regions
+        try:
+            region = Regions.objects.get(pk=region_id)
+            # Districts store full region names, so use region_name for filtering
+            districts = Districts.objects.filter(
+                region_code=region.region_name
+            ).values_list('district_code', 'district_name').order_by('district_name')
+        except Regions.DoesNotExist:
+            districts = []
         
-        options = '<option value="">Select District</option>'
-        for district_code, district_name in districts:
-            options += f'<option value="{district_code}">{district_name}</option>'
+        district_list = [
+            {'id': district_code, 'name': district_name}
+            for district_code, district_name in districts
+        ]
         
-        return HttpResponse(options)
+        return JsonResponse({'districts': district_list})
     except Exception as e:
-        return HttpResponse('<option value="">Error loading districts</option>')
+        return JsonResponse({'districts': [], 'error': str(e)})
 
 
 def load_settlements(request):
     """Load settlements based on selected district"""
-    from django.http import HttpResponse
+    from django.http import JsonResponse
     from setup.models import Settlement
     
-    district_id = request.GET.get('district')
+    district_id = request.GET.get('district_id') or request.GET.get('district')
     if not district_id:
-        return HttpResponse('<option value="">Select Settlement</option>')
+        return JsonResponse({'settlements': []})
     
     try:
         settlements = Settlement.objects.filter(
             district_code=district_id
         ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
         
-        options = '<option value="">Select Settlement</option>'
-        for settlement_code, settlement_name in settlements:
-            options += f'<option value="{settlement_code}">{settlement_name}</option>'
+        settlement_list = [
+            {'id': settlement_code, 'name': settlement_name}
+            for settlement_code, settlement_name in settlements
+        ]
         
-        return HttpResponse(options)
+        return JsonResponse({'settlements': settlement_list})
     except Exception as e:
-        return HttpResponse('<option value="">Error loading settlements</option>')
+        return JsonResponse({'settlements': [], 'error': str(e)})
 
 
 def load_kpi_descriptions(request):
@@ -990,11 +999,20 @@ def ohs_add(request):
                 return redirect('ohs_list')
             except Exception as e:
                 messages.error(request, f'Error saving OHS record: {str(e)}')
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f'OHS save error: {str(e)}')
         else:
-            # Show form validation errors
+            # Show form validation errors with better debugging
+            messages.error(request, 'Please correct the following errors:')
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{field}: {error}')
+            # Add debug info for troubleshooting
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f'Form errors: {form.errors}')
+            logger.debug(f'Form data: {form.data}')
     else:
         form = OHSMonitoringForm()
     
