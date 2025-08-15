@@ -6,6 +6,9 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates
+- **August 15, 2025**: MS SQL Server connection configured but blocked by FreeTDS driver issues and VS Code port forwarding tunnel not active. System restored to SQLite mode for stable operation.
+
 ## System Architecture
 
 ### UI/UX Decisions
