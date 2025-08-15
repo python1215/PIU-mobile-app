@@ -376,13 +376,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Region -> District -> Settlement cascade
-    const regionField = document.getElementById('id_region');
-    const districtField = document.getElementById('id_district');
-    const settlementField = document.getElementById('id_pap_Current_Address');
-    
     if (regionField && districtField && settlementField) {
         regionField.addEventListener('change', function() {
             const regionId = this.value;
+            console.log('Loading districts for region:', regionId);
             
             // Clear and disable district and settlement fields
             districtField.innerHTML = '<option value="">Select District</option>';
@@ -392,27 +389,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (regionId) {
                 // Load districts for selected region
-                fetch(`{% url 'load_districts' %}?region_id=${regionId}`, {
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'same-origin'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.districts && data.districts.length > 0) {
-                            data.districts.forEach(district => {
-                                const option = document.createElement('option');
-                                option.value = district.id;
-                                option.textContent = district.name;
-                                districtField.appendChild(option);
-                            });
-                        }
+                fetch(`/social_and_env/ajax/load-districts/?region=${regionId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        districtField.innerHTML = html;
                         districtField.disabled = false;
+                        console.log('Districts loaded successfully');
                     })
                     .catch(error => {
                         console.error('Error loading districts:', error);
+                        districtField.innerHTML = '<option value="">Error loading districts</option>';
                         districtField.disabled = false;
                     });
             }
@@ -420,6 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         districtField.addEventListener('change', function() {
             const districtId = this.value;
+            console.log('Loading settlements for district:', districtId);
             
             // Clear settlement field
             settlementField.innerHTML = '<option value="">Select Settlement</option>';
@@ -427,21 +414,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (districtId) {
                 // Load settlements for selected district
-                fetch(`{% url 'load_settlements' %}?district_id=${districtId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.settlements && data.settlements.length > 0) {
-                            data.settlements.forEach(settlement => {
-                                const option = document.createElement('option');
-                                option.value = settlement.id;
-                                option.textContent = settlement.name;
-                                settlementField.appendChild(option);
-                            });
-                        }
+                fetch(`/social_and_env/ajax/load-settlements/?district=${districtId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        settlementField.innerHTML = html;
                         settlementField.disabled = false;
+                        console.log('Settlements loaded successfully');
                     })
                     .catch(error => {
                         console.error('Error loading settlements:', error);
+                        settlementField.innerHTML = '<option value="">Error loading settlements</option>';
                         settlementField.disabled = false;
                     });
             }

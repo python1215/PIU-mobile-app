@@ -781,29 +781,49 @@ def ohs_list(request):
 
 # AJAX endpoints for cascading dropdowns
 def load_districts(request):
-    """Load districts based on selected region for AJAX requests"""
-    from django.http import JsonResponse
+    """Load districts based on selected region"""
+    from django.http import HttpResponse
     from setup.models import Districts
     
-    region_id = request.GET.get('region_id')
-    if region_id:
-        districts = Districts.objects.filter(region_code_id=region_id).order_by('district_name')
-        district_list = [{'id': d.id, 'name': d.district_name} for d in districts]
-        return JsonResponse({'districts': district_list})
-    return JsonResponse({'districts': []})
+    region_id = request.GET.get('region')
+    if not region_id:
+        return HttpResponse('<option value="">Select District</option>')
+    
+    try:
+        districts = Districts.objects.filter(
+            region_code=region_id
+        ).values_list('district_code', 'district_name').order_by('district_name')
+        
+        options = '<option value="">Select District</option>'
+        for district_code, district_name in districts:
+            options += f'<option value="{district_code}">{district_name}</option>'
+        
+        return HttpResponse(options)
+    except Exception as e:
+        return HttpResponse('<option value="">Error loading districts</option>')
 
 
 def load_settlements(request):
-    """Load settlements based on selected district for AJAX requests"""
-    from django.http import JsonResponse
+    """Load settlements based on selected district"""
+    from django.http import HttpResponse
     from setup.models import Settlement
     
-    district_id = request.GET.get('district_id')
-    if district_id:
-        settlements = Settlement.objects.filter(district_code_id=district_id).order_by('settlement_name')
-        settlement_list = [{'id': s.id, 'name': s.settlement_name} for s in settlements]
-        return JsonResponse({'settlements': settlement_list})
-    return JsonResponse({'settlements': []})
+    district_id = request.GET.get('district')
+    if not district_id:
+        return HttpResponse('<option value="">Select Settlement</option>')
+    
+    try:
+        settlements = Settlement.objects.filter(
+            district_code=district_id
+        ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
+        
+        options = '<option value="">Select Settlement</option>'
+        for settlement_code, settlement_name in settlements:
+            options += f'<option value="{settlement_code}">{settlement_name}</option>'
+        
+        return HttpResponse(options)
+    except Exception as e:
+        return HttpResponse('<option value="">Error loading settlements</option>')
 
 
 def load_kpi_descriptions(request):
@@ -1571,101 +1591,10 @@ def test_cascading_dropdown(request):
         })
 
 
-# ======================== Core Cascading Dropdown Views ========================
-@login_required
-def load_districts(request):
-    """Load districts based on selected region"""
-    from django.http import HttpResponse
-    
-    region_id = request.GET.get('region')
-    if not region_id:
-        return HttpResponse('<option value="">Select District</option>')
-    
-    try:
-        districts = Districts.objects.filter(
-            region_code=region_id
-        ).values_list('district_code', 'district_name').order_by('district_name')
-        
-        options = '<option value="">Select District</option>'
-        for district_code, district_name in districts:
-            options += f'<option value="{district_code}">{district_name}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
-@login_required
-def load_settlements(request):
-    """Load settlements based on selected district"""
-    from django.http import HttpResponse
-    
-    district_id = request.GET.get('district')
-    if not district_id:
-        return HttpResponse('<option value="">Select Settlement</option>')
-    
-    try:
-        settlements = Settlement.objects.filter(
-            district_code=district_id
-        ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
-        
-        options = '<option value="">Select Settlement</option>'
-        for settlement_code, settlement_name in settlements:
-            options += f'<option value="{settlement_code}">{settlement_name}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
-@login_required
-def load_districts_pap(request):
-    """Load districts for PAP based on selected region"""
-    from django.http import HttpResponse
-    
-    region_id = request.GET.get('region')
-    if not region_id:
-        return HttpResponse('<option value="">Select District</option>')
-    
-    try:
-        districts = Districts.objects.filter(
-            region_code=region_id
-        ).values_list('district_code', 'district_name').order_by('district_name')
-        
-        options = '<option value="">Select District</option>'
-        for district_code, district_name in districts:
-            options += f'<option value="{district_code}">{district_name}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
-
-
-@login_required
-def load_settlements_pap(request):
-    """Load settlements for PAP based on selected district"""
-    from django.http import HttpResponse
-    
-    district_id = request.GET.get('district')
-    if not district_id:
-        return HttpResponse('<option value="">Select Settlement</option>')
-    
-    try:
-        settlements = Settlement.objects.filter(
-            district_code=district_id
-        ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
-        
-        options = '<option value="">Select Settlement</option>'
-        for settlement_code, settlement_name in settlements:
-            options += f'<option value="{settlement_code}">{settlement_name}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 @login_required
