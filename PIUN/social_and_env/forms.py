@@ -287,14 +287,14 @@ class PAPForm(forms.ModelForm):
         
         # Auto-select district if not provided
         if region and not cleaned_data.get('district'):
-            first_district = Districts.objects.filter(region_code=region).first()
+            first_district = Districts.objects.filter(region_code_id=region.pk).first()
             if first_district:
                 cleaned_data['district'] = first_district
         
         # Auto-select settlement if not provided
         district = cleaned_data.get('district')
         if district and not cleaned_data.get('pap_Current_Address'):
-            first_settlement = Settlement.objects.filter(district_code=district).first()
+            first_settlement = Settlement.objects.filter(district_code_id=district.pk).first()
             if first_settlement:
                 cleaned_data['pap_Current_Address'] = first_settlement
         

@@ -376,10 +376,10 @@ def pap_add(request):
                     pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
                 
                 if not pap.district and pap.region:
-                    pap.district = Districts.objects.filter(region_code=pap.region).first()
+                    pap.district = Districts.objects.filter(region_code_id=pap.region.pk).first()
                 
                 if not pap.pap_Current_Address and pap.district:
-                    pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+                    pap.pap_Current_Address = Settlement.objects.filter(district_code_id=pap.district.pk).first()
                 
                 # Set defaults for required lookup fields
                 if not pap.type_of_pap:
