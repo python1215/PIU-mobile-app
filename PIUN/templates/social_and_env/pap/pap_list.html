@@ -185,13 +185,13 @@
                                     {% if pap.sex == 'M' %}M{% else %}F{% endif %}
                                 </span>
                             </td>
-                            <td><small>{{ pap.project.project|truncatechars:30 }}</small></td>
-                            <td><small>{{ pap.type_of_investment.type_of_investment|truncatechars:25 }}</small></td>
-                            <td><small>{{ pap.type_of_pap.type_of_pap|truncatechars:20 }}</small></td>
+                            <td style="white-space: normal; word-wrap: break-word; max-width: 180px;"><small>{{ pap.project.project }}</small></td>
+                            <td style="white-space: normal; word-wrap: break-word; max-width: 150px;"><small>{{ pap.type_of_investment.type_of_investment }}</small></td>
+                            <td style="white-space: normal; word-wrap: break-word; max-width: 120px;"><small>{{ pap.type_of_pap.type_of_pap }}</small></td>
                             <td><small>{{ pap.region.region_name }}</small></td>
                             <td><small>{{ pap.district.district_name }}</small></td>
                             <td><small>{{ pap.pap_Current_Address.settlement_name|truncatechars:20 }}</small></td>
-                            <td><small>{{ pap.pap_category.pap_category|truncatechars:20 }}</small></td>
+                            <td style="white-space: normal; word-wrap: break-word; max-width: 120px;"><small>{{ pap.pap_category.pap_category }}</small></td>
                             <td><small>{{ pap.vulnerability_category.vulnerability|truncatechars:25 }}</small></td>
                             <td><small>{{ pap.location_of_impact|truncatechars:25 }}</small></td>
                             <td><small>{{ pap.type_of_impact.impact|truncatechars:20 }}</small></td>
