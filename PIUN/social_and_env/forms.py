@@ -500,11 +500,10 @@ class OHSMonitoringForm(forms.ModelForm):
     )
 
     Kpi_description = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.none(),
+        queryset=KPI_For_Contract.objects.all(),
         empty_label="Select KPI Description",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False,
-        to_field_name='Kpi_description'
+        required=False
     )
 
     class Meta:
@@ -572,14 +571,16 @@ class OHSMonitoringForm(forms.ModelForm):
         if 'project' in self.data:
             try:
                 project_id = int(self.data.get('project'))
-                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
-                )
-                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
-                ).distinct()
+                project_kpis = KPI_For_Contract.objects.filter(project_id=project_id)
+                self.fields['Type_of_Investment'].queryset = project_kpis
+                self.fields['Kpi_description'].queryset = project_kpis
             except (ValueError, TypeError):
                 pass
+        elif self.instance and self.instance.pk and self.instance.project:
+            # For editing existing records, load KPIs for the selected project
+            project_kpis = KPI_For_Contract.objects.filter(project=self.instance.project)
+            self.fields['Type_of_Investment'].queryset = project_kpis
+            self.fields['Kpi_description'].queryset = project_kpis
         
         # Set up dynamic querysets for geographic cascading
         if 'region' in self.data:
@@ -590,6 +591,8 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
+        else:
+            self.fields['district'].queryset = Districts.objects.all()
         
         if 'district' in self.data:
             try:
@@ -599,27 +602,7 @@ class OHSMonitoringForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
-
-        if 'region' in self.data:
-            try:
-                region_code = self.data.get('region')
-                self.fields['district'].queryset = Districts.objects.filter(region_code=region_code)
-            except (ValueError, TypeError):
-                pass
         else:
-            # For new forms, include all districts to prevent validation errors
-            self.fields['district'].queryset = Districts.objects.all()
-
-        if 'district' in self.data:
-            try:
-                district_code = self.data.get('district')
-                self.fields['settlement'].queryset = Settlement.objects.filter(
-                    district_code=district_code
-                )
-            except (ValueError, TypeError):
-                pass
-        else:
-            # For new forms, include all settlements to prevent validation errors
             self.fields['settlement'].queryset = Settlement.objects.all()
 
 
