@@ -19,7 +19,7 @@ def test_basic_connectivity():
     
     # Connection parameters from environment
     host = os.environ.get('MSSQL_HOST', '127.0.0.1')
-    port = int(os.environ.get('MSSQL_PORT', '14330'))
+    port = int(os.environ.get('MSSQL_PORT', '14331'))
     
     print(f"=== Testing Network Connectivity ===")
     print(f"Target: {host}:{port}")

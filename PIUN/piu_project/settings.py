@@ -20,7 +20,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -39,7 +38,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,16 +47,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'allauth',
     'allauth.account',
- 
 
-     # Other apps
+    # Other apps
     'widget_tweaks',
     'django_filters',  # Add this line
     'django_htmx',
-     'crispy_forms',
+    'crispy_forms',
     'crispy_bootstrap5',
 
     #apps
@@ -84,7 +80,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-      # Add this line
+    # Add this line
     'allauth.account.middleware.AccountMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
 ]
@@ -113,7 +109,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'piu_project.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -132,8 +127,10 @@ if USE_SQL_SERVER:
             'NAME': os.environ.get('MSSQL_DATABASE', 'piuprod3'),
             'USER': os.environ.get('MSSQL_USER', 'nawec'),
             'PASSWORD': os.environ.get('MSSQL_PASSWORD', 'password'),
-            'HOST': os.environ.get('MSSQL_HOST', '127.0.0.1'),  # Use localhost for port forwarding/tunneling
-            'PORT': os.environ.get('MSSQL_PORT', '1433'),
+            'HOST': os.environ.get(
+                'MSSQL_HOST',
+                '127.0.0.1'),  # Use localhost for port forwarding/tunneling
+            'PORT': os.environ.get('MSSQL_PORT', '14331'),
             'OPTIONS': {
                 # Use FreeTDS driver (available in Replit)
                 'driver': '{FreeTDS}',
@@ -152,25 +149,27 @@ else:
     }
     DATABASE_MODE = 'sqlite'
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -182,7 +181,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
