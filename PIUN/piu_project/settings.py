@@ -132,9 +132,10 @@ if USE_SQL_SERVER:
                 '127.0.0.1'),  # Use localhost for port forwarding/tunneling
             'PORT': os.environ.get('MSSQL_PORT', '14331'),
             'OPTIONS': {
-                # Use FreeTDS driver (available in Replit)
-                'driver': '{FreeTDS}',
+                # Use FreeTDS driver with dynamic path detection
+                'driver': 'FreeTDS',
                 'extra_params': 'TDS_Version=8.0;',
+                'autocommit': True,
             },
         }
     }
