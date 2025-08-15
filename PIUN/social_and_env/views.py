@@ -1779,24 +1779,39 @@ def load_settlements_pap(request):
 @login_required
 def load_investment_types_pap(request):
     """Load investment types for PAP based on project selection"""
-    from django.http import HttpResponse
+    from django.http import HttpResponse, JsonResponse
     
-    project_id = request.GET.get('project')
+    project_id = request.GET.get('project') or request.GET.get('project_id')
     if not project_id:
+        if request.headers.get('Content-Type') == 'application/json':
+            return JsonResponse({'investment_types': []})
         return HttpResponse('<option value="">Select Investment Type</option>')
     
     try:
         investment_types = KPI_For_Contract.objects.filter(
             project=project_id
-        ).values_list('type_of_investment', flat=True).distinct().order_by('type_of_investment')
+        ).distinct().order_by('type_of_investment')
         
+        # Check if requesting JSON format (for edit forms)
+        if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
+            investment_data = []
+            for investment in investment_types:
+                investment_data.append({
+                    'id': investment.monitoring_Type_Code,
+                    'name': investment.type_of_investment
+                })
+            return JsonResponse({'investment_types': investment_data})
+        
+        # Return HTML options (for add forms)
         options = '<option value="">Select Investment Type</option>'
-        for investment_type in investment_types:
-            options += f'<option value="{investment_type}">{investment_type}</option>'
+        for investment in investment_types:
+            options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
         
         return HttpResponse(options)
     
     except Exception as e:
+        if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
+            return JsonResponse({'error': str(e), 'investment_types': []})
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 

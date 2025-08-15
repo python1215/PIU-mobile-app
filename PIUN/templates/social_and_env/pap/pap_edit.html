@@ -351,26 +351,29 @@ document.addEventListener('DOMContentLoaded', function() {
             investmentField.disabled = !projectId;
             
             if (projectId) {
-                // Load investment types for selected project
-                fetch(`{% url 'load_investment_types_pap' %}?project_id=${projectId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.investment_types && data.investment_types.length > 0) {
-                            data.investment_types.forEach(investment => {
-                                const option = document.createElement('option');
-                                option.value = investment.id;
-                                option.textContent = investment.name;
-                                // Re-select current value if it matches
-                                if (investment.id == '{{ pap.type_of_investment.id }}') {
-                                    option.selected = true;
-                                }
-                                investmentField.appendChild(option);
-                            });
-                        }
+                console.log('Loading investment types for project:', projectId);
+                
+                // Load investment types for selected project using HTML response format
+                fetch(`{% url 'load_investment_types_pap' %}?project=${projectId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        investmentField.innerHTML = html;
                         investmentField.disabled = false;
+                        
+                        // Try to re-select the current investment type if it exists
+                        const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                        if (currentInvestmentId) {
+                            const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
+                            if (optionToSelect) {
+                                optionToSelect.selected = true;
+                            }
+                        }
+                        
+                        console.log('Investment types loaded successfully');
                     })
                     .catch(error => {
                         console.error('Error loading investment types:', error);
+                        investmentField.innerHTML = '<option value="">Error loading investment types</option>';
                         investmentField.disabled = false;
                     });
             }
