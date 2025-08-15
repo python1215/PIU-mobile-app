@@ -848,24 +848,7 @@ def load_investment_types_esia(request):
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
-from django.contrib.auth.decorators import login_required
 
-@login_required
-def load_investment_types_pap(request):
-    """Load all available investment types for PAP form"""
-    from django.http import JsonResponse
-    from PIU_Financial_mgt.models import KPI_For_Contract
-    
-    try:
-        # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
-        investment_list = [
-            {'id': inv['monitoring_Type_Code'] or f'inv_{idx}', 'name': inv['type_of_investment']} 
-            for idx, inv in enumerate(investment_types, 1) if inv['type_of_investment']
-        ]
-        return JsonResponse({'investment_types': investment_list})
-    except Exception as e:
-        return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
 @login_required
