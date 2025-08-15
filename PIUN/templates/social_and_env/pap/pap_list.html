@@ -192,10 +192,10 @@
                             <td><small>{{ pap.district.district_name }}</small></td>
                             <td><small>{{ pap.pap_Current_Address.settlement_name|truncatechars:20 }}</small></td>
                             <td><small>{{ pap.pap_category.pap_category|truncatechars:20 }}</small></td>
-                            <td><small>{{ pap.vulnerability_category.vulnerability_category|truncatechars:25 }}</small></td>
+                            <td><small>{{ pap.vulnerability_category.vulnerability|truncatechars:25 }}</small></td>
                             <td><small>{{ pap.location_of_impact|truncatechars:25 }}</small></td>
-                            <td><small>{{ pap.type_of_impact.type_of_impact|truncatechars:20 }}</small></td>
-                            <td><small>{{ pap.nature_of_compensation.natureOf_Settlement|truncatechars:25 }}</small></td>
+                            <td><small>{{ pap.type_of_impact.impact|truncatechars:20 }}</small></td>
+                            <td><small>{{ pap.nature_of_compensation.nature_of_settlement|truncatechars:25 }}</small></td>
                             <td><small>${{ pap.amount|floatformat:0 }}</small></td>
                             <td><small>{{ pap.area }}</small></td>
                             <td>
