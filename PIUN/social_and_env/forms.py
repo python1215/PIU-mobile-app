@@ -601,21 +601,24 @@ class OHSMonitoringForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
         empty_label="Select Region",
-        widget=forms.Select(attrs={"class": "form-select"})
+        widget=forms.Select(attrs={"class": "form-select"}),
+        to_field_name='region_code'
     )
 
     district = forms.ModelChoiceField(
-        queryset=Districts.objects.none(),
+        queryset=Districts.objects.all(),
         empty_label="Select District",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False
+        required=False,
+        to_field_name='district_code'
     )
 
     settlement = forms.ModelChoiceField(
-        queryset=Settlement.objects.none(),
+        queryset=Settlement.objects.all(),
         empty_label="Select Settlement",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False
+        required=False,
+        to_field_name='settlement_code'
     )
     
     Kpi_description = forms.ModelChoiceField(
@@ -690,31 +693,54 @@ class OHSMonitoringForm(forms.ModelForm):
         # Set up dynamic querysets for project-based fields
         if 'project' in self.data:
             try:
-                project_id = int(self.data.get('project'))
+                project_id = self.data.get('project')
                 project_kpis = KPI_For_Contract.objects.filter(project_id=project_id)
                 self.fields['Type_of_Investment'].queryset = project_kpis
                 self.fields['Kpi_description'].queryset = project_kpis
             except (ValueError, TypeError):
-                pass
+                # If error, show all KPIs to prevent validation failures
+                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
+                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.all()
         elif self.instance and self.instance.pk and self.instance.project:
             # For editing existing records, load KPIs for the selected project
             project_kpis = KPI_For_Contract.objects.filter(project=self.instance.project)
             self.fields['Type_of_Investment'].queryset = project_kpis
             self.fields['Kpi_description'].queryset = project_kpis
+        else:
+            # For new forms, show all KPIs initially
+            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
+            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.all()
         
         # Set up dynamic querysets for geographic cascading
         if 'region' in self.data:
             try:
-                region_id = int(self.data.get('region'))
+                region_value = self.data.get('region')
                 self.fields['district'].queryset = Districts.objects.filter(
-                    region_code_id=region_id
+                    region_code=region_value
                 )
+                
+                # If district is also selected, load settlements
+                if 'district' in self.data:
+                    district_value = self.data.get('district')
+                    self.fields['settlement'].queryset = Settlement.objects.filter(
+                        district_code=district_value
+                    )
             except (ValueError, TypeError):
-                pass
+                # If error, show all districts to prevent validation failures
+                self.fields['district'].queryset = Districts.objects.all()
+                self.fields['settlement'].queryset = Settlement.objects.all()
         elif self.instance and self.instance.pk and hasattr(self.instance, 'region') and self.instance.region:
             self.fields['district'].queryset = Districts.objects.filter(
-                region_code_id=self.instance.region.region_code
+                region_code=self.instance.region.region_code
             )
+            if hasattr(self.instance, 'district') and self.instance.district:
+                self.fields['settlement'].queryset = Settlement.objects.filter(
+                    district_code=self.instance.district.district_code
+                )
+        else:
+            # For new forms, start with all available options
+            self.fields['district'].queryset = Districts.objects.all()
+            self.fields['settlement'].queryset = Settlement.objects.all()
         
         if 'district' in self.data:
             try:
