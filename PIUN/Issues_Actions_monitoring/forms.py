@@ -137,3 +137,22 @@ class IssueActionsFilterForm(forms.Form):
         empty_label="All Assignees",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    # Date range filters for Assign Date
+    assign_date_from = forms.DateField(
+        required=False,
+        label="Assign Date From",
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'placeholder': 'From Date'
+        })
+    )
+    assign_date_to = forms.DateField(
+        required=False,
+        label="Assign Date To", 
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'placeholder': 'To Date'
+        })
+    )

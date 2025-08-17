@@ -69,6 +69,30 @@
                                 <i class="bi bi-x-lg"></i>
                             </a>
                         </div>
+                        
+                        <!-- Second row for additional filters -->
+                        <div class="col-md-2">
+                            {{ filter_form.quarter.label_tag }}
+                            {{ filter_form.quarter }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ filter_form.assigned_to.label_tag }}
+                            {{ filter_form.assigned_to }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ filter_form.assign_date_from.label_tag }}
+                            {{ filter_form.assign_date_from }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ filter_form.assign_date_to.label_tag }}
+                            {{ filter_form.assign_date_to }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle"></i> Use date filters to find issues assigned between specific dates
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

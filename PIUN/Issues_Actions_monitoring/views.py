@@ -136,6 +136,11 @@ def issues_list(request):
             issues = issues.filter(priority=filter_form.cleaned_data['priority'])
         if filter_form.cleaned_data['assigned_to']:
             issues = issues.filter(assigned_to=filter_form.cleaned_data['assigned_to'])
+        # Apply date range filters
+        if filter_form.cleaned_data['assign_date_from']:
+            issues = issues.filter(assign_date__gte=filter_form.cleaned_data['assign_date_from'])
+        if filter_form.cleaned_data['assign_date_to']:
+            issues = issues.filter(assign_date__lte=filter_form.cleaned_data['assign_date_to'])
     
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -289,6 +294,11 @@ def export_issues_excel(request):
             issues = issues.filter(priority=filter_form.cleaned_data['priority'])
         if filter_form.cleaned_data['assigned_to']:
             issues = issues.filter(assigned_to=filter_form.cleaned_data['assigned_to'])
+        # Apply date range filters
+        if filter_form.cleaned_data['assign_date_from']:
+            issues = issues.filter(assign_date__gte=filter_form.cleaned_data['assign_date_from'])
+        if filter_form.cleaned_data['assign_date_to']:
+            issues = issues.filter(assign_date__lte=filter_form.cleaned_data['assign_date_to'])
     
     # Create workbook
     wb = openpyxl.Workbook()
@@ -396,6 +406,11 @@ def export_issues_word(request):
             issues = issues.filter(priority=filter_form.cleaned_data['priority'])
         if filter_form.cleaned_data['assigned_to']:
             issues = issues.filter(assigned_to=filter_form.cleaned_data['assigned_to'])
+        # Apply date range filters
+        if filter_form.cleaned_data['assign_date_from']:
+            issues = issues.filter(assign_date__gte=filter_form.cleaned_data['assign_date_from'])
+        if filter_form.cleaned_data['assign_date_to']:
+            issues = issues.filter(assign_date__lte=filter_form.cleaned_data['assign_date_to'])
     
     # Create document
     doc = Document()
