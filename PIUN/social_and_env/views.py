@@ -633,8 +633,33 @@ def grievance_detail(request, pk):
 def grievance_add(request):
     """Add new Grievance record"""
     if request.method == 'POST':
+        print("=== GRIEVANCE ADD DEBUG START ===")
+        print(f"POST data: {dict(request.POST)}")
+        
         form = GrievianceMonitoringLogForm(request.POST)
-        if form.is_valid():
+        print(f"Form created, is_valid: {form.is_valid()}")
+        
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+            print(f"Non-field errors: {form.non_field_errors()}")
+            
+            # Form is not valid, show errors
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(f"{field}: {error}")
+                    print(f"Field error - {field}: {error}")
+            
+            if form.non_field_errors():
+                for error in form.non_field_errors():
+                    error_messages.append(f"General: {error}")
+                    print(f"Non-field error: {error}")
+                    
+            if error_messages:
+                messages.error(request, f'Form validation failed: {"; ".join(error_messages)}')
+            print("=== FORM VALIDATION FAILED ===")
+        else:
+            print("Form is valid, attempting to save...")
             try:
                 grievance = form.save(commit=False)
                 grievance.loginUser = request.user
@@ -643,6 +668,7 @@ def grievance_add(request):
                 project_value = request.POST.get('project')
                 investment_value = request.POST.get('type_of_investment')
                 print(f"Form data: project={project_value}, type_of_investment={investment_value}")
+                print(f"Grievance object before save: project={grievance.project}, investment={grievance.type_of_investment}")
                 
                 # Validate that type_of_investment is properly set
                 if not grievance.type_of_investment and investment_value:
@@ -669,28 +695,23 @@ def grievance_add(request):
                             print(f"Auto-assigned investment type: {default_investment}")
                         else:
                             messages.error(request, 'No investment type found for the selected project.')
+                            print("=== NO INVESTMENT TYPE FOUND ===")
                             return render(request, 'social_and_env/grievance/grievance_add_form.html', {
                                 'form': form,
                                 'title': 'Add New Grievance Record'
                             })
                 
+                print(f"Final grievance object: {grievance.__dict__}")
                 grievance.save()
+                print("Grievance saved successfully!")
                 messages.success(request, 'Grievance record added successfully.')
                 return redirect('grievance_list')
             except Exception as e:
                 import traceback
                 error_details = traceback.format_exc()
                 messages.error(request, f'Error saving grievance record: {str(e)}')
-                # For debugging - you can remove this in production
                 print(f"Grievance save error: {error_details}")
-        else:
-            # Form is not valid, show errors
-            error_messages = []
-            for field, errors in form.errors.items():
-                for error in errors:
-                    error_messages.append(f"{field}: {error}")
-            if error_messages:
-                messages.error(request, f'Form errors: {"; ".join(error_messages)}')
+                print("=== SAVE ERROR ===")
     else:
         form = GrievianceMonitoringLogForm()
     
