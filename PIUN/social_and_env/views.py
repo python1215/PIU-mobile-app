@@ -780,11 +780,8 @@ def ohs_list(request):
         total_records = OHS_Monitoring.objects.all().count()
         print(f"Total OHS records in database: {total_records}")
         
-        # Use Django ORM to get OHS records with proper joins
-        ohs_queryset = OHS_Monitoring.objects.select_related(
-            'project', 'region', 'district', 'settlement', 
-            'year_of_report', 'quarter', 'Type_of_Investment'
-        ).all()
+        # Use Django ORM to get OHS records - remove problematic joins for now
+        ohs_queryset = OHS_Monitoring.objects.select_related('project').all()
         
         print(f"OHS queryset count: {ohs_queryset.count()}")
         
@@ -839,7 +836,7 @@ def ohs_list(request):
                 ohs_data.append({
                     'ohs_id': ohs.ohs_Id,
                     'project_id': ohs.project.projectID if ohs.project else ohs.project_id,
-                    'project_name': ohs.project.project_name if ohs.project else ohs.project_id,
+                    'project_name': ohs.project.project if ohs.project else ohs.project_id,
                     'date': ohs.date,
                     'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
                     'working_environment': ohs.working_environment,
@@ -848,12 +845,12 @@ def ohs_list(request):
                     'female': ohs.female,
                     'youth_male': ohs.youth_male,
                     'youth_female': ohs.youth_female,
-                    'region_name': ohs.region.region_name if ohs.region else ohs.region_id,
-                    'district_name': ohs.district.district_name if ohs.district else ohs.district_id,
-                    'settlement_name': ohs.settlement.settlement_name if ohs.settlement else ohs.settlement_id,
-                    'year_name': ohs.year_of_report.year_name if ohs.year_of_report else str(ohs.year_of_report_id),
-                    'quarter_name': ohs.quarter.quarter_name if ohs.quarter else str(ohs.quarter_id),
-                    'investment_type': ohs.Type_of_Investment.type_of_investment if ohs.Type_of_Investment else ohs.Type_of_Investment_id,
+                    'region_name': str(ohs.region_id) if ohs.region_id else '',
+                    'district_name': str(ohs.district_id) if ohs.district_id else '',
+                    'settlement_name': str(ohs.settlement_id) if ohs.settlement_id else '',
+                    'year_name': str(ohs.year_of_report_id) if ohs.year_of_report_id else '',
+                    'quarter_name': str(ohs.quarter_id) if ohs.quarter_id else '',
+                    'investment_type': str(ohs.Type_of_Investment_id) if ohs.Type_of_Investment_id else '',
                 })
                 print(f"  Successfully processed record {ohs.ohs_Id}")
             except Exception as e:
