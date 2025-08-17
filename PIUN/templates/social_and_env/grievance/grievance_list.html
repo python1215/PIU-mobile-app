@@ -146,16 +146,27 @@
     <div class="card-body">
         {% if page_obj %}
             <div class="table-responsive issues-actions-table">
-                <table class="table table-hover">
+                <table class="table table-hover grievance-table">
                     <thead class="table-primary-header">
                         <tr>
                             <th>Case No</th>
-                            <th>Complainant</th>
                             <th>Project</th>
+                            <th>Investment Type</th>
+                            <th>Complainant</th>
+                            <th>Gender</th>
+                            <th>Phone</th>
                             <th>Date Received</th>
-                            <th>Decision Date</th>
-                            <th>Outcome</th>
+                            <th>How Received</th>
+                            <th>Person Receiving</th>
+                            <th>Complaint Content</th>
+                            <th>Acknowledgment</th>
+                            <th>Expected Decision</th>
+                            <th>Decision Outcome</th>
+                            <th>Decision Communicated</th>
+                            <th>Communication Method</th>
                             <th>Satisfaction</th>
+                            <th>Follow-up Actions</th>
+                            <th>Days to Resolution</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -163,31 +174,70 @@
                         {% for grievance in page_obj %}
                         <tr>
                             <td><strong>{{ grievance.case_no }}</strong></td>
+                            <td>{{ grievance.project.project|truncatechars:20 }}</td>
+                            <td>
+                                {% if grievance.type_of_investment %}
+                                    {{ grievance.type_of_investment.type_of_investment|truncatechars:15 }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 <a href="{% url 'grievance_detail' grievance.pk %}" class="text-decoration-none">
-                                    {{ grievance.name_of_complainant }}
+                                    {{ grievance.name_of_complainant|truncatechars:25 }}
                                 </a>
+                            </td>
+                            <td>
                                 {% if grievance.sex %}
-                                    <br><small class="text-muted">
-                                        <span class="badge bg-{% if grievance.sex == 'M' %}primary{% else %}info{% endif %}">
-                                            {% if grievance.sex == 'M' %}Male{% else %}Female{% endif %}
-                                        </span>
-                                    </small>
+                                    <span class="badge bg-{% if grievance.sex == 'M' %}primary{% else %}info{% endif %} badge-sm">
+                                        {% if grievance.sex == 'M' %}M{% else %}F{% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
-                            <td>{{ grievance.project|truncatechars:25 }}</td>
+                            <td>{{ grievance.tell_no|default:"-" }}</td>
                             <td>{{ grievance.date_claim_recieved|date:"M d, Y" }}</td>
+                            <td>{{ grievance.get_how_complaint_was_received_display|truncatechars:10 }}</td>
+                            <td>{{ grievance.name_of_person_receiving_complaint|truncatechars:15 }}</td>
                             <td>
-                                {{ grievance.expected_decision_date|date:"M d, Y" }}
-                                {% if grievance.days_to_resolution %}
-                                    <br><small class="text-muted">{{ grievance.days_to_resolution }} days</small>
-                                {% endif %}
+                                <span title="{{ grievance.complaint_content }}">
+                                    {{ grievance.complaint_content|truncatechars:30 }}
+                                </span>
                             </td>
-                            <td>{{ grievance.decision_outcome|truncatechars:20 }}</td>
                             <td>
-                                <span class="badge bg-{% if grievance.was_complainant_satisfied_with_decision == 'Y' %}success{% else %}danger{% endif %}">
+                                <span class="badge bg-{% if grievance.was_recieved_of_complaint_ack == 'Y' %}success{% else %}secondary{% endif %} badge-sm">
+                                    {% if grievance.was_recieved_of_complaint_ack == 'Y' %}Yes{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ grievance.expected_decision_date|date:"M d, Y" }}</td>
+                            <td>{{ grievance.decision_outcome|truncatechars:15 }}</td>
+                            <td>
+                                <span class="badge bg-{% if grievance.was_decison_communicated_to_complainant == 'Y' %}success{% else %}warning{% endif %} badge-sm">
+                                    {% if grievance.was_decison_communicated_to_complainant == 'Y' %}Yes{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ grievance.get_communication_method_display|truncatechars:10 }}</td>
+                            <td>
+                                <span class="badge bg-{% if grievance.was_complainant_satisfied_with_decision == 'Y' %}success{% else %}danger{% endif %} badge-sm">
                                     {% if grievance.was_complainant_satisfied_with_decision == 'Y' %}Satisfied{% else %}Not Satisfied{% endif %}
                                 </span>
+                            </td>
+                            <td>
+                                {% if grievance.any_follow_up_action %}
+                                    <span title="{{ grievance.any_follow_up_action }}">
+                                        {{ grievance.any_follow_up_action|truncatechars:20 }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if grievance.days_to_resolution %}
+                                    <span class="badge bg-info badge-sm">{{ grievance.days_to_resolution }} days</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
@@ -197,9 +247,6 @@
                                     <a href="{% url 'grievance_edit' grievance.pk %}" class="btn btn-outline-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-info" title="Follow-up">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
