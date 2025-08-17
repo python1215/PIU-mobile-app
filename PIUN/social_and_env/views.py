@@ -934,6 +934,60 @@ def load_investment_types_esia(request):
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 
+@login_required
+def load_investment_types_pap(request):
+    """Load investment types for PAP form based on selected project"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    
+    if project_id:
+        try:
+            investment_types = KPI_For_Contract.objects.filter(
+                project__projectID=project_id
+            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+            
+            investment_list = [
+                {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
+                for inv in investment_types if inv['type_of_investment']
+            ]
+            
+            return JsonResponse({'investment_types': investment_list})
+        except Exception as e:
+            return JsonResponse({'investment_types': [], 'error': str(e)})
+    
+    return JsonResponse({'investment_types': []})
+
+
+@login_required
+def load_investment_types_grievance(request):
+    """Load investment types for Grievance form based on selected project"""
+    from django.http import JsonResponse
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project_id')
+    
+    if project_id:
+        try:
+            # Filter KPI_For_Contract by project for ESS (Environmental and Social Safeguards)
+            investment_types = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type_id='ESS'
+            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+            
+            investment_list = [
+                {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
+                for inv in investment_types if inv['type_of_investment']
+            ]
+            
+            return JsonResponse({'investment_types': investment_list})
+        except Exception as e:
+            return JsonResponse({'investment_types': [], 'error': str(e)})
+    
+    return JsonResponse({'investment_types': []})
+
+
 
 
 

@@ -50,5 +50,6 @@ urlpatterns = [
     path('ajax/load-investment-types-esia/', views.load_investment_types_esia, name='load_investment_types_esia'),
     path('ajax/load-investment-types-pap/', views.load_investment_types_pap, name='load_investment_types_pap'),
     path('ajax/load-investment-types-ohs/', views.load_investment_types_ohs, name='load_investment_types_ohs'),
+    path('ajax/load-investment-types-grievance/', views.load_investment_types_grievance, name='load_investment_types_grievance'),
     path('ajax/load-kpi-descriptions-ohs/', views.load_kpi_descriptions_ohs, name='load_kpi_descriptions_ohs'),
 ]
