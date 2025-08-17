@@ -3,6 +3,10 @@
 
 {% block title %}Issue/Action Sources{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/issues-actions-table-fix.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- Header -->
@@ -51,12 +55,12 @@
     <!-- Sources Table -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card issues-actions-module">
                 <div class="card-body">
                     {% if page_obj %}
-                        <div class="table-responsive">
+                        <div class="table-responsive issues-actions-table">
                             <table class="table table-hover table-striped">
-                                <thead class="table-dark">
+                                <thead class="table-primary-header">
                                     <tr>
                                         <th>Source Name</th>
                                         <th>Created By</th>

@@ -3,6 +3,10 @@
 
 {% block title %}Issues & Actions Monitoring Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/issues-actions-table-fix.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- Header -->
@@ -180,9 +184,9 @@
                 </div>
                 <div class="card-body">
                     {% if recent_issues %}
-                        <div class="table-responsive">
+                        <div class="table-responsive issues-actions-table">
                             <table class="table table-hover">
-                                <thead class="table-light">
+                                <thead class="table-primary-header">
                                     <tr>
                                         <th>Issue Code</th>
                                         <th>Project</th>

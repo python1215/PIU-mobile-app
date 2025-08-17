@@ -4,6 +4,10 @@
 
 {% block title %}{{ action }} Issue/Action{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/issues-actions-table-fix.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
