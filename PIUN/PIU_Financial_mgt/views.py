@@ -739,7 +739,7 @@ def export_components_excel(request):
     for component in components_qs.order_by('-date'):
         row_data = [
             component.compID,
-            component.projectIDID.project if component.projectID else '',
+            component.projectID.project if component.projectID else '',
             component.project_components or '',
             component.component_description or '',
             component.currency.currency if component.currency else '',
@@ -883,7 +883,7 @@ def export_components_pdf(request):
     # Add component data with text wrapping
     for component in components_qs.order_by('-date'):
         # Use project name instead of project ID and wrap text properly
-        project_name = component.projectIDID.project if component.projectID else ''
+        project_name = component.projectID.project if component.projectID else ''
         component_name = component.project_components or ''
         
         row = [
@@ -1009,7 +1009,7 @@ def delete_component(request, component_id):
     component = get_object_or_404(Component, compID=component_id)
     
     if request.method == 'POST':
-        project_id = component.projectIDID.projectID
+        project_id = component.projectID.projectID
         component.delete()
         messages.success(request, 'Component deleted successfully!')
         return redirect('PIU_Financial_mgt:components')
@@ -1251,7 +1251,7 @@ def export_subcomponents_excel(request):
     for subcomponent in subcomponents_qs.order_by('-date'):
         row_data = [
             subcomponent.subcompID,
-            subcomponent.projectIDID.project if subcomponent.projectID else '',
+            subcomponent.projectID.project if subcomponent.projectID else '',
             subcomponent.compID.project_components if subcomponent.compID else '',
             subcomponent.subcomponent or '',
             subcomponent.subcomponent_Description or '',
@@ -1393,7 +1393,7 @@ def export_subcomponents_pdf(request):
     # Add subcomponent data with text wrapping
     for subcomponent in subcomponents_qs.order_by('-date'):
         # Use project and component names with text wrapping
-        project_name = subcomponent.projectIDID.project if subcomponent.projectID else ''
+        project_name = subcomponent.projectID.project if subcomponent.projectID else ''
         component_name = subcomponent.compID.project_components if subcomponent.compID else ''
         subcomponent_name = subcomponent.subcomponent or ''
         
@@ -2477,8 +2477,8 @@ def export_components_excel(request):
     # Data rows
     for component in components_qs.order_by('-date'):
         row = [
-            component.projectIDID.projectID if component.projectID else '',
-            component.projectIDID.project if component.projectID else '',
+            component.projectID.projectID if component.projectID else '',
+            component.projectID.project if component.projectID else '',
             component.project_components,
             component.component_description,
             component.currency.currency if component.currency else '',
