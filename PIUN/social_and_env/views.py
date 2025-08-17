@@ -638,11 +638,41 @@ def grievance_add(request):
             try:
                 grievance = form.save(commit=False)
                 grievance.loginUser = request.user
+                
+                # Ensure required fields are set
+                if not grievance.type_of_investment:
+                    # Try to get a default investment type for the project
+                    if grievance.project:
+                        default_investment = KPI_For_Contract.objects.filter(
+                            project=grievance.project,
+                            monitoring_type_id='ESS'
+                        ).first()
+                        if default_investment:
+                            grievance.type_of_investment = default_investment
+                        else:
+                            messages.error(request, 'No investment type found for the selected project.')
+                            return render(request, 'social_and_env/grievance/grievance_add_form.html', {
+                                'form': form,
+                                'title': 'Add New Grievance Record'
+                            })
+                
                 grievance.save()
                 messages.success(request, 'Grievance record added successfully.')
                 return redirect('grievance_list')
             except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
                 messages.error(request, f'Error saving grievance record: {str(e)}')
+                # For debugging - you can remove this in production
+                print(f"Grievance save error: {error_details}")
+        else:
+            # Form is not valid, show errors
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(f"{field}: {error}")
+            if error_messages:
+                messages.error(request, f'Form errors: {"; ".join(error_messages)}')
     else:
         form = GrievianceMonitoringLogForm()
     
@@ -1669,13 +1699,16 @@ def load_investment_types_grievance(request):
         return HttpResponse('<option value="">Select Investment Type</option>')
     
     try:
+        # Filter for ESS monitoring types specifically for grievance management
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).values_list('type_of_investment', flat=True).distinct().order_by('type_of_investment')
+            project=project_id,
+            monitoring_type_id='ESS'
+        ).order_by('type_of_investment')
         
         options = '<option value="">Select Investment Type</option>'
-        for investment_type in investment_types:
-            options += f'<option value="{investment_type}">{investment_type}</option>'
+        for investment in investment_types:
+            # Use monitoring_Type_Code as value since form expects it
+            options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
         
         return HttpResponse(options)
     

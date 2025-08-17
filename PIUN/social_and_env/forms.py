@@ -455,6 +455,72 @@ class GrievianceMonitoringLogForm(BaseGrievianceForm):
                 )
             except (ValueError, TypeError):
                 pass
+    
+    def clean(self):
+        """Enhanced validation for grievance form"""
+        cleaned_data = super().clean()
+        
+        # Validate project and investment type
+        project = cleaned_data.get('project')
+        type_of_investment = cleaned_data.get('type_of_investment')
+        
+        if project and not type_of_investment:
+            # Auto-assign first available ESS investment type for the project
+            default_investment = KPI_For_Contract.objects.filter(
+                project=project,
+                monitoring_type_id='ESS'
+            ).first()
+            if default_investment:
+                cleaned_data['type_of_investment'] = default_investment
+            else:
+                raise forms.ValidationError(
+                    'No ESS investment type found for the selected project. Please contact administrator.'
+                )
+        
+        # Validate case number is unique
+        case_no = cleaned_data.get('case_no')
+        if case_no:
+            existing = GrievianceMonitoringLog.objects.filter(case_no=case_no)
+            if self.instance and self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise forms.ValidationError('A grievance with this case number already exists.')
+        
+        # Validate dates
+        date_received = cleaned_data.get('date_claim_recieved')
+        expected_date = cleaned_data.get('expected_decision_date')
+        
+        if date_received and expected_date:
+            if expected_date < date_received:
+                raise forms.ValidationError('Expected decision date cannot be before the date claim was received.')
+        
+        # Ensure required choice fields have values
+        if not cleaned_data.get('sex'):
+            cleaned_data['sex'] = 'M'  # Default to Male
+            
+        if not cleaned_data.get('how_complaint_was_received'):
+            cleaned_data['how_complaint_was_received'] = 'In Person'  # Default
+            
+        if not cleaned_data.get('was_recieved_of_complaint_ack'):
+            cleaned_data['was_recieved_of_complaint_ack'] = 'Y'  # Default to Yes
+            
+        if not cleaned_data.get('was_decison_communicated_to_complainant'):
+            cleaned_data['was_decison_communicated_to_complainant'] = 'N'  # Default to No
+            
+        if not cleaned_data.get('communication_method'):
+            cleaned_data['communication_method'] = 'In Person'  # Default
+            
+        if not cleaned_data.get('was_complainant_satisfied_with_decision'):
+            cleaned_data['was_complainant_satisfied_with_decision'] = 'N'  # Default to No
+            
+        # Ensure decision_outcome has a default value
+        if not cleaned_data.get('decision_outcome'):
+            from setup.models import DecisionOutcome
+            default_decision = DecisionOutcome.objects.first()
+            if default_decision:
+                cleaned_data['decision_outcome'] = default_decision
+        
+        return cleaned_data
 
 
 # Form for updating existing grievance records  
