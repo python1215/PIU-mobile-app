@@ -626,13 +626,6 @@ class OHSMonitoringForm(forms.ModelForm):
         required=False
     )
 
-    Kpi_description = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.none(),
-        empty_label="Select KPI Description",
-        widget=forms.Select(attrs={"class": "form-select"}),
-        required=False
-    )
-
     class Meta:
         model = OHS_Monitoring
         fields = [

@@ -1116,11 +1116,40 @@ def load_investment_types_ohs(request):
 def ohs_add(request):
     """Add new OHS record with improved form handling"""
     if request.method == 'POST':
+        print("=== OHS ADD DEBUG START ===")
+        print(f"POST data: {dict(request.POST)}")
+        print(f"FILES data: {dict(request.FILES)}")
+        
         form = OHSMonitoringForm(request.POST, request.FILES)
-        if form.is_valid():
+        print(f"Form created, is_valid: {form.is_valid()}")
+        
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+            print(f"Non-field errors: {form.non_field_errors()}")
+            
+            # Show form validation errors with better debugging
+            messages.error(request, 'Please correct the following errors:')
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(f"{field}: {error}")
+                    print(f"Field error - {field}: {error}")
+            
+            if form.non_field_errors():
+                for error in form.non_field_errors():
+                    error_messages.append(f"General: {error}")
+                    print(f"Non-field error: {error}")
+                    
+            if error_messages:
+                messages.error(request, f'Form validation failed: {"; ".join(error_messages)}')
+            print("=== OHS FORM VALIDATION FAILED ===")
+        else:
+            print("Form is valid, attempting to save...")
             try:
                 ohs = form.save(commit=False)
                 ohs.loginUser = request.user
+                
+                print(f"OHS object before save: {ohs.__dict__}")
                 
                 # Set default values for optional fields
                 if not ohs.male:
@@ -1132,27 +1161,24 @@ def ohs_add(request):
                 if not ohs.youth_female:
                     ohs.youth_female = 0
                 
+                # Debug investment type assignment
+                if hasattr(ohs, 'Type_of_Investment'):
+                    print(f"Investment type assigned: {ohs.Type_of_Investment}")
+                else:
+                    print("No investment type assigned")
+                
                 ohs.save()
+                print("OHS record saved successfully!")
                 messages.success(request, 'OHS record added successfully.')
                 
                 # Redirect to list with success message
                 return redirect('ohs_list')
             except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
                 messages.error(request, f'Error saving OHS record: {str(e)}')
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f'OHS save error: {str(e)}')
-        else:
-            # Show form validation errors with better debugging
-            messages.error(request, 'Please correct the following errors:')
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'{field}: {error}')
-            # Add debug info for troubleshooting
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.debug(f'Form errors: {form.errors}')
-            logger.debug(f'Form data: {form.data}')
+                print(f"OHS save error: {error_details}")
+                print("=== OHS SAVE ERROR ===")
     else:
         form = OHSMonitoringForm()
     
