@@ -490,7 +490,16 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             event.stopPropagation();
             
+            console.log('=== CONTRACT SELECTION DEBUG START ===');
             console.log('Contract selection button clicked - starting process');
+            
+            // Enhanced debugging for offline environments
+            console.log('Environment check:');
+            console.log('- Current URL:', window.location.href);
+            console.log('- Server accessible:', typeof fetch !== 'undefined');
+            console.log('- Bootstrap available:', typeof bootstrap !== 'undefined');
+            console.log('- jQuery available:', typeof $ !== 'undefined');
+            console.log('- CSRF token present:', document.querySelector('[name=csrfmiddlewaretoken]') ? 'YES' : 'NO');
             
             const projectId = projectSelect.value;
             const contractType = contractTypeSelect.value;
@@ -515,12 +524,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = `/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`;
             console.log('Fetching contracts from:', url);
             
-            // Add timeout for offline deployments
+            // Get CSRF token for Django
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Add timeout for offline deployments (reduced to 5 seconds for faster feedback)
             const controller = new AbortController();
             const timeoutId = setTimeout(() => {
                 controller.abort();
-                console.error('Request timed out');
-            }, 10000); // 10 second timeout
+                console.error('Request timed out after 5 seconds');
+            }, 5000); // 5 second timeout for offline environments
         
             // Fetch contracts by project and type with comprehensive error handling
             fetch(url, { 
@@ -528,8 +540,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin'
             })
             .then(response => {
                 clearTimeout(timeoutId);
@@ -584,9 +598,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 if (error.name === 'AbortError') {
-                    alert('Request timed out. Please check your connection and try again.');
+                    console.log('=== REQUEST TIMEOUT - ACTIVATING FALLBACK ===');
+                    showManualContractInput();
+                } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    console.log('=== NETWORK ERROR - ACTIVATING FALLBACK ===');
+                    showManualContractInput();
                 } else {
-                    alert('Error loading contracts. Please check your connection and try again.');
+                    console.log('=== GENERAL ERROR - ACTIVATING FALLBACK ===');
+                    console.error('Error details:', error);
+                    showManualContractInput();
                 }
             });
             
@@ -724,15 +744,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Show modal with error handling
+            // Show modal with error handling and fallback
             try {
                 console.log('Attempting to show modal...');
-                const bootstrapModal = new bootstrap.Modal(modal);
-                bootstrapModal.show();
-                console.log('Modal shown successfully');
+                
+                // Check if Bootstrap is available
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const bootstrapModal = new bootstrap.Modal(modal);
+                    bootstrapModal.show();
+                    console.log('Bootstrap modal shown successfully');
+                } else {
+                    // Fallback for when Bootstrap Modal is not available
+                    console.warn('Bootstrap Modal not available, using fallback');
+                    modal.style.display = 'block';
+                    modal.classList.add('show');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('modal-open');
+                    
+                    // Create backdrop
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show';
+                    backdrop.setAttribute('data-fallback-backdrop', 'true');
+                    document.body.appendChild(backdrop);
+                    
+                    console.log('Fallback modal display activated');
+                }
             } catch (modalShowError) {
                 console.error('Error showing modal:', modalShowError);
-                alert('Error displaying contract selection modal. Please refresh the page and try again.');
+                
+                // Emergency fallback - force show the modal
+                try {
+                    modal.style.display = 'block';
+                    modal.style.position = 'fixed';
+                    modal.style.top = '10%';
+                    modal.style.left = '10%';
+                    modal.style.right = '10%';
+                    modal.style.zIndex = '9999';
+                    modal.style.backgroundColor = 'white';
+                    modal.style.border = '2px solid #333';
+                    modal.style.borderRadius = '8px';
+                    modal.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+                    console.log('Emergency modal display activated');
+                } catch (emergencyError) {
+                    console.error('Emergency modal display failed:', emergencyError);
+                    alert('Critical error displaying modal. Contract data loaded in console. Please refresh page.');
+                }
             }
             
         } catch (modalError) {
@@ -760,11 +816,30 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store contract details for potential navigation
         contractRefInput.dataset.contractDetailUrl = contract.detail_url;
         
-        // Close modal immediately
+        // Close modal immediately with fallback handling
         const modal = document.getElementById('contractSelectionModal');
-        const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        if (bootstrapModal) {
-            bootstrapModal.hide();
+        try {
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (bootstrapModal) {
+                bootstrapModal.hide();
+            } else {
+                // Fallback modal close
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('modal-open');
+                
+                // Remove fallback backdrop if it exists
+                const fallbackBackdrop = document.querySelector('[data-fallback-backdrop="true"]');
+                if (fallbackBackdrop) {
+                    fallbackBackdrop.remove();
+                }
+            }
+        } catch (modalCloseError) {
+            console.error('Error closing modal:', modalCloseError);
+            // Emergency modal close
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
         }
         
         // Show simple success message without links to prevent navigation
@@ -808,6 +883,50 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             return false;
+        }
+    }
+    
+    // Fallback function for when AJAX fails (offline deployments)
+    function showManualContractInput() {
+        console.log('Showing manual contract input fallback');
+        
+        const contractRefValue = prompt(`AJAX contract lookup failed. This is normal for offline deployments.
+
+Please enter the contract reference manually:
+
+Project: ${projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown'}
+Contract Type: ${contractTypeSelect.options[contractTypeSelect.selectedIndex]?.text || 'Unknown'}
+
+Enter Contract Reference Number:`);
+        
+        if (contractRefValue && contractRefValue.trim()) {
+            contractRefInput.value = contractRefValue.trim();
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.className = 'alert alert-info alert-dismissible fade show mt-2';
+            successMsg.innerHTML = `
+                <strong>Manual Entry:</strong> ${contractRefValue.trim()}
+                <small class="text-muted d-block">Contract reference entered manually (offline mode)</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const inputGroup = contractRefInput.parentNode;
+            inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
+            
+            // Auto-remove message
+            setTimeout(() => {
+                if (successMsg.parentNode) {
+                    successMsg.parentNode.removeChild(successMsg);
+                }
+            }, 5000);
+            
+            // Trigger validation
+            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('Manual contract reference set:', contractRefValue.trim());
+        } else {
+            console.log('Manual entry cancelled by user');
         }
     }
     
