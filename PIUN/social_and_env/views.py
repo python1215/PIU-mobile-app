@@ -774,11 +774,19 @@ def ohs_list(request):
     from django.db.models import Q
     
     try:
+        print("=== OHS LIST DEBUG START ===")
+        
+        # First check total records without joins
+        total_records = OHS_Monitoring.objects.all().count()
+        print(f"Total OHS records in database: {total_records}")
+        
         # Use Django ORM to get OHS records with proper joins
         ohs_queryset = OHS_Monitoring.objects.select_related(
             'project', 'region', 'district', 'settlement', 
             'year_of_report', 'quarter', 'Type_of_Investment'
         ).all()
+        
+        print(f"OHS queryset count: {ohs_queryset.count()}")
         
         # Apply filters using Django ORM
         if request.GET.get('project'):
@@ -822,28 +830,59 @@ def ohs_list(request):
         # Convert to list for compatibility with existing template logic
         ohs_data = []
         for ohs in ohs_queryset:
-            ohs_data.append({
-                'ohs_id': ohs.ohs_Id,
-                'project_id': ohs.project.projectID if ohs.project else '',
-                'project_name': ohs.project.project_name if ohs.project else '',
-                'date': ohs.date,
-                'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
-                'working_environment': ohs.working_environment,
-                'remarks': ohs.remarks,
-                'male': ohs.male,
-                'female': ohs.female,
-                'youth_male': ohs.youth_male,
-                'youth_female': ohs.youth_female,
-                'region_name': ohs.region.region_name if ohs.region else '',
-                'district_name': ohs.district.district_name if ohs.district else '',
-                'settlement_name': ohs.settlement.settlement_name if ohs.settlement else '',
-                'year_name': ohs.year_of_report.year_name if ohs.year_of_report else '',
-                'quarter_name': ohs.quarter.quarter_name if ohs.quarter else '',
-                'investment_type': ohs.Type_of_Investment.type_of_investment if ohs.Type_of_Investment else '',
-            })
+            try:
+                print(f"Processing OHS record {ohs.ohs_Id}")
+                print(f"  Project: {ohs.project_id}")
+                print(f"  Region: {ohs.region_id}")
+                print(f"  Date: {ohs.date}")
+                
+                ohs_data.append({
+                    'ohs_id': ohs.ohs_Id,
+                    'project_id': ohs.project.projectID if ohs.project else ohs.project_id,
+                    'project_name': ohs.project.project_name if ohs.project else ohs.project_id,
+                    'date': ohs.date,
+                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
+                    'working_environment': ohs.working_environment,
+                    'remarks': ohs.remarks,
+                    'male': ohs.male,
+                    'female': ohs.female,
+                    'youth_male': ohs.youth_male,
+                    'youth_female': ohs.youth_female,
+                    'region_name': ohs.region.region_name if ohs.region else ohs.region_id,
+                    'district_name': ohs.district.district_name if ohs.district else ohs.district_id,
+                    'settlement_name': ohs.settlement.settlement_name if ohs.settlement else ohs.settlement_id,
+                    'year_name': ohs.year_of_report.year_name if ohs.year_of_report else str(ohs.year_of_report_id),
+                    'quarter_name': ohs.quarter.quarter_name if ohs.quarter else str(ohs.quarter_id),
+                    'investment_type': ohs.Type_of_Investment.type_of_investment if ohs.Type_of_Investment else ohs.Type_of_Investment_id,
+                })
+                print(f"  Successfully processed record {ohs.ohs_Id}")
+            except Exception as e:
+                print(f"  Error processing record {ohs.ohs_Id}: {str(e)}")
+                # Still add basic data even if relationships fail
+                ohs_data.append({
+                    'ohs_id': ohs.ohs_Id,
+                    'project_id': ohs.project_id,
+                    'project_name': ohs.project_id,
+                    'date': ohs.date,
+                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
+                    'working_environment': ohs.working_environment,
+                    'remarks': ohs.remarks,
+                    'male': ohs.male,
+                    'female': ohs.female,
+                    'youth_male': ohs.youth_male,
+                    'youth_female': ohs.youth_female,
+                    'region_name': str(ohs.region_id),
+                    'district_name': str(ohs.district_id),
+                    'settlement_name': str(ohs.settlement_id),
+                    'year_name': str(ohs.year_of_report_id),
+                    'quarter_name': str(ohs.quarter_id),
+                    'investment_type': str(ohs.Type_of_Investment_id),
+                })
         
         # Filtering already done at ORM level
         filtered_data = ohs_data
+        print(f"Final OHS data count: {len(ohs_data)}")
+        print("=== OHS LIST DEBUG END ===")
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
