@@ -212,6 +212,18 @@
                         
                         <div class="col-md-6">
                             <label for="{{ form.picture.id_for_label }}" class="form-label">Monitoring Photo</label>
+                            
+                            <!-- Show current picture if editing -->
+                            {% if ohs and ohs.picture %}
+                                <div class="mb-2">
+                                    <p class="text-muted mb-1">Current photo:</p>
+                                    <div class="border rounded p-2" style="max-width: 200px;">
+                                        <img src="{{ ohs.picture.url }}" alt="Current OHS Photo" class="img-fluid rounded" style="max-height: 150px;">
+                                    </div>
+                                    <small class="text-muted">Choose a new file to replace this photo</small>
+                                </div>
+                            {% endif %}
+                            
                             {% render_field form.picture %}
                             {% if form.picture.errors %}
                                 <div class="invalid-feedback d-block">
