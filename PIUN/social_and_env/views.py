@@ -774,80 +774,76 @@ def ohs_list(request):
     from django.db.models import Q
     
     try:
-        # Use raw SQL to get OHS records with proper joins
-        from django.db import connection
+        # Use Django ORM to get OHS records with proper joins
+        ohs_queryset = OHS_Monitoring.objects.select_related(
+            'project', 'region', 'district', 'settlement', 
+            'year_of_report', 'quarter', 'Type_of_Investment'
+        ).all()
         
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    ohs.ohs_id,
-                    ohs.project_id,
-                    ohs.date,
-                    ohs.quality_at_entry_requirement,
-                    ohs.working_environment,
-                    ohs.remarks,
-                    ohs.male,
-                    ohs.female,
-                    ohs.youth_male,
-                    ohs.youth_female,
-                    r.region_name,
-                    d.district_name,
-                    y.year_name,
-                    q.quarter_name
-                FROM social_and_env_ohs_monitoring ohs
-                LEFT JOIN setup_regions r ON ohs.region_id = r.id
-                LEFT JOIN setup_districts d ON ohs.district_id = d.id
-                LEFT JOIN setup_year y ON ohs.year_of_report_id = y.id
-                LEFT JOIN setup_quarter q ON ohs.quarter_id = q.id
-                ORDER BY ohs.date DESC, ohs.date_created DESC
-            """)
-            
-            ohs_data = []
-            for row in cursor.fetchall():
-                ohs_data.append({
-                    'ohs_id': row[0],
-                    'project_id': row[1],
-                    'date': row[2],
-                    'quality_at_entry_requirement': row[3],
-                    'working_environment': row[4],
-                    'remarks': row[5],
-                    'male': row[6],
-                    'female': row[7],
-                    'youth_male': row[8],
-                    'youth_female': row[9],
-                    'region_name': row[10],
-                    'district_name': row[11],
-                    'year_name': row[12],
-                    'quarter_name': row[13]
-                })
-        
-        # Apply filters to the data
-        filtered_data = ohs_data
-        
+        # Apply filters using Django ORM
         if request.GET.get('project'):
-            filtered_data = [ohs for ohs in filtered_data if request.GET.get('project') in str(ohs['project_id'])]
+            ohs_queryset = ohs_queryset.filter(
+                project__projectID__icontains=request.GET.get('project')
+            )
         
         if request.GET.get('region'):
-            filtered_data = [ohs for ohs in filtered_data if ohs['region_name'] and request.GET.get('region') in ohs['region_name']]
+            ohs_queryset = ohs_queryset.filter(
+                region__region_name__icontains=request.GET.get('region')
+            )
             
         if request.GET.get('district'):
-            filtered_data = [ohs for ohs in filtered_data if ohs['district_name'] and request.GET.get('district') in ohs['district_name']]
+            ohs_queryset = ohs_queryset.filter(
+                district__district_name__icontains=request.GET.get('district')
+            )
             
         if request.GET.get('year'):
-            filtered_data = [ohs for ohs in filtered_data if ohs['year_name'] and request.GET.get('year') in str(ohs['year_name'])]
+            ohs_queryset = ohs_queryset.filter(
+                year_of_report__year_name__icontains=request.GET.get('year')
+            )
             
         if request.GET.get('quarter'):
-            filtered_data = [ohs for ohs in filtered_data if ohs['quarter_name'] and request.GET.get('quarter') in str(ohs['quarter_name'])]
+            ohs_queryset = ohs_queryset.filter(
+                quarter__quarter_name__icontains=request.GET.get('quarter')
+            )
             
         # Apply search filter
         search_query = request.GET.get('search', '').strip()
         if search_query:
-            filtered_data = [ohs for ohs in filtered_data if 
-                search_query.lower() in str(ohs['project_id']).lower() or
-                search_query.lower() in str(ohs['quality_at_entry_requirement']).lower() or
-                search_query.lower() in str(ohs['working_environment']).lower() or
-                search_query.lower() in str(ohs['remarks']).lower()
-            ]
+            ohs_queryset = ohs_queryset.filter(
+                Q(project__projectID__icontains=search_query) |
+                Q(quality_at_entry_requirement__icontains=search_query) |
+                Q(working_environment__icontains=search_query) |
+                Q(remarks__icontains=search_query)
+            )
+        
+        # Order by date
+        ohs_queryset = ohs_queryset.order_by('-date', '-date_created')
+        
+        # Convert to list for compatibility with existing template logic
+        ohs_data = []
+        for ohs in ohs_queryset:
+            ohs_data.append({
+                'ohs_id': ohs.ohs_Id,
+                'project_id': ohs.project.projectID if ohs.project else '',
+                'project_name': ohs.project.project_name if ohs.project else '',
+                'date': ohs.date,
+                'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
+                'working_environment': ohs.working_environment,
+                'remarks': ohs.remarks,
+                'male': ohs.male,
+                'female': ohs.female,
+                'youth_male': ohs.youth_male,
+                'youth_female': ohs.youth_female,
+                'region_name': ohs.region.region_name if ohs.region else '',
+                'district_name': ohs.district.district_name if ohs.district else '',
+                'settlement_name': ohs.settlement.settlement_name if ohs.settlement else '',
+                'year_name': ohs.year_of_report.year_name if ohs.year_of_report else '',
+                'quarter_name': ohs.quarter.quarter_name if ohs.quarter else '',
+                'investment_type': ohs.Type_of_Investment.type_of_investment if ohs.Type_of_Investment else '',
+            })
+        
+        # Filtering already done at ORM level
+        filtered_data = ohs_data
         
         # Pagination
         page_size = request.GET.get('page_size', 10)
