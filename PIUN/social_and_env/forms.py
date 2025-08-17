@@ -435,17 +435,18 @@ class GrievianceMonitoringLogForm(BaseGrievianceForm):
     type_of_investment = forms.ModelChoiceField(
         queryset=KPI_For_Contract.objects.all(),
         empty_label="Select Investment Type",
-        widget=forms.Select(attrs={"class": "form-select"}),
-        required=False,
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "data-preserve-on-submit": "true"
+        }),
+        required=True,  # Make this required to ensure it's selected
         to_field_name='monitoring_Type_Code'
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # For new forms, start with empty investment types until project is selected
-        self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.none()
-        
+        # Set initial queryset based on context
         if 'project' in self.data:
             try:
                 project_id = int(self.data.get('project'))
@@ -454,7 +455,15 @@ class GrievianceMonitoringLogForm(BaseGrievianceForm):
                     monitoring_type_id='ESS'
                 )
             except (ValueError, TypeError):
-                pass
+                # If error, show all ESS types to prevent form validation errors
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    monitoring_type_id='ESS'
+                )
+        else:
+            # For new forms without data, show all ESS investment types
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                monitoring_type_id='ESS'
+            )
     
     def clean(self):
         """Enhanced validation for grievance form"""
@@ -541,8 +550,11 @@ class GrievianceUpdateForm(BaseGrievianceForm):
     type_of_investment = forms.ModelChoiceField(
         queryset=KPI_For_Contract.objects.all(),
         empty_label="Select Investment Type",
-        widget=forms.Select(attrs={"class": "form-select"}),
-        required=False,
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "data-preserve-on-submit": "true"
+        }),
+        required=True,  # Make this required to ensure it's selected
         to_field_name='monitoring_Type_Code'
     )
 

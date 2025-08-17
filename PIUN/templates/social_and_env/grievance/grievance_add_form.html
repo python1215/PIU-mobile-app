@@ -36,7 +36,7 @@
             </h5>
         </div>
         <div class="card-body">
-            <form method="post" hx-boost="true">
+            <form method="post">
                 {% csrf_token %}
                 
                 <div class="row g-3">
@@ -200,4 +200,77 @@
         </div>
     </div>
 </div>
+
+<script>
+// Store and preserve form values during HTMX updates and form submissions
+let formValues = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const projectField = document.getElementById('id_project');
+    const investmentField = document.getElementById('id_type_of_investment');
+    
+    // Function to store current form values
+    function storeFormValues() {
+        if (projectField) formValues.project = projectField.value;
+        if (investmentField) formValues.type_of_investment = investmentField.value;
+        console.log('Stored values:', formValues);
+    }
+    
+    // Function to restore form values  
+    function restoreFormValues() {
+        if (formValues.project && projectField) {
+            projectField.value = formValues.project;
+        }
+        if (formValues.type_of_investment && investmentField) {
+            setTimeout(() => {
+                if (investmentField) {
+                    investmentField.value = formValues.type_of_investment;
+                    console.log('Restored investment type:', formValues.type_of_investment);
+                }
+            }, 200);
+        }
+    }
+    
+    // Store values when project changes
+    if (projectField) {
+        projectField.addEventListener('change', function() {
+            storeFormValues();
+        });
+    }
+    
+    // Store values when investment type changes
+    if (investmentField) {
+        investmentField.addEventListener('change', function() {
+            storeFormValues();
+        });
+    }
+    
+    // Store all values before form submission
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            storeFormValues();
+            console.log('Form submitted with values:', formValues);
+        });
+    }
+});
+
+// Restore values after HTMX swaps the investment dropdown
+document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'id_type_of_investment') {
+        console.log('Investment dropdown updated via HTMX');
+        // Restore the previously selected investment type
+        if (formValues.type_of_investment) {
+            setTimeout(() => {
+                const investmentField = document.getElementById('id_type_of_investment');
+                if (investmentField) {
+                    investmentField.value = formValues.type_of_investment;
+                    console.log('Restored after HTMX:', formValues.type_of_investment);
+                }
+            }, 100);
+        }
+    }
+});
+</script>
+
 {% endblock %}

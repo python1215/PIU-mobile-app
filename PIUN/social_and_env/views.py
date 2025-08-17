@@ -639,7 +639,24 @@ def grievance_add(request):
                 grievance = form.save(commit=False)
                 grievance.loginUser = request.user
                 
-                # Ensure required fields are set
+                # Debug: Print submitted data
+                project_value = request.POST.get('project')
+                investment_value = request.POST.get('type_of_investment')
+                print(f"Form data: project={project_value}, type_of_investment={investment_value}")
+                
+                # Validate that type_of_investment is properly set
+                if not grievance.type_of_investment and investment_value:
+                    # Try to find the investment type by monitoring_Type_Code
+                    try:
+                        investment_obj = KPI_For_Contract.objects.get(
+                            monitoring_Type_Code=investment_value
+                        )
+                        grievance.type_of_investment = investment_obj
+                        print(f"Found investment type by code: {investment_obj}")
+                    except KPI_For_Contract.DoesNotExist:
+                        print(f"No investment type found for code: {investment_value}")
+                
+                # Final check - ensure investment type is set
                 if not grievance.type_of_investment:
                     # Try to get a default investment type for the project
                     if grievance.project:
@@ -649,6 +666,7 @@ def grievance_add(request):
                         ).first()
                         if default_investment:
                             grievance.type_of_investment = default_investment
+                            print(f"Auto-assigned investment type: {default_investment}")
                         else:
                             messages.error(request, 'No investment type found for the selected project.')
                             return render(request, 'social_and_env/grievance/grievance_add_form.html', {
