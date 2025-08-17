@@ -833,7 +833,8 @@ def ohs_list(request):
                 print(f"  Region: {ohs.region_id}")
                 print(f"  Date: {ohs.date}")
                 
-                ohs_data.append({
+                # Create object-like structure for template compatibility
+                ohs_obj = type('OHSRecord', (), {
                     'ohs_id': ohs.ohs_Id,
                     'project_id': ohs.project.projectID if ohs.project else ohs.project_id,
                     'project_name': ohs.project.project if ohs.project else ohs.project_id,
@@ -851,30 +852,36 @@ def ohs_list(request):
                     'year_name': str(ohs.year_of_report_id) if ohs.year_of_report_id else '',
                     'quarter_name': str(ohs.quarter_id) if ohs.quarter_id else '',
                     'investment_type': str(ohs.Type_of_Investment_id) if ohs.Type_of_Investment_id else '',
-                })
+                    'picture': ohs.picture,
+                    'pk': ohs.ohs_Id
+                })()
+                ohs_data.append(ohs_obj)
                 print(f"  Successfully processed record {ohs.ohs_Id}")
             except Exception as e:
                 print(f"  Error processing record {ohs.ohs_Id}: {str(e)}")
                 # Still add basic data even if relationships fail
-                ohs_data.append({
+                ohs_obj = type('OHSRecord', (), {
                     'ohs_id': ohs.ohs_Id,
                     'project_id': ohs.project_id,
                     'project_name': ohs.project_id,
                     'date': ohs.date,
-                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
-                    'working_environment': ohs.working_environment,
-                    'remarks': ohs.remarks,
-                    'male': ohs.male,
-                    'female': ohs.female,
-                    'youth_male': ohs.youth_male,
-                    'youth_female': ohs.youth_female,
-                    'region_name': str(ohs.region_id),
-                    'district_name': str(ohs.district_id),
-                    'settlement_name': str(ohs.settlement_id),
-                    'year_name': str(ohs.year_of_report_id),
-                    'quarter_name': str(ohs.quarter_id),
-                    'investment_type': str(ohs.Type_of_Investment_id),
-                })
+                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement or '',
+                    'working_environment': ohs.working_environment or '',
+                    'remarks': ohs.remarks or '',
+                    'male': ohs.male or 0,
+                    'female': ohs.female or 0,
+                    'youth_male': ohs.youth_male or 0,
+                    'youth_female': ohs.youth_female or 0,
+                    'region_name': str(ohs.region_id) if ohs.region_id else '',
+                    'district_name': str(ohs.district_id) if ohs.district_id else '',
+                    'settlement_name': str(ohs.settlement_id) if ohs.settlement_id else '',
+                    'year_name': str(ohs.year_of_report_id) if ohs.year_of_report_id else '',
+                    'quarter_name': str(ohs.quarter_id) if ohs.quarter_id else '',
+                    'investment_type': str(ohs.Type_of_Investment_id) if ohs.Type_of_Investment_id else '',
+                    'picture': ohs.picture,
+                    'pk': ohs.ohs_Id
+                })()
+                ohs_data.append(ohs_obj)
         
         # Filtering already done at ORM level
         filtered_data = ohs_data
@@ -898,34 +905,40 @@ def ohs_list(request):
         stats = {
             'total_ohs': len(ohs_data),
             'filtered_count': len(filtered_data),
-            'total_male_workers': sum(ohs.get('male', 0) or 0 for ohs in filtered_data),
-            'total_female_workers': sum(ohs.get('female', 0) or 0 for ohs in filtered_data),
-            'total_youth_male': sum(ohs.get('youth_male', 0) or 0 for ohs in filtered_data),
-            'total_youth_female': sum(ohs.get('youth_female', 0) or 0 for ohs in filtered_data),
+            'total_male_workers': sum(getattr(ohs, 'male', 0) or 0 for ohs in filtered_data),
+            'total_female_workers': sum(getattr(ohs, 'female', 0) or 0 for ohs in filtered_data),
+            'total_youth_male': sum(getattr(ohs, 'youth_male', 0) or 0 for ohs in filtered_data),
+            'total_youth_female': sum(getattr(ohs, 'youth_female', 0) or 0 for ohs in filtered_data),
         }
         
         # Calculate additional metrics
         stats['total_workers'] = stats['total_male_workers'] + stats['total_female_workers']
         stats['total_youth'] = stats['total_youth_male'] + stats['total_youth_female']
         
-        # Get filter choices for dropdowns - simplified for raw data
+        # Get filter choices for dropdowns - updated for object attributes
         filter_choices = {
-            'projects': list(set(ohs['project_id'] for ohs in ohs_data if ohs['project_id'])),
-            'regions': list(set(ohs['region_name'] for ohs in ohs_data if ohs['region_name'])),
-            'districts': list(set(ohs['district_name'] for ohs in ohs_data if ohs['district_name'])),
-            'years': list(set(ohs['year_name'] for ohs in ohs_data if ohs['year_name'])),
-            'quarters': list(set(ohs['quarter_name'] for ohs in ohs_data if ohs['quarter_name'])),
+            'projects': list(set(getattr(ohs, 'project_id', '') for ohs in ohs_data if getattr(ohs, 'project_id', ''))),
+            'regions': list(set(getattr(ohs, 'region_name', '') for ohs in ohs_data if getattr(ohs, 'region_name', ''))),
+            'districts': list(set(getattr(ohs, 'district_name', '') for ohs in ohs_data if getattr(ohs, 'district_name', ''))),
+            'years': list(set(getattr(ohs, 'year_name', '') for ohs in ohs_data if getattr(ohs, 'year_name', ''))),
+            'quarters': list(set(getattr(ohs, 'quarter_name', '') for ohs in ohs_data if getattr(ohs, 'quarter_name', ''))),
         }
         
         # Remove debug output - issue resolved
         
         context = {
             'page_obj': page_obj,
+            'ohs_list': page_obj.object_list if page_obj else [],  # Add direct access to data
             'stats': stats,
             'filter_choices': filter_choices,
             'current_filters': request.GET,
             'title': 'OHS Monitoring'
         }
+        
+        print(f"Context page_obj: {page_obj}")
+        print(f"Context ohs_list count: {len(context['ohs_list'])}")
+        if context['ohs_list']:
+            print(f"First record: {context['ohs_list'][0]}")
         
         return render(request, 'social_and_env/ohs/ohs_list.html', context)
     
