@@ -646,9 +646,9 @@ def grievance_add(request):
     else:
         form = GrievianceMonitoringLogForm()
     
-    return render(request, 'social_and_env/grievance/grievance_form.html', {
+    return render(request, 'social_and_env/grievance/grievance_add_form.html', {
         'form': form,
-        'title': 'Add Grievance Record'
+        'title': 'Add New Grievance Record'
     })
 
 
@@ -658,7 +658,7 @@ def grievance_edit(request, pk):
     grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
     
     if request.method == 'POST':
-        form = GrievianceMonitoringLogForm(request.POST, instance=grievance)
+        form = GrievianceUpdateForm(request.POST, instance=grievance)
         if form.is_valid():
             try:
                 grievance = form.save(commit=False)
@@ -669,10 +669,11 @@ def grievance_edit(request, pk):
             except Exception as e:
                 messages.error(request, f'Error updating grievance record: {str(e)}')
     else:
-        form = GrievianceMonitoringLogForm(instance=grievance)
+        form = GrievianceUpdateForm(instance=grievance)
     
-    return render(request, 'social_and_env/grievance/grievance_form.html', {
+    return render(request, 'social_and_env/grievance/grievance_edit_form.html', {
         'form': form,
+        'grievance': grievance,
         'title': 'Edit Grievance Record'
     })
 

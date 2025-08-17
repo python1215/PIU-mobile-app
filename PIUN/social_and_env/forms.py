@@ -333,26 +333,10 @@ class PAPForm(forms.ModelForm):
 
 
 
-class GrievianceMonitoringLogForm(forms.ModelForm):
-    project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
-        empty_label="Select Project",
-        widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": reverse_lazy("load_investment_types_grievance"),
-            "hx-target": "#id_type_of_investment",
-            "hx-trigger": "change"
-        })
-    )
-
-    type_of_investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.all(),
-        empty_label="Select Investment Type",
-        widget=forms.Select(attrs={"class": "form-select"}),
-        required=False,
-        to_field_name='monitoring_Type_Code'
-    )
-
+# Base form class for common fields and methods
+class BaseGrievianceForm(forms.ModelForm):
+    """Base form for Grievance Management with common fields and methods"""
+    
     class Meta:
         model = GrievianceMonitoringLog
         fields = [
@@ -414,26 +398,6 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        if 'project' in self.data:
-            try:
-                project_id = int(self.data.get('project'))
-                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project=project_id
-                )
-            except (ValueError, TypeError):
-                pass
-        elif self.instance and self.instance.pk and self.instance.project:
-            # For editing existing records, load investment types for the selected project
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project=self.instance.project
-            )
-        else:
-            # For new forms, include all investment types to prevent validation errors
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
-    
     def clean_type_of_investment(self):
         """Custom validation for type_of_investment field"""
         type_of_investment = self.cleaned_data.get('type_of_investment')
@@ -443,11 +407,102 @@ class GrievianceMonitoringLogForm(forms.ModelForm):
             project = self.cleaned_data.get('project')
             if project:
                 from PIU_Financial_mgt.models import KPI_For_Contract
-                first_investment = KPI_For_Contract.objects.filter(project=project).first()
-                if first_investment:
-                    return first_investment
+                default_investment = KPI_For_Contract.objects.filter(
+                    project=project,
+                    monitoring_type_id='ESS'
+                ).first()
+                if default_investment:
+                    return default_investment
         
         return type_of_investment
+
+
+# Form for creating new grievance records
+class GrievianceMonitoringLogForm(BaseGrievianceForm):
+    """Form for creating new grievance monitoring records"""
+    
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        empty_label="Select Project",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": reverse_lazy("load_investment_types_grievance"),
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change"
+        })
+    )
+
+    type_of_investment = forms.ModelChoiceField(
+        queryset=KPI_For_Contract.objects.all(),
+        empty_label="Select Investment Type",
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+        to_field_name='monitoring_Type_Code'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # For new forms, start with empty investment types until project is selected
+        self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.none()
+        
+        if 'project' in self.data:
+            try:
+                project_id = int(self.data.get('project'))
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project=project_id,
+                    monitoring_type_id='ESS'
+                )
+            except (ValueError, TypeError):
+                pass
+
+
+# Form for updating existing grievance records  
+class GrievianceUpdateForm(BaseGrievianceForm):
+    """Form for updating existing grievance monitoring records"""
+    
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        empty_label="Select Project",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": reverse_lazy("load_investment_types_grievance"),
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change"
+        })
+    )
+
+    type_of_investment = forms.ModelChoiceField(
+        queryset=KPI_For_Contract.objects.all(),
+        empty_label="Select Investment Type",
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+        to_field_name='monitoring_Type_Code'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        if 'project' in self.data:
+            try:
+                project_id = int(self.data.get('project'))
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project=project_id,
+                    monitoring_type_id='ESS'
+                )
+            except (ValueError, TypeError):
+                pass
+        elif self.instance and self.instance.pk and self.instance.project:
+            # For editing existing records, load investment types for the selected project
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                project=self.instance.project,
+                monitoring_type_id='ESS'
+            )
+        else:
+            # For existing forms without project selection, show all ESS types
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                monitoring_type_id='ESS'
+            )
 
 
 class OHSMonitoringForm(forms.ModelForm):
