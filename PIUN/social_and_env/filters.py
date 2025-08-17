@@ -1,4 +1,5 @@
 import django_filters
+from django import forms
 from django_filters import FilterSet, ModelChoiceFilter
 
 # Import all required models from their respective modules
@@ -15,61 +16,91 @@ from setup.models import (
 class GrievianceMonitoringLogFilter(django_filters.FilterSet):
     project = django_filters.ModelChoiceFilter(
         queryset=Project.objects.all(),
-        label="Project"
+        label="Project",
+        empty_label="All Projects",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     type_of_investment = django_filters.ModelChoiceFilter(
         queryset=KPI_For_Contract.objects.filter(monitoring_type_id='ESS'),
-        label="Type of Investment"
+        label="Type of Investment",
+        empty_label="All Investment Types",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     sex = django_filters.ChoiceFilter(
-        choices=GrievianceMonitoringLog._meta.get_field('sex').choices,
-        label="Sex"
+        choices=[('', 'All Genders')] + list(GrievianceMonitoringLog._meta.get_field('sex').choices),
+        label="Gender",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     decision_outcome = django_filters.ModelChoiceFilter(
         queryset=DecisionOutcome.objects.all(),
-        label="Decision Outcome"
+        label="Decision Outcome",
+        empty_label="All Outcomes",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    was_complainant_satisfied_with_decision = django_filters.ChoiceFilter(
+        choices=[('', 'All Satisfaction Levels'), ('Y', 'Satisfied'), ('N', 'Not Satisfied')],
+        label="Complainant Satisfaction",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     communication_method = django_filters.ChoiceFilter(
-        choices=GrievianceMonitoringLog.Communication_method,
-        label="Communication Method"
+        choices=[('', 'All Methods')] + list(GrievianceMonitoringLog.Communication_method),
+        label="Communication Method",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     how_complaint_was_received = django_filters.ChoiceFilter(
-        choices=GrievianceMonitoringLog.Communication_method,
-        label="How Complaint Was Received"
+        choices=[('', 'All Methods')] + list(GrievianceMonitoringLog.Communication_method),
+        label="How Complaint Was Received",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
-    # Method 1: Using separate date filters (recommended)
+    # Date range filters
     date_claim_recieved_after = django_filters.DateFilter(
         field_name='date_claim_recieved',
         lookup_expr='gte',
-        label='Date Received (From)'
+        label='Date Received (From)',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
     
     date_claim_recieved_before = django_filters.DateFilter(
         field_name='date_claim_recieved',
         lookup_expr='lte',
-        label='Date Received (To)'
+        label='Date Received (To)',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
 
-    any_follow_up_action = django_filters.CharFilter(
-        field_name='any_follow_up_action',
+    # Text search filters
+    name_of_complainant = django_filters.CharFilter(
         lookup_expr='icontains',
-        label="Follow-up Action"
+        label="Complainant Name",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search by complainant name...'})
+    )
+
+    complaint_content = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label="Complaint Content",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search in complaint content...'})
+    )
+
+    case_no = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label="Case Number",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search by case number...'})
     )
 
     class Meta:
         model = GrievianceMonitoringLog
         fields = [
-            'project', 'type_of_investment', 'sex',
-            'decision_outcome', 'communication_method',
-            'how_complaint_was_received', 
-            'date_claim_recieved_after', 'date_claim_recieved_before',
-            'any_follow_up_action'
+            'project', 'type_of_investment', 'sex', 'decision_outcome',
+            'was_complainant_satisfied_with_decision', 'communication_method',
+            'how_complaint_was_received', 'date_claim_recieved_after', 
+            'date_claim_recieved_before', 'name_of_complainant', 
+            'complaint_content', 'case_no'
         ]
 
 class OHSMonitoringFilter(FilterSet):

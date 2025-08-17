@@ -1,7 +1,12 @@
 {% extends 'social_and_env/base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block title %}Grievance Management - PIUN Social & Environmental{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/issues-actions-table-fix.css' %}">
+{% endblock %}
 
 {% block social_env_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -72,37 +77,65 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
+            <!-- First Row -->
             <div class="col-md-3">
-                <label class="form-label">Project</label>
-                {% render_field filter.form.project class="form-select" %}
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" value="{{ search_query }}" 
+                       placeholder="Search case number, complainant, content...">
             </div>
             <div class="col-md-3">
-                <label class="form-label">Decision Outcome</label>
-                {% render_field filter.form.decision_outcome class="form-select" %}
+                {{ filter.form.project.label_tag }}
+                {{ filter.form.project }}
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Gender</label>
-                {% render_field filter.form.sex class="form-select" %}
+            <div class="col-md-3">
+                {{ filter.form.decision_outcome.label_tag }}
+                {{ filter.form.decision_outcome }}
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Satisfaction</label>
-                {% render_field filter.form.was_complainant_satisfied_with_decision class="form-select" %}
+            <div class="col-md-3">
+                {{ filter.form.sex.label_tag }}
+                {{ filter.form.sex }}
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            
+            <!-- Second Row -->
+            <div class="col-md-3">
+                {{ filter.form.was_complainant_satisfied_with_decision.label_tag }}
+                {{ filter.form.was_complainant_satisfied_with_decision }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.type_of_investment.label_tag }}
+                {{ filter.form.type_of_investment }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.date_claim_recieved_after.label_tag }}
+                {{ filter.form.date_claim_recieved_after }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.date_claim_recieved_before.label_tag }}
+                {{ filter.form.date_claim_recieved_before }}
+            </div>
+            
+            <!-- Third Row -->
+            <div class="col-md-4">
+                {{ filter.form.name_of_complainant.label_tag }}
+                {{ filter.form.name_of_complainant }}
+            </div>
+            <div class="col-md-4">
+                {{ filter.form.complaint_content.label_tag }}
+                {{ filter.form.complaint_content }}
+            </div>
+            <div class="col-md-4">
+                {{ filter.form.case_no.label_tag }}
+                {{ filter.form.case_no }}
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="col-12 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filter
+                    <i class="bi bi-search me-1"></i>Apply Filters
                 </button>
                 <a href="{% url 'grievance_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x me-1"></i>Clear
+                    <i class="bi bi-x-circle me-1"></i>Clear All
                 </a>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Complainant Name</label>
-                {% render_field filter.form.name_of_complainant class="form-control" %}
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Complaint Content</label>
-                {% render_field filter.form.complaint_content class="form-control" %}
             </div>
         </form>
     </div>
@@ -112,9 +145,9 @@
 <div class="card">
     <div class="card-body">
         {% if page_obj %}
-            <div class="table-responsive">
+            <div class="table-responsive issues-actions-table">
                 <table class="table table-hover">
-                    <thead class="table-dark">
+                    <thead class="table-primary-header">
                         <tr>
                             <th>Case No</th>
                             <th>Complainant</th>

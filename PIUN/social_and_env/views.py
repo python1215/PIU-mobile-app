@@ -539,46 +539,59 @@ def grievance_list(request):
     from django.core.paginator import Paginator
     
     try:
-        grievances = GrievianceMonitoringLog.objects.select_related(
-            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
-        ).all()
+        # Initialize the filter
+        grievance_filter = GrievianceMonitoringLogFilter(request.GET, 
+            queryset=GrievianceMonitoringLog.objects.select_related(
+                'project', 'type_of_investment', 'decision_outcome', 'loginUser'
+            ).order_by('-date_claim_recieved'))
         
-        # Apply filters
-        if request.GET.get('project'):
-            grievances = grievances.filter(project=request.GET.get('project'))
+        # Get filtered queryset
+        grievances = grievance_filter.qs
         
-        if request.GET.get('satisfaction_status'):
-            grievances = grievances.filter(was_complainant_satisfied_with_decision=request.GET.get('satisfaction_status'))
-        
-        if request.GET.get('complainant_name'):
-            grievances = grievances.filter(name_of_complainant__icontains=request.GET.get('complainant_name'))
+        # Search functionality (additional to filters)
+        search_query = request.GET.get('search', '')
+        if search_query:
+            grievances = grievances.filter(
+                Q(case_no__icontains=search_query) |
+                Q(name_of_complainant__icontains=search_query) |
+                Q(complaint_content__icontains=search_query) |
+                Q(project__project__icontains=search_query)
+            )
         
         # Pagination
-        page_size = request.GET.get('page_size', 10)
+        page_size = request.GET.get('page_size', 15)
         try:
             page_size = int(page_size)
             if page_size not in [10, 15, 25, 50, 100]:
-                page_size = 10
+                page_size = 15
         except (ValueError, TypeError):
-            page_size = 10
+            page_size = 15
         
         paginator = Paginator(grievances, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        # Get statistics
+        # Get statistics from filtered queryset
+        total_cases = grievances.count()
+        satisfied = grievances.filter(was_complainant_satisfied_with_decision='Y').count()
+        not_satisfied = grievances.filter(was_complainant_satisfied_with_decision='N').count()
+        pending = grievances.filter(was_complainant_satisfied_with_decision__isnull=True).count()
+        
         stats = {
-            'total_grievances': GrievianceMonitoringLog.objects.count(),
-            'filtered_count': grievances.count(),
-            'satisfied_grievances': grievances.filter(was_complainant_satisfied_with_decision='Y').count(),
-            'unsatisfied_grievances': grievances.filter(was_complainant_satisfied_with_decision='N').count(),
+            'total_cases': total_cases,
+            'satisfied': satisfied,
+            'not_satisfied': not_satisfied,
+            'pending': pending,
             'male_complainants': grievances.filter(sex='M').count(),
             'female_complainants': grievances.filter(sex='F').count(),
         }
         
         context = {
             'page_obj': page_obj,
+            'filter': grievance_filter,
             'stats': stats,
+            'search_query': search_query,
+            'is_filtered': bool(request.GET),
             'title': 'Grievance Management'
         }
         
@@ -588,7 +601,10 @@ def grievance_list(request):
         messages.error(request, f'Error loading grievances: {str(e)}')
         return render(request, 'social_and_env/grievance/grievance_list.html', {
             'page_obj': None,
+            'filter': None,
             'stats': {},
+            'search_query': '',
+            'is_filtered': False,
             'title': 'Grievance Management'
         })
 
