@@ -55,9 +55,15 @@ class updatesubcomponentForm(forms.ModelForm):
         widget=forms.Select(attrs={
             "hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'),
             "hx-target": "#id_compID"
-        })
+        }),
+        empty_label="Select Project...",
+        to_field_name='projectID'
     )
-    compID = forms.ModelChoiceField(queryset=Component.objects.none(), required=False)  # Allow null values
+    compID = forms.ModelChoiceField(
+        queryset=Component.objects.none(), 
+        required=False,
+        empty_label="Select Component..."
+    )
     
     # Fix currency field validation by explicitly setting queryset
     currency = forms.ModelChoiceField(
@@ -128,15 +134,20 @@ class updatesubcomponentForm(forms.ModelForm):
 class addsubcomponentForm(forms.ModelForm):
     projectID = forms.ModelChoiceField(
         queryset=Project.objects.all(),
-        widget=forms.Select(attrs={"hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'), "hx-target": "#id_compID"})
-
+        widget=forms.Select(attrs={"hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'), "hx-target": "#id_compID"}),
+        empty_label="Select Project...",
+        to_field_name='projectID'  # This ensures we use projectID as the value but display project name
     )
-    compID = forms.ModelChoiceField(queryset=Component.objects.none())
+    compID = forms.ModelChoiceField(
+        queryset=Component.objects.none(),
+        empty_label="Select Component..."
+    )
     
     # Fix currency field validation by explicitly setting queryset
     currency = forms.ModelChoiceField(
         queryset=Currency.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Select Currency..."
     )
 
     def __init__(self, *args, **kwargs):
@@ -157,16 +168,21 @@ class addActivitiesForm(forms.ModelForm):
     projectID = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         widget=forms.Select(attrs={"hx-get":  reverse_lazy('PIU_Financial_mgt:load_project_components'), "hx-target": "#id_compID"}),
+        empty_label="Select Project...",
+        to_field_name='projectID'
     )
-
-    #compID = forms.ModelChoiceField(queryset=Component.objects.none(), required=False)
 
     compID = forms.ModelChoiceField(
         queryset=Component.objects.all(),
-        widget=forms.Select(attrs={"hx-get": reverse_lazy("PIU_Financial_mgt:load_project_subcomponents"), "hx-target": "#id_subcompID"})
+        widget=forms.Select(attrs={"hx-get": reverse_lazy("PIU_Financial_mgt:load_project_subcomponents"), "hx-target": "#id_subcompID"}),
+        empty_label="Select Component..."
     )
 
-    subcompID = forms.ModelChoiceField(queryset=Subcomponent.objects.none(), required=False)
+    subcompID = forms.ModelChoiceField(
+        queryset=Subcomponent.objects.none(), 
+        required=False,
+        empty_label="Select Subcomponent..."
+    )
 
    
     class Meta:
@@ -202,7 +218,9 @@ class updateActivitiesForm(forms.ModelForm):
             "class": "form-control"
         }),
         required=True,
-        label="Project"
+        label="Project",
+        empty_label="Select Project...",
+        to_field_name='projectID'
     )
 
     compID = forms.ModelChoiceField(
