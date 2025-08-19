@@ -21,7 +21,19 @@
                         <!-- Project and Investment Type -->
                         <div class="col-md-6">
                             <label for="{{ form.project.id_for_label }}" class="form-label required">Project</label>
-                            {% render_field form.project %}
+                            <select name="project" id="id_project" class="form-select" 
+                                    hx-get="/social_and_env/ajax/load-investment-types-pap/" 
+                                    hx-target="#id_type_of_investment" 
+                                    hx-trigger="change"
+                                    hx-vals='{"project_id": "js:this.value"}'
+                                    hx-indicator="#investment-loading">
+                                <option value="">Select Project</option>
+                                {% for value, text in form.project.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form.project.value == value %}selected{% endif %}>{{ text }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
                             {% if form.project.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.project.errors %}{{ error }}{% endfor %}
@@ -31,7 +43,23 @@
                         
                         <div class="col-md-6">
                             <label for="{{ form.type_of_investment.id_for_label }}" class="form-label required">Investment Type</label>
-                            {% render_field form.type_of_investment %}
+                            <div class="position-relative">
+                                <select name="type_of_investment" id="id_type_of_investment" class="form-select">
+                                    <option value="">Select Project First</option>
+                                    {% if form.type_of_investment.value %}
+                                        {% for value, text in form.type_of_investment.field.choices %}
+                                            {% if value %}
+                                                <option value="{{ value }}" {% if form.type_of_investment.value == value %}selected{% endif %}>{{ text }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <div id="investment-loading" class="htmx-indicator position-absolute top-50 end-0 translate-middle-y me-3">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
                             {% if form.type_of_investment.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.type_of_investment.errors %}{{ error }}{% endfor %}
@@ -253,6 +281,21 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -262,70 +305,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const compensationDateField = document.getElementById('id_compensation_date');
     const refNoField = document.getElementById('id_compensation_RefNo');
     
-    // Investment Type Cascading Dropdown - Enhanced for offline compatibility
+    // HTMX Fallback for offline scenarios
     const projectField = document.getElementById('id_project');
     const investmentTypeField = document.getElementById('id_type_of_investment');
     
-    // Populate Investment Types based on selected project
-    function loadInvestmentTypes(projectId, selectedInvestmentType = null) {
-        if (!projectId || !investmentTypeField) return;
-        
-        // Show loading state
-        investmentTypeField.innerHTML = '<option value="">Loading...</option>';
-        investmentTypeField.disabled = true;
-        
-        // Prepare data for AJAX request
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const url = '/social_and_env/ajax/load-investment-types-pap/';
-        
-        // Try AJAX request first (for online scenarios)
-        fetch(url + '?project_id=' + encodeURIComponent(projectId), {
-            method: 'GET',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Clear and populate investment types
-            investmentTypeField.innerHTML = '<option value="">Select Investment Type</option>';
+    // Add HTMX error handling and offline fallback
+    document.body.addEventListener('htmx:responseError', function(evt) {
+        if (evt.detail.target.id === 'id_type_of_investment') {
+            console.log('HTMX failed, using offline fallback');
             
-            if (data.investment_types && data.investment_types.length > 0) {
-                data.investment_types.forEach(investment => {
-                    const option = document.createElement('option');
-                    option.value = investment.id;
-                    option.textContent = investment.name;
-                    
-                    // Auto-select if this was the previously selected value
-                    if (selectedInvestmentType && investment.id === selectedInvestmentType) {
-                        option.selected = true;
-                    }
-                    
-                    investmentTypeField.appendChild(option);
-                });
-                
-                // If no specific investment was selected, auto-select the first one for offline compatibility
-                if (!selectedInvestmentType && data.investment_types.length > 0) {
-                    investmentTypeField.value = data.investment_types[0].id;
-                }
-            } else {
-                // No investment types found
-                investmentTypeField.innerHTML = '<option value="">No investment types available for this project</option>';
-            }
-            
-            investmentTypeField.disabled = false;
-        })
-        .catch(error => {
-            console.log('AJAX failed, using offline fallback:', error);
-            
-            // Offline fallback - Enable manual selection with all available options
+            // Offline fallback - populate with known investment types
             investmentTypeField.innerHTML = `
                 <option value="">Select Investment Type</option>
                 <option value="AMR-Meters">LOT I – Procurement of AMR meters - Xylem Water Solutions</option>
@@ -350,17 +339,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <option value="RE">Renewable Energy Feasibility Study</option>
             `;
             
-            // Auto-select the previously selected value if available
-            if (selectedInvestmentType) {
-                investmentTypeField.value = selectedInvestmentType;
-            }
-            
-            investmentTypeField.disabled = false;
-            
             // Show user-friendly message
             const errorDiv = document.createElement('div');
             errorDiv.className = 'alert alert-info mt-2';
-            errorDiv.innerHTML = '<small><i class="bi bi-info-circle me-1"></i>Investment types loaded from offline data. All project options are available for selection.</small>';
+            errorDiv.innerHTML = '<small><i class="bi bi-info-circle me-1"></i>Connection failed. Investment types loaded from offline data.</small>';
             investmentTypeField.parentNode.appendChild(errorDiv);
             
             // Remove the message after 5 seconds
@@ -369,27 +351,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorDiv.parentNode.removeChild(errorDiv);
                 }
             }, 5000);
-        });
-    }
-    
-    // Handle project selection change
-    if (projectField) {
-        projectField.addEventListener('change', function() {
-            const selectedProject = this.value;
-            if (selectedProject) {
-                loadInvestmentTypes(selectedProject);
-            } else {
-                investmentTypeField.innerHTML = '<option value="">Select Project First</option>';
-                investmentTypeField.disabled = true;
-            }
-        });
-        
-        // Load investment types for the currently selected project (for edit forms)
-        if (projectField.value) {
-            const currentInvestment = investmentTypeField.value;
-            loadInvestmentTypes(projectField.value, currentInvestment);
         }
-    }
+    });
     
     // Show/hide compensation fields based on status
     function toggleCompensationFields() {

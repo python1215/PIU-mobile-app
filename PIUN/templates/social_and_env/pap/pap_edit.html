@@ -28,7 +28,19 @@
                         <!-- Project and Investment Type -->
                         <div class="col-md-6">
                             <label for="{{ form.project.id_for_label }}" class="form-label required">Project</label>
-                            {% render_field form.project class="form-control" %}
+                            <select name="project" id="id_project" class="form-select" 
+                                    hx-get="/social_and_env/ajax/load-investment-types-pap/" 
+                                    hx-target="#id_type_of_investment" 
+                                    hx-trigger="change"
+                                    hx-vals='{"project_id": "js:this.value"}'
+                                    hx-indicator="#investment-loading-edit">
+                                <option value="">Select Project</option>
+                                {% for value, text in form.project.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form.project.value == value %}selected{% endif %}>{{ text }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
                             {% if form.project.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.project.errors %}{{ error }}{% endfor %}
@@ -39,13 +51,29 @@
                         
                         <div class="col-md-6">
                             <label for="{{ form.type_of_investment.id_for_label }}" class="form-label required">Investment Type</label>
-                            {% render_field form.type_of_investment class="form-control" %}
+                            <div class="position-relative">
+                                <select name="type_of_investment" id="id_type_of_investment" class="form-select">
+                                    <option value="">Select Investment Type</option>
+                                    {% if form.type_of_investment.value %}
+                                        {% for value, text in form.type_of_investment.field.choices %}
+                                            {% if value %}
+                                                <option value="{{ value }}" {% if form.type_of_investment.value == value %}selected{% endif %}>{{ text }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <div id="investment-loading-edit" class="htmx-indicator position-absolute top-50 end-0 translate-middle-y me-3">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
                             {% if form.type_of_investment.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.type_of_investment.errors %}{{ error }}{% endfor %}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Current: {{ pap.type_of_investment.investment_type }}</div>
+                            <div class="form-text">Current: {{ pap.type_of_investment.type_of_investment }}</div>
                         </div>
                         
                         <!-- PAP Identification -->
@@ -298,6 +326,21 @@
     <i class="bi bi-info-circle me-2"></i>
     <strong>Changes detected:</strong> Remember to save your changes before leaving this page.
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}

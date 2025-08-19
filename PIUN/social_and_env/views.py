@@ -1085,32 +1085,33 @@ def load_investment_types_pap(request):
             
             logger.debug(f"Found {len(investment_list)} investment types for project {project_id}")
             
-            # Check if requesting JSON format (HTMX/AJAX)
-            if request.headers.get('HX-Request') or 'project_id' in request.GET:
-                return JsonResponse({'investment_types': investment_list})
-            else:
-                # Return HTML options for direct form rendering
+            # Check if requesting HTML format (HTMX) or JSON format (AJAX)
+            if request.headers.get('HX-Request'):
+                # Return HTML options for HTMX
                 options = '<option value="">Select Investment Type</option>'
                 for inv in investment_list:
                     options += f'<option value="{inv["id"]}">{inv["name"]}</option>'
                 return HttpResponse(options)
+            else:
+                # Return JSON for AJAX/API requests
+                return JsonResponse({'investment_types': investment_list})
                 
         else:
             logger.debug("No project_id provided")
             # No project selected
-            if request.headers.get('HX-Request') or 'project_id' in request.GET:
-                return JsonResponse({'investment_types': []})
-            else:
+            if request.headers.get('HX-Request'):
                 return HttpResponse('<option value="">Select Project First</option>')
+            else:
+                return JsonResponse({'investment_types': []})
                 
     except Exception as e:
         logger.error(f"Error in load_investment_types_pap: {str(e)}")
         error_msg = f"Error loading investment types: {str(e)}"
         
-        if request.headers.get('HX-Request') or 'project_id' in request.GET:
-            return JsonResponse({'investment_types': [], 'error': error_msg})
-        else:
+        if request.headers.get('HX-Request'):
             return HttpResponse(f'<option value="">Error: {error_msg}</option>')
+        else:
+            return JsonResponse({'investment_types': [], 'error': error_msg})
 
 
 @login_required
