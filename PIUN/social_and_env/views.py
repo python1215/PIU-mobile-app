@@ -1051,28 +1051,66 @@ def load_investment_types_esia(request):
 
 @login_required
 def load_investment_types_pap(request):
-    """Load investment types for PAP form based on selected project"""
-    from django.http import JsonResponse
+    """Load investment types for PAP form based on selected project - Enhanced for offline compatibility"""
+    from django.http import JsonResponse, HttpResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
+    import logging
     
-    project_id = request.GET.get('project_id')
+    logger = logging.getLogger(__name__)
+    project_id = request.GET.get('project_id') or request.GET.get('project')
     
-    if project_id:
+    logger.debug(f"PAP Investment Types AJAX called with project_id: {project_id}")
+    
+    # Convert project ID to projectID if needed
+    if project_id and project_id.isdigit():
         try:
+            project_obj = Project.objects.filter(pk=int(project_id)).first()
+            if project_obj:
+                project_id = project_obj.projectID
+                logger.debug(f"Converted project PK {project_id} to projectID: {project_obj.projectID}")
+        except (ValueError, TypeError):
+            pass
+    
+    try:
+        if project_id:
+            # Filter KPI_For_Contract by project using projectID field
             investment_types = KPI_For_Contract.objects.filter(
                 project__projectID=project_id
-            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+            ).values('monitoring_Type_Code', 'type_of_investment').distinct().order_by('type_of_investment')
             
             investment_list = [
                 {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
-                for inv in investment_types if inv['type_of_investment']
+                for inv in investment_types if inv['type_of_investment'] and inv['type_of_investment'].strip()
             ]
             
-            return JsonResponse({'investment_types': investment_list})
-        except Exception as e:
-            return JsonResponse({'investment_types': [], 'error': str(e)})
-    
-    return JsonResponse({'investment_types': []})
+            logger.debug(f"Found {len(investment_list)} investment types for project {project_id}")
+            
+            # Check if requesting JSON format (HTMX/AJAX)
+            if request.headers.get('HX-Request') or 'project_id' in request.GET:
+                return JsonResponse({'investment_types': investment_list})
+            else:
+                # Return HTML options for direct form rendering
+                options = '<option value="">Select Investment Type</option>'
+                for inv in investment_list:
+                    options += f'<option value="{inv["id"]}">{inv["name"]}</option>'
+                return HttpResponse(options)
+                
+        else:
+            logger.debug("No project_id provided")
+            # No project selected
+            if request.headers.get('HX-Request') or 'project_id' in request.GET:
+                return JsonResponse({'investment_types': []})
+            else:
+                return HttpResponse('<option value="">Select Project First</option>')
+                
+    except Exception as e:
+        logger.error(f"Error in load_investment_types_pap: {str(e)}")
+        error_msg = f"Error loading investment types: {str(e)}"
+        
+        if request.headers.get('HX-Request') or 'project_id' in request.GET:
+            return JsonResponse({'investment_types': [], 'error': error_msg})
+        else:
+            return HttpResponse(f'<option value="">Error: {error_msg}</option>')
 
 
 @login_required
@@ -1908,43 +1946,7 @@ def test_cascading_dropdown(request):
 
 
 
-@login_required
-def load_investment_types_pap(request):
-    """Load investment types for PAP based on project selection"""
-    from django.http import HttpResponse, JsonResponse
-    
-    project_id = request.GET.get('project') or request.GET.get('project_id')
-    if not project_id:
-        if request.headers.get('Content-Type') == 'application/json':
-            return JsonResponse({'investment_types': []})
-        return HttpResponse('<option value="">Select Investment Type</option>')
-    
-    try:
-        investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).distinct().order_by('type_of_investment')
-        
-        # Check if requesting JSON format (for edit forms)
-        if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
-            investment_data = []
-            for investment in investment_types:
-                investment_data.append({
-                    'id': investment.monitoring_Type_Code,
-                    'name': investment.type_of_investment
-                })
-            return JsonResponse({'investment_types': investment_data})
-        
-        # Return HTML options (for add forms)
-        options = '<option value="">Select Investment Type</option>'
-        for investment in investment_types:
-            options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
-        
-        return HttpResponse(options)
-    
-    except Exception as e:
-        if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
-            return JsonResponse({'error': str(e), 'investment_types': []})
-        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+
 
 
 @login_required

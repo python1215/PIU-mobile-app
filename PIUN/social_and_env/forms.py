@@ -118,7 +118,10 @@ class PAPForm(forms.ModelForm):
         queryset=Project.objects.all(),
         empty_label="Select Project",
         widget=forms.Select(attrs={
-            "class": "form-select"
+            "class": "form-select",
+            "hx-get": "/social_and_env/ajax/load-investment-types-pap/",
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change"
         })
     )
 
@@ -213,20 +216,45 @@ class PAPForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set up dynamic querysets based on form data
+        # Set up dynamic querysets based on form data - Enhanced for offline compatibility
         if 'project' in self.data:
             try:
-                project_id = int(self.data.get('project'))
-                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
-                )
+                project_id = self.data.get('project')
+                # Try to get the project and populate investment types
+                project_obj = Project.objects.filter(pk=project_id).first()
+                if project_obj:
+                    # Use projectID field for KPI lookup (not project_id)
+                    self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                        project__projectID=project_obj.projectID
+                    ).distinct()
+                    
+                    # If no investment types found, fallback to all for this project
+                    if not self.fields['type_of_investment'].queryset.exists():
+                        self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                            project=project_obj
+                        ).distinct()
             except (ValueError, TypeError):
-                pass
+                # Fallback: show all investment types for any project
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+                
         elif self.instance and self.instance.pk and self.instance.project:
             # For editing existing PAP records, populate investment types for the selected project
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project=self.instance.project
-            )
+            try:
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                    project__projectID=self.instance.project.projectID
+                ).distinct()
+                
+                # Fallback if no results
+                if not self.fields['type_of_investment'].queryset.exists():
+                    self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                        project=self.instance.project
+                    ).distinct()
+            except (AttributeError, TypeError):
+                # Final fallback
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+        else:
+            # Default fallback for offline scenarios - show all investment types
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
         
         if 'region' in self.data:
             try:

@@ -262,6 +262,135 @@ document.addEventListener('DOMContentLoaded', function() {
     const compensationDateField = document.getElementById('id_compensation_date');
     const refNoField = document.getElementById('id_compensation_RefNo');
     
+    // Investment Type Cascading Dropdown - Enhanced for offline compatibility
+    const projectField = document.getElementById('id_project');
+    const investmentTypeField = document.getElementById('id_type_of_investment');
+    
+    // Populate Investment Types based on selected project
+    function loadInvestmentTypes(projectId, selectedInvestmentType = null) {
+        if (!projectId || !investmentTypeField) return;
+        
+        // Show loading state
+        investmentTypeField.innerHTML = '<option value="">Loading...</option>';
+        investmentTypeField.disabled = true;
+        
+        // Prepare data for AJAX request
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const url = '/social_and_env/ajax/load-investment-types-pap/';
+        
+        // Try AJAX request first (for online scenarios)
+        fetch(url + '?project_id=' + encodeURIComponent(projectId), {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Clear and populate investment types
+            investmentTypeField.innerHTML = '<option value="">Select Investment Type</option>';
+            
+            if (data.investment_types && data.investment_types.length > 0) {
+                data.investment_types.forEach(investment => {
+                    const option = document.createElement('option');
+                    option.value = investment.id;
+                    option.textContent = investment.name;
+                    
+                    // Auto-select if this was the previously selected value
+                    if (selectedInvestmentType && investment.id === selectedInvestmentType) {
+                        option.selected = true;
+                    }
+                    
+                    investmentTypeField.appendChild(option);
+                });
+                
+                // If no specific investment was selected, auto-select the first one for offline compatibility
+                if (!selectedInvestmentType && data.investment_types.length > 0) {
+                    investmentTypeField.value = data.investment_types[0].id;
+                }
+            } else {
+                // No investment types found
+                investmentTypeField.innerHTML = '<option value="">No investment types available for this project</option>';
+            }
+            
+            investmentTypeField.disabled = false;
+        })
+        .catch(error => {
+            console.log('AJAX failed, using offline fallback:', error);
+            
+            // Offline fallback - Enable manual selection with all available options
+            investmentTypeField.innerHTML = `
+                <option value="">Select Investment Type</option>
+                <option value="AMR-Meters">LOT I – Procurement of AMR meters - Xylem Water Solutions</option>
+                <option value="Azorom">Service Contractor (AZOROM)</option>
+                <option value="BB1 Compliance">Backbone phase 1</option>
+                <option value="BB2 -HKEEP">GERMP- Backbone Phase 2.2</option>
+                <option value="BB2 -PPE">GERMP Backbone Phase 2.1</option>
+                <option value="BB3-HKEEP">GERMP- Backbone Phase 3.2</option>
+                <option value="BB3-PPE">GERMP Backbone Phase 3.1</option>
+                <option value="BB4-HKEEP">GERMP- Backbone Phase 4.2</option>
+                <option value="BB4-PPE">GERMP Backbone Phase 4.1</option>
+                <option value="CB1 to CB5">GERMP- Central Banjul 1 - 5</option>
+                <option value="Cell-HKEEP">Cells ESHS</option>
+                <option value="Cell-PPE">Cells Engineering</option>
+                <option value="DB1 to DB4">GERMP- Distribution Phase 1 - 4</option>
+                <option value="ESHS">GERMP- Environmental and Social Safeguards</option>
+                <option value="MV Grid">GERMP- MV Grid</option>
+                <option value="PMU - HQ">GERMP- PMU HQ</option>
+                <option value="PMU - REG">GERMP- PMU Regional</option>
+                <option value="T&D">GERMP- Transmission and Distribution</option>
+                <option value="TRANS">GERMP- Transmission</option>
+                <option value="RE">Renewable Energy Feasibility Study</option>
+            `;
+            
+            // Auto-select the previously selected value if available
+            if (selectedInvestmentType) {
+                investmentTypeField.value = selectedInvestmentType;
+            }
+            
+            investmentTypeField.disabled = false;
+            
+            // Show user-friendly message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-info mt-2';
+            errorDiv.innerHTML = '<small><i class="bi bi-info-circle me-1"></i>Investment types loaded from offline data. All project options are available for selection.</small>';
+            investmentTypeField.parentNode.appendChild(errorDiv);
+            
+            // Remove the message after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
+        });
+    }
+    
+    // Handle project selection change
+    if (projectField) {
+        projectField.addEventListener('change', function() {
+            const selectedProject = this.value;
+            if (selectedProject) {
+                loadInvestmentTypes(selectedProject);
+            } else {
+                investmentTypeField.innerHTML = '<option value="">Select Project First</option>';
+                investmentTypeField.disabled = true;
+            }
+        });
+        
+        // Load investment types for the currently selected project (for edit forms)
+        if (projectField.value) {
+            const currentInvestment = investmentTypeField.value;
+            loadInvestmentTypes(projectField.value, currentInvestment);
+        }
+    }
+    
     // Show/hide compensation fields based on status
     function toggleCompensationFields() {
         const isCompensated = compensatedField && compensatedField.value === 'Y';

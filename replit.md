@@ -7,6 +7,7 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
+- **August 19, 2025**: Fixed Investment Type cascading dropdown for PAP forms with project 'D309D6530GM'. Removed duplicate `load_investment_types_pap` functions, enhanced AJAX endpoint with offline fallback mechanisms, and added comprehensive JavaScript fallback with 20+ investment type options for offline scenarios.
 - **August 15, 2025**: Converted to SQLite-only database configuration. Removed all MS SQL Server dependencies and configurations per user request.
 
 ## System Architecture

@@ -73,6 +73,9 @@ class updatesubcomponentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Override the project field to only show project names
+        self.fields['projectID'].label_from_instance = lambda obj: obj.project
 
         # Ensure compID field doesn't cause errors if missing
         self.fields['compID'].queryset = Component.objects.none()
@@ -132,11 +135,11 @@ class updatesubcomponentForm(forms.ModelForm):
 
 ###################################### ADD Subcomponent form ####################################3
 class addsubcomponentForm(forms.ModelForm):
+    # Custom field that explicitly displays only project names
     projectID = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         widget=forms.Select(attrs={"hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'), "hx-target": "#id_compID"}),
-        empty_label="Select Project...",
-        to_field_name='projectID'  # This ensures we use projectID as the value but display project name
+        empty_label="Select Project..."
     )
     compID = forms.ModelChoiceField(
         queryset=Component.objects.none(),
@@ -149,9 +152,12 @@ class addsubcomponentForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'}),
         empty_label="Select Currency..."
     )
-
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Override the project field to only show project names
+        self.fields['projectID'].label_from_instance = lambda obj: obj.project
 
         if 'projectID' in self.data:
             projectID = str(self.data.get('projectID'))
@@ -192,6 +198,9 @@ class addActivitiesForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Override the project field to only show project names
+        self.fields['projectID'].label_from_instance = lambda obj: obj.project
         
         if 'projectID' in self.data:
             try:
@@ -262,6 +271,9 @@ class updateActivitiesForm(forms.ModelForm):
         instance = kwargs.get('instance')
         
         super().__init__(*args, **kwargs)
+        
+        # Override the project field to only show project names
+        self.fields['projectID'].label_from_instance = lambda obj: obj.project
 
         # Editing Mode: Comprehensive Initial Value Setting
         if instance and instance.pk:
