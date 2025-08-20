@@ -169,103 +169,122 @@ def esia_delete(request, pk):
 @login_required
 def esia_export_excel(request):
     """Export ESIA data to Excel"""
-    import openpyxl
-    from django.http import HttpResponse
-    from datetime import datetime
-    
     try:
-        # Get all ESIA records
-        esia_list = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
-
-        # Create workbook
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+        from django.http import HttpResponse
+        from datetime import datetime
+        
+        # Get all ESIA records with related data
+        esia_queryset = ESIA.objects.select_related(
+            'project_name', 
+            'type_of_investment', 
+            'loginUser'
+        ).all()
+        
+        # Create a new workbook and select the active worksheet
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "ESIA Records"
-
-        # Define headers
+        
+        # Define column headers
         headers = [
-            'ESIA ID', 'Project Name', 'Investment Type',
-            'Project Duration (Months)', 'Project Phase', 'Project Locations',
-            'Number of Communities', 'ESIA Findings', 'Date Created', 'Created By'
+            'ESIA ID',
+            'Project Name', 
+            'Investment Type',
+            'Duration (Months)',
+            'Phase',
+            'Locations',
+            'Communities Count',
+            'ESIA Findings',
+            'Date Created',
+            'Created By'
         ]
-
-        # Add headers to first row
-        for col, header in enumerate(headers, 1):
-            ws.cell(row=1, column=col, value=header)
-
-        # Add data
-        for row, esia in enumerate(esia_list, 2):
-            try:
-                ws.cell(row=row, column=1, value=str(esia.esiaID) if esia.esiaID else "")
-                
-                # Project name with safe access
-                project_name = ""
-                if esia.project_name:
-                    try:
-                        project_name = str(esia.project_name.project)
-                    except:
-                        project_name = str(esia.project_name)
-                ws.cell(row=row, column=2, value=project_name)
-                
-                # Investment type with safe access
-                investment_type = ""
-                if esia.type_of_investment:
-                    try:
-                        investment_type = str(esia.type_of_investment.type_of_investment)
-                    except:
-                        investment_type = str(esia.type_of_investment)
-                ws.cell(row=row, column=3, value=investment_type)
-                
-                ws.cell(row=row, column=4, value=esia.project_duration if esia.project_duration else "")
-                ws.cell(row=row, column=5, value=esia.project_phase if esia.project_phase else "")
-                ws.cell(row=row, column=6, value=esia.project_locations if esia.project_locations else "")
-                ws.cell(row=row, column=7, value=esia.number_of_communities if esia.number_of_communities else "")
-                ws.cell(row=row, column=8, value=esia.esia_findings if esia.esia_findings else "")
-                
-                # Date with safe formatting
-                date_created = ""
-                if esia.date_created:
-                    try:
-                        date_created = esia.date_created.strftime('%Y-%m-%d %H:%M')
-                    except:
-                        date_created = str(esia.date_created)
-                ws.cell(row=row, column=9, value=date_created)
-                
-                # User with safe access
-                username = ""
-                if esia.loginUser:
-                    try:
-                        username = str(esia.loginUser.username)
-                    except:
-                        username = str(esia.loginUser)
-                ws.cell(row=row, column=10, value=username)
-                
-            except Exception as e:
-                # Skip problematic rows and continue
-                print(f"Error processing ESIA row {row}: {str(e)}")
-                continue
-
-        # Auto-adjust column widths
-        for col in range(1, len(headers) + 1):
-            column_letter = openpyxl.utils.get_column_letter(col)
-            ws.column_dimensions[column_letter].width = 15
-
-        # Create response
+        
+        # Style for headers
+        header_font = Font(bold=True)
+        header_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
+        
+        # Write headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+        
+        # Write data rows
+        row_num = 2
+        for esia in esia_queryset:
+            # ESIA ID
+            ws.cell(row=row_num, column=1, value=esia.esiaID)
+            
+            # Project Name
+            project_name = getattr(esia.project_name, 'project', 'N/A') if esia.project_name else 'N/A'
+            ws.cell(row=row_num, column=2, value=project_name)
+            
+            # Investment Type
+            investment_type = getattr(esia.type_of_investment, 'type_of_investment', 'N/A') if esia.type_of_investment else 'N/A'
+            ws.cell(row=row_num, column=3, value=investment_type)
+            
+            # Duration
+            ws.cell(row=row_num, column=4, value=esia.project_duration or 0)
+            
+            # Phase
+            ws.cell(row=row_num, column=5, value=esia.project_phase or 0)
+            
+            # Locations
+            ws.cell(row=row_num, column=6, value=esia.project_locations or '')
+            
+            # Communities Count
+            ws.cell(row=row_num, column=7, value=esia.number_of_communities or 0)
+            
+            # ESIA Findings (truncate if too long)
+            findings = esia.esia_findings or ''
+            if len(findings) > 1000:
+                findings = findings[:1000] + '...'
+            ws.cell(row=row_num, column=8, value=findings)
+            
+            # Date Created
+            date_str = esia.date_created.strftime('%Y-%m-%d %H:%M') if esia.date_created else ''
+            ws.cell(row=row_num, column=9, value=date_str)
+            
+            # Created By
+            username = getattr(esia.loginUser, 'username', 'Unknown') if esia.loginUser else 'Unknown'
+            ws.cell(row=row_num, column=10, value=username)
+            
+            row_num += 1
+        
+        # Auto-size columns
+        for column_cells in ws.columns:
+            length = max(len(str(cell.value) or '') for cell in column_cells)
+            ws.column_dimensions[column_cells[0].column_letter].width = min(length + 2, 50)
+        
+        # Prepare the HTTP response
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        filename = f'esia_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'ESIA_Records_{timestamp}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        # Save workbook to response
         wb.save(response)
+        
         return response
+        
+    except ImportError:
+        from django.contrib import messages
+        messages.error(request, 'openpyxl library is not installed. Please contact your administrator.')
+        return redirect('esia_list')
         
     except Exception as e:
         from django.contrib import messages
-        import traceback
-        print(f"ESIA Export Error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
-        messages.error(request, f'Error exporting ESIA records: {str(e)}')
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        logger.error(f"ESIA Excel export failed: {str(e)}", exc_info=True)
+        
+        messages.error(request, f'Failed to export ESIA records: {str(e)}')
         return redirect('esia_list')
 
 
