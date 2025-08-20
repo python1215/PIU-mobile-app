@@ -180,67 +180,62 @@ def esia_delete(request, pk):
 @login_required
 def esia_export_excel(request):
     """Export ESIA data to Excel"""
-    # Apply same filters as list view
-    esia_list = ESIA.objects.select_related('project_name',
-                                            'type_of_investment',
-                                            'loginUser').all()
+    import openpyxl
+    from django.http import HttpResponse
+    from datetime import datetime
+    
+    try:
+        # Get all ESIA records
+        esia_list = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
 
-    esia_filter = ESIAFilter(request.GET, queryset=esia_list)
-    filtered_esia = esia_filter.qs
+        # Create workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "ESIA Records"
 
-    # Create workbook
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "ESIA Records"
+        # Define headers
+        headers = [
+            'ESIA ID', 'Project Name', 'Investment Type',
+            'Project Duration (Months)', 'Project Phase', 'Project Locations',
+            'Number of Communities', 'ESIA Findings', 'Date Created', 'Created By'
+        ]
 
-    # Define headers
-    headers = [
-        'ESIA ID', 'Project Name', 'Investment Type',
-        'Project Duration (Months)', 'Project Phase', 'Project Locations',
-        'Number of Communities', 'ESIA Findings', 'Date Created', 'Created By'
-    ]
+        # Add headers to first row
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=1, column=col, value=header)
 
-    # Style headers
-    header_font = Font(bold=True, color="FFFFFF")
-    header_fill = PatternFill(start_color="366092",
-                              end_color="366092",
-                              fill_type="solid")
-    header_alignment = Alignment(horizontal="center", vertical="center")
+        # Add data
+        for row, esia in enumerate(esia_list, 2):
+            ws.cell(row=row, column=1, value=esia.esiaID)
+            ws.cell(row=row, column=2, value=str(esia.project_name.project) if esia.project_name else "")
+            ws.cell(row=row, column=3, value=str(esia.type_of_investment.type_of_investment) if esia.type_of_investment else "")
+            ws.cell(row=row, column=4, value=esia.project_duration)
+            ws.cell(row=row, column=5, value=esia.project_phase)
+            ws.cell(row=row, column=6, value=esia.project_locations)
+            ws.cell(row=row, column=7, value=esia.number_of_communities)
+            ws.cell(row=row, column=8, value=esia.esia_findings)
+            ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d %H:%M'))
+            ws.cell(row=row, column=10, value=str(esia.loginUser.username))
 
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=header)
-        cell.font = header_font
-        cell.fill = header_fill
-        cell.alignment = header_alignment
+        # Auto-adjust column widths
+        for col in range(1, len(headers) + 1):
+            column_letter = openpyxl.utils.get_column_letter(col)
+            ws.column_dimensions[column_letter].width = 15
 
-    # Add data
-    for row, esia in enumerate(filtered_esia, 2):
-        ws.cell(row=row, column=1, value=esia.esiaID)
-        ws.cell(row=row, column=2, value=str(esia.project_name))
-        ws.cell(row=row, column=3, value=str(esia.type_of_investment))
-        ws.cell(row=row, column=4, value=esia.project_duration)
-        ws.cell(row=row, column=5, value=esia.project_phase)
-        ws.cell(row=row, column=6, value=esia.project_locations)
-        ws.cell(row=row, column=7, value=esia.number_of_communities)
-        ws.cell(row=row, column=8, value=esia.esia_findings)
-        ws.cell(row=row,
-                column=9,
-                value=esia.date_created.strftime('%Y-%m-%d %H:%M'))
-        ws.cell(row=row, column=10, value=str(esia.loginUser))
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        filename = f'esia_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
 
-    # Auto-adjust column widths
-    for col in range(1, len(headers) + 1):
-        ws.column_dimensions[get_column_letter(col)].width = 15
-
-    # Create response
-    response = HttpResponse(
-        content_type=
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response[
-        'Content-Disposition'] = f'attachment; filename=esia_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-
-    wb.save(response)
-    return response
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        from django.contrib import messages
+        messages.error(request, f'Error exporting ESIA records: {str(e)}')
+        return redirect('esia_list')
 
 
 # ======================== PAP Views ========================
