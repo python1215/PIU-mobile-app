@@ -2402,6 +2402,11 @@ def pap_upload_document(request, pk):
                 document = form.save(commit=False)
                 document.pap = pap
                 document.uploaded_by = request.user
+                # Auto-generate document name from filename
+                if document.document_file:
+                    document.document_name = document.document_file.name
+                # Set default document type
+                document.document_type = 'other'
                 document.save()
                 print(f"🔍 Document saved successfully: {document.id}")
                 messages.success(request, f'Document "{document.document_name}" uploaded successfully.')
