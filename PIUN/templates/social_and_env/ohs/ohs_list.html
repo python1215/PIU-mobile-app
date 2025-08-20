@@ -132,35 +132,43 @@
                     <tbody>
                         {% for ohs in page_obj %}
                         <tr>
-                            <td><strong>OHS-{{ ohs.ohs_id }}</strong></td>
-                            <td>{{ ohs.project_id|truncatechars:25 }}</td>
+                            <td><strong>OHS-{{ ohs.ohs_Id }}</strong></td>
                             <td>
-                                {% if ohs.region_name and ohs.district_name %}
-                                    {{ ohs.region_name }}
-                                    <br><small class="text-muted">{{ ohs.district_name }}</small>
+                                {% if ohs.project %}
+                                    {{ ohs.project.project|truncatechars:25 }}
+                                {% else %}
+                                    <span class="text-muted">No project</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ohs.region and ohs.district %}
+                                    {{ ohs.region.region_name }}
+                                    <br><small class="text-muted">{{ ohs.district.district_name }}</small>
+                                {% elif ohs.region %}
+                                    {{ ohs.region.region_name }}
                                 {% else %}
                                     <span class="text-muted">Location not specified</span>
                                 {% endif %}
                             </td>
                             <td>{{ ohs.date|date:"M d, Y" }}</td>
                             <td>
-                                {% if ohs.year_name %}
-                                    <span class="badge bg-info">{{ ohs.year_name }}</span>
+                                {% if ohs.year_of_report %}
+                                    <span class="badge bg-info">{{ ohs.year_of_report.year_name }}</span>
                                 {% endif %}
-                                {% if ohs.quarter_name %}
-                                    <span class="badge bg-secondary">{{ ohs.quarter_name }}</span>
+                                {% if ohs.quarter %}
+                                    <span class="badge bg-secondary">{{ ohs.quarter.quarter_name }}</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% with total_workers=ohs.male|add:ohs.female %}
                                     <span class="badge bg-primary">{{ total_workers }}</span>
-                                    <br><small class="text-muted">M: {{ ohs.male }}, F: {{ ohs.female }}</small>
+                                    <br><small class="text-muted">M: {{ ohs.male|default:0 }}, F: {{ ohs.female|default:0 }}</small>
                                 {% endwith %}
                             </td>
                             <td>
                                 {% with total_youth=ohs.youth_male|add:ohs.youth_female %}
                                     <span class="badge bg-success">{{ total_youth }}</span>
-                                    <br><small class="text-muted">M: {{ ohs.youth_male }}, F: {{ ohs.youth_female }}</small>
+                                    <br><small class="text-muted">M: {{ ohs.youth_male|default:0 }}, F: {{ ohs.youth_female|default:0 }}</small>
                                 {% endwith %}
                             </td>
                             <td>
@@ -172,7 +180,7 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'ohs_detail' ohs.ohs_id %}" class="btn btn-outline-primary" title="View">
+                                    <a href="{% url 'ohs_detail' ohs.ohs_Id %}" class="btn btn-outline-primary" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <a href="{% url 'ohs_edit' ohs.pk %}" class="btn btn-outline-warning" title="Edit">
