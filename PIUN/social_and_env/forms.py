@@ -126,79 +126,25 @@ class PAPForm(forms.ModelForm):
         })
     )
 
-    type_of_investment = forms.ModelChoiceField(
-    queryset=KPI_For_Contract.objects.none(),
-    empty_label="Select Investment Type",
-    widget=forms.Select(attrs={"class": "form-select"}),
-    to_field_name="monitoring_Type_Code",  # tells Django to match on code instead of PK
-    required=False,
-)
+    type_of_investment = forms.CharField(
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        project_id = None
-        if "project" in self.data:
-            project_id = self.data.get("project")
-        elif self.initial.get("project"):
-            project_id = self.initial.get("project").id
-
-        if project_id:
-            self.fields["type_of_investment"].queryset = KPI_For_Contract.objects.filter(
-                project_id=project_id, monitoring_type_id="ESS"
-            )
-
-    def clean_type_of_investment(self):
-        """
-        Custom validation for type_of_investment to allow any value.
-        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
-        """
-        # Get the submitted value directly from the form data
-        raw_value = self.data.get('type_of_investment')
         
-        # If no value submitted, return None
-        if not raw_value:
-            return None
-            
-        # Try to find an existing KPI_For_Contract with this monitoring_Type_Code
-        try:
-            kpi = KPI_For_Contract.objects.get(monitoring_Type_Code=raw_value)
-            return kpi
-        except KPI_For_Contract.DoesNotExist:
-            # Allow any string value for offline scenarios
-            return raw_value
-    
-    def clean_district(self):
-        """
-        Custom validation for district to allow any value.
-        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
-        """
-        raw_value = self.data.get('district')
-        if not raw_value:
-            return None
-            
-        try:
-            district = Districts.objects.get(district_code=raw_value)
-            return district
-        except Districts.DoesNotExist:
-            # Return the raw value if district doesn't exist in database
-            return raw_value
-    
-    def clean_pap_Current_Address(self):
-        """
-        Custom validation for settlement to allow any value.
-        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
-        """
-        raw_value = self.data.get('pap_Current_Address')
-        if not raw_value:
-            return None
-            
-        try:
-            settlement = Settlement.objects.get(settlement_code=raw_value)
-            return settlement
-        except Settlement.DoesNotExist:
-            # Return the raw value if settlement doesn't exist in database
-            return raw_value
+        # Initialize CharField select fields with proper options
+        self.fields['type_of_investment'].widget.choices = [('', 'Select Investment Type')]
+        self.fields['district'].widget.choices = [('', 'Select District')]  
+        self.fields['pap_Current_Address'].widget.choices = [('', 'Select Settlement')]
+        
+        # Set non-required fields
+        self.fields['area'].required = False
+        self.fields['compensation_RefNo'].required = False
+        self.fields['compensation_date'].required = False
+
+
 
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
@@ -212,9 +158,7 @@ class PAPForm(forms.ModelForm):
         })
     )
 
-    district = forms.ModelChoiceField(
-        queryset=Districts.objects.none(),
-        empty_label="Select District",
+    district = forms.CharField(
         widget=forms.Select(attrs={
             "class": "form-select",
             "hx-get": "/social_and_env/ajax/load-settlements/",
@@ -225,9 +169,7 @@ class PAPForm(forms.ModelForm):
         required=False
     )
 
-    pap_Current_Address = forms.ModelChoiceField(
-        queryset=Settlement.objects.none(),
-        empty_label="Select Settlement",
+    pap_Current_Address = forms.CharField(
         widget=forms.Select(attrs={"class": "form-select"}),
         required=False
     )

@@ -520,12 +520,37 @@ def pap_add(request):
                 pap = form.save(commit=False)
                 pap.loginUser = request.user
 
-                # Ensure lookup defaults exist
-                pap.type_of_investment = pap.type_of_investment or KPI_For_Contract.objects.filter(project=pap.project).first()
-                pap.district = pap.district or (Districts.objects.filter(region_code_id=pap.region.pk).first() if pap.region else None)
-                pap.pap_Current_Address = pap.pap_Current_Address or (Settlement.objects.filter(district_code_id=pap.district.pk).first() if pap.district else None)
+                # Convert CharField values to model instances for cascading dropdowns
+                type_of_investment_value = form.cleaned_data.get('type_of_investment')
+                if type_of_investment_value and isinstance(type_of_investment_value, str):
+                    try:
+                        kpi = KPI_For_Contract.objects.get(monitoring_Type_Code=type_of_investment_value)
+                        pap.type_of_investment = kpi
+                    except KPI_For_Contract.DoesNotExist:
+                        # Use first available for this project as fallback
+                        pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
 
-                # Required lookup fields
+                district_value = form.cleaned_data.get('district')
+                if district_value and isinstance(district_value, str):
+                    try:
+                        district = Districts.objects.get(district_code=district_value)
+                        pap.district = district
+                    except Districts.DoesNotExist:
+                        # Use first district in region as fallback
+                        if pap.region:
+                            pap.district = Districts.objects.filter(region_code=pap.region).first()
+
+                settlement_value = form.cleaned_data.get('pap_Current_Address')
+                if settlement_value and isinstance(settlement_value, str):
+                    try:
+                        settlement = Settlement.objects.get(settlement_code=settlement_value)
+                        pap.pap_Current_Address = settlement
+                    except Settlement.DoesNotExist:
+                        # Use first settlement in district as fallback
+                        if pap.district:
+                            pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+
+                # Ensure required lookup fields have values
                 pap.type_of_pap = pap.type_of_pap or (TypeOfPAP.objects.first() if TypeOfPAP.objects.exists() else None)
                 pap.pap_category = pap.pap_category or (PAPCategory.objects.first() if PAPCategory.objects.exists() else None)
                 pap.vulnerability_category = pap.vulnerability_category or (VulnerabilityCategory.objects.first() if VulnerabilityCategory.objects.exists() else None)
