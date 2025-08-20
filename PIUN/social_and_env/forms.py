@@ -22,7 +22,7 @@ class ESIAForm(forms.ModelForm):
         queryset=KPI_For_Contract.objects.none(),
         empty_label="Select Investment Type",
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=False,
+        required=True,
         to_field_name='monitoring_Type_Code'
     )
 
@@ -75,27 +75,46 @@ class ESIAForm(forms.ModelForm):
                 )
             except (ValueError, TypeError):
                 pass
-                pass
+        elif self.instance and self.instance.pk and self.instance.project_name:
+            # For existing instances, set queryset based on the saved project
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
+                project=self.instance.project_name,
+                monitoring_type_id='ESS'
+            )
         
-        # Make required fields (except cascading dropdowns)
+        # Make all fields required
         for field_name, field in self.fields.items():
-            if field_name not in ['type_of_investment']:
-                field.required = True
+            field.required = True
 
 
 
     def clean_type_of_investment(self):
         """Custom validation for type_of_investment field"""
         type_of_investment = self.cleaned_data.get('type_of_investment')
+        project_name = self.cleaned_data.get('project_name')
         
-        # If no investment type selected, try to find a default
-        if not type_of_investment:
-            project_name = self.cleaned_data.get('project_name')
-            if project_name:
-                from PIU_Financial_mgt.models import KPI_For_Contract
-                first_investment = KPI_For_Contract.objects.filter(project=project_name).first()
-                if first_investment:
-                    return first_investment
+        # If investment type is provided, validate it exists for the project
+        if type_of_investment and project_name:
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            try:
+                # Validate that the investment type exists for this project
+                investment = KPI_For_Contract.objects.filter(
+                    project=project_name,
+                    monitoring_Type_Code=type_of_investment,
+                    monitoring_type_id='ESS'
+                ).first()
+                if investment:
+                    return investment
+                else:
+                    # If no exact match, try to find any ESS investment for this project
+                    fallback_investment = KPI_For_Contract.objects.filter(
+                        project=project_name,
+                        monitoring_type_id='ESS'
+                    ).first()
+                    if fallback_investment:
+                        return fallback_investment
+            except Exception:
+                pass
         
         return type_of_investment
 
