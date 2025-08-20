@@ -74,22 +74,22 @@
         <form method="get" class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Project</label>
-                <select name="project" class="form-select">
+                <select name="project_name" class="form-select">
                     <option value="">All Projects</option>
                     {% for project in projects %}
-                        <option value="{{ project.project }}" {% if request.GET.project == project.project %}selected{% endif %}>
+                        <option value="{{ project.id }}" {% if request.GET.project_name == project.id|stringformat:"s" %}selected{% endif %}>
                             {{ project.project_name }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Region</label>
-                <select name="region" class="form-select">
-                    <option value="">All Regions</option>
-                    {% for region in regions %}
-                        <option value="{{ region.region_code }}" {% if request.GET.region == region.region_code %}selected{% endif %}>
-                            {{ region.region_name }}
+                <label class="form-label">Investment Type</label>
+                <select name="type_of_investment" class="form-select">
+                    <option value="">All Investment Types</option>
+                    {% for investment in investment_types %}
+                        <option value="{{ investment.id }}" {% if request.GET.type_of_investment == investment.id|stringformat:"s" %}selected{% endif %}>
+                            {{ investment.type_of_investment }}
                         </option>
                     {% endfor %}
                 </select>

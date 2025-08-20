@@ -62,11 +62,20 @@ def esia_list(request):
             Sum('number_of_communities'))['number_of_communities__sum'] or 0,
     }
 
+    # Add filter context data
+    projects = Project.objects.all()
+    investment_types = KPI_For_Contract.objects.filter(monitoring_type_id='ESS')
+    years = ESIA.objects.dates('date_created', 'year').distinct()
+    year_list = [date.year for date in years]
+
     context = {
         'page_obj': page_obj,
         'filter': esia_filter,
         'stats': stats,
         'is_filtered': bool(request.GET),
+        'projects': projects,
+        'investment_types': investment_types,
+        'years': year_list,
     }
 
     return render(request, 'social_and_env/esia/esia_list.html', context)
