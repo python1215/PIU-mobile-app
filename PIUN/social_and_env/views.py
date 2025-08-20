@@ -525,6 +525,23 @@ def pap_add(request):
                 pap.pre_project_situation = pap.pre_project_situation or 'Information not provided'
 
                 pap.save()
+                
+                # Handle document upload if provided
+                if 'document_file' in request.FILES:
+                    document_file = request.FILES['document_file']
+                    if document_file:
+                        # Create document record
+                        from .document_forms import PAPDocumentForm
+                        doc = PAPDocument(
+                            pap=pap,
+                            document_type='other',  # Default type
+                            document_name=document_file.name,  # Use filename
+                            document_file=document_file,
+                            uploaded_by=request.user
+                        )
+                        doc.save()
+                        print(f"🔍 Document uploaded for new PAP: {doc.id}")
+                
                 messages.success(
                     request,
                     f'PAP record {pap.pap_identification_number} added successfully.'

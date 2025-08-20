@@ -14,7 +14,7 @@
                 </h4>
             </div>
             <div class="card-body">
-                <form method="post" id="pap-form">
+                <form method="post" id="pap-form" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="row g-3">
@@ -237,6 +237,24 @@
                                     {% for error in form.remarks.errors %}{{ error }}{% endfor %}
                                 </div>
                             {% endif %}
+                        </div>
+                        
+                        <!-- Document Upload Section -->
+                        <div class="col-12">
+                            <hr class="my-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="bi bi-file-earmark-text me-2"></i>Document Upload (Optional)
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="id_document_file" class="form-label">Select Document to Upload</label>
+                                    <input type="file" class="form-control" id="id_document_file" name="document_file" 
+                                           accept=".pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png">
+                                    <div class="form-text">
+                                        Supported formats: PDF, Word, Excel, Images (max 10MB)
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
