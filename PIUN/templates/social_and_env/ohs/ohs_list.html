@@ -73,44 +73,67 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-3">
-                <label for="search" class="form-label">Search</label>
-                <input type="text" name="search" id="search" class="form-control" 
-                       placeholder="Search OHS records..." value="{{ request.GET.search }}">
-            </div>
-            <div class="col-md-3">
-                <label for="project" class="form-label">Project</label>
-                <select name="project" id="project" class="form-select">
+                <label class="form-label">Project</label>
+                <select name="project" class="form-select">
                     <option value="">All Projects</option>
-                    {% for project in filter_choices.projects %}
-                        <option value="{{ project }}" 
-                                {% if request.GET.project == project %}selected{% endif %}>
-                            {{ project }}
-                        </option>
+                    {% for value, label in filter.form.project.field.choices %}
+                        {% if value %}
+                            <option value="{{ value }}" {% if request.GET.project == value|stringformat:"s" %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
-                <label for="region" class="form-label">Region</label>
-                <select name="region" id="region" class="form-select">
+            <div class="col-md-2">
+                <label class="form-label">Investment Type</label>
+                <select name="Type_of_Investment" class="form-select">
+                    <option value="">All Investment Types</option>
+                    {% for value, label in filter.form.Type_of_Investment.field.choices %}
+                        {% if value %}
+                            <option value="{{ value }}" {% if request.GET.Type_of_Investment == value|stringformat:"s" %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Region</label>
+                <select name="region" class="form-select">
                     <option value="">All Regions</option>
-                    {% for region in filter_choices.regions %}
-                        <option value="{{ region }}" 
-                                {% if request.GET.region == region %}selected{% endif %}>
-                            {{ region }}
-                        </option>
+                    {% for value, label in filter.form.region.field.choices %}
+                        {% if value %}
+                            <option value="{{ value }}" {% if request.GET.region == value|stringformat:"s" %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
-                <label for="page_size" class="form-label">Page Size</label>
-                <select name="page_size" id="page_size" class="form-select">
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select name="year_of_report" class="form-select">
+                    <option value="">All Years</option>
+                    {% for value, label in filter.form.year_of_report.field.choices %}
+                        {% if value %}
+                            <option value="{{ value }}" {% if request.GET.year_of_report == value|stringformat:"s" %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">Page Size</label>
+                <select name="page_size" class="form-select">
                     <option value="10" {% if request.GET.page_size == '10' %}selected{% endif %}>10</option>
                     <option value="25" {% if request.GET.page_size == '25' %}selected{% endif %}>25</option>
                     <option value="50" {% if request.GET.page_size == '50' %}selected{% endif %}>50</option>
                     <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100</option>
                 </select>
             </div>
-            <div class="col-12 d-flex justify-content-end mt-3">
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary me-2">
                     <i class="bi bi-search me-1"></i>Filter
                 </button>

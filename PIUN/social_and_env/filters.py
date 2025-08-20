@@ -104,16 +104,48 @@ class GrievianceMonitoringLogFilter(django_filters.FilterSet):
         ]
 
 class OHSMonitoringFilter(FilterSet):
-    project = ModelChoiceFilter(queryset=Project.objects.all(), label="Project")
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), 
+        label="Project",
+        empty_label="All Projects",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     Type_of_Investment = ModelChoiceFilter(
         queryset=KPI_For_Contract.objects.filter(monitoring_type_id='ESS'),
-        label="Type of Investment"
+        label="Type of Investment",
+        empty_label="All Investment Types",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    year_of_report = ModelChoiceFilter(queryset=YEAR.objects.all(), label="Year")
-    quarter = ModelChoiceFilter(queryset=Quarter.objects.all(), label="Quarter")
-    region = ModelChoiceFilter(queryset=Regions.objects.all(), label="Region")
-    district = ModelChoiceFilter(queryset=Districts.objects.all(), label="District")
-    settlement = ModelChoiceFilter(queryset=Settlement.objects.all(), label="Settlement")
+    year_of_report = ModelChoiceFilter(
+        queryset=YEAR.objects.all(), 
+        label="Year",
+        empty_label="All Years",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    quarter = ModelChoiceFilter(
+        queryset=Quarter.objects.all(), 
+        label="Quarter",
+        empty_label="All Quarters",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    region = ModelChoiceFilter(
+        queryset=Regions.objects.all(), 
+        label="Region",
+        empty_label="All Regions",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    district = ModelChoiceFilter(
+        queryset=Districts.objects.all(), 
+        label="District",
+        empty_label="All Districts",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    settlement = ModelChoiceFilter(
+        queryset=Settlement.objects.all(), 
+        label="Settlement",
+        empty_label="All Settlements",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     # Method 1: Using separate date filters (recommended)
     date_after = django_filters.DateFilter(
