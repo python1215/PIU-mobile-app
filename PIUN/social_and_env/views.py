@@ -2293,17 +2293,15 @@ def load_investment_types_esia(request):
         return HttpResponse('<option value="">Select Investment Type</option>')
 
     try:
-        investment_types = KPI_For_Contract.objects.filter(
+        # Get full objects to access monitoring_Type_Code for form validation
+        investment_objects = KPI_For_Contract.objects.filter(
             project=project_id,
             monitoring_type_id='ESS'
-        ).values_list(
-            'type_of_investment',
-            flat=True
         ).distinct().order_by('type_of_investment')
 
         options = '<option value="">Select Investment Type</option>'
-        for investment_type in investment_types:
-            options += f'<option value="{investment_type}">{investment_type}</option>'
+        for investment in investment_objects:
+            options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
 
         return HttpResponse(options)
 

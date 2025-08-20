@@ -70,9 +70,11 @@ class ESIAForm(forms.ModelForm):
             try:
                 project_id = int(self.data.get('project_name'))
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id
+                    project_id=project_id,
+                    monitoring_type_id='ESS'
                 )
             except (ValueError, TypeError):
+                pass
                 pass
         
         # Make required fields (except cascading dropdowns)
