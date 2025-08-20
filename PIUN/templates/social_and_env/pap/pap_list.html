@@ -167,6 +167,7 @@
                             <th style="font-weight: bold; border-bottom: 2px solid #dee2e6; min-width: 120px;">Remarks</th>
                             <th style="font-weight: bold; border-bottom: 2px solid #dee2e6; min-width: 100px;">Date Created</th>
                             <th style="font-weight: bold; border-bottom: 2px solid #dee2e6; min-width: 100px;">Created By</th>
+                            <th style="font-weight: bold; border-bottom: 2px solid #dee2e6; min-width: 80px;">Documents</th>
                             <th style="font-weight: bold; border-bottom: 2px solid #dee2e6; min-width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -208,6 +209,9 @@
                             <td><small>{{ pap.remarks|truncatechars:30|default:"-" }}</small></td>
                             <td><small>{{ pap.date_created|date:"M d, Y" }}</small></td>
                             <td><small>{{ pap.loginUser.username }}</small></td>
+                            <td class="text-center">
+                                <span class="badge bg-info">{{ pap.documents.count }}</span>
+                            </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a href="{% url 'pap_detail' pap.pap_identification_number %}" class="btn btn-outline-primary btn-sm" title="View">

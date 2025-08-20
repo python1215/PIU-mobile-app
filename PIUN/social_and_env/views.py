@@ -17,10 +17,11 @@ import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
-from .models import ESIA, PAP, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
+from .models import ESIA, PAP, PAPDocument, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
 from .forms import (ESIAForm, ESIAUpdateForm, PAPForm, PAPUpdateForm,
                     GrievianceMonitoringLogForm, GrievianceUpdateForm,
                     OHSMonitoringForm, OHSUpdateForm, CommunityEngagementForm)
+from .document_forms import PAPDocumentForm
 from .filters import (ESIAFilter, PAPFilter, GrievianceMonitoringLogFilter,
                       OHSMonitoringFilter, CommunityEngagementFilter)
 from setup.models import Districts, Settlement, Regions, Quarter, YEAR
@@ -92,10 +93,12 @@ def esia_add(request):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA/ESMP record created successfully!')
+                messages.success(request,
+                                 'ESIA/ESMP record created successfully!')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error saving ESIA/ESMP record: {str(e)}')
+                messages.error(request,
+                               f'Error saving ESIA/ESMP record: {str(e)}')
         else:
             # Print form errors for debugging
             for field, errors in form.errors.items():
@@ -120,10 +123,12 @@ def esia_edit(request, pk):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA/ESMP record updated successfully!')
+                messages.success(request,
+                                 'ESIA/ESMP record updated successfully!')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error updating ESIA/ESMP record: {str(e)}')
+                messages.error(request,
+                               f'Error updating ESIA/ESMP record: {str(e)}')
         else:
             # Print form errors for debugging
             for field, errors in form.errors.items():
@@ -134,9 +139,6 @@ def esia_edit(request, pk):
 
     context = {'form': form, 'esia': esia, 'title': 'Edit ESIA/ESMP Record'}
     return render(request, 'social_and_env/esia/esia_edit.html', context)
-
-
-
 
 
 @login_required
@@ -215,36 +217,35 @@ def esia_export_excel(request):
     return response
 
 
-
 # ======================== PAP Views ========================
+
 
 @login_required
 def pap_list(request):
     """Enhanced PAP list view with filtering and pagination"""
-    
+
     # Check total records in database
     total_db_records = PAP.objects.count()
     print(f"🔍 Total PAP records in database: {total_db_records}")
-    
+
     # Initial queryset
     pap_list = PAP.objects.select_related(
         'project', 'type_of_investment', 'region', 'district',
         'pap_Current_Address', 'type_of_pap', 'pap_category',
         'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
-        'loginUser'
-    ).all()
-    
+        'loginUser').all()
+
     print(f"🔍 Records after select_related: {pap_list.count()}")
-    
+
     # Check for any filters being applied
     print(f"🔍 GET parameters: {request.GET}")
-    
+
     # Apply filters
     pap_filter = PAPFilter(request.GET, queryset=pap_list)
     filtered_pap = pap_filter.qs
-    
+
     print(f"🔍 Records after filtering: {filtered_pap.count()}")
-    
+
     # Check if any records have broken relationships
     broken_records = []
     for pap in PAP.objects.all()[:5]:  # Check first 5 records
@@ -263,28 +264,35 @@ def pap_list(request):
             _ = pap.loginUser.username
         except Exception as e:
             broken_records.append(f"PAP {pap.pap_identification_number}: {e}")
-    
+
     if broken_records:
         print(f"🚨 Records with broken relationships: {broken_records}")
-    
+
     # Pagination
     paginator = Paginator(filtered_pap, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     print(f"🔍 Records on current page: {len(page_obj)}")
     print(f"🔍 Total pages: {paginator.num_pages}")
     print(f"🔍 Current page number: {page_obj.number}")
-    
+
     # Statistics
     stats = {
-        'total_pap': pap_list.count(),
-        'filtered_count': filtered_pap.count(),
-        'compensated': filtered_pap.filter(pap_compensated='Y').count(),
-        'not_compensated': filtered_pap.filter(pap_compensated='N').count(),
-        'total_compensation': filtered_pap.aggregate(Sum('amount'))['amount__sum'] or 0,
-        'male_count': filtered_pap.filter(sex='M').count(),
-        'female_count': filtered_pap.filter(sex='F').count(),
+        'total_pap':
+        pap_list.count(),
+        'filtered_count':
+        filtered_pap.count(),
+        'compensated':
+        filtered_pap.filter(pap_compensated='Y').count(),
+        'not_compensated':
+        filtered_pap.filter(pap_compensated='N').count(),
+        'total_compensation':
+        filtered_pap.aggregate(Sum('amount'))['amount__sum'] or 0,
+        'male_count':
+        filtered_pap.filter(sex='M').count(),
+        'female_count':
+        filtered_pap.filter(sex='F').count(),
     }
 
     context = {
@@ -304,46 +312,6 @@ def pap_list(request):
     return render(request, 'social_and_env/pap/pap_list.html', context)
 
 
-# @login_required
-# def pap_list(request):
-#     """Enhanced PAP list view with filtering and pagination"""
-#     pap_list = PAP.objects.select_related(
-#         'project', 'type_of_investment', 'region', 'district',
-#         'pap_Current_Address', 'type_of_pap', 'pap_category',
-#         'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
-#         'loginUser'
-#     ).all()
-
-#     # Apply filters
-#     pap_filter = PAPFilter(request.GET, queryset=pap_list)
-#     filtered_pap = pap_filter.qs
-
-#     # Pagination
-#     paginator = Paginator(filtered_pap, 10)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-
-#     # Statistics
-#     stats = {
-#         'total_pap': pap_list.count(),
-#         'filtered_count': filtered_pap.count(),
-#         'compensated': filtered_pap.filter(pap_compensated='Y').count(),
-#         'not_compensated': filtered_pap.filter(pap_compensated='N').count(),
-#         'total_compensation': filtered_pap.aggregate(Sum('amount'))['amount__sum'] or 0,
-#         'male_count': filtered_pap.filter(sex='M').count(),
-#         'female_count': filtered_pap.filter(sex='F').count(),
-#     }
-
-#     context = {
-#         'page_obj': page_obj,
-#         'filter': pap_filter,
-#         'stats': stats,
-#         'is_filtered': bool(request.GET),
-#     }
-
-#     return render(request, 'social_and_env/pap/pap_list.html', context)
-
-
 @login_required
 def pap_detail(request, pk):
     """PAP detail view"""
@@ -351,16 +319,16 @@ def pap_detail(request, pk):
         pap = get_object_or_404(PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
             'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'
-        ), pk=pk)
-        
+            'vulnerability_category', 'type_of_impact', 'loginUser'),
+                                pk=pk)
+
         context = {
             'pap': pap,
             'title': f'PAP Details - {pap.pap_name}',
         }
-        
+
         return render(request, 'social_and_env/pap/pap_detail.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading PAP details: {str(e)}')
         return redirect('pap_list')
@@ -373,74 +341,101 @@ def export_pap_excel(request):
     from openpyxl import Workbook
     from openpyxl.utils import get_column_letter
     from datetime import datetime
-    
+
     try:
         # Get PAP data using Django ORM
         pap_list = PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
             'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'
-        ).all()
-        
+            'vulnerability_category', 'type_of_impact', 'loginUser').all()
+
         # Create workbook and worksheet
         wb = Workbook()
         ws = wb.active
         ws.title = 'PAP Records'
-        
+
         # Define headers
         headers = [
             'PAP ID', 'PAP Name', 'Gender', 'Project', 'Region', 'District',
-            'Location of Impact', 'Amount', 'Area', 'Compensated', 'Compensation Date',
-            'Compensation Ref No', 'Type of PAP', 'PAP Category', 'Vulnerability Category',
-            'Type of Impact', 'Type of Investment', 'Pre-Project Situation', 'Remarks',
+            'Location of Impact', 'Amount', 'Area', 'Compensated',
+            'Compensation Date', 'Compensation Ref No', 'Type of PAP',
+            'PAP Category', 'Vulnerability Category', 'Type of Impact',
+            'Type of Investment', 'Pre-Project Situation', 'Remarks',
             'Date Created', 'User'
         ]
-        
+
         # Write headers
         for col, header in enumerate(headers, 1):
             ws.cell(row=1, column=col, value=header)
-        
+
         # Write data
         for row, pap in enumerate(pap_list, 2):
             ws.cell(row=row, column=1, value=pap.pap_identification_number)
             ws.cell(row=row, column=2, value=pap.pap_name)
             ws.cell(row=row, column=3, value=pap.gender)
-            ws.cell(row=row, column=4, value=pap.project.project if pap.project else '')
-            ws.cell(row=row, column=5, value=pap.region.region_name if pap.region else '')
-            ws.cell(row=row, column=6, value=pap.district.district_name if pap.district else '')
+            ws.cell(row=row,
+                    column=4,
+                    value=pap.project.project if pap.project else '')
+            ws.cell(row=row,
+                    column=5,
+                    value=pap.region.region_name if pap.region else '')
+            ws.cell(row=row,
+                    column=6,
+                    value=pap.district.district_name if pap.district else '')
             ws.cell(row=row, column=7, value=pap.location_of_impact)
             ws.cell(row=row, column=8, value=pap.amount)
             ws.cell(row=row, column=9, value=pap.area)
             ws.cell(row=row, column=10, value=pap.pap_compensated)
             ws.cell(row=row, column=11, value=pap.compensation_date)
             ws.cell(row=row, column=12, value=pap.compensation_RefNo)
-            ws.cell(row=row, column=13, value=pap.type_of_pap.type_of_pap if pap.type_of_pap else '')
-            ws.cell(row=row, column=14, value=pap.pap_category.pap_category if pap.pap_category else '')
-            ws.cell(row=row, column=15, value=pap.vulnerability_category.vulnerability_category if pap.vulnerability_category else '')
-            ws.cell(row=row, column=16, value=pap.type_of_impact.type_of_impact if pap.type_of_impact else '')
-            ws.cell(row=row, column=17, value=pap.type_of_investment.type_of_investment if pap.type_of_investment else '')
+            ws.cell(
+                row=row,
+                column=13,
+                value=pap.type_of_pap.type_of_pap if pap.type_of_pap else '')
+            ws.cell(row=row,
+                    column=14,
+                    value=pap.pap_category.pap_category
+                    if pap.pap_category else '')
+            ws.cell(row=row,
+                    column=15,
+                    value=pap.vulnerability_category.vulnerability_category
+                    if pap.vulnerability_category else '')
+            ws.cell(row=row,
+                    column=16,
+                    value=pap.type_of_impact.type_of_impact
+                    if pap.type_of_impact else '')
+            ws.cell(row=row,
+                    column=17,
+                    value=pap.type_of_investment.type_of_investment
+                    if pap.type_of_investment else '')
             ws.cell(row=row, column=18, value=pap.pre_project_situation)
             ws.cell(row=row, column=19, value=pap.remarks)
-            ws.cell(row=row, column=20, value=pap.date_created.strftime('%Y-%m-%d %H:%M') if pap.date_created else '')
-            ws.cell(row=row, column=21, value=pap.loginUser.username if pap.loginUser else '')
-        
+            ws.cell(row=row,
+                    column=20,
+                    value=pap.date_created.strftime('%Y-%m-%d %H:%M')
+                    if pap.date_created else '')
+            ws.cell(row=row,
+                    column=21,
+                    value=pap.loginUser.username if pap.loginUser else '')
+
         # Auto-adjust column widths
         for col in range(1, len(headers) + 1):
             ws.column_dimensions[get_column_letter(col)].width = 15
-        
+
         # Create response
         response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type=
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = f'attachment; filename=pap_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-        
+        response[
+            'Content-Disposition'] = f'attachment; filename=pap_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+
         wb.save(response)
         return response
-    
+
     except Exception as e:
         messages.error(request, f'Error exporting PAP data: {str(e)}')
         return redirect('pap_list')
-
 
 
 @login_required
@@ -454,55 +449,75 @@ def pap_add(request):
                 pap.loginUser = request.user
 
                 # Handle the excluded CharField fields manually by getting raw POST data
-                type_of_investment_value = request.POST.get('type_of_investment')
+                type_of_investment_value = request.POST.get(
+                    'type_of_investment')
                 if type_of_investment_value:
                     try:
-                        kpi = KPI_For_Contract.objects.get(monitoring_Type_Code=type_of_investment_value)
+                        kpi = KPI_For_Contract.objects.get(
+                            monitoring_Type_Code=type_of_investment_value)
                         pap.type_of_investment = kpi
                     except KPI_For_Contract.DoesNotExist:
                         # Use first available for this project as fallback
-                        pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
+                        pap.type_of_investment = KPI_For_Contract.objects.filter(
+                            project=pap.project).first()
 
                 district_value = request.POST.get('district')
                 if district_value:
                     try:
-                        district = Districts.objects.get(district_code=district_value)
+                        district = Districts.objects.get(
+                            district_code=district_value)
                         pap.district = district
                     except Districts.DoesNotExist:
                         # Use first district in region as fallback
                         if pap.region:
-                            pap.district = Districts.objects.filter(region_code=pap.region).first()
+                            pap.district = Districts.objects.filter(
+                                region_code=pap.region).first()
 
                 settlement_value = request.POST.get('pap_Current_Address')
                 if settlement_value:
                     try:
-                        settlement = Settlement.objects.get(settlement_code=settlement_value)
+                        settlement = Settlement.objects.get(
+                            settlement_code=settlement_value)
                         pap.pap_Current_Address = settlement
                     except Settlement.DoesNotExist:
                         # Use first settlement in district as fallback
                         if pap.district:
-                            pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
-                
+                            pap.pap_Current_Address = Settlement.objects.filter(
+                                district_code=pap.district).first()
+
                 # Ensure pap_Current_Address is not None (required field)
                 if not pap.pap_Current_Address:
                     if pap.district:
-                        pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+                        pap.pap_Current_Address = Settlement.objects.filter(
+                            district_code=pap.district).first()
                     elif pap.region:
                         # Find any settlement in the region
-                        first_district = Districts.objects.filter(region_code=pap.region).first()
+                        first_district = Districts.objects.filter(
+                            region_code=pap.region).first()
                         if first_district:
-                            pap.pap_Current_Address = Settlement.objects.filter(district_code=first_district).first()
-                    
+                            pap.pap_Current_Address = Settlement.objects.filter(
+                                district_code=first_district).first()
+
                     # Last resort - use any available settlement
                     if not pap.pap_Current_Address:
                         pap.pap_Current_Address = Settlement.objects.first()
 
                 # Ensure required lookup fields have values
-                pap.type_of_pap = pap.type_of_pap or (TypeOfPAP.objects.first() if TypeOfPAP.objects.exists() else None)
-                pap.pap_category = pap.pap_category or (PAPCategory.objects.first() if PAPCategory.objects.exists() else None)
-                pap.vulnerability_category = pap.vulnerability_category or (VulnerabilityCategory.objects.first() if VulnerabilityCategory.objects.exists() else None)
-                pap.type_of_impact = pap.type_of_impact or (TypeOfImpact.objects.first() if TypeOfImpact.objects.exists() else None)
-                pap.nature_of_compensation = pap.nature_of_compensation or (NatureOfSettlement.objects.first() if NatureOfSettlement.objects.exists() else None)
+                pap.type_of_pap = pap.type_of_pap or (
+                    TypeOfPAP.objects.first()
+                    if TypeOfPAP.objects.exists() else None)
+                pap.pap_category = pap.pap_category or (
+                    PAPCategory.objects.first()
+                    if PAPCategory.objects.exists() else None)
+                pap.vulnerability_category = pap.vulnerability_category or (
+                    VulnerabilityCategory.objects.first()
+                    if VulnerabilityCategory.objects.exists() else None)
+                pap.type_of_impact = pap.type_of_impact or (
+                    TypeOfImpact.objects.first()
+                    if TypeOfImpact.objects.exists() else None)
+                pap.nature_of_compensation = pap.nature_of_compensation or (
+                    NatureOfSettlement.objects.first()
+                    if NatureOfSettlement.objects.exists() else None)
 
                 # Default text/numeric fields
                 pap.area = pap.area or '0'
@@ -510,7 +525,10 @@ def pap_add(request):
                 pap.pre_project_situation = pap.pre_project_situation or 'Information not provided'
 
                 pap.save()
-                messages.success(request, f'PAP record {pap.pap_identification_number} added successfully.')
+                messages.success(
+                    request,
+                    f'PAP record {pap.pap_identification_number} added successfully.'
+                )
                 return redirect('pap_list')
 
             except Exception as e:
@@ -536,10 +554,10 @@ def pap_edit(request, pk):
         pap = get_object_or_404(PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
             'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
-            'loginUser'
-        ), pk=pk)
-        
+            'vulnerability_category', 'type_of_impact',
+            'nature_of_compensation', 'loginUser'),
+                                pk=pk)
+
         if request.method == 'POST':
             form = PAPUpdateForm(request.POST, instance=pap)
             if form.is_valid():
@@ -548,10 +566,13 @@ def pap_edit(request, pk):
                     updated_pap.loginUser = request.user
                     # Note: date_modified field doesn't exist in PAP model, removed to avoid error
                     updated_pap.save()
-                    messages.success(request, f'PAP record "{pap.pap_name}" updated successfully.')
+                    messages.success(
+                        request,
+                        f'PAP record "{pap.pap_name}" updated successfully.')
                     return redirect('pap_list')
                 except Exception as e:
-                    messages.error(request, f'Error updating PAP record: {str(e)}')
+                    messages.error(request,
+                                   f'Error updating PAP record: {str(e)}')
             else:
                 # Display form validation errors
                 for field, errors in form.errors.items():
@@ -559,17 +580,18 @@ def pap_edit(request, pk):
                         messages.error(request, f'{field}: {error}')
         else:
             form = PAPUpdateForm(instance=pap)
-        
+
         context = {
             'form': form,
             'pap': pap,
             'title': f'Edit PAP Record - {pap.pap_name}',
         }
-        
+
         return render(request, 'social_and_env/pap/pap_edit.html', context)
-        
+
     except Exception as e:
-        messages.error(request, f'Error loading PAP record for editing: {str(e)}')
+        messages.error(request,
+                       f'Error loading PAP record for editing: {str(e)}')
         return redirect('pap_list')
 
 
@@ -577,7 +599,7 @@ def pap_edit(request, pk):
 def pap_delete(request, pk):
     """Delete PAP record"""
     pap = get_object_or_404(PAP, pk=pk)
-    
+
     if request.method == 'POST':
         try:
             pap.delete()
@@ -585,7 +607,7 @@ def pap_delete(request, pk):
             return redirect('pap_list')
         except Exception as e:
             messages.error(request, f'Error deleting PAP record: {str(e)}')
-    
+
     return render(request, 'social_and_env/pap/pap_confirm_delete.html', {
         'pap': pap,
         'title': 'Delete PAP Record'
@@ -596,27 +618,45 @@ def pap_delete(request, pk):
 def social_env_dashboard(request):
     """Dashboard with overview statistics"""
     from django.db.models import Count, Sum
-    
+
     try:
         # Get statistics using Django ORM
         stats = {
-            'total_pap': PAP.objects.count(),
-            'total_grievances': GrievianceMonitoringLog.objects.count(),
-            'total_esia': ESIA.objects.count(),
-            'total_ohs': OHS_Monitoring.objects.count(),
-            'total_community': CommunityConsult_Engagement.objects.count(),
-            'compensated_pap': PAP.objects.filter(pap_compensated='Y').count(),
-            'male_pap': PAP.objects.filter(sex='M').count(),
-            'female_pap': PAP.objects.filter(sex='F').count(),
-            'open_grievances': GrievianceMonitoringLog.objects.filter(was_complainant_satisfied_with_decision='N').count(),
-            'closed_grievances': GrievianceMonitoringLog.objects.filter(was_complainant_satisfied_with_decision='Y').count(),
+            'total_pap':
+            PAP.objects.count(),
+            'total_grievances':
+            GrievianceMonitoringLog.objects.count(),
+            'total_esia':
+            ESIA.objects.count(),
+            'total_ohs':
+            OHS_Monitoring.objects.count(),
+            'total_community':
+            CommunityConsult_Engagement.objects.count(),
+            'compensated_pap':
+            PAP.objects.filter(pap_compensated='Y').count(),
+            'male_pap':
+            PAP.objects.filter(sex='M').count(),
+            'female_pap':
+            PAP.objects.filter(sex='F').count(),
+            'open_grievances':
+            GrievianceMonitoringLog.objects.filter(
+                was_complainant_satisfied_with_decision='N').count(),
+            'closed_grievances':
+            GrievianceMonitoringLog.objects.filter(
+                was_complainant_satisfied_with_decision='Y').count(),
         }
-        
+
         # Get recent activities - convert to lists for template evaluation
-        recent_pap = list(PAP.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
-        recent_grievances = list(GrievianceMonitoringLog.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
-        recent_esia = list(ESIA.objects.select_related('project', 'loginUser').order_by('-date_created')[:5])
-        
+        recent_pap = list(
+            PAP.objects.select_related(
+                'project', 'loginUser').order_by('-date_created')[:5])
+        recent_grievances = list(
+            GrievianceMonitoringLog.objects.select_related(
+                'project', 'loginUser').order_by('-date_created')[:5])
+        recent_esia = list(
+            ESIA.objects.select_related(
+                'project', 'loginUser').order_by('-date_created')[:5])
+
         context = {
             'stats': stats,
             'recent_pap': recent_pap,
@@ -624,18 +664,19 @@ def social_env_dashboard(request):
             'recent_esia': recent_esia,
             'title': 'Social & Environmental Dashboard'
         }
-        
+
         return render(request, 'social_and_env/dashboard.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading dashboard: {str(e)}')
-        return render(request, 'social_and_env/dashboard.html', {
-            'stats': {},
-            'recent_pap': [],
-            'recent_grievances': [],
-            'recent_esia': [],
-            'title': 'Social & Environmental Dashboard'
-        })
+        return render(
+            request, 'social_and_env/dashboard.html', {
+                'stats': {},
+                'recent_pap': [],
+                'recent_grievances': [],
+                'recent_esia': [],
+                'title': 'Social & Environmental Dashboard'
+            })
 
 
 # ======================== Grievance Views ========================
@@ -643,27 +684,27 @@ def social_env_dashboard(request):
 def grievance_list(request):
     """Enhanced Grievance list view with filtering and pagination"""
     from django.core.paginator import Paginator
-    
+
     try:
         # Initialize the filter
-        grievance_filter = GrievianceMonitoringLogFilter(request.GET, 
+        grievance_filter = GrievianceMonitoringLogFilter(
+            request.GET,
             queryset=GrievianceMonitoringLog.objects.select_related(
-                'project', 'type_of_investment', 'decision_outcome', 'loginUser'
-            ).order_by('-date_claim_recieved'))
-        
+                'project', 'type_of_investment', 'decision_outcome',
+                'loginUser').order_by('-date_claim_recieved'))
+
         # Get filtered queryset
         grievances = grievance_filter.qs
-        
+
         # Search functionality (additional to filters)
         search_query = request.GET.get('search', '')
         if search_query:
             grievances = grievances.filter(
-                Q(case_no__icontains=search_query) |
-                Q(name_of_complainant__icontains=search_query) |
-                Q(complaint_content__icontains=search_query) |
-                Q(project__project__icontains=search_query)
-            )
-        
+                Q(case_no__icontains=search_query)
+                | Q(name_of_complainant__icontains=search_query)
+                | Q(complaint_content__icontains=search_query)
+                | Q(project__project__icontains=search_query))
+
         # Pagination
         page_size = request.GET.get('page_size', 15)
         try:
@@ -672,17 +713,20 @@ def grievance_list(request):
                 page_size = 15
         except (ValueError, TypeError):
             page_size = 15
-        
+
         paginator = Paginator(grievances, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
+
         # Get statistics from filtered queryset
         total_cases = grievances.count()
-        satisfied = grievances.filter(was_complainant_satisfied_with_decision='Y').count()
-        not_satisfied = grievances.filter(was_complainant_satisfied_with_decision='N').count()
-        pending = grievances.filter(was_complainant_satisfied_with_decision__isnull=True).count()
-        
+        satisfied = grievances.filter(
+            was_complainant_satisfied_with_decision='Y').count()
+        not_satisfied = grievances.filter(
+            was_complainant_satisfied_with_decision='N').count()
+        pending = grievances.filter(
+            was_complainant_satisfied_with_decision__isnull=True).count()
+
         stats = {
             'total_cases': total_cases,
             'satisfied': satisfied,
@@ -691,7 +735,7 @@ def grievance_list(request):
             'male_complainants': grievances.filter(sex='M').count(),
             'female_complainants': grievances.filter(sex='F').count(),
         }
-        
+
         context = {
             'page_obj': page_obj,
             'filter': grievance_filter,
@@ -700,36 +744,42 @@ def grievance_list(request):
             'is_filtered': bool(request.GET),
             'title': 'Grievance Management'
         }
-        
-        return render(request, 'social_and_env/grievance/grievance_list.html', context)
-    
+
+        return render(request, 'social_and_env/grievance/grievance_list.html',
+                      context)
+
     except Exception as e:
         messages.error(request, f'Error loading grievances: {str(e)}')
-        return render(request, 'social_and_env/grievance/grievance_list.html', {
-            'page_obj': None,
-            'filter': None,
-            'stats': {},
-            'search_query': '',
-            'is_filtered': False,
-            'title': 'Grievance Management'
-        })
+        return render(
+            request, 'social_and_env/grievance/grievance_list.html', {
+                'page_obj': None,
+                'filter': None,
+                'stats': {},
+                'search_query': '',
+                'is_filtered': False,
+                'title': 'Grievance Management'
+            })
 
 
 @login_required
 def grievance_detail(request, pk):
     """Grievance detail view"""
     try:
-        grievance = get_object_or_404(GrievianceMonitoringLog.objects.select_related(
-            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
-        ), pk=pk)
-        
+        grievance = get_object_or_404(
+            GrievianceMonitoringLog.objects.select_related(
+                'project', 'type_of_investment', 'decision_outcome',
+                'loginUser'),
+            pk=pk)
+
         context = {
             'grievance': grievance,
             'title': f'Grievance Details - {grievance.case_no}',
         }
-        
-        return render(request, 'social_and_env/grievance/grievance_detail.html', context)
-    
+
+        return render(request,
+                      'social_and_env/grievance/grievance_detail.html',
+                      context)
+
     except Exception as e:
         messages.error(request, f'Error loading grievance details: {str(e)}')
         return redirect('grievance_list')
@@ -741,97 +791,115 @@ def grievance_add(request):
     if request.method == 'POST':
         print("=== GRIEVANCE ADD DEBUG START ===")
         print(f"POST data: {dict(request.POST)}")
-        
+
         form = GrievianceMonitoringLogForm(request.POST)
         print(f"Form created, is_valid: {form.is_valid()}")
-        
+
         if not form.is_valid():
             print(f"Form errors: {form.errors}")
             print(f"Non-field errors: {form.non_field_errors()}")
-            
+
             # Form is not valid, show errors
             error_messages = []
             for field, errors in form.errors.items():
                 for error in errors:
                     error_messages.append(f"{field}: {error}")
                     print(f"Field error - {field}: {error}")
-            
+
             if form.non_field_errors():
                 for error in form.non_field_errors():
                     error_messages.append(f"General: {error}")
                     print(f"Non-field error: {error}")
-                    
+
             if error_messages:
-                messages.error(request, f'Form validation failed: {"; ".join(error_messages)}')
+                messages.error(
+                    request,
+                    f'Form validation failed: {"; ".join(error_messages)}')
             print("=== FORM VALIDATION FAILED ===")
         else:
             print("Form is valid, attempting to save...")
             try:
                 grievance = form.save(commit=False)
                 grievance.loginUser = request.user
-                
+
                 # Debug: Print submitted data
                 project_value = request.POST.get('project')
                 investment_value = request.POST.get('type_of_investment')
-                print(f"Form data: project={project_value}, type_of_investment={investment_value}")
-                print(f"Grievance object before save: project={grievance.project}, investment={grievance.type_of_investment}")
-                
+                print(
+                    f"Form data: project={project_value}, type_of_investment={investment_value}"
+                )
+                print(
+                    f"Grievance object before save: project={grievance.project}, investment={grievance.type_of_investment}"
+                )
+
                 # Validate that type_of_investment is properly set
                 if not grievance.type_of_investment and investment_value:
                     # Try to find the investment type by monitoring_Type_Code
                     try:
                         investment_obj = KPI_For_Contract.objects.get(
-                            monitoring_Type_Code=investment_value
-                        )
+                            monitoring_Type_Code=investment_value)
                         grievance.type_of_investment = investment_obj
-                        print(f"Found investment type by code: {investment_obj}")
+                        print(
+                            f"Found investment type by code: {investment_obj}")
                     except KPI_For_Contract.DoesNotExist:
-                        print(f"No investment type found for code: {investment_value}")
-                
+                        print(
+                            f"No investment type found for code: {investment_value}"
+                        )
+
                 # Final check - ensure investment type is set
                 if not grievance.type_of_investment:
                     # Try to get a default investment type for the project
                     if grievance.project:
                         default_investment = KPI_For_Contract.objects.filter(
                             project=grievance.project,
-                            monitoring_type_id='ESS'
-                        ).first()
+                            monitoring_type_id='ESS').first()
                         if default_investment:
                             grievance.type_of_investment = default_investment
-                            print(f"Auto-assigned investment type: {default_investment}")
+                            print(
+                                f"Auto-assigned investment type: {default_investment}"
+                            )
                         else:
-                            messages.error(request, 'No investment type found for the selected project.')
+                            messages.error(
+                                request,
+                                'No investment type found for the selected project.'
+                            )
                             print("=== NO INVESTMENT TYPE FOUND ===")
-                            return render(request, 'social_and_env/grievance/grievance_add_form.html', {
-                                'form': form,
-                                'title': 'Add New Grievance Record'
-                            })
-                
+                            return render(
+                                request,
+                                'social_and_env/grievance/grievance_add_form.html',
+                                {
+                                    'form': form,
+                                    'title': 'Add New Grievance Record'
+                                })
+
                 print(f"Final grievance object: {grievance.__dict__}")
                 grievance.save()
                 print("Grievance saved successfully!")
-                messages.success(request, 'Grievance record added successfully.')
+                messages.success(request,
+                                 'Grievance record added successfully.')
                 return redirect('grievance_list')
             except Exception as e:
                 import traceback
                 error_details = traceback.format_exc()
-                messages.error(request, f'Error saving grievance record: {str(e)}')
+                messages.error(request,
+                               f'Error saving grievance record: {str(e)}')
                 print(f"Grievance save error: {error_details}")
                 print("=== SAVE ERROR ===")
     else:
         form = GrievianceMonitoringLogForm()
-    
-    return render(request, 'social_and_env/grievance/grievance_add_form.html', {
-        'form': form,
-        'title': 'Add New Grievance Record'
-    })
+
+    return render(request, 'social_and_env/grievance/grievance_add_form.html',
+                  {
+                      'form': form,
+                      'title': 'Add New Grievance Record'
+                  })
 
 
 @login_required
 def grievance_edit(request, pk):
     """Edit Grievance record"""
     grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
-    
+
     if request.method == 'POST':
         form = GrievianceUpdateForm(request.POST, instance=grievance)
         if form.is_valid():
@@ -839,97 +907,96 @@ def grievance_edit(request, pk):
                 grievance = form.save(commit=False)
                 grievance.loginUser = request.user
                 grievance.save()
-                messages.success(request, 'Grievance record updated successfully.')
+                messages.success(request,
+                                 'Grievance record updated successfully.')
                 return redirect('grievance_list')
             except Exception as e:
-                messages.error(request, f'Error updating grievance record: {str(e)}')
+                messages.error(request,
+                               f'Error updating grievance record: {str(e)}')
     else:
         form = GrievianceUpdateForm(instance=grievance)
-    
-    return render(request, 'social_and_env/grievance/grievance_edit_form.html', {
-        'form': form,
-        'grievance': grievance,
-        'title': 'Edit Grievance Record'
-    })
+
+    return render(request, 'social_and_env/grievance/grievance_edit_form.html',
+                  {
+                      'form': form,
+                      'grievance': grievance,
+                      'title': 'Edit Grievance Record'
+                  })
 
 
 @login_required
 def grievance_delete(request, pk):
     """Delete Grievance record"""
     grievance = get_object_or_404(GrievianceMonitoringLog, pk=pk)
-    
+
     if request.method == 'POST':
         try:
             grievance.delete()
             messages.success(request, 'Grievance record deleted successfully.')
             return redirect('grievance_list')
         except Exception as e:
-            messages.error(request, f'Error deleting grievance record: {str(e)}')
-    
-    return render(request, 'social_and_env/grievance/grievance_confirm_delete.html', {
-        'grievance': grievance,
-        'title': 'Delete Grievance Record'
-    })
+            messages.error(request,
+                           f'Error deleting grievance record: {str(e)}')
+
+    return render(request,
+                  'social_and_env/grievance/grievance_confirm_delete.html', {
+                      'grievance': grievance,
+                      'title': 'Delete Grievance Record'
+                  })
 
 
 # ======================== OHS Views ========================
-@login_required  
+@login_required
 def ohs_list(request):
     """Enhanced OHS list view with filtering and pagination"""
     from django.core.paginator import Paginator
     from django.db.models import Q
-    
+
     try:
         print("=== OHS LIST DEBUG START ===")
-        
+
         # First check total records without joins
         total_records = OHS_Monitoring.objects.all().count()
         print(f"Total OHS records in database: {total_records}")
-        
+
         # Use Django ORM to get OHS records - remove problematic joins for now
         ohs_queryset = OHS_Monitoring.objects.select_related('project').all()
-        
+
         print(f"OHS queryset count: {ohs_queryset.count()}")
-        
+
         # Apply filters using Django ORM
         if request.GET.get('project'):
             ohs_queryset = ohs_queryset.filter(
-                project__projectID__icontains=request.GET.get('project')
-            )
-        
+                project__projectID__icontains=request.GET.get('project'))
+
         if request.GET.get('region'):
             ohs_queryset = ohs_queryset.filter(
-                region__region_name__icontains=request.GET.get('region')
-            )
-            
+                region__region_name__icontains=request.GET.get('region'))
+
         if request.GET.get('district'):
             ohs_queryset = ohs_queryset.filter(
-                district__district_name__icontains=request.GET.get('district')
-            )
-            
+                district__district_name__icontains=request.GET.get('district'))
+
         if request.GET.get('year'):
             ohs_queryset = ohs_queryset.filter(
-                year_of_report__year_name__icontains=request.GET.get('year')
-            )
-            
+                year_of_report__year_name__icontains=request.GET.get('year'))
+
         if request.GET.get('quarter'):
             ohs_queryset = ohs_queryset.filter(
-                quarter__quarter_name__icontains=request.GET.get('quarter')
-            )
-            
+                quarter__quarter_name__icontains=request.GET.get('quarter'))
+
         # Apply search filter
         search_query = request.GET.get('search', '').strip()
         if search_query:
             ohs_queryset = ohs_queryset.filter(
-                Q(project__projectID__icontains=search_query) |
-                Q(quality_at_entry_requirement__icontains=search_query) |
-                Q(working_environment__icontains=search_query) |
-                Q(remarks__icontains=search_query)
-            )
-        
+                Q(project__projectID__icontains=search_query)
+                | Q(quality_at_entry_requirement__icontains=search_query)
+                | Q(working_environment__icontains=search_query)
+                | Q(remarks__icontains=search_query))
+
         # Order by date
         ohs_queryset = ohs_queryset.order_by('-date', '-date_created')
-        
+
         # Convert to list for compatibility with existing template logic
         ohs_data = []
         for ohs in ohs_queryset:
@@ -938,62 +1005,107 @@ def ohs_list(request):
                 print(f"  Project: {ohs.project_id}")
                 print(f"  Region: {ohs.region_id}")
                 print(f"  Date: {ohs.date}")
-                
+
                 # Create object-like structure for template compatibility
-                ohs_obj = type('OHSRecord', (), {
-                    'ohs_id': ohs.ohs_Id,
-                    'project_id': ohs.project.projectID if ohs.project else ohs.project_id,
-                    'project_name': ohs.project.project if ohs.project else ohs.project_id,
-                    'date': ohs.date,
-                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement,
-                    'working_environment': ohs.working_environment,
-                    'remarks': ohs.remarks,
-                    'male': ohs.male,
-                    'female': ohs.female,
-                    'youth_male': ohs.youth_male,
-                    'youth_female': ohs.youth_female,
-                    'region_name': str(ohs.region_id) if ohs.region_id else '',
-                    'district_name': str(ohs.district_id) if ohs.district_id else '',
-                    'settlement_name': str(ohs.settlement_id) if ohs.settlement_id else '',
-                    'year_name': str(ohs.year_of_report_id) if ohs.year_of_report_id else '',
-                    'quarter_name': str(ohs.quarter_id) if ohs.quarter_id else '',
-                    'investment_type': str(ohs.Type_of_Investment_id) if ohs.Type_of_Investment_id else '',
-                    'picture': ohs.picture,
-                    'pk': ohs.ohs_Id
-                })()
+                ohs_obj = type(
+                    'OHSRecord', (), {
+                        'ohs_id':
+                        ohs.ohs_Id,
+                        'project_id':
+                        ohs.project.projectID
+                        if ohs.project else ohs.project_id,
+                        'project_name':
+                        ohs.project.project if ohs.project else ohs.project_id,
+                        'date':
+                        ohs.date,
+                        'quality_at_entry_requirement':
+                        ohs.quality_at_entry_requirement,
+                        'working_environment':
+                        ohs.working_environment,
+                        'remarks':
+                        ohs.remarks,
+                        'male':
+                        ohs.male,
+                        'female':
+                        ohs.female,
+                        'youth_male':
+                        ohs.youth_male,
+                        'youth_female':
+                        ohs.youth_female,
+                        'region_name':
+                        str(ohs.region_id) if ohs.region_id else '',
+                        'district_name':
+                        str(ohs.district_id) if ohs.district_id else '',
+                        'settlement_name':
+                        str(ohs.settlement_id) if ohs.settlement_id else '',
+                        'year_name':
+                        str(ohs.year_of_report_id)
+                        if ohs.year_of_report_id else '',
+                        'quarter_name':
+                        str(ohs.quarter_id) if ohs.quarter_id else '',
+                        'investment_type':
+                        str(ohs.Type_of_Investment_id)
+                        if ohs.Type_of_Investment_id else '',
+                        'picture':
+                        ohs.picture,
+                        'pk':
+                        ohs.ohs_Id
+                    })()
                 ohs_data.append(ohs_obj)
                 print(f"  Successfully processed record {ohs.ohs_Id}")
             except Exception as e:
                 print(f"  Error processing record {ohs.ohs_Id}: {str(e)}")
                 # Still add basic data even if relationships fail
-                ohs_obj = type('OHSRecord', (), {
-                    'ohs_id': ohs.ohs_Id,
-                    'project_id': ohs.project_id,
-                    'project_name': ohs.project_id,
-                    'date': ohs.date,
-                    'quality_at_entry_requirement': ohs.quality_at_entry_requirement or '',
-                    'working_environment': ohs.working_environment or '',
-                    'remarks': ohs.remarks or '',
-                    'male': ohs.male or 0,
-                    'female': ohs.female or 0,
-                    'youth_male': ohs.youth_male or 0,
-                    'youth_female': ohs.youth_female or 0,
-                    'region_name': str(ohs.region_id) if ohs.region_id else '',
-                    'district_name': str(ohs.district_id) if ohs.district_id else '',
-                    'settlement_name': str(ohs.settlement_id) if ohs.settlement_id else '',
-                    'year_name': str(ohs.year_of_report_id) if ohs.year_of_report_id else '',
-                    'quarter_name': str(ohs.quarter_id) if ohs.quarter_id else '',
-                    'investment_type': str(ohs.Type_of_Investment_id) if ohs.Type_of_Investment_id else '',
-                    'picture': ohs.picture,
-                    'pk': ohs.ohs_Id
-                })()
+                ohs_obj = type(
+                    'OHSRecord', (), {
+                        'ohs_id':
+                        ohs.ohs_Id,
+                        'project_id':
+                        ohs.project_id,
+                        'project_name':
+                        ohs.project_id,
+                        'date':
+                        ohs.date,
+                        'quality_at_entry_requirement':
+                        ohs.quality_at_entry_requirement or '',
+                        'working_environment':
+                        ohs.working_environment or '',
+                        'remarks':
+                        ohs.remarks or '',
+                        'male':
+                        ohs.male or 0,
+                        'female':
+                        ohs.female or 0,
+                        'youth_male':
+                        ohs.youth_male or 0,
+                        'youth_female':
+                        ohs.youth_female or 0,
+                        'region_name':
+                        str(ohs.region_id) if ohs.region_id else '',
+                        'district_name':
+                        str(ohs.district_id) if ohs.district_id else '',
+                        'settlement_name':
+                        str(ohs.settlement_id) if ohs.settlement_id else '',
+                        'year_name':
+                        str(ohs.year_of_report_id)
+                        if ohs.year_of_report_id else '',
+                        'quarter_name':
+                        str(ohs.quarter_id) if ohs.quarter_id else '',
+                        'investment_type':
+                        str(ohs.Type_of_Investment_id)
+                        if ohs.Type_of_Investment_id else '',
+                        'picture':
+                        ohs.picture,
+                        'pk':
+                        ohs.ohs_Id
+                    })()
                 ohs_data.append(ohs_obj)
-        
+
         # Filtering already done at ORM level
         filtered_data = ohs_data
         print(f"Final OHS data count: {len(ohs_data)}")
         print("=== OHS LIST DEBUG END ===")
-        
+
         # Pagination
         page_size = request.GET.get('page_size', 10)
         try:
@@ -1002,52 +1114,81 @@ def ohs_list(request):
                 page_size = 10
         except (ValueError, TypeError):
             page_size = 10
-        
+
         paginator = Paginator(filtered_data, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
+
         # Get statistics from filtered data
         stats = {
-            'total_ohs': len(ohs_data),
-            'filtered_count': len(filtered_data),
-            'total_male_workers': sum(getattr(ohs, 'male', 0) or 0 for ohs in filtered_data),
-            'total_female_workers': sum(getattr(ohs, 'female', 0) or 0 for ohs in filtered_data),
-            'total_youth_male': sum(getattr(ohs, 'youth_male', 0) or 0 for ohs in filtered_data),
-            'total_youth_female': sum(getattr(ohs, 'youth_female', 0) or 0 for ohs in filtered_data),
+            'total_ohs':
+            len(ohs_data),
+            'filtered_count':
+            len(filtered_data),
+            'total_male_workers':
+            sum(getattr(ohs, 'male', 0) or 0 for ohs in filtered_data),
+            'total_female_workers':
+            sum(getattr(ohs, 'female', 0) or 0 for ohs in filtered_data),
+            'total_youth_male':
+            sum(getattr(ohs, 'youth_male', 0) or 0 for ohs in filtered_data),
+            'total_youth_female':
+            sum(getattr(ohs, 'youth_female', 0) or 0 for ohs in filtered_data),
         }
-        
+
         # Calculate additional metrics
-        stats['total_workers'] = stats['total_male_workers'] + stats['total_female_workers']
-        stats['total_youth'] = stats['total_youth_male'] + stats['total_youth_female']
-        
+        stats['total_workers'] = stats['total_male_workers'] + stats[
+            'total_female_workers']
+        stats['total_youth'] = stats['total_youth_male'] + stats[
+            'total_youth_female']
+
         # Get filter choices for dropdowns - updated for object attributes
         filter_choices = {
-            'projects': list(set(getattr(ohs, 'project_id', '') for ohs in ohs_data if getattr(ohs, 'project_id', ''))),
-            'regions': list(set(getattr(ohs, 'region_name', '') for ohs in ohs_data if getattr(ohs, 'region_name', ''))),
-            'districts': list(set(getattr(ohs, 'district_name', '') for ohs in ohs_data if getattr(ohs, 'district_name', ''))),
-            'years': list(set(getattr(ohs, 'year_name', '') for ohs in ohs_data if getattr(ohs, 'year_name', ''))),
-            'quarters': list(set(getattr(ohs, 'quarter_name', '') for ohs in ohs_data if getattr(ohs, 'quarter_name', ''))),
+            'projects':
+            list(
+                set(
+                    getattr(ohs, 'project_id', '') for ohs in ohs_data
+                    if getattr(ohs, 'project_id', ''))),
+            'regions':
+            list(
+                set(
+                    getattr(ohs, 'region_name', '') for ohs in ohs_data
+                    if getattr(ohs, 'region_name', ''))),
+            'districts':
+            list(
+                set(
+                    getattr(ohs, 'district_name', '') for ohs in ohs_data
+                    if getattr(ohs, 'district_name', ''))),
+            'years':
+            list(
+                set(
+                    getattr(ohs, 'year_name', '') for ohs in ohs_data
+                    if getattr(ohs, 'year_name', ''))),
+            'quarters':
+            list(
+                set(
+                    getattr(ohs, 'quarter_name', '') for ohs in ohs_data
+                    if getattr(ohs, 'quarter_name', ''))),
         }
-        
+
         # Remove debug output - issue resolved
-        
+
         context = {
             'page_obj': page_obj,
-            'ohs_list': page_obj.object_list if page_obj else [],  # Add direct access to data
+            'ohs_list': page_obj.object_list
+            if page_obj else [],  # Add direct access to data
             'stats': stats,
             'filter_choices': filter_choices,
             'current_filters': request.GET,
             'title': 'OHS Monitoring'
         }
-        
+
         print(f"Context page_obj: {page_obj}")
         print(f"Context ohs_list count: {len(context['ohs_list'])}")
         if context['ohs_list']:
             print(f"First record: {context['ohs_list'][0]}")
-        
+
         return render(request, 'social_and_env/ohs/ohs_list.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading OHS records: {str(e)}')
         return render(request, 'social_and_env/ohs/ohs_list.html', {
@@ -1062,27 +1203,27 @@ def load_districts(request):
     """Load districts based on selected region - HTMX compatible"""
     from django.http import JsonResponse, HttpResponse
     from setup.models import Districts, Regions
-    
-    region_id = request.GET.get('region_id') or request.GET.get('region') or request.GET.get('id_region')
-    
+
+    region_id = request.GET.get('region_id') or request.GET.get(
+        'region') or request.GET.get('id_region')
+
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
-    
+
     if not region_id:
         if is_htmx:
             return HttpResponse('<option value="">Select District</option>')
         return JsonResponse({'districts': []})
-    
+
     try:
         # Get districts by region
         try:
             region = Regions.objects.get(pk=region_id)
             districts = Districts.objects.filter(
-                region_code_id=region_id
-            ).order_by('district_name')
+                region_code_id=region_id).order_by('district_name')
         except Regions.DoesNotExist:
             districts = Districts.objects.none()
-        
+
         if is_htmx:
             # Return HTML options for HTMX
             options = '<option value="">Select District</option>'
@@ -1091,12 +1232,12 @@ def load_districts(request):
             return HttpResponse(options)
         else:
             # Return JSON for regular AJAX
-            district_list = [
-                {'id': district.pk, 'name': district.district_name}
-                for district in districts
-            ]
+            district_list = [{
+                'id': district.pk,
+                'name': district.district_name
+            } for district in districts]
             return JsonResponse({'districts': district_list})
-            
+
     except Exception as e:
         if is_htmx:
             return HttpResponse(f'<option value="">Error: {str(e)}</option>')
@@ -1107,22 +1248,22 @@ def load_settlements(request):
     """Load settlements based on selected district - HTMX compatible"""
     from django.http import JsonResponse, HttpResponse
     from setup.models import Settlement
-    
-    district_id = request.GET.get('district_id') or request.GET.get('district') or request.GET.get('id_district')
-    
+
+    district_id = request.GET.get('district_id') or request.GET.get(
+        'district') or request.GET.get('id_district')
+
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
-    
+
     if not district_id:
         if is_htmx:
             return HttpResponse('<option value="">Select Settlement</option>')
         return JsonResponse({'settlements': []})
-    
+
     try:
         settlements = Settlement.objects.filter(
-            district_code_id=district_id
-        ).order_by('settlement_name')
-        
+            district_code_id=district_id).order_by('settlement_name')
+
         if is_htmx:
             # Return HTML options for HTMX
             options = '<option value="">Select Settlement</option>'
@@ -1131,12 +1272,12 @@ def load_settlements(request):
             return HttpResponse(options)
         else:
             # Return JSON for regular AJAX
-            settlement_list = [
-                {'id': settlement.pk, 'name': settlement.settlement_name}
-                for settlement in settlements
-            ]
+            settlement_list = [{
+                'id': settlement.pk,
+                'name': settlement.settlement_name
+            } for settlement in settlements]
             return JsonResponse({'settlements': settlement_list})
-            
+
     except Exception as e:
         if is_htmx:
             return HttpResponse(f'<option value="">Error: {str(e)}</option>')
@@ -1147,22 +1288,23 @@ def load_kpi_descriptions(request):
     """Load KPI descriptions based on selected project for AJAX requests"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
-    
+
     project_id = request.GET.get('project_id')
     # Remove debug output for production
-    
+
     if project_id:
         # Use project_id directly as foreign key lookup since project field expects the primary key
-        kpi_contracts = KPI_For_Contract.objects.filter(project_id=project_id).distinct()
-        
+        kpi_contracts = KPI_For_Contract.objects.filter(
+            project_id=project_id).distinct()
+
         kpi_list = []
         for kpi in kpi_contracts:
             if kpi.Kpi_description and kpi.Kpi_description.strip():
                 kpi_list.append({
-                    'id': kpi.monitoring_Type_Code, 
+                    'id': kpi.monitoring_Type_Code,
                     'description': kpi.Kpi_description.strip()
                 })
-                
+
         return JsonResponse({'kpi_descriptions': kpi_list})
     return JsonResponse({'kpi_descriptions': []})
 
@@ -1172,21 +1314,19 @@ def load_investment_types_esia(request):
     """Load all available investment types for ESIA form"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
-    
+
     try:
         # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values('monitoring_Type_Code', 'type_of_investment').distinct()
-        investment_list = [
-            {'id': inv['monitoring_Type_Code'] or f'inv_{idx}', 'name': inv['type_of_investment']} 
-            for idx, inv in enumerate(investment_types, 1) if inv['type_of_investment']
-        ]
+        investment_types = KPI_For_Contract.objects.values(
+            'monitoring_Type_Code', 'type_of_investment').distinct()
+        investment_list = [{
+            'id': inv['monitoring_Type_Code'] or f'inv_{idx}',
+            'name': inv['type_of_investment']
+        } for idx, inv in enumerate(investment_types, 1)
+                           if inv['type_of_investment']]
         return JsonResponse({'investment_types': investment_list})
     except Exception as e:
         return JsonResponse({'investment_types': [], 'error': str(e)})
-
-
-
-
 
 
 @login_required
@@ -1194,67 +1334,66 @@ def load_investment_types_grievance(request):
     """Load investment types for Grievance form based on selected project"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
-    
+
     project_id = request.GET.get('project_id')
-    
+
     if project_id:
         try:
             # Filter KPI_For_Contract by project for ESS (Environmental and Social Safeguards)
             investment_types = KPI_For_Contract.objects.filter(
                 project__projectID=project_id,
-                monitoring_type_id='ESS'
-            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
-            
-            investment_list = [
-                {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
-                for inv in investment_types if inv['type_of_investment']
-            ]
-            
+                monitoring_type_id='ESS').values(
+                    'monitoring_Type_Code', 'type_of_investment').distinct()
+
+            investment_list = [{
+                'id': inv['monitoring_Type_Code'],
+                'name': inv['type_of_investment']
+            } for inv in investment_types if inv['type_of_investment']]
+
             return JsonResponse({'investment_types': investment_list})
         except Exception as e:
             return JsonResponse({'investment_types': [], 'error': str(e)})
-    
+
     return JsonResponse({'investment_types': []})
 
 
-
-
-
-@login_required 
+@login_required
 def load_investment_types_ohs(request):
     """Load investment types and KPI descriptions for OHS form based on selected project"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
     import logging
-    
+
     logger = logging.getLogger(__name__)
     project_id = request.GET.get('project_id')
     logger.debug(f"OHS AJAX called with project_id: {project_id}")
-    
+
     try:
         if project_id:
             # Get investment types for specific project (using projectID field)
             investment_types = KPI_For_Contract.objects.filter(
-                project__projectID=project_id
-            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
-            
+                project__projectID=project_id).values(
+                    'monitoring_Type_Code', 'type_of_investment').distinct()
+
             # Get KPI descriptions for the project (using correct field name: Kpi_description)
             kpi_descriptions = KPI_For_Contract.objects.filter(
-                project__projectID=project_id
-            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
-            
-            investment_list = [
-                {'id': inv['monitoring_Type_Code'], 'name': inv['type_of_investment']} 
-                for inv in investment_types if inv['type_of_investment']
-            ]
-            
-            kpi_list = [
-                {'id': kpi['monitoring_Type_Code'], 'name': kpi['Kpi_description']} 
-                for kpi in kpi_descriptions if kpi['Kpi_description']
-            ]
-            
-            logger.debug(f"Found {len(investment_list)} investments, {len(kpi_list)} KPIs")
-            
+                project__projectID=project_id).values(
+                    'monitoring_Type_Code', 'Kpi_description').distinct()
+
+            investment_list = [{
+                'id': inv['monitoring_Type_Code'],
+                'name': inv['type_of_investment']
+            } for inv in investment_types if inv['type_of_investment']]
+
+            kpi_list = [{
+                'id': kpi['monitoring_Type_Code'],
+                'name': kpi['Kpi_description']
+            } for kpi in kpi_descriptions if kpi['Kpi_description']]
+
+            logger.debug(
+                f"Found {len(investment_list)} investments, {len(kpi_list)} KPIs"
+            )
+
             response_data = {
                 'investment_types': investment_list,
                 'kpi_descriptions': kpi_list
@@ -1264,11 +1403,18 @@ def load_investment_types_ohs(request):
         else:
             # No project selected - return empty lists
             logger.debug("No project_id provided, returning empty lists")
-            return JsonResponse({'investment_types': [], 'kpi_descriptions': []})
-            
+            return JsonResponse({
+                'investment_types': [],
+                'kpi_descriptions': []
+            })
+
     except Exception as e:
         logger.error(f"Error in load_investment_types_ohs: {str(e)}")
-        return JsonResponse({'investment_types': [], 'kpi_descriptions': [], 'error': str(e)})
+        return JsonResponse({
+            'investment_types': [],
+            'kpi_descriptions': [],
+            'error': str(e)
+        })
 
 
 @login_required
@@ -1278,14 +1424,14 @@ def ohs_add(request):
         print("=== OHS ADD DEBUG START ===")
         print(f"POST data: {dict(request.POST)}")
         print(f"FILES data: {dict(request.FILES)}")
-        
+
         form = OHSMonitoringForm(request.POST, request.FILES)
         print(f"Form created, is_valid: {form.is_valid()}")
-        
+
         if not form.is_valid():
             print(f"Form errors: {form.errors}")
             print(f"Non-field errors: {form.non_field_errors()}")
-            
+
             # Show form validation errors with better debugging
             messages.error(request, 'Please correct the following errors:')
             error_messages = []
@@ -1293,23 +1439,25 @@ def ohs_add(request):
                 for error in errors:
                     error_messages.append(f"{field}: {error}")
                     print(f"Field error - {field}: {error}")
-            
+
             if form.non_field_errors():
                 for error in form.non_field_errors():
                     error_messages.append(f"General: {error}")
                     print(f"Non-field error: {error}")
-                    
+
             if error_messages:
-                messages.error(request, f'Form validation failed: {"; ".join(error_messages)}')
+                messages.error(
+                    request,
+                    f'Form validation failed: {"; ".join(error_messages)}')
             print("=== OHS FORM VALIDATION FAILED ===")
         else:
             print("Form is valid, attempting to save...")
             try:
                 ohs = form.save(commit=False)
                 ohs.loginUser = request.user
-                
+
                 print(f"OHS object before save: {ohs.__dict__}")
-                
+
                 # Set default values for optional fields
                 if not ohs.male:
                     ohs.male = 0
@@ -1319,17 +1467,18 @@ def ohs_add(request):
                     ohs.youth_male = 0
                 if not ohs.youth_female:
                     ohs.youth_female = 0
-                
+
                 # Debug investment type assignment
                 if hasattr(ohs, 'Type_of_Investment'):
-                    print(f"Investment type assigned: {ohs.Type_of_Investment}")
+                    print(
+                        f"Investment type assigned: {ohs.Type_of_Investment}")
                 else:
                     print("No investment type assigned")
-                
+
                 ohs.save()
                 print("OHS record saved successfully!")
                 messages.success(request, 'OHS record added successfully.')
-                
+
                 # Redirect to list with success message
                 return redirect('ohs_list')
             except Exception as e:
@@ -1340,7 +1489,7 @@ def ohs_add(request):
                 print("=== OHS SAVE ERROR ===")
     else:
         form = OHSMonitoringForm()
-    
+
     return render(request, 'social_and_env/ohs/ohs_form.html', {
         'form': form,
         'title': 'Add OHS Record'
@@ -1352,25 +1501,25 @@ def load_kpi_descriptions_ohs(request):
     """Load KPI descriptions for OHS form based on selected project"""
     from django.http import JsonResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
-    
+
     project_id = request.GET.get('project_id')
-    
+
     try:
         if project_id:
             # Get KPI descriptions for the project (using correct field name: Kpi_description)
             kpi_descriptions = KPI_For_Contract.objects.filter(
-                project__projectID=project_id
-            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
-            
-            kpi_list = [
-                {'id': kpi['monitoring_Type_Code'], 'name': kpi['Kpi_description']} 
-                for kpi in kpi_descriptions if kpi['Kpi_description']
-            ]
-            
+                project__projectID=project_id).values(
+                    'monitoring_Type_Code', 'Kpi_description').distinct()
+
+            kpi_list = [{
+                'id': kpi['monitoring_Type_Code'],
+                'name': kpi['Kpi_description']
+            } for kpi in kpi_descriptions if kpi['Kpi_description']]
+
             return JsonResponse({'kpi_descriptions': kpi_list})
         else:
             return JsonResponse({'kpi_descriptions': []})
-            
+
     except Exception as e:
         return JsonResponse({'kpi_descriptions': [], 'error': str(e)})
 
@@ -1380,17 +1529,19 @@ def ohs_detail(request, pk):
     """Detail view for OHS monitoring record"""
     try:
         ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 
-            'region', 'district', 'settlement', 'loginUser'
-        ), pk=pk)
-        
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter',
+            'region', 'district', 'settlement', 'loginUser'),
+                                pk=pk)
+
         context = {
-            'ohs': ohs,
-            'title': f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
+            'ohs':
+            ohs,
+            'title':
+            f'OHS Monitoring - {ohs.project.project if ohs.project else "Unknown"}',
         }
-        
+
         return render(request, 'social_and_env/ohs/ohs_detail.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading OHS details: {str(e)}')
         return redirect('ohs_list')
@@ -1402,19 +1553,19 @@ def ohs_edit(request, pk):
     try:
         ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter',
-            'region', 'district', 'settlement'
-        ), pk=pk)
+            'region', 'district', 'settlement'),
+                                pk=pk)
     except OHS_Monitoring.DoesNotExist:
         messages.error(request, 'OHS record not found.')
         return redirect('ohs_list')
-    
+
     if request.method == 'POST':
         form = OHSMonitoringForm(request.POST, request.FILES, instance=ohs)
         if form.is_valid():
             try:
                 ohs = form.save(commit=False)
                 ohs.loginUser = request.user
-                
+
                 # Ensure numeric fields have valid values
                 if not ohs.male:
                     ohs.male = 0
@@ -1424,7 +1575,7 @@ def ohs_edit(request, pk):
                     ohs.youth_male = 0
                 if not ohs.youth_female:
                     ohs.youth_female = 0
-                
+
                 ohs.save()
                 messages.success(request, 'OHS record updated successfully.')
                 return redirect('ohs_list')
@@ -1439,7 +1590,7 @@ def ohs_edit(request, pk):
                     messages.error(request, f'{field}: {error}')
     else:
         form = OHSMonitoringForm(instance=ohs)
-    
+
     return render(request, 'social_and_env/ohs/ohs_form.html', {
         'form': form,
         'ohs': ohs,
@@ -1452,23 +1603,27 @@ def ohs_delete(request, pk):
     """Delete OHS monitoring record with improved error handling"""
     try:
         ohs = get_object_or_404(OHS_Monitoring.objects.select_related(
-            'project', 'Type_of_Investment', 'region', 'district', 'settlement'
-        ), pk=pk)
+            'project', 'Type_of_Investment', 'region', 'district',
+            'settlement'),
+                                pk=pk)
     except OHS_Monitoring.DoesNotExist:
         messages.error(request, 'OHS record not found.')
         return redirect('ohs_list')
-    
+
     if request.method == 'POST':
         try:
             ohs_project = ohs.project.project if ohs.project else "Unknown"
             ohs_id = ohs.ohs_Id
             ohs.delete()
-            messages.success(request, f'OHS record OHS-{ohs_id} for project {ohs_project} deleted successfully.')
+            messages.success(
+                request,
+                f'OHS record OHS-{ohs_id} for project {ohs_project} deleted successfully.'
+            )
             return redirect('ohs_list')
         except Exception as e:
             messages.error(request, f'Error deleting OHS record: {str(e)}')
             return redirect('ohs_detail', pk=pk)
-    
+
     return render(request, 'social_and_env/ohs/ohs_confirm_delete.html', {
         'ohs': ohs,
         'title': 'Delete OHS Record'
@@ -1482,60 +1637,89 @@ def export_ohs_excel(request):
     from openpyxl.styles import Font, Alignment, PatternFill
     from django.http import HttpResponse
     import io
-    
+
     try:
         # Create workbook and worksheet
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "OHS Monitoring Data"
-        
+
         # Headers
         headers = [
             'OHS ID', 'Project', 'Investment Type', 'Year', 'Quarter', 'Date',
-            'Region', 'District', 'Settlement', 'Male Workers', 'Female Workers',
-            'Youth Male', 'Youth Female', 'Total Workers', 'Quality Requirements',
-            'Working Environment', 'Remarks', 'Created By', 'Created Date'
+            'Region', 'District', 'Settlement', 'Male Workers',
+            'Female Workers', 'Youth Male', 'Youth Female', 'Total Workers',
+            'Quality Requirements', 'Working Environment', 'Remarks',
+            'Created By', 'Created Date'
         ]
-        
+
         # Style headers
         header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        header_fill = PatternFill(start_color="366092",
+                                  end_color="366092",
+                                  fill_type="solid")
         header_alignment = Alignment(horizontal="center", vertical="center")
-        
+
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=header)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = header_alignment
-        
+
         # Get OHS data with related fields
         ohs_records = OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter',
-            'region', 'district', 'settlement', 'loginUser'
-        ).order_by('-date')
-        
+            'region', 'district', 'settlement', 'loginUser').order_by('-date')
+
         # Add data rows
         for row, ohs in enumerate(ohs_records, 2):
             ws.cell(row=row, column=1, value=f"OHS-{ohs.ohs_Id}")
-            ws.cell(row=row, column=2, value=ohs.project.project if ohs.project else "N/A")
-            ws.cell(row=row, column=3, value=ohs.Type_of_Investment.monitoring_Type_Code if ohs.Type_of_Investment else "N/A")
-            ws.cell(row=row, column=4, value=ohs.year_of_report.year_name if ohs.year_of_report else "N/A")
-            ws.cell(row=row, column=5, value=ohs.quarter.quarter_name if ohs.quarter else "N/A")
-            ws.cell(row=row, column=6, value=ohs.date.strftime('%Y-%m-%d') if ohs.date else "N/A")
-            ws.cell(row=row, column=7, value=ohs.region.region_name if ohs.region else "N/A")
-            ws.cell(row=row, column=8, value=ohs.district.district_name if ohs.district else "N/A")
-            ws.cell(row=row, column=9, value=ohs.settlement.settlement_name if ohs.settlement else "N/A")
+            ws.cell(row=row,
+                    column=2,
+                    value=ohs.project.project if ohs.project else "N/A")
+            ws.cell(row=row,
+                    column=3,
+                    value=ohs.Type_of_Investment.monitoring_Type_Code
+                    if ohs.Type_of_Investment else "N/A")
+            ws.cell(row=row,
+                    column=4,
+                    value=ohs.year_of_report.year_name
+                    if ohs.year_of_report else "N/A")
+            ws.cell(row=row,
+                    column=5,
+                    value=ohs.quarter.quarter_name if ohs.quarter else "N/A")
+            ws.cell(row=row,
+                    column=6,
+                    value=ohs.date.strftime('%Y-%m-%d') if ohs.date else "N/A")
+            ws.cell(row=row,
+                    column=7,
+                    value=ohs.region.region_name if ohs.region else "N/A")
+            ws.cell(
+                row=row,
+                column=8,
+                value=ohs.district.district_name if ohs.district else "N/A")
+            ws.cell(row=row,
+                    column=9,
+                    value=ohs.settlement.settlement_name
+                    if ohs.settlement else "N/A")
             ws.cell(row=row, column=10, value=ohs.male or 0)
             ws.cell(row=row, column=11, value=ohs.female or 0)
             ws.cell(row=row, column=12, value=ohs.youth_male or 0)
             ws.cell(row=row, column=13, value=ohs.youth_female or 0)
             ws.cell(row=row, column=14, value=ohs.total_workers)
-            ws.cell(row=row, column=15, value=ohs.quality_at_entry_requirement or "N/A")
+            ws.cell(row=row,
+                    column=15,
+                    value=ohs.quality_at_entry_requirement or "N/A")
             ws.cell(row=row, column=16, value=ohs.working_environment or "N/A")
             ws.cell(row=row, column=17, value=ohs.remarks or "N/A")
-            ws.cell(row=row, column=18, value=ohs.loginUser.username if ohs.loginUser else "N/A")
-            ws.cell(row=row, column=19, value=ohs.date_created.strftime('%Y-%m-%d %H:%M') if ohs.date_created else "N/A")
-        
+            ws.cell(row=row,
+                    column=18,
+                    value=ohs.loginUser.username if ohs.loginUser else "N/A")
+            ws.cell(row=row,
+                    column=19,
+                    value=ohs.date_created.strftime('%Y-%m-%d %H:%M')
+                    if ohs.date_created else "N/A")
+
         # Auto-adjust column widths
         for column in ws.columns:
             max_length = 0
@@ -1548,20 +1732,22 @@ def export_ohs_excel(request):
                     pass
             adjusted_width = min(max_length + 2, 50)
             ws.column_dimensions[column_letter].width = adjusted_width
-        
+
         # Save to response
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
-        
+
         response = HttpResponse(
             output.getvalue(),
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type=
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="OHS_Monitoring_Data.xlsx"'
-        
+        response[
+            'Content-Disposition'] = 'attachment; filename="OHS_Monitoring_Data.xlsx"'
+
         return response
-        
+
     except Exception as e:
         messages.error(request, f'Error exporting OHS data: {str(e)}')
         return redirect('ohs_list')
@@ -1573,30 +1759,32 @@ def community_list(request):
     """Enhanced Community Engagement list view with filtering and pagination"""
     from django.core.paginator import Paginator
     from django.db.models import Sum
-    
+
     try:
         engagements = CommunityConsult_Engagement.objects.select_related(
-            'project_name', 'stake_holder_engagement_Types', 'year', 'loginUser'
-        ).all()
-        
+            'project_name', 'stake_holder_engagement_Types', 'year',
+            'loginUser').all()
+
         # Apply filters
         if request.GET.get('project'):
-            engagements = engagements.filter(project_name=request.GET.get('project'))
-        
+            engagements = engagements.filter(
+                project_name=request.GET.get('project'))
+
         if request.GET.get('engagement_type'):
-            engagements = engagements.filter(stake_holder_engagement_Types=request.GET.get('engagement_type'))
-        
+            engagements = engagements.filter(
+                stake_holder_engagement_Types=request.GET.get(
+                    'engagement_type'))
+
         if request.GET.get('year'):
             engagements = engagements.filter(year=request.GET.get('year'))
-        
+
         if request.GET.get('search'):
             search_term = request.GET.get('search')
             engagements = engagements.filter(
-                models.Q(place_of_event__icontains=search_term) |
-                models.Q(key_issues_discussed__icontains=search_term) |
-                models.Q(reference_number__icontains=search_term)
-            )
-        
+                models.Q(place_of_event__icontains=search_term)
+                | models.Q(key_issues_discussed__icontains=search_term)
+                | models.Q(reference_number__icontains=search_term))
+
         # Pagination
         page_size = request.GET.get('page_size', 10)
         try:
@@ -1605,27 +1793,34 @@ def community_list(request):
                 page_size = 10
         except (ValueError, TypeError):
             page_size = 10
-        
+
         paginator = Paginator(engagements, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
+
         # Get statistics with correct field names
         stats = {
-            'total_engagements': CommunityConsult_Engagement.objects.count(),
-            'filtered_count': engagements.count(),
-            'total_male_participants': engagements.aggregate(total=Sum('male'))['total'] or 0,
-            'total_female_participants': engagements.aggregate(total=Sum('female'))['total'] or 0,
-            'total_participants': engagements.aggregate(total=Sum('total_participants'))['total'] or 0,
+            'total_engagements':
+            CommunityConsult_Engagement.objects.count(),
+            'filtered_count':
+            engagements.count(),
+            'total_male_participants':
+            engagements.aggregate(total=Sum('male'))['total'] or 0,
+            'total_female_participants':
+            engagements.aggregate(total=Sum('female'))['total'] or 0,
+            'total_participants':
+            engagements.aggregate(total=Sum('total_participants'))['total']
+            or 0,
         }
-        
+
         # Get filter data
         from PIU_Financial_mgt.models import Project
         from setup.models import YEAR
-        projects = Project.objects.filter(project='National Electricity and Water Company')
+        projects = Project.objects.filter(
+            project='National Electricity and Water Company')
         years = YEAR.objects.all()
         engagement_types = TypeOfStakeholderEngagement.objects.all()
-        
+
         context = {
             'page_obj': page_obj,
             'stats': stats,
@@ -1634,31 +1829,35 @@ def community_list(request):
             'engagement_types': engagement_types,
             'title': 'Community Engagement'
         }
-        
-        return render(request, 'social_and_env/community/community_list.html', context)
-    
+
+        return render(request, 'social_and_env/community/community_list.html',
+                      context)
+
     except Exception as e:
-        messages.error(request, f'Error loading community engagements: {str(e)}')
+        messages.error(request,
+                       f'Error loading community engagements: {str(e)}')
         # Get filter data for error case
         try:
             from PIU_Financial_mgt.models import Project
             from setup.models import YEAR
-            projects = Project.objects.filter(project='National Electricity and Water Company')
+            projects = Project.objects.filter(
+                project='National Electricity and Water Company')
             years = YEAR.objects.all()
             engagement_types = TypeOfStakeholderEngagement.objects.all()
         except:
             projects = []
             years = []
             engagement_types = []
-        
-        return render(request, 'social_and_env/community/community_list.html', {
-            'page_obj': None,
-            'stats': {},
-            'projects': projects,
-            'years': years,
-            'engagement_types': engagement_types,
-            'title': 'Community Engagement'
-        })
+
+        return render(
+            request, 'social_and_env/community/community_list.html', {
+                'page_obj': None,
+                'stats': {},
+                'projects': projects,
+                'years': years,
+                'engagement_types': engagement_types,
+                'title': 'Community Engagement'
+            })
 
 
 @login_required
@@ -1671,13 +1870,16 @@ def community_add(request):
                 engagement = form.save(commit=False)
                 engagement.loginUser = request.user
                 engagement.save()
-                messages.success(request, 'Community engagement record added successfully.')
+                messages.success(
+                    request, 'Community engagement record added successfully.')
                 return redirect('community_list')
             except Exception as e:
-                messages.error(request, f'Error saving community engagement record: {str(e)}')
+                messages.error(
+                    request,
+                    f'Error saving community engagement record: {str(e)}')
     else:
         form = CommunityEngagementForm()
-    
+
     return render(request, 'social_and_env/community/community_form.html', {
         'form': form,
         'title': 'Add Community Engagement Record'
@@ -1688,19 +1890,26 @@ def community_add(request):
 def community_detail(request, pk):
     """Community Engagement detail view"""
     try:
-        engagement = get_object_or_404(CommunityConsult_Engagement.objects.select_related(
-            'project_name', 'stake_holder_engagement_Types', 'year', 'loginUser'
-        ), pk=pk)
-        
+        engagement = get_object_or_404(
+            CommunityConsult_Engagement.objects.select_related(
+                'project_name', 'stake_holder_engagement_Types', 'year',
+                'loginUser'),
+            pk=pk)
+
         context = {
-            'engagement': engagement,
-            'title': f'Community Engagement - {engagement.project_name.project if engagement.project_name else "Unknown"}',
+            'engagement':
+            engagement,
+            'title':
+            f'Community Engagement - {engagement.project_name.project if engagement.project_name else "Unknown"}',
         }
-        
-        return render(request, 'social_and_env/community/community_detail.html', context)
-    
+
+        return render(request,
+                      'social_and_env/community/community_detail.html',
+                      context)
+
     except Exception as e:
-        messages.error(request, f'Error loading community engagement details: {str(e)}')
+        messages.error(
+            request, f'Error loading community engagement details: {str(e)}')
         return redirect('community_list')
 
 
@@ -1708,21 +1917,27 @@ def community_detail(request, pk):
 def community_edit(request, pk):
     """Edit Community Engagement record"""
     engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
-    
+
     if request.method == 'POST':
-        form = CommunityEngagementForm(request.POST, request.FILES, instance=engagement)
+        form = CommunityEngagementForm(request.POST,
+                                       request.FILES,
+                                       instance=engagement)
         if form.is_valid():
             try:
                 engagement = form.save(commit=False)
                 engagement.loginUser = request.user
                 engagement.save()
-                messages.success(request, 'Community engagement record updated successfully.')
+                messages.success(
+                    request,
+                    'Community engagement record updated successfully.')
                 return redirect('community_list')
             except Exception as e:
-                messages.error(request, f'Error updating community engagement record: {str(e)}')
+                messages.error(
+                    request,
+                    f'Error updating community engagement record: {str(e)}')
     else:
         form = CommunityEngagementForm(instance=engagement)
-    
+
     return render(request, 'social_and_env/community/community_form.html', {
         'form': form,
         'title': 'Edit Community Engagement Record'
@@ -1733,19 +1948,23 @@ def community_edit(request, pk):
 def community_delete(request, pk):
     """Delete Community Engagement record"""
     engagement = get_object_or_404(CommunityConsult_Engagement, pk=pk)
-    
+
     if request.method == 'POST':
         try:
             engagement.delete()
-            messages.success(request, 'Community engagement record deleted successfully.')
+            messages.success(
+                request, 'Community engagement record deleted successfully.')
             return redirect('community_list')
         except Exception as e:
-            messages.error(request, f'Error deleting community engagement record: {str(e)}')
-    
-    return render(request, 'social_and_env/community/community_confirm_delete.html', {
-        'engagement': engagement,
-        'title': 'Delete Community Engagement Record'
-    })
+            messages.error(
+                request,
+                f'Error deleting community engagement record: {str(e)}')
+
+    return render(request,
+                  'social_and_env/community/community_confirm_delete.html', {
+                      'engagement': engagement,
+                      'title': 'Delete Community Engagement Record'
+                  })
 
 
 # ======================== ESIA Views ========================
@@ -1753,20 +1972,20 @@ def community_delete(request, pk):
 def esia_list(request):
     """Enhanced ESIA list view with filtering and pagination"""
     from django.core.paginator import Paginator
-    
+
     try:
-        esias = ESIA.objects.select_related(
-            'project_name', 'type_of_investment', 'loginUser'
-        ).all()
-        
+        esias = ESIA.objects.select_related('project_name',
+                                            'type_of_investment',
+                                            'loginUser').all()
+
         # Apply filters
         if request.GET.get('project'):
             esias = esias.filter(project_name=request.GET.get('project'))
-        
+
         if request.GET.get('region'):
             # Since ESIA doesn't have region field, we'll skip this filter
             pass
-        
+
         # Pagination
         page_size = request.GET.get('page_size', 10)
         try:
@@ -1775,25 +1994,28 @@ def esia_list(request):
                 page_size = 10
         except (ValueError, TypeError):
             page_size = 10
-        
+
         paginator = Paginator(esias, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
+
         # Get statistics
         stats = {
-            'total_esia': ESIA.objects.count(),
-            'filtered_count': esias.count(),
-            'total_communities': esias.aggregate(total=Sum('number_of_communities'))['total'] or 0,
+            'total_esia':
+            ESIA.objects.count(),
+            'filtered_count':
+            esias.count(),
+            'total_communities':
+            esias.aggregate(total=Sum('number_of_communities'))['total'] or 0,
         }
-        
+
         # Get filter data
         from PIU_Financial_mgt.models import Project
         projects = Project.objects.all()
         regions = Regions.objects.all()
         years = [record.date_created.year for record in ESIA.objects.all()]
         years = sorted(list(set(years)))
-        
+
         context = {
             'page_obj': page_obj,
             'stats': stats,
@@ -1802,9 +2024,9 @@ def esia_list(request):
             'years': years,
             'title': 'ESIA/ESMP Management'
         }
-        
+
         return render(request, 'social_and_env/esia/esia_list.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading ESIA/ESMP records: {str(e)}')
         # Get filter data for error case
@@ -1812,15 +2034,16 @@ def esia_list(request):
         projects = Project.objects.all()
         regions = Regions.objects.all()
         years = []
-        
-        return render(request, 'social_and_env/esia/esia_list.html', {
-            'page_obj': None,
-            'stats': {},
-            'projects': projects,
-            'regions': regions,
-            'years': years,
-            'title': 'ESIA/ESMP Management'
-        })
+
+        return render(
+            request, 'social_and_env/esia/esia_list.html', {
+                'page_obj': None,
+                'stats': {},
+                'projects': projects,
+                'regions': regions,
+                'years': years,
+                'title': 'ESIA/ESMP Management'
+            })
 
 
 @login_required
@@ -1833,13 +2056,15 @@ def esia_add(request):
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
                 esia.save()
-                messages.success(request, 'ESIA/ESMP record added successfully.')
+                messages.success(request,
+                                 'ESIA/ESMP record added successfully.')
                 return redirect('esia_list')
             except Exception as e:
-                messages.error(request, f'Error saving ESIA/ESMP record: {str(e)}')
+                messages.error(request,
+                               f'Error saving ESIA/ESMP record: {str(e)}')
     else:
         form = ESIAForm()
-    
+
     return render(request, 'social_and_env/esia/esia_form.html', {
         'form': form,
         'title': 'Add ESIA/ESMP Record'
@@ -1851,29 +2076,28 @@ def esia_detail(request, pk):
     """ESIA/ESMP detail view"""
     try:
         esia = get_object_or_404(ESIA.objects.select_related(
-            'project_name', 'type_of_investment', 'loginUser'
-        ), pk=pk)
-        
+            'project_name', 'type_of_investment', 'loginUser'),
+                                 pk=pk)
+
         context = {
-            'esia': esia,
-            'title': f'ESIA/ESMP Details - {esia.project_name.project if esia.project_name else "Unknown"}',
+            'esia':
+            esia,
+            'title':
+            f'ESIA/ESMP Details - {esia.project_name.project if esia.project_name else "Unknown"}',
         }
-        
+
         return render(request, 'social_and_env/esia/esia_detail.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading ESIA/ESMP details: {str(e)}')
         return redirect('esia_list')
-
-
-
 
 
 @login_required
 def esia_delete(request, pk):
     """Delete ESIA record"""
     esia = get_object_or_404(ESIA, pk=pk)
-    
+
     if request.method == 'POST':
         try:
             esia.delete()
@@ -1881,7 +2105,7 @@ def esia_delete(request, pk):
             return redirect('esia_list')
         except Exception as e:
             messages.error(request, f'Error deleting ESIA record: {str(e)}')
-    
+
     return render(request, 'social_and_env/esia/esia_confirm_delete.html', {
         'esia': esia,
         'title': 'Delete ESIA Record'
@@ -1893,22 +2117,23 @@ def esia_delete(request, pk):
 def load_investment_types(request):
     """Load investment types based on project selection"""
     from django.http import HttpResponse
-    
+
     project_id = request.GET.get('project')
     if not project_id:
         return HttpResponse('<option value="">Select Investment Type</option>')
-    
+
     try:
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).values_list('type_of_investment', flat=True).distinct().order_by('type_of_investment')
-        
+            project=project_id).values_list(
+                'type_of_investment',
+                flat=True).distinct().order_by('type_of_investment')
+
         options = '<option value="">Select Investment Type</option>'
         for investment_type in investment_types:
             options += f'<option value="{investment_type}">{investment_type}</option>'
-        
+
         return HttpResponse(options)
-    
+
     except Exception as e:
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
@@ -1917,51 +2142,49 @@ def load_investment_types(request):
 def load_investment_types_grievance(request):
     """Load investment types for Grievance based on project selection"""
     from django.http import HttpResponse
-    
+
     project_id = request.GET.get('project')
     if not project_id:
         return HttpResponse('<option value="">Select Investment Type</option>')
-    
+
     try:
         # Filter for ESS monitoring types specifically for grievance management
         investment_types = KPI_For_Contract.objects.filter(
             project=project_id,
-            monitoring_type_id='ESS'
-        ).order_by('type_of_investment')
-        
+            monitoring_type_id='ESS').order_by('type_of_investment')
+
         options = '<option value="">Select Investment Type</option>'
         for investment in investment_types:
             # Use monitoring_Type_Code as value since form expects it
             options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
-        
+
         return HttpResponse(options)
-    
+
     except Exception as e:
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
-
-
 
 
 @login_required
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
     from django.http import HttpResponse
-    
+
     district_id = request.GET.get('district')
     if not district_id:
         return HttpResponse('<option value="">Select Settlement</option>')
-    
+
     try:
         settlements = Settlement.objects.filter(
-            district_code=district_id
-        ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
-        
+            district_code=district_id).values_list(
+                'settlement_code',
+                'settlement_name').order_by('settlement_name')
+
         options = '<option value="">Select Settlement</option>'
         for settlement_code, settlement_name in settlements:
             options += f'<option value="{settlement_code}">{settlement_name}</option>'
-        
+
         return HttpResponse(options)
-    
+
     except Exception as e:
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
@@ -1970,52 +2193,56 @@ def load_settlements_ohs(request):
 def test_cascading_dropdown(request):
     """Test endpoint to validate cascading dropdown functionality"""
     from django.http import JsonResponse
-    
+
     try:
         # Test data for cascading dropdowns
         test_data = {
-            'status': 'success',
-            'message': 'Cascading dropdown test endpoint working',
-            'regions': list(Regions.objects.values('region_code', 'region_name')),
-            'districts': list(Districts.objects.values('district_code', 'district_name', 'region_code')),
-            'settlements': list(Settlement.objects.values('settlement_code', 'settlement_name', 'district_code')),
-            'projects': list(Project.objects.values('project', 'project_name')),
+            'status':
+            'success',
+            'message':
+            'Cascading dropdown test endpoint working',
+            'regions':
+            list(Regions.objects.values('region_code', 'region_name')),
+            'districts':
+            list(
+                Districts.objects.values('district_code', 'district_name',
+                                         'region_code')),
+            'settlements':
+            list(
+                Settlement.objects.values('settlement_code', 'settlement_name',
+                                          'district_code')),
+            'projects':
+            list(Project.objects.values('project', 'project_name')),
         }
-        
+
         return JsonResponse(test_data)
-    
+
     except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        })
-
-
-
-
-
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 @login_required
 def load_investment_types_pap(request):
     """Load investment types for PAP based on project selection - HTMX compatible"""
     from django.http import HttpResponse, JsonResponse
-    
-    project_id = request.GET.get('project') or request.GET.get('project_id') or request.GET.get('id_project')
-    
+
+    project_id = request.GET.get('project') or request.GET.get(
+        'project_id') or request.GET.get('id_project')
+
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
-    
+
     if not project_id:
         if is_htmx:
-            return HttpResponse('<option value="">Select Investment Type</option>')
+            return HttpResponse(
+                '<option value="">Select Investment Type</option>')
         return JsonResponse({'investment_types': []})
 
     try:
         # Get investment types from database for all projects
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).distinct().order_by('type_of_investment')
+            project=project_id,
+            monitoring_type_id='ESS').distinct().order_by('type_of_investment')
 
         if is_htmx:
             # Return HTML options for HTMX
@@ -2025,12 +2252,10 @@ def load_investment_types_pap(request):
             return HttpResponse(options)
         else:
             # Return JSON for regular AJAX
-            investment_data = [
-                {
-                    'id': inv.monitoring_Type_Code,
-                    'name': inv.type_of_investment
-                } for inv in investment_types
-            ]
+            investment_data = [{
+                'id': inv.monitoring_Type_Code,
+                'name': inv.type_of_investment
+            } for inv in investment_types]
             return JsonResponse({'investment_types': investment_data})
 
     except Exception as e:
@@ -2043,22 +2268,23 @@ def load_investment_types_pap(request):
 def load_investment_types_esia(request):
     """Load investment types for ESIA based on project selection"""
     from django.http import HttpResponse
-    
+
     project_id = request.GET.get('project')
     if not project_id:
         return HttpResponse('<option value="">Select Investment Type</option>')
-    
+
     try:
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id
-        ).values_list('type_of_investment', flat=True).distinct().order_by('type_of_investment')
-        
+            project=project_id).values_list(
+                'type_of_investment',
+                flat=True).distinct().order_by('type_of_investment')
+
         options = '<option value="">Select Investment Type</option>'
         for investment_type in investment_types:
             options += f'<option value="{investment_type}">{investment_type}</option>'
-        
+
         return HttpResponse(options)
-    
+
     except Exception as e:
         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
@@ -2068,48 +2294,66 @@ def esia_export_excel(request):
     """Export ESIA data to Excel"""
     import openpyxl
     from django.http import HttpResponse
-    
+
     try:
         # Get all ESIA records
-        esias = ESIA.objects.select_related(
-            'project', 'Type_of_Investment', 'year_of_report', 'quarter', 'loginUser'
-        ).all()
-        
+        esias = ESIA.objects.select_related('project', 'Type_of_Investment',
+                                            'year_of_report', 'quarter',
+                                            'loginUser').all()
+
         # Create workbook and worksheet
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = 'ESIA Data'
-        
+
         # Add headers
         headers = [
-            'Project', 'Investment Type', 'Year', 'Quarter', 'Region', 
-            'Number of Communities', 'ESIA Findings', 'Created By', 'Date Created'
+            'Project', 'Investment Type', 'Year', 'Quarter', 'Region',
+            'Number of Communities', 'ESIA Findings', 'Created By',
+            'Date Created'
         ]
-        
+
         for col, header in enumerate(headers, 1):
             ws.cell(row=1, column=col, value=header)
-        
+
         # Add data rows
         for row, esia in enumerate(esias, 2):
-            ws.cell(row=row, column=1, value=esia.project.project if esia.project else '')
-            ws.cell(row=row, column=2, value=esia.Type_of_Investment.type_of_investment if esia.Type_of_Investment else '')
-            ws.cell(row=row, column=3, value=esia.year_of_report.year if esia.year_of_report else '')
-            ws.cell(row=row, column=4, value=esia.quarter.quarter if esia.quarter else '')
+            ws.cell(row=row,
+                    column=1,
+                    value=esia.project.project if esia.project else '')
+            ws.cell(row=row,
+                    column=2,
+                    value=esia.Type_of_Investment.type_of_investment
+                    if esia.Type_of_Investment else '')
+            ws.cell(
+                row=row,
+                column=3,
+                value=esia.year_of_report.year if esia.year_of_report else '')
+            ws.cell(row=row,
+                    column=4,
+                    value=esia.quarter.quarter if esia.quarter else '')
             ws.cell(row=row, column=5, value=esia.region)
             ws.cell(row=row, column=6, value=esia.number_of_communities)
             ws.cell(row=row, column=7, value=esia.esia_findings)
-            ws.cell(row=row, column=8, value=esia.loginUser.username if esia.loginUser else '')
-            ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d') if esia.date_created else '')
-        
+            ws.cell(row=row,
+                    column=8,
+                    value=esia.loginUser.username if esia.loginUser else '')
+            ws.cell(row=row,
+                    column=9,
+                    value=esia.date_created.strftime('%Y-%m-%d')
+                    if esia.date_created else '')
+
         # Set up response
         response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type=
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="esia_data.xlsx"'
-        
+        response[
+            'Content-Disposition'] = 'attachment; filename="esia_data.xlsx"'
+
         wb.save(response)
         return response
-    
+
     except Exception as e:
         messages.error(request, f'Error exporting ESIA data: {str(e)}')
         return redirect('esia_list')
@@ -2117,20 +2361,89 @@ def esia_export_excel(request):
 
 @login_required
 def pap_detail(request, pk):
-    """PAP detail view"""
+    """PAP detail view with document management"""
     try:
         pap = get_object_or_404(PAP.objects.select_related(
-            'project', 'type_of_investment', 'region', 'district', 
-            'pap_category', 'loginUser'
-        ), pk=pk)
+            'project', 'type_of_investment', 'region', 'district',
+            'pap_category', 'loginUser'),
+                                pk=pk)
         
+        # Get all documents for this PAP
+        documents = pap.documents.all().order_by('-upload_date')
+
         context = {
             'pap': pap,
+            'documents': documents,
+            'document_form': PAPDocumentForm(),
             'title': f'PAP Details - {pap.pap_name}',
         }
-        
+
         return render(request, 'social_and_env/pap/pap_detail.html', context)
-    
+
     except Exception as e:
         messages.error(request, f'Error loading PAP details: {str(e)}')
         return redirect('pap_list')
+
+
+@login_required
+def pap_upload_document(request, pk):
+    """Upload document for PAP"""
+    pap = get_object_or_404(PAP, pk=pk)
+    
+    if request.method == 'POST':
+        form = PAPDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                document = form.save(commit=False)
+                document.pap = pap
+                document.uploaded_by = request.user
+                document.save()
+                messages.success(request, f'Document "{document.document_name}" uploaded successfully.')
+                return redirect('pap_detail', pk=pk)
+            except Exception as e:
+                messages.error(request, f'Error uploading document: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    
+    return redirect('pap_detail', pk=pk)
+
+
+@login_required
+def pap_delete_document(request, pk, doc_id):
+    """Delete PAP document"""
+    pap = get_object_or_404(PAP, pk=pk)
+    document = get_object_or_404(PAPDocument, id=doc_id, pap=pap)
+    
+    if request.method == 'POST':
+        try:
+            # Delete the file from storage
+            if document.document_file:
+                document.document_file.delete()
+            document.delete()
+            messages.success(request, 'Document deleted successfully.')
+        except Exception as e:
+            messages.error(request, f'Error deleting document: {str(e)}')
+    
+    return redirect('pap_detail', pk=pk)
+
+
+@login_required
+def pap_download_document(request, pk, doc_id):
+    """Download PAP document"""
+    pap = get_object_or_404(PAP, pk=pk)
+    document = get_object_or_404(PAPDocument, id=doc_id, pap=pap)
+    
+    try:
+        if document.document_file:
+            response = HttpResponse(document.document_file.read(), 
+                                  content_type='application/octet-stream')
+            response['Content-Disposition'] = f'attachment; filename="{document.document_file.name.split("/")[-1]}"'
+            return response
+        else:
+            messages.error(request, 'Document file not found.')
+            return redirect('pap_detail', pk=pk)
+    except Exception as e:
+        messages.error(request, f'Error downloading document: {str(e)}')
+        return redirect('pap_detail', pk=pk)
