@@ -69,8 +69,9 @@ class ESIAForm(forms.ModelForm):
         if self.instance and self.instance.pk and hasattr(self.instance, 'type_of_investment'):
             try:
                 if self.instance.type_of_investment:
-                    # Set the current value for the CharField
-                    self.initial['type_of_investment'] = self.instance.type_of_investment.monitoring_Type_Code
+                    # Set the current value for the CharField - this is crucial for edit forms
+                    current_code = self.instance.type_of_investment.monitoring_Type_Code
+                    self.initial['type_of_investment'] = current_code
                     
                     # Populate the dropdown with options for this project
                     from PIU_Financial_mgt.models import KPI_For_Contract
@@ -80,14 +81,18 @@ class ESIAForm(forms.ModelForm):
                     ).distinct().order_by('type_of_investment')
                     
                     choices = [('', 'Select Investment Type')]
-                    for investment in investment_objects:
-                        choices.append((investment.monitoring_Type_Code, investment.type_of_investment))
                     
-                    # If no database options, add current value and fallbacks
+                    # Add current value first to ensure it's available
+                    current_name = str(self.instance.type_of_investment.type_of_investment) if hasattr(self.instance.type_of_investment, 'type_of_investment') else str(self.instance.type_of_investment)
+                    choices.append((current_code, current_name))
+                    
+                    # Add other project-specific options
+                    for investment in investment_objects:
+                        if investment.monitoring_Type_Code != current_code:  # Avoid duplicates
+                            choices.append((investment.monitoring_Type_Code, investment.type_of_investment))
+                    
+                    # If no database options, add fallbacks
                     if not investment_objects.exists():
-                        choices.append((self.instance.type_of_investment.monitoring_Type_Code, 
-                                      str(self.instance.type_of_investment)))
-                        # Add fallback options
                         fallback_options = [
                             ('ESS001', 'Environmental Impact Assessment'),
                             ('ESS002', 'Social Impact Assessment'),
@@ -100,8 +105,27 @@ class ESIAForm(forms.ModelForm):
                                 choices.append((code, name))
                     
                     self.fields['type_of_investment'].widget.choices = choices
-            except Exception:
-                pass
+                    
+                    # Ensure the field value is set properly
+                    if 'type_of_investment' in self.data:
+                        # Form submission - keep the submitted value
+                        pass  
+                    else:
+                        # Initial load - set the saved value
+                        self.fields['type_of_investment'].initial = current_code
+                        
+            except Exception as e:
+                # In case of error, at least try to set basic fallback
+                if hasattr(self.instance, 'type_of_investment') and self.instance.type_of_investment:
+                    try:
+                        fallback_code = getattr(self.instance.type_of_investment, 'monitoring_Type_Code', 'ESS001')
+                        self.initial['type_of_investment'] = fallback_code
+                        self.fields['type_of_investment'].widget.choices = [
+                            ('', 'Select Investment Type'),
+                            (fallback_code, str(self.instance.type_of_investment))
+                        ]
+                    except:
+                        pass
         
         # Make all fields required
         for field_name, field in self.fields.items():

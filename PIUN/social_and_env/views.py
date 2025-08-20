@@ -161,7 +161,19 @@ def esia_edit(request, pk):
         form = ESIAForm(instance=esia)
         # Ensure the investment type is properly populated for editing
         if esia.type_of_investment:
-            form.fields['type_of_investment'].initial = esia.type_of_investment.monitoring_Type_Code
+            investment_code = esia.type_of_investment.monitoring_Type_Code
+            form.fields['type_of_investment'].initial = investment_code
+            
+            # Also set the widget value to ensure it displays correctly
+            from django.forms.widgets import Select
+            if hasattr(form.fields['type_of_investment'].widget, 'choices'):
+                current_choices = list(form.fields['type_of_investment'].widget.choices)
+                # Ensure current value is in choices
+                current_in_choices = any(choice[0] == investment_code for choice in current_choices)
+                if not current_in_choices:
+                    current_name = str(esia.type_of_investment.type_of_investment) if hasattr(esia.type_of_investment, 'type_of_investment') else str(esia.type_of_investment)
+                    current_choices.append((investment_code, current_name))
+                    form.fields['type_of_investment'].widget.choices = current_choices
 
     context = {'form': form, 'esia': esia, 'title': 'Edit ESIA/ESMP Record'}
     return render(request, 'social_and_env/esia/esia_edit.html', context)
