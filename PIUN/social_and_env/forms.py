@@ -300,75 +300,16 @@ class PAPForm(forms.ModelForm):
         """Custom validation for type_of_investment field"""
         type_of_investment = self.cleaned_data.get('type_of_investment')
         
-        # If no investment type selected, try to find a default
-        if not type_of_investment:
-            project = self.cleaned_data.get('project')
-            if project:
-                from PIU_Financial_mgt.models import KPI_For_Contract
-                first_investment = KPI_For_Contract.objects.filter(project=project).first()
-                if first_investment:
-                    return first_investment
-        
+        # Always return the value as-is for cascading dropdown fields
+        # Let the view handle defaults if needed
         return type_of_investment
     
     def clean(self):
         cleaned_data = super().clean()
         
-        # Handle cascading dropdowns and required fields with defaults
-        project = cleaned_data.get('project')
-        region = cleaned_data.get('region')
-        
-        # Auto-select investment type if not provided or invalid
-        type_of_investment = cleaned_data.get('type_of_investment')
-        if project:
-            if not type_of_investment:
-                # Find first investment type for this project
-                first_investment = KPI_For_Contract.objects.filter(project=project).first()
-                if first_investment:
-                    cleaned_data['type_of_investment'] = first_investment
-            else:
-                # Validate that selected investment type belongs to the project
-                valid_investments = KPI_For_Contract.objects.filter(project=project)
-                if type_of_investment not in valid_investments:
-                    # Use first valid investment type for this project
-                    first_investment = valid_investments.first()
-                    if first_investment:
-                        cleaned_data['type_of_investment'] = first_investment
-        
-        # Auto-select district if not provided or invalid
-        district = cleaned_data.get('district')
-        if region:
-            if not district:
-                # Find first district for this region
-                first_district = Districts.objects.filter(region_code_id=region.pk).first()
-                if first_district:
-                    cleaned_data['district'] = first_district
-            else:
-                # Validate that selected district belongs to the region
-                valid_districts = Districts.objects.filter(region_code_id=region.pk)
-                if district not in valid_districts:
-                    # Use first valid district for this region
-                    first_district = valid_districts.first()
-                    if first_district:
-                        cleaned_data['district'] = first_district
-        
-        # Auto-select settlement if not provided or invalid
-        district = cleaned_data.get('district')  # Get updated district value
-        settlement = cleaned_data.get('pap_Current_Address')
-        if district:
-            if not settlement:
-                # Find first settlement for this district
-                first_settlement = Settlement.objects.filter(district_code_id=district.pk).first()
-                if first_settlement:
-                    cleaned_data['pap_Current_Address'] = first_settlement
-            else:
-                # Validate that selected settlement belongs to the district
-                valid_settlements = Settlement.objects.filter(district_code_id=district.pk)
-                if settlement not in valid_settlements:
-                    # Use first valid settlement for this district
-                    first_settlement = valid_settlements.first()
-                    if first_settlement:
-                        cleaned_data['pap_Current_Address'] = first_settlement
+        # Don't perform cascading dropdown validation here
+        # Let the view handle defaults and validation
+        # This prevents "Select a valid choice" errors for cascading fields
         
         # Ensure required lookup fields have defaults
         if not cleaned_data.get('type_of_pap'):
