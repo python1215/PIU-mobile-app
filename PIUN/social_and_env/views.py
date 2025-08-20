@@ -2488,7 +2488,7 @@ def export_grievance_excel(request):
 
     try:
         # Get all grievance records
-        grievances = Grievance.objects.select_related(
+        grievances = GrievianceMonitoringLog.objects.select_related(
             'project', 'type_of_investment', 'decision_outcome', 'loginUser'
         ).all()
 
@@ -2523,7 +2523,7 @@ def export_grievance_excel(request):
             ws.cell(row=row, column=10, value=grievance.complaint_content)
             ws.cell(row=row, column=11, value=grievance.was_recieved_of_complaint_ack)
             ws.cell(row=row, column=12, value=grievance.expected_decision_date.strftime('%Y-%m-%d') if grievance.expected_decision_date else '')
-            ws.cell(row=row, column=13, value=grievance.decision_outcome.grievance_outcome if grievance.decision_outcome else '')
+            ws.cell(row=row, column=13, value=str(grievance.decision_outcome) if grievance.decision_outcome else '')
             ws.cell(row=row, column=14, value=grievance.was_decison_communicated_to_complainant)
             ws.cell(row=row, column=15, value=grievance.communication_method)
             ws.cell(row=row, column=16, value=grievance.was_complainant_satisfied_with_decision)
