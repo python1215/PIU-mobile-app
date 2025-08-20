@@ -88,13 +88,13 @@
             <div class="col-md-2">
                 <label class="form-label">Page Size</label>
                 <select name="page_size" class="form-select">
-                    <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10</option>
-                    <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25</option>
-                    <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50</option>
-                    <option value="100" {% if request.GET.page_size == "100" %}selected{% endif %}>100</option>
+                    <option value="10" {% if request.GET.page_size == '10' %}selected{% endif %}>10</option>
+                    <option value="25" {% if request.GET.page_size == '25' %}selected{% endif %}>25</option>
+                    <option value="50" {% if request.GET.page_size == '50' %}selected{% endif %}>50</option>
+                    <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-12 d-flex justify-content-end mt-3">
                 <button type="submit" class="btn btn-primary me-2">
                     <i class="bi bi-search me-1"></i>Apply Filters
                 </button>
