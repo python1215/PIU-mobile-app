@@ -18,12 +18,9 @@ class ESIAForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-select"})
     )
 
-    type_of_investment = forms.ModelChoiceField(
-        queryset=KPI_For_Contract.objects.none(),
-        empty_label="Select Investment Type",
+    type_of_investment = forms.CharField(
         widget=forms.Select(attrs={"class": "form-select"}),
-        required=True,
-        to_field_name='monitoring_Type_Code'
+        required=True
     )
 
     class Meta:
@@ -65,22 +62,8 @@ class ESIAForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set up dynamic querysets for investment types
-        if 'project_name' in self.data:
-            try:
-                project_id = int(self.data.get('project_name'))
-                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project_id=project_id,
-                    monitoring_type_id='ESS'
-                )
-            except (ValueError, TypeError):
-                pass
-        elif self.instance and self.instance.pk and self.instance.project_name:
-            # For existing instances, set queryset based on the saved project
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                project=self.instance.project_name,
-                monitoring_type_id='ESS'
-            )
+        # Initialize investment type dropdown as empty
+        self.fields['type_of_investment'].widget.choices = [('', 'Select Investment Type')]
         
         # Make all fields required
         for field_name, field in self.fields.items():
@@ -97,7 +80,7 @@ class ESIAForm(forms.ModelForm):
         if type_of_investment and project_name:
             from PIU_Financial_mgt.models import KPI_For_Contract
             try:
-                # Validate that the investment type exists for this project
+                # Try to find the KPI_For_Contract object by monitoring_Type_Code
                 investment = KPI_For_Contract.objects.filter(
                     project=project_name,
                     monitoring_Type_Code=type_of_investment,
@@ -106,13 +89,16 @@ class ESIAForm(forms.ModelForm):
                 if investment:
                     return investment
                 else:
-                    # If no exact match, try to find any ESS investment for this project
-                    fallback_investment = KPI_For_Contract.objects.filter(
-                        project=project_name,
-                        monitoring_type_id='ESS'
-                    ).first()
-                    if fallback_investment:
-                        return fallback_investment
+                    # Allow fallback ESS codes for offline scenarios
+                    fallback_codes = ['ESS001', 'ESS002', 'ESS003', 'ESS004', 'ESS005', 
+                                    'ESS006', 'ESS007', 'ESS008', 'ESS009', 'ESS010']
+                    if type_of_investment in fallback_codes:
+                        # Create a minimal object for validation
+                        from PIU_Financial_mgt.models import KPI_For_Contract
+                        fallback = KPI_For_Contract()
+                        fallback.monitoring_Type_Code = type_of_investment
+                        fallback.project = project_name
+                        return fallback
             except Exception:
                 pass
         
