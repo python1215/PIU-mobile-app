@@ -520,9 +520,9 @@ def pap_add(request):
                 pap = form.save(commit=False)
                 pap.loginUser = request.user
 
-                # Convert CharField values to model instances for cascading dropdowns
-                type_of_investment_value = form.cleaned_data.get('type_of_investment')
-                if type_of_investment_value and isinstance(type_of_investment_value, str):
+                # Handle the excluded CharField fields manually by getting raw POST data
+                type_of_investment_value = request.POST.get('type_of_investment')
+                if type_of_investment_value:
                     try:
                         kpi = KPI_For_Contract.objects.get(monitoring_Type_Code=type_of_investment_value)
                         pap.type_of_investment = kpi
@@ -530,8 +530,8 @@ def pap_add(request):
                         # Use first available for this project as fallback
                         pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
 
-                district_value = form.cleaned_data.get('district')
-                if district_value and isinstance(district_value, str):
+                district_value = request.POST.get('district')
+                if district_value:
                     try:
                         district = Districts.objects.get(district_code=district_value)
                         pap.district = district
@@ -540,8 +540,8 @@ def pap_add(request):
                         if pap.region:
                             pap.district = Districts.objects.filter(region_code=pap.region).first()
 
-                settlement_value = form.cleaned_data.get('pap_Current_Address')
-                if settlement_value and isinstance(settlement_value, str):
+                settlement_value = request.POST.get('pap_Current_Address')
+                if settlement_value:
                     try:
                         settlement = Settlement.objects.get(settlement_code=settlement_value)
                         pap.pap_Current_Address = settlement

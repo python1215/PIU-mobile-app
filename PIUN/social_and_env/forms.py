@@ -176,10 +176,12 @@ class PAPForm(forms.ModelForm):
 
     class Meta:
         model = PAP
+        # Exclude the CharField cascading dropdown fields from automatic processing
+        exclude = ['type_of_investment', 'district', 'pap_Current_Address']
         fields = [
-            'project', 'type_of_investment', 'pap_identification_number',
-            'type_of_pap', 'region', 'district', 'pap_name', 'sex',
-            'pap_category', 'pap_Current_Address', 'vulnerability_category',
+            'project', 'pap_identification_number',
+            'type_of_pap', 'region', 'pap_name', 'sex',
+            'pap_category', 'vulnerability_category',
             'location_of_impact', 'type_of_impact', 'nature_of_compensation',
             'amount', 'area', 'pap_compensated', 'compensation_date',
             'compensation_RefNo', 'pre_project_situation', 'remarks'
