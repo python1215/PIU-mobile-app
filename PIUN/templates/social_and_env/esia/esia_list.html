@@ -73,37 +73,16 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label">Project</label>
-                <select name="project_name" class="form-select">
-                    <option value="">All Projects</option>
-                    {% for project in projects %}
-                        <option value="{{ project.id }}" {% if request.GET.project_name == project.id|stringformat:"s" %}selected{% endif %}>
-                            {{ project.project_name }}
-                        </option>
-                    {% endfor %}
-                </select>
+                {{ filter.form.project_name.label_tag }}
+                {{ filter.form.project_name }}
             </div>
             <div class="col-md-3">
-                <label class="form-label">Investment Type</label>
-                <select name="type_of_investment" class="form-select">
-                    <option value="">All Investment Types</option>
-                    {% for investment in investment_types %}
-                        <option value="{{ investment.id }}" {% if request.GET.type_of_investment == investment.id|stringformat:"s" %}selected{% endif %}>
-                            {{ investment.type_of_investment }}
-                        </option>
-                    {% endfor %}
-                </select>
+                {{ filter.form.type_of_investment.label_tag }}
+                {{ filter.form.type_of_investment }}
             </div>
             <div class="col-md-2">
-                <label class="form-label">Year</label>
-                <select name="year" class="form-select">
-                    <option value="">All Years</option>
-                    {% for year in years %}
-                        <option value="{{ year }}" {% if request.GET.year == year %}selected{% endif %}>
-                            {{ year }}
-                        </option>
-                    {% endfor %}
-                </select>
+                {{ filter.form.project_locations.label_tag }}
+                {{ filter.form.project_locations }}
             </div>
             <div class="col-md-2">
                 <label class="form-label">Page Size</label>
