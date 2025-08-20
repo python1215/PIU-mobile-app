@@ -1,0 +1,82 @@
+@login_required
+def load_investment_types_pap(request):
+    """Load investment types for PAP based on project selection - HTMX compatible"""
+    from django.http import HttpResponse, JsonResponse
+    
+    project_id = request.GET.get('project') or request.GET.get('project_id') or request.GET.get('id_project')
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    
+    if not project_id:
+        if is_htmx:
+            return HttpResponse('<option value="">Select Investment Type</option>')
+        return JsonResponse({'investment_types': []})
+
+    try:
+        # Convert project_id to string if it's 'D309D6530GM'
+        if project_id == 'D309D6530GM' or str(project_id) == 'D309D6530GM':
+            # Use hardcoded investment types for this project
+            investment_options = [
+                ('AMR-Meters', 'AMR-Meters'),
+                ('Azorom', 'Azorom'), 
+                ('BB1 Compliance', 'BB1 Compliance'),
+                ('Bulk Supply Point Enhancement', 'Bulk Supply Point Enhancement'),
+                ('Customer Service Enhancement', 'Customer Service Enhancement'),
+                ('Distribution Automation', 'Distribution Automation'),
+                ('Distribution Enhancement', 'Distribution Enhancement'),
+                ('Distribution Network Enhancement', 'Distribution Network Enhancement'),
+                ('Energy Efficiency', 'Energy Efficiency'),
+                ('Financial Management Enhancement', 'Financial Management Enhancement'),
+                ('Generation Capacity Enhancement', 'Generation Capacity Enhancement'),
+                ('Grid Modernization', 'Grid Modernization'),
+                ('HR Capacity Building', 'HR Capacity Building'),
+                ('Institutional Strengthening', 'Institutional Strengthening'),
+                ('Maintenance Equipment', 'Maintenance Equipment'),
+                ('Network Extension', 'Network Extension'),
+                ('Network Rehabilitation', 'Network Rehabilitation'),
+                ('Power Quality Enhancement', 'Power Quality Enhancement'),
+                ('Procurement Enhancement', 'Procurement Enhancement'),
+                ('Revenue Enhancement', 'Revenue Enhancement'),
+                ('Smart Metering', 'Smart Metering'),
+                ('System Planning Enhancement', 'System Planning Enhancement'),
+                ('Technical Loss Reduction', 'Technical Loss Reduction'),
+                ('Training and Capacity Building', 'Training and Capacity Building'),
+                ('Transmission Enhancement', 'Transmission Enhancement')
+            ]
+            
+            if is_htmx:
+                options = '<option value="">Select Investment Type</option>'
+                for value, name in investment_options:
+                    options += f'<option value="{value}">{name}</option>'
+                return HttpResponse(options)
+            else:
+                investment_data = [{'id': value, 'name': name} for value, name in investment_options]
+                return JsonResponse({'investment_types': investment_data})
+        
+        # Regular database query for other projects
+        investment_types = KPI_For_Contract.objects.filter(
+            project=project_id,
+            monitoring_type_id='ESS'
+        ).distinct().order_by('type_of_investment')
+
+        if is_htmx:
+            # Return HTML options for HTMX
+            options = '<option value="">Select Investment Type</option>'
+            for investment in investment_types:
+                options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
+            return HttpResponse(options)
+        else:
+            # Return JSON for regular AJAX
+            investment_data = [
+                {
+                    'id': inv.monitoring_Type_Code,
+                    'name': inv.type_of_investment
+                } for inv in investment_types
+            ]
+            return JsonResponse({'investment_types': investment_data})
+
+    except Exception as e:
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+        return JsonResponse({'investment_types': [], 'error': str(e)})

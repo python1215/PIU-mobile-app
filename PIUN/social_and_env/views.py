@@ -442,73 +442,6 @@ def export_pap_excel(request):
         return redirect('pap_list')
 
 
-# @login_required
-# def pap_add(request):
-#     """Add new PAP record with improved error handling"""
-#     if request.method == 'POST':
-#         form = PAPForm(request.POST)
-#         if form.is_valid():
-#             try:
-#                 pap = form.save(commit=False)
-#                 pap.loginUser = request.user
-                
-#                 # Import required models
-#                 from PIU_Financial_mgt.models import KPI_For_Contract
-#                 from setup.models import (
-#                     Districts, Settlement, TypeOfPAP, PAPCategory, 
-#                     VulnerabilityCategory, TypeOfImpact, NatureOfSettlement
-#                 )
-                
-#                 # Ensure all required fields have values
-#                 if not pap.type_of_investment and pap.project:
-#                     pap.type_of_investment = KPI_For_Contract.objects.filter(project=pap.project).first()
-                
-#                 if not pap.district and pap.region:
-#                     pap.district = Districts.objects.filter(region_code_id=pap.region.pk).first()
-                
-#                 if not pap.pap_Current_Address and pap.district:
-#                     pap.pap_Current_Address = Settlement.objects.filter(district_code_id=pap.district.pk).first()
-                
-#                 # Set defaults for required lookup fields
-#                 if not pap.type_of_pap:
-#                     pap.type_of_pap = TypeOfPAP.objects.first()
-#                 if not pap.pap_category:
-#                     pap.pap_category = PAPCategory.objects.first()
-#                 if not pap.vulnerability_category:
-#                     pap.vulnerability_category = VulnerabilityCategory.objects.first()
-#                 if not pap.type_of_impact:
-#                     pap.type_of_impact = TypeOfImpact.objects.first()
-#                 if not pap.nature_of_compensation:
-#                     pap.nature_of_compensation = NatureOfSettlement.objects.first()
-                
-#                 # Set defaults for required text fields
-#                 if not pap.area:
-#                     pap.area = '0'
-#                 if not pap.pap_compensated:
-#                     pap.pap_compensated = 'N'
-#                 if not pap.pre_project_situation:
-#                     pap.pre_project_situation = 'Information not provided'
-                
-#                 pap.save()
-#                 messages.success(request, f'PAP record {pap.pap_identification_number} added successfully.')
-#                 return redirect('pap_list')
-                
-#             except Exception as e:
-#                 messages.error(request, f'Error saving PAP record: {str(e)}')
-#                 import traceback
-#                 print(f'PAP Save Error: {traceback.format_exc()}')
-#         else:
-#             # Display form errors to user
-#             for field, errors in form.errors.items():
-#                 for error in errors:
-#                     messages.error(request, f'{field}: {error}')
-#     else:
-#         form = PAPForm()
-    
-#     return render(request, 'social_and_env/pap/pap_form.html', {
-#         'form': form,
-#         'title': 'Add PAP Record'
-#     })
 
 @login_required
 def pap_add(request):
@@ -549,6 +482,20 @@ def pap_add(request):
                         # Use first settlement in district as fallback
                         if pap.district:
                             pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+                
+                # Ensure pap_Current_Address is not None (required field)
+                if not pap.pap_Current_Address:
+                    if pap.district:
+                        pap.pap_Current_Address = Settlement.objects.filter(district_code=pap.district).first()
+                    elif pap.region:
+                        # Find any settlement in the region
+                        first_district = Districts.objects.filter(region_code=pap.region).first()
+                        if first_district:
+                            pap.pap_Current_Address = Settlement.objects.filter(district_code=first_district).first()
+                    
+                    # Last resort - use any available settlement
+                    if not pap.pap_Current_Address:
+                        pap.pap_Current_Address = Settlement.objects.first()
 
                 # Ensure required lookup fields have values
                 pap.type_of_pap = pap.type_of_pap or (TypeOfPAP.objects.first() if TypeOfPAP.objects.exists() else None)
@@ -1995,35 +1942,6 @@ def load_investment_types_grievance(request):
 
 
 
-
-# @login_required
-# def load_districts_ohs(request):
-#     """Load districts for OHS based on selected region"""
-#     from django.http import JsonResponse
-    
-#     region_id = request.GET.get('region')
-#     if not region_id:
-#         return JsonResponse({'districts': []})
-    
-#     try:
-#         districts = Districts.objects.filter(
-#             region_code=region_id
-#         ).order_by('district_name')
-        
-#         # Build districts list
-#         districts_list = []
-#         for district in districts:
-#             districts_list.append({
-#                 'id': district.district_code,
-#                 'name': district.district_name
-#             })
-        
-#         return JsonResponse({'districts': districts_list})
-    
-#     except Exception as e:
-#         return JsonResponse({'districts': [], 'error': str(e)}, status=500)
-
-
 @login_required
 def load_settlements_ohs(request):
     """Load settlements for OHS based on selected district"""
@@ -2094,50 +2012,9 @@ def load_investment_types_pap(request):
         return JsonResponse({'investment_types': []})
 
     try:
-        # Convert project_id to string if it's 'D309D6530GM'
-        if project_id == 'D309D6530GM' or str(project_id) == 'D309D6530GM':
-            # Use hardcoded investment types for this project
-            investment_options = [
-                ('AMR-Meters', 'AMR-Meters'),
-                ('Azorom', 'Azorom'), 
-                ('BB1 Compliance', 'BB1 Compliance'),
-                ('Bulk Supply Point Enhancement', 'Bulk Supply Point Enhancement'),
-                ('Customer Service Enhancement', 'Customer Service Enhancement'),
-                ('Distribution Automation', 'Distribution Automation'),
-                ('Distribution Enhancement', 'Distribution Enhancement'),
-                ('Distribution Network Enhancement', 'Distribution Network Enhancement'),
-                ('Energy Efficiency', 'Energy Efficiency'),
-                ('Financial Management Enhancement', 'Financial Management Enhancement'),
-                ('Generation Capacity Enhancement', 'Generation Capacity Enhancement'),
-                ('Grid Modernization', 'Grid Modernization'),
-                ('HR Capacity Building', 'HR Capacity Building'),
-                ('Institutional Strengthening', 'Institutional Strengthening'),
-                ('Maintenance Equipment', 'Maintenance Equipment'),
-                ('Network Extension', 'Network Extension'),
-                ('Network Rehabilitation', 'Network Rehabilitation'),
-                ('Power Quality Enhancement', 'Power Quality Enhancement'),
-                ('Procurement Enhancement', 'Procurement Enhancement'),
-                ('Revenue Enhancement', 'Revenue Enhancement'),
-                ('Smart Metering', 'Smart Metering'),
-                ('System Planning Enhancement', 'System Planning Enhancement'),
-                ('Technical Loss Reduction', 'Technical Loss Reduction'),
-                ('Training and Capacity Building', 'Training and Capacity Building'),
-                ('Transmission Enhancement', 'Transmission Enhancement')
-            ]
-            
-            if is_htmx:
-                options = '<option value="">Select Investment Type</option>'
-                for value, name in investment_options:
-                    options += f'<option value="{value}">{name}</option>'
-                return HttpResponse(options)
-            else:
-                investment_data = [{'id': value, 'name': name} for value, name in investment_options]
-                return JsonResponse({'investment_types': investment_data})
-        
-        # Regular database query for other projects
+        # Get investment types from database for all projects
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id,
-            monitoring_type_id='ESS'
+            project=project_id
         ).distinct().order_by('type_of_investment')
 
         if is_htmx:
@@ -2160,43 +2037,6 @@ def load_investment_types_pap(request):
         if is_htmx:
             return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({'investment_types': [], 'error': str(e)})
-
-# @login_required
-# def load_investment_types_pap(request):
-#     """Load investment types for PAP based on project selection"""
-        
-#     project_id = request.GET.get('project') or request.GET.get('project_id')
-#     if not project_id:
-#         if request.headers.get('Content-Type') == 'application/json':
-#             return JsonResponse({'investment_types': []})
-#         return HttpResponse('<option value="">Select Investment Type</option>')
-    
-#     try:
-#         investment_types = KPI_For_Contract.objects.filter(
-#             project=project_id, monitoring_type_id ='ESS'
-#         ).distinct().order_by('type_of_investment')
-        
-#         # Check if requesting JSON format (for edit forms)
-#         if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
-#             investment_data = []
-#             for investment in investment_types:
-#                 investment_data.append({
-#                     'id': investment.monitoring_Type_Code,
-#                     'name': investment.type_of_investment
-#                 })
-#             return JsonResponse({'investment_types': investment_data})
-        
-#         # Return HTML options (for add forms)
-#         options = '<option value="">Select Investment Type</option>'
-#         for investment in investment_types:
-#             options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
-        
-#         return HttpResponse(options)
-    
-#     except Exception as e:
-#         if request.headers.get('Content-Type') == 'application/json' or 'project_id' in request.GET:
-#             return JsonResponse({'error': str(e), 'investment_types': []})
-#         return HttpResponse(f'<option value="">Error: {str(e)}</option>')
 
 
 @login_required
