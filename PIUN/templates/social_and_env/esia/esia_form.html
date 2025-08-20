@@ -187,33 +187,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const investmentField = document.getElementById('id_type_of_investment');
     
     if (projectField && investmentField) {
-        // Load investment types immediately when project is selected or on page load
+        // Load investment types based on selected project
         function loadInvestmentTypes() {
-            fetch(`{% url 'load_investment_types_esia' %}`)
-                .then(response => response.json())
-                .then(data => {
-                    investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-                    if (data.investment_types && data.investment_types.length > 0) {
-                        data.investment_types.forEach(investment => {
-                            const option = document.createElement('option');
-                            option.value = investment.id;
-                            option.textContent = investment.name;
-                            investmentField.appendChild(option);
-                        });
-                    }
-                    investmentField.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error loading investment types:', error);
-                    investmentField.disabled = false;
-                });
+            const projectId = projectField.value;
+            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            investmentField.disabled = true;
+            
+            if (projectId) {
+                fetch(`{% url 'load_investment_types_esia' %}?project=${encodeURIComponent(projectId)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        investmentField.innerHTML = html;
+                        investmentField.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading investment types:', error);
+                        investmentField.innerHTML = '<option value="">Error loading investment types</option>';
+                        investmentField.disabled = false;
+                    });
+            } else {
+                investmentField.disabled = false;
+            }
         }
         
         // Load investment types when project changes
         projectField.addEventListener('change', loadInvestmentTypes);
         
-        // Load investment types on page load regardless of project selection
-        loadInvestmentTypes();
+        // Load investment types on page load if project is already selected
+        if (projectField.value) {
+            loadInvestmentTypes();
+        }
     }
 });
 </script>
