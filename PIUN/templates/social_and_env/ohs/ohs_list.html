@@ -72,59 +72,24 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
+            <!-- Filter Form using Django Filter - same as PAP Management -->
             <div class="col-md-3">
-                <label class="form-label">Project</label>
-                <select name="project" class="form-select">
-                    <option value="">All Projects</option>
-                    {% for value, label in filter.form.project.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.project == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label class="form-label">{{ filter.form.project.label }}</label>
+                {% render_field filter.form.project class="form-select" %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ filter.form.Type_of_Investment.label }}</label>
+                {% render_field filter.form.Type_of_Investment class="form-select" %}
             </div>
             <div class="col-md-2">
-                <label class="form-label">Investment Type</label>
-                <select name="Type_of_Investment" class="form-select">
-                    <option value="">All Investment Types</option>
-                    {% for value, label in filter.form.Type_of_Investment.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.Type_of_Investment == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label class="form-label">{{ filter.form.region.label }}</label>
+                {% render_field filter.form.region class="form-select" %}
             </div>
             <div class="col-md-2">
-                <label class="form-label">Region</label>
-                <select name="region" class="form-select">
-                    <option value="">All Regions</option>
-                    {% for value, label in filter.form.region.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.region == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label class="form-label">{{ filter.form.year_of_report.label }}</label>
+                {% render_field filter.form.year_of_report class="form-select" %}
             </div>
             <div class="col-md-2">
-                <label class="form-label">Year</label>
-                <select name="year_of_report" class="form-select">
-                    <option value="">All Years</option>
-                    {% for value, label in filter.form.year_of_report.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.year_of_report == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-1">
                 <label class="form-label">Page Size</label>
                 <select name="page_size" class="form-select">
                     <option value="10" {% if request.GET.page_size == '10' %}selected{% endif %}>10</option>
@@ -133,12 +98,12 @@
                     <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-12 d-flex justify-content-end mt-3">
                 <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filter
+                    <i class="bi bi-search me-1"></i>Apply Filters
                 </button>
                 <a href="{% url 'ohs_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x me-1"></i>Clear
+                    <i class="bi bi-x me-1"></i>Clear All
                 </a>
             </div>
         </form>

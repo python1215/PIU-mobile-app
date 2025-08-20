@@ -992,244 +992,65 @@ def grievance_delete(request, pk):
 # ======================== OHS Views ========================
 @login_required
 def ohs_list(request):
-    """Enhanced OHS list view with filtering and pagination"""
+    """OHS list view with Django filtering - following PAP Management pattern"""
     from django.core.paginator import Paginator
-    from django.db.models import Q
+    from django.db.models import Sum
+    from .filters import OHSMonitoringFilter
 
     try:
         print("=== OHS LIST DEBUG START ===")
 
-        # First check total records without joins
-        total_records = OHS_Monitoring.objects.all().count()
-        print(f"Total OHS records in database: {total_records}")
+        # Get total record count for debugging
+        total_db_records = OHS_Monitoring.objects.count()
+        print(f"Total OHS records in database: {total_db_records}")
 
-        # Use Django ORM to get OHS records - remove problematic joins for now
-        ohs_queryset = OHS_Monitoring.objects.select_related('project').all()
+        # Get OHS records with relationships - following PAP pattern
+        ohs_list = OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'region', 'district', 'settlement',
+            'year_of_report', 'quarter', 'loginUser'
+        ).all()
 
-        print(f"OHS queryset count: {ohs_queryset.count()}")
+        print(f"OHS queryset count: {ohs_list.count()}")
 
-        # Apply filters using Django ORM
-        if request.GET.get('project'):
-            ohs_queryset = ohs_queryset.filter(
-                project__projectID__icontains=request.GET.get('project'))
+        # Apply Django filters
+        ohs_filter = OHSMonitoringFilter(request.GET, queryset=ohs_list)
+        filtered_ohs = ohs_filter.qs
 
-        if request.GET.get('region'):
-            ohs_queryset = ohs_queryset.filter(
-                region__region_name__icontains=request.GET.get('region'))
-
-        if request.GET.get('district'):
-            ohs_queryset = ohs_queryset.filter(
-                district__district_name__icontains=request.GET.get('district'))
-
-        if request.GET.get('year'):
-            ohs_queryset = ohs_queryset.filter(
-                year_of_report__year_name__icontains=request.GET.get('year'))
-
-        if request.GET.get('quarter'):
-            ohs_queryset = ohs_queryset.filter(
-                quarter__quarter_name__icontains=request.GET.get('quarter'))
-
-        # Apply search filter
-        search_query = request.GET.get('search', '').strip()
-        if search_query:
-            ohs_queryset = ohs_queryset.filter(
-                Q(project__projectID__icontains=search_query)
-                | Q(quality_at_entry_requirement__icontains=search_query)
-                | Q(working_environment__icontains=search_query)
-                | Q(remarks__icontains=search_query))
-
-        # Order by date
-        ohs_queryset = ohs_queryset.order_by('-date', '-date_created')
-
-        # Convert to list for compatibility with existing template logic
-        ohs_data = []
-        for ohs in ohs_queryset:
-            try:
-                print(f"Processing OHS record {ohs.ohs_Id}")
-                print(f"  Project: {ohs.project_id}")
-                print(f"  Region: {ohs.region_id}")
-                print(f"  Date: {ohs.date}")
-
-                # Create object-like structure for template compatibility
-                ohs_obj = type(
-                    'OHSRecord', (), {
-                        'ohs_id':
-                        ohs.ohs_Id,
-                        'project_id':
-                        ohs.project.projectID
-                        if ohs.project else ohs.project_id,
-                        'project_name':
-                        ohs.project.project if ohs.project else ohs.project_id,
-                        'date':
-                        ohs.date,
-                        'quality_at_entry_requirement':
-                        ohs.quality_at_entry_requirement,
-                        'working_environment':
-                        ohs.working_environment,
-                        'remarks':
-                        ohs.remarks,
-                        'male':
-                        ohs.male,
-                        'female':
-                        ohs.female,
-                        'youth_male':
-                        ohs.youth_male,
-                        'youth_female':
-                        ohs.youth_female,
-                        'region_name':
-                        str(ohs.region_id) if ohs.region_id else '',
-                        'district_name':
-                        str(ohs.district_id) if ohs.district_id else '',
-                        'settlement_name':
-                        str(ohs.settlement_id) if ohs.settlement_id else '',
-                        'year_name':
-                        str(ohs.year_of_report_id)
-                        if ohs.year_of_report_id else '',
-                        'quarter_name':
-                        str(ohs.quarter_id) if ohs.quarter_id else '',
-                        'investment_type':
-                        str(ohs.Type_of_Investment_id)
-                        if ohs.Type_of_Investment_id else '',
-                        'picture':
-                        ohs.picture,
-                        'pk':
-                        ohs.ohs_Id
-                    })()
-                ohs_data.append(ohs_obj)
-                print(f"  Successfully processed record {ohs.ohs_Id}")
-            except Exception as e:
-                print(f"  Error processing record {ohs.ohs_Id}: {str(e)}")
-                # Still add basic data even if relationships fail
-                ohs_obj = type(
-                    'OHSRecord', (), {
-                        'ohs_id':
-                        ohs.ohs_Id,
-                        'project_id':
-                        ohs.project_id,
-                        'project_name':
-                        ohs.project_id,
-                        'date':
-                        ohs.date,
-                        'quality_at_entry_requirement':
-                        ohs.quality_at_entry_requirement or '',
-                        'working_environment':
-                        ohs.working_environment or '',
-                        'remarks':
-                        ohs.remarks or '',
-                        'male':
-                        ohs.male or 0,
-                        'female':
-                        ohs.female or 0,
-                        'youth_male':
-                        ohs.youth_male or 0,
-                        'youth_female':
-                        ohs.youth_female or 0,
-                        'region_name':
-                        str(ohs.region_id) if ohs.region_id else '',
-                        'district_name':
-                        str(ohs.district_id) if ohs.district_id else '',
-                        'settlement_name':
-                        str(ohs.settlement_id) if ohs.settlement_id else '',
-                        'year_name':
-                        str(ohs.year_of_report_id)
-                        if ohs.year_of_report_id else '',
-                        'quarter_name':
-                        str(ohs.quarter_id) if ohs.quarter_id else '',
-                        'investment_type':
-                        str(ohs.Type_of_Investment_id)
-                        if ohs.Type_of_Investment_id else '',
-                        'picture':
-                        ohs.picture,
-                        'pk':
-                        ohs.ohs_Id
-                    })()
-                ohs_data.append(ohs_obj)
-
-        # Filtering already done at ORM level
-        filtered_data = ohs_data
-        print(f"Final OHS data count: {len(ohs_data)}")
+        print(f"Final OHS data count: {filtered_ohs.count()}")
         print("=== OHS LIST DEBUG END ===")
 
-        # Pagination
+        # Pagination - following PAP pattern
         page_size = request.GET.get('page_size', 10)
         try:
             page_size = int(page_size)
-            if page_size not in [10, 15, 25, 50, 100]:
+            if page_size not in [10, 25, 50, 100]:
                 page_size = 10
         except (ValueError, TypeError):
             page_size = 10
 
-        paginator = Paginator(filtered_data, page_size)
+        paginator = Paginator(filtered_ohs, page_size)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        # Get statistics from filtered data
+        # Statistics - following PAP pattern
         stats = {
-            'total_ohs':
-            len(ohs_data),
-            'filtered_count':
-            len(filtered_data),
-            'total_male_workers':
-            sum(getattr(ohs, 'male', 0) or 0 for ohs in filtered_data),
-            'total_female_workers':
-            sum(getattr(ohs, 'female', 0) or 0 for ohs in filtered_data),
-            'total_youth_male':
-            sum(getattr(ohs, 'youth_male', 0) or 0 for ohs in filtered_data),
-            'total_youth_female':
-            sum(getattr(ohs, 'youth_female', 0) or 0 for ohs in filtered_data),
+            'total_ohs': ohs_list.count(),
+            'filtered_count': filtered_ohs.count(),
+            'total_workers': (filtered_ohs.aggregate(Sum('male'))['male__sum'] or 0) + 
+                           (filtered_ohs.aggregate(Sum('female'))['female__sum'] or 0),
+            'total_male': filtered_ohs.aggregate(Sum('male'))['male__sum'] or 0,
+            'total_female': filtered_ohs.aggregate(Sum('female'))['female__sum'] or 0,
+            'total_youth': (filtered_ohs.aggregate(Sum('youth_male'))['youth_male__sum'] or 0) + 
+                          (filtered_ohs.aggregate(Sum('youth_female'))['youth_female__sum'] or 0),
         }
-
-        # Calculate additional metrics
-        stats['total_workers'] = stats['total_male_workers'] + stats[
-            'total_female_workers']
-        stats['total_youth'] = stats['total_youth_male'] + stats[
-            'total_youth_female']
-
-        # Get filter choices for dropdowns - updated for object attributes
-        filter_choices = {
-            'projects':
-            list(
-                set(
-                    getattr(ohs, 'project_id', '') for ohs in ohs_data
-                    if getattr(ohs, 'project_id', ''))),
-            'regions':
-            list(
-                set(
-                    getattr(ohs, 'region_name', '') for ohs in ohs_data
-                    if getattr(ohs, 'region_name', ''))),
-            'districts':
-            list(
-                set(
-                    getattr(ohs, 'district_name', '') for ohs in ohs_data
-                    if getattr(ohs, 'district_name', ''))),
-            'years':
-            list(
-                set(
-                    getattr(ohs, 'year_name', '') for ohs in ohs_data
-                    if getattr(ohs, 'year_name', ''))),
-            'quarters':
-            list(
-                set(
-                    getattr(ohs, 'quarter_name', '') for ohs in ohs_data
-                    if getattr(ohs, 'quarter_name', ''))),
-        }
-
-        # Remove debug output - issue resolved
 
         context = {
             'page_obj': page_obj,
-            'ohs_list': page_obj.object_list
-            if page_obj else [],  # Add direct access to data
+            'filter': ohs_filter,
             'stats': stats,
-            'filter_choices': filter_choices,
-            'current_filters': request.GET,
+            'is_filtered': bool(request.GET),
             'title': 'OHS Monitoring'
         }
-
-        print(f"Context page_obj: {page_obj}")
-        print(f"Context ohs_list count: {len(context['ohs_list'])}")
-        if context['ohs_list']:
-            print(f"First record: {context['ohs_list'][0]}")
 
         return render(request, 'social_and_env/ohs/ohs_list.html', context)
 
@@ -1237,9 +1058,14 @@ def ohs_list(request):
         messages.error(request, f'Error loading OHS records: {str(e)}')
         return render(request, 'social_and_env/ohs/ohs_list.html', {
             'page_obj': None,
+            'filter': OHSMonitoringFilter(),
             'stats': {},
+            'is_filtered': False,
             'title': 'OHS Monitoring'
         })
+
+
+
 
 
 # AJAX endpoints for cascading dropdowns
