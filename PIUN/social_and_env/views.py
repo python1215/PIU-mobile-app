@@ -169,122 +169,57 @@ def esia_delete(request, pk):
 @login_required
 def esia_export_excel(request):
     """Export ESIA data to Excel"""
+    from django.http import HttpResponse
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    from datetime import datetime
+    
     try:
         import openpyxl
-        from openpyxl.styles import Font, PatternFill
-        from django.http import HttpResponse
-        from datetime import datetime
+    except ImportError:
+        messages.error(request, 'Excel export functionality is not available.')
+        return redirect('esia_list')
+    
+    try:
+        # Get ESIA data
+        esia_data = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
         
-        # Get all ESIA records with related data
-        esia_queryset = ESIA.objects.select_related(
-            'project_name', 
-            'type_of_investment', 
-            'loginUser'
-        ).all()
-        
-        # Create a new workbook and select the active worksheet
+        # Create workbook
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "ESIA Records"
         
-        # Define column headers
-        headers = [
-            'ESIA ID',
-            'Project Name', 
-            'Investment Type',
-            'Duration (Months)',
-            'Phase',
-            'Locations',
-            'Communities Count',
-            'ESIA Findings',
-            'Date Created',
-            'Created By'
-        ]
-        
-        # Style for headers
-        header_font = Font(bold=True)
-        header_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
+        # Headers
+        headers = ['ESIA ID', 'Project', 'Investment Type', 'Duration', 'Phase', 'Locations', 'Communities', 'Findings', 'Date', 'User']
         
         # Write headers
-        for col_num, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col_num, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=1, column=col, value=header)
         
-        # Write data rows
-        row_num = 2
-        for esia in esia_queryset:
-            # ESIA ID
-            ws.cell(row=row_num, column=1, value=esia.esiaID)
-            
-            # Project Name
-            project_name = getattr(esia.project_name, 'project', 'N/A') if esia.project_name else 'N/A'
-            ws.cell(row=row_num, column=2, value=project_name)
-            
-            # Investment Type
-            investment_type = getattr(esia.type_of_investment, 'type_of_investment', 'N/A') if esia.type_of_investment else 'N/A'
-            ws.cell(row=row_num, column=3, value=investment_type)
-            
-            # Duration
-            ws.cell(row=row_num, column=4, value=esia.project_duration or 0)
-            
-            # Phase
-            ws.cell(row=row_num, column=5, value=esia.project_phase or 0)
-            
-            # Locations
-            ws.cell(row=row_num, column=6, value=esia.project_locations or '')
-            
-            # Communities Count
-            ws.cell(row=row_num, column=7, value=esia.number_of_communities or 0)
-            
-            # ESIA Findings (truncate if too long)
-            findings = esia.esia_findings or ''
-            if len(findings) > 1000:
-                findings = findings[:1000] + '...'
-            ws.cell(row=row_num, column=8, value=findings)
-            
-            # Date Created
-            date_str = esia.date_created.strftime('%Y-%m-%d %H:%M') if esia.date_created else ''
-            ws.cell(row=row_num, column=9, value=date_str)
-            
-            # Created By
-            username = getattr(esia.loginUser, 'username', 'Unknown') if esia.loginUser else 'Unknown'
-            ws.cell(row=row_num, column=10, value=username)
-            
-            row_num += 1
+        # Write data
+        for row, esia in enumerate(esia_data, 2):
+            ws.cell(row=row, column=1, value=esia.esiaID)
+            ws.cell(row=row, column=2, value=str(esia.project_name.project) if esia.project_name else 'N/A')
+            ws.cell(row=row, column=3, value=str(esia.type_of_investment.type_of_investment) if esia.type_of_investment else 'N/A')
+            ws.cell(row=row, column=4, value=esia.project_duration)
+            ws.cell(row=row, column=5, value=esia.project_phase)
+            ws.cell(row=row, column=6, value=esia.project_locations)
+            ws.cell(row=row, column=7, value=esia.number_of_communities)
+            ws.cell(row=row, column=8, value=str(esia.esia_findings)[:500] if esia.esia_findings else '')
+            ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d') if esia.date_created else '')
+            ws.cell(row=row, column=10, value=str(esia.loginUser.username) if esia.loginUser else '')
         
-        # Auto-size columns
-        for column_cells in ws.columns:
-            length = max(len(str(cell.value) or '') for cell in column_cells)
-            ws.column_dimensions[column_cells[0].column_letter].width = min(length + 2, 50)
-        
-        # Prepare the HTTP response
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'ESIA_Records_{timestamp}.xlsx'
+        # Prepare response
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        filename = f'ESIA_Records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
-        # Save workbook to response
+        # Save to response
         wb.save(response)
-        
         return response
         
-    except ImportError:
-        from django.contrib import messages
-        messages.error(request, 'openpyxl library is not installed. Please contact your administrator.')
-        return redirect('esia_list')
-        
     except Exception as e:
-        from django.contrib import messages
-        import logging
-        
-        logger = logging.getLogger(__name__)
-        logger.error(f"ESIA Excel export failed: {str(e)}", exc_info=True)
-        
-        messages.error(request, f'Failed to export ESIA records: {str(e)}')
+        messages.error(request, f'Export failed: {str(e)}')
         return redirect('esia_list')
 
 
