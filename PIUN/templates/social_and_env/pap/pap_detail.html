@@ -311,6 +311,12 @@
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label for="{{ document_form.document_type.id_for_label }}" class="form-label">
+                            {{ document_form.document_type.label }}
+                        </label>
+                        {{ document_form.document_type }}
+                    </div>
+                    <div class="mb-3">
                         <label for="{{ document_form.document_name.id_for_label }}" class="form-label">
                             {{ document_form.document_name.label }}
                         </label>
@@ -325,14 +331,6 @@
                             Supported formats: PDF, Word, Excel, Images (max 10MB)
                         </div>
                     </div>
-                    {% if document_form.description %}
-                    <div class="mb-3">
-                        <label for="{{ document_form.description.id_for_label }}" class="form-label">
-                            {{ document_form.description.label }}
-                        </label>
-                        {{ document_form.description }}
-                    </div>
-                    {% endif %}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

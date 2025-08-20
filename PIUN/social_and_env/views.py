@@ -2391,18 +2391,26 @@ def pap_upload_document(request, pk):
     pap = get_object_or_404(PAP, pk=pk)
     
     if request.method == 'POST':
+        print(f"🔍 POST data: {request.POST}")
+        print(f"🔍 FILES data: {request.FILES}")
+        
         form = PAPDocumentForm(request.POST, request.FILES)
+        print(f"🔍 Form is valid: {form.is_valid()}")
+        
         if form.is_valid():
             try:
                 document = form.save(commit=False)
                 document.pap = pap
                 document.uploaded_by = request.user
                 document.save()
+                print(f"🔍 Document saved successfully: {document.id}")
                 messages.success(request, f'Document "{document.document_name}" uploaded successfully.')
                 return redirect('pap_detail', pk=pk)
             except Exception as e:
+                print(f"🔍 Error saving document: {str(e)}")
                 messages.error(request, f'Error uploading document: {str(e)}')
         else:
+            print(f"🔍 Form errors: {form.errors}")
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{field}: {error}')
