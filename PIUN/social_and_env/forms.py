@@ -119,9 +119,10 @@ class PAPForm(forms.ModelForm):
         empty_label="Select Project",
         widget=forms.Select(attrs={
             "class": "form-select",
-            "hx-get": "/social-and-env/ajax/load-investment-types-pap/",
+            "hx-get": "/social_and_env/ajax/load-investment-types-pap/",
             "hx-target": "#id_type_of_investment",
-            "hx-trigger": "change"
+            "hx-trigger": "change",
+            "hx-include": "this"
         })
     )
 
@@ -149,19 +150,65 @@ class PAPForm(forms.ModelForm):
 
     def clean_type_of_investment(self):
         """
-        Since ModelChoiceField already returns the object (thanks to to_field_name),
-        we just need to return it.
+        Custom validation for type_of_investment to allow any value.
+        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
         """
-        return self.cleaned_data.get("type_of_investment")
+        # Get the submitted value directly from the form data
+        raw_value = self.data.get('type_of_investment')
+        
+        # If no value submitted, return None
+        if not raw_value:
+            return None
+            
+        # Try to find an existing KPI_For_Contract with this monitoring_Type_Code
+        try:
+            kpi = KPI_For_Contract.objects.get(monitoring_Type_Code=raw_value)
+            return kpi
+        except KPI_For_Contract.DoesNotExist:
+            # Allow any string value for offline scenarios
+            return raw_value
+    
+    def clean_district(self):
+        """
+        Custom validation for district to allow any value.
+        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
+        """
+        raw_value = self.data.get('district')
+        if not raw_value:
+            return None
+            
+        try:
+            district = Districts.objects.get(district_code=raw_value)
+            return district
+        except Districts.DoesNotExist:
+            # Return the raw value if district doesn't exist in database
+            return raw_value
+    
+    def clean_pap_Current_Address(self):
+        """
+        Custom validation for settlement to allow any value.
+        This bypasses Django's strict ModelChoiceField validation for cascading dropdowns.
+        """
+        raw_value = self.data.get('pap_Current_Address')
+        if not raw_value:
+            return None
+            
+        try:
+            settlement = Settlement.objects.get(settlement_code=raw_value)
+            return settlement
+        except Settlement.DoesNotExist:
+            # Return the raw value if settlement doesn't exist in database
+            return raw_value
 
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
         empty_label="Select Region",
         widget=forms.Select(attrs={
             "class": "form-select",
-            "hx-get": "/social-and-env/ajax/load-districts/",
+            "hx-get": "/social_and_env/ajax/load-districts/",
             "hx-target": "#id_district",
-            "hx-trigger": "change"
+            "hx-trigger": "change",
+            "hx-include": "this"
         })
     )
 
@@ -170,9 +217,10 @@ class PAPForm(forms.ModelForm):
         empty_label="Select District",
         widget=forms.Select(attrs={
             "class": "form-select",
-            "hx-get": "/social-and-env/ajax/load-settlements/",
+            "hx-get": "/social_and_env/ajax/load-settlements/",
             "hx-target": "#id_pap_Current_Address",
-            "hx-trigger": "change"
+            "hx-trigger": "change",
+            "hx-include": "this"
         }),
         required=False
     )
@@ -295,6 +343,11 @@ class PAPForm(forms.ModelForm):
         self.fields['area'].required = False
         self.fields['compensation_RefNo'].required = False
         self.fields['compensation_date'].required = False
+        
+        # Allow empty choice validation for cascading fields
+        self.fields['type_of_investment'].empty_label = "Select Investment Type"
+        self.fields['district'].empty_label = "Select District" 
+        self.fields['pap_Current_Address'].empty_label = "Select Settlement"
     
     def clean_type_of_investment(self):
         """Custom validation for type_of_investment field"""

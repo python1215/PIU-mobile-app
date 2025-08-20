@@ -1091,7 +1091,7 @@ def load_districts(request):
     from django.http import JsonResponse, HttpResponse
     from setup.models import Districts, Regions
     
-    region_id = request.GET.get('region_id') or request.GET.get('region')
+    region_id = request.GET.get('region_id') or request.GET.get('region') or request.GET.get('id_region')
     
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
@@ -1136,7 +1136,7 @@ def load_settlements(request):
     from django.http import JsonResponse, HttpResponse
     from setup.models import Settlement
     
-    district_id = request.GET.get('district_id') or request.GET.get('district')
+    district_id = request.GET.get('district_id') or request.GET.get('district') or request.GET.get('id_district')
     
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
@@ -2058,7 +2058,7 @@ def load_investment_types_pap(request):
     """Load investment types for PAP based on project selection - HTMX compatible"""
     from django.http import HttpResponse, JsonResponse
     
-    project_id = request.GET.get('project') or request.GET.get('project_id')
+    project_id = request.GET.get('project') or request.GET.get('project_id') or request.GET.get('id_project')
     
     # Detect HTMX request
     is_htmx = request.headers.get('HX-Request') == 'true'
