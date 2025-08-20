@@ -232,12 +232,16 @@ class PAPFilter(django_filters.FilterSet):
 class ESIAFilter(django_filters.FilterSet):
     project_name = django_filters.ModelChoiceFilter(
         queryset=Project.objects.all(),
-        label="Project"
+        label="Project",
+        empty_label="All Projects",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     type_of_investment = django_filters.ModelChoiceFilter(
         queryset=KPI_For_Contract.objects.filter(monitoring_type_id="ESS"),
-        label="Type of Investment"
+        label="Type of Investment",
+        empty_label="All Investment Types",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
 
     project_locations = django_filters.CharFilter(
