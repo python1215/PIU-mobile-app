@@ -1,0 +1,93 @@
+@login_required
+def load_investment_types_esia(request):
+    """Load investment types for ESIA based on project selection"""
+    from django.http import HttpResponse
+
+    project_id = request.GET.get('project')
+    if not project_id:
+        return HttpResponse('<option value="">Select Investment Type</option>')
+
+    try:
+        investment_types = KPI_For_Contract.objects.filter(
+            project=project_id).values_list(
+                'type_of_investment',monitoring_type_id='ESS'
+                flat=True).distinct().order_by('type_of_investment')
+
+        options = '<option value="">Select Investment Type</option>'
+        for investment_type in investment_types:
+            options += f'<option value="{investment_type}">{investment_type}</option>'
+
+        return HttpResponse(options)
+
+    except Exception as e:
+        return HttpResponse(f'<option value="">Error: {str(e)}</option>')
+
+
+@login_required
+def esia_export_excel(request):
+    """Export ESIA data to Excel"""
+    import openpyxl
+    from django.http import HttpResponse
+
+    try:
+        # Get all ESIA records
+        esias = ESIA.objects.select_related('project', 'Type_of_Investment',
+                                            'year_of_report', 'quarter',
+                                            'loginUser').all()
+
+        # Create workbook and worksheet
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'ESIA Data'
+
+        # Add headers
+        headers = [
+            'Project', 'Investment Type', 'Year', 'Quarter', 'Region',
+            'Number of Communities', 'ESIA Findings', 'Created By',
+            'Date Created'
+        ]
+
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=1, column=col, value=header)
+
+        # Add data rows
+        for row, esia in enumerate(esias, 2):
+            ws.cell(row=row,
+                    column=1,
+                    value=esia.project.project if esia.project else '')
+            ws.cell(row=row,
+                    column=2,
+                    value=esia.Type_of_Investment.type_of_investment
+                    if esia.Type_of_Investment else '')
+            ws.cell(
+                row=row,
+                column=3,
+                value=esia.year_of_report.year if esia.year_of_report else '')
+            ws.cell(row=row,
+                    column=4,
+                    value=esia.quarter.quarter if esia.quarter else '')
+            ws.cell(row=row, column=5, value=esia.region)
+            ws.cell(row=row, column=6, value=esia.number_of_communities)
+            ws.cell(row=row, column=7, value=esia.esia_findings)
+            ws.cell(row=row,
+                    column=8,
+                    value=esia.loginUser.username if esia.loginUser else '')
+            ws.cell(row=row,
+                    column=9,
+                    value=esia.date_created.strftime('%Y-%m-%d')
+                    if esia.date_created else '')
+
+        # Set up response
+        response = HttpResponse(
+            content_type=
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response[
+            'Content-Disposition'] = 'attachment; filename="esia_data.xlsx"'
+
+        wb.save(response)
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting ESIA data: {str(e)}')
+        return redirect('esia_list')

@@ -1333,8 +1333,10 @@ def load_investment_types_esia(request):
     from PIU_Financial_mgt.models import KPI_For_Contract
 
     try:
-        # Get all distinct investment types since they're not project-specific
-        investment_types = KPI_For_Contract.objects.values(
+        # Get all distinct investment types for ESS (Environmental and Social Safeguards)
+        investment_types = KPI_For_Contract.objects.filter(
+            monitoring_type_id='ESS'
+        ).values(
             'monitoring_Type_Code', 'type_of_investment').distinct()
         investment_list = [{
             'id': inv['monitoring_Type_Code'] or f'inv_{idx}',
@@ -2292,9 +2294,12 @@ def load_investment_types_esia(request):
 
     try:
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id).values_list(
-                'type_of_investment',
-                flat=True).distinct().order_by('type_of_investment')
+            project=project_id,
+            monitoring_type_id='ESS'
+        ).values_list(
+            'type_of_investment',
+            flat=True
+        ).distinct().order_by('type_of_investment')
 
         options = '<option value="">Select Investment Type</option>'
         for investment_type in investment_types:
