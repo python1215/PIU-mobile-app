@@ -35,31 +35,34 @@ from monitoring.models import Indicator_Description
 @login_required
 def esia_list(request):
     """Enhanced ESIA/ESMP list view with filtering and pagination"""
+    # Get all ESIA records with related data
     esia_list = ESIA.objects.select_related('project_name',
                                             'type_of_investment',
                                             'loginUser').all()
 
-    # Apply filters
+    # Apply Django Filter
     esia_filter = ESIAFilter(request.GET, queryset=esia_list)
     filtered_esia = esia_filter.qs
 
-    # Pagination
-    paginator = Paginator(filtered_esia, 10)
+    # Pagination with page size support
+    page_size = request.GET.get('page_size', 10)
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 25, 50, 100]:
+            page_size = 10
+    except (ValueError, TypeError):
+        page_size = 10
+
+    paginator = Paginator(filtered_esia, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # Statistics
     stats = {
-        'total_esia':
-        esia_list.count(),
-        'filtered_count':
-        filtered_esia.count(),
-        'avg_duration':
-        esia_list.aggregate(Avg('project_duration'))['project_duration__avg']
-        or 0,
-        'total_communities':
-        esia_list.aggregate(
-            Sum('number_of_communities'))['number_of_communities__sum'] or 0,
+        'total_esia': esia_list.count(),
+        'filtered_count': filtered_esia.count(),
+        'avg_duration': esia_list.aggregate(Avg('project_duration'))['project_duration__avg'] or 0,
+        'total_communities': esia_list.aggregate(Sum('number_of_communities'))['number_of_communities__sum'] or 0,
     }
 
     context = {
@@ -67,6 +70,7 @@ def esia_list(request):
         'filter': esia_filter,
         'stats': stats,
         'is_filtered': bool(request.GET),
+        'title': 'ESIA/ESMP Records'
     }
 
     return render(request, 'social_and_env/esia/esia_list.html', context)
