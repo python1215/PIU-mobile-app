@@ -72,35 +72,18 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
+            <!-- Filter Form using Django Filter - same as OHS Monitoring -->
             <div class="col-md-3">
-                <label class="form-label">Project</label>
-                <select name="project_name" class="form-select">
-                    <option value="">All Projects</option>
-                    {% for value, label in filter.form.project_name.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.project_name == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label class="form-label">{{ filter.form.project_name.label }}</label>
+                {% render_field filter.form.project_name class="form-select" %}
             </div>
             <div class="col-md-3">
-                <label class="form-label">Investment Type</label>
-                <select name="type_of_investment" class="form-select">
-                    <option value="">All Investment Types</option>
-                    {% for value, label in filter.form.type_of_investment.field.choices %}
-                        {% if value %}
-                            <option value="{{ value }}" {% if request.GET.type_of_investment == value|stringformat:"s" %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label class="form-label">{{ filter.form.type_of_investment.label }}</label>
+                {% render_field filter.form.type_of_investment class="form-select" %}
             </div>
             <div class="col-md-2">
-                <label class="form-label">Location</label>
-                <input type="text" name="project_locations" class="form-control" value="{{ request.GET.project_locations }}" placeholder="Search location...">
+                <label class="form-label">{{ filter.form.project_locations.label }}</label>
+                {% render_field filter.form.project_locations class="form-control" placeholder="Search location..." %}
             </div>
             <div class="col-md-2">
                 <label class="form-label">Page Size</label>
@@ -113,10 +96,10 @@
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filter
+                    <i class="bi bi-search me-1"></i>Apply Filters
                 </button>
                 <a href="{% url 'esia_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x me-1"></i>Clear
+                    <i class="bi bi-x me-1"></i>Clear All
                 </a>
             </div>
         </form>
