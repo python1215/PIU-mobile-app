@@ -118,7 +118,10 @@ class PAPForm(forms.ModelForm):
         queryset=Project.objects.all(),
         empty_label="Select Project",
         widget=forms.Select(attrs={
-            "class": "form-select"
+            "class": "form-select",
+            "hx-get": "/social-and-env/ajax/load-investment-types-pap/",
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change"
         })
     )
 
@@ -154,13 +157,23 @@ class PAPForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Regions.objects.all(),
         empty_label="Select Region",
-        widget=forms.Select(attrs={"class": "form-select"})
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": "/social-and-env/ajax/load-districts/",
+            "hx-target": "#id_district",
+            "hx-trigger": "change"
+        })
     )
 
     district = forms.ModelChoiceField(
         queryset=Districts.objects.none(),
         empty_label="Select District",
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": "/social-and-env/ajax/load-settlements/",
+            "hx-target": "#id_pap_Current_Address",
+            "hx-trigger": "change"
+        }),
         required=False
     )
 
@@ -301,40 +314,83 @@ class PAPForm(forms.ModelForm):
         project = cleaned_data.get('project')
         region = cleaned_data.get('region')
         
-        # Auto-select investment type if not provided
-        if project and not cleaned_data.get('type_of_investment'):
-            first_investment = KPI_For_Contract.objects.filter(project=project).first()
-            if first_investment:
-                cleaned_data['type_of_investment'] = first_investment
+        # Auto-select investment type if not provided or invalid
+        type_of_investment = cleaned_data.get('type_of_investment')
+        if project:
+            if not type_of_investment:
+                # Find first investment type for this project
+                first_investment = KPI_For_Contract.objects.filter(project=project).first()
+                if first_investment:
+                    cleaned_data['type_of_investment'] = first_investment
+            else:
+                # Validate that selected investment type belongs to the project
+                valid_investments = KPI_For_Contract.objects.filter(project=project)
+                if type_of_investment not in valid_investments:
+                    # Use first valid investment type for this project
+                    first_investment = valid_investments.first()
+                    if first_investment:
+                        cleaned_data['type_of_investment'] = first_investment
         
-        # Auto-select district if not provided
-        if region and not cleaned_data.get('district'):
-            first_district = Districts.objects.filter(region_code_id=region.pk).first()
-            if first_district:
-                cleaned_data['district'] = first_district
-        
-        # Auto-select settlement if not provided
+        # Auto-select district if not provided or invalid
         district = cleaned_data.get('district')
-        if district and not cleaned_data.get('pap_Current_Address'):
-            first_settlement = Settlement.objects.filter(district_code_id=district.pk).first()
-            if first_settlement:
-                cleaned_data['pap_Current_Address'] = first_settlement
+        if region:
+            if not district:
+                # Find first district for this region
+                first_district = Districts.objects.filter(region_code_id=region.pk).first()
+                if first_district:
+                    cleaned_data['district'] = first_district
+            else:
+                # Validate that selected district belongs to the region
+                valid_districts = Districts.objects.filter(region_code_id=region.pk)
+                if district not in valid_districts:
+                    # Use first valid district for this region
+                    first_district = valid_districts.first()
+                    if first_district:
+                        cleaned_data['district'] = first_district
+        
+        # Auto-select settlement if not provided or invalid
+        district = cleaned_data.get('district')  # Get updated district value
+        settlement = cleaned_data.get('pap_Current_Address')
+        if district:
+            if not settlement:
+                # Find first settlement for this district
+                first_settlement = Settlement.objects.filter(district_code_id=district.pk).first()
+                if first_settlement:
+                    cleaned_data['pap_Current_Address'] = first_settlement
+            else:
+                # Validate that selected settlement belongs to the district
+                valid_settlements = Settlement.objects.filter(district_code_id=district.pk)
+                if settlement not in valid_settlements:
+                    # Use first valid settlement for this district
+                    first_settlement = valid_settlements.first()
+                    if first_settlement:
+                        cleaned_data['pap_Current_Address'] = first_settlement
         
         # Ensure required lookup fields have defaults
         if not cleaned_data.get('type_of_pap'):
-            cleaned_data['type_of_pap'] = TypeOfPAP.objects.first()
+            default_pap_type = TypeOfPAP.objects.first()
+            if default_pap_type:
+                cleaned_data['type_of_pap'] = default_pap_type
             
         if not cleaned_data.get('pap_category'):
-            cleaned_data['pap_category'] = PAPCategory.objects.first()
+            default_category = PAPCategory.objects.first()
+            if default_category:
+                cleaned_data['pap_category'] = default_category
             
         if not cleaned_data.get('vulnerability_category'):
-            cleaned_data['vulnerability_category'] = VulnerabilityCategory.objects.first()
+            default_vulnerability = VulnerabilityCategory.objects.first()
+            if default_vulnerability:
+                cleaned_data['vulnerability_category'] = default_vulnerability
             
         if not cleaned_data.get('type_of_impact'):
-            cleaned_data['type_of_impact'] = TypeOfImpact.objects.first()
+            default_impact = TypeOfImpact.objects.first()
+            if default_impact:
+                cleaned_data['type_of_impact'] = default_impact
             
         if not cleaned_data.get('nature_of_compensation'):
-            cleaned_data['nature_of_compensation'] = NatureOfSettlement.objects.first()
+            default_nature = NatureOfSettlement.objects.first()
+            if default_nature:
+                cleaned_data['nature_of_compensation'] = default_nature
         
         # Set default values for required text/choice fields
         if not cleaned_data.get('area'):

@@ -21,7 +21,7 @@
                         <!-- Project and Investment Type -->
                         <div class="col-md-6">
                             <label for="{{ form.project.id_for_label }}" class="form-label required">Project</label>
-                            {% render_field form.project %}
+                            {% render_field form.project hx-get="/social-and-env/ajax/load-investment-types-pap/" hx-target="#id_type_of_investment" hx-trigger="change" %}
                             {% if form.project.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.project.errors %}{{ error }}{% endfor %}
@@ -32,6 +32,7 @@
                         <div class="col-md-6">
                             <label for="{{ form.type_of_investment.id_for_label }}" class="form-label required">Investment Type</label>
                             {% render_field form.type_of_investment %}
+                            <div class="htmx-indicator">Loading...</div>
                             {% if form.type_of_investment.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.type_of_investment.errors %}{{ error }}{% endfor %}
@@ -84,6 +85,7 @@
                         <div class="col-md-4">
                             <label for="{{ form.district.id_for_label }}" class="form-label required">District</label>
                             {% render_field form.district %}
+                            <div class="htmx-indicator">Loading...</div>
                             {% if form.district.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.district.errors %}{{ error }}{% endfor %}
@@ -94,6 +96,7 @@
                         <div class="col-md-4">
                             <label for="{{ form.pap_Current_Address.id_for_label }}" class="form-label required">Settlement</label>
                             {% render_field form.pap_Current_Address %}
+                            <div class="htmx-indicator">Loading...</div>
                             {% if form.pap_Current_Address.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.pap_Current_Address.errors %}{{ error }}{% endfor %}

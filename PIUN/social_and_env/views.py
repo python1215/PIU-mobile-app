@@ -1087,57 +1087,87 @@ def ohs_list(request):
 
 # AJAX endpoints for cascading dropdowns
 def load_districts(request):
-    """Load districts based on selected region"""
-    from django.http import JsonResponse
-    from setup.models import Districts
+    """Load districts based on selected region - HTMX compatible"""
+    from django.http import JsonResponse, HttpResponse
+    from setup.models import Districts, Regions
     
     region_id = request.GET.get('region_id') or request.GET.get('region')
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    
     if not region_id:
+        if is_htmx:
+            return HttpResponse('<option value="">Select District</option>')
         return JsonResponse({'districts': []})
     
     try:
-        # Get districts by region code - direct match with stored values
-        from setup.models import Regions
+        # Get districts by region
         try:
             region = Regions.objects.get(pk=region_id)
-            # Districts store region codes or full names, check both patterns
             districts = Districts.objects.filter(
-                region_code__in=[region.region_code, region.region_name]
-            ).values_list('district_code', 'district_name').order_by('district_name')
+                region_code_id=region_id
+            ).order_by('district_name')
         except Regions.DoesNotExist:
-            districts = []
+            districts = Districts.objects.none()
         
-        district_list = [
-            {'id': district_code, 'name': district_name}
-            for district_code, district_name in districts
-        ]
-        
-        return JsonResponse({'districts': district_list})
+        if is_htmx:
+            # Return HTML options for HTMX
+            options = '<option value="">Select District</option>'
+            for district in districts:
+                options += f'<option value="{district.pk}">{district.district_name}</option>'
+            return HttpResponse(options)
+        else:
+            # Return JSON for regular AJAX
+            district_list = [
+                {'id': district.pk, 'name': district.district_name}
+                for district in districts
+            ]
+            return JsonResponse({'districts': district_list})
+            
     except Exception as e:
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({'districts': [], 'error': str(e)})
 
 
 def load_settlements(request):
-    """Load settlements based on selected district"""
-    from django.http import JsonResponse
+    """Load settlements based on selected district - HTMX compatible"""
+    from django.http import JsonResponse, HttpResponse
     from setup.models import Settlement
     
     district_id = request.GET.get('district_id') or request.GET.get('district')
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    
     if not district_id:
+        if is_htmx:
+            return HttpResponse('<option value="">Select Settlement</option>')
         return JsonResponse({'settlements': []})
     
     try:
         settlements = Settlement.objects.filter(
-            district_code=district_id
-        ).values_list('settlement_code', 'settlement_name').order_by('settlement_name')
+            district_code_id=district_id
+        ).order_by('settlement_name')
         
-        settlement_list = [
-            {'id': settlement_code, 'name': settlement_name}
-            for settlement_code, settlement_name in settlements
-        ]
-        
-        return JsonResponse({'settlements': settlement_list})
+        if is_htmx:
+            # Return HTML options for HTMX
+            options = '<option value="">Select Settlement</option>'
+            for settlement in settlements:
+                options += f'<option value="{settlement.pk}">{settlement.settlement_name}</option>'
+            return HttpResponse(options)
+        else:
+            # Return JSON for regular AJAX
+            settlement_list = [
+                {'id': settlement.pk, 'name': settlement.settlement_name}
+                for settlement in settlements
+            ]
+            return JsonResponse({'settlements': settlement_list})
+            
     except Exception as e:
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({'settlements': [], 'error': str(e)})
 
 
@@ -2025,28 +2055,85 @@ def test_cascading_dropdown(request):
 
 @login_required
 def load_investment_types_pap(request):
-    """Load investment types for PAP based on project selection in JSON format"""
-
+    """Load investment types for PAP based on project selection - HTMX compatible"""
+    from django.http import HttpResponse, JsonResponse
+    
     project_id = request.GET.get('project') or request.GET.get('project_id')
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    
     if not project_id:
+        if is_htmx:
+            return HttpResponse('<option value="">Select Investment Type</option>')
         return JsonResponse({'investment_types': []})
 
     try:
+        # Convert project_id to string if it's 'D309D6530GM'
+        if project_id == 'D309D6530GM' or str(project_id) == 'D309D6530GM':
+            # Use hardcoded investment types for this project
+            investment_options = [
+                ('AMR-Meters', 'AMR-Meters'),
+                ('Azorom', 'Azorom'), 
+                ('BB1 Compliance', 'BB1 Compliance'),
+                ('Bulk Supply Point Enhancement', 'Bulk Supply Point Enhancement'),
+                ('Customer Service Enhancement', 'Customer Service Enhancement'),
+                ('Distribution Automation', 'Distribution Automation'),
+                ('Distribution Enhancement', 'Distribution Enhancement'),
+                ('Distribution Network Enhancement', 'Distribution Network Enhancement'),
+                ('Energy Efficiency', 'Energy Efficiency'),
+                ('Financial Management Enhancement', 'Financial Management Enhancement'),
+                ('Generation Capacity Enhancement', 'Generation Capacity Enhancement'),
+                ('Grid Modernization', 'Grid Modernization'),
+                ('HR Capacity Building', 'HR Capacity Building'),
+                ('Institutional Strengthening', 'Institutional Strengthening'),
+                ('Maintenance Equipment', 'Maintenance Equipment'),
+                ('Network Extension', 'Network Extension'),
+                ('Network Rehabilitation', 'Network Rehabilitation'),
+                ('Power Quality Enhancement', 'Power Quality Enhancement'),
+                ('Procurement Enhancement', 'Procurement Enhancement'),
+                ('Revenue Enhancement', 'Revenue Enhancement'),
+                ('Smart Metering', 'Smart Metering'),
+                ('System Planning Enhancement', 'System Planning Enhancement'),
+                ('Technical Loss Reduction', 'Technical Loss Reduction'),
+                ('Training and Capacity Building', 'Training and Capacity Building'),
+                ('Transmission Enhancement', 'Transmission Enhancement')
+            ]
+            
+            if is_htmx:
+                options = '<option value="">Select Investment Type</option>'
+                for value, name in investment_options:
+                    options += f'<option value="{value}">{name}</option>'
+                return HttpResponse(options)
+            else:
+                investment_data = [{'id': value, 'name': name} for value, name in investment_options]
+                return JsonResponse({'investment_types': investment_data})
+        
+        # Regular database query for other projects
         investment_types = KPI_For_Contract.objects.filter(
             project=project_id,
             monitoring_type_id='ESS'
         ).distinct().order_by('type_of_investment')
 
-        investment_data = [
-            {
-                'id': inv.monitoring_Type_Code,
-                'name': inv.type_of_investment
-            } for inv in investment_types
-        ]
-
-        return JsonResponse({'investment_types': investment_data})
+        if is_htmx:
+            # Return HTML options for HTMX
+            options = '<option value="">Select Investment Type</option>'
+            for investment in investment_types:
+                options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
+            return HttpResponse(options)
+        else:
+            # Return JSON for regular AJAX
+            investment_data = [
+                {
+                    'id': inv.monitoring_Type_Code,
+                    'name': inv.type_of_investment
+                } for inv in investment_types
+            ]
+            return JsonResponse({'investment_types': investment_data})
 
     except Exception as e:
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 # @login_required
