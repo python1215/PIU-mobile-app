@@ -1633,29 +1633,14 @@ def community_list(request):
     from django.db.models import Sum
 
     try:
-        engagements = CommunityConsult_Engagement.objects.select_related(
+        # Use Django filter for consistency
+        engagement_list = CommunityConsult_Engagement.objects.select_related(
             'project_name', 'stake_holder_engagement_Types', 'year',
             'loginUser').all()
 
-        # Apply filters
-        if request.GET.get('project'):
-            engagements = engagements.filter(
-                project_name=request.GET.get('project'))
-
-        if request.GET.get('engagement_type'):
-            engagements = engagements.filter(
-                stake_holder_engagement_Types=request.GET.get(
-                    'engagement_type'))
-
-        if request.GET.get('year'):
-            engagements = engagements.filter(year=request.GET.get('year'))
-
-        if request.GET.get('search'):
-            search_term = request.GET.get('search')
-            engagements = engagements.filter(
-                models.Q(place_of_event__icontains=search_term)
-                | models.Q(key_issues_discussed__icontains=search_term)
-                | models.Q(reference_number__icontains=search_term))
+        # Apply Django Filter
+        engagement_filter = CommunityEngagementFilter(request.GET, queryset=engagement_list)
+        engagements = engagement_filter.qs
 
         # Pagination
         page_size = request.GET.get('page_size', 10)
@@ -1685,20 +1670,11 @@ def community_list(request):
             or 0,
         }
 
-        # Get filter data
-        from PIU_Financial_mgt.models import Project
-        from setup.models import YEAR
-        projects = Project.objects.filter(
-            project='National Electricity and Water Company')
-        years = YEAR.objects.all()
-        engagement_types = TypeOfStakeholderEngagement.objects.all()
-
         context = {
             'page_obj': page_obj,
+            'filter': engagement_filter,
             'stats': stats,
-            'projects': projects,
-            'years': years,
-            'engagement_types': engagement_types,
+            'is_filtered': bool(request.GET),
             'title': 'Community Engagement'
         }
 
