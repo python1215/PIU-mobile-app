@@ -1,0 +1,84 @@
+ Applying social_and_env.0002_papdocument...Traceback (most recent call last):
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\mssql\base.py", line 677, in
+ execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+pyodbc.ProgrammingError: ('42000', "[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]There are no primary or candidate keys in the referenced table 'social_and_env_pap' that match the referencing column list in the foreign key 'social_and_env_papdocument_pap_id_646edd22_fk_social_and_env_pap_pap_identification_number'. (1776) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Could not create constraint or index. See previous errors. (1750)")       
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\PIUN\manage.py", line 22, in <module>
+    main()
+    ~~~~^^
+  File "C:\PIUN\manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\base.py", line 413, in run_from_argv
+    self.execute(*args, **cmd_options)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\base.py", line 459, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\core\management\commands\migrate.py", line 356, in handle
+    post_migrate_state = executor.migrate(
+        targets,
+    ...<3 lines>...
+        fake_initial=fake_initial,
+    )
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\migrations\executor.py", line 135, in migrate
+    state = self._migrate_all_forwards(
+        state, plan, full_plan, fake=fake, fake_initial=fake_initial
+    )
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\migrations\executor.py", line 167, in _migrate_all_forwards
+    state = self.apply_migration(
+        state, migration, fake=fake, fake_initial=fake_initial
+    )
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\migrations\executor.py", line 249, in apply_migration
+    with self.connection.schema_editor(
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        atomic=migration.atomic
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    ) as schema_editor:
+    ^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\base\schema.py", line 167, in __exit__
+    self.execute(sql, None)
+    ~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\mssql\schema.py", line 1392, in execute
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\django\db\backends\utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\PGOMEZ_1\.virtualenvs\PIUN-Du29Df6A\Lib\site-packages\mssql\base.py", line 677, in
+ execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: ('42000', "[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]There are no primary or candidate keys in the referenced table 'social_and_env_pap' that match the referencing column list in the foreign key 'social_and_env_papdocument_pap_id_646edd22_fk_social_and_env_pap_pap_identification_number'. (1776) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Could not create constraint or index. See previous errors. (1750)")

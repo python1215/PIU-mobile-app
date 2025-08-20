@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('document_file', models.FileField(help_text='Upload document (PDF, DOC, DOCX, JPG, PNG - Max 10MB)', upload_to=social_and_env.models.pap_document_upload_path)),
                 ('document_name', models.CharField(help_text='Document description or name', max_length=200)),
                 ('upload_date', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('pap', models.ForeignKey(db_index=True, on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='social_and_env.pap')),
+                ('pap', models.ForeignKey(db_index=True, on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='social_and_env.pap', to_field='pap_identification_number')),
                 ('uploaded_by', models.ForeignKey(db_index=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
