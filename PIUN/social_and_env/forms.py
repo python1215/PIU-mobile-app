@@ -62,8 +62,46 @@ class ESIAForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Initialize investment type dropdown as empty
+        # Initialize investment type dropdown
         self.fields['type_of_investment'].widget.choices = [('', 'Select Investment Type')]
+        
+        # For editing existing records, populate the investment type field
+        if self.instance and self.instance.pk and hasattr(self.instance, 'type_of_investment'):
+            try:
+                if self.instance.type_of_investment:
+                    # Set the current value for the CharField
+                    self.initial['type_of_investment'] = self.instance.type_of_investment.monitoring_Type_Code
+                    
+                    # Populate the dropdown with options for this project
+                    from PIU_Financial_mgt.models import KPI_For_Contract
+                    investment_objects = KPI_For_Contract.objects.filter(
+                        project=self.instance.project_name,
+                        monitoring_type_id='ESS'
+                    ).distinct().order_by('type_of_investment')
+                    
+                    choices = [('', 'Select Investment Type')]
+                    for investment in investment_objects:
+                        choices.append((investment.monitoring_Type_Code, investment.type_of_investment))
+                    
+                    # If no database options, add current value and fallbacks
+                    if not investment_objects.exists():
+                        choices.append((self.instance.type_of_investment.monitoring_Type_Code, 
+                                      str(self.instance.type_of_investment)))
+                        # Add fallback options
+                        fallback_options = [
+                            ('ESS001', 'Environmental Impact Assessment'),
+                            ('ESS002', 'Social Impact Assessment'),
+                            ('ESS003', 'Biodiversity Assessment'),
+                            ('ESS004', 'Water Quality Assessment'),
+                            ('ESS005', 'Air Quality Assessment'),
+                        ]
+                        for code, name in fallback_options:
+                            if code not in [c[0] for c in choices]:
+                                choices.append((code, name))
+                    
+                    self.fields['type_of_investment'].widget.choices = choices
+            except Exception:
+                pass
         
         # Make all fields required
         for field_name, field in self.fields.items():

@@ -122,6 +122,29 @@ def esia_edit(request, pk):
             try:
                 esia = form.save(commit=False)
                 esia.loginUser = request.user
+                
+                # Handle type_of_investment conversion from CharField to ForeignKey
+                investment_code = form.cleaned_data.get('type_of_investment')
+                if isinstance(investment_code, str):
+                    # Find the KPI_For_Contract object
+                    from PIU_Financial_mgt.models import KPI_For_Contract
+                    investment_obj = KPI_For_Contract.objects.filter(
+                        monitoring_Type_Code=investment_code,
+                        project=esia.project_name
+                    ).first()
+                    if investment_obj:
+                        esia.type_of_investment = investment_obj
+                    else:
+                        # Create a fallback object if needed
+                        fallback_obj = KPI_For_Contract.objects.filter(
+                            project=esia.project_name,
+                            monitoring_type_id='ESS'
+                        ).first()
+                        if fallback_obj:
+                            esia.type_of_investment = fallback_obj
+                elif hasattr(investment_code, 'pk'):
+                    esia.type_of_investment = investment_code
+                
                 esia.save()
                 messages.success(request,
                                  'ESIA/ESMP record updated successfully!')
@@ -136,6 +159,9 @@ def esia_edit(request, pk):
                     messages.error(request, f'{field}: {error}')
     else:
         form = ESIAForm(instance=esia)
+        # Ensure the investment type is properly populated for editing
+        if esia.type_of_investment:
+            form.fields['type_of_investment'].initial = esia.type_of_investment.monitoring_Type_Code
 
     context = {'form': form, 'esia': esia, 'title': 'Edit ESIA/ESMP Record'}
     return render(request, 'social_and_env/esia/esia_edit.html', context)
