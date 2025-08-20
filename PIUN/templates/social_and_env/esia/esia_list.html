@@ -74,15 +74,29 @@
         <form method="get" class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Project</label>
-                {{ filter.form.project_name|add_class:"form-select" }}
+                <select name="project_name" class="form-select">
+                    <option value="">All Projects</option>
+                    {% for project in filter.form.project_name.field.queryset %}
+                        <option value="{{ project.projectID }}" {% if request.GET.project_name == project.projectID|stringformat:"s" %}selected{% endif %}>
+                            {{ project.project }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Investment Type</label>
-                {{ filter.form.type_of_investment|add_class:"form-select" }}
+                <select name="type_of_investment" class="form-select">
+                    <option value="">All Investment Types</option>
+                    {% for investment in filter.form.type_of_investment.field.queryset %}
+                        <option value="{{ investment.type_of_investment }}" {% if request.GET.type_of_investment == investment.type_of_investment %}selected{% endif %}>
+                            {{ investment.type_of_investment }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-2">
                 <label class="form-label">Location</label>
-                {{ filter.form.project_locations|add_class:"form-control" }}
+                <input type="text" name="project_locations" class="form-control" value="{{ request.GET.project_locations }}" placeholder="Search location...">
             </div>
             <div class="col-md-2">
                 <label class="form-label">Page Size</label>

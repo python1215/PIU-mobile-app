@@ -227,8 +227,14 @@ def esia_export_excel(request):
         filename = f'ESIA_Records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
-        # Save to response
-        wb.save(response)
+        # Save to response using BytesIO to ensure proper content
+        from io import BytesIO
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        response.write(buffer.getvalue())
+        buffer.close()
+        
         logger.info("Excel file saved to response successfully")
         return response
         
