@@ -248,49 +248,53 @@ class PAPForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Set up dynamic querysets based on form data
-        if 'project' in self.data:
+        if 'project' in self.data and self.data.get('project'):
             try:
                 project_id = int(self.data.get('project'))
                 self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
                     project_id=project_id
                 )
             except (ValueError, TypeError):
-                pass
+                # Reset to empty queryset if invalid project_id
+                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.none()
         elif self.instance and self.instance.pk and self.instance.project:
             # For editing existing PAP records, populate investment types for the selected project
             self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
                 project=self.instance.project
             )
+        else:
+            # For fresh forms or invalid data, reset to empty
+            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.none()
         
-        if 'region' in self.data:
+        if 'region' in self.data and self.data.get('region'):
             try:
                 region_id = int(self.data.get('region'))
                 self.fields['district'].queryset = Districts.objects.filter(
                     region_code_id=region_id
                 )
             except (ValueError, TypeError):
-                pass
+                self.fields['district'].queryset = Districts.objects.none()
+        else:
+            self.fields['district'].queryset = Districts.objects.none()
         
-        if 'district' in self.data:
+        if 'district' in self.data and self.data.get('district'):
             try:
                 district_id = int(self.data.get('district'))
                 self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
                     district_code_id=district_id
                 )
             except (ValueError, TypeError):
-                pass
+                self.fields['pap_Current_Address'].queryset = Settlement.objects.none()
+        else:
+            self.fields['pap_Current_Address'].queryset = Settlement.objects.none()
         
-        # Make optional fields explicitly not required
+        # Make cascading dropdown fields not required to avoid validation errors
+        self.fields['type_of_investment'].required = False
+        self.fields['district'].required = False  
+        self.fields['pap_Current_Address'].required = False
         self.fields['area'].required = False
         self.fields['compensation_RefNo'].required = False
         self.fields['compensation_date'].required = False
-        self.fields['type_of_investment'].required = False
-        self.fields['district'].required = False
-        self.fields['pap_Current_Address'].required = False
-        
-        # Set required=False for all form fields - we'll handle validation in clean() method
-        for field_name, field in self.fields.items():
-            field.required = False
     
     def clean_type_of_investment(self):
         """Custom validation for type_of_investment field"""

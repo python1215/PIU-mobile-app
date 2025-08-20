@@ -244,6 +244,9 @@
                         <a href="{% url 'pap_list' %}" class="btn btn-outline-secondary me-2">
                             <i class="bi bi-arrow-left me-1"></i>Cancel
                         </a>
+                        <button type="button" id="clear-form" class="btn btn-outline-warning me-2">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Clear Form
+                        </button>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save me-1"></i>
                             {% if pap %}Update{% else %}Create{% endif %} PAP Record
@@ -263,6 +266,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const compensatedField = document.getElementById('id_pap_compensated');
     const compensationDateField = document.getElementById('id_compensation_date');
     const refNoField = document.getElementById('id_compensation_RefNo');
+
+    // --- Form Reset on Page Load ---
+    function clearFormOnLoad() {
+        // Check if this is a fresh page load (not a form submission)
+        if (window.performance.navigation.type === 1 || document.referrer === window.location.href) {
+            // Clear all form fields
+            const allFields = form.querySelectorAll('input, select, textarea');
+            allFields.forEach(field => {
+                if (field.type === 'select-one' || field.tagName === 'SELECT') {
+                    field.selectedIndex = 0; // Select first option (empty option)
+                } else if (field.type !== 'hidden' && field.name !== 'csrfmiddlewaretoken') {
+                    field.value = '';
+                }
+                field.classList.remove('is-invalid');
+            });
+            
+            // Reset cascading dropdowns
+            const investmentField = document.getElementById('id_type_of_investment');
+            const districtField = document.getElementById('id_district');
+            const settlementField = document.getElementById('id_pap_Current_Address');
+            
+            if (investmentField) investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            if (districtField) districtField.innerHTML = '<option value="">Select District</option>';
+            if (settlementField) settlementField.innerHTML = '<option value="">Select Settlement</option>';
+        }
+    }
+    
+    // Call clear function on load
+    clearFormOnLoad();
+
+    // --- Clear Form Button ---
+    const clearFormBtn = document.getElementById('clear-form');
+    if (clearFormBtn) {
+        clearFormBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all form fields?')) {
+                clearFormOnLoad(); // Reuse the same clear function
+            }
+        });
+    }
 
     // --- Compensation toggle ---
     function toggleCompensationFields() {
