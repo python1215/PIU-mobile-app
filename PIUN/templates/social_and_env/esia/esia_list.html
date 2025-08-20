@@ -73,16 +73,16 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-3">
-                {{ filter.form.project_name.label_tag }}
-                {{ filter.form.project_name }}
+                <label class="form-label">Project</label>
+                {{ filter.form.project_name|add_class:"form-select" }}
             </div>
             <div class="col-md-3">
-                {{ filter.form.type_of_investment.label_tag }}
-                {{ filter.form.type_of_investment }}
+                <label class="form-label">Investment Type</label>
+                {{ filter.form.type_of_investment|add_class:"form-select" }}
             </div>
             <div class="col-md-2">
-                {{ filter.form.project_locations.label_tag }}
-                {{ filter.form.project_locations }}
+                <label class="form-label">Location</label>
+                {{ filter.form.project_locations|add_class:"form-control" }}
             </div>
             <div class="col-md-2">
                 <label class="form-label">Page Size</label>
