@@ -151,18 +151,62 @@ class ESIAForm(forms.ModelForm):
                 if investment:
                     return investment
                 else:
-                    # Allow fallback ESS codes for offline scenarios
-                    fallback_codes = ['ESS001', 'ESS002', 'ESS003', 'ESS004', 'ESS005', 
-                                    'ESS006', 'ESS007', 'ESS008', 'ESS009', 'ESS010']
-                    if type_of_investment in fallback_codes:
-                        # Create a minimal object for validation
-                        from PIU_Financial_mgt.models import KPI_For_Contract
-                        fallback = KPI_For_Contract()
-                        fallback.monitoring_Type_Code = type_of_investment
-                        fallback.project = project_name
-                        return fallback
-            except Exception:
-                pass
+                    # Try to find any investment for this project with the code
+                    any_investment = KPI_For_Contract.objects.filter(
+                        project=project_name,
+                        monitoring_Type_Code=type_of_investment
+                    ).first()
+                    if any_investment:
+                        return any_investment
+                    else:
+                        # Create the KPI_For_Contract object for fallback codes
+                        fallback_codes = ['ESS001', 'ESS002', 'ESS003', 'ESS004', 'ESS005', 
+                                        'ESS006', 'ESS007', 'ESS008', 'ESS009', 'ESS010',
+                                        'ECOREAP-DSI', 'ECOREAP-EIS', 'ECOREAP-SIA']
+                        if type_of_investment in fallback_codes or type_of_investment.startswith('ECOREAP'):
+                            # Get or create the KPI object
+                            fallback_names = {
+                                'ESS001': 'Environmental Impact Assessment',
+                                'ESS002': 'Social Impact Assessment',
+                                'ESS003': 'Biodiversity Assessment',
+                                'ESS004': 'Water Quality Assessment',
+                                'ESS005': 'Air Quality Assessment',
+                                'ESS006': 'Soil Assessment',
+                                'ESS007': 'Noise Assessment',
+                                'ESS008': 'Cultural Heritage Assessment',
+                                'ESS009': 'Community Health Assessment',
+                                'ESS010': 'Stakeholder Engagement',
+                                'ECOREAP-DSI': 'Distribution System Investment',
+                                'ECOREAP-EIS': 'Electrical Infrastructure System',
+                                'ECOREAP-SIA': 'Social Impact Assessment',
+                            }
+                            
+                            investment_obj, created = KPI_For_Contract.objects.get_or_create(
+                                monitoring_Type_Code=type_of_investment,
+                                project=project_name,
+                                defaults={
+                                    'type_of_investment': fallback_names.get(type_of_investment, f'Investment {type_of_investment}'),
+                                    'monitoring_type_id': 'ESS'
+                                }
+                            )
+                            return investment_obj
+                        else:
+                            # For unknown codes, find any ESS investment for this project
+                            any_ess = KPI_For_Contract.objects.filter(
+                                project=project_name,
+                                monitoring_type_id='ESS'
+                            ).first()
+                            if any_ess:
+                                return any_ess
+                            
+            except Exception as e:
+                # Final fallback - find any investment for this project
+                try:
+                    any_investment = KPI_For_Contract.objects.filter(project=project_name).first()
+                    if any_investment:
+                        return any_investment
+                except:
+                    pass
         
         return type_of_investment
 
@@ -181,71 +225,7 @@ class ESIAForm(forms.ModelForm):
             
         return cleaned_data
 
-    def save(self, commit=True):
-        """Override save method to handle type_of_investment conversion"""
-        instance = super().save(commit=False)
-        
-        # Handle type_of_investment conversion from CharField to ForeignKey
-        investment_code = self.cleaned_data.get('type_of_investment')
-        if isinstance(investment_code, str) and investment_code:
-            from PIU_Financial_mgt.models import KPI_For_Contract
-            try:
-                # Find the KPI_For_Contract object by monitoring_Type_Code
-                investment_obj = KPI_For_Contract.objects.filter(
-                    monitoring_Type_Code=investment_code,
-                    project=instance.project_name
-                ).first()
-                if investment_obj:
-                    instance.type_of_investment = investment_obj
-                else:
-                    # Fallback: find any ESS investment for this project
-                    fallback_obj = KPI_For_Contract.objects.filter(
-                        project=instance.project_name,
-                        monitoring_type_id='ESS'
-                    ).first()
-                    if fallback_obj:
-                        instance.type_of_investment = fallback_obj
-                    else:
-                        # Create a minimal KPI_For_Contract object for fallback codes
-                        if investment_code in ['ESS001', 'ESS002', 'ESS003', 'ESS004', 'ESS005', 
-                                             'ESS006', 'ESS007', 'ESS008', 'ESS009', 'ESS010']:
-                            # For fallback scenarios, create a temporary object
-                            fallback_names = {
-                                'ESS001': 'Environmental Impact Assessment',
-                                'ESS002': 'Social Impact Assessment',
-                                'ESS003': 'Biodiversity Assessment',
-                                'ESS004': 'Water Quality Assessment',
-                                'ESS005': 'Air Quality Assessment',
-                                'ESS006': 'Soil Assessment',
-                                'ESS007': 'Noise Assessment',
-                                'ESS008': 'Cultural Heritage Assessment',
-                                'ESS009': 'Community Health Assessment',
-                                'ESS010': 'Stakeholder Engagement',
-                            }
-                            # Try to find or create the KPI object
-                            investment_obj, created = KPI_For_Contract.objects.get_or_create(
-                                monitoring_Type_Code=investment_code,
-                                project=instance.project_name,
-                                defaults={
-                                    'type_of_investment': fallback_names.get(investment_code, 'ESS Investment'),
-                                    'monitoring_type_id': 'ESS'
-                                }
-                            )
-                            instance.type_of_investment = investment_obj
-            except Exception as e:
-                # If all else fails, find any KPI object for this project
-                any_investment = KPI_For_Contract.objects.filter(
-                    project=instance.project_name
-                ).first()
-                if any_investment:
-                    instance.type_of_investment = any_investment
-        elif hasattr(investment_code, 'pk'):
-            # Already a model instance
-            instance.type_of_investment = investment_code
-            
-        if commit:
-            instance.save()
-        return instance
+
 
 
 class PAPForm(forms.ModelForm):
