@@ -195,16 +195,55 @@ def esia_export_excel(request):
 
         # Add data
         for row, esia in enumerate(esia_list, 2):
-            ws.cell(row=row, column=1, value=esia.esiaID)
-            ws.cell(row=row, column=2, value=str(esia.project_name.project) if esia.project_name else "")
-            ws.cell(row=row, column=3, value=str(esia.type_of_investment.type_of_investment) if esia.type_of_investment else "")
-            ws.cell(row=row, column=4, value=esia.project_duration)
-            ws.cell(row=row, column=5, value=esia.project_phase)
-            ws.cell(row=row, column=6, value=esia.project_locations)
-            ws.cell(row=row, column=7, value=esia.number_of_communities)
-            ws.cell(row=row, column=8, value=esia.esia_findings)
-            ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d %H:%M'))
-            ws.cell(row=row, column=10, value=str(esia.loginUser.username))
+            try:
+                ws.cell(row=row, column=1, value=str(esia.esiaID) if esia.esiaID else "")
+                
+                # Project name with safe access
+                project_name = ""
+                if esia.project_name:
+                    try:
+                        project_name = str(esia.project_name.project)
+                    except:
+                        project_name = str(esia.project_name)
+                ws.cell(row=row, column=2, value=project_name)
+                
+                # Investment type with safe access
+                investment_type = ""
+                if esia.type_of_investment:
+                    try:
+                        investment_type = str(esia.type_of_investment.type_of_investment)
+                    except:
+                        investment_type = str(esia.type_of_investment)
+                ws.cell(row=row, column=3, value=investment_type)
+                
+                ws.cell(row=row, column=4, value=esia.project_duration if esia.project_duration else "")
+                ws.cell(row=row, column=5, value=esia.project_phase if esia.project_phase else "")
+                ws.cell(row=row, column=6, value=esia.project_locations if esia.project_locations else "")
+                ws.cell(row=row, column=7, value=esia.number_of_communities if esia.number_of_communities else "")
+                ws.cell(row=row, column=8, value=esia.esia_findings if esia.esia_findings else "")
+                
+                # Date with safe formatting
+                date_created = ""
+                if esia.date_created:
+                    try:
+                        date_created = esia.date_created.strftime('%Y-%m-%d %H:%M')
+                    except:
+                        date_created = str(esia.date_created)
+                ws.cell(row=row, column=9, value=date_created)
+                
+                # User with safe access
+                username = ""
+                if esia.loginUser:
+                    try:
+                        username = str(esia.loginUser.username)
+                    except:
+                        username = str(esia.loginUser)
+                ws.cell(row=row, column=10, value=username)
+                
+            except Exception as e:
+                # Skip problematic rows and continue
+                print(f"Error processing ESIA row {row}: {str(e)}")
+                continue
 
         # Auto-adjust column widths
         for col in range(1, len(headers) + 1):
@@ -223,6 +262,9 @@ def esia_export_excel(request):
         
     except Exception as e:
         from django.contrib import messages
+        import traceback
+        print(f"ESIA Export Error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         messages.error(request, f'Error exporting ESIA records: {str(e)}')
         return redirect('esia_list')
 
