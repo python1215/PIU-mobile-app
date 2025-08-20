@@ -173,21 +173,29 @@ def esia_export_excel(request):
     from django.shortcuts import redirect
     from django.contrib import messages
     from datetime import datetime
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    logger.info("ESIA Excel export initiated")
     
     try:
         import openpyxl
-    except ImportError:
-        messages.error(request, 'Excel export functionality is not available.')
+        logger.info("openpyxl imported successfully")
+    except ImportError as e:
+        logger.error(f"openpyxl import failed: {e}")
+        messages.error(request, 'Excel export functionality is not available. openpyxl is missing.')
         return redirect('esia_list')
     
     try:
         # Get ESIA data
         esia_data = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        logger.info(f"Retrieved {esia_data.count()} ESIA records")
         
         # Create workbook
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "ESIA Records"
+        logger.info("Workbook created successfully")
         
         # Headers
         headers = ['ESIA ID', 'Project', 'Investment Type', 'Duration', 'Phase', 'Locations', 'Communities', 'Findings', 'Date', 'User']
@@ -198,16 +206,22 @@ def esia_export_excel(request):
         
         # Write data
         for row, esia in enumerate(esia_data, 2):
-            ws.cell(row=row, column=1, value=esia.esiaID)
-            ws.cell(row=row, column=2, value=str(esia.project_name.project) if esia.project_name else 'N/A')
-            ws.cell(row=row, column=3, value=str(esia.type_of_investment.type_of_investment) if esia.type_of_investment else 'N/A')
-            ws.cell(row=row, column=4, value=esia.project_duration)
-            ws.cell(row=row, column=5, value=esia.project_phase)
-            ws.cell(row=row, column=6, value=esia.project_locations)
-            ws.cell(row=row, column=7, value=esia.number_of_communities)
-            ws.cell(row=row, column=8, value=str(esia.esia_findings)[:500] if esia.esia_findings else '')
-            ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d') if esia.date_created else '')
-            ws.cell(row=row, column=10, value=str(esia.loginUser.username) if esia.loginUser else '')
+            try:
+                ws.cell(row=row, column=1, value=esia.esiaID)
+                ws.cell(row=row, column=2, value=str(esia.project_name.project) if esia.project_name else 'N/A')
+                ws.cell(row=row, column=3, value=str(esia.type_of_investment.type_of_investment) if esia.type_of_investment else 'N/A')
+                ws.cell(row=row, column=4, value=esia.project_duration)
+                ws.cell(row=row, column=5, value=esia.project_phase)
+                ws.cell(row=row, column=6, value=esia.project_locations)
+                ws.cell(row=row, column=7, value=esia.number_of_communities)
+                ws.cell(row=row, column=8, value=str(esia.esia_findings)[:500] if esia.esia_findings else '')
+                ws.cell(row=row, column=9, value=esia.date_created.strftime('%Y-%m-%d') if esia.date_created else '')
+                ws.cell(row=row, column=10, value=str(esia.loginUser.username) if esia.loginUser else '')
+            except Exception as row_error:
+                logger.error(f"Error processing row {row}: {row_error}")
+                continue
+        
+        logger.info("Data written to workbook successfully")
         
         # Prepare response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -216,9 +230,11 @@ def esia_export_excel(request):
         
         # Save to response
         wb.save(response)
+        logger.info("Excel file saved to response successfully")
         return response
         
     except Exception as e:
+        logger.error(f"ESIA Excel export failed: {str(e)}", exc_info=True)
         messages.error(request, f'Export failed: {str(e)}')
         return redirect('esia_list')
 
