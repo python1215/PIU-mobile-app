@@ -2477,3 +2477,69 @@ def pap_download_document(request, pk, doc_id):
     except Exception as e:
         messages.error(request, f'Error downloading document: {str(e)}')
         return redirect('pap_detail', pk=pk)
+
+
+@login_required
+def export_grievance_excel(request):
+    """Export Grievance data to Excel"""
+    import openpyxl
+    from django.http import HttpResponse
+    from datetime import datetime
+
+    try:
+        # Get all grievance records
+        grievances = Grievance.objects.select_related(
+            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
+        ).all()
+
+        # Create workbook and worksheet
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Grievance Data'
+
+        # Add headers
+        headers = [
+            'Case No', 'Project', 'Investment Type', 'Complainant Name', 'Gender',
+            'Phone Number', 'Date Received', 'Received By', 'How Received',
+            'Complaint Content', 'Acknowledgment Sent', 'Expected Decision Date',
+            'Decision Outcome', 'Decision Communicated', 'Communication Method',
+            'Complainant Satisfied', 'Follow-up Action', 'Created By', 'Date Created'
+        ]
+
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=1, column=col, value=header)
+
+        # Add data rows
+        for row, grievance in enumerate(grievances, 2):
+            ws.cell(row=row, column=1, value=grievance.case_no)
+            ws.cell(row=row, column=2, value=grievance.project.project if grievance.project else '')
+            ws.cell(row=row, column=3, value=grievance.type_of_investment.type_of_investment if grievance.type_of_investment else '')
+            ws.cell(row=row, column=4, value=grievance.name_of_complainant)
+            ws.cell(row=row, column=5, value=grievance.sex)
+            ws.cell(row=row, column=6, value=grievance.tell_no)
+            ws.cell(row=row, column=7, value=grievance.date_claim_recieved.strftime('%Y-%m-%d') if grievance.date_claim_recieved else '')
+            ws.cell(row=row, column=8, value=grievance.name_of_person_receiving_complaint)
+            ws.cell(row=row, column=9, value=grievance.how_complaint_was_received)
+            ws.cell(row=row, column=10, value=grievance.complaint_content)
+            ws.cell(row=row, column=11, value=grievance.was_recieved_of_complaint_ack)
+            ws.cell(row=row, column=12, value=grievance.expected_decision_date.strftime('%Y-%m-%d') if grievance.expected_decision_date else '')
+            ws.cell(row=row, column=13, value=grievance.decision_outcome.grievance_outcome if grievance.decision_outcome else '')
+            ws.cell(row=row, column=14, value=grievance.was_decison_communicated_to_complainant)
+            ws.cell(row=row, column=15, value=grievance.communication_method)
+            ws.cell(row=row, column=16, value=grievance.was_complainant_satisfied_with_decision)
+            ws.cell(row=row, column=17, value=grievance.any_follow_up_action)
+            ws.cell(row=row, column=18, value=grievance.loginUser.username if grievance.loginUser else '')
+            ws.cell(row=row, column=19, value=grievance.date_created.strftime('%Y-%m-%d %H:%M') if grievance.date_created else '')
+
+        # Create HTTP response with Excel file
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="grievance_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        
+        wb.save(response)
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting grievance data: {str(e)}')
+        return redirect('grievance_list')

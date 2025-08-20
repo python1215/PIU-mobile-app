@@ -32,6 +32,7 @@ urlpatterns = [
     path('grievance/<str:pk>/', views.grievance_detail, name='grievance_detail'),
     path('grievance/<str:pk>/edit/', views.grievance_edit, name='grievance_edit'),
     path('grievance/<str:pk>/delete/', views.grievance_delete, name='grievance_delete'),
+    path('grievance/export/excel/', views.export_grievance_excel, name='export_grievance_excel'),
     
     # OHS Monitoring
     path('ohs/', views.ohs_list, name='ohs_list'),
