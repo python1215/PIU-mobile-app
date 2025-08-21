@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Try to re-select the current investment type if needed
                 if (selectCurrentValue) {
-                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:""|escape }}';
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
                     console.log('Attempting to select investment type:', currentInvestmentId);
                     console.log('Available options:', Array.from(investmentField.options).map(opt => opt.value));
                     if (currentInvestmentId) {
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Try to select current value from fallback options
                 if (selectCurrentValue) {
-                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:""|escape }}';
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
                     console.log('Fallback: Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
                         for (let option of investmentField.options) {
