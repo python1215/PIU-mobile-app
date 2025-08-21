@@ -1064,8 +1064,11 @@ class PAPUpdateForm(PAPForm):
                 # Set the initial value if instance has an investment type
                 if self.instance.type_of_investment:
                     current_code = self.instance.type_of_investment.monitoring_Type_Code
+                    # Set both initial data and field value for the CharField
                     self.initial['type_of_investment'] = current_code
+                    self.fields['type_of_investment'].initial = current_code
                     print(f"🔍 Current investment type: {self.instance.type_of_investment.type_of_investment} (Code: {current_code})")
+                    print(f"🔍 Set initial value to: {current_code}")
                 else:
                     print("🔍 No current investment type assigned")
             else:
