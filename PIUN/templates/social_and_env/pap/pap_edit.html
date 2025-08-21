@@ -388,41 +388,81 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectField = document.getElementById('id_project');
     const investmentField = document.getElementById('id_type_of_investment');
     
+    function loadInvestmentTypes(projectId, selectCurrentValue = false) {
+        if (!projectId) {
+            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
+            investmentField.disabled = true;
+            return;
+        }
+        
+        console.log('Loading investment types for project:', projectId);
+        
+        // Load investment types for selected project using HTML response format
+        fetch(`{% url 'load_investment_types_pap' %}?project=${projectId}`)
+            .then(response => response.text())
+            .then(html => {
+                investmentField.innerHTML = html;
+                investmentField.disabled = false;
+                
+                // Try to re-select the current investment type if needed
+                if (selectCurrentValue) {
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    if (currentInvestmentId) {
+                        const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
+                        if (optionToSelect) {
+                            optionToSelect.selected = true;
+                            console.log('Selected current investment type:', currentInvestmentId);
+                        }
+                    }
+                }
+                
+                console.log('Investment types loaded successfully');
+            })
+            .catch(error => {
+                console.error('Error loading investment types:', error);
+                // Use fallback options for offline scenarios
+                investmentField.innerHTML = `
+                    <option value="">Select Investment Type</option>
+                    <option value="BB1">BB1 - Compliance</option>
+                    <option value="BB2">BB2 - Operational</option>
+                    <option value="BB3">BB3 - Regulatory</option>
+                    <option value="ESS1">ESS1 - Environmental Assessment</option>
+                    <option value="ESS2">ESS2 - Labor and Working Conditions</option>
+                    <option value="ESS3">ESS3 - Resource Efficiency</option>
+                    <option value="ESS4">ESS4 - Community Health and Safety</option>
+                    <option value="ESS5">ESS5 - Land Acquisition</option>
+                    <option value="ESS6">ESS6 - Biodiversity Conservation</option>
+                    <option value="ESS7">ESS7 - Indigenous Peoples</option>
+                    <option value="ESS8">ESS8 - Cultural Heritage</option>
+                    <option value="ESS9">ESS9 - Financial Intermediaries</option>
+                    <option value="ESS10">ESS10 - Stakeholder Engagement</option>
+                `;
+                investmentField.disabled = false;
+                
+                // Try to select current value from fallback options
+                if (selectCurrentValue) {
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    if (currentInvestmentId) {
+                        const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
+                        if (optionToSelect) {
+                            optionToSelect.selected = true;
+                        }
+                    }
+                }
+            });
+    }
+    
     if (projectField && investmentField) {
+        // Initialize on page load
+        const currentProjectId = projectField.value;
+        if (currentProjectId) {
+            loadInvestmentTypes(currentProjectId, true);
+        }
+        
         projectField.addEventListener('change', function() {
             const projectId = this.value;
-            
-            // Clear investment type field
-            investmentField.innerHTML = '<option value="">Select Investment Type</option>';
-            investmentField.disabled = !projectId;
-            
-            if (projectId) {
-                console.log('Loading investment types for project:', projectId);
-                
-                // Load investment types for selected project using HTML response format
-                fetch(`{% url 'load_investment_types_pap' %}?project=${projectId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        investmentField.innerHTML = html;
-                        investmentField.disabled = false;
-                        
-                        // Try to re-select the current investment type if it exists
-                        const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
-                        if (currentInvestmentId) {
-                            const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
-                            if (optionToSelect) {
-                                optionToSelect.selected = true;
-                            }
-                        }
-                        
-                        console.log('Investment types loaded successfully');
-                    })
-                    .catch(error => {
-                        console.error('Error loading investment types:', error);
-                        investmentField.innerHTML = '<option value="">Error loading investment types</option>';
-                        investmentField.disabled = false;
-                    });
-            }
+            loadInvestmentTypes(projectId, false);
+        });
         });
     }
     
