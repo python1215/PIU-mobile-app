@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
                     console.log('Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
-                        const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
+                        const optionToSelect = investmentField.querySelector('option[value="' + currentInvestmentId + '"]');
                         if (optionToSelect) {
                             optionToSelect.selected = true;
                             console.log('Selected current investment type:', currentInvestmentId);
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
                     console.log('Fallback: Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
-                        const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
+                        const optionToSelect = investmentField.querySelector('option[value="' + currentInvestmentId + '"]');
                         if (optionToSelect) {
                             optionToSelect.selected = true;
                             console.log('Fallback: Selected investment type:', currentInvestmentId);
@@ -470,7 +470,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const projectId = this.value;
             loadInvestmentTypes(projectId, false);
         });
-    }
     }
     
     // Region -> District -> Settlement cascade
