@@ -407,11 +407,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Try to re-select the current investment type if needed
                 if (selectCurrentValue) {
                     const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    console.log('Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
                         const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
                         if (optionToSelect) {
                             optionToSelect.selected = true;
                             console.log('Selected current investment type:', currentInvestmentId);
+                        } else {
+                            console.log('Option not found for:', currentInvestmentId);
                         }
                     }
                 }
@@ -442,10 +445,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Try to select current value from fallback options
                 if (selectCurrentValue) {
                     const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    console.log('Fallback: Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
                         const optionToSelect = investmentField.querySelector(`option[value="${currentInvestmentId}"]`);
                         if (optionToSelect) {
                             optionToSelect.selected = true;
+                            console.log('Fallback: Selected investment type:', currentInvestmentId);
+                        } else {
+                            console.log('Fallback: Option not found for:', currentInvestmentId);
                         }
                     }
                 }
