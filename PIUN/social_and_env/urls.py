@@ -21,10 +21,7 @@ urlpatterns = [
     path('pap/<str:pk>/delete/', views.pap_delete, name='pap_delete'),
     path('pap/export/excel/', views.export_pap_excel, name='export_pap_excel'),
     
-    # PAP Document Management
-    path('pap/<str:pk>/upload-document/', views.pap_upload_document, name='pap_upload_document'),
-    path('pap/<str:pk>/document/<int:doc_id>/delete/', views.pap_delete_document, name='pap_delete_document'),
-    path('pap/<str:pk>/document/<int:doc_id>/download/', views.pap_download_document, name='pap_download_document'),
+    # PAP Document Management - Removed (functions deleted)
     
     # Grievance Management
     path('grievance/', views.grievance_list, name='grievance_list'),

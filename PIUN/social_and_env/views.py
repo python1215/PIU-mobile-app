@@ -2230,107 +2230,10 @@ def esia_export_excel(request):
         return redirect('esia_list')
 
 
-@login_required
-def pap_detail(request, pk):
-    """PAP detail view with document management"""
-    try:
-        pap = get_object_or_404(PAP.objects.select_related(
-            'project', 'type_of_investment', 'region', 'district',
-            'pap_category', 'loginUser'),
-                                pk=pk)
-        
-        # Get all documents for this PAP
-        documents = pap.documents.all().order_by('-upload_date')
-
-        context = {
-            'pap': pap,
-            'documents': documents,
-            'document_form': PAPDocumentForm(),
-            'title': f'PAP Details - {pap.pap_name}',
-        }
-
-        return render(request, 'social_and_env/pap/pap_detail.html', context)
-
-    except Exception as e:
-        messages.error(request, f'Error loading PAP details: {str(e)}')
-        return redirect('pap_list')
 
 
-@login_required
-def pap_upload_document(request, pk):
-    """Upload document for PAP"""
-    pap = get_object_or_404(PAP, pk=pk)
-    
-    if request.method == 'POST':
-        print(f"🔍 POST data: {request.POST}")
-        print(f"🔍 FILES data: {request.FILES}")
-        
-        form = PAPDocumentForm(request.POST, request.FILES)
-        print(f"🔍 Form is valid: {form.is_valid()}")
-        
-        if form.is_valid():
-            try:
-                document = form.save(commit=False)
-                document.pap = pap
-                document.uploaded_by = request.user
-                # Auto-generate document name from filename
-                if document.document_file:
-                    document.document_name = document.document_file.name
-                # Set default document type
-                document.document_type = 'other'
-                document.save()
-                print(f"🔍 Document saved successfully: {document.id}")
-                messages.success(request, f'Document "{document.document_name}" uploaded successfully.')
-                return redirect('pap_detail', pk=pk)
-            except Exception as e:
-                print(f"🔍 Error saving document: {str(e)}")
-                messages.error(request, f'Error uploading document: {str(e)}')
-        else:
-            print(f"🔍 Form errors: {form.errors}")
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'{field}: {error}')
-    
-    return redirect('pap_detail', pk=pk)
 
 
-@login_required
-def pap_delete_document(request, pk, doc_id):
-    """Delete PAP document"""
-    pap = get_object_or_404(PAP, pk=pk)
-    document = get_object_or_404(PAPDocument, id=doc_id, pap=pap)
-    
-    if request.method == 'POST':
-        try:
-            # Delete the file from storage
-            if document.document_file:
-                document.document_file.delete()
-            document.delete()
-            messages.success(request, 'Document deleted successfully.')
-        except Exception as e:
-            messages.error(request, f'Error deleting document: {str(e)}')
-    
-    return redirect('pap_detail', pk=pk)
-
-
-@login_required
-def pap_download_document(request, pk, doc_id):
-    """Download PAP document"""
-    pap = get_object_or_404(PAP, pk=pk)
-    document = get_object_or_404(PAPDocument, id=doc_id, pap=pap)
-    
-    try:
-        if document.document_file:
-            response = HttpResponse(document.document_file.read(), 
-                                  content_type='application/octet-stream')
-            response['Content-Disposition'] = f'attachment; filename="{document.document_file.name.split("/")[-1]}"'
-            return response
-        else:
-            messages.error(request, 'Document file not found.')
-            return redirect('pap_detail', pk=pk)
-    except Exception as e:
-        messages.error(request, f'Error downloading document: {str(e)}')
-        return redirect('pap_detail', pk=pk)
 
 
 @login_required
