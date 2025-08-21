@@ -358,9 +358,23 @@ def pap_detail(request, pk):
 
         logger.info(f"🔍 Found PAP: {pap.pap_name} (ID: {pap.pk})")
         
+        # Create a documents context - check if document_upload field exists
+        documents = []
+        if hasattr(pap, 'document_upload') and pap.document_upload:
+            documents = [{
+                'id': 1,
+                'document_name': pap.document_upload.name.split('/')[-1],
+                'upload_date': pap.date_created,
+                'uploaded_by': pap.loginUser,
+                'file_url': pap.document_upload.url
+            }]
+        
+        logger.info(f"🔍 Found {len(documents)} documents for PAP")
+        
         context = {
             'pap': pap,
             'title': f'PAP Details - {pap.pap_name}',
+            'documents': documents,
         }
 
         logger.info(f"🔍 Rendering pap_detail.html with context")
