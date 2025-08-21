@@ -231,18 +231,14 @@
                                 </small>
                             </div>
                             <div class="btn-group">
-                                <a href="{% url 'pap_download_document' pap.pk doc.id %}" 
+                                <a href="#" 
                                    class="btn btn-outline-primary btn-sm" title="Download">
                                     <i class="bi bi-download"></i>
                                 </a>
-                                <form method="post" action="{% url 'pap_delete_document' pap.pk doc.id %}" 
-                                      style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                            onclick="return confirm('Delete this document?')" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        onclick="return confirm('Delete this document?')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </div>
                         {% endfor %}
@@ -307,7 +303,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'pap_upload_document' pap.pk %}" enctype="multipart/form-data">
+            <form method="post" action="#" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
