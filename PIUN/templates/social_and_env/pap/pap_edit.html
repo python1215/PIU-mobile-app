@@ -45,7 +45,7 @@
                                     {% for error in form.type_of_investment.errors %}{{ error }}{% endfor %}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Current: {{ pap.type_of_investment.investment_type }}</div>
+                            <div class="form-text">Current: {{ pap.type_of_investment.type_of_investment|default:"None selected" }}</div>
                         </div>
                         
                         <!-- PAP Identification -->

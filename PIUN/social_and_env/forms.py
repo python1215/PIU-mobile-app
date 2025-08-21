@@ -1042,33 +1042,76 @@ class PAPUpdateForm(PAPForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
-            # Pre-populate dependent fields
+            # Debug output to understand the data structure
+            print(f"🔍 PAPUpdateForm - Editing PAP: {self.instance.pap_name} (ID: {self.instance.pk})")
             if self.instance.project:
-                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.filter(
-                    project=self.instance.project
-                )
-            else:
-                # If no project, show all investment types
-                self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
+                print(f"🔍 Project: {self.instance.project.project}")
+                print(f"🔍 Project ID: {self.instance.project.pk}")
                 
+                # Get investment types for this project
+                investment_types = KPI_For_Contract.objects.filter(project=self.instance.project)
+                print(f"🔍 Available investment types for project: {investment_types.count()}")
+                
+                # Build choices for CharField type_of_investment field
+                investment_choices = [('', 'Select Investment Type')]
+                for inv_type in investment_types:
+                    investment_choices.append((inv_type.monitoring_Type_Code, inv_type.type_of_investment))
+                    print(f"🔍   - {inv_type.type_of_investment} (Code: {inv_type.monitoring_Type_Code})")
+                
+                # Set the choices for the CharField
+                self.fields['type_of_investment'].widget.choices = investment_choices
+                
+                # Set the initial value if instance has an investment type
+                if self.instance.type_of_investment:
+                    current_code = self.instance.type_of_investment.monitoring_Type_Code
+                    self.initial['type_of_investment'] = current_code
+                    print(f"🔍 Current investment type: {self.instance.type_of_investment.type_of_investment} (Code: {current_code})")
+                else:
+                    print("🔍 No current investment type assigned")
+            else:
+                print("🔍 No project assigned to this PAP")
+                # Fallback: Add some common investment types
+                fallback_choices = [
+                    ('', 'Select Investment Type'),
+                    ('transmission_line', 'Transmission Line'),
+                    ('substation', 'Substation'),
+                    ('distribution_line', 'Distribution Line'),
+                    ('generation_facility', 'Generation Facility'),
+                ]
+                self.fields['type_of_investment'].widget.choices = fallback_choices
+                
+            # Handle district dropdown
             if self.instance.region:
-                self.fields['district'].queryset = Districts.objects.filter(
-                    region_code_id=self.instance.region.region_code
-                )
-            else:
-                self.fields['district'].queryset = Districts.objects.all()
+                print(f"🔍 Region: {self.instance.region.region_name}")
+                districts = Districts.objects.filter(region_code_id=self.instance.region.region_code)
+                district_choices = [('', 'Select District')]
+                for district in districts:
+                    district_choices.append((district.district_code, district.district_name))
+                self.fields['district'].widget.choices = district_choices
                 
-            if self.instance.district:
-                self.fields['pap_Current_Address'].queryset = Settlement.objects.filter(
-                    district_code_id=self.instance.district.district_code
-                )
+                # Set current district
+                if self.instance.district:
+                    self.initial['district'] = self.instance.district.district_code
+                    print(f"🔍 Current district: {self.instance.district.district_name}")
             else:
-                self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
+                print("🔍 No region assigned")
+                
+            # Handle settlement dropdown  
+            if self.instance.district:
+                settlements = Settlement.objects.filter(district_code_id=self.instance.district.district_code)
+                settlement_choices = [('', 'Select Settlement')]
+                for settlement in settlements:
+                    settlement_choices.append((settlement.settlement_code, settlement.settlement_name))
+                self.fields['pap_Current_Address'].widget.choices = settlement_choices
+                
+                # Set current settlement
+                if self.instance.pap_Current_Address:
+                    self.initial['pap_Current_Address'] = self.instance.pap_Current_Address.settlement_code
+                    print(f"🔍 Current settlement: {self.instance.pap_Current_Address.settlement_name}")
+            else:
+                print("🔍 No district assigned for settlements")
         else:
-            # For new forms (shouldn't happen in update form but safety measure)
-            self.fields['type_of_investment'].queryset = KPI_For_Contract.objects.all()
-            self.fields['district'].queryset = Districts.objects.all()
-            self.fields['pap_Current_Address'].queryset = Settlement.objects.all()
+            print("🔍 PAPUpdateForm - No instance provided, this shouldn't happen in edit form")
 
 
 class GrievianceUpdateForm(GrievianceMonitoringLogForm):
