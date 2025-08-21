@@ -345,21 +345,29 @@ def pap_list(request):
 @login_required
 def pap_detail(request, pk):
     """PAP detail view"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"🔍 PAP Detail view called with pk: {pk}")
+    
     try:
         pap = get_object_or_404(PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
             'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser'),
+            'vulnerability_category', 'type_of_impact', 'nature_of_compensation', 'loginUser'),
                                 pk=pk)
 
+        logger.info(f"🔍 Found PAP: {pap.pap_name} (ID: {pap.pk})")
+        
         context = {
             'pap': pap,
             'title': f'PAP Details - {pap.pap_name}',
         }
 
+        logger.info(f"🔍 Rendering pap_detail.html with context")
         return render(request, 'social_and_env/pap/pap_detail.html', context)
 
     except Exception as e:
+        logger.error(f"🔍 Error in pap_detail view: {str(e)}")
         messages.error(request, f'Error loading PAP details: {str(e)}')
         return redirect('pap_list')
 
