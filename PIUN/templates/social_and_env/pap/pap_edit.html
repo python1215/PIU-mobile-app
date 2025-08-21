@@ -406,8 +406,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Try to re-select the current investment type if needed
                 if (selectCurrentValue) {
-                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:""|escape }}';
                     console.log('Attempting to select investment type:', currentInvestmentId);
+                    console.log('Available options:', Array.from(investmentField.options).map(opt => opt.value));
                     if (currentInvestmentId) {
                         const optionToSelect = investmentField.querySelector('option[value="' + currentInvestmentId + '"]');
                         if (optionToSelect) {
@@ -415,6 +416,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.log('Selected current investment type:', currentInvestmentId);
                         } else {
                             console.log('Option not found for:', currentInvestmentId);
+                            console.log('Trying exact match search...');
+                            // Try to find by partial match
+                            for (let option of investmentField.options) {
+                                if (option.value === currentInvestmentId) {
+                                    option.selected = true;
+                                    console.log('Found and selected by exact match:', option.value);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -444,15 +454,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Try to select current value from fallback options
                 if (selectCurrentValue) {
-                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:"" }}';
+                    const currentInvestmentId = '{{ pap.type_of_investment.monitoring_Type_Code|default:""|escape }}';
                     console.log('Fallback: Attempting to select investment type:', currentInvestmentId);
                     if (currentInvestmentId) {
-                        const optionToSelect = investmentField.querySelector('option[value="' + currentInvestmentId + '"]');
-                        if (optionToSelect) {
-                            optionToSelect.selected = true;
-                            console.log('Fallback: Selected investment type:', currentInvestmentId);
-                        } else {
-                            console.log('Fallback: Option not found for:', currentInvestmentId);
+                        for (let option of investmentField.options) {
+                            if (option.value === currentInvestmentId) {
+                                option.selected = true;
+                                console.log('Fallback: Selected investment type:', currentInvestmentId);
+                                break;
+                            }
                         }
                     }
                 }
