@@ -2090,39 +2090,16 @@ def load_investment_types_pap(request):
         return JsonResponse({'investment_types': []})
 
     try:
-        # Get investment types from database for the selected project (no ESS filter for PAP)
-        # PAP can have any type of investment, not just ESS
+        # Get investment types from database for all projects
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id).distinct().order_by('type_of_investment')
-        
-        print(f"🔍 AJAX load_investment_types_pap: project_id={project_id}")
-        print(f"🔍 Found {investment_types.count()} investment types for project")
+            project=project_id,
+            monitoring_type_id='ESS').distinct().order_by('type_of_investment')
 
         if is_htmx:
             # Return HTML options for HTMX
             options = '<option value="">Select Investment Type</option>'
             for investment in investment_types:
                 options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
-                print(f"🔍   - {investment.type_of_investment} (Code: {investment.monitoring_Type_Code})")
-            
-            # Add fallback options if no investment types found
-            if not investment_types.exists():
-                print("🔍 No investment types found, adding fallback options")
-                fallback_options = [
-                    ('BB1', 'Backbone Phase 1'),
-                    ('BB2', 'Backbone Phase 2'), 
-                    ('BB3', 'Backbone Phase 3'),
-                    ('BB4', 'Backbone Phase 4'),
-                    ('BB5', 'Backbone Phase 5'),
-                    ('TL', 'Transmission Line'),
-                    ('SUBSTATION', 'Substation'),
-                    ('SOLAR', 'Solar Installation'),
-                    ('SCADA', 'SCADA System'),
-                    ('METERS', 'Meter Installation'),
-                ]
-                for code, name in fallback_options:
-                    options += f'<option value="{code}">{name}</option>'
-            
             return HttpResponse(options)
         else:
             # Return JSON for regular AJAX
