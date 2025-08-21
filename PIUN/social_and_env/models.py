@@ -167,6 +167,15 @@ class PAP(models.Model):
         help_text="Describe the situation before project implementation"
     )
     remarks = models.TextField(blank=True)
+    
+    # Document Upload (Optional)
+    document_upload = models.FileField(
+        upload_to='documents/pap/',
+        blank=True,
+        null=True,
+        help_text="Upload document (PDF, Word, Excel, Images - max 10MB)"
+    )
+    
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     loginUser = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -299,7 +299,7 @@ class PAPForm(forms.ModelForm):
             'pap_category', 'vulnerability_category',
             'location_of_impact', 'type_of_impact', 'nature_of_compensation',
             'amount', 'area', 'pap_compensated', 'compensation_date',
-            'compensation_RefNo', 'pre_project_situation', 'remarks'
+            'compensation_RefNo', 'pre_project_situation', 'remarks', 'document_upload'
         ]
         widgets = {
             'pap_identification_number': forms.TextInput(attrs={
@@ -348,6 +348,10 @@ class PAPForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 2,
                 'placeholder': 'Additional remarks...'
+            }),
+            'document_upload': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png',
             }),
         }
 
