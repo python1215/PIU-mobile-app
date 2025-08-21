@@ -592,7 +592,7 @@ def pap_edit(request, pk):
                                 pk=pk)
 
         if request.method == 'POST':
-            form = PAPUpdateForm(request.POST, instance=pap)
+            form = PAPUpdateForm(request.POST, request.FILES, instance=pap)
             if form.is_valid():
                 try:
                     updated_pap = form.save(commit=False)
