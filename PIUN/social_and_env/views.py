@@ -2074,45 +2074,33 @@ def test_cascading_dropdown(request):
 
 @login_required
 def load_investment_types_pap(request):
-    """Load investment types for PAP based on project selection - HTMX compatible"""
+    """Load investment types for PAP based on project selection - Database only"""
     from django.http import HttpResponse, JsonResponse
 
     project_id = request.GET.get('project') or request.GET.get(
         'project_id') or request.GET.get('id_project')
 
-    # Detect HTMX request
-    is_htmx = request.headers.get('HX-Request') == 'true'
-
     if not project_id:
-        if is_htmx:
-            return HttpResponse(
-                '<option value="">Select Investment Type</option>')
-        return JsonResponse({'investment_types': []})
+        return HttpResponse('<option value="">Select Investment Type</option>')
 
     try:
-        # Get investment types from database for all projects
+        # Get investment types from database only
         investment_types = KPI_For_Contract.objects.filter(
             project=project_id,
             monitoring_type_id='ESS').distinct().order_by('type_of_investment')
 
-        if is_htmx:
-            # Return HTML options for HTMX
+        if investment_types.exists():
+            # Return HTML options from database
             options = '<option value="">Select Investment Type</option>'
             for investment in investment_types:
                 options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
             return HttpResponse(options)
         else:
-            # Return JSON for regular AJAX
-            investment_data = [{
-                'id': inv.monitoring_Type_Code,
-                'name': inv.type_of_investment
-            } for inv in investment_types]
-            return JsonResponse({'investment_types': investment_data})
+            # No investment types found in database
+            return HttpResponse('<option value="">No investment types available for this project</option>')
 
     except Exception as e:
-        if is_htmx:
-            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
-        return JsonResponse({'investment_types': [], 'error': str(e)})
+        return HttpResponse(f'<option value="">Database error: {str(e)}</option>')
 
 
 @login_required

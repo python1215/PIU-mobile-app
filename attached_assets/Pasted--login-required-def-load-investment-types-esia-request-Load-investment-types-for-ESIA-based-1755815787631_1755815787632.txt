@@ -1,0 +1,52 @@
+@login_required
+def load_investment_types_esia(request):
+    """Load investment types for ESIA based on project selection"""
+    from django.http import HttpResponse
+
+    project_id = request.GET.get('project')
+    if not project_id:
+        return HttpResponse('<option value="">Select Investment Type</option>')
+
+    try:
+        # Get full objects to access monitoring_Type_Code for form validation
+        investment_objects = KPI_For_Contract.objects.filter(
+            project=project_id,
+            monitoring_type_id='ESS'
+        ).distinct().order_by('type_of_investment')
+
+        options = '<option value="">Select Investment Type</option>'
+        for investment in investment_objects:
+            options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
+
+        # If no options found, provide offline fallback
+        if not investment_objects.exists():
+            fallback_options = [
+                ('ESS001', 'Environmental Impact Assessment'),
+                ('ESS002', 'Social Impact Assessment'),
+                ('ESS003', 'Biodiversity Assessment'),
+                ('ESS004', 'Water Quality Assessment'),
+                ('ESS005', 'Air Quality Assessment'),
+                ('ESS006', 'Soil Assessment'),
+                ('ESS007', 'Noise Assessment'),
+                ('ESS008', 'Cultural Heritage Assessment'),
+                ('ESS009', 'Community Health Assessment'),
+                ('ESS010', 'Stakeholder Engagement'),
+            ]
+            for code, name in fallback_options:
+                options += f'<option value="{code}">{name}</option>'
+
+        return HttpResponse(options)
+
+    except Exception as e:
+        # Provide fallback options even on error
+        fallback_options = '<option value="">Select Investment Type</option>'
+        fallback_data = [
+            ('ESS001', 'Environmental Impact Assessment'),
+            ('ESS002', 'Social Impact Assessment'),
+            ('ESS003', 'Biodiversity Assessment'),
+            ('ESS004', 'Water Quality Assessment'),
+            ('ESS005', 'Air Quality Assessment'),
+        ]
+        for code, name in fallback_data:
+            fallback_options += f'<option value="{code}">{name}</option>'
+        return HttpResponse(fallback_options)
