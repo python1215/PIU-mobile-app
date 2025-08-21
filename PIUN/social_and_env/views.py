@@ -17,11 +17,10 @@ import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
-from .models import ESIA, PAP, PAPDocument, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
+from .models import ESIA, PAP, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
 from .forms import (ESIAForm, ESIAUpdateForm, PAPForm, PAPUpdateForm,
                     GrievianceMonitoringLogForm, GrievianceUpdateForm,
                     OHSMonitoringForm, OHSUpdateForm, CommunityEngagementForm)
-from .document_forms import PAPDocumentForm
 from .filters import (ESIAFilter, PAPFilter, GrievianceMonitoringLogFilter,
                       OHSMonitoringFilter, CommunityEngagementFilter)
 from setup.models import Districts, Settlement, Regions, Quarter, YEAR
@@ -557,21 +556,7 @@ def pap_add(request):
 
                 pap.save()
                 
-                # Handle document upload if provided
-                if 'document_file' in request.FILES:
-                    document_file = request.FILES['document_file']
-                    if document_file:
-                        # Create document record
-                        from .document_forms import PAPDocumentForm
-                        doc = PAPDocument(
-                            pap=pap,
-                            document_type='other',  # Default type
-                            document_name=document_file.name,  # Use filename
-                            document_file=document_file,
-                            uploaded_by=request.user
-                        )
-                        doc.save()
-                        print(f"🔍 Document uploaded for new PAP: {doc.id}")
+                # Document upload functionality removed
                 
                 messages.success(
                     request,

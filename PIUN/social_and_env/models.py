@@ -23,9 +23,7 @@ def image_upload_path(instance, filename):
     imgfolder = str(instance.__class__.__name__).replace(" ", "_")
     return os.path.join("images", imgfolder, filename)
 
-# Document upload path for PAP documents
-def pap_document_upload_path(instance, filename):
-    return os.path.join("documents", "pap", instance.pap.pap_identification_number, filename)
+
 
 
 # ESIA form : Environmental And Social Impact Assessment
@@ -196,65 +194,7 @@ class PAP(models.Model):
         return "Compensated" if self.pap_compensated == "Y" else "Not Compensated"
 
 
-# PAP Document Model for multiple document uploads (title deeds, etc.)
-class PAPDocument(models.Model):
-    pap = models.ForeignKey(
-        PAP, 
-        on_delete=models.CASCADE, 
-        related_name='documents',
-        db_index=True
-    )
-    document_type = models.CharField(
-        max_length=50,
-        choices=[
-            ('title_deed', 'Title Deed'),
-            ('id_document', 'ID Document'),
-            ('compensation_agreement', 'Compensation Agreement'),
-            ('valuation_report', 'Valuation Report'),
-            ('other', 'Other Document')
-        ],
-        default='title_deed',
-        db_index=True
-    )
-    document_file = models.FileField(
-        upload_to=pap_document_upload_path,
-        help_text="Upload document (PDF, DOC, DOCX, JPG, PNG - Max 10MB)"
-    )
-    document_name = models.CharField(
-        max_length=200,
-        help_text="Document description or name"
-    )
-    upload_date = models.DateTimeField(auto_now_add=True, db_index=True)
-    uploaded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        db_index=True
-    )
 
-    class Meta:
-        verbose_name = "PAP Document"
-        verbose_name_plural = "PAP Documents"
-        ordering = ['-upload_date']
-        indexes = [
-            models.Index(fields=['pap', 'document_type']),
-            models.Index(fields=['upload_date', 'uploaded_by']),
-        ]
-
-    def __str__(self):
-        return f"{self.pap.pap_identification_number} - {self.document_name} ({self.get_document_type_display()})"
-
-    @property
-    def file_size_mb(self):
-        """Return file size in MB"""
-        if self.document_file:
-            return round(self.document_file.size / (1024 * 1024), 2)
-        return 0
-
-    def get_file_extension(self):
-        """Get file extension"""
-        if self.document_file:
-            return os.path.splitext(self.document_file.name)[1].lower()
-        return ""
 
 
 # Grievance Form

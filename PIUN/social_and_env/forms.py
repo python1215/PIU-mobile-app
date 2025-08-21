@@ -1,7 +1,7 @@
 from django import forms
 from django.urls import reverse_lazy
 from django.core.exceptions import ValidationError
-from .models import ESIA, PAP, PAPDocument, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
+from .models import ESIA, PAP, GrievianceMonitoringLog, OHS_Monitoring, CommunityConsult_Engagement
 from setup.models import (
     Regions, Districts, Settlement, TypeOfPAP, 
     PAPCategory, VulnerabilityCategory, TypeOfImpact, NatureOfSettlement,
