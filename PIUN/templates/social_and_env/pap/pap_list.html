@@ -210,7 +210,15 @@
                             <td><small>{{ pap.date_created|date:"M d, Y" }}</small></td>
                             <td><small>{{ pap.loginUser.username }}</small></td>
                             <td class="text-center">
-                                <span class="badge bg-info">{{ pap.documents.count }}</span>
+                                {% if pap.document_upload %}
+                                    <span class="badge bg-success" title="Document uploaded">
+                                        <i class="bi bi-file-earmark-check"></i> Yes
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary" title="No document">
+                                        <i class="bi bi-file-earmark-x"></i> No
+                                    </span>
+                                {% endif %}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
