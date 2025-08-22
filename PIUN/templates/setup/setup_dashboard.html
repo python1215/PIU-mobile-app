@@ -228,6 +228,45 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Progress & Metrics Setup -->
+        <div class="col-lg-6 mb-4">
+            <div class="card setup-module-card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up me-2" style="color: #6f42c1;"></i>Progress & Metrics Setup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-graph-up fs-1 mb-2" style="color: #e83e8c;"></i>
+                                    <h6 class="card-title">Physical Progress</h6>
+                                    <p class="card-text small text-muted">Configure progress scales and measurements</p>
+                                    <a href="{% url 'setup:physical_progress_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text fs-1 mb-2" style="color: #6f42c1;"></i>
+                                    <h6 class="card-title">Document Types</h6>
+                                    <p class="card-text small text-muted">Manage document classifications</p>
+                                    <a href="{% url 'setup:document_type_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Geographic Setup -->
         <div class="col-lg-6 mb-4">

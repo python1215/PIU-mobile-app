@@ -20,6 +20,7 @@ def setup_dashboard(request):
         'total_kpi_contracts': 0,  # Moved to PIU_Financial_mgt
         'total_quarters': Quarter.objects.count(),
         'total_measurement_units': Measurement_Unit.objects.count(),
+        'total_physical_progress': Physicalprogress.objects.count(),
         'total_regions': Regions.objects.count(),
         'total_districts': Districts.objects.count(),
         'total_settlements': Settlement.objects.count(),
@@ -28,6 +29,7 @@ def setup_dashboard(request):
         # Recent items
         'recent_donors': list(Donor.objects.order_by('-donorID')[:5]),
         'recent_categories': list(ProjectCategory.objects.order_by('-categoryID')[:5]),
+        'recent_physical_progress': list(Physicalprogress.objects.order_by('-date')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -847,3 +849,86 @@ def document_type_delete(request, pk):
     
     context = {'document_type': document_type}
     return render(request, 'setup/document_types/document_type_confirm_delete.html', context)
+
+
+# ============ PHYSICAL PROGRESS CRUD OPERATIONS ============
+
+@login_required
+def physical_progress_list(request):
+    """List all physical progress records with pagination and search"""
+    physical_progress_list = Physicalprogress.objects.all().order_by('-date')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        physical_progress_list = physical_progress_list.filter(
+            progress_scale__icontains=search_query
+        )
+    
+    paginator = Paginator(physical_progress_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'physical_progress': page_obj,
+        'total_physical_progress': Physicalprogress.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/physical_progress/physical_progress_list.html', context)
+
+@login_required
+def physical_progress_create(request):
+    """Create a new physical progress record"""
+    if request.method == 'POST':
+        form = PhysicalprogressForm(request.POST)
+        if form.is_valid():
+            physical_progress = form.save(commit=False)
+            physical_progress.loginUser = request.user
+            physical_progress.save()
+            messages.success(request, 'Physical progress record created successfully!')
+            return redirect('setup:physical_progress_list')
+    else:
+        form = PhysicalprogressForm()
+    
+    context = {'form': form, 'title': 'Add New Physical Progress Record'}
+    return render(request, 'setup/physical_progress/physical_progress_form.html', context)
+
+@login_required
+def physical_progress_detail(request, pk):
+    """View details of a physical progress record"""
+    physical_progress = get_object_or_404(Physicalprogress, id=pk)
+    context = {'physical_progress': physical_progress}
+    return render(request, 'setup/physical_progress/physical_progress_detail.html', context)
+
+@login_required
+def physical_progress_update(request, pk):
+    """Update an existing physical progress record"""
+    physical_progress = get_object_or_404(Physicalprogress, id=pk)
+    if request.method == 'POST':
+        form = PhysicalprogressForm(request.POST, instance=physical_progress)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Physical progress record updated successfully!')
+            return redirect('setup:physical_progress_list')
+    else:
+        form = PhysicalprogressForm(instance=physical_progress)
+    
+    context = {
+        'form': form, 
+        'physical_progress': physical_progress, 
+        'title': f'Edit Physical Progress: {physical_progress.progress_scale}'
+    }
+    return render(request, 'setup/physical_progress/physical_progress_form.html', context)
+
+@login_required
+def physical_progress_delete(request, pk):
+    """Delete a physical progress record"""
+    physical_progress = get_object_or_404(Physicalprogress, id=pk)
+    if request.method == 'POST':
+        progress_scale = physical_progress.progress_scale
+        physical_progress.delete()
+        messages.success(request, f'Physical progress record "{progress_scale}" deleted successfully!')
+        return redirect('setup:physical_progress_list')
+    
+    context = {'physical_progress': physical_progress}
+    return render(request, 'setup/physical_progress/physical_progress_confirm_delete.html', context)

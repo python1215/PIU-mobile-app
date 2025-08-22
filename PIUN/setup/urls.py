@@ -98,4 +98,11 @@ urlpatterns = [
     path('document-types/<int:pk>/', views.document_type_detail, name='document_type_detail'),
     path('document-types/<int:pk>/edit/', views.document_type_update, name='document_type_update'),
     path('document-types/<int:pk>/delete/', views.document_type_delete, name='document_type_delete'),
+    
+    # Physical Progress URLs
+    path('physical-progress/', views.physical_progress_list, name='physical_progress_list'),
+    path('physical-progress/add/', views.physical_progress_create, name='physical_progress_create'),
+    path('physical-progress/<int:pk>/', views.physical_progress_detail, name='physical_progress_detail'),
+    path('physical-progress/<int:pk>/edit/', views.physical_progress_update, name='physical_progress_update'),
+    path('physical-progress/<int:pk>/delete/', views.physical_progress_delete, name='physical_progress_delete'),
 ]
