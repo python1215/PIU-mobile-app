@@ -100,9 +100,9 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <small class="text-muted">
-                                                {{ kpi.project.project_name|default:"No Project"|truncatechars:25 }}
-                                            </small>
+                                            <span class="badge bg-success">
+                                                {{ kpi.project.project|default:"No Project"|truncatechars:25 }}
+                                            </span>
                                         </td>
                                         <td>
                                             <small class="text-muted">
