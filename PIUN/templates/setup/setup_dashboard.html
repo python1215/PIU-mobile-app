@@ -174,7 +174,16 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <!-- Empty slot for future use -->
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-person-badge fs-1 mb-2" style="color: #198754;"></i>
+                                    <h6 class="card-title">Type of PAP</h6>
+                                    <p class="card-text small text-muted">Manage Project Affected Person types</p>
+                                    <a href="{% url 'setup:type_of_pap_list' %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Manage
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

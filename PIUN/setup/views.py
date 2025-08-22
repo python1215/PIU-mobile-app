@@ -32,6 +32,8 @@ def setup_dashboard(request):
         'recent_categories': list(ProjectCategory.objects.order_by('-categoryID')[:5]),
         'recent_physical_progress': list(Physicalprogress.objects.order_by('-date')[:5]),
         'recent_type_of_impact': list(TypeOfImpact.objects.order_by('impact_number')[:5]),
+        'total_type_of_pap': TypeOfPAP.objects.count(),
+        'recent_type_of_pap': list(TypeOfPAP.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1017,3 +1019,86 @@ def type_of_impact_delete(request, pk):
     
     context = {'type_of_impact': type_of_impact}
     return render(request, 'setup/type_of_impact/type_of_impact_confirm_delete.html', context)
+
+
+# ============ TYPE OF PAP CRUD OPERATIONS ============
+
+@login_required
+def type_of_pap_list(request):
+    """List all type of PAP records with pagination and search"""
+    type_of_pap_list = TypeOfPAP.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        type_of_pap_list = type_of_pap_list.filter(
+            type_of_pap__icontains=search_query
+        )
+    
+    paginator = Paginator(type_of_pap_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'type_of_pap': page_obj,
+        'total_type_of_pap': TypeOfPAP.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/type_of_pap/type_of_pap_list.html', context)
+
+@login_required
+def type_of_pap_create(request):
+    """Create a new type of PAP record"""
+    if request.method == 'POST':
+        form = TypeOfPAPForm(request.POST)
+        if form.is_valid():
+            type_of_pap = form.save(commit=False)
+            type_of_pap.loginUser = request.user
+            type_of_pap.save()
+            messages.success(request, 'Type of PAP record created successfully!')
+            return redirect('setup:type_of_pap_list')
+    else:
+        form = TypeOfPAPForm()
+    
+    context = {'form': form, 'title': 'Add New Type of PAP'}
+    return render(request, 'setup/type_of_pap/type_of_pap_form.html', context)
+
+@login_required
+def type_of_pap_detail(request, pk):
+    """View details of a type of PAP record"""
+    type_of_pap = get_object_or_404(TypeOfPAP, id=pk)
+    context = {'type_of_pap': type_of_pap}
+    return render(request, 'setup/type_of_pap/type_of_pap_detail.html', context)
+
+@login_required
+def type_of_pap_update(request, pk):
+    """Update an existing type of PAP record"""
+    type_of_pap = get_object_or_404(TypeOfPAP, id=pk)
+    if request.method == 'POST':
+        form = TypeOfPAPForm(request.POST, instance=type_of_pap)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Type of PAP record updated successfully!')
+            return redirect('setup:type_of_pap_list')
+    else:
+        form = TypeOfPAPForm(instance=type_of_pap)
+    
+    context = {
+        'form': form, 
+        'type_of_pap': type_of_pap, 
+        'title': f'Edit Type of PAP: {type_of_pap.type_of_pap}'
+    }
+    return render(request, 'setup/type_of_pap/type_of_pap_form.html', context)
+
+@login_required
+def type_of_pap_delete(request, pk):
+    """Delete a type of PAP record"""
+    type_of_pap = get_object_or_404(TypeOfPAP, id=pk)
+    if request.method == 'POST':
+        pap_description = type_of_pap.type_of_pap
+        type_of_pap.delete()
+        messages.success(request, f'Type of PAP "{pap_description}" deleted successfully!')
+        return redirect('setup:type_of_pap_list')
+    
+    context = {'type_of_pap': type_of_pap}
+    return render(request, 'setup/type_of_pap/type_of_pap_confirm_delete.html', context)

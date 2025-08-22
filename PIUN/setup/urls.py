@@ -112,4 +112,11 @@ urlpatterns = [
     path('type-of-impact/<int:pk>/', views.type_of_impact_detail, name='type_of_impact_detail'),
     path('type-of-impact/<int:pk>/edit/', views.type_of_impact_update, name='type_of_impact_update'),
     path('type-of-impact/<int:pk>/delete/', views.type_of_impact_delete, name='type_of_impact_delete'),
+    
+    # Type of PAP URLs
+    path('type-of-pap/', views.type_of_pap_list, name='type_of_pap_list'),
+    path('type-of-pap/add/', views.type_of_pap_create, name='type_of_pap_create'),
+    path('type-of-pap/<int:pk>/', views.type_of_pap_detail, name='type_of_pap_detail'),
+    path('type-of-pap/<int:pk>/edit/', views.type_of_pap_update, name='type_of_pap_update'),
+    path('type-of-pap/<int:pk>/delete/', views.type_of_pap_delete, name='type_of_pap_delete'),
 ]
