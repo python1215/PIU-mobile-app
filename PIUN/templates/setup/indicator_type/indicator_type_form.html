@@ -1,0 +1,143 @@
+{% extends 'setup/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title|default:"Indicator Type" }} - Setup{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Core Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:indicator_type_list' %}">Indicator Type</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if indicator_type %}Edit{% else %}Add New{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-graph-up-arrow me-2"></i>
+                    {{ title|default:"Indicator Type Form" }}
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.indicator_type.id_for_label }}" class="form-label required">
+                            Indicator Type
+                        </label>
+                        {% render_field form.indicator_type %}
+                        {% if form.indicator_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.indicator_type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter the indicator type or measurement category (e.g., "Output", "Outcome", "Impact", "Process")
+                        </div>
+                    </div>
+
+                    <!-- Information Section -->
+                    <div class="mt-4 mb-3">
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle me-3 mt-1"></i>
+                                <div>
+                                    <strong>About Indicator Types:</strong>
+                                    <p class="mb-2 mt-1">
+                                        Indicator types classify performance measures by their purpose and level 
+                                        in the results chain, helping organize monitoring and evaluation frameworks.
+                                    </p>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Input:</strong> Resources invested in the project (funding, staff, materials)</li>
+                                        <li><strong>Output:</strong> Direct products or services delivered by the project</li>
+                                        <li><strong>Outcome:</strong> Short to medium-term effects on beneficiaries</li>
+                                        <li><strong>Impact:</strong> Long-term sustainable changes and benefits</li>
+                                        <li><strong>Process:</strong> How activities are being implemented</li>
+                                        <li><strong>Quality:</strong> Standards and satisfaction measures</li>
+                                        <li><strong>Efficiency:</strong> Cost-effectiveness and resource utilization</li>
+                                        <li><strong>Coverage:</strong> Reach and accessibility of services</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'setup:indicator_type_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        <div>
+                            {% if indicator_type %}
+                                <a href="{% url 'setup:indicator_type_detail' indicator_type.id %}" 
+                                   class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                {% if indicator_type %}Update{% else %}Create{% endif %} Indicator Type
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on the first input field
+    const firstInput = document.querySelector('input[type="text"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Auto-dismiss success messages
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.remove('show');
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}

@@ -161,4 +161,11 @@ urlpatterns = [
     path('type-of-investment/<int:pk>/', views.type_of_investment_detail, name='type_of_investment_detail'),
     path('type-of-investment/<int:pk>/edit/', views.type_of_investment_update, name='type_of_investment_update'),
     path('type-of-investment/<int:pk>/delete/', views.type_of_investment_delete, name='type_of_investment_delete'),
+    
+    # Indicator Type URLs
+    path('indicator-type/', views.indicator_type_list, name='indicator_type_list'),
+    path('indicator-type/add/', views.indicator_type_create, name='indicator_type_create'),
+    path('indicator-type/<int:pk>/', views.indicator_type_detail, name='indicator_type_detail'),
+    path('indicator-type/<int:pk>/edit/', views.indicator_type_update, name='indicator_type_update'),
+    path('indicator-type/<int:pk>/delete/', views.indicator_type_delete, name='indicator_type_delete'),
 ]

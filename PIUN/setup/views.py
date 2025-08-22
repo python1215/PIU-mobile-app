@@ -46,6 +46,8 @@ def setup_dashboard(request):
         'recent_data_collection_frequency': list(Data_Collection_Frequency.objects.order_by('id')[:5]),
         'total_type_of_investment': TypeOfInvestment.objects.count(),
         'recent_type_of_investment': list(TypeOfInvestment.objects.order_by('investmentID')[:5]),
+        'total_indicator_type': Indicator_Type.objects.count(),
+        'recent_indicator_type': list(Indicator_Type.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1612,3 +1614,86 @@ def type_of_investment_delete(request, pk):
     
     context = {'type_of_investment': type_of_investment}
     return render(request, 'setup/type_of_investment/type_of_investment_confirm_delete.html', context)
+
+
+# ============ INDICATOR TYPE CRUD OPERATIONS ============
+
+@login_required
+def indicator_type_list(request):
+    """List all indicator type records with pagination and search"""
+    indicator_type_list = Indicator_Type.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        indicator_type_list = indicator_type_list.filter(
+            indicator_type__icontains=search_query
+        )
+    
+    paginator = Paginator(indicator_type_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'indicator_type': page_obj,
+        'total_indicator_type': Indicator_Type.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/indicator_type/indicator_type_list.html', context)
+
+@login_required
+def indicator_type_create(request):
+    """Create a new indicator type record"""
+    if request.method == 'POST':
+        form = IndicatorTypeForm(request.POST)
+        if form.is_valid():
+            indicator_type = form.save(commit=False)
+            indicator_type.loginUser = request.user
+            indicator_type.save()
+            messages.success(request, 'Indicator type record created successfully!')
+            return redirect('setup:indicator_type_list')
+    else:
+        form = IndicatorTypeForm()
+    
+    context = {'form': form, 'title': 'Add New Indicator Type'}
+    return render(request, 'setup/indicator_type/indicator_type_form.html', context)
+
+@login_required
+def indicator_type_detail(request, pk):
+    """View details of an indicator type record"""
+    indicator_type = get_object_or_404(Indicator_Type, id=pk)
+    context = {'indicator_type': indicator_type}
+    return render(request, 'setup/indicator_type/indicator_type_detail.html', context)
+
+@login_required
+def indicator_type_update(request, pk):
+    """Update an existing indicator type record"""
+    indicator_type = get_object_or_404(Indicator_Type, id=pk)
+    if request.method == 'POST':
+        form = IndicatorTypeForm(request.POST, instance=indicator_type)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Indicator type record updated successfully!')
+            return redirect('setup:indicator_type_list')
+    else:
+        form = IndicatorTypeForm(instance=indicator_type)
+    
+    context = {
+        'form': form, 
+        'indicator_type': indicator_type, 
+        'title': f'Edit Indicator Type: {indicator_type.indicator_type}'
+    }
+    return render(request, 'setup/indicator_type/indicator_type_form.html', context)
+
+@login_required
+def indicator_type_delete(request, pk):
+    """Delete an indicator type record"""
+    indicator_type = get_object_or_404(Indicator_Type, id=pk)
+    if request.method == 'POST':
+        type_description = indicator_type.indicator_type
+        indicator_type.delete()
+        messages.success(request, f'Indicator type "{type_description}" deleted successfully!')
+        return redirect('setup:indicator_type_list')
+    
+    context = {'indicator_type': indicator_type}
+    return render(request, 'setup/indicator_type/indicator_type_confirm_delete.html', context)
