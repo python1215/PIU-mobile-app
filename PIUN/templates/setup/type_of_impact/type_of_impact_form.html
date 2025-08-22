@@ -4,6 +4,30 @@
 {% block title %}{{ title|default:"Type of Impact" }} - Setup{% endblock %}
 
 {% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Core Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:type_of_impact_list' %}">Type of Impact</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if type_of_impact %}Edit{% else %}Add New{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card">
