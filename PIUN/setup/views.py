@@ -38,6 +38,8 @@ def setup_dashboard(request):
         'recent_nature_of_settlement': list(NatureOfSettlement.objects.order_by('id')[:5]),
         'total_decision_outcome': DecisionOutcome.objects.count(),
         'recent_decision_outcome': list(DecisionOutcome.objects.order_by('id')[:5]),
+        'total_type_of_stakeholder_engagement': TypeOfStakeholderEngagement.objects.count(),
+        'recent_type_of_stakeholder_engagement': list(TypeOfStakeholderEngagement.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1272,3 +1274,86 @@ def decision_outcome_delete(request, pk):
     
     context = {'decision_outcome': decision_outcome}
     return render(request, 'setup/decision_outcome/decision_outcome_confirm_delete.html', context)
+
+
+# ============ TYPE OF STAKEHOLDER ENGAGEMENT CRUD OPERATIONS ============
+
+@login_required
+def type_of_stakeholder_engagement_list(request):
+    """List all type of stakeholder engagement records with pagination and search"""
+    type_of_stakeholder_engagement_list = TypeOfStakeholderEngagement.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        type_of_stakeholder_engagement_list = type_of_stakeholder_engagement_list.filter(
+            stake_holder_engagement__icontains=search_query
+        )
+    
+    paginator = Paginator(type_of_stakeholder_engagement_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'type_of_stakeholder_engagement': page_obj,
+        'total_type_of_stakeholder_engagement': TypeOfStakeholderEngagement.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_list.html', context)
+
+@login_required
+def type_of_stakeholder_engagement_create(request):
+    """Create a new type of stakeholder engagement record"""
+    if request.method == 'POST':
+        form = TypeOfStakeholderEngagementForm(request.POST)
+        if form.is_valid():
+            type_of_stakeholder_engagement = form.save(commit=False)
+            type_of_stakeholder_engagement.loginUser = request.user
+            type_of_stakeholder_engagement.save()
+            messages.success(request, 'Type of stakeholder engagement record created successfully!')
+            return redirect('setup:type_of_stakeholder_engagement_list')
+    else:
+        form = TypeOfStakeholderEngagementForm()
+    
+    context = {'form': form, 'title': 'Add New Type of Stakeholder Engagement'}
+    return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_form.html', context)
+
+@login_required
+def type_of_stakeholder_engagement_detail(request, pk):
+    """View details of a type of stakeholder engagement record"""
+    type_of_stakeholder_engagement = get_object_or_404(TypeOfStakeholderEngagement, id=pk)
+    context = {'type_of_stakeholder_engagement': type_of_stakeholder_engagement}
+    return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_detail.html', context)
+
+@login_required
+def type_of_stakeholder_engagement_update(request, pk):
+    """Update an existing type of stakeholder engagement record"""
+    type_of_stakeholder_engagement = get_object_or_404(TypeOfStakeholderEngagement, id=pk)
+    if request.method == 'POST':
+        form = TypeOfStakeholderEngagementForm(request.POST, instance=type_of_stakeholder_engagement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Type of stakeholder engagement record updated successfully!')
+            return redirect('setup:type_of_stakeholder_engagement_list')
+    else:
+        form = TypeOfStakeholderEngagementForm(instance=type_of_stakeholder_engagement)
+    
+    context = {
+        'form': form, 
+        'type_of_stakeholder_engagement': type_of_stakeholder_engagement, 
+        'title': f'Edit Type of Stakeholder Engagement: {type_of_stakeholder_engagement.stake_holder_engagement}'
+    }
+    return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_form.html', context)
+
+@login_required
+def type_of_stakeholder_engagement_delete(request, pk):
+    """Delete a type of stakeholder engagement record"""
+    type_of_stakeholder_engagement = get_object_or_404(TypeOfStakeholderEngagement, id=pk)
+    if request.method == 'POST':
+        engagement_description = type_of_stakeholder_engagement.stake_holder_engagement
+        type_of_stakeholder_engagement.delete()
+        messages.success(request, f'Type of stakeholder engagement "{engagement_description}" deleted successfully!')
+        return redirect('setup:type_of_stakeholder_engagement_list')
+    
+    context = {'type_of_stakeholder_engagement': type_of_stakeholder_engagement}
+    return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_confirm_delete.html', context)

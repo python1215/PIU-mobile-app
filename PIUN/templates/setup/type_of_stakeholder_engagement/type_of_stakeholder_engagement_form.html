@@ -1,0 +1,142 @@
+{% extends 'setup/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title|default:"Type of Stakeholder Engagement" }} - Setup{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Core Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:type_of_stakeholder_engagement_list' %}">Stakeholder Engagement</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if type_of_stakeholder_engagement %}Edit{% else %}Add New{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    {{ title|default:"Type of Stakeholder Engagement Form" }}
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.stake_holder_engagement.id_for_label }}" class="form-label required">
+                            Consultation/Engagement Type
+                        </label>
+                        {% render_field form.stake_holder_engagement %}
+                        {% if form.stake_holder_engagement.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.stake_holder_engagement.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter the type of stakeholder consultation or engagement (e.g., "Community Meeting", "Public Hearing", "Focus Group Discussion")
+                        </div>
+                    </div>
+
+                    <!-- Information Section -->
+                    <div class="mt-4 mb-3">
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle me-3 mt-1"></i>
+                                <div>
+                                    <strong>About Stakeholder Engagement Types:</strong>
+                                    <p class="mb-2 mt-1">
+                                        Stakeholder engagement types define the various methods and formats used 
+                                        to consult with and engage project stakeholders throughout the project lifecycle.
+                                    </p>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Community Meetings:</strong> Large group consultations with local communities</li>
+                                        <li><strong>Public Hearings:</strong> Formal public consultation sessions</li>
+                                        <li><strong>Focus Group Discussions:</strong> Targeted discussions with specific groups</li>
+                                        <li><strong>Key Informant Interviews:</strong> One-on-one consultations with leaders</li>
+                                        <li><strong>Surveys/Questionnaires:</strong> Structured data collection from stakeholders</li>
+                                        <li><strong>Workshops:</strong> Interactive sessions for collaborative planning</li>
+                                        <li><strong>Site Visits:</strong> Field-based consultations and demonstrations</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'setup:type_of_stakeholder_engagement_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        <div>
+                            {% if type_of_stakeholder_engagement %}
+                                <a href="{% url 'setup:type_of_stakeholder_engagement_detail' type_of_stakeholder_engagement.id %}" 
+                                   class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                {% if type_of_stakeholder_engagement %}Update{% else %}Create{% endif %} Engagement Type
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on the first input field
+    const firstInput = document.querySelector('input[type="text"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Auto-dismiss success messages
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.remove('show');
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}

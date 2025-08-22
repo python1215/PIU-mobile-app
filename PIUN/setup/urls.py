@@ -133,4 +133,11 @@ urlpatterns = [
     path('decision-outcome/<int:pk>/', views.decision_outcome_detail, name='decision_outcome_detail'),
     path('decision-outcome/<int:pk>/edit/', views.decision_outcome_update, name='decision_outcome_update'),
     path('decision-outcome/<int:pk>/delete/', views.decision_outcome_delete, name='decision_outcome_delete'),
+    
+    # Type of Stakeholder Engagement URLs
+    path('type-of-stakeholder-engagement/', views.type_of_stakeholder_engagement_list, name='type_of_stakeholder_engagement_list'),
+    path('type-of-stakeholder-engagement/add/', views.type_of_stakeholder_engagement_create, name='type_of_stakeholder_engagement_create'),
+    path('type-of-stakeholder-engagement/<int:pk>/', views.type_of_stakeholder_engagement_detail, name='type_of_stakeholder_engagement_detail'),
+    path('type-of-stakeholder-engagement/<int:pk>/edit/', views.type_of_stakeholder_engagement_update, name='type_of_stakeholder_engagement_update'),
+    path('type-of-stakeholder-engagement/<int:pk>/delete/', views.type_of_stakeholder_engagement_delete, name='type_of_stakeholder_engagement_delete'),
 ]
