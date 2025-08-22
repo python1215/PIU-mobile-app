@@ -36,6 +36,8 @@ def setup_dashboard(request):
         'recent_type_of_pap': list(TypeOfPAP.objects.order_by('id')[:5]),
         'total_nature_of_settlement': NatureOfSettlement.objects.count(),
         'recent_nature_of_settlement': list(NatureOfSettlement.objects.order_by('id')[:5]),
+        'total_decision_outcome': DecisionOutcome.objects.count(),
+        'recent_decision_outcome': list(DecisionOutcome.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1187,3 +1189,86 @@ def nature_of_settlement_delete(request, pk):
     
     context = {'nature_of_settlement': nature_of_settlement}
     return render(request, 'setup/nature_of_settlement/nature_of_settlement_confirm_delete.html', context)
+
+
+# ============ DECISION OUTCOME CRUD OPERATIONS ============
+
+@login_required
+def decision_outcome_list(request):
+    """List all decision outcome records with pagination and search"""
+    decision_outcome_list = DecisionOutcome.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        decision_outcome_list = decision_outcome_list.filter(
+            outcome__icontains=search_query
+        )
+    
+    paginator = Paginator(decision_outcome_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'decision_outcome': page_obj,
+        'total_decision_outcome': DecisionOutcome.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/decision_outcome/decision_outcome_list.html', context)
+
+@login_required
+def decision_outcome_create(request):
+    """Create a new decision outcome record"""
+    if request.method == 'POST':
+        form = DecisionOutcomeForm(request.POST)
+        if form.is_valid():
+            decision_outcome = form.save(commit=False)
+            decision_outcome.loginUser = request.user
+            decision_outcome.save()
+            messages.success(request, 'Decision outcome record created successfully!')
+            return redirect('setup:decision_outcome_list')
+    else:
+        form = DecisionOutcomeForm()
+    
+    context = {'form': form, 'title': 'Add New Decision Outcome'}
+    return render(request, 'setup/decision_outcome/decision_outcome_form.html', context)
+
+@login_required
+def decision_outcome_detail(request, pk):
+    """View details of a decision outcome record"""
+    decision_outcome = get_object_or_404(DecisionOutcome, id=pk)
+    context = {'decision_outcome': decision_outcome}
+    return render(request, 'setup/decision_outcome/decision_outcome_detail.html', context)
+
+@login_required
+def decision_outcome_update(request, pk):
+    """Update an existing decision outcome record"""
+    decision_outcome = get_object_or_404(DecisionOutcome, id=pk)
+    if request.method == 'POST':
+        form = DecisionOutcomeForm(request.POST, instance=decision_outcome)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Decision outcome record updated successfully!')
+            return redirect('setup:decision_outcome_list')
+    else:
+        form = DecisionOutcomeForm(instance=decision_outcome)
+    
+    context = {
+        'form': form, 
+        'decision_outcome': decision_outcome, 
+        'title': f'Edit Decision Outcome: {decision_outcome.outcome}'
+    }
+    return render(request, 'setup/decision_outcome/decision_outcome_form.html', context)
+
+@login_required
+def decision_outcome_delete(request, pk):
+    """Delete a decision outcome record"""
+    decision_outcome = get_object_or_404(DecisionOutcome, id=pk)
+    if request.method == 'POST':
+        outcome_description = decision_outcome.outcome
+        decision_outcome.delete()
+        messages.success(request, f'Decision outcome "{outcome_description}" deleted successfully!')
+        return redirect('setup:decision_outcome_list')
+    
+    context = {'decision_outcome': decision_outcome}
+    return render(request, 'setup/decision_outcome/decision_outcome_confirm_delete.html', context)

@@ -126,4 +126,11 @@ urlpatterns = [
     path('nature-of-settlement/<int:pk>/', views.nature_of_settlement_detail, name='nature_of_settlement_detail'),
     path('nature-of-settlement/<int:pk>/edit/', views.nature_of_settlement_update, name='nature_of_settlement_update'),
     path('nature-of-settlement/<int:pk>/delete/', views.nature_of_settlement_delete, name='nature_of_settlement_delete'),
+    
+    # Decision Outcome URLs
+    path('decision-outcome/', views.decision_outcome_list, name='decision_outcome_list'),
+    path('decision-outcome/add/', views.decision_outcome_create, name='decision_outcome_create'),
+    path('decision-outcome/<int:pk>/', views.decision_outcome_detail, name='decision_outcome_detail'),
+    path('decision-outcome/<int:pk>/edit/', views.decision_outcome_update, name='decision_outcome_update'),
+    path('decision-outcome/<int:pk>/delete/', views.decision_outcome_delete, name='decision_outcome_delete'),
 ]
