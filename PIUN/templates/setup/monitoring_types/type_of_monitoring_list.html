@@ -5,15 +5,39 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-6">
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Monitoring Types</h1>
-            <p class="text-gray-600 mt-2">Manage monitoring type configurations</p>
+    <!-- Header Section with Back Button -->
+    <div class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Monitoring Types</h1>
+                <p class="text-gray-600 mt-2">Manage monitoring type configurations for project tracking and KPI monitoring</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'setup:setup_dashboard' %}" 
+                   class="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+                <a href="{% url 'setup:type_of_monitoring_create' %}" 
+                   class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors">
+                    <i class="bi bi-plus me-1"></i>Add New Type
+                </a>
+            </div>
         </div>
-        <a href="{% url 'setup:type_of_monitoring_create' %}" 
-           class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors">
-            Add New Type
-        </a>
+        
+        <!-- Statistics Card -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        <span class="font-medium">{{ total_monitoring_types }} monitoring type{{ total_monitoring_types|pluralize }}</span> configured in the system.
+                        These types are used for categorizing KPIs and tracking different aspects of project monitoring.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="bg-white shadow-lg rounded-lg overflow-hidden">
