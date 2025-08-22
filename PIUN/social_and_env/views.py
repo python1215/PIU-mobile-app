@@ -2076,17 +2076,24 @@ def test_cascading_dropdown(request):
 def load_investment_types_pap(request):
     """Load investment types for PAP based on project selection - Database only"""
     from django.http import HttpResponse, JsonResponse
+    from urllib.parse import unquote
 
+    # Get project_id and handle URL encoding (especially for & characters)
     project_id = request.GET.get('project') or request.GET.get(
         'project_id') or request.GET.get('id_project')
+    
+    if project_id:
+        # Decode URL-encoded characters (e.g., %26 becomes &)
+        project_id = unquote(project_id)
 
     if not project_id:
         return HttpResponse('<option value="">Select Investment Type</option>')
 
     try:
         # Get investment types from database only
+        # Handle project lookup by exact projectID match
         investment_types = KPI_For_Contract.objects.filter(
-            project=project_id,
+            project__projectID=project_id,
             monitoring_type_id='ESS').distinct().order_by('type_of_investment')
 
         if investment_types.exists():
@@ -2097,7 +2104,7 @@ def load_investment_types_pap(request):
             return HttpResponse(options)
         else:
             # No investment types found in database
-            return HttpResponse('<option value="">No investment types available for this project</option>')
+            return HttpResponse(f'<option value="">No investment types available for project: {project_id}</option>')
 
     except Exception as e:
         return HttpResponse(f'<option value="">Database error: {str(e)}</option>')

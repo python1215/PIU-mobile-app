@@ -398,7 +398,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Loading investment types for project:', projectId);
         
         // Load investment types for selected project using HTML response format
-        fetch(`/social_and_env/ajax/load-investment-types-pap/?project=${projectId}`)
+        // Encode project ID to handle special characters like &
+        const encodedProjectId = encodeURIComponent(projectId);
+        fetch(`/social_and_env/ajax/load-investment-types-pap/?project=${encodedProjectId}`)
             .then(response => response.text())
             .then(html => {
                 investmentField.innerHTML = html;
