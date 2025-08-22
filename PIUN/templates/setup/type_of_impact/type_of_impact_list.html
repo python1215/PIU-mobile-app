@@ -1,0 +1,151 @@
+{% extends 'setup/base.html' %}
+{% load static %}
+
+{% block title %}Type of Impact Records - Setup{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Type of Impact Records
+                    </h4>
+                    <small class="text-muted">Manage impact types and classifications</small>
+                </div>
+                <a href="{% url 'setup:type_of_impact_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Add New Impact Type
+                </a>
+            </div>
+            
+            <div class="card-body">
+                <!-- Search and Stats -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <form method="GET" class="d-flex">
+                            <input type="text" name="search" class="form-control me-2" 
+                                   placeholder="Search impact types..." 
+                                   value="{{ search_query|default:'' }}">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            {% if search_query %}
+                                <a href="{% url 'setup:type_of_impact_list' %}" class="btn btn-outline-secondary ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="badge bg-info fs-6">
+                            {{ total_type_of_impact }} Total Impact Types
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Records Table -->
+                {% if type_of_impact %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col">Impact Number</th>
+                                    <th scope="col">Impact Description</th>
+                                    <th scope="col">Created By</th>
+                                    <th scope="col" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for impact in type_of_impact %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">{{ impact.impact_number }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ impact.impact }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ impact.loginUser.username|default:"Unknown" }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'setup:type_of_impact_detail' impact.impact_number %}" 
+                                                   class="btn btn-sm btn-outline-info" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'setup:type_of_impact_update' impact.impact_number %}" 
+                                                   class="btn btn-sm btn-outline-primary" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="{% url 'setup:type_of_impact_delete' impact.impact_number %}" 
+                                                   class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if type_of_impact.has_other_pages %}
+                        <nav aria-label="Type of Impact pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if type_of_impact.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ type_of_impact.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Page {{ type_of_impact.number }} of {{ type_of_impact.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if type_of_impact.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ type_of_impact.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ type_of_impact.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <i class="bi bi-exclamation-triangle text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 text-muted">No Impact Types Found</h5>
+                        <p class="text-muted">
+                            {% if search_query %}
+                                No impact types match your search criteria "{{ search_query }}".
+                                <br><a href="{% url 'setup:type_of_impact_list' %}">View all impact types</a>
+                            {% else %}
+                                Start by creating your first impact type record.
+                            {% endif %}
+                        </p>
+                        {% if not search_query %}
+                            <a href="{% url 'setup:type_of_impact_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i>Add First Impact Type
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

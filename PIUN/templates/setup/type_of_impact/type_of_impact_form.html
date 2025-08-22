@@ -1,0 +1,132 @@
+{% extends 'setup/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title|default:"Type of Impact" }} - Setup{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {{ title|default:"Type of Impact Form" }}
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.impact_number.id_for_label }}" class="form-label required">
+                                    Impact Number
+                                </label>
+                                {% render_field form.impact_number %}
+                                {% if form.impact_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.impact_number.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Enter a unique impact number (e.g., 1, 2, 3, etc.)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="{{ form.impact.id_for_label }}" class="form-label required">
+                                    Impact Description
+                                </label>
+                                {% render_field form.impact %}
+                                {% if form.impact.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.impact.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Describe the type of impact (e.g., "Loss of land", "Loss of earning", "Property damage")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Information Section -->
+                    <div class="mt-4 mb-3">
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle me-3 mt-1"></i>
+                                <div>
+                                    <strong>About Impact Types:</strong>
+                                    <p class="mb-0 mt-1">
+                                        Impact types help categorize different kinds of effects that projects may have on communities, 
+                                        environment, or property. Common examples include land acquisition impacts, economic impacts, 
+                                        social impacts, and environmental impacts.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'setup:type_of_impact_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        <div>
+                            {% if type_of_impact %}
+                                <a href="{% url 'setup:type_of_impact_detail' type_of_impact.impact_number %}" 
+                                   class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                {% if type_of_impact %}Update{% else %}Create{% endif %} Impact Type
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on the first input field
+    const firstInput = document.querySelector('input[type="number"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Auto-dismiss success messages
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.remove('show');
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}

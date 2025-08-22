@@ -21,6 +21,7 @@ def setup_dashboard(request):
         'total_quarters': Quarter.objects.count(),
         'total_measurement_units': Measurement_Unit.objects.count(),
         'total_physical_progress': Physicalprogress.objects.count(),
+        'total_type_of_impact': TypeOfImpact.objects.count(),
         'total_regions': Regions.objects.count(),
         'total_districts': Districts.objects.count(),
         'total_settlements': Settlement.objects.count(),
@@ -30,6 +31,7 @@ def setup_dashboard(request):
         'recent_donors': list(Donor.objects.order_by('-donorID')[:5]),
         'recent_categories': list(ProjectCategory.objects.order_by('-categoryID')[:5]),
         'recent_physical_progress': list(Physicalprogress.objects.order_by('-date')[:5]),
+        'recent_type_of_impact': list(TypeOfImpact.objects.order_by('impact_number')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -932,3 +934,86 @@ def physical_progress_delete(request, pk):
     
     context = {'physical_progress': physical_progress}
     return render(request, 'setup/physical_progress/physical_progress_confirm_delete.html', context)
+
+
+# ============ TYPE OF IMPACT CRUD OPERATIONS ============
+
+@login_required
+def type_of_impact_list(request):
+    """List all type of impact records with pagination and search"""
+    type_of_impact_list = TypeOfImpact.objects.all().order_by('impact_number')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        type_of_impact_list = type_of_impact_list.filter(
+            impact__icontains=search_query
+        )
+    
+    paginator = Paginator(type_of_impact_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'type_of_impact': page_obj,
+        'total_type_of_impact': TypeOfImpact.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/type_of_impact/type_of_impact_list.html', context)
+
+@login_required
+def type_of_impact_create(request):
+    """Create a new type of impact record"""
+    if request.method == 'POST':
+        form = TypeOfImpactForm(request.POST)
+        if form.is_valid():
+            type_of_impact = form.save(commit=False)
+            type_of_impact.loginUser = request.user
+            type_of_impact.save()
+            messages.success(request, 'Type of impact record created successfully!')
+            return redirect('setup:type_of_impact_list')
+    else:
+        form = TypeOfImpactForm()
+    
+    context = {'form': form, 'title': 'Add New Type of Impact'}
+    return render(request, 'setup/type_of_impact/type_of_impact_form.html', context)
+
+@login_required
+def type_of_impact_detail(request, pk):
+    """View details of a type of impact record"""
+    type_of_impact = get_object_or_404(TypeOfImpact, impact_number=pk)
+    context = {'type_of_impact': type_of_impact}
+    return render(request, 'setup/type_of_impact/type_of_impact_detail.html', context)
+
+@login_required
+def type_of_impact_update(request, pk):
+    """Update an existing type of impact record"""
+    type_of_impact = get_object_or_404(TypeOfImpact, impact_number=pk)
+    if request.method == 'POST':
+        form = TypeOfImpactForm(request.POST, instance=type_of_impact)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Type of impact record updated successfully!')
+            return redirect('setup:type_of_impact_list')
+    else:
+        form = TypeOfImpactForm(instance=type_of_impact)
+    
+    context = {
+        'form': form, 
+        'type_of_impact': type_of_impact, 
+        'title': f'Edit Type of Impact: {type_of_impact.impact}'
+    }
+    return render(request, 'setup/type_of_impact/type_of_impact_form.html', context)
+
+@login_required
+def type_of_impact_delete(request, pk):
+    """Delete a type of impact record"""
+    type_of_impact = get_object_or_404(TypeOfImpact, impact_number=pk)
+    if request.method == 'POST':
+        impact_description = type_of_impact.impact
+        type_of_impact.delete()
+        messages.success(request, f'Type of impact "{impact_description}" deleted successfully!')
+        return redirect('setup:type_of_impact_list')
+    
+    context = {'type_of_impact': type_of_impact}
+    return render(request, 'setup/type_of_impact/type_of_impact_confirm_delete.html', context)

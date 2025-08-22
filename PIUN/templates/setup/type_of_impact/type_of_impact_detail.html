@@ -1,0 +1,142 @@
+{% extends 'setup/base.html' %}
+
+{% block title %}{{ type_of_impact.impact }} - Type of Impact Details{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Type of Impact Details
+                </h4>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'setup:type_of_impact_update' type_of_impact.impact_number %}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="{% url 'setup:type_of_impact_delete' type_of_impact.impact_number %}" 
+                       class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Main Information -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="text-muted" style="width: 30%;">
+                                        <i class="bi bi-hash me-2"></i>Impact Number:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">{{ type_of_impact.impact_number }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Impact Description:
+                                    </th>
+                                    <td>
+                                        <strong class="fs-5 text-primary">{{ type_of_impact.impact }}</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-person me-2"></i>Created By:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-secondary fs-6">
+                                            {{ type_of_impact.loginUser.username|default:"Unknown User" }}
+                                        </span>
+                                        {% if type_of_impact.loginUser.first_name or type_of_impact.loginUser.last_name %}
+                                            <small class="text-muted ms-2">
+                                                ({{ type_of_impact.loginUser.get_full_name }})
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Impact Information -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Impact Information
+                    </h6>
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <i class="bi bi-lightbulb me-3 mt-1"></i>
+                            <div>
+                                <strong>About This Impact Type:</strong>
+                                <p class="mb-2 mt-1">
+                                    Impact #{{ type_of_impact.impact_number }}: "{{ type_of_impact.impact }}"
+                                </p>
+                                <p class="mb-0">
+                                    This impact type can be used across the system to categorize and track different 
+                                    kinds of project impacts, particularly in social and environmental monitoring, 
+                                    PAP (Project Affected Persons) assessments, and impact mitigation planning.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Examples -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-diagram-3 me-2"></i>Common Usage Areas
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-people me-2"></i>PAP Assessments
+                                    </h6>
+                                    <p class="card-text small">
+                                        Used to categorize impacts on Project Affected Persons
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-tree me-2"></i>ESIA/ESMP
+                                    </h6>
+                                    <p class="card-text small">
+                                        Environmental and Social Impact Assessment tracking
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'setup:type_of_impact_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    </a>
+                    <div>
+                        <a href="{% url 'setup:type_of_impact_create' %}" class="btn btn-outline-success me-2">
+                            <i class="bi bi-plus-lg me-1"></i>Add New Impact Type
+                        </a>
+                        <a href="{% url 'setup:type_of_impact_update' type_of_impact.impact_number %}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit This Impact Type
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

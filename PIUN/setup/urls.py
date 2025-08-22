@@ -105,4 +105,11 @@ urlpatterns = [
     path('physical-progress/<int:pk>/', views.physical_progress_detail, name='physical_progress_detail'),
     path('physical-progress/<int:pk>/edit/', views.physical_progress_update, name='physical_progress_update'),
     path('physical-progress/<int:pk>/delete/', views.physical_progress_delete, name='physical_progress_delete'),
+    
+    # Type of Impact URLs
+    path('type-of-impact/', views.type_of_impact_list, name='type_of_impact_list'),
+    path('type-of-impact/add/', views.type_of_impact_create, name='type_of_impact_create'),
+    path('type-of-impact/<int:pk>/', views.type_of_impact_detail, name='type_of_impact_detail'),
+    path('type-of-impact/<int:pk>/edit/', views.type_of_impact_update, name='type_of_impact_update'),
+    path('type-of-impact/<int:pk>/delete/', views.type_of_impact_delete, name='type_of_impact_delete'),
 ]
