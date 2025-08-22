@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 from .models import *
 from .forms import *
 from PIU_Financial_mgt.models import KPI_For_Contract
@@ -305,68 +306,7 @@ def type_of_monitoring_delete(request, pk):
     context = {'monitoring_type': monitoring_type}
     return render(request, 'setup/monitoring_types/monitoring_type_confirm_delete.html', context)
 
-# ============ KPI FOR CONTRACT CRUD OPERATIONS ============
 
-@login_required
-def kpi_for_contract_list(request):
-    kpis = KPI_For_Contract.objects.all().order_by('-date')
-    paginator = Paginator(kpis, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'kpis': page_obj,
-        'total_kpis': KPI_For_Contract.objects.count(),
-    }
-    return render(request, 'setup/kpi_contracts/kpi_contract_list.html', context)
-
-@login_required
-def kpi_for_contract_create(request):
-    if request.method == 'POST':
-        form = KPIForContractForm(request.POST)
-        if form.is_valid():
-            kpi = form.save(commit=False)
-            kpi.loginUser = request.user
-            kpi.save()
-            messages.success(request, 'KPI for contract created successfully!')
-            return redirect('setup:kpi_for_contract_list')
-    else:
-        form = KPIForContractForm()
-    
-    context = {'form': form, 'title': 'Add New KPI for Contract'}
-    return render(request, 'setup/kpi_for_contract/add-kpi_for_contract.html', context)
-
-@login_required
-def kpi_for_contract_detail(request, pk):
-    kpi = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
-    context = {'kpi': kpi}
-    return render(request, 'setup/kpi_contracts/kpi_contract_detail.html', context)
-
-@login_required
-def kpi_for_contract_update(request, pk):
-    kpi = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
-    if request.method == 'POST':
-        form = KPIForContractForm(request.POST, instance=kpi)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'KPI for contract updated successfully!')
-            return redirect('setup:kpi_for_contract_detail', pk=kpi.monitoring_Type_Code)
-    else:
-        form = KPIForContractForm(instance=kpi)
-    
-    context = {'form': form, 'kpi': kpi, 'title': 'Edit KPI for Contract'}
-    return render(request, 'setup/kpi_contracts/kpi_contract_form.html', context)
-
-@login_required
-def kpi_for_contract_delete(request, pk):
-    kpi = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
-    if request.method == 'POST':
-        kpi.delete()
-        messages.success(request, 'KPI for contract deleted successfully!')
-        return redirect('setup:kpi_for_contract_list')
-    
-    context = {'kpi': kpi}
-    return render(request, 'setup/kpi_contracts/kpi_contract_confirm_delete.html', context)
 
 # ============ QUARTER CRUD OPERATIONS ============
 

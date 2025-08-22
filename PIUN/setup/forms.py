@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import *
+from PIU_Financial_mgt.models import KPI_For_Contract
 
 class DonorForm(forms.ModelForm):
     class Meta:
@@ -74,6 +75,38 @@ class DocumentTypeForm(forms.ModelForm):
         widgets = {
             'document_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter document type'})
         }
+
+class TypeOfMonitoringForm(forms.ModelForm):
+    class Meta:
+        model = Type_of_Monitoring
+        fields = ['monitoring_type_code', 'monitoring_type']
+        widgets = {
+            'monitoring_type_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter monitoring code', 'maxlength': '10'}),
+            'monitoring_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter monitoring type'})
+        }
+
+class KPIForContractForm(forms.ModelForm):
+    class Meta:
+        model = KPI_For_Contract
+        fields = ['project', 'type_of_investment', 'Kpi_description', 'monitoring_Type_Code', 'monitoring_type']
+        widgets = {
+            'project': forms.Select(attrs={'class': 'form-control'}),
+            'type_of_investment': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter investment type', 'rows': 3}),
+            'Kpi_description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter KPI description', 'rows': 4}),
+            'monitoring_Type_Code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter monitoring type code'}),
+            'monitoring_type': forms.Select(attrs={'class': 'form-control'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Import here to avoid circular imports
+        from PIU_Financial_mgt.models import Project
+        
+        # Set the project queryset to all available projects
+        self.fields['project'].queryset = Project.objects.all()
+        
+        # Set the monitoring type queryset
+        self.fields['monitoring_type'].queryset = Type_of_Monitoring.objects.all()
 
 class TypeOfMonitoringForm(forms.ModelForm):
     class Meta:
