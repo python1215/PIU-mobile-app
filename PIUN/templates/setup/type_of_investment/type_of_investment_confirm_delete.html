@@ -57,11 +57,11 @@
                         <tbody>
                             <tr>
                                 <th style="width: 40%;">Record ID:</th>
-                                <td><code>{{ type_of_investment.id }}</code></td>
+                                <td><code>{{ type_of_investment.investmentID }}</code></td>
                             </tr>
                             <tr>
                                 <th>Investment Type:</th>
-                                <td><strong>{{ type_of_investment.investment_type }}</strong></td>
+                                <td><strong>{{ type_of_investment.name_of_investment }}</strong></td>
                             </tr>
                             <tr>
                                 <th>Created By:</th>
@@ -90,7 +90,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'setup:type_of_investment_detail' type_of_investment.id %}" 
+                        <a href="{% url 'setup:type_of_investment_detail' type_of_investment.investmentID %}" 
                            class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i>Cancel
                         </a>

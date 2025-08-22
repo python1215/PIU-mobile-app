@@ -43,13 +43,13 @@
                     {% csrf_token %}
                     
                     <div class="mb-3">
-                        <label for="{{ form.investment_type.id_for_label }}" class="form-label required">
+                        <label for="{{ form.name_of_investment.id_for_label }}" class="form-label required">
                             Investment Type
                         </label>
-                        {% render_field form.investment_type %}
-                        {% if form.investment_type.errors %}
+                        {% render_field form.name_of_investment %}
+                        {% if form.name_of_investment.errors %}
                             <div class="invalid-feedback d-block">
-                                {% for error in form.investment_type.errors %}
+                                {% for error in form.name_of_investment.errors %}
                                     {{ error }}
                                 {% endfor %}
                             </div>
@@ -92,7 +92,7 @@
                         </a>
                         <div>
                             {% if type_of_investment %}
-                                <a href="{% url 'setup:type_of_investment_detail' type_of_investment.id %}" 
+                                <a href="{% url 'setup:type_of_investment_detail' type_of_investment.investmentID %}" 
                                    class="btn btn-outline-info me-2">
                                     <i class="bi bi-eye me-1"></i>View Details
                                 </a>

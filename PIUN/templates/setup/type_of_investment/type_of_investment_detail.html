@@ -19,7 +19,7 @@
                 <li class="breadcrumb-item">
                     <a href="{% url 'setup:type_of_investment_list' %}">Type of Investment</a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">{{ type_of_investment.investment_type }}</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ type_of_investment.name_of_investment }}</li>
             </ol>
         </nav>
     </div>
@@ -34,11 +34,11 @@
                     Investment Type Details
                 </h4>
                 <div class="btn-group" role="group">
-                    <a href="{% url 'setup:type_of_investment_update' type_of_investment.id %}" 
+                    <a href="{% url 'setup:type_of_investment_update' type_of_investment.investmentID %}" 
                        class="btn btn-outline-primary">
                         <i class="bi bi-pencil me-1"></i>Edit
                     </a>
-                    <a href="{% url 'setup:type_of_investment_delete' type_of_investment.id %}" 
+                    <a href="{% url 'setup:type_of_investment_delete' type_of_investment.investmentID %}" 
                        class="btn btn-outline-danger">
                         <i class="bi bi-trash me-1"></i>Delete
                     </a>
@@ -56,7 +56,7 @@
                                         <i class="bi bi-hash me-2"></i>Record ID:
                                     </th>
                                     <td>
-                                        <code>{{ type_of_investment.id }}</code>
+                                        <code>{{ type_of_investment.investmentID }}</code>
                                     </td>
                                 </tr>
                                 <tr>
@@ -64,7 +64,7 @@
                                         <i class="bi bi-cash-coin me-2"></i>Investment Type:
                                     </th>
                                     <td>
-                                        <strong class="fs-5 text-primary">{{ type_of_investment.investment_type }}</strong>
+                                        <strong class="fs-5 text-primary">{{ type_of_investment.name_of_investment }}</strong>
                                     </td>
                                 </tr>
                                 <tr>
@@ -98,7 +98,7 @@
                             <div>
                                 <strong>About This Investment Type:</strong>
                                 <p class="mb-2 mt-1">
-                                    "{{ type_of_investment.investment_type }}" represents a specific funding source 
+                                    "{{ type_of_investment.name_of_investment }}" represents a specific funding source 
                                     or investment category used in project financing and implementation.
                                 </p>
                                 <p class="mb-0">
@@ -181,7 +181,7 @@
                         <a href="{% url 'setup:type_of_investment_create' %}" class="btn btn-outline-success me-2">
                             <i class="bi bi-plus-lg me-1"></i>Add New Investment Type
                         </a>
-                        <a href="{% url 'setup:type_of_investment_update' type_of_investment.id %}" class="btn btn-primary">
+                        <a href="{% url 'setup:type_of_investment_update' type_of_investment.investmentID %}" class="btn btn-primary">
                             <i class="bi bi-pencil me-1"></i>Edit This Investment Type
                         </a>
                     </div>

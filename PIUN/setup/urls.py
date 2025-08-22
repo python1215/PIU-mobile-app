@@ -155,7 +155,7 @@ urlpatterns = [
     path('data-collection-frequency/<int:pk>/edit/', views.data_collection_frequency_update, name='data_collection_frequency_update'),
     path('data-collection-frequency/<int:pk>/delete/', views.data_collection_frequency_delete, name='data_collection_frequency_delete'),
     
-    # Type of Investment URLs
+    # Type of Investment URLs (using investmentID as primary key)
     path('type-of-investment/', views.type_of_investment_list, name='type_of_investment_list'),
     path('type-of-investment/add/', views.type_of_investment_create, name='type_of_investment_create'),
     path('type-of-investment/<int:pk>/', views.type_of_investment_detail, name='type_of_investment_detail'),

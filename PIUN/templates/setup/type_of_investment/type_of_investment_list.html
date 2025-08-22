@@ -86,7 +86,7 @@
                                     <tr>
                                         <td>{{ forloop.counter0|add:type_of_investment.start_index }}</td>
                                         <td>
-                                            <strong>{{ investment.investment_type }}</strong>
+                                            <strong>{{ investment.name_of_investment }}</strong>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary">
@@ -95,15 +95,15 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
-                                                <a href="{% url 'setup:type_of_investment_detail' investment.id %}" 
+                                                <a href="{% url 'setup:type_of_investment_detail' investment.investmentID %}" 
                                                    class="btn btn-sm btn-outline-info" title="View Details">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a href="{% url 'setup:type_of_investment_update' investment.id %}" 
+                                                <a href="{% url 'setup:type_of_investment_update' investment.investmentID %}" 
                                                    class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
-                                                <a href="{% url 'setup:type_of_investment_delete' investment.id %}" 
+                                                <a href="{% url 'setup:type_of_investment_delete' investment.investmentID %}" 
                                                    class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="bi bi-trash"></i>
                                                 </a>
