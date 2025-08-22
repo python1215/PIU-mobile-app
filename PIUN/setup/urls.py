@@ -119,4 +119,11 @@ urlpatterns = [
     path('type-of-pap/<int:pk>/', views.type_of_pap_detail, name='type_of_pap_detail'),
     path('type-of-pap/<int:pk>/edit/', views.type_of_pap_update, name='type_of_pap_update'),
     path('type-of-pap/<int:pk>/delete/', views.type_of_pap_delete, name='type_of_pap_delete'),
+    
+    # Nature of Settlement URLs
+    path('nature-of-settlement/', views.nature_of_settlement_list, name='nature_of_settlement_list'),
+    path('nature-of-settlement/add/', views.nature_of_settlement_create, name='nature_of_settlement_create'),
+    path('nature-of-settlement/<int:pk>/', views.nature_of_settlement_detail, name='nature_of_settlement_detail'),
+    path('nature-of-settlement/<int:pk>/edit/', views.nature_of_settlement_update, name='nature_of_settlement_update'),
+    path('nature-of-settlement/<int:pk>/delete/', views.nature_of_settlement_delete, name='nature_of_settlement_delete'),
 ]

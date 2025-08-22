@@ -34,6 +34,8 @@ def setup_dashboard(request):
         'recent_type_of_impact': list(TypeOfImpact.objects.order_by('impact_number')[:5]),
         'total_type_of_pap': TypeOfPAP.objects.count(),
         'recent_type_of_pap': list(TypeOfPAP.objects.order_by('id')[:5]),
+        'total_nature_of_settlement': NatureOfSettlement.objects.count(),
+        'recent_nature_of_settlement': list(NatureOfSettlement.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1102,3 +1104,86 @@ def type_of_pap_delete(request, pk):
     
     context = {'type_of_pap': type_of_pap}
     return render(request, 'setup/type_of_pap/type_of_pap_confirm_delete.html', context)
+
+
+# ============ NATURE OF SETTLEMENT CRUD OPERATIONS ============
+
+@login_required
+def nature_of_settlement_list(request):
+    """List all nature of settlement records with pagination and search"""
+    nature_of_settlement_list = NatureOfSettlement.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        nature_of_settlement_list = nature_of_settlement_list.filter(
+            nature_of_settlement__icontains=search_query
+        )
+    
+    paginator = Paginator(nature_of_settlement_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'nature_of_settlement': page_obj,
+        'total_nature_of_settlement': NatureOfSettlement.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/nature_of_settlement/nature_of_settlement_list.html', context)
+
+@login_required
+def nature_of_settlement_create(request):
+    """Create a new nature of settlement record"""
+    if request.method == 'POST':
+        form = NatureOfSettlementForm(request.POST)
+        if form.is_valid():
+            nature_of_settlement = form.save(commit=False)
+            nature_of_settlement.loginUser = request.user
+            nature_of_settlement.save()
+            messages.success(request, 'Nature of settlement record created successfully!')
+            return redirect('setup:nature_of_settlement_list')
+    else:
+        form = NatureOfSettlementForm()
+    
+    context = {'form': form, 'title': 'Add New Nature of Settlement'}
+    return render(request, 'setup/nature_of_settlement/nature_of_settlement_form.html', context)
+
+@login_required
+def nature_of_settlement_detail(request, pk):
+    """View details of a nature of settlement record"""
+    nature_of_settlement = get_object_or_404(NatureOfSettlement, id=pk)
+    context = {'nature_of_settlement': nature_of_settlement}
+    return render(request, 'setup/nature_of_settlement/nature_of_settlement_detail.html', context)
+
+@login_required
+def nature_of_settlement_update(request, pk):
+    """Update an existing nature of settlement record"""
+    nature_of_settlement = get_object_or_404(NatureOfSettlement, id=pk)
+    if request.method == 'POST':
+        form = NatureOfSettlementForm(request.POST, instance=nature_of_settlement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Nature of settlement record updated successfully!')
+            return redirect('setup:nature_of_settlement_list')
+    else:
+        form = NatureOfSettlementForm(instance=nature_of_settlement)
+    
+    context = {
+        'form': form, 
+        'nature_of_settlement': nature_of_settlement, 
+        'title': f'Edit Nature of Settlement: {nature_of_settlement.nature_of_settlement}'
+    }
+    return render(request, 'setup/nature_of_settlement/nature_of_settlement_form.html', context)
+
+@login_required
+def nature_of_settlement_delete(request, pk):
+    """Delete a nature of settlement record"""
+    nature_of_settlement = get_object_or_404(NatureOfSettlement, id=pk)
+    if request.method == 'POST':
+        settlement_description = nature_of_settlement.nature_of_settlement
+        nature_of_settlement.delete()
+        messages.success(request, f'Nature of settlement "{settlement_description}" deleted successfully!')
+        return redirect('setup:nature_of_settlement_list')
+    
+    context = {'nature_of_settlement': nature_of_settlement}
+    return render(request, 'setup/nature_of_settlement/nature_of_settlement_confirm_delete.html', context)
