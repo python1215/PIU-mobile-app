@@ -85,28 +85,7 @@ class TypeOfMonitoringForm(forms.ModelForm):
             'monitoring_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter monitoring type'})
         }
 
-class KPIForContractForm(forms.ModelForm):
-    class Meta:
-        model = KPI_For_Contract
-        fields = ['project', 'type_of_investment', 'Kpi_description', 'monitoring_Type_Code', 'monitoring_type']
-        widgets = {
-            'project': forms.Select(attrs={'class': 'form-control'}),
-            'type_of_investment': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter investment type', 'rows': 3}),
-            'Kpi_description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter KPI description', 'rows': 4}),
-            'monitoring_Type_Code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter monitoring type code'}),
-            'monitoring_type': forms.Select(attrs={'class': 'form-control'})
-        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Import here to avoid circular imports
-        from PIU_Financial_mgt.models import Project
-        
-        # Set the project queryset to all available projects
-        self.fields['project'].queryset = Project.objects.all()
-        
-        # Set the monitoring type queryset
-        self.fields['monitoring_type'].queryset = Type_of_Monitoring.objects.all()
 
 class TypeOfMonitoringForm(forms.ModelForm):
     class Meta:
@@ -125,8 +104,6 @@ class TypeOfInvestmentForm(forms.ModelForm):
             'name_of_investment': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter investment type'})
         }
 
-from PIU_Financial_mgt.models import KPI_For_Contract
-
 class KPIForContractForm(forms.ModelForm):
     class Meta:
         model = KPI_For_Contract
@@ -143,6 +120,19 @@ class KPIForContractForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Import here to avoid circular imports
         from PIU_Financial_mgt.models import Project
+        
+        # Set the project queryset to all available projects
+        self.fields['project'].queryset = Project.objects.all()
+        self.fields['project'].empty_label = "Select a project..."
+        
+        # Set the monitoring type queryset
+        self.fields['monitoring_type'].queryset = Type_of_Monitoring.objects.all()
+        self.fields['monitoring_type'].empty_label = "Select monitoring type..."
+        
+        # Add debugging info
+        project_count = Project.objects.count()
+        if project_count == 0:
+            self.fields['project'].help_text = "No projects available. Please create projects first in the Financial Management module."
         
         # Set the project queryset to all available projects
         self.fields['project'].queryset = Project.objects.all()
