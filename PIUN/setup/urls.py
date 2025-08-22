@@ -140,4 +140,11 @@ urlpatterns = [
     path('type-of-stakeholder-engagement/<int:pk>/', views.type_of_stakeholder_engagement_detail, name='type_of_stakeholder_engagement_detail'),
     path('type-of-stakeholder-engagement/<int:pk>/edit/', views.type_of_stakeholder_engagement_update, name='type_of_stakeholder_engagement_update'),
     path('type-of-stakeholder-engagement/<int:pk>/delete/', views.type_of_stakeholder_engagement_delete, name='type_of_stakeholder_engagement_delete'),
+    
+    # Access URLs
+    path('access/', views.access_list, name='access_list'),
+    path('access/add/', views.access_create, name='access_create'),
+    path('access/<int:pk>/', views.access_detail, name='access_detail'),
+    path('access/<int:pk>/edit/', views.access_update, name='access_update'),
+    path('access/<int:pk>/delete/', views.access_delete, name='access_delete'),
 ]

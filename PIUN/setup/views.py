@@ -40,6 +40,8 @@ def setup_dashboard(request):
         'recent_decision_outcome': list(DecisionOutcome.objects.order_by('id')[:5]),
         'total_type_of_stakeholder_engagement': TypeOfStakeholderEngagement.objects.count(),
         'recent_type_of_stakeholder_engagement': list(TypeOfStakeholderEngagement.objects.order_by('id')[:5]),
+        'total_access': Access.objects.count(),
+        'recent_access': list(Access.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1357,3 +1359,86 @@ def type_of_stakeholder_engagement_delete(request, pk):
     
     context = {'type_of_stakeholder_engagement': type_of_stakeholder_engagement}
     return render(request, 'setup/type_of_stakeholder_engagement/type_of_stakeholder_engagement_confirm_delete.html', context)
+
+
+# ============ ACCESS CRUD OPERATIONS ============
+
+@login_required
+def access_list(request):
+    """List all access records with pagination and search"""
+    access_list = Access.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        access_list = access_list.filter(
+            access_type__icontains=search_query
+        )
+    
+    paginator = Paginator(access_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'access': page_obj,
+        'total_access': Access.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/access/access_list.html', context)
+
+@login_required
+def access_create(request):
+    """Create a new access record"""
+    if request.method == 'POST':
+        form = AccessForm(request.POST)
+        if form.is_valid():
+            access = form.save(commit=False)
+            access.loginUser = request.user
+            access.save()
+            messages.success(request, 'Access record created successfully!')
+            return redirect('setup:access_list')
+    else:
+        form = AccessForm()
+    
+    context = {'form': form, 'title': 'Add New Access'}
+    return render(request, 'setup/access/access_form.html', context)
+
+@login_required
+def access_detail(request, pk):
+    """View details of an access record"""
+    access = get_object_or_404(Access, id=pk)
+    context = {'access': access}
+    return render(request, 'setup/access/access_detail.html', context)
+
+@login_required
+def access_update(request, pk):
+    """Update an existing access record"""
+    access = get_object_or_404(Access, id=pk)
+    if request.method == 'POST':
+        form = AccessForm(request.POST, instance=access)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Access record updated successfully!')
+            return redirect('setup:access_list')
+    else:
+        form = AccessForm(instance=access)
+    
+    context = {
+        'form': form, 
+        'access': access, 
+        'title': f'Edit Access: {access.access_type}'
+    }
+    return render(request, 'setup/access/access_form.html', context)
+
+@login_required
+def access_delete(request, pk):
+    """Delete an access record"""
+    access = get_object_or_404(Access, id=pk)
+    if request.method == 'POST':
+        access_description = access.access_type
+        access.delete()
+        messages.success(request, f'Access "{access_description}" deleted successfully!')
+        return redirect('setup:access_list')
+    
+    context = {'access': access}
+    return render(request, 'setup/access/access_confirm_delete.html', context)
