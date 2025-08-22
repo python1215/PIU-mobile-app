@@ -1,0 +1,259 @@
+{% extends 'setup/base.html' %}
+
+{% block title %}{{ kpi_for_contract.Kpi_description|truncatechars:50 }} - KPI Details{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Monitoring Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:kpi_for_contract_list' %}">KPI for Contract</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ kpi_for_contract.monitoring_Type_Code }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-clipboard-check me-2"></i>
+                    KPI Details
+                </h4>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'setup:kpi_for_contract_update' kpi_for_contract.monitoring_Type_Code %}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="{% url 'setup:kpi_for_contract_delete' kpi_for_contract.monitoring_Type_Code %}" 
+                       class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Main Information -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="text-muted" style="width: 30%;">
+                                        <i class="bi bi-hash me-2"></i>Monitoring Code:
+                                    </th>
+                                    <td>
+                                        <code class="fs-6">{{ kpi_for_contract.monitoring_Type_Code }}</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-clipboard-check me-2"></i>KPI Description:
+                                    </th>
+                                    <td>
+                                        <strong class="fs-5 text-primary">{{ kpi_for_contract.Kpi_description }}</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-cash-coin me-2"></i>Investment Type:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-secondary fs-6">{{ kpi_for_contract.type_of_investment }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-folder me-2"></i>Project:
+                                    </th>
+                                    <td>
+                                        <strong>{{ kpi_for_contract.project.project_name|default:"No Project Assigned" }}</strong>
+                                        {% if kpi_for_contract.project.project_code %}
+                                            <small class="text-muted ms-2">({{ kpi_for_contract.project.project_code }})</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-graph-up me-2"></i>Monitoring Type:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">{{ kpi_for_contract.monitoring_type }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-calendar me-2"></i>Date Created:
+                                    </th>
+                                    <td>
+                                        {{ kpi_for_contract.date|date:"F j, Y g:i A" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-person me-2"></i>Created By:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-secondary fs-6">
+                                            {{ kpi_for_contract.loginUser.username|default:"Unknown User" }}
+                                        </span>
+                                        {% if kpi_for_contract.loginUser.first_name or kpi_for_contract.loginUser.last_name %}
+                                            <small class="text-muted ms-2">
+                                                ({{ kpi_for_contract.loginUser.get_full_name }})
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- KPI Information -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-info-circle me-2"></i>KPI Information
+                    </h6>
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <i class="bi bi-lightbulb me-3 mt-1"></i>
+                            <div>
+                                <strong>About This KPI:</strong>
+                                <p class="mb-2 mt-1">
+                                    This Key Performance Indicator tracks "{{ kpi_for_contract.Kpi_description }}" 
+                                    for the {{ kpi_for_contract.type_of_investment }} investment category.
+                                </p>
+                                <p class="mb-0">
+                                    The KPI uses {{ kpi_for_contract.monitoring_type }} monitoring methodology 
+                                    and is uniquely identified by code <code>{{ kpi_for_contract.monitoring_Type_Code }}</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Context -->
+                {% if kpi_for_contract.project %}
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-folder me-2"></i>Project Context
+                    </h6>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-folder-fill me-2"></i>{{ kpi_for_contract.project.project_name }}
+                                    </h6>
+                                    {% if kpi_for_contract.project.project_code %}
+                                        <p class="card-text">
+                                            <strong>Project Code:</strong> {{ kpi_for_contract.project.project_code }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        This KPI provides performance measurement specifically for this project's 
+                                        {{ kpi_for_contract.type_of_investment }} activities.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Usage Areas -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-diagram-3 me-2"></i>KPI Applications
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-graph-up me-2"></i>Performance Tracking
+                                    </h6>
+                                    <p class="card-text small">
+                                        Monitor and measure project progress against defined targets
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Contract Monitoring
+                                    </h6>
+                                    <p class="card-text small">
+                                        Evaluate contractor performance and deliverable quality
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-clipboard-data me-2"></i>Results Framework
+                                    </h6>
+                                    <p class="card-text small">
+                                        Support logical framework implementation and outcome tracking
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-bar-chart me-2"></i>Reporting Systems
+                                    </h6>
+                                    <p class="card-text small">
+                                        Generate performance reports and dashboard visualizations
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-gear me-1"></i>Setup Dashboard
+                        </a>
+                        <a href="{% url 'setup:kpi_for_contract_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                    <div>
+                        <a href="{% url 'setup:kpi_for_contract_create' %}" class="btn btn-outline-success me-2">
+                            <i class="bi bi-plus-lg me-1"></i>Add New KPI
+                        </a>
+                        <a href="{% url 'setup:kpi_for_contract_update' kpi_for_contract.monitoring_Type_Code %}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit This KPI
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

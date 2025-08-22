@@ -168,4 +168,11 @@ urlpatterns = [
     path('indicator-type/<int:pk>/', views.indicator_type_detail, name='indicator_type_detail'),
     path('indicator-type/<int:pk>/edit/', views.indicator_type_update, name='indicator_type_update'),
     path('indicator-type/<int:pk>/delete/', views.indicator_type_delete, name='indicator_type_delete'),
+    
+    # KPI For Contract URLs (using monitoring_Type_Code as primary key)
+    path('kpi-for-contract/', views.kpi_for_contract_list, name='kpi_for_contract_list'),
+    path('kpi-for-contract/add/', views.kpi_for_contract_create, name='kpi_for_contract_create'),
+    path('kpi-for-contract/<str:pk>/', views.kpi_for_contract_detail, name='kpi_for_contract_detail'),
+    path('kpi-for-contract/<str:pk>/edit/', views.kpi_for_contract_update, name='kpi_for_contract_update'),
+    path('kpi-for-contract/<str:pk>/delete/', views.kpi_for_contract_delete, name='kpi_for_contract_delete'),
 ]

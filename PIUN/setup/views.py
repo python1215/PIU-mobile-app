@@ -48,6 +48,8 @@ def setup_dashboard(request):
         'recent_type_of_investment': list(TypeOfInvestment.objects.order_by('investmentID')[:5]),
         'total_indicator_type': Indicator_Type.objects.count(),
         'recent_indicator_type': list(Indicator_Type.objects.order_by('id')[:5]),
+        'total_kpi_for_contract': KPI_For_Contract.objects.count(),
+        'recent_kpi_for_contract': list(KPI_For_Contract.objects.order_by('date')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1697,3 +1699,88 @@ def indicator_type_delete(request, pk):
     
     context = {'indicator_type': indicator_type}
     return render(request, 'setup/indicator_type/indicator_type_confirm_delete.html', context)
+
+
+# ============ KPI FOR CONTRACT CRUD OPERATIONS ============
+
+@login_required
+def kpi_for_contract_list(request):
+    """List all KPI for contract records with pagination and search"""
+    kpi_for_contract_list = KPI_For_Contract.objects.all().order_by('date')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        kpi_for_contract_list = kpi_for_contract_list.filter(
+            Q(Kpi_description__icontains=search_query) |
+            Q(type_of_investment__icontains=search_query) |
+            Q(monitoring_Type_Code__icontains=search_query)
+        )
+    
+    paginator = Paginator(kpi_for_contract_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'kpi_for_contract': page_obj,
+        'total_kpi_for_contract': KPI_For_Contract.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/kpi_for_contract/kpi_for_contract_list.html', context)
+
+@login_required
+def kpi_for_contract_create(request):
+    """Create a new KPI for contract record"""
+    if request.method == 'POST':
+        form = KPIForContractForm(request.POST)
+        if form.is_valid():
+            kpi_for_contract = form.save(commit=False)
+            kpi_for_contract.loginUser = request.user
+            kpi_for_contract.save()
+            messages.success(request, 'KPI for contract record created successfully!')
+            return redirect('setup:kpi_for_contract_list')
+    else:
+        form = KPIForContractForm()
+    
+    context = {'form': form, 'title': 'Add New KPI for Contract'}
+    return render(request, 'setup/kpi_for_contract/kpi_for_contract_form.html', context)
+
+@login_required
+def kpi_for_contract_detail(request, pk):
+    """View details of a KPI for contract record"""
+    kpi_for_contract = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
+    context = {'kpi_for_contract': kpi_for_contract}
+    return render(request, 'setup/kpi_for_contract/kpi_for_contract_detail.html', context)
+
+@login_required
+def kpi_for_contract_update(request, pk):
+    """Update an existing KPI for contract record"""
+    kpi_for_contract = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
+    if request.method == 'POST':
+        form = KPIForContractForm(request.POST, instance=kpi_for_contract)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'KPI for contract record updated successfully!')
+            return redirect('setup:kpi_for_contract_list')
+    else:
+        form = KPIForContractForm(instance=kpi_for_contract)
+    
+    context = {
+        'form': form, 
+        'kpi_for_contract': kpi_for_contract, 
+        'title': f'Edit KPI: {kpi_for_contract.Kpi_description[:50]}...'
+    }
+    return render(request, 'setup/kpi_for_contract/kpi_for_contract_form.html', context)
+
+@login_required
+def kpi_for_contract_delete(request, pk):
+    """Delete a KPI for contract record"""
+    kpi_for_contract = get_object_or_404(KPI_For_Contract, monitoring_Type_Code=pk)
+    if request.method == 'POST':
+        kpi_description = kpi_for_contract.Kpi_description[:50]
+        kpi_for_contract.delete()
+        messages.success(request, f'KPI "{kpi_description}..." deleted successfully!')
+        return redirect('setup:kpi_for_contract_list')
+    
+    context = {'kpi_for_contract': kpi_for_contract}
+    return render(request, 'setup/kpi_for_contract/kpi_for_contract_confirm_delete.html', context)

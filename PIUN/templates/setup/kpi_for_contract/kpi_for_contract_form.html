@@ -1,35 +1,215 @@
+{% extends 'setup/base.html' %}
 {% load widget_tweaks %}
 
-<h1 class="font-bold uppercase text-red-600">KPI FOR CONTRACT</h1>
-<div class="container mx-auto px-4 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <!-- Standard form fields with smaller table and font -->
-        {% for field in form %}
-            {% if field.name != 'document' %}
-            <div class="flex flex-col sm:flex-row gap-2">
-                <label class="text-black sm:text-right sm:w-1/3 text-xs font-small">
-                    {{ field.label }}
-                </label>
-                <div class="flex-1">
-                    <div class="relative">
-                        {% render_field field class="input input-sm w-full bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded text-xs" %}
-                        {% if field.errors %}
-                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
-                            <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% if field.errors %}
-                    <p class="text-xs text-red-500">{{ field.errors|join:", " }}</p>
-                    {% endif %}
-                    {% if field.help_text %}
-                    <p class="text-xs text-gray-400">{{ field.help_text }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
+{% block title %}{{ title|default:"KPI for Contract" }} - Setup{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Monitoring Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:kpi_for_contract_list' %}">KPI for Contract</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if kpi_for_contract %}Edit{% else %}Add New{% endif %}
+                </li>
+            </ol>
+        </nav>
     </div>
 </div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-clipboard-check me-2"></i>
+                    {{ title|default:"KPI for Contract Form" }}
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Monitoring Type Code -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.monitoring_Type_Code.id_for_label }}" class="form-label required">
+                                Monitoring Type Code
+                            </label>
+                            {% render_field form.monitoring_Type_Code %}
+                            {% if form.monitoring_Type_Code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.monitoring_Type_Code.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Enter a unique code for this KPI (e.g., "KPI001", "MON_INF_01")
+                            </div>
+                        </div>
+
+                        <!-- Project Selection -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.project.id_for_label }}" class="form-label required">
+                                Project
+                            </label>
+                            {% render_field form.project %}
+                            {% if form.project.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.project.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Select the project this KPI will monitor
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Investment Type -->
+                    <div class="mb-3">
+                        <label for="{{ form.type_of_investment.id_for_label }}" class="form-label required">
+                            Type of Investment
+                        </label>
+                        {% render_field form.type_of_investment %}
+                        {% if form.type_of_investment.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.type_of_investment.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Describe the investment type or funding category this KPI relates to
+                        </div>
+                    </div>
+
+                    <!-- KPI Description -->
+                    <div class="mb-3">
+                        <label for="{{ form.Kpi_description.id_for_label }}" class="form-label required">
+                            KPI Description
+                        </label>
+                        {% render_field form.Kpi_description %}
+                        {% if form.Kpi_description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.Kpi_description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Provide a detailed description of what this KPI measures and tracks
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Type -->
+                    <div class="mb-3">
+                        <label for="{{ form.monitoring_type.id_for_label }}" class="form-label required">
+                            Monitoring Type
+                        </label>
+                        {% render_field form.monitoring_type %}
+                        {% if form.monitoring_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.monitoring_type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Select the type of monitoring this KPI will use
+                        </div>
+                    </div>
+
+                    <!-- Information Section -->
+                    <div class="mt-4 mb-3">
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle me-3 mt-1"></i>
+                                <div>
+                                    <strong>About KPI for Contracts:</strong>
+                                    <p class="mb-2 mt-1">
+                                        Key Performance Indicators (KPIs) for contracts help track and measure 
+                                        the effectiveness and progress of project activities and deliverables.
+                                    </p>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Monitoring Code:</strong> Unique identifier for tracking and reporting</li>
+                                        <li><strong>Investment Type:</strong> Links KPI to specific funding streams</li>
+                                        <li><strong>Description:</strong> Clear definition of what is being measured</li>
+                                        <li><strong>Project Link:</strong> Associates KPI with specific project outcomes</li>
+                                        <li><strong>Monitoring Type:</strong> Defines the measurement methodology</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'setup:kpi_for_contract_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        <div>
+                            {% if kpi_for_contract %}
+                                <a href="{% url 'setup:kpi_for_contract_detail' kpi_for_contract.monitoring_Type_Code %}" 
+                                   class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                {% if kpi_for_contract %}Update{% else %}Create{% endif %} KPI Record
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on the first input field
+    const firstInput = document.querySelector('input[type="text"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Auto-dismiss success messages
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.remove('show');
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}
