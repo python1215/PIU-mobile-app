@@ -44,6 +44,8 @@ def setup_dashboard(request):
         'recent_access': list(Access.objects.order_by('id')[:5]),
         'total_data_collection_frequency': Data_Collection_Frequency.objects.count(),
         'recent_data_collection_frequency': list(Data_Collection_Frequency.objects.order_by('id')[:5]),
+        'total_type_of_investment': TypeOfInvestment.objects.count(),
+        'recent_type_of_investment': list(TypeOfInvestment.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1527,3 +1529,86 @@ def data_collection_frequency_delete(request, pk):
     
     context = {'data_collection_frequency': data_collection_frequency}
     return render(request, 'setup/data_collection_frequency/data_collection_frequency_confirm_delete.html', context)
+
+
+# ============ TYPE OF INVESTMENT CRUD OPERATIONS ============
+
+@login_required
+def type_of_investment_list(request):
+    """List all type of investment records with pagination and search"""
+    type_of_investment_list = TypeOfInvestment.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        type_of_investment_list = type_of_investment_list.filter(
+            investment_type__icontains=search_query
+        )
+    
+    paginator = Paginator(type_of_investment_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'type_of_investment': page_obj,
+        'total_type_of_investment': TypeOfInvestment.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/type_of_investment/type_of_investment_list.html', context)
+
+@login_required
+def type_of_investment_create(request):
+    """Create a new type of investment record"""
+    if request.method == 'POST':
+        form = TypeOfInvestmentForm(request.POST)
+        if form.is_valid():
+            type_of_investment = form.save(commit=False)
+            type_of_investment.loginUser = request.user
+            type_of_investment.save()
+            messages.success(request, 'Type of investment record created successfully!')
+            return redirect('setup:type_of_investment_list')
+    else:
+        form = TypeOfInvestmentForm()
+    
+    context = {'form': form, 'title': 'Add New Type of Investment'}
+    return render(request, 'setup/type_of_investment/type_of_investment_form.html', context)
+
+@login_required
+def type_of_investment_detail(request, pk):
+    """View details of a type of investment record"""
+    type_of_investment = get_object_or_404(TypeOfInvestment, id=pk)
+    context = {'type_of_investment': type_of_investment}
+    return render(request, 'setup/type_of_investment/type_of_investment_detail.html', context)
+
+@login_required
+def type_of_investment_update(request, pk):
+    """Update an existing type of investment record"""
+    type_of_investment = get_object_or_404(TypeOfInvestment, id=pk)
+    if request.method == 'POST':
+        form = TypeOfInvestmentForm(request.POST, instance=type_of_investment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Type of investment record updated successfully!')
+            return redirect('setup:type_of_investment_list')
+    else:
+        form = TypeOfInvestmentForm(instance=type_of_investment)
+    
+    context = {
+        'form': form, 
+        'type_of_investment': type_of_investment, 
+        'title': f'Edit Type of Investment: {type_of_investment.investment_type}'
+    }
+    return render(request, 'setup/type_of_investment/type_of_investment_form.html', context)
+
+@login_required
+def type_of_investment_delete(request, pk):
+    """Delete a type of investment record"""
+    type_of_investment = get_object_or_404(TypeOfInvestment, id=pk)
+    if request.method == 'POST':
+        investment_description = type_of_investment.investment_type
+        type_of_investment.delete()
+        messages.success(request, f'Type of investment "{investment_description}" deleted successfully!')
+        return redirect('setup:type_of_investment_list')
+    
+    context = {'type_of_investment': type_of_investment}
+    return render(request, 'setup/type_of_investment/type_of_investment_confirm_delete.html', context)

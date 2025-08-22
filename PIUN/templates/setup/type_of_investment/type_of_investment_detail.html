@@ -1,0 +1,193 @@
+{% extends 'setup/base.html' %}
+
+{% block title %}{{ type_of_investment.investment_type }} - Investment Type Details{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">Core Setup</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:type_of_investment_list' %}">Type of Investment</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ type_of_investment.investment_type }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-cash-coin me-2"></i>
+                    Investment Type Details
+                </h4>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'setup:type_of_investment_update' type_of_investment.id %}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="{% url 'setup:type_of_investment_delete' type_of_investment.id %}" 
+                       class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Main Information -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="text-muted" style="width: 30%;">
+                                        <i class="bi bi-hash me-2"></i>Record ID:
+                                    </th>
+                                    <td>
+                                        <code>{{ type_of_investment.id }}</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-cash-coin me-2"></i>Investment Type:
+                                    </th>
+                                    <td>
+                                        <strong class="fs-5 text-primary">{{ type_of_investment.investment_type }}</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-muted">
+                                        <i class="bi bi-person me-2"></i>Created By:
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-secondary fs-6">
+                                            {{ type_of_investment.loginUser.username|default:"Unknown User" }}
+                                        </span>
+                                        {% if type_of_investment.loginUser.first_name or type_of_investment.loginUser.last_name %}
+                                            <small class="text-muted ms-2">
+                                                ({{ type_of_investment.loginUser.get_full_name }})
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Investment Information -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Investment Type Information
+                    </h6>
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <i class="bi bi-lightbulb me-3 mt-1"></i>
+                            <div>
+                                <strong>About This Investment Type:</strong>
+                                <p class="mb-2 mt-1">
+                                    "{{ type_of_investment.investment_type }}" represents a specific funding source 
+                                    or investment category used in project financing and implementation.
+                                </p>
+                                <p class="mb-0">
+                                    This investment type helps track financial flows, ensure accountability, 
+                                    and maintain transparency in project funding management.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Areas -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-diagram-3 me-2"></i>Common Usage Areas
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-wallet2 me-2"></i>Financial Tracking
+                                    </h6>
+                                    <p class="card-text small">
+                                        Used to categorize and track different funding sources
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-file-earmark-text me-2"></i>Project Planning
+                                    </h6>
+                                    <p class="card-text small">
+                                        Applied in project design and funding allocation planning
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-graph-up me-2"></i>Reporting & Analytics
+                                    </h6>
+                                    <p class="card-text small">
+                                        Supports financial reporting and investment analysis
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-shield-check me-2"></i>Compliance
+                                    </h6>
+                                    <p class="card-text small">
+                                        Ensures compliance with funding requirements and regulations
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-gear me-1"></i>Setup Dashboard
+                        </a>
+                        <a href="{% url 'setup:type_of_investment_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                    <div>
+                        <a href="{% url 'setup:type_of_investment_create' %}" class="btn btn-outline-success me-2">
+                            <i class="bi bi-plus-lg me-1"></i>Add New Investment Type
+                        </a>
+                        <a href="{% url 'setup:type_of_investment_update' type_of_investment.id %}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit This Investment Type
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

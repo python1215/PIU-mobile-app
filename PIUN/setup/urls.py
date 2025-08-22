@@ -154,4 +154,11 @@ urlpatterns = [
     path('data-collection-frequency/<int:pk>/', views.data_collection_frequency_detail, name='data_collection_frequency_detail'),
     path('data-collection-frequency/<int:pk>/edit/', views.data_collection_frequency_update, name='data_collection_frequency_update'),
     path('data-collection-frequency/<int:pk>/delete/', views.data_collection_frequency_delete, name='data_collection_frequency_delete'),
+    
+    # Type of Investment URLs
+    path('type-of-investment/', views.type_of_investment_list, name='type_of_investment_list'),
+    path('type-of-investment/add/', views.type_of_investment_create, name='type_of_investment_create'),
+    path('type-of-investment/<int:pk>/', views.type_of_investment_detail, name='type_of_investment_detail'),
+    path('type-of-investment/<int:pk>/edit/', views.type_of_investment_update, name='type_of_investment_update'),
+    path('type-of-investment/<int:pk>/delete/', views.type_of_investment_delete, name='type_of_investment_delete'),
 ]
