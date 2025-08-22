@@ -147,4 +147,11 @@ urlpatterns = [
     path('access/<int:pk>/', views.access_detail, name='access_detail'),
     path('access/<int:pk>/edit/', views.access_update, name='access_update'),
     path('access/<int:pk>/delete/', views.access_delete, name='access_delete'),
+    
+    # Data Collection Frequency URLs
+    path('data-collection-frequency/', views.data_collection_frequency_list, name='data_collection_frequency_list'),
+    path('data-collection-frequency/add/', views.data_collection_frequency_create, name='data_collection_frequency_create'),
+    path('data-collection-frequency/<int:pk>/', views.data_collection_frequency_detail, name='data_collection_frequency_detail'),
+    path('data-collection-frequency/<int:pk>/edit/', views.data_collection_frequency_update, name='data_collection_frequency_update'),
+    path('data-collection-frequency/<int:pk>/delete/', views.data_collection_frequency_delete, name='data_collection_frequency_delete'),
 ]

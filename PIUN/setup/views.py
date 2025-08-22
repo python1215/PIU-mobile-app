@@ -42,6 +42,8 @@ def setup_dashboard(request):
         'recent_type_of_stakeholder_engagement': list(TypeOfStakeholderEngagement.objects.order_by('id')[:5]),
         'total_access': Access.objects.count(),
         'recent_access': list(Access.objects.order_by('id')[:5]),
+        'total_data_collection_frequency': Data_Collection_Frequency.objects.count(),
+        'recent_data_collection_frequency': list(Data_Collection_Frequency.objects.order_by('id')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1442,3 +1444,86 @@ def access_delete(request, pk):
     
     context = {'access': access}
     return render(request, 'setup/access/access_confirm_delete.html', context)
+
+
+# ============ DATA COLLECTION FREQUENCY CRUD OPERATIONS ============
+
+@login_required
+def data_collection_frequency_list(request):
+    """List all data collection frequency records with pagination and search"""
+    data_collection_frequency_list = Data_Collection_Frequency.objects.all().order_by('id')
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        data_collection_frequency_list = data_collection_frequency_list.filter(
+            frequency__icontains=search_query
+        )
+    
+    paginator = Paginator(data_collection_frequency_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'data_collection_frequency': page_obj,
+        'total_data_collection_frequency': Data_Collection_Frequency.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/data_collection_frequency/data_collection_frequency_list.html', context)
+
+@login_required
+def data_collection_frequency_create(request):
+    """Create a new data collection frequency record"""
+    if request.method == 'POST':
+        form = DataCollectionFrequencyForm(request.POST)
+        if form.is_valid():
+            data_collection_frequency = form.save(commit=False)
+            data_collection_frequency.loginUser = request.user
+            data_collection_frequency.save()
+            messages.success(request, 'Data collection frequency record created successfully!')
+            return redirect('setup:data_collection_frequency_list')
+    else:
+        form = DataCollectionFrequencyForm()
+    
+    context = {'form': form, 'title': 'Add New Data Collection Frequency'}
+    return render(request, 'setup/data_collection_frequency/data_collection_frequency_form.html', context)
+
+@login_required
+def data_collection_frequency_detail(request, pk):
+    """View details of a data collection frequency record"""
+    data_collection_frequency = get_object_or_404(Data_Collection_Frequency, id=pk)
+    context = {'data_collection_frequency': data_collection_frequency}
+    return render(request, 'setup/data_collection_frequency/data_collection_frequency_detail.html', context)
+
+@login_required
+def data_collection_frequency_update(request, pk):
+    """Update an existing data collection frequency record"""
+    data_collection_frequency = get_object_or_404(Data_Collection_Frequency, id=pk)
+    if request.method == 'POST':
+        form = DataCollectionFrequencyForm(request.POST, instance=data_collection_frequency)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Data collection frequency record updated successfully!')
+            return redirect('setup:data_collection_frequency_list')
+    else:
+        form = DataCollectionFrequencyForm(instance=data_collection_frequency)
+    
+    context = {
+        'form': form, 
+        'data_collection_frequency': data_collection_frequency, 
+        'title': f'Edit Data Collection Frequency: {data_collection_frequency.frequency}'
+    }
+    return render(request, 'setup/data_collection_frequency/data_collection_frequency_form.html', context)
+
+@login_required
+def data_collection_frequency_delete(request, pk):
+    """Delete a data collection frequency record"""
+    data_collection_frequency = get_object_or_404(Data_Collection_Frequency, id=pk)
+    if request.method == 'POST':
+        frequency_description = data_collection_frequency.frequency
+        data_collection_frequency.delete()
+        messages.success(request, f'Data collection frequency "{frequency_description}" deleted successfully!')
+        return redirect('setup:data_collection_frequency_list')
+    
+    context = {'data_collection_frequency': data_collection_frequency}
+    return render(request, 'setup/data_collection_frequency/data_collection_frequency_confirm_delete.html', context)
