@@ -474,10 +474,10 @@ def export_monitoring_records_to_pdf(queryset=None):
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
         topMargin=1*inch,
-        bottomMargin=0.75*inch
+        bottomMargin=1*inch
     )
     
     # Get styles
@@ -532,8 +532,8 @@ def export_monitoring_records_to_pdf(queryset=None):
         ]
         data.append(row)
     
-    # Create table with proper column widths for A4
-    col_widths = [0.8*inch, 1.2*inch, 0.7*inch, 0.8*inch, 0.6*inch, 1.0*inch, 1.2*inch, 0.7*inch, 0.7*inch, 0.8*inch, 1.2*inch]
+    # Create table with proper column widths for A4 with normal margins (6.5" usable width)
+    col_widths = [0.6*inch, 0.9*inch, 0.6*inch, 0.7*inch, 0.5*inch, 0.8*inch, 0.9*inch, 0.5*inch, 0.5*inch, 0.6*inch, 0.8*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
@@ -594,10 +594,10 @@ def export_works_contracts_to_pdf(queryset=None):
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
         topMargin=1*inch,
-        bottomMargin=0.75*inch
+        bottomMargin=1*inch
     )
     
     # Get styles
@@ -663,8 +663,8 @@ def export_works_contracts_to_pdf(queryset=None):
         ]
         data.append(row)
     
-    # Create table with proper column widths for A4
-    col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.0*inch, 0.7*inch]
+    # Create table with proper column widths for A4 with normal margins (6.5" usable width)
+    col_widths = [0.7*inch, 1.0*inch, 0.7*inch, 0.9*inch, 0.7*inch, 0.5*inch, 0.6*inch, 0.6*inch, 0.6*inch, 0.7*inch, 0.5*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
@@ -725,10 +725,10 @@ def export_goods_services_contracts_to_pdf(queryset=None):
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
         topMargin=1*inch,
-        bottomMargin=0.75*inch
+        bottomMargin=1*inch
     )
     
     # Get styles
@@ -794,8 +794,8 @@ def export_goods_services_contracts_to_pdf(queryset=None):
         ]
         data.append(row)
     
-    # Create table with proper column widths for A4
-    col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.2*inch, 0.7*inch]
+    # Create table with proper column widths for A4 with normal margins (6.5" usable width)
+    col_widths = [0.7*inch, 1.0*inch, 0.7*inch, 0.9*inch, 0.7*inch, 0.5*inch, 0.6*inch, 0.6*inch, 0.6*inch, 0.9*inch, 0.5*inch]
     
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
