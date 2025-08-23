@@ -104,18 +104,30 @@
                             </form>
                         </div>
                         <div class="col-md-4 text-end">
-                            <div class="btn-group">
-                                <button class="btn btn-outline-secondary dropdown-toggle" 
-                                        type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-filter me-1"></i>Filter
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="?status=active">Active</a></li>
-                                    <li><a class="dropdown-item" href="?status=completed">Completed</a></li>
-                                    <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="?">All Contracts</a></li>
-                                </ul>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary dropdown-toggle" 
+                                            type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-filter me-1"></i>Filter
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="?status=active">Active</a></li>
+                                        <li><a class="dropdown-item" href="?status=completed">Completed</a></li>
+                                        <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="?">All Contracts</a></li>
+                                    </ul>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'project_actions:export_works_contracts_excel' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" 
+                                       class="btn btn-success btn-sm" title="Export to Excel">
+                                        <i class="bi bi-file-earmark-spreadsheet me-1"></i>Excel
+                                    </a>
+                                    <a href="{% url 'project_actions:export_works_contracts_pdf' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" 
+                                       class="btn btn-danger btn-sm" title="Export to PDF (A4 Portrait)">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

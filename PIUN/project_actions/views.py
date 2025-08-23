@@ -1633,6 +1633,71 @@ def debug_cascading_dropdowns(request):
         })
 
 
+# ============ PDF EXPORT VIEWS ============
+
+@login_required
+def export_monitoring_records_pdf(request):
+    """Export monitoring records to PDF with A4 portrait formatting"""
+    try:
+        queryset = Specific_Contract_Monitoring.objects.all().select_related(
+            'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
+            'Kpi_description', 'Contract_implementation_Status', 'loginUser'
+        )
+        
+        # Apply same filters as list view
+        filter_form = SpecificContractMonitoringFilter(request.GET, queryset=queryset)
+        queryset = filter_form.qs
+        
+        from .utils import export_monitoring_records_to_pdf
+        return export_monitoring_records_to_pdf(queryset)
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('project_actions:contract_monitoring_list')
+
+
+@login_required
+def export_works_contracts_pdf(request):
+    """Export works contracts to PDF with A4 portrait formatting"""
+    try:
+        queryset = Contract_Profiling_works.objects.all().select_related(
+            'projectID', 'compID', 'subcompID', 'activityID', 'project_Category',
+            'funding_source', 'currency', 'loginUser'
+        )
+        
+        # Apply same filters as list view
+        filter_form = ContractProfilingWorksFilter(request.GET, queryset=queryset)
+        queryset = filter_form.qs
+        
+        from .utils import export_works_contracts_to_pdf
+        return export_works_contracts_to_pdf(queryset)
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('project_actions:contract_profiling_works_list')
+
+
+@login_required
+def export_goods_services_contracts_pdf(request):
+    """Export goods & services contracts to PDF with A4 portrait formatting"""
+    try:
+        queryset = Contract_Profiling_goods_services.objects.all().select_related(
+            'projectID', 'compID', 'subcompID', 'activityID', 'project_Category',
+            'funding_source', 'currency', 'loginUser'
+        )
+        
+        # Apply same filters as list view
+        filter_form = ContractProfilingGoodsServicesFilter(request.GET, queryset=queryset)
+        queryset = filter_form.qs
+        
+        from .utils import export_goods_services_contracts_to_pdf
+        return export_goods_services_contracts_to_pdf(queryset)
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('project_actions:contract_profiling_goods_services_list')
+
+
 @login_required
 def get_contracts_by_project_and_type(request):
     """AJAX endpoint to fetch contracts by project and contract type"""

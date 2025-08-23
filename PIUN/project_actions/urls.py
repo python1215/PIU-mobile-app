@@ -34,6 +34,11 @@ urlpatterns = [
     path('export/goods-services-contracts/', views.export_goods_services_contracts_excel, name='export_goods_services_contracts_excel'),
     path('export/monitoring-records/', views.export_monitoring_records_excel, name='export_monitoring_records_excel'),
     
+    # PDF Export functions - A4 Portrait formatted
+    path('export/works-contracts-pdf/', views.export_works_contracts_pdf, name='export_works_contracts_pdf'),
+    path('export/goods-services-contracts-pdf/', views.export_goods_services_contracts_pdf, name='export_goods_services_contracts_pdf'),
+    path('export/monitoring-records-pdf/', views.export_monitoring_records_pdf, name='export_monitoring_records_pdf'),
+    
     # AJAX endpoints - Maintaining exact existing URL names
     path('ajax/get-project-components/', views.get_project_components, name='get_project_components'),
     path('ajax/get-project-subcomponents/', views.get_project_subcomponents, name='get_project_subcomponents'),

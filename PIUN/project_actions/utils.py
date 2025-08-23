@@ -6,6 +6,13 @@ from django.db.models import Sum, Count, Avg, Q
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 from .models import Contract_Profiling_works, Contract_Profiling_goods_services, Specific_Contract_Monitoring
 
@@ -449,6 +456,363 @@ def get_dashboard_analytics():
         print(f"Error in dashboard analytics: {str(e)}")
     
     return analytics
+
+
+def export_monitoring_records_to_pdf(queryset=None):
+    """Export Contract Monitoring Records to PDF with A4 portrait formatting"""
+    
+    if queryset is None:
+        queryset = Specific_Contract_Monitoring.objects.all().select_related(
+            'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
+            'Kpi_description', 'Contract_implementation_Status', 'loginUser'
+        )
+    
+    # Create PDF buffer
+    buffer = BytesIO()
+    
+    # Create PDF document with A4 portrait
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=1*inch,
+        bottomMargin=0.75*inch
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        textColor=colors.black,
+        alignment=1  # Center alignment
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Title
+    title = Paragraph("Contract Monitoring Records Report", title_style)
+    story.append(title)
+    
+    # Date and summary
+    date_text = f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}"
+    summary_text = f"Total Records: {queryset.count()}"
+    
+    story.append(Paragraph(date_text, styles['Normal']))
+    story.append(Paragraph(summary_text, styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    # Prepare table data
+    data = []
+    headers = [
+        'Contract Ref', 'Project', 'Type', 'Monitoring Date', 
+        'Quarter', 'Investment Type', 'KPI Description', 'Target', 
+        'Achievement', 'Status', 'Remarks'
+    ]
+    data.append(headers)
+    
+    # Add data rows
+    for record in queryset:
+        row = [
+            record.contract_refNo or '',
+            str(record.project)[:30] if record.project else '',
+            str(record.type_of_contract)[:15] if record.type_of_contract else '',
+            record.monitoring_date.strftime('%Y-%m-%d') if record.monitoring_date else '',
+            str(record.quarter) if record.quarter else '',
+            str(record.Type_of_Investment)[:20] if record.Type_of_Investment else '',
+            str(record.Kpi_description)[:25] if record.Kpi_description else '',
+            str(record.Target)[:15] if record.Target else '',
+            str(record.Achieved_status)[:15] if record.Achieved_status else '',
+            str(record.Contract_implementation_Status)[:15] if record.Contract_implementation_Status else '',
+            str(record.remarks)[:30] if record.remarks else ''
+        ]
+        data.append(row)
+    
+    # Create table with proper column widths for A4
+    col_widths = [0.8*inch, 1.2*inch, 0.7*inch, 0.8*inch, 0.6*inch, 1.0*inch, 1.2*inch, 0.7*inch, 0.7*inch, 0.8*inch, 1.2*inch]
+    
+    table = Table(data, colWidths=col_widths)
+    
+    # Style the table
+    table.setStyle(TableStyle([
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), colors.navy),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data style
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    
+    story.append(table)
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Get PDF data
+    pdf_data = buffer.getvalue()
+    buffer.close()
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="monitoring_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response.write(pdf_data)
+    
+    return response
+
+
+def export_works_contracts_to_pdf(queryset=None):
+    """Export Works Contracts to PDF with A4 portrait formatting"""
+    
+    if queryset is None:
+        queryset = Contract_Profiling_works.objects.all().select_related(
+            'projectID', 'compID', 'subcompID', 'activityID', 'project_Category',
+            'funding_source', 'currency', 'loginUser'
+        )
+    
+    # Create PDF buffer
+    buffer = BytesIO()
+    
+    # Create PDF document with A4 portrait
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=1*inch,
+        bottomMargin=0.75*inch
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        textColor=colors.black,
+        alignment=1  # Center alignment
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Title
+    title = Paragraph("Works Contracts Report", title_style)
+    story.append(title)
+    
+    # Date and summary
+    date_text = f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}"
+    summary_text = f"Total Contracts: {queryset.count()}"
+    
+    story.append(Paragraph(date_text, styles['Normal']))
+    story.append(Paragraph(summary_text, styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    # Prepare table data
+    data = []
+    headers = [
+        'Contract Ref', 'Project', 'Component', 'Contractor', 
+        'Contract Value', 'Currency', 'Start Date', 'End Date', 
+        'Duration (Days)', 'Location', 'Status'
+    ]
+    data.append(headers)
+    
+    # Add data rows
+    for contract in queryset:
+        # Calculate duration
+        duration = ''
+        if contract.contract_start_date and contract.contract_end_date:
+            duration = str((contract.contract_end_date - contract.contract_start_date).days)
+        
+        row = [
+            contract.contract_refNo or '',
+            str(contract.projectID)[:25] if contract.projectID else '',
+            str(contract.compID)[:20] if contract.compID else '',
+            contract.name_of_contractor[:25] if contract.name_of_contractor else '',
+            f"{contract.contract_value:,.2f}" if contract.contract_value else '',
+            str(contract.currency) if contract.currency else '',
+            contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
+            contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
+            duration,
+            contract.location[:20] if contract.location else '',
+            'Active' if contract.contract_start_date and contract.contract_end_date and 
+                     contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date else 'Inactive'
+        ]
+        data.append(row)
+    
+    # Create table with proper column widths for A4
+    col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.0*inch, 0.7*inch]
+    
+    table = Table(data, colWidths=col_widths)
+    
+    # Style the table
+    table.setStyle(TableStyle([
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data style
+        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    
+    story.append(table)
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Get PDF data
+    pdf_data = buffer.getvalue()
+    buffer.close()
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="works_contracts_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response.write(pdf_data)
+    
+    return response
+
+
+def export_goods_services_contracts_to_pdf(queryset=None):
+    """Export Goods & Services Contracts to PDF with A4 portrait formatting"""
+    
+    if queryset is None:
+        queryset = Contract_Profiling_goods_services.objects.all().select_related(
+            'projectID', 'compID', 'subcompID', 'activityID', 'project_Category',
+            'funding_source', 'currency', 'loginUser'
+        )
+    
+    # Create PDF buffer
+    buffer = BytesIO()
+    
+    # Create PDF document with A4 portrait
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=1*inch,
+        bottomMargin=0.75*inch
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        textColor=colors.black,
+        alignment=1  # Center alignment
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Title
+    title = Paragraph("Goods & Services Contracts Report", title_style)
+    story.append(title)
+    
+    # Date and summary
+    date_text = f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}"
+    summary_text = f"Total Contracts: {queryset.count()}"
+    
+    story.append(Paragraph(date_text, styles['Normal']))
+    story.append(Paragraph(summary_text, styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    # Prepare table data
+    data = []
+    headers = [
+        'Contract Ref', 'Project', 'Component', 'Supplier', 
+        'Contract Value', 'Currency', 'Start Date', 'End Date', 
+        'Duration (Days)', 'Description', 'Status'
+    ]
+    data.append(headers)
+    
+    # Add data rows
+    for contract in queryset:
+        # Calculate duration
+        duration = ''
+        if contract.contract_start_date and contract.contract_end_date:
+            duration = str((contract.contract_end_date - contract.contract_start_date).days)
+        
+        row = [
+            contract.contract_refNo or '',
+            str(contract.projectID)[:25] if contract.projectID else '',
+            str(contract.compID)[:20] if contract.compID else '',
+            contract.name_of_Supplier[:25] if contract.name_of_Supplier else '',
+            f"{contract.contract_value:,.2f}" if contract.contract_value else '',
+            str(contract.currency) if contract.currency else '',
+            contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
+            contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
+            duration,
+            contract.service_or_goods_description[:25] if contract.service_or_goods_description else '',
+            'Active' if contract.contract_start_date and contract.contract_end_date and 
+                     contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date else 'Inactive'
+        ]
+        data.append(row)
+    
+    # Create table with proper column widths for A4
+    col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.2*inch, 0.7*inch]
+    
+    table = Table(data, colWidths=col_widths)
+    
+    # Style the table
+    table.setStyle(TableStyle([
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkgreen),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data style
+        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    
+    story.append(table)
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Get PDF data
+    pdf_data = buffer.getvalue()
+    buffer.close()
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="goods_services_contracts_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response.write(pdf_data)
+    
+    return response
 
 
 def calculate_contract_duration_days(start_date, end_date):
