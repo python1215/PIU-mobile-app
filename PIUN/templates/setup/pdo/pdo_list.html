@@ -1,0 +1,168 @@
+{% extends 'setup/base.html' %}
+{% load static %}
+
+{% block title %}Project Development Objectives{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-bullseye"></i>
+                        Project Development Objectives
+                        <span class="badge bg-primary ms-2">{{ total_pdos }}</span>
+                    </h3>
+                    <a href="{% url 'setup:pdo_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New PDO
+                    </a>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Search and Filter Form -->
+                    <form method="get" class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search PDOs...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="active" class="form-label">Active Status</label>
+                            <select class="form-control" id="active" name="active">
+                                <option value="">All</option>
+                                <option value="true" {% if active_filter == 'true' %}selected{% endif %}>Active Only</option>
+                                <option value="false" {% if active_filter == 'false' %}selected{% endif %}>Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-secondary me-2">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a href="{% url 'setup:pdo_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+
+                    {% if pdos %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Responsible Unit</th>
+                                    <th>Status</th>
+                                    <th>Target Date</th>
+                                    <th>Active</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pdo in pdos %}
+                                <tr>
+                                    <td>{{ pdo.pdoID }}</td>
+                                    <td>
+                                        <strong>{{ pdo.pdo_title|truncatechars:50 }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ pdo.pdo_description|truncatechars:100 }}</small>
+                                    </td>
+                                    <td>{{ pdo.responsible_unit|default:"-" }}</td>
+                                    <td>
+                                        <span class="{{ pdo.get_status_display_class }}">
+                                            {{ pdo.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ pdo.target_date|default:"-" }}</td>
+                                    <td>
+                                        {% if pdo.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ pdo.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'setup:pdo_detail' pdo.pk %}" 
+                                               class="btn btn-sm btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'setup:pdo_update' pdo.pk %}" 
+                                               class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'setup:pdo_delete' pdo.pk %}" 
+                                               class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if pdos.has_other_pages %}
+                    <nav aria-label="PDO pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if pdos.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pdos.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in pdos.paginator.page_range %}
+                                {% if pdos.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > pdos.number|add:'-3' and num < pdos.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if pdos.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pdos.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No PDOs Found</h4>
+                        <p class="text-muted">No Project Development Objectives match your search criteria.</p>
+                        <a href="{% url 'setup:pdo_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Your First PDO
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

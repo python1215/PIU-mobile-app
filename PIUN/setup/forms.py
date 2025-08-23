@@ -281,3 +281,55 @@ class TypeOfStakeholderEngagementForm(forms.ModelForm):
         widgets = {
             'stake_holder_engagement': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter stakeholder engagement type'})
         }
+class SetupPDOForm(forms.ModelForm):
+    class Meta:
+        model = SetupPDO
+        fields = [
+            'pdo_title', 'pdo_description', 'pdo_indicator', 'target_value', 
+            'baseline_value', 'target_date', 'responsible_unit', 'status', 'is_active'
+        ]
+        widgets = {
+            'pdo_title': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter PDO title',
+                'maxlength': '300'
+            }),
+            'pdo_description': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter detailed description of the PDO',
+                'rows': 4
+            }),
+            'pdo_indicator': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter key performance indicator'
+            }),
+            'target_value': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter target value or outcome'
+            }),
+            'baseline_value': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter baseline value'
+            }),
+            'target_date': forms.DateInput(attrs={
+                'class': 'form-control', 
+                'type': 'date'
+            }),
+            'responsible_unit': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enter responsible unit or department'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add help text to fields
+        self.fields['pdo_title'].help_text = "Enter a clear and concise PDO title"
+        self.fields['pdo_description'].help_text = "Provide detailed description of what this PDO aims to achieve"
+        self.fields['target_date'].help_text = "Expected completion date for this PDO"

@@ -169,6 +169,13 @@ urlpatterns = [
     path('indicator-type/<int:pk>/edit/', views.indicator_type_update, name='indicator_type_update'),
     path('indicator-type/<int:pk>/delete/', views.indicator_type_delete, name='indicator_type_delete'),
     
+    # PDO (Project Development Objectives) URLs
+    path('pdo/', views.pdo_list, name='pdo_list'),
+    path('pdo/add/', views.pdo_create, name='pdo_create'),
+    path('pdo/<int:pk>/', views.pdo_detail, name='pdo_detail'),
+    path('pdo/<int:pk>/edit/', views.pdo_update, name='pdo_update'),
+    path('pdo/<int:pk>/delete/', views.pdo_delete, name='pdo_delete'),
+    
     # KPI For Contract URLs (using monitoring_Type_Code as primary key)
     path('kpi-for-contract/', views.kpi_for_contract_list, name='kpi_for_contract_list'),
     path('kpi-for-contract/add/', views.kpi_for_contract_create, name='kpi_for_contract_create'),

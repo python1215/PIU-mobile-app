@@ -51,6 +51,8 @@ def setup_dashboard(request):
         'recent_indicator_type': list(Indicator_Type.objects.order_by('id')[:5]),
         'total_kpi_for_contract': KPI_For_Contract.objects.count(),
         'recent_kpi_for_contract': list(KPI_For_Contract.objects.order_by('date')[:5]),
+        'total_setup_pdos': SetupPDO.objects.count(),
+        'recent_setup_pdos': list(SetupPDO.objects.order_by('-date')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1724,3 +1726,121 @@ def kpi_for_contract_delete(request, pk):
     
     context = {'kpi_for_contract': kpi_for_contract}
     return render(request, 'setup/kpi_for_contract/kpi_for_contract_confirm_delete.html', context)
+# PDO Views
+@login_required
+def pdo_list(request):
+    """List all PDOs with search and filtering"""
+    pdos = SetupPDO.objects.all().order_by('-date')
+    
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        pdos = pdos.filter(
+            Q(pdo_title__icontains=search_query) | 
+            Q(pdo_description__icontains=search_query) |
+            Q(responsible_unit__icontains=search_query)
+        )
+    
+    # Status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        pdos = pdos.filter(status=status_filter)
+    
+    # Active filter
+    active_filter = request.GET.get('active', '')
+    if active_filter == 'true':
+        pdos = pdos.filter(is_active=True)
+    elif active_filter == 'false':
+        pdos = pdos.filter(is_active=False)
+    
+    # Pagination
+    paginator = Paginator(pdos, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Status choices for filter dropdown
+    status_choices = SetupPDO._meta.get_field('status').choices
+    
+    context = {
+        'pdos': page_obj,
+        'total_pdos': SetupPDO.objects.count(),
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'active_filter': active_filter,
+        'status_choices': status_choices,
+    }
+    return render(request, 'setup/pdo/pdo_list.html', context)
+
+@login_required
+def pdo_create(request):
+    """Create a new PDO"""
+    if request.method == 'POST':
+        form = SetupPDOForm(request.POST)
+        if form.is_valid():
+            pdo = form.save(commit=False)
+            pdo.loginUser = request.user
+            pdo.save()
+            messages.success(request, 'Project Development Objective created successfully!')
+            return redirect('setup:pdo_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SetupPDOForm()
+    
+    context = {
+        'form': form, 
+        'title': 'Add New Project Development Objective',
+        'submit_text': 'Create PDO'
+    }
+    return render(request, 'setup/pdo/pdo_form.html', context)
+
+@login_required
+def pdo_detail(request, pk):
+    """Display PDO details"""
+    pdo = get_object_or_404(SetupPDO, pk=pk)
+    context = {
+        'pdo': pdo,
+        'title': f'PDO Details: {pdo.pdo_title}'
+    }
+    return render(request, 'setup/pdo/pdo_detail.html', context)
+
+@login_required
+def pdo_update(request, pk):
+    """Update an existing PDO"""
+    pdo = get_object_or_404(SetupPDO, pk=pk)
+    
+    if request.method == 'POST':
+        form = SetupPDOForm(request.POST, instance=pdo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project Development Objective updated successfully!')
+            return redirect('setup:pdo_detail', pk=pdo.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SetupPDOForm(instance=pdo)
+    
+    context = {
+        'form': form, 
+        'pdo': pdo,
+        'title': f'Edit PDO: {pdo.pdo_title}',
+        'submit_text': 'Update PDO'
+    }
+    return render(request, 'setup/pdo/pdo_form.html', context)
+
+@login_required
+def pdo_delete(request, pk):
+    """Delete a PDO"""
+    pdo = get_object_or_404(SetupPDO, pk=pk)
+    
+    if request.method == 'POST':
+        pdo_title = pdo.pdo_title
+        pdo.delete()
+        messages.success(request, f'PDO "{pdo_title}" has been deleted successfully!')
+        return redirect('setup:pdo_list')
+    
+    context = {
+        'pdo': pdo,
+        'title': f'Delete PDO: {pdo.pdo_title}'
+    }
+    return render(request, 'setup/pdo/pdo_confirm_delete.html', context)
