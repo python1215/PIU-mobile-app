@@ -1,0 +1,18 @@
+compID	project_components	component_description	allocation	date	loginUser_id	currency_id	projectID_id
+1	Component 1:	20MW On-Grid Solar PV Plant with Backup Energy Storage System (BESS)	28300000.00	2024-06-10 13:49:31.4053280 +00:00	2	4	D309& D6530 -GM
+2	Component 2	T&D restoration and modernization	90000000.00	2024-06-10 13:50:55.9470420 +00:00	2	4	D309& D6530 -GM
+3	component 3	Institutional strengthening and project implementation support	32500000.00	2024-06-10 13:51:46.5825080 +00:00	2	4	D309& D6530 -GM
+4	component 4	Urgent actions to address the water crisis	13100000.00	2024-06-10 13:52:27.1720260 +00:00	2	4	D309& D6530 -GM
+5	Component 5	Covid-19 Emergency Assistance	2500000.00	2024-06-10 13:53:04.2829690 +00:00	2	4	D309& D6530 -GM
+6	Component 6	Government of The Gambia and NAWEC Contributions	6000000.00	2024-06-10 13:53:44.6094310 +00:00	2	4	D309& D6530 -GM
+7	Component 1	Design , Supply and Installation of  Electricity Distribution Infrastructure	62000000.00	2024-10-01 11:50:24.0651510 +00:00	2	4	D309& D6530 -GM
+8	Component 2:	Supervision of the construction and technical advisory:	2000000.00	2024-10-01 11:51:19.6772760 +00:00	2	4	D309& D6530 -GM
+9	Component 3	Project coordination and technical assistance:	2000000.00	2024-10-01 11:59:47.1314750 +00:00	2	4	D309& D6530 -GM
+10	Component 1	Grid Reinforcement, Rehabilitation and Expansion of electricity distribution infrastructures	14000000.00	2024-10-18 11:31:02.4502390 +00:00	2	3	D309& D6530 -GM
+11	component 2	Project Implementation Management	850000.00	2024-10-18 11:32:33.5199420 +00:00	2	3	D309& D6530 -GM
+12	component 3	Institutional Support and Capacity Building	150000.00	2024-10-18 11:33:13.1993830 +00:00	2	3	D309& D6530 -GM
+13	Component A	Expansion of Electricity Distribution     Infrastructure	15495882.00	2024-11-27 12:24:39.5418890 +00:00	2	4	D309& D6530 -GM
+14	Component B	Project Implementation Management	1176618.00	2024-11-27 12:25:22.5888780 +00:00	2	4	D309& D6530 -GM
+15	Component C	Institutional Development and Capacity Building	337500.00	2024-11-27 12:26:03.2449110 +00:00	2	4	D309& D6530 -GM
+31	ewrty	wretys	2345.00	2025-08-13 04:06:25.2930310 +00:00	4	2	D309& D6530 -GM
+32	wertyu	wert	23.00	2025-08-15 16:56:47.9897370 +00:00	4	2	D309& D6530 -GM

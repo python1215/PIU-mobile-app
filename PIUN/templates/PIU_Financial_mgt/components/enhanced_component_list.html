@@ -159,12 +159,21 @@
                     <tbody>
                         {% for component in components %}
                             <tr>
-                                <td>{{ component.projectIDID }}</td>
-                                <td>{{ component.project_components }}</td>
-                                <td>{{ component.component_description }}</td>
-                                <td>{{ component.currency.currency }}</td>
-                                <td>{{ component.allocation }}</td>
-                                <td>{{ component.date|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <strong>{{ component.projectID.projectID }}</strong>
+                                    <br><small class="text-muted">{{ component.projectID.project|truncatechars:30 }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ component.project_components }}</strong>
+                                </td>
+                                <td>{{ component.component_description|truncatechars:50 }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ component.currency.currency }}</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success">{{ component.allocation|floatformat:2 }}</strong>
+                                </td>
+                                <td>{{ component.date|date:"M d, Y H:i" }}</td>
                                 <td>{{ component.loginUser.username }}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">

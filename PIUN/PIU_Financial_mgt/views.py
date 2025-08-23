@@ -638,11 +638,34 @@ def components(request):
     projects = Project.objects.all()
     currencies = Currency.objects.all()
     
-    # Ensure the QuerySet is properly evaluated for the template
+    # Order components for display
     final_components = components_qs.order_by('-date')
     
+    # Debug logging for troubleshooting (can be removed in production)
+    print(f"=== COMPONENT LIST DEBUG ===")
+    print(f"User: {request.user}")
+    print(f"Total components in DB: {total_components}")
+    print(f"Filtered components count: {filtered_count}")
+    print(f"Is filtered: {is_filtered}")
+    try:
+        sample_data = list(final_components[:3].values('compID', 'project_components', 'projectID__projectID'))
+        print(f"Sample components: {sample_data}")
+    except Exception as e:
+        print(f"Error getting sample data: {e}")
+    print(f"============================")
+    
+    # Ensure we have a valid QuerySet for the template
+    try:
+        # Test if the QuerySet can be evaluated
+        component_count = final_components.count()
+        print(f"Successfully evaluated QuerySet: {component_count} components")
+    except Exception as e:
+        print(f"QuerySet evaluation error: {e}")
+        # Fallback to basic query if complex query fails
+        final_components = Component.objects.all().select_related('projectID', 'currency', 'loginUser').order_by('-date')
+    
     context = {
-        'components': list(final_components),  # Convert to list for reliable template evaluation
+        'components': final_components,
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
