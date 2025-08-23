@@ -176,6 +176,13 @@ urlpatterns = [
     path('pdo/<int:pk>/edit/', views.pdo_update, name='pdo_update'),
     path('pdo/<int:pk>/delete/', views.pdo_delete, name='pdo_delete'),
     
+    # Project Outcome URLs
+    path('project-outcomes/', views.project_outcome_list, name='project_outcome_list'),
+    path('project-outcomes/add/', views.project_outcome_create, name='project_outcome_create'),
+    path('project-outcomes/<int:pk>/', views.project_outcome_detail, name='project_outcome_detail'),
+    path('project-outcomes/<int:pk>/edit/', views.project_outcome_update, name='project_outcome_update'),
+    path('project-outcomes/<int:pk>/delete/', views.project_outcome_delete, name='project_outcome_delete'),
+    
     # KPI For Contract URLs (using monitoring_Type_Code as primary key)
     path('kpi-for-contract/', views.kpi_for_contract_list, name='kpi_for_contract_list'),
     path('kpi-for-contract/add/', views.kpi_for_contract_create, name='kpi_for_contract_create'),

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-target"></i>
+                            {{ title }}
+                        </h3>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a href="{% url 'setup:setup_dashboard' %}" class="text-decoration-none">Core Setup</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'setup:project_outcome_list' %}" class="text-decoration-none">Project Outcomes</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- PDO Selection -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.pdo.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-bullseye text-primary"></i> Related PDO *
+                                </label>
+                                {{ form.pdo }}
+                                {% if form.pdo.errors %}
+                                    <div class="text-danger small">{{ form.pdo.errors }}</div>
+                                {% endif %}
+                                {% if form.pdo.help_text %}
+                                    <div class="form-text">{{ form.pdo.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Project Outcome -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.project_outcome.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-target text-success"></i> Project Outcome *
+                                </label>
+                                {{ form.project_outcome }}
+                                {% if form.project_outcome.errors %}
+                                    <div class="text-danger small">{{ form.project_outcome.errors }}</div>
+                                {% endif %}
+                                {% if form.project_outcome.help_text %}
+                                    <div class="form-text">{{ form.project_outcome.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Help Section -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Project Outcome Guidelines</h6>
+                            <ul class="mb-0 small">
+                                <li>Select the PDO that this outcome supports</li>
+                                <li>Describe a specific, measurable outcome</li>
+                                <li>Outcomes should be achievable and time-bound</li>
+                                <li>Use clear, actionable language</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-home"></i> Core Setup
+                                </a>
+                                <a href="{% url 'setup:project_outcome_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ submit_text|default:"Save Project Outcome" }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

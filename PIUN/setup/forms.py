@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import *
-from PIU_Financial_mgt.models import KPI_For_Contract
+from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome, PDO
 
 class DonorForm(forms.ModelForm):
     class Meta:
@@ -333,3 +333,30 @@ class SetupPDOForm(forms.ModelForm):
         self.fields['pdo_title'].help_text = "Enter a clear and concise PDO title"
         self.fields['pdo_description'].help_text = "Provide detailed description of what this PDO aims to achieve"
         self.fields['target_date'].help_text = "Expected completion date for this PDO"
+
+
+class ProjectOutcomeForm(forms.ModelForm):
+    class Meta:
+        model = ProjectOutCome
+        fields = ['pdo', 'project_outcome']
+        widgets = {
+            'pdo': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Select a PDO'
+            }),
+            'project_outcome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter project outcome description',
+                'maxlength': '200'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add help text to fields
+        self.fields['pdo'].help_text = "Select the related Project Development Objective"
+        self.fields['project_outcome'].help_text = "Enter a clear and measurable project outcome"
+        
+        # Customize the PDO queryset to show more descriptive text
+        self.fields['pdo'].queryset = PDO.objects.all().order_by('pdo_statement')
+        self.fields['pdo'].empty_label = "Select a PDO..."

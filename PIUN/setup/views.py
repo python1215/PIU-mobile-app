@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from .models import *
 from .forms import *
-from PIU_Financial_mgt.models import KPI_For_Contract
+from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome, PDO
 
 @login_required
 def setup_dashboard(request):
@@ -53,6 +53,8 @@ def setup_dashboard(request):
         'recent_kpi_for_contract': list(KPI_For_Contract.objects.order_by('date')[:5]),
         'total_setup_pdos': SetupPDO.objects.count(),
         'recent_setup_pdos': list(SetupPDO.objects.order_by('-date')[:5]),
+        'total_project_outcomes': ProjectOutCome.objects.count(),
+        'recent_project_outcomes': list(ProjectOutCome.objects.order_by('-date')[:5]),
     }
     return render(request, 'setup/setup_dashboard.html', context)
 
@@ -1844,3 +1846,105 @@ def pdo_delete(request, pk):
         'title': f'Delete PDO: {pdo.pdo_title}'
     }
     return render(request, 'setup/pdo/pdo_confirm_delete.html', context)
+
+
+# ============ PROJECT OUTCOME CRUD OPERATIONS ============
+
+@login_required
+def project_outcome_list(request):
+    """List all project outcomes with search functionality"""
+    search_query = request.GET.get('search', '')
+    
+    project_outcomes = ProjectOutCome.objects.all().order_by('-date')
+    
+    if search_query:
+        project_outcomes = project_outcomes.filter(
+            Q(project_outcome__icontains=search_query) |
+            Q(pdo__pdo_statement__icontains=search_query)
+        )
+    
+    paginator = Paginator(project_outcomes, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'project_outcomes': page_obj,
+        'total_outcomes': ProjectOutCome.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/project_outcomes/project_outcome_list.html', context)
+
+@login_required
+def project_outcome_create(request):
+    """Create a new project outcome"""
+    if request.method == 'POST':
+        form = ProjectOutcomeForm(request.POST)
+        if form.is_valid():
+            project_outcome = form.save(commit=False)
+            project_outcome.loginUser = request.user
+            project_outcome.save()
+            messages.success(request, 'Project Outcome created successfully!')
+            return redirect('setup:project_outcome_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProjectOutcomeForm()
+    
+    context = {
+        'form': form, 
+        'title': 'Add New Project Outcome',
+        'submit_text': 'Create Project Outcome'
+    }
+    return render(request, 'setup/project_outcomes/project_outcome_form.html', context)
+
+@login_required
+def project_outcome_detail(request, pk):
+    """View project outcome details"""
+    project_outcome = get_object_or_404(ProjectOutCome, pk=pk)
+    
+    context = {
+        'project_outcome': project_outcome,
+        'title': f'Project Outcome Details: {project_outcome.project_outcome}'
+    }
+    return render(request, 'setup/project_outcomes/project_outcome_detail.html', context)
+
+@login_required
+def project_outcome_update(request, pk):
+    """Update an existing project outcome"""
+    project_outcome = get_object_or_404(ProjectOutCome, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProjectOutcomeForm(request.POST, instance=project_outcome)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project Outcome updated successfully!')
+            return redirect('setup:project_outcome_detail', pk=project_outcome.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProjectOutcomeForm(instance=project_outcome)
+    
+    context = {
+        'form': form, 
+        'project_outcome': project_outcome,
+        'title': f'Edit Project Outcome: {project_outcome.project_outcome}',
+        'submit_text': 'Update Project Outcome'
+    }
+    return render(request, 'setup/project_outcomes/project_outcome_form.html', context)
+
+@login_required
+def project_outcome_delete(request, pk):
+    """Delete a project outcome"""
+    project_outcome = get_object_or_404(ProjectOutCome, pk=pk)
+    
+    if request.method == 'POST':
+        outcome_title = project_outcome.project_outcome
+        project_outcome.delete()
+        messages.success(request, f'Project Outcome "{outcome_title}" has been deleted successfully!')
+        return redirect('setup:project_outcome_list')
+    
+    context = {
+        'project_outcome': project_outcome,
+        'title': f'Delete Project Outcome: {project_outcome.project_outcome}'
+    }
+    return render(request, 'setup/project_outcomes/project_outcome_confirm_delete.html', context)
