@@ -9,10 +9,20 @@
         <div class="col-lg-6">
             <div class="card border-danger">
                 <div class="card-header bg-danger text-white">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Confirm Deletion
-                    </h3>
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Confirm Deletion
+                        </h3>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a href="{% url 'setup:setup_dashboard' %}" class="text-decoration-none text-white">Core Setup</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'setup:pdo_list' %}" class="text-decoration-none text-white">PDO Management</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'setup:pdo_detail' pdo.pk %}" class="text-decoration-none text-white">{{ pdo.pdo_title|truncatechars:20 }}</a></li>
+                                <li class="breadcrumb-item active text-white-50" aria-current="page">Delete</li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
                 
                 <div class="card-body">
@@ -77,9 +87,14 @@
                     <form method="post" class="mt-4">
                         {% csrf_token %}
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'setup:pdo_detail' pdo.pk %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancel
-                            </a>
+                            <div>
+                                <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-home"></i> Core Setup
+                                </a>
+                                <a href="{% url 'setup:pdo_detail' pdo.pk %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancel
+                                </a>
+                            </div>
                             <div>
                                 <a href="{% url 'setup:pdo_list' %}" class="btn btn-outline-secondary me-2">
                                     <i class="fas fa-list"></i> Back to List

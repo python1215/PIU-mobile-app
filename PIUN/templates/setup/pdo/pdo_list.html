@@ -9,14 +9,27 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">
-                        <i class="fas fa-bullseye"></i>
-                        Project Development Objectives
-                        <span class="badge bg-primary ms-2">{{ total_pdos }}</span>
-                    </h3>
-                    <a href="{% url 'setup:pdo_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add New PDO
-                    </a>
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-bullseye"></i>
+                            Project Development Objectives
+                            <span class="badge bg-primary ms-2">{{ total_pdos }}</span>
+                        </h3>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a href="{% url 'setup:setup_dashboard' %}" class="text-decoration-none">Core Setup</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">PDO Management</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div>
+                        <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left"></i> Back to Setup
+                        </a>
+                        <a href="{% url 'setup:pdo_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add New PDO
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="card-body">
