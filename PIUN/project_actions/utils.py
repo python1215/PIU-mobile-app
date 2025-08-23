@@ -509,7 +509,7 @@ def export_monitoring_records_to_pdf(queryset=None):
     # Prepare table data
     data = []
     headers = [
-        'Contract Ref', 'Project', 'Type', 'Monitoring Date', 
+        'Contract Ref', 'Project', 'Monitoring Type', 'Monitoring Date', 
         'Quarter', 'Investment Type', 'KPI Description', 'Target', 
         'Achievement', 'Status', 'Remarks'
     ]
@@ -520,7 +520,7 @@ def export_monitoring_records_to_pdf(queryset=None):
         row = [
             record.contract_refNo or '',
             str(record.project)[:30] if record.project else '',
-            str(record.type_of_contract)[:15] if record.type_of_contract else '',
+            str(record.type_of_monitoring)[:15] if record.type_of_monitoring else '',
             record.monitoring_date.strftime('%Y-%m-%d') if record.monitoring_date else '',
             str(record.quarter) if record.quarter else '',
             str(record.Type_of_Investment)[:20] if record.Type_of_Investment else '',
