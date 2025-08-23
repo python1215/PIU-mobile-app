@@ -360,3 +360,39 @@ class ProjectOutcomeForm(forms.ModelForm):
         # Customize the PDO queryset to show more descriptive text
         self.fields['pdo'].queryset = PDO.objects.all().order_by('pdo_statement')
         self.fields['pdo'].empty_label = "Select a PDO..."
+
+
+class ProjectResultForm(forms.ModelForm):
+    """Form for creating and editing project results"""
+    
+    class Meta:
+        model = ProjectResult
+        fields = ['project_outcome', 'project_result']
+        widgets = {
+            'project_outcome': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'project_result': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Enter detailed project result description...',
+                'required': True
+            }),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Show all project outcomes with their related PDO information
+        self.fields['project_outcome'].queryset = ProjectOutCome.objects.select_related('pdo').order_by('project_outcome')
+        
+        # Update field labels
+        self.fields['project_outcome'].label = "Related Project Outcome"
+        self.fields['project_result'].label = "Project Result Description"
+        
+        # Add help text
+        self.fields['project_outcome'].help_text = "Select the project outcome that this result supports"
+        self.fields['project_result'].help_text = "Describe the specific, measurable result achieved"
+        
+        # Customize the empty label
+        self.fields['project_outcome'].empty_label = "Select a Project Outcome..."

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-trophy"></i>
+                            Project Result Details
+                        </h3>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a href="{% url 'setup:setup_dashboard' %}" class="text-decoration-none">Core Setup</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'setup:project_result_list' %}" class="text-decoration-none">Project Results</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">{{ project_result.project_result|truncatechars:30 }}</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div>
+                        <a href="{% url 'setup:project_result_update' project_result.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'setup:project_result_delete' project_result.pk %}" class="btn btn-danger ms-2">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Main Information -->
+                        <div class="col-lg-8">
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle"></i> Project Result Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Result ID:</strong>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <span class="badge bg-secondary">#{{ project_result.id }}</span>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Project Result:</strong>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <p class="mb-0">{{ project_result.project_result }}</p>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Related Outcome:</strong>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="alert alert-success mb-0">
+                                                <strong>{{ project_result.project_outcome.project_outcome }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Information -->
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-cog"></i> System Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <small class="text-muted">Created By</small>
+                                        <div>
+                                            <i class="fas fa-user text-primary"></i>
+                                            {{ project_result.loginUser.username }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">Date Created</small>
+                                        <div>
+                                            <i class="fas fa-calendar text-success"></i>
+                                            {{ project_result.date|date:"F d, Y" }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">Time Created</small>
+                                        <div>
+                                            <i class="fas fa-clock text-info"></i>
+                                            {{ project_result.date|date:"H:i" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Information -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-link"></i> Related Project Outcome & PDO
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <strong>Outcome:</strong>
+                                        </div>
+                                        <div class="col-md-10">
+                                            {{ project_result.project_outcome.project_outcome }}
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <strong>Related PDO:</strong>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div class="alert alert-info mb-0">
+                                                {{ project_result.project_outcome.pdo.pdo_statement }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <strong>Hierarchy:</strong>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <nav aria-label="breadcrumb">
+                                                <ol class="breadcrumb mb-0">
+                                                    <li class="breadcrumb-item">
+                                                        <span class="badge bg-primary">PDO</span>
+                                                        {{ project_result.project_outcome.pdo.pdo_statement|truncatechars:50 }}
+                                                    </li>
+                                                    <li class="breadcrumb-item">
+                                                        <span class="badge bg-success">Outcome</span>
+                                                        {{ project_result.project_outcome.project_outcome|truncatechars:50 }}
+                                                    </li>
+                                                    <li class="breadcrumb-item active">
+                                                        <span class="badge bg-warning text-dark">Result</span>
+                                                        {{ project_result.project_result|truncatechars:50 }}
+                                                    </li>
+                                                </ol>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'setup:setup_dashboard' %}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-home"></i> Core Setup
+                            </a>
+                            <a href="{% url 'setup:project_result_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{% url 'setup:project_result_update' project_result.pk %}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit Project Result
+                            </a>
+                            <a href="{% url 'setup:project_result_delete' project_result.pk %}" class="btn btn-danger ms-2">
+                                <i class="fas fa-trash"></i> Delete Project Result
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -183,6 +183,13 @@ urlpatterns = [
     path('project-outcomes/<int:pk>/edit/', views.project_outcome_update, name='project_outcome_update'),
     path('project-outcomes/<int:pk>/delete/', views.project_outcome_delete, name='project_outcome_delete'),
     
+    # Project Result URLs
+    path('project-results/', views.project_result_list, name='project_result_list'),
+    path('project-results/add/', views.project_result_create, name='project_result_create'),
+    path('project-results/<int:pk>/', views.project_result_detail, name='project_result_detail'),
+    path('project-results/<int:pk>/edit/', views.project_result_update, name='project_result_update'),
+    path('project-results/<int:pk>/delete/', views.project_result_delete, name='project_result_delete'),
+    
     # KPI For Contract URLs (using monitoring_Type_Code as primary key)
     path('kpi-for-contract/', views.kpi_for_contract_list, name='kpi_for_contract_list'),
     path('kpi-for-contract/add/', views.kpi_for_contract_create, name='kpi_for_contract_create'),

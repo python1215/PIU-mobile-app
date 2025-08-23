@@ -1948,3 +1948,106 @@ def project_outcome_delete(request, pk):
         'title': f'Delete Project Outcome: {project_outcome.project_outcome}'
     }
     return render(request, 'setup/project_outcomes/project_outcome_confirm_delete.html', context)
+
+
+# ============ PROJECT RESULT CRUD OPERATIONS ============
+
+@login_required
+def project_result_list(request):
+    """List all project results with search functionality"""
+    search_query = request.GET.get('search', '')
+    
+    project_results = ProjectResult.objects.select_related('project_outcome', 'project_outcome__pdo').all().order_by('-date')
+    
+    if search_query:
+        project_results = project_results.filter(
+            Q(project_result__icontains=search_query) |
+            Q(project_outcome__project_outcome__icontains=search_query) |
+            Q(project_outcome__pdo__pdo_statement__icontains=search_query)
+        )
+    
+    paginator = Paginator(project_results, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'project_results': page_obj,
+        'total_results': ProjectResult.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'setup/project_results/project_result_list.html', context)
+
+@login_required
+def project_result_create(request):
+    """Create a new project result"""
+    if request.method == 'POST':
+        form = ProjectResultForm(request.POST)
+        if form.is_valid():
+            project_result = form.save(commit=False)
+            project_result.loginUser = request.user
+            project_result.save()
+            messages.success(request, 'Project Result created successfully!')
+            return redirect('setup:project_result_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProjectResultForm()
+    
+    context = {
+        'form': form, 
+        'title': 'Add New Project Result',
+        'submit_text': 'Create Project Result'
+    }
+    return render(request, 'setup/project_results/project_result_form.html', context)
+
+@login_required
+def project_result_detail(request, pk):
+    """View project result details"""
+    project_result = get_object_or_404(ProjectResult, pk=pk)
+    
+    context = {
+        'project_result': project_result,
+        'title': f'Project Result Details: {project_result.project_result}'
+    }
+    return render(request, 'setup/project_results/project_result_detail.html', context)
+
+@login_required
+def project_result_update(request, pk):
+    """Update an existing project result"""
+    project_result = get_object_or_404(ProjectResult, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProjectResultForm(request.POST, instance=project_result)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project Result updated successfully!')
+            return redirect('setup:project_result_detail', pk=project_result.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProjectResultForm(instance=project_result)
+    
+    context = {
+        'form': form, 
+        'project_result': project_result,
+        'title': f'Edit Project Result: {project_result.project_result}',
+        'submit_text': 'Update Project Result'
+    }
+    return render(request, 'setup/project_results/project_result_form.html', context)
+
+@login_required
+def project_result_delete(request, pk):
+    """Delete a project result"""
+    project_result = get_object_or_404(ProjectResult, pk=pk)
+    
+    if request.method == 'POST':
+        result_title = project_result.project_result
+        project_result.delete()
+        messages.success(request, f'Project Result "{result_title}" has been deleted successfully!')
+        return redirect('setup:project_result_list')
+    
+    context = {
+        'project_result': project_result,
+        'title': f'Delete Project Result: {project_result.project_result}'
+    }
+    return render(request, 'setup/project_results/project_result_confirm_delete.html', context)

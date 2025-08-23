@@ -7,6 +7,7 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
+- **August 23, 2025**: Added complete ProjectResult CRUD system integrated with Core Setup. Implemented full CRUD operations (Create, Read, Update, Delete) for ProjectResult model from PIU_Financial_mgt app, with comprehensive forms, views, templates, and navigation integration. Added ProjectResult setup card to Core Setup dashboard with orange/red theme and trophy icon. Enhanced project hierarchy display showing PDO → Outcome → Result relationships.
 - **August 23, 2025**: Added complete ProjectOutcome CRUD system integrated with Core Setup. Implemented full CRUD operations (Create, Read, Update, Delete) for ProjectOutcome model from PIU_Financial_mgt app, with comprehensive forms, views, templates, and navigation integration. Added ProjectOutcome setup card to Core Setup dashboard with pink/magenta theme and target icon. Enhanced PDO system with comprehensive navigation links and "Back to Core Setup" functionality across all templates.
 - **August 23, 2025**: Added comprehensive Excel and PDF export functionality with A4 portrait formatting. Fixed JavaScript freezing issue in offline deployments by optimizing timeout/promise handling. Implemented professional PDF reports using ReportLab with proper A4 dimensions, color-coded headers, and optimized column widths. All export functions support current page filters and provide timestamped file downloads.
 - **August 20, 2025**: Fixed critical cascading dropdown validation errors in PAP forms. Replaced entire social_and_env module with updated files featuring HTMX-powered cascading dropdowns, enhanced form validation with auto-selection of valid options, and implemented form reset functionality that clears all fields on page refresh/reload. Added comprehensive offline fallback with 25+ investment types for project D309D6530GM.
@@ -27,7 +28,7 @@ Preferred communication style: Simple, everyday language.
 - **Form Handling**: Flask-WTF for validation.
 - **File Handling**: Werkzeug for secure uploads.
 - **Session Management**: Flask session.
-- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, SetupPDO, ProjectOutCome.
+- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, SetupPDO, ProjectOutCome, ProjectResult.
 - **Feature Specifications**:
     - **Dashboard**: Real-time analytics and summary cards.
     - **Project Management**: CRUD operations with status tracking.
@@ -40,7 +41,7 @@ Preferred communication style: Simple, everyday language.
     - **Financial Management**: Budget tracking, component, and subcomponent management.
 
 ### System Design Choices
-- **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, Social & Environmental Monitoring, Setup Management (PDO and ProjectOutcome CRUD operations), and Core Setup configurations.
+- **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, Social & Environmental Monitoring, Setup Management (PDO, ProjectOutcome, and ProjectResult CRUD operations), and Core Setup configurations.
 - **Data Flow**: User interaction via web forms, data validation with Flask-WTF, persistence via SQLAlchemy, secure file storage, Chart.js for visualization, and system-generated reports.
 - **Database Strategy**: SQLite database using Django ORM exclusively for simplicity and reliability.
 - **Deployment**: Configurable via environment variables for database URI, session secret, and upload folder. Includes provisions for secure production deployment with proxy fix and file size limits.

@@ -553,3 +553,7 @@ class SetupPDO(models.Model):
             'cancelled': 'badge bg-danger'
         }
         return status_classes.get(self.status, 'badge bg-secondary')
+
+
+# Import models from other apps for use in setup
+from PIU_Financial_mgt.models import PDO, ProjectOutCome, ProjectResult
