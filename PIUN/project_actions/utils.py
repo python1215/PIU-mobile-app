@@ -515,27 +515,27 @@ def export_monitoring_records_to_pdf(queryset=None):
     ]
     data.append(headers)
     
-    # Add data rows
+    # Add data rows with Paragraph objects for text wrapping
     for record in queryset:
         row = [
-            record.contract_refNo or '',
-            str(record.project)[:30] if record.project else '',
-            str(record.type_of_monitoring)[:15] if record.type_of_monitoring else '',
-            record.monitoring_date.strftime('%Y-%m-%d') if record.monitoring_date else '',
-            str(record.quarter) if record.quarter else '',
-            str(record.Type_of_Investment)[:20] if record.Type_of_Investment else '',
-            str(record.Kpi_description)[:25] if record.Kpi_description else '',
-            str(record.Target)[:15] if record.Target else '',
-            str(record.Achieved_status)[:15] if record.Achieved_status else '',
-            str(record.Contract_implementation_Status)[:15] if record.Contract_implementation_Status else '',
-            str(record.remarks)[:30] if record.remarks else ''
+            Paragraph(record.contract_refNo or '', styles['Normal']),
+            Paragraph(str(record.project) if record.project else '', styles['Normal']),
+            Paragraph(str(record.type_of_monitoring) if record.type_of_monitoring else '', styles['Normal']),
+            Paragraph(record.monitoring_date.strftime('%Y-%m-%d') if record.monitoring_date else '', styles['Normal']),
+            Paragraph(str(record.quarter) if record.quarter else '', styles['Normal']),
+            Paragraph(str(record.Type_of_Investment) if record.Type_of_Investment else '', styles['Normal']),
+            Paragraph(str(record.Kpi_description) if record.Kpi_description else '', styles['Normal']),
+            Paragraph(str(record.Target) if record.Target else '', styles['Normal']),
+            Paragraph(str(record.Achieved_status) if record.Achieved_status else '', styles['Normal']),
+            Paragraph(str(record.Contract_implementation_Status) if record.Contract_implementation_Status else '', styles['Normal']),
+            Paragraph(str(record.remarks) if record.remarks else '', styles['Normal'])
         ]
         data.append(row)
     
     # Create table with proper column widths for A4
     col_widths = [0.8*inch, 1.2*inch, 0.7*inch, 0.8*inch, 0.6*inch, 1.0*inch, 1.2*inch, 0.7*inch, 0.7*inch, 0.8*inch, 1.2*inch]
     
-    table = Table(data, colWidths=col_widths)
+    table = Table(data, colWidths=col_widths, repeatRows=1)
     
     # Style the table
     table.setStyle(TableStyle([
@@ -554,6 +554,11 @@ def export_monitoring_records_to_pdf(queryset=None):
         ('FONTSIZE', (0, 1), (-1, -1), 7),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),
     ]))
     
     story.append(table)
@@ -630,33 +635,38 @@ def export_works_contracts_to_pdf(queryset=None):
     ]
     data.append(headers)
     
-    # Add data rows
+    # Add data rows with Paragraph objects for text wrapping
     for contract in queryset:
         # Calculate duration
         duration = ''
         if contract.contract_start_date and contract.contract_end_date:
             duration = str((contract.contract_end_date - contract.contract_start_date).days)
         
+        # Status determination
+        status = 'Inactive'
+        if contract.contract_start_date and contract.contract_end_date:
+            if contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date:
+                status = 'Active'
+        
         row = [
-            contract.contract_refNo or '',
-            str(contract.projectID)[:25] if contract.projectID else '',
-            str(contract.compID)[:20] if contract.compID else '',
-            contract.name_of_contractor[:25] if contract.name_of_contractor else '',
-            f"{contract.contract_value:,.2f}" if contract.contract_value else '',
-            str(contract.currency) if contract.currency else '',
-            contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
-            contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
-            duration,
-            contract.location[:20] if contract.location else '',
-            'Active' if contract.contract_start_date and contract.contract_end_date and 
-                     contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date else 'Inactive'
+            Paragraph(contract.contract_refNo or '', styles['Normal']),
+            Paragraph(str(contract.projectID) if contract.projectID else '', styles['Normal']),
+            Paragraph(str(contract.compID) if contract.compID else '', styles['Normal']),
+            Paragraph(contract.name_of_contractor if contract.name_of_contractor else '', styles['Normal']),
+            Paragraph(f"{contract.contract_value:,.2f}" if contract.contract_value else '', styles['Normal']),
+            Paragraph(str(contract.currency) if contract.currency else '', styles['Normal']),
+            Paragraph(contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '', styles['Normal']),
+            Paragraph(contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '', styles['Normal']),
+            Paragraph(duration, styles['Normal']),
+            Paragraph(str(contract.location_of_investment) if hasattr(contract, 'location_of_investment') and contract.location_of_investment else '', styles['Normal']),
+            Paragraph(status, styles['Normal'])
         ]
         data.append(row)
     
     # Create table with proper column widths for A4
     col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.0*inch, 0.7*inch]
     
-    table = Table(data, colWidths=col_widths)
+    table = Table(data, colWidths=col_widths, repeatRows=1)
     
     # Style the table
     table.setStyle(TableStyle([
@@ -675,6 +685,11 @@ def export_works_contracts_to_pdf(queryset=None):
         ('FONTSIZE', (0, 1), (-1, -1), 7),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),
     ]))
     
     story.append(table)
@@ -751,33 +766,38 @@ def export_goods_services_contracts_to_pdf(queryset=None):
     ]
     data.append(headers)
     
-    # Add data rows
+    # Add data rows with Paragraph objects for text wrapping
     for contract in queryset:
         # Calculate duration
         duration = ''
         if contract.contract_start_date and contract.contract_end_date:
             duration = str((contract.contract_end_date - contract.contract_start_date).days)
         
+        # Status determination
+        status = 'Inactive'
+        if contract.contract_start_date and contract.contract_end_date:
+            if contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date:
+                status = 'Active'
+        
         row = [
-            contract.contract_refNo or '',
-            str(contract.projectID)[:25] if contract.projectID else '',
-            str(contract.compID)[:20] if contract.compID else '',
-            contract.name_of_Supplier[:25] if contract.name_of_Supplier else '',
-            f"{contract.contract_value:,.2f}" if contract.contract_value else '',
-            str(contract.currency) if contract.currency else '',
-            contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
-            contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
-            duration,
-            contract.service_or_goods_description[:25] if contract.service_or_goods_description else '',
-            'Active' if contract.contract_start_date and contract.contract_end_date and 
-                     contract.contract_start_date <= datetime.now().date() <= contract.contract_end_date else 'Inactive'
+            Paragraph(contract.contract_refNo or '', styles['Normal']),
+            Paragraph(str(contract.projectID) if contract.projectID else '', styles['Normal']),
+            Paragraph(str(contract.compID) if contract.compID else '', styles['Normal']),
+            Paragraph(contract.name_of_Supplier if contract.name_of_Supplier else '', styles['Normal']),
+            Paragraph(f"{contract.contract_value:,.2f}" if contract.contract_value else '', styles['Normal']),
+            Paragraph(str(contract.currency) if contract.currency else '', styles['Normal']),
+            Paragraph(contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '', styles['Normal']),
+            Paragraph(contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '', styles['Normal']),
+            Paragraph(duration, styles['Normal']),
+            Paragraph(str(contract.remarks) if hasattr(contract, 'remarks') and contract.remarks else '', styles['Normal']),
+            Paragraph(status, styles['Normal'])
         ]
         data.append(row)
     
     # Create table with proper column widths for A4
     col_widths = [1.0*inch, 1.3*inch, 1.0*inch, 1.2*inch, 0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.7*inch, 1.2*inch, 0.7*inch]
     
-    table = Table(data, colWidths=col_widths)
+    table = Table(data, colWidths=col_widths, repeatRows=1)
     
     # Style the table
     table.setStyle(TableStyle([
@@ -796,6 +816,11 @@ def export_goods_services_contracts_to_pdf(queryset=None):
         ('FONTSIZE', (0, 1), (-1, -1), 7),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),
     ]))
     
     story.append(table)
