@@ -527,14 +527,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get CSRF token for Django
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
-            // Add timeout for offline deployments (reduced to 5 seconds for faster feedback)
+            // Enhanced timeout handling for offline deployments with immediate response processing
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => {
-                controller.abort();
-                console.error('Request timed out after 5 seconds');
-            }, 5000); // 5 second timeout for offline environments
+            let timeoutId;
+            let isResponseProcessed = false;
+            
+            // Reduced timeout to 3 seconds for faster feedback in offline environments
+            timeoutId = setTimeout(() => {
+                if (!isResponseProcessed) {
+                    controller.abort();
+                    console.error('Request timed out after 3 seconds');
+                }
+            }, 3000);
         
-            // Fetch contracts by project and type with comprehensive error handling
+            // Fetch contracts with optimized handling for offline deployments
             fetch(url, { 
                 signal: controller.signal,
                 method: 'GET',
@@ -546,24 +552,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 credentials: 'same-origin'
             })
             .then(response => {
+                isResponseProcessed = true;
                 clearTimeout(timeoutId);
                 console.log('Response received, status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
+                // Force immediate JSON parsing for offline environments
                 return response.json();
             })
             .then(data => {
                 console.log('Response data received:', data);
                 
-                // Always reset button state first
-                try {
-                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                    selectContractBtn.disabled = false;
-                } catch (resetError) {
-                    console.error('Error resetting button:', resetError);
-                }
+                // Immediate button state reset
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
                 
                 if (data.error) {
                     console.error('Server error:', data.error);
@@ -573,38 +578,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (data.contracts && data.contracts.length > 0) {
                     console.log(`Found ${data.contracts.length} contracts`);
-                    try {
+                    // Use setTimeout to ensure modal shows after button state reset
+                    setTimeout(() => {
                         showContractSelectionModal(data.contracts, contractType);
-                    } catch (modalError) {
-                        console.error('Error showing modal:', modalError);
-                        alert('Error displaying contract selection. Please try again.');
-                    }
+                    }, 100);
                 } else {
                     console.warn('No contracts found for project:', projectId, 'type:', contractType);
                     console.warn('Full response data:', data);
-                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nThis could be due to:\n1. No contracts exist for this project\n2. Contract type mismatch\n3. Project ID format issue\n\nCheck browser console for more details.`);
+                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nPlease check if contracts exist for this project.`);
                 }
             })
             .catch(error => {
+                isResponseProcessed = true;
                 clearTimeout(timeoutId);
                 console.error('Error fetching contracts:', error);
                 
-                // Always reset button state on error
-                try {
-                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                    selectContractBtn.disabled = false;
-                } catch (resetError) {
-                    console.error('Error resetting button on error:', resetError);
-                }
+                // Immediate button state reset on error
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
                 
                 if (error.name === 'AbortError') {
-                    console.log('=== REQUEST TIMEOUT - ACTIVATING FALLBACK ===');
+                    console.log('=== REQUEST TIMEOUT - ENABLING MANUAL INPUT ===');
                     showManualContractInput();
                 } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                    console.log('=== NETWORK ERROR - ACTIVATING FALLBACK ===');
+                    console.log('=== NETWORK ERROR - ENABLING MANUAL INPUT ===');
                     showManualContractInput();
                 } else {
-                    console.log('=== GENERAL ERROR - ACTIVATING FALLBACK ===');
+                    console.log('=== GENERAL ERROR - ENABLING MANUAL INPUT ===');
                     console.error('Error details:', error);
                     showManualContractInput();
                 }
