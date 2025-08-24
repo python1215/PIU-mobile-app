@@ -142,13 +142,28 @@
     </div>
     <div class="card-body p-0">
         {% if components %}
-            <!-- Debug info -->
-            <div class="alert alert-info">
-                <small>Debug: Found {{ components|length }} components. Sample: 
-                {% for comp in components|slice:":2" %}
-                    {{ comp.project_components }} ({{ comp.projectID.projectID|default:"No Project" }}){% if not forloop.last %}, {% endif %}
-                {% endfor %}
-                </small>
+            <!-- Debug info for troubleshooting -->
+            <div class="alert alert-info mb-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <div>
+                        <strong>Debug Information:</strong>
+                        <br><small>
+                            Found {{ components|length }} components in database. 
+                            {% if components|length > 0 %}
+                                Sample data:
+                                {% for comp in components|slice:":2" %}
+                                    <strong>{{ comp.project_components }}</strong> 
+                                    (Project: {{ comp.projectID.projectID|default:"No Project" }})
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                {% if components|length > 2 %}... and {{ components|length|add:"-2" }} more{% endif %}
+                            {% else %}
+                                No component data available.
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
             </div>
             
             <div class="table-responsive">

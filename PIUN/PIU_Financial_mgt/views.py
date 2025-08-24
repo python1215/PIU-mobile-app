@@ -572,8 +572,20 @@ def components(request):
     from django.db.models import Q, Sum, Count
     from PIU_Financial_mgt.models import Currency
     
-    # Get all components
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+    print(f"=== COMPONENTS VIEW ACCESSED ===")
+    print(f"User: {request.user}")
+    print(f"Request method: {request.method}")
+    print(f"Request path: {request.path}")
+    print(f"User authenticated: {request.user.is_authenticated}")
+    print(f"===================================")
+    
+    # Get all components with detailed error handling
+    try:
+        components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
+        print(f"Successfully created component QuerySet")
+    except Exception as e:
+        print(f"Error creating component QuerySet: {e}")
+        components_qs = Component.objects.all()
     
     # Filter parameters
     project_id = request.GET.get('project', '').strip()
