@@ -1123,8 +1123,18 @@ def subcomponents(request):
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     from PIU_Financial_mgt.models import Currency
     
+    print(f"=== SUBCOMPONENTS VIEW ACCESSED ===")
+    print(f"User: {request.user}")
+    print(f"User authenticated: {request.user.is_authenticated}")
+    print(f"====================================")
+    
     # Get all subcomponents
-    subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+    try:
+        subcomponents_qs = Subcomponent.objects.all().select_related('projectID', 'compID', 'currency', 'loginUser')
+        print(f"Successfully created subcomponent QuerySet: {subcomponents_qs.count()} items")
+    except Exception as e:
+        print(f"Error creating subcomponent QuerySet: {e}")
+        subcomponents_qs = Subcomponent.objects.all()
     
     # Filter parameters
     project_filter = request.GET.get('project', '')
@@ -1179,18 +1189,29 @@ def subcomponents(request):
     # Order subcomponents
     ordered_subcomponents = subcomponents_qs.order_by('-date')
     
+    # Debug subcomponent data
+    print(f"=== SUBCOMPONENT DATA DEBUG ===")
+    print(f"Total subcomponents before pagination: {ordered_subcomponents.count()}")
+    if ordered_subcomponents.exists():
+        sample = ordered_subcomponents.first()
+        print(f"Sample subcomponent: {sample.subcomponent} | Project: {sample.projectID.projectID}")
+    print(f"==============================")
+    
     # Pagination - 10 records per page for better UX
     paginator = Paginator(ordered_subcomponents, 10)
     page = request.GET.get('page')
     
     try:
         subcomponents = paginator.page(page)
+        print(f"Paginated subcomponents: {len(subcomponents)} items on page {subcomponents.number}")
     except PageNotAnInteger:
         # If page is not an integer, deliver first page
         subcomponents = paginator.page(1)
+        print(f"PageNotAnInteger - showing first page with {len(subcomponents)} items")
     except EmptyPage:
         # If page is out of range, deliver last page
         subcomponents = paginator.page(paginator.num_pages)
+        print(f"EmptyPage - showing last page with {len(subcomponents)} items")
     
     # Get filter options
     projects = Project.objects.all()

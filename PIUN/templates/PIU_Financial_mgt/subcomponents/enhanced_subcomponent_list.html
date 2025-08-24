@@ -162,6 +162,11 @@
             </h5>
         </div>
         <div class="card-body">
+            <!-- Subcomponent Count Debug -->
+            <div class="mb-2 p-2 bg-light">
+                <small class="text-muted">Template Debug: Subcomponents variable has {{ subcomponents|length }} items</small>
+            </div>
+            
             {% if subcomponents %}
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">

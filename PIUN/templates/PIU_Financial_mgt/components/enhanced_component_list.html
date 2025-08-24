@@ -141,6 +141,11 @@
         </div>
     </div>
     <div class="card-body p-0">
+        <!-- Component Count Debug -->
+        <div class="mb-2 p-2 bg-light">
+            <small class="text-muted">Template Debug: Components variable has {{ components|length }} items | Type: {{ components|class_name }}</small>
+        </div>
+        
         {% if components %}
 
             
