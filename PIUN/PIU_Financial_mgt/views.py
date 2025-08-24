@@ -587,7 +587,10 @@ def components(request):
         print(f"Error creating component QuerySet: {e}")
         components_qs = Component.objects.all()
     
-    # Filter parameters
+    # Filter parameters with enhanced debugging
+    print(f"=== REQUEST PARAMETERS DEBUG ===")
+    print(f"All GET parameters: {dict(request.GET)}")
+    
     project_id = request.GET.get('project', '').strip()
     component_name = request.GET.get('component', '').strip()
     currency_id = request.GET.get('currency', '').strip()
@@ -596,20 +599,39 @@ def components(request):
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     
+    print(f"Processed parameters:")
+    print(f"  project_id: '{project_id}'")
+    print(f"  component_name: '{component_name}'")
+    print(f"  currency_id: '{currency_id}'")
+    print(f"  allocation_min: '{allocation_min}'")
+    print(f"  allocation_max: '{allocation_max}'")
+    print(f"  date_from: '{date_from}'")
+    print(f"  date_to: '{date_to}'")
+    print(f"===================================")
+    
     is_filtered = False
     
-    # Apply filters only if values are provided
-    if project_id and project_id != '':
+    # Apply filters only if values are provided - Enhanced debugging for offline deployments
+    print(f"=== FILTERING DEBUG ===")
+    print(f"project_id filter: '{project_id}' (length: {len(project_id) if project_id else 0})")
+    print(f"component_name filter: '{component_name}' (length: {len(component_name) if component_name else 0})")
+    print(f"currency_id filter: '{currency_id}' (length: {len(currency_id) if currency_id else 0})")
+    print(f"Initial components_qs count: {components_qs.count()}")
+    
+    if project_id and project_id.strip() != '':
         components_qs = components_qs.filter(projectID__projectID__icontains=project_id)
         is_filtered = True
+        print(f"After project filter: {components_qs.count()} components")
     
-    if component_name and component_name != '':
+    if component_name and component_name.strip() != '':
         components_qs = components_qs.filter(project_components__icontains=component_name)
         is_filtered = True
+        print(f"After component name filter: {components_qs.count()} components")
     
-    if currency_id and currency_id != '':
+    if currency_id and currency_id.strip() != '':
         components_qs = components_qs.filter(currency__id=currency_id)
         is_filtered = True
+        print(f"After currency filter: {components_qs.count()} components")
     
     if allocation_min:
         try:
@@ -671,14 +693,34 @@ def components(request):
         # Test if the QuerySet can be evaluated
         component_count = final_components.count()
         print(f"Successfully evaluated QuerySet: {component_count} components")
+        
+        # For offline deployments, ensure we get all components without filtering issues
+        if component_count == 0 or (component_count < total_components and not is_filtered):
+            print(f"WARNING: Filtered count ({component_count}) is less than total ({total_components}) without explicit filtering")
+            print(f"Resetting to unfiltered query for offline deployment compatibility")
+            final_components = Component.objects.all().select_related('projectID', 'currency', 'loginUser').order_by('-date')
+            component_count = final_components.count()
+            print(f"Unfiltered count: {component_count} components")
+            # Update stats to reflect the reset
+            stats['filtered_count'] = component_count
+            is_filtered = False
+        elif component_count < total_components and is_filtered:
+            print(f"INFO: Filtering applied - showing {component_count} of {total_components} components")
+        
         # Convert to list to ensure template compatibility in offline deployments
         components_list = list(final_components)
         print(f"Converted to list: {len(components_list)} components")
+        
+        # Additional debug for offline deployments
+        if len(components_list) != component_count:
+            print(f"MISMATCH: QuerySet count ({component_count}) != List length ({len(components_list)})")
+        
     except Exception as e:
         print(f"QuerySet evaluation error: {e}")
         # Fallback to basic query if complex query fails
         final_components = Component.objects.all().select_related('projectID', 'currency', 'loginUser').order_by('-date')
         components_list = list(final_components)
+        print(f"Fallback query result: {len(components_list)} components")
     
     context = {
         'components': components_list,  # Use the converted list for better template compatibility
