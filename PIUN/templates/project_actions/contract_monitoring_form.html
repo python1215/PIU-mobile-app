@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
     projectSelect.addEventListener('change', updateContractSelectionButton);
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
-    // Handle contract selection button click
+    // Handle contract selection button click with improved offline compatibility
     selectContractBtn.addEventListener('click', function(event) {
         try {
             // Prevent any default behavior that might cause issues
@@ -492,6 +492,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('=== CONTRACT SELECTION DEBUG START ===');
             console.log('Contract selection button clicked - starting process');
+            
+            // Immediate fallback for offline deployments - enable manual input
+            const isOfflineMode = !navigator.onLine || window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.app');
+            if (isOfflineMode) {
+                console.log('=== OFFLINE MODE DETECTED - ENABLING MANUAL INPUT ===');
+                // Reset button state immediately
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
+                showManualContractInput();
+                return;
+            }
             
             // Enhanced debugging for offline environments
             console.log('Environment check:');
@@ -527,18 +538,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get CSRF token for Django
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
-            // Enhanced timeout handling for offline deployments with immediate response processing
+            // Ultra-short timeout for immediate fallback in offline deployments
             const controller = new AbortController();
             let timeoutId;
             let isResponseProcessed = false;
             
-            // Reduced timeout to 3 seconds for faster feedback in offline environments
+            // 500ms timeout for immediate fallback - prevents hanging
             timeoutId = setTimeout(() => {
                 if (!isResponseProcessed) {
+                    console.log('=== FAST TIMEOUT - SWITCHING TO MANUAL INPUT ===');
                     controller.abort();
-                    console.error('Request timed out after 3 seconds');
                 }
-            }, 3000);
+            }, 500);
         
             // Fetch contracts with optimized handling for offline deployments
             fetch(url, { 
@@ -591,23 +602,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 isResponseProcessed = true;
                 clearTimeout(timeoutId);
-                console.error('Error fetching contracts:', error);
+                console.log('AJAX request failed, switching to manual input:', error.message);
                 
                 // Immediate button state reset on error
                 selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
                 selectContractBtn.disabled = false;
                 
-                if (error.name === 'AbortError') {
-                    console.log('=== REQUEST TIMEOUT - ENABLING MANUAL INPUT ===');
-                    showManualContractInput();
-                } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                    console.log('=== NETWORK ERROR - ENABLING MANUAL INPUT ===');
-                    showManualContractInput();
-                } else {
-                    console.log('=== GENERAL ERROR - ENABLING MANUAL INPUT ===');
-                    console.error('Error details:', error);
-                    showManualContractInput();
-                }
+                // Always use manual input fallback for any error to prevent freezing
+                console.log('=== ENABLING MANUAL INPUT FALLBACK ===');
+                showManualContractInput();
             });
             
         } catch (mainError) {
