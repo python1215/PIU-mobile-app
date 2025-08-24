@@ -493,16 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('=== CONTRACT SELECTION DEBUG START ===');
             console.log('Contract selection button clicked - starting process');
             
-            // Immediate fallback for offline deployments - enable manual input
-            const isOfflineMode = !navigator.onLine || window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.app');
-            if (isOfflineMode) {
-                console.log('=== OFFLINE MODE DETECTED - ENABLING MANUAL INPUT ===');
-                // Reset button state immediately
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
-                showManualContractInput();
-                return;
-            }
+
             
             // Enhanced debugging for offline environments
             console.log('Environment check:');
@@ -538,18 +529,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get CSRF token for Django
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
-            // Ultra-short timeout for immediate fallback in offline deployments
+            // Timeout handling for contract fetching
             const controller = new AbortController();
             let timeoutId;
             let isResponseProcessed = false;
             
-            // 500ms timeout for immediate fallback - prevents hanging
+            // Set reasonable timeout of 8 seconds to allow proper server response
             timeoutId = setTimeout(() => {
                 if (!isResponseProcessed) {
-                    console.log('=== FAST TIMEOUT - SWITCHING TO MANUAL INPUT ===');
+                    console.log('=== REQUEST TIMEOUT AFTER 8 SECONDS ===');
                     controller.abort();
                 }
-            }, 500);
+            }, 8000);
         
             // Fetch contracts with optimized handling for offline deployments
             fetch(url, { 
