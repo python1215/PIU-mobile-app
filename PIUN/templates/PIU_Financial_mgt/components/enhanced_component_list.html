@@ -142,6 +142,15 @@
     </div>
     <div class="card-body p-0">
         {% if components %}
+            <!-- Debug info -->
+            <div class="alert alert-info">
+                <small>Debug: Found {{ components|length }} components. Sample: 
+                {% for comp in components|slice:":2" %}
+                    {{ comp.project_components }} ({{ comp.projectID.projectID|default:"No Project" }}){% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </small>
+            </div>
+            
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
@@ -149,10 +158,10 @@
                             <th>Project</th>
                             <th>Component Name</th>
                             <th>Description</th>
-                            <th>currency</th>
-                            <th>allocation</th>
-                            <th>date</th>
-                            <th>loginUser</th>
+                            <th>Currency</th>
+                            <th>Allocation</th>
+                            <th>Date</th>
+                            <th>User</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -160,8 +169,12 @@
                         {% for component in components %}
                             <tr>
                                 <td>
-                                    <strong>{{ component.projectID.projectID }}</strong>
-                                    <br><small class="text-muted">{{ component.projectID.project|truncatechars:30 }}</small>
+                                    {% if component.projectID %}
+                                        <strong>{{ component.projectID.projectID }}</strong>
+                                        <br><small class="text-muted">{{ component.projectID.project|truncatechars:30 }}</small>
+                                    {% else %}
+                                        <span class="text-muted">No Project</span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <strong>{{ component.project_components }}</strong>
