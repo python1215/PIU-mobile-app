@@ -1240,7 +1240,10 @@ def subcomponents(request):
     print(f"Total subcomponents before pagination: {ordered_subcomponents.count()}")
     if ordered_subcomponents.exists():
         sample = ordered_subcomponents.first()
-        print(f"Sample subcomponent: {sample.subcomponent} | Project: {sample.projectID.projectID}")
+        if sample and sample.projectID:
+            print(f"Sample subcomponent: {sample.subcomponent} | Project: {sample.projectID.projectID}")
+        else:
+            print(f"Sample subcomponent: {sample.subcomponent if sample else 'None'} | Project: None")
     print(f"==============================")
     
     # Pagination - 10 records per page for better UX
