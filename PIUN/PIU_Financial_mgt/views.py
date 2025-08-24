@@ -666,18 +666,22 @@ def components(request):
         print(f"Error getting sample data: {e}")
     print(f"============================")
     
-    # Ensure we have a valid QuerySet for the template
+    # Ensure we have a valid QuerySet for the template - Convert to list for offline deployment compatibility
     try:
         # Test if the QuerySet can be evaluated
         component_count = final_components.count()
         print(f"Successfully evaluated QuerySet: {component_count} components")
+        # Convert to list to ensure template compatibility in offline deployments
+        components_list = list(final_components)
+        print(f"Converted to list: {len(components_list)} components")
     except Exception as e:
         print(f"QuerySet evaluation error: {e}")
         # Fallback to basic query if complex query fails
         final_components = Component.objects.all().select_related('projectID', 'currency', 'loginUser').order_by('-date')
+        components_list = list(final_components)
     
     context = {
-        'components': final_components,
+        'components': components_list,  # Use the converted list for better template compatibility
         'stats': stats,
         'is_filtered': is_filtered,
         'projects': projects,
