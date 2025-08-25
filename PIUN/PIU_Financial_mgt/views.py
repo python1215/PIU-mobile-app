@@ -347,7 +347,7 @@ def add_subcomponent(request):
     else:
         print("GET request - creating new form")
         form = addsubcomponentForm()
-    return render(request, 'PIU_Financial_mgt/subcomponents/add-subcomponent.html', {'form': form})
+    return render(request, 'PIU_Financial_mgt/subcomponents/add_subcomponent.html', {'form': form})
 
 @login_required
 def add_subcomponent_isolated(request):
@@ -404,7 +404,7 @@ def add_subcomponent_isolated(request):
         'form': form,
         'page_title': 'Add Subcomponent - Isolated',
     }
-    return render(request, 'PIU_Financial_mgt/subcomponents/add-subcomponent-isolated.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/add_subcomponent.html', context)
 
 @login_required
 def load_project_components(request):
@@ -1160,7 +1160,7 @@ def addsubcomponent(request):
         'currencies': currencies,
     }
     
-    return render(request, 'PIU_Financial_mgt/subcomponents/simple-add-subcomponent.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/add_subcomponent.html', context)
 
 @login_required
 def subcomponents(request):
