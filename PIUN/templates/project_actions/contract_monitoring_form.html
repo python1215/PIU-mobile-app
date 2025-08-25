@@ -897,48 +897,136 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Fallback function for when AJAX fails (offline deployments)
+    // Improved offline mode function for manual contract entry
     function showManualContractInput() {
-        console.log('Showing manual contract input fallback');
+        console.log('Switching to offline mode for manual contract entry');
         
-        const contractRefValue = prompt(`AJAX contract lookup failed. This is normal for offline deployments.
-
-Please enter the contract reference manually:
-
-Project: ${projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown'}
-Contract Type: ${contractTypeSelect.options[contractTypeSelect.selectedIndex]?.text || 'Unknown'}
-
-Enter Contract Reference Number:`);
+        // Create a user-friendly modal for offline mode
+        const offlineModal = document.createElement('div');
+        offlineModal.className = 'modal fade';
+        offlineModal.id = 'offlineContractModal';
+        offlineModal.setAttribute('tabindex', '-1');
+        offlineModal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-wifi-off me-2"></i>Offline Mode - Manual Entry
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Working Offline:</strong> Contract lookup requires internet connection. 
+                            Please enter the contract reference manually.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Project:</strong></label>
+                            <p class="text-muted">${projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown'}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Contract Type:</strong></label>
+                            <p class="text-muted">${contractTypeSelect.options[contractTypeSelect.selectedIndex]?.text || 'Unknown'}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="manualContractRef" class="form-label">
+                                <strong>Contract Reference Number</strong> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="manualContractRef" 
+                                   placeholder="Enter contract reference number..."
+                                   autocomplete="off">
+                            <div class="form-text">Enter the complete contract reference number as it appears on your contract documents.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" id="confirmManualEntry">
+                            <i class="bi bi-check-circle me-1"></i>Set Contract Reference
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        if (contractRefValue && contractRefValue.trim()) {
-            contractRefInput.value = contractRefValue.trim();
+        // Add modal to page
+        document.body.appendChild(offlineModal);
+        
+        // Initialize and show modal
+        const modalInstance = new bootstrap.Modal(offlineModal, { keyboard: false, backdrop: 'static' });
+        modalInstance.show();
+        
+        // Focus on input field when modal opens
+        offlineModal.addEventListener('shown.bs.modal', function() {
+            document.getElementById('manualContractRef').focus();
+        });
+        
+        // Handle confirmation
+        document.getElementById('confirmManualEntry').addEventListener('click', function() {
+            const contractRefValue = document.getElementById('manualContractRef').value.trim();
+            
+            if (!contractRefValue) {
+                alert('Please enter a contract reference number.');
+                document.getElementById('manualContractRef').focus();
+                return;
+            }
+            
+            if (contractRefValue.length < 3) {
+                alert('Contract reference must be at least 3 characters long.');
+                document.getElementById('manualContractRef').focus();
+                return;
+            }
+            
+            // Set the contract reference
+            contractRefInput.value = contractRefValue;
             
             // Show success message
             const successMsg = document.createElement('div');
-            successMsg.className = 'alert alert-info alert-dismissible fade show mt-2';
+            successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
             successMsg.innerHTML = `
-                <strong>Manual Entry:</strong> ${contractRefValue.trim()}
-                <small class="text-muted d-block">Contract reference entered manually (offline mode)</small>
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Contract Reference Set:</strong> ${contractRefValue}
+                <small class="text-muted d-block">Entered manually in offline mode</small>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             
             const inputGroup = contractRefInput.parentNode;
             inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
             
-            // Auto-remove message
+            // Auto-remove message after 8 seconds
             setTimeout(() => {
                 if (successMsg.parentNode) {
                     successMsg.parentNode.removeChild(successMsg);
                 }
-            }, 5000);
+            }, 8000);
             
             // Trigger validation
             contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
             
-            console.log('Manual contract reference set:', contractRefValue.trim());
-        } else {
-            console.log('Manual entry cancelled by user');
-        }
+            console.log('Manual contract reference set:', contractRefValue);
+            
+            // Close modal
+            modalInstance.hide();
+        });
+        
+        // Handle Enter key in input field
+        document.getElementById('manualContractRef').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('confirmManualEntry').click();
+            }
+        });
+        
+        // Clean up modal when hidden
+        offlineModal.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(offlineModal);
+        });
     }
     
     // Initialize button state on page load
