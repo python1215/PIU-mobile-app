@@ -83,7 +83,7 @@ class updatesubcomponentForm(forms.ModelForm):
         # Editing an existing subcomponent
         if self.instance and self.instance.pk:
             if hasattr(self.instance, 'projectID') and self.instance.projectID:  # Ensure projectID exists
-                self.fields['compID'].queryset = Component.objects.filter(project=self.instance.projectID)
+                self.fields['compID'].queryset = Component.objects.filter(projectID=self.instance.projectID)
 
             if hasattr(self.instance, 'compID') and self.instance.compID_id:  # Check using compID_id to avoid errors
                 self.fields['compID'].initial = self.instance.compID
@@ -92,7 +92,7 @@ class updatesubcomponentForm(forms.ModelForm):
         elif 'projectID' in self.data:
             try:
                 projectID = int(self.data.get('projectID'))  # Convert to int safely
-                self.fields['compID'].queryset = Component.objects.filter(project=projectID)
+                self.fields['compID'].queryset = Component.objects.filter(projectID=projectID)
             except (ValueError, TypeError):
                 pass  # Handle invalid data gracefully
 
