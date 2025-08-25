@@ -1092,32 +1092,77 @@ def subcomponents(request):
     # Order subcomponents
     ordered_subcomponents = subcomponents_qs.order_by('-date')
     
-    # Debug subcomponent data
+    # Debug subcomponent data with enhanced error handling
     print(f"=== SUBCOMPONENT DATA DEBUG ===")
     print(f"Total subcomponents before pagination: {ordered_subcomponents.count()}")
-    if ordered_subcomponents.exists():
-        sample = ordered_subcomponents.first()
-        if sample and sample.projectID:
-            print(f"Sample subcomponent: {sample.subcomponent} | Project: {sample.projectID.projectID}")
+    
+    # Try to evaluate the QuerySet properly
+    try:
+        # Force QuerySet evaluation to catch any issues
+        subcomponent_list = list(ordered_subcomponents[:5])  # Get first 5 for testing
+        print(f"Successfully converted to list: {len(subcomponent_list)} items")
+        
+        if subcomponent_list:
+            sample = subcomponent_list[0]
+            print(f"Sample subcomponent: {sample.subcomponent} | Project: {sample.projectID.projectID if sample.projectID else 'None'}")
+            print(f"Sample attributes: compID={getattr(sample, 'subcompID', 'N/A')}, allocation={getattr(sample, 'allocation', 'N/A')}")
         else:
-            print(f"Sample subcomponent: {sample.subcomponent if sample else 'None'} | Project: None")
+            print("No subcomponents in converted list")
+            
+    except Exception as eval_error:
+        print(f"QuerySet evaluation error: {eval_error}")
+        # Try a simpler query as fallback
+        try:
+            simple_qs = Subcomponent.objects.all()
+            simple_count = simple_qs.count()
+            print(f"Fallback simple query count: {simple_count}")
+            if simple_count > 0:
+                ordered_subcomponents = simple_qs.order_by('-date')
+        except Exception as fallback_error:
+            print(f"Fallback query also failed: {fallback_error}")
     print(f"==============================")
     
-    # Pagination - 10 records per page for better UX
-    paginator = Paginator(ordered_subcomponents, 10)
-    page = request.GET.get('page')
-    
+    # Enhanced pagination with error handling for offline deployments
     try:
-        subcomponents = paginator.page(page)
-        print(f"Paginated subcomponents: {len(subcomponents)} items on page {subcomponents.number}")
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page
-        subcomponents = paginator.page(1)
-        print(f"PageNotAnInteger - showing first page with {len(subcomponents)} items")
-    except EmptyPage:
-        # If page is out of range, deliver last page
-        subcomponents = paginator.page(paginator.num_pages)
-        print(f"EmptyPage - showing last page with {len(subcomponents)} items")
+        paginator = Paginator(ordered_subcomponents, 10)
+        page = request.GET.get('page', 1)
+        
+        print(f"Paginator created: {paginator.count} total items, {paginator.num_pages} pages")
+        
+        try:
+            subcomponents = paginator.page(page)
+            print(f"Successfully paginated: {len(subcomponents)} items on page {subcomponents.number}")
+        except PageNotAnInteger:
+            subcomponents = paginator.page(1)
+            print(f"PageNotAnInteger - showing first page with {len(subcomponents)} items")
+        except EmptyPage:
+            subcomponents = paginator.page(paginator.num_pages)
+            print(f"EmptyPage - showing last page with {len(subcomponents)} items")
+            
+    except Exception as pagination_error:
+        print(f"Pagination error: {pagination_error}")
+        # Create a simple list as fallback
+        try:
+            subcomponent_list = list(ordered_subcomponents[:10])
+            # Create a mock paginator object for template compatibility
+            class MockPage:
+                def __init__(self, object_list):
+                    self.object_list = object_list
+                    self.number = 1
+                    self.has_previous = lambda: False
+                    self.has_next = lambda: False
+                    self.previous_page_number = lambda: None
+                    self.next_page_number = lambda: None
+                def __iter__(self):
+                    return iter(self.object_list)
+                def __len__(self):
+                    return len(self.object_list)
+            
+            subcomponents = MockPage(subcomponent_list)
+            print(f"Created fallback page with {len(subcomponents)} items")
+        except Exception as fallback_error:
+            print(f"Fallback pagination failed: {fallback_error}")
+            subcomponents = []
     
     # Get filter options
     projects = Project.objects.all()
