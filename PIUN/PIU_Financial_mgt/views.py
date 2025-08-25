@@ -347,7 +347,7 @@ def add_subcomponent(request):
     else:
         print("GET request - creating new form")
         form = addsubcomponentForm()
-    return render(request, 'PIU_Financial_mgt/subcomponent/add-subcomponent.html', {'form': form})
+    return render(request, 'PIU_Financial_mgt/subcomponents/add-subcomponent.html', {'form': form})
 
 @login_required
 def add_subcomponent_isolated(request):
@@ -404,7 +404,7 @@ def add_subcomponent_isolated(request):
         'form': form,
         'page_title': 'Add Subcomponent - Isolated',
     }
-    return render(request, 'PIU_Financial_mgt/subcomponent/add-subcomponent-isolated.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/add-subcomponent-isolated.html', context)
 
 @login_required
 def load_project_components(request):
@@ -1160,7 +1160,7 @@ def addsubcomponent(request):
         'currencies': currencies,
     }
     
-    return render(request, 'PIU_Financial_mgt/subcomponent/simple-add-subcomponent.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/simple-add-subcomponent.html', context)
 
 @login_required
 def subcomponents(request):
@@ -2685,7 +2685,7 @@ def subcomponent_detail(request, subcomponent_id):
         'subcomponent': subcomponent,
         'activities': activities,
     }
-    return render(request, 'PIU_Financial_mgt/subcomponent/subcomponent_detail.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/subcomponent_detail.html', context)
 
 @login_required
 def edit_subcomponent(request, subcomponent_id):
@@ -2713,7 +2713,7 @@ def edit_subcomponent(request, subcomponent_id):
         'subcomponent': subcomponent,
         'is_edit': True,
     }
-    return render(request, 'PIU_Financial_mgt/subcomponent/edit_subcomponent.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/edit_subcomponent.html', context)
 
 @login_required
 def delete_subcomponent(request, subcomponent_id):
@@ -2732,7 +2732,7 @@ def delete_subcomponent(request, subcomponent_id):
     context = {
         'subcomponent': subcomponent,
     }
-    return render(request, 'PIU_Financial_mgt/subcomponent/delete_subcomponent.html', context)
+    return render(request, 'PIU_Financial_mgt/subcomponents/delete_subcomponent.html', context)
 
 # Financial Validation API Endpoints
 @require_http_methods(["POST"])
