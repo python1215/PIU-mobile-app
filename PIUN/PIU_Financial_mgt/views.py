@@ -638,6 +638,19 @@ def components(request):
         components_list = list(final_components)
         print(f"Fallback query result: {len(components_list)} components")
     
+    # Final debugging before template rendering
+    print(f"=== FINAL TEMPLATE CONTEXT DEBUG ===")
+    print(f"components_list type: {type(components_list)}")
+    print(f"components_list length: {len(components_list)}")
+    print(f"components_list is truthy: {bool(components_list)}")
+    if components_list:
+        print(f"First component: {components_list[0]}")
+        print(f"First component type: {type(components_list[0])}")
+        print(f"First component attributes: {dir(components_list[0])}")
+    else:
+        print("components_list is empty or falsy!")
+    print(f"=====================================")
+    
     context = {
         'components': components_list,  # Use the converted list for better template compatibility
         'stats': stats,
