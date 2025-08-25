@@ -519,8 +519,7 @@ def components(request):
     project_id = request.GET.get('project', '').strip()
     component_name = request.GET.get('component', '').strip()
     currency_id = request.GET.get('currency', '').strip()
-    allocation_min = request.GET.get('allocation_min', '').strip()
-    allocation_max = request.GET.get('allocation_max', '').strip()
+    allocation = request.GET.get('allocation', '').strip()
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     
@@ -528,8 +527,7 @@ def components(request):
     print(f"  project_id: '{project_id}'")
     print(f"  component_name: '{component_name}'")
     print(f"  currency_id: '{currency_id}'")
-    print(f"  allocation_min: '{allocation_min}'")
-    print(f"  allocation_max: '{allocation_max}'")
+    print(f"  allocation: '{allocation}'")
     print(f"  date_from: '{date_from}'")
     print(f"  date_to: '{date_to}'")
     print(f"===================================")
@@ -558,16 +556,9 @@ def components(request):
         is_filtered = True
         print(f"After currency filter: {components_qs.count()} components")
     
-    if allocation_min:
+    if allocation:
         try:
-            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
-            is_filtered = True
-        except ValueError:
-            pass
-    
-    if allocation_max:
-        try:
-            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
+            components_qs = components_qs.filter(allocation=float(allocation))
             is_filtered = True
         except ValueError:
             pass
@@ -677,8 +668,7 @@ def export_components_excel(request):
     project_id = request.GET.get('project', '').strip()
     component_name = request.GET.get('component', '').strip()
     currency_id = request.GET.get('currency', '').strip()
-    allocation_min = request.GET.get('allocation_min', '').strip()
-    allocation_max = request.GET.get('allocation_max', '').strip()
+    allocation = request.GET.get('allocation', '').strip()
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     
@@ -694,16 +684,10 @@ def export_components_excel(request):
     if currency_id and currency_id != '':
         components_qs = components_qs.filter(currency__id=currency_id)
         print(f"Filtered by currency ID: {currency_id}")
-    if allocation_min:
+    if allocation:
         try:
-            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
-            print(f"Filtered by min allocation: {allocation_min}")
-        except ValueError:
-            pass
-    if allocation_max:
-        try:
-            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
-            print(f"Filtered by max allocation: {allocation_max}")
+            components_qs = components_qs.filter(allocation=float(allocation))
+            print(f"Filtered by allocation: {allocation}")
         except ValueError:
             pass
     if date_from:
@@ -789,8 +773,7 @@ def export_components_pdf(request):
     project_id = request.GET.get('project', '').strip()
     component_name = request.GET.get('component', '').strip()
     currency_id = request.GET.get('currency', '').strip()
-    allocation_min = request.GET.get('allocation_min', '').strip()
-    allocation_max = request.GET.get('allocation_max', '').strip()
+    allocation = request.GET.get('allocation', '').strip()
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     
@@ -806,16 +789,10 @@ def export_components_pdf(request):
     if currency_id and currency_id != '':
         components_qs = components_qs.filter(currency__id=currency_id)
         print(f"Filtered by currency ID: {currency_id}")
-    if allocation_min:
+    if allocation:
         try:
-            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
-            print(f"Filtered by min allocation: {allocation_min}")
-        except ValueError:
-            pass
-    if allocation_max:
-        try:
-            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
-            print(f"Filtered by max allocation: {allocation_max}")
+            components_qs = components_qs.filter(allocation=float(allocation))
+            print(f"Filtered by allocation: {allocation}")
         except ValueError:
             pass
     if date_from:
@@ -858,7 +835,7 @@ def export_components_pdf(request):
     
     # Export info
     export_info = f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>Total Components: {components_qs.count()}"
-    if any([project_id, component_name, currency_id, allocation_min, allocation_max, date_from, date_to]):
+    if any([project_id, component_name, currency_id, allocation, date_from, date_to]):
         export_info += "<br/>Filters Applied: Yes"
     else:
         export_info += "<br/>Filters Applied: None (All Components)"

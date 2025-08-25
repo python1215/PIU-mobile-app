@@ -72,7 +72,7 @@
     <div class="card-header">
         <h5 class="mb-0">
             <i class="bi bi-funnel me-2"></i>Filters
-            {% if request.GET.project or request.GET.component or request.GET.currency or request.GET.allocation_min or request.GET.allocation_max %}
+            {% if request.GET.project or request.GET.component or request.GET.currency or request.GET.allocation %}
                 <span class="badge bg-primary ms-2">Active</span>
             {% endif %}
         </h5>
@@ -106,12 +106,8 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Min Allocation</label>
-                <input type="number" name="allocation_min" value="{{ request.GET.allocation_min }}" class="form-control" step="0.01" placeholder="0.00">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Max Allocation</label>
-                <input type="number" name="allocation_max" value="{{ request.GET.allocation_max }}" class="form-control" step="0.01" placeholder="0.00">
+                <label class="form-label">Allocation</label>
+                <input type="number" name="allocation" value="{{ request.GET.allocation }}" class="form-control" step="0.01" placeholder="0.00">
             </div>
             <div class="col-md-9 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary">
