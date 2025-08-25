@@ -493,6 +493,19 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('=== CONTRACT SELECTION DEBUG START ===');
             console.log('Contract selection button clicked - starting process');
             
+            // Quick offline detection for immediate fallback
+            const isLikelyOffline = window.location.hostname.includes('127.0.0.1') || 
+                                   window.location.hostname.includes('localhost') ||
+                                   !navigator.onLine;
+            
+            if (isLikelyOffline) {
+                console.log('=== OFFLINE DEPLOYMENT DETECTED - USING MANUAL INPUT ===');
+                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                selectContractBtn.disabled = false;
+                showManualContractInput();
+                return;
+            }
+            
 
             
             // Enhanced debugging for offline environments
@@ -534,13 +547,17 @@ document.addEventListener('DOMContentLoaded', function() {
             let timeoutId;
             let isResponseProcessed = false;
             
-            // Set reasonable timeout of 8 seconds to allow proper server response
+            // Set shorter timeout of 2 seconds for offline deployment compatibility
             timeoutId = setTimeout(() => {
                 if (!isResponseProcessed) {
-                    console.log('=== REQUEST TIMEOUT AFTER 8 SECONDS ===');
+                    console.log('=== REQUEST TIMEOUT AFTER 2 SECONDS - ENABLING MANUAL INPUT ===');
                     controller.abort();
+                    // Immediately show manual input on timeout
+                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
+                    selectContractBtn.disabled = false;
+                    showManualContractInput();
                 }
-            }, 8000);
+            }, 2000);
         
             // Fetch contracts with optimized handling for offline deployments
             fetch(url, { 
