@@ -602,9 +602,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         showContractSelectionModal(data.contracts, contractType);
                     }, 100);
                 } else {
-                    console.warn('No contracts found for project:', projectId, 'type:', contractType);
-                    console.warn('Full response data:', data);
-                    alert(`No contracts found for the selected project and contract type.\n\nProject ID: ${projectId}\nContract Type: ${contractType}\n\nPlease check if contracts exist for this project.`);
+                    console.log('Database accessed successfully, no contracts found for project:', projectId, 'type:', contractType);
+                    console.log('Full response data:', data);
+                    showNoContractsFoundDialog(projectId, contractType);
                 }
             })
             .catch(error => {
@@ -897,6 +897,162 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Function to show when no contracts are found in database
+    function showNoContractsFoundDialog(projectId, contractType) {
+        console.log('Showing no contracts found dialog for LAN deployment');
+        
+        const projectText = projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown';
+        const contractTypeText = contractType === 'works_contract' ? 'Works Contract' : 'Goods & Services Contract';
+        
+        // Create a user-friendly modal for no contracts found
+        const noContractsModal = document.createElement('div');
+        noContractsModal.className = 'modal fade';
+        noContractsModal.id = 'noContractsModal';
+        noContractsModal.setAttribute('tabindex', '-1');
+        noContractsModal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="bi bi-database-check me-2"></i>No Contracts Found
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Database Connected:</strong> The system successfully connected to the database, 
+                            but no ${contractTypeText.toLowerCase()} records were found for this project.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Project:</strong></label>
+                            <p class="text-muted">${projectText}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Contract Type:</strong></label>
+                            <p class="text-muted">${contractTypeText}</p>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Next Steps:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>If you have a contract reference, enter it manually below</li>
+                                <li>Or create the contract first in the Contract Profiling section</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="manualContractRefNoContracts" class="form-label">
+                                <strong>Contract Reference Number</strong> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="manualContractRefNoContracts" 
+                                   placeholder="Enter contract reference if you have one..."
+                                   autocomplete="off">
+                            <div class="form-text">Enter the contract reference if it exists but wasn't found in the system.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancel
+                        </button>
+                        <button type="button" class="btn btn-info" id="createContractBtn">
+                            <i class="bi bi-plus-circle me-1"></i>Create New Contract
+                        </button>
+                        <button type="button" class="btn btn-primary" id="confirmManualEntryNoContracts">
+                            <i class="bi bi-check-circle me-1"></i>Set Reference
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to page
+        document.body.appendChild(noContractsModal);
+        
+        // Initialize and show modal
+        const modalInstance = new bootstrap.Modal(noContractsModal, { keyboard: false, backdrop: 'static' });
+        modalInstance.show();
+        
+        // Focus on input field when modal opens
+        noContractsModal.addEventListener('shown.bs.modal', function() {
+            document.getElementById('manualContractRefNoContracts').focus();
+        });
+        
+        // Handle create contract button
+        document.getElementById('createContractBtn').addEventListener('click', function() {
+            const createUrl = contractType === 'works_contract' 
+                ? '/project_actions/contract-profiling-works/add/' 
+                : '/project_actions/contract-profiling-goods-services/add/';
+            window.open(createUrl, '_blank');
+            modalInstance.hide();
+        });
+        
+        // Handle manual entry confirmation
+        document.getElementById('confirmManualEntryNoContracts').addEventListener('click', function() {
+            const contractRefValue = document.getElementById('manualContractRefNoContracts').value.trim();
+            
+            if (!contractRefValue) {
+                alert('Please enter a contract reference number or click "Create New Contract" to add one first.');
+                document.getElementById('manualContractRefNoContracts').focus();
+                return;
+            }
+            
+            if (contractRefValue.length < 3) {
+                alert('Contract reference must be at least 3 characters long.');
+                document.getElementById('manualContractRefNoContracts').focus();
+                return;
+            }
+            
+            // Set the contract reference
+            contractRefInput.value = contractRefValue;
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+            successMsg.innerHTML = `
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Contract Reference Set:</strong> ${contractRefValue}
+                <small class="text-muted d-block">Manually entered - no existing contracts found in database</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const inputGroup = contractRefInput.parentNode;
+            inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
+            
+            // Auto-remove message after 8 seconds
+            setTimeout(() => {
+                if (successMsg.parentNode) {
+                    successMsg.parentNode.removeChild(successMsg);
+                }
+            }, 8000);
+            
+            // Trigger validation
+            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('Manual contract reference set (no contracts found):', contractRefValue);
+            
+            // Close modal
+            modalInstance.hide();
+        });
+        
+        // Handle Enter key in input field
+        document.getElementById('manualContractRefNoContracts').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('confirmManualEntryNoContracts').click();
+            }
+        });
+        
+        // Clean up modal when hidden
+        noContractsModal.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(noContractsModal);
+        });
+    }
+
     // Improved offline mode function for manual contract entry
     function showManualContractInput() {
         console.log('Switching to offline mode for manual contract entry');
