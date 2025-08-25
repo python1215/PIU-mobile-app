@@ -144,21 +144,6 @@ def add_project(request):
     return render(request, 'PIU_Financial_mgt/projects/add-project.html', {'form': form})
 
 @login_required
-def add_project_test(request):
-    if request.method == 'POST':
-        form = addProjectForm(request.POST)
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.loginUser = request.user
-            project.save()
-            form.save_m2m()  # Save many-to-many relationships
-            messages.success(request, 'Project created successfully!')
-            return redirect('PIU_Financial_mgt:enhanced_project_dashboard')
-    else:
-        form = addProjectForm()
-    return render(request, 'PIU_Financial_mgt/projects/add-project.html', {'form': form})
-
-@login_required
 def enhanced_project_dashboard(request, project_id=None):
     from django.db.models import Sum, Count, Avg
     from social_and_env.models import ESIA, GrievianceMonitoringLog, OHS_Monitoring, PAP, CommunityConsult_Engagement
@@ -254,46 +239,6 @@ def enhanced_project_dashboard(request, project_id=None):
     }
     
     return render(request, 'PIU_Financial_mgt/projects/enhanced_project_dashboard.html', context)
-
-@login_required
-def add_component(request):
-    if request.method == 'POST':
-        print("=== ADD COMPONENT VIEW ===")
-        
-        
-        
-        form = addComponentForm(request.POST)
-        
-        
-        is_valid = form.is_valid()
-        
-        print("Form errors:", dict(form.errors))
-        
-        if form.is_valid():
-            try:
-                print("Form valid - saving component")
-                component = form.save(commit=False)
-                component.loginUser = request.user
-                component.save()
-                messages.success(request, 'Component created successfully!')
-                print("Component saved successfully - redirecting")
-                return redirect('PIU_Financial_mgt:enhanced_project_dashboard')
-            except Exception as e:
-                print(f"Error saving component: {e}")
-                messages.error(request, f'Error saving component: {str(e)}')
-                # Continue to re-render form with error
-        else:
-            print("Form validation failed:")
-            for field, errors in form.errors.items():
-                print(f"Field {field}: {errors}")
-            # Add validation error message for user
-            messages.error(request, 'Please correct the errors below and try again.')
-    else:
-        print("=== ADD COMPONENT VIEW ===")
-        print("Method: GET")
-        print("GET request - creating new form")
-        form = addComponentForm()
-    return render(request, 'PIU_Financial_mgt/components/add-component.html', {'form': form})
 
 @login_required
 def add_subcomponent(request):
@@ -432,32 +377,12 @@ def load_project_components(request):
     
     return render(request, "htmx/project_components_dropdown.html", {"components": components})
 
-# Removed duplicate function - using the enhanced version below
-    
-
-def load_project_Activities(request):
-    subcompID = request.GET.get("subcompID")
-    print("Received subcompID:", subcompID)
-    activities = Activities.objects.filter(subcompID=subcompID)
-   
-    print("activities:", activities)
-    return render(request, "htmx/project_activities_dropdown.html", {"activities": activities})
 
 
-@login_required
-def addproject(request):
-    if request.method == 'POST':
-        form = addProjectForm(request.POST)
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.loginUser = request.user  # Set the logged-in user
-            project.save()
-            form.save_m2m()  # Save many-to-many relationships
-            messages.success(request, 'Project created successfully!')
-            return redirect('PIU_Financial_mgt:projects')  
-    else:
-        form = addProjectForm()
-    return render(request, 'PIU_Financial_mgt/projects/add-project.html', {'form': form})
+
+
+
+
 
 
 @login_required
@@ -1102,65 +1027,7 @@ def delete_component(request, component_id):
     }
     return render(request, 'PIU_Financial_mgt/components/delete_component.html', context)
 
-@login_required
-def addsubcomponent(request):
-    print(f"=== ADD SUBCOMPONENT VIEW ===")
-    print(f"Method: {request.method}")
-    
-    if request.method == 'POST':
-        print(f"POST data: {request.POST}")
-        print(f"Files: {request.FILES}")
-        
-        # Check if this is an actual form submission with data vs just project selection
-        has_submit_data = (request.POST.get('subcomponent', '').strip() and 
-                          request.POST.get('subcomponent_Description', '').strip() and 
-                          request.POST.get('allocation', '').strip() and 
-                          request.POST.get('compID', '').strip())
-        print(f"Has actual form data: {has_submit_data}")
-        
-        if not has_submit_data:
-            # This is likely just a project selection change, redirect to GET to avoid POST loop
-            print("No form data detected, redirecting to GET")
-            return redirect('PIU_Financial_mgt:add_subcomponent')
-        else:
-            # This is a real form submission with data
-            # Using standard addsubcomponentForm from forms.py
-            form = addsubcomponentForm(request.POST)
-            print(f"Form created: {form}")
-            print(f"Form is valid: {form.is_valid()}")
-            
-            if not form.is_valid():
-                print(f"Form errors: {form.errors}")
-                print(f"Form non_field_errors: {form.non_field_errors()}")
-                for field, errors in form.errors.items():
-                    print(f"Field '{field}' errors: {errors}")
-            
-            if form.is_valid():
-                print("Form is valid, saving...")
-                subcomponent = form.save(commit=False)
-                subcomponent.loginUser = request.user
-                subcomponent.save()
-                print(f"Subcomponent saved: {subcomponent}")
-                messages.success(request, 'Subcomponent created successfully!')
-                return redirect('PIU_Financial_mgt:subcomponents')
-            else:
-                print("Form validation failed, rendering with errors")
-    else:
-        print("GET request - creating new form")
-        # Using standard forms
-        form = addsubcomponentForm()
-    
-    # Get filter options for dropdowns
-    projects = Project.objects.all()
-    currencies = Currency.objects.all()
-    
-    context = {
-        'form': form,
-        'projects': projects,
-        'currencies': currencies,
-    }
-    
-    return render(request, 'PIU_Financial_mgt/subcomponents/add_subcomponent.html', context)
+
 
 @login_required
 def subcomponents(request):
@@ -1586,16 +1453,7 @@ def addactivity(request):
     }
     return render(request, 'PIU_Financial_mgt/activity/add-activity.html', context)
 
-@login_required
-def load_project_components(request):
-    """HTMX view to load components for selected project"""
-    project_id = request.GET.get('projectID')
-    components = Component.objects.none()
-    
-    if project_id:
-        components = Component.objects.filter(projectID=project_id)
-    
-    return render(request, 'PIU_Financial_mgt/htmx/components_dropdown.html', {'components': components})
+
 
 @login_required
 def load_project_subcomponents(request):
@@ -2034,22 +1892,7 @@ def export_activities_pdf(request):
     return response
 
 
-############################################ Dashboard ############################################
 
-@login_required
-def dashboard(request):
-    projects = Project.objects.all()
-    components = Component.objects.all()
-    subcomponents = Subcomponent.objects.all()
-    activities = Activities.objects.all()
-    
-    context = {
-        'projects': projects,
-        'components': components,
-        'subcomponents': subcomponents,
-        'activities': activities,
-    }
-    return render(request, 'PIU_Financial_mgt/dashboard.html', context)
 
 ############################################ Budget Summary ############################################
 
@@ -2525,87 +2368,6 @@ def export_projects_pdf(request):
     # Build PDF
     doc.build(elements)
     
-    return response
-
-@login_required
-def export_components_excel(request):
-    """Export components to Excel with applied filters"""
-    from django.http import HttpResponse
-    from openpyxl import Workbook
-    from PIU_Financial_mgt.models import Currency
-    import datetime
-    
-    # Apply same filtering logic as components view
-    components_qs = Component.objects.all().select_related('projectID', 'currency', 'loginUser')
-    
-    # Filter parameters (same as components view)
-    project_id = request.GET.get('project', '')
-    component_name = request.GET.get('component', '')
-    currency_id = request.GET.get('currency', '')
-    allocation_min = request.GET.get('allocation_min', '')
-    allocation_max = request.GET.get('allocation_max', '')
-    date_from = request.GET.get('date_from', '')
-    date_to = request.GET.get('date_to', '')
-    
-    # Apply filters
-    if project_id:
-        components_qs = components_qs.filter(projectID__projectID__icontains=project_id)
-    if component_name:
-        components_qs = components_qs.filter(project_components__icontains=component_name)
-    if currency_id:
-        components_qs = components_qs.filter(currency__currency=currency_id)
-    if allocation_min:
-        try:
-            components_qs = components_qs.filter(allocation__gte=float(allocation_min))
-        except ValueError:
-            pass
-    if allocation_max:
-        try:
-            components_qs = components_qs.filter(allocation__lte=float(allocation_max))
-        except ValueError:
-            pass
-    if date_from:
-        components_qs = components_qs.filter(date__gte=date_from)
-    if date_to:
-        components_qs = components_qs.filter(date__lte=date_to)
-    
-    # Create workbook
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Components"
-    
-    # Headers
-    headers = ['Project ID', 'Project Name', 'Component Name', 'Component Description', 
-               'Currency', 'Allocation', 'Created Date', 'Created By']
-    ws.append(headers)
-    
-    # Data rows
-    for component in components_qs.order_by('-date'):
-        row = [
-            component.projectID.projectID if component.projectID else '',
-            component.projectID.project if component.projectID else '',
-            component.project_components,
-            component.component_description,
-            component.currency.currency if component.currency else '',
-            float(component.allocation) if component.allocation else 0,
-            component.date.strftime('%Y-%m-%d') if component.date else '',
-            component.loginUser.username if component.loginUser else ''
-        ]
-        ws.append(row)
-        
-        # Apply text wrapping for long content
-        row_num = ws.max_row
-        for col_num, cell in enumerate(ws[row_num], 1):
-            cell.alignment = Alignment(wrap_text=True, vertical="top", horizontal="left")
-            # Special formatting for funding column
-            if col_num == 6 and cell.value:  # Funding column
-                cell.number_format = '#,##0.00'
-    
-    # Prepare response
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=components_export_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-    
-    wb.save(response)
     return response
 
 @login_required
