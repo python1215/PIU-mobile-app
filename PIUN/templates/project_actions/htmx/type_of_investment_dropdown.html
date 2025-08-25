@@ -3,7 +3,7 @@
     <select name="Type_of_Investment" class="form-select" id="id_Type_of_Investment">
         <option value="">Select Investment</option>
         {% for inv in investments %}
-            <option value="{{ inv.id }}">{{ inv.name }}</option>
+            <option value="{{ inv.type_of_investment }}">{{ inv.type_of_investment }}</option>
         {% endfor %}
     </select>
 </div>

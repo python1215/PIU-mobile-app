@@ -116,16 +116,60 @@ def load_subcomponent_activities(request):
 
 @login_required
 def load_type_of_investments(request):
-    monitoring_id = request.GET.get("monitoring")
-    investments = KPI_For_Contract.objects.filter(monitoring_type_id=monitoring_id)
+    """Load Type of Investment options based on selected project and monitoring type - returns HTMX partial template"""
+    project_id = request.GET.get('project_id') or request.GET.get('projectID')
+    monitoring_type_id = request.GET.get('monitoring_type_id') or request.GET.get('monitoring')
+    
+    investments = []
+    
+    if project_id and monitoring_type_id:
+        try:
+            # Filter based on project and monitoring type
+            investments = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type__monitoring_type_code=monitoring_type_id
+            ).values('type_of_investment').distinct().order_by('type_of_investment')
+        except Exception as e:
+            print(f"Error loading type of investments: {e}")
+    elif monitoring_type_id:
+        try:
+            # Fallback to filtering by monitoring type only
+            investments = KPI_For_Contract.objects.filter(
+                monitoring_type_id=monitoring_type_id
+            ).order_by('type_of_investment')
+        except Exception as e:
+            print(f"Error loading type of investments (fallback): {e}")
+    
     return render(request, "project_actions/htmx/type_of_investment_dropdown.html", {
         "investments": investments,
     })
 
 @login_required
 def load_kpi_descriptions(request):
-    investment_id = request.GET.get("investment")
-    kpis = KPI_For_Contract.objects.filter(type_of_investment_id=investment_id)
+    """Load KPI Description options based on selected project and type of investment - returns HTMX partial template"""
+    project_id = request.GET.get('project_id') or request.GET.get('projectID')
+    investment_code = request.GET.get('investment_code') or request.GET.get('investment') or request.GET.get('type_of_investment')
+    
+    kpis = []
+    
+    if project_id and investment_code:
+        try:
+            # Filter based on project and investment type
+            kpis = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                type_of_investment=investment_code
+            ).order_by('monitoring_Type_Code')
+        except Exception as e:
+            print(f"Error loading KPI descriptions: {e}")
+    elif investment_code:
+        try:
+            # Fallback to filtering by investment type only
+            kpis = KPI_For_Contract.objects.filter(
+                type_of_investment_id=investment_code
+            ).order_by('monitoring_Type_Code')
+        except Exception as e:
+            print(f"Error loading KPI descriptions (fallback): {e}")
+    
     return render(request, "project_actions/htmx/kpi_description_dropdown.html", {
         "kpis": kpis,
     })
@@ -257,197 +301,6 @@ def dashboard(request):
         }
     
     return render(request, 'project_actions/dashboard.html', context)
-
-
-# AJAX Views for Cascading Dropdowns
-@login_required
-def load_type_of_investments(request):
-    """Load Type of Investment options based on selected project and monitoring type"""
-    monitoring_type_id = request.GET.get('monitoring_type_id')
-    
-    # Handle project_id with special characters properly
-    full_query_string = request.META.get('QUERY_STRING', '')
-    
-    
-    # Advanced parsing to handle project_id with & characters
-    project_id = None
-    
-    # Method 1: Try to reconstruct from URL path and query
-    if 'project_id=' in full_query_string:
-        # Split by '&' and find all parts that might belong to project_id
-        parts = full_query_string.split('&')
-        project_parts = []
-        
-        collecting_project_id = False
-        for part in parts:
-            if part.startswith('project_id='):
-                # Start collecting project_id
-                collecting_project_id = True
-                project_parts.append(part[11:])  # Remove 'project_id=' prefix
-            elif collecting_project_id and not any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
-                # Continue collecting if this part doesn't start with a known parameter
-                project_parts.append(part)
-            elif collecting_project_id and any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
-                # Stop collecting when we hit a known parameter
-                break
-        
-        if project_parts:
-            # Reconstruct project_id with & characters
-            project_id = '&'.join(project_parts)
-            
-            # URL decode
-            import urllib.parse
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    # Method 2: Fallback to direct URL parsing
-    if not project_id:
-        import urllib.parse
-        # Parse the full URL to get all parameters
-        request_url = request.build_absolute_uri()
-        parsed_url = urllib.parse.urlparse(request_url)
-        
-        # Manual extraction from raw query string
-        if 'project_id=' in parsed_url.query:
-            start_pos = parsed_url.query.find('project_id=') + len('project_id=')
-            end_pos = parsed_url.query.find('&monitoring_type_id=', start_pos)
-            if end_pos == -1:
-                end_pos = len(parsed_url.query)
-            
-            project_id = parsed_url.query[start_pos:end_pos]
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    # Method 3: Final fallback
-    if not project_id:
-        project_id = request.GET.get('project_id', '')
-        if project_id:
-            import urllib.parse
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    if monitoring_type_id and project_id:
-        try:
-            # Check if we're using SQL Server (based on database engine)
-            from django.db import connection
-            engine = connection.settings_dict.get('ENGINE', '')
-            
-            
-            
-            # Use Django ORM exclusively for platform independence
-            kpi_records = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                monitoring_type__monitoring_type_code=monitoring_type_id
-            ).values('type_of_investment').distinct()
-            
-            options = []
-            for record in kpi_records:
-                options.append({
-                    'value': record['type_of_investment'],
-                    'text': record['type_of_investment']
-                })
-            
-            print(f"Django ORM query results: {len(options)} options found")
-            return JsonResponse({'options': options})
-                
-        except Exception as e:
-            print("Error loading type of investments:", str(e))
-            import traceback
-            print("Full traceback:", traceback.format_exc())
-            return JsonResponse({'options': [], 'error': str(e)})
-    return JsonResponse({'options': []})
-
-
-@login_required
-def load_kpi_descriptions(request):
-    """Load KPI Description options based on selected project and type of investment"""
-    investment_code = request.GET.get('investment_code')
-    
-    # Handle project_id with special characters properly
-    full_query_string = request.META.get('QUERY_STRING', '')
-    
-    
-    # Advanced parsing to handle project_id with & characters
-    project_id = None
-    
-    # Method 1: Try to reconstruct from URL path and query
-    if 'project_id=' in full_query_string:
-        # Split by '&' and find all parts that might belong to project_id
-        parts = full_query_string.split('&')
-        project_parts = []
-        
-        collecting_project_id = False
-        for part in parts:
-            if part.startswith('project_id='):
-                # Start collecting project_id
-                collecting_project_id = True
-                project_parts.append(part[11:])  # Remove 'project_id=' prefix
-            elif collecting_project_id and not any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
-                # Continue collecting if this part doesn't start with a known parameter
-                project_parts.append(part)
-            elif collecting_project_id and any(part.startswith(param + '=') for param in ['monitoring_type_id', 'investment_code', 'type_of_investment']):
-                # Stop collecting when we hit a known parameter
-                break
-        
-        if project_parts:
-            # Reconstruct project_id with & characters
-            project_id = '&'.join(project_parts)
-            
-            # URL decode
-            import urllib.parse
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    # Method 2: Fallback to direct URL parsing
-    if not project_id:
-        import urllib.parse
-        # Parse the full URL to get all parameters
-        request_url = request.build_absolute_uri()
-        parsed_url = urllib.parse.urlparse(request_url)
-        
-        # Manual extraction from raw query string
-        if 'project_id=' in parsed_url.query:
-            start_pos = parsed_url.query.find('project_id=') + len('project_id=')
-            end_pos = parsed_url.query.find('&investment_code=', start_pos)
-            if end_pos == -1:
-                end_pos = len(parsed_url.query)
-            
-            project_id = parsed_url.query[start_pos:end_pos]
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    # Method 3: Final fallback
-    if not project_id:
-        project_id = request.GET.get('project_id', '')
-        if project_id:
-            import urllib.parse
-            project_id = urllib.parse.unquote(project_id)
-            
-    
-    if investment_code and project_id:
-        try:
-            # Check if we're using SQL Server
-            from django.db import connection
-            # Use Django ORM exclusively for platform independence
-            kpi_records = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                type_of_investment=investment_code
-            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
-            
-            options = []
-            for record in kpi_records:
-                options.append({
-                    'value': record['monitoring_Type_Code'],
-                    'text': record['Kpi_description']
-                })
-            
-            return JsonResponse({'options': options})
-                
-        except Exception as e:
-            print("Error loading KPI descriptions:", str(e))
-            return JsonResponse({'options': [], 'error': str(e)})
-    
-    return JsonResponse({'options': []})
 
 
 # SQL Server Testing and Diagnostics

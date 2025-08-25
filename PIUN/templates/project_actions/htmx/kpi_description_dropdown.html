@@ -3,7 +3,7 @@
     <select name="Kpi_description" class="form-select" id="id_Kpi_description">
         <option value="">Select KPI</option>
         {% for kpi in kpis %}
-            <option value="{{ kpi.id }}">{{ kpi.description }}</option>
+            <option value="{{ kpi.monitoring_Type_Code }}">{{ kpi.Kpi_description }}</option>
         {% endfor %}
     </select>
 </div>
