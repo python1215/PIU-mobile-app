@@ -293,7 +293,7 @@ def add_component(request):
         print("Method: GET")
         print("GET request - creating new form")
         form = addComponentForm()
-    return render(request, 'PIU_Financial_mgt/component/add-component.html', {'form': form})
+    return render(request, 'PIU_Financial_mgt/components/add-component.html', {'form': form})
 
 @login_required
 def add_subcomponent(request):
@@ -564,7 +564,7 @@ def addcomponent(request):
             return redirect('PIU_Financial_mgt:components')  
     else:
         form = addComponentForm()
-    return render(request, 'PIU_Financial_mgt/component/add-component.html', {'form': form})
+    return render(request, 'PIU_Financial_mgt/components/add-component.html', {'form': form})
 
 @login_required
 def components(request):
@@ -1082,7 +1082,7 @@ def edit_component(request, component_id):
         'component': component,
         'is_edit': True,
     }
-    return render(request, 'PIU_Financial_mgt/component/add-component.html', context)
+    return render(request, 'PIU_Financial_mgt/components/add-component.html', context)
 
 @login_required
 def delete_component(request, component_id):
