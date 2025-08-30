@@ -1,0 +1,108 @@
+Short version: the modal still freezes because (a) your HTMX success handler is attached to the button, but HTMX fires afterSwap on the target (#contractModalBody) → your handler never runs, so you fall back to the 500 ms timer that opens an empty shell; (b) you create new Bootstrap Modal instances in multiple places which can leave doubled backdrops/focus traps; and (c) your HTMX partial (per the response you showed) still wraps the payload in another .modal-body and includes a <script>, which HTMX won’t execute and which nests a .modal-body inside another one. All three together cause the “dark screen + no interaction” effect. 
+ 
+
+Here’s the tight, surgical fix.
+
+1) Listen on the right element (not the button)
+
+Right now you do:
+
+selectContractBtn.addEventListener('htmx:afterSwap', ...);
+
+
+But htmx:afterSwap fires on the target (#contractModalBody), not on the trigger button, so this handler almost never runs. Attach the handler to the target (or document) instead. Replace your modal-opening logic with this:
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl = document.getElementById('contractSelectionModal');
+  const modalBody = document.getElementById('contractModalBody');
+
+  // Open modal exactly when #contractModalBody receives new content
+  modalBody.addEventListener('htmx:afterSwap', function (evt) {
+    const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    instance.show();
+  });
+
+  // Optional: show spinner as request starts (fires on the target)
+  modalBody.addEventListener('htmx:beforeRequest', function () {
+    modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  });
+
+  // Error/timeouts -> show a friendly message in the body, then show modal
+  modalBody.addEventListener('htmx:responseError', function () {
+    modalBody.innerHTML = '<div class="alert alert-danger">Could not load contracts. Please try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+  modalBody.addEventListener('htmx:timeout', function () {
+    modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Please try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+});
+</script>
+
+
+And remove the 500 ms setTimeout opener from the button click handler entirely. That timer is opening the shell before content arrives, causing the “empty modal + backdrop” feel. (See your current click handler and afterSwap on the button. 
+)
+
+2) Reuse the same Bootstrap Modal instance
+
+Everywhere you open the modal you currently do:
+
+const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
+modal.show();
+
+
+That can create multiple instances/backdrops. Always use:
+
+const instance = bootstrap.Modal.getOrCreateInstance(document.getElementById('contractSelectionModal'));
+instance.show();
+
+
+You already close with getInstance() in selectContract()—good. Do the same for showing. (Your current show calls are scattered in click/afterSwap/error/timeout handlers. 
+)
+
+3) Make sure the HTMX partial returns a fragment only
+
+Your Network tab shows the response still has:
+
+<div class="modal-body"> ... </div>
+<script>function selectContract(...) {...}</script>
+
+
+That will be injected inside the existing .modal-body#contractModalBody, creating nested .modal-body and a <script> that HTMX will not execute. Update the template rendered by get_contracts_by_project_and_type_htmx to return only the inner content (heading + .list-group), no extra .modal-body wrapper, no <script>. The view renders project_actions/htmx/contract_selection_modal.html; fix that file accordingly. 
+
+4) Keep selectContract() global (already correct)
+
+You moved selectContract() into the page—good. Leave it there so buttons like onclick="selectContract('…')" in the fragment work. Also switch its closing logic to getOrCreateInstance for symmetry:
+
+function selectContract(contractRef) {
+  const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
+  if (!input) { alert('Could not find contract reference field.'); return; }
+  input.value = contractRef;
+  const modalEl = document.getElementById('contractSelectionModal');
+  const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+  instance.hide();
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+
+(You already have this function in the form template—keep it there. 
+)
+
+5) Small wiring niceties
+
+Add hx-swap="innerHTML" on the button to be explicit that you replace the body contents (not the element). Your target is #contractModalBody, which is good. 
+
+Your enable/disable logic for the button is fine—keep it. 
+
+Why it freezes today (in one breath)
+
+The modal is opened via a timer before content is in place → empty shell + backdrop.
+
+The HTMX success handler is listening on the button, not on the target, so it never actually runs; you rely on the timer.
+
+The partial still includes a .modal-body + <script>, which HTMX won’t execute and which results in nested modal markup, confusing Bootstrap’s focus/backdrop.
+
+Creating new Modal instances repeatedly can leave stacked backdrops and a stuck focus trap.
+
+Apply the changes above and the modal will open exactly once, after content swaps, using a single instance, with no nested .modal-body.

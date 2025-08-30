@@ -81,7 +81,8 @@
                                             hx-target="#contractModalBody"
                                             hx-include="#id_project, #id_type_of_contract"
                                             hx-trigger="click"
-                                            hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'>
+                                            hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
+                                            hx-swap="innerHTML">
                                         <i class="bi bi-search me-1"></i>Select Contract
                                     </button>
                                 </div>
@@ -301,45 +302,29 @@ document.addEventListener('DOMContentLoaded', function() {
     projectSelect.addEventListener('change', updateContractSelectionButton);
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
-    // Add click handler to manually trigger modal after HTMX request
-    selectContractBtn.addEventListener('click', function(event) {
-        console.log('Select Contract button clicked');
-        // Set a timeout to open modal after HTMX processes
-        setTimeout(function() {
-            console.log('Opening modal after delay');
-            const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
-            modal.show();
-        }, 500); // 500ms delay to allow HTMX to process
+    // Modal handling - listen on the target element, not the button
+    const modalEl = document.getElementById('contractSelectionModal');
+    const modalBody = document.getElementById('contractModalBody');
+
+    // Open modal exactly when #contractModalBody receives new content
+    modalBody.addEventListener('htmx:afterSwap', function(evt) {
+        const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        instance.show();
     });
-    
-    // HTMX success handling - open modal after content loads
-    selectContractBtn.addEventListener('htmx:afterSwap', function(event) {
-        console.log('HTMX content loaded successfully, opening modal');
-        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
-        modal.show();
+
+    // Optional: show spinner as request starts (fires on the target)
+    modalBody.addEventListener('htmx:beforeRequest', function() {
+        modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
     });
-    
-    // HTMX error handling for contract selection (offline-compatible)
-    selectContractBtn.addEventListener('htmx:responseError', function(event) {
-        console.log('HTMX failed - offline mode active');
-        // Show user-friendly offline message and open modal
-        const modalBody = document.getElementById('contractModalBody');
-        if (modalBody) {
-            modalBody.innerHTML = '<div class="alert alert-info"><i class="bi bi-wifi-off me-2"></i>Offline Mode: Please enter the contract reference number manually in the form.</div>';
-        }
-        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
-        modal.show();
+
+    // Error/timeouts -> show a friendly message in the body, then show modal
+    modalBody.addEventListener('htmx:responseError', function() {
+        modalBody.innerHTML = '<div class="alert alert-danger">Could not load contracts. Please try again.</div>';
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
-    
-    selectContractBtn.addEventListener('htmx:timeout', function(event) {
-        console.log('HTMX timeout - offline mode fallback');
-        // Show user-friendly timeout message and open modal
-        const modalBody = document.getElementById('contractModalBody');
-        if (modalBody) {
-            modalBody.innerHTML = '<div class="alert alert-warning"><i class="bi bi-clock me-2"></i>Request timed out. Please enter the contract reference number manually.</div>';
-        }
-        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
-        modal.show();
+    modalBody.addEventListener('htmx:timeout', function() {
+        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Please try again.</div>';
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
     
     // Initialize button state on page load
@@ -348,45 +333,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Contract selection function (moved from HTMX partial to avoid execution issues)
 function selectContract(contractRef) {
-    try {
-        console.log('Selecting contract:', contractRef);
-        
-        // Find the contract reference input field
-        const contractRefInput = document.querySelector('input[name="contract_refNo"]') || 
-                                document.getElementById('id_contract_refNo');
-        
-        if (contractRefInput) {
-            contractRefInput.value = contractRef;
-            console.log('Contract reference set:', contractRef);
-            
-            // Close the modal
-            const modal = document.getElementById('contractSelectionModal');
-            if (modal) {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) {
-                    bsModal.hide();
-                } else {
-                    // Fallback for manual modal closing
-                    modal.style.display = 'none';
-                    modal.setAttribute('aria-hidden', 'true');
-                    document.body.classList.remove('modal-open');
-                    const backdrop = document.querySelector('.modal-backdrop');
-                    if (backdrop) backdrop.remove();
-                }
-            }
-            
-            // Trigger any change events that might be needed
-            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
-            
-        } else {
-            console.error('Contract reference input field not found');
-            alert('Error: Could not find contract reference field. Please enter manually.');
-        }
-        
-    } catch (error) {
-        console.error('Error selecting contract:', error);
-        alert('Error selecting contract. Please try manual entry.');
+    const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
+    if (!input) { 
+        alert('Could not find contract reference field.'); 
+        return; 
     }
+    input.value = contractRef;
+    const modalEl = document.getElementById('contractSelectionModal');
+    const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    instance.hide();
+    input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 </script>
 
