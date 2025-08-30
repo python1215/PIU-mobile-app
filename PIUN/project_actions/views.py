@@ -64,11 +64,13 @@ def load_project_components(request):
     
     if project_id and Component:
         try:
-            components = Component.objects.filter(projectID=project_id).order_by('component_Description')
+            components = Component.objects.filter(projectID=project_id).order_by('project_components')
+            print(f"DEBUG: Found {components.count()} components for project {project_id}")
         except Exception as e:
+            print(f"DEBUG: Error loading components for project {project_id}: {e}")
             pass
     else:
-        pass
+        print(f"DEBUG: No project_id ({project_id}) or Component model not available")
 
     
     return render(request, 'project_actions/htmx/component_dropdown_options.html', {
@@ -84,10 +86,12 @@ def load_component_subcomponents(request):
     if component_id and Subcomponent:
         try:
             subcomponents = Subcomponent.objects.filter(compID=component_id).order_by('subcomponent')
+            print(f"DEBUG: Found {subcomponents.count()} subcomponents for component {component_id}")
         except Exception as e:
+            print(f"DEBUG: Error loading subcomponents for component {component_id}: {e}")
             pass
     else:
-        pass
+        print(f"DEBUG: No component_id ({component_id}) or Subcomponent model not available")
 
     
     return render(request, 'project_actions/htmx/subcomponent_dropdown_options.html', {
@@ -103,10 +107,12 @@ def load_subcomponent_activities(request):
     if subcomponent_id and Activities:
         try:
             activities = Activities.objects.filter(subcompID=subcomponent_id).order_by('activity')
+            print(f"DEBUG: Found {activities.count()} activities for subcomponent {subcomponent_id}")
         except Exception as e:
+            print(f"DEBUG: Error loading activities for subcomponent {subcomponent_id}: {e}")
             pass
     else:
-        pass
+        print(f"DEBUG: No subcomponent_id ({subcomponent_id}) or Activities model not available")
 
     
     return render(request, 'project_actions/htmx/activity_dropdown_options.html', {
