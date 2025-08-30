@@ -54,7 +54,6 @@ try:
 except ImportError:
     Project = Component = Subcomponent = Activities = Currency = None
 
-
 # HTMX Views for Cascading Dropdowns
 @login_required
 def load_project_components(request):
@@ -112,70 +111,6 @@ def load_subcomponent_activities(request):
     return render(request, 'project_actions/htmx/activity_dropdown_options.html', {
         'activities': activities
     })
-
-
-@login_required
-def load_type_of_investments(request):
-    """Load Type of Investment options based on selected project and monitoring type - returns HTMX partial template"""
-    project_id = request.GET.get('project_id') or request.GET.get('projectID')
-    monitoring_type_id = request.GET.get('monitoring_type_id') or request.GET.get('monitoring')
-    
-    investments = []
-    
-    if project_id and monitoring_type_id:
-        try:
-            # Filter based on project and monitoring type
-            investments = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                monitoring_type__monitoring_type_code=monitoring_type_id
-            ).values('type_of_investment').distinct().order_by('type_of_investment')
-        except Exception as e:
-            print(f"Error loading type of investments: {e}")
-    elif monitoring_type_id:
-        try:
-            # Fallback to filtering by monitoring type only
-            investments = KPI_For_Contract.objects.filter(
-                monitoring_type_id=monitoring_type_id
-            ).order_by('type_of_investment')
-        except Exception as e:
-            print(f"Error loading type of investments (fallback): {e}")
-    
-    return render(request, "project_actions/htmx/type_of_investment_dropdown.html", {
-        "investments": investments,
-    })
-
-@login_required
-def load_kpi_descriptions(request):
-    """Load KPI Description options based on selected project and type of investment - returns HTMX partial template"""
-    project_id = request.GET.get('project_id') or request.GET.get('projectID')
-    investment_code = request.GET.get('investment_code') or request.GET.get('investment') or request.GET.get('type_of_investment')
-    
-    kpis = []
-    
-    if project_id and investment_code:
-        try:
-            # Filter based on project and investment type
-            kpis = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                type_of_investment=investment_code
-            ).order_by('monitoring_Type_Code')
-        except Exception as e:
-            print(f"Error loading KPI descriptions: {e}")
-    elif investment_code:
-        try:
-            # Fallback to filtering by investment type only
-            kpis = KPI_For_Contract.objects.filter(
-                type_of_investment_id=investment_code
-            ).order_by('monitoring_Type_Code')
-        except Exception as e:
-            print(f"Error loading KPI descriptions (fallback): {e}")
-    
-    return render(request, "project_actions/htmx/kpi_description_dropdown.html", {
-        "kpis": kpis,
-    })
-
-
-
 
 # Dashboard and Overview Views
 @login_required
@@ -302,10 +237,7 @@ def dashboard(request):
     
     return render(request, 'project_actions/dashboard.html', context)
 
-
-# SQL Server Testing and Diagnostics
-@login_required
-def test_sql_server_connection(request):
+# Contract Profiling Works Views
     """Test SQL Server connection and KPI data availability"""
     try:
         from django.db import connection
@@ -354,40 +286,6 @@ def test_sql_server_connection(request):
             }
         })
 
-@login_required
-def sql_server_diagnostics(request):
-    """System diagnostics for internal use only"""
-    try:
-        from django.db import connection
-        
-        diagnostics = {
-            'system_status': 'operational',
-            'tests': {}
-        }
-        
-        # Use Django ORM for system diagnostics
-        try:
-            # Test basic KPI data access
-            from PIU_Financial_mgt.models import KPI_For_Contract
-            kpi_count = KPI_For_Contract.objects.count()
-            diagnostics['tests']['kpi_count'] = kpi_count
-            diagnostics['tests']['database_access'] = 'Success'
-        except Exception as e:
-            diagnostics['tests']['database_access'] = f"Error: {e}"
-        
-        return JsonResponse({
-            'status': 'success',
-            'diagnostics': diagnostics
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'error': str(e)
-        })
-
-
-# Contract Profiling Works Views
 @login_required
 def contract_profiling_works_list(request):
     """Enhanced list view for Contract Profiling Works using Django ORM exclusively"""
@@ -494,7 +392,6 @@ def contract_profiling_works_list(request):
     
     return render(request, 'project_actions/contract_profiling_works_list.html', context)
 
-
 @login_required
 def contract_profiling_works_detail(request, pk):
     """Detailed view for a specific Works contract"""
@@ -546,7 +443,6 @@ def contract_profiling_works_detail(request, pk):
     
     return render(request, 'project_actions/contract_profiling_works_detail.html', context)
 
-
 @login_required
 @transaction.atomic
 def contract_profiling_works_create(request):
@@ -579,7 +475,6 @@ def contract_profiling_works_create(request):
     }
     
     return render(request, 'project_actions/contract_profiling_works_form.html', context)
-
 
 @login_required
 @transaction.atomic
@@ -619,7 +514,6 @@ def contract_profiling_works_update(request, pk):
     
     return render(request, 'project_actions/contract_profiling_works_form.html', context)
 
-
 @login_required
 @require_http_methods(["POST"])
 def contract_profiling_works_delete(request, pk):
@@ -635,7 +529,6 @@ def contract_profiling_works_delete(request, pk):
         messages.error(request, f"Error deleting contract: {str(e)}")
     
     return redirect('project_actions:contract_profiling_works-list')
-
 
 # Contract Profiling Goods & Services Views
 @login_required
@@ -701,7 +594,6 @@ def contract_profiling_goods_services_list(request):
     
     return render(request, 'project_actions/contract_profiling_goods_services_list.html', context)
 
-
 @login_required
 def contract_profiling_goods_services_detail(request, pk):
     """Detailed view for a specific Goods & Services contract"""
@@ -753,7 +645,6 @@ def contract_profiling_goods_services_detail(request, pk):
     
     return render(request, 'project_actions/contract_profiling_goods_services_detail.html', context)
 
-
 @login_required
 @transaction.atomic
 def contract_profiling_goods_services_create(request):
@@ -786,7 +677,6 @@ def contract_profiling_goods_services_create(request):
     }
     
     return render(request, 'project_actions/contract_profiling_goods_services_form.html', context)
-
 
 @login_required
 @transaction.atomic
@@ -826,7 +716,6 @@ def contract_profiling_goods_services_update(request, pk):
     
     return render(request, 'project_actions/contract_profiling_goods_services_form.html', context)
 
-
 @login_required
 @require_http_methods(["POST"])
 def contract_profiling_goods_services_delete(request, pk):
@@ -842,7 +731,6 @@ def contract_profiling_goods_services_delete(request, pk):
         messages.error(request, f"Error deleting contract: {str(e)}")
     
     return redirect('project_actions:contract_profiling_goods_services_list')
-
 
 # Contract Monitoring Views
 @login_required
@@ -928,7 +816,6 @@ def contract_monitoring_list(request):
     
     return render(request, 'project_actions/contract_monitoring_list.html', context)
 
-
 @login_required
 def contract_monitoring_detail(request, pk):
     """Detailed view for a specific monitoring record"""
@@ -981,7 +868,6 @@ def contract_monitoring_detail(request, pk):
         return redirect('project_actions:contract_monitoring_list')
     
     return render(request, 'project_actions/contract_monitoring_detail.html', context)
-
 
 @login_required
 @transaction.atomic
@@ -1083,7 +969,6 @@ def contract_monitoring_create(request):
     
     return render(request, 'project_actions/contract_monitoring_form.html', context)
 
-
 @login_required
 @transaction.atomic
 def contract_monitoring_update(request, pk):
@@ -1123,7 +1008,6 @@ def contract_monitoring_update(request, pk):
     
     return render(request, 'project_actions/contract_monitoring_form.html', context)
 
-
 @login_required
 @require_http_methods(["POST"])
 def contract_monitoring_delete(request, pk):
@@ -1139,7 +1023,6 @@ def contract_monitoring_delete(request, pk):
         messages.error(request, f"Error deleting monitoring record: {str(e)}")
     
     return redirect('project_actions:contract_monitoring_list')
-
 
 # Export Views
 @login_required
@@ -1161,7 +1044,6 @@ def export_works_contracts_excel(request):
         messages.error(request, f"Error exporting data: {str(e)}")
         return redirect('project_actions:contract_profiling_works-list')
 
-
 @login_required
 def export_goods_services_contracts_excel(request):
     """Export goods & services contracts to Excel"""
@@ -1180,7 +1062,6 @@ def export_goods_services_contracts_excel(request):
     except Exception as e:
         messages.error(request, f"Error exporting data: {str(e)}")
         return redirect('project_actions:contract_profiling_goods_services_list')
-
 
 @login_required
 def export_monitoring_records_excel(request):
@@ -1201,7 +1082,6 @@ def export_monitoring_records_excel(request):
         messages.error(request, f"Error exporting data: {str(e)}")
         return redirect('project_actions:contract_monitoring_list')
 
-
 # AJAX Views
 @login_required
 def get_project_components(request):
@@ -1217,7 +1097,6 @@ def get_project_components(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
 @login_required
 def get_project_subcomponents(request):
     """AJAX endpoint to get subcomponents for a component"""
@@ -1232,7 +1111,6 @@ def get_project_subcomponents(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
 @login_required
 def get_project_activities(request):
     """AJAX endpoint to get activities for a subcomponent"""
@@ -1246,56 +1124,6 @@ def get_project_activities(request):
         return JsonResponse({'activities': list(activities)})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-@login_required
-def get_contract_info(request):
-    """AJAX endpoint to get contract information for monitoring"""
-    contract_ref = request.GET.get('contract_ref')
-    
-    if not contract_ref:
-        return JsonResponse({'error': 'Contract reference required'}, status=400)
-    
-    try:
-        # Check in works contracts first
-        works_contract = Contract_Profiling_works.objects.filter(
-            contract_refNo=contract_ref
-        ).first()
-        
-        if works_contract:
-            return JsonResponse({
-                'found': True,
-                'type': 'works',
-                'project_id': works_contract.projectID.pk if works_contract.projectID else None,
-                'project_name': str(works_contract.projectID) if works_contract.projectID else '',
-                'contractor': works_contract.name_of_contractor or '',
-                'consultant': works_contract.name_of_consultant or '',
-                'start_date': works_contract.contract_start_date.isoformat() if works_contract.contract_start_date else '',
-                'end_date': works_contract.contract_end_date.isoformat() if works_contract.contract_end_date else '',
-            })
-        
-        # Check in goods & services contracts
-        gs_contract = Contract_Profiling_goods_services.objects.filter(
-            contract_refNo=contract_ref
-        ).first()
-        
-        if gs_contract:
-            return JsonResponse({
-                'found': True,
-                'type': 'goods_services',
-                'project_id': gs_contract.projectID.pk if gs_contract.projectID else None,
-                'project_name': str(gs_contract.projectID) if gs_contract.projectID else '',
-                'supplier': gs_contract.name_of_Supplier or '',
-                'consultant': gs_contract.name_of_consultant or '',
-                'start_date': gs_contract.contract_start_date.isoformat() if gs_contract.contract_start_date else '',
-                'end_date': gs_contract.contract_end_date.isoformat() if gs_contract.contract_end_date else '',
-            })
-        
-        return JsonResponse({'found': False})
-        
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
 
 @login_required
 def bulk_actions(request):
@@ -1350,8 +1178,6 @@ def bulk_actions(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-
 # HTMX Views for Dynamic Cascading Dropdowns
 def htmx_get_components(request):
     """HTMX endpoint to get components based on selected project"""
@@ -1367,7 +1193,6 @@ def htmx_get_components(request):
         'components': components
     })
 
-
 def htmx_get_subcomponents(request):
     """HTMX endpoint to get subcomponents based on selected component"""
     component_id = request.GET.get('component_id')
@@ -1381,7 +1206,6 @@ def htmx_get_subcomponents(request):
     return render(request, 'project_actions/htmx/subcomponents_options.html', {
         'subcomponents': subcomponents
     })
-
 
 def htmx_get_activities(request):
     """HTMX endpoint to get activities based on selected subcomponent"""
@@ -1397,98 +1221,7 @@ def htmx_get_activities(request):
         'activities': activities
     })
 
-
-
 @login_required  
-def debug_cascading_dropdowns(request):
-    """Debug endpoint specifically for cascading dropdown issues"""
-    monitoring_type_id = request.GET.get("monitoring_type_id", "proc")
-    project_id = request.GET.get("project_id", "D309D6530GM")
-    
-    try:
-        from django.db import connection
-        
-        result = {
-            "parameters": {
-                "monitoring_type_id": monitoring_type_id,
-                "project_id": project_id
-            },
-            "status": "debug_mode"
-        }
-        
-        if True:  # Force SQL Server mode - always use raw SQL queries
-            # SQL Server mode
-                result["table_columns"] = columns
-                
-                # Test the actual investment query
-                query = """
-                    SELECT DISTINCT 
-                        type_of_investment,
-                        monitoring_type_id,
-                        project_id
-                    WHERE project_id = ? AND monitoring_type_id = ?
-                """
-                cursor.execute(query, [project_id, monitoring_type_id])
-                investments = cursor.fetchall()
-                result["investments_found"] = len(investments)
-                result["sample_investments"] = investments[:3]
-                
-                # Test KPI descriptions query
-                if investments:
-                    investment_code = investments[0][0]  # First investment
-                    kpi_query = """
-                        SELECT DISTINCT 
-                            monitoring_Type_Code,
-                            Kpi_description
-                        WHERE type_of_investment = ? AND project_id = ?
-                    """
-                    cursor.execute(kpi_query, [investment_code, project_id])
-                    kpi_results = cursor.fetchall()
-                    result["kpi_descriptions_found"] = len(kpi_results)
-                    result["sample_kpi_descriptions"] = kpi_results[:3]
-                
-                # Check all available combinations
-                cursor.execute("""
-                    SELECT DISTINCT project_id, monitoring_type_id 
-                """)
-                available_combinations = cursor.fetchall()
-                result["available_combinations"] = available_combinations[:10]
-                
-        else:
-            # SQLite mode
-            from PIU_Financial_mgt.models import KPI_For_Contract
-            
-            investments = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,
-                monitoring_type__monitoring_type_code=monitoring_type_id
-            ).values("type_of_investment").distinct()
-            
-            result["investments_found"] = len(investments)
-            result["sample_investments"] = list(investments[:3])
-            
-            # Show available combinations
-            available = KPI_For_Contract.objects.values(
-                "project__projectID", 
-                "monitoring_type__monitoring_type_code"
-            ).distinct()
-            result["available_combinations"] = list(available[:10])
-        
-        return JsonResponse(result)
-        
-    except Exception as e:
-        return JsonResponse({
-            "error": str(e),
-            "engine": engine,
-            "parameters": {
-                "monitoring_type_id": monitoring_type_id,
-                "project_id": project_id
-            }
-        })
-
-
-# ============ PDF EXPORT VIEWS ============
-
-@login_required
 def export_monitoring_records_pdf(request):
     """Export monitoring records to PDF with A4 portrait formatting"""
     try:
@@ -1507,7 +1240,6 @@ def export_monitoring_records_pdf(request):
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
         return redirect('project_actions:contract_monitoring_list')
-
 
 @login_required
 def export_works_contracts_pdf(request):
@@ -1529,7 +1261,6 @@ def export_works_contracts_pdf(request):
         messages.error(request, f"Error exporting PDF: {str(e)}")
         return redirect('project_actions:contract_profiling_works_list')
 
-
 @login_required
 def export_goods_services_contracts_pdf(request):
     """Export goods & services contracts to PDF with A4 portrait formatting"""
@@ -1549,7 +1280,6 @@ def export_goods_services_contracts_pdf(request):
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
         return redirect('project_actions:contract_profiling_goods_services_list')
-
 
 @login_required
 def get_contracts_by_project_and_type_htmx(request):
@@ -1654,7 +1384,6 @@ def get_contracts_by_project_and_type_htmx(request):
         context['error'] = str(e)
         return render(request, 'project_actions/htmx/contract_selection_modal.html', context)
 
-
 def get_contract_status(start_date, end_date):
     """Helper function to determine contract status"""
     from django.utils import timezone
@@ -1666,7 +1395,6 @@ def get_contract_status(start_date, end_date):
         return 'completed'
     else:
         return 'active'
-
 
 def htmx_load_investment_kpi(request):
     """HTMX endpoint for loading investment types and KPI descriptions based on monitoring type"""

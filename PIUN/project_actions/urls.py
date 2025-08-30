@@ -39,28 +39,14 @@ urlpatterns = [
     path('export/goods-services-contracts-pdf/', views.export_goods_services_contracts_pdf, name='export_goods_services_contracts_pdf'),
     path('export/monitoring-records-pdf/', views.export_monitoring_records_pdf, name='export_monitoring_records_pdf'),
     
-    # AJAX endpoints - Maintaining exact existing URL names
-    path('ajax/get-project-components/', views.get_project_components, name='get_project_components'),
-    path('ajax/get-project-subcomponents/', views.get_project_subcomponents, name='get_project_subcomponents'),
-    path('ajax/get-project-activities/', views.get_project_activities, name='get_project_activities'),
-    path('ajax/get-contract-info/', views.get_contract_info, name='get_contract_info'),
-    path('htmx/get-contracts-by-project-and-type/', views.get_contracts_by_project_and_type_htmx, name='get_contracts_by_project_and_type_htmx'),
-    
-    # Bulk actions
-    path('ajax/bulk-actions/', views.bulk_actions, name='bulk_actions'),
-    
-    # HTMX endpoints for dynamic cascading dropdowns
+    # HTMX endpoints for dynamic cascading dropdowns (offline-compatible)
     path('htmx/load-components/', views.load_project_components, name='load_project_components'),
     path('htmx/load-subcomponents/', views.load_component_subcomponents, name='load_component_subcomponents'),
     path('htmx/load-activities/', views.load_subcomponent_activities, name='load_subcomponent_activities'),
     path('htmx/load-investment-kpi/', views.htmx_load_investment_kpi, name='htmx_load_investment_kpi'),
-
-    path("ajax/load-type-of-investments/", views.load_type_of_investments, name="load_type_of_investments"),
-    path("ajax/load-kpi-descriptions/", views.load_kpi_descriptions, name="load_kpi_descriptions"),
+    path('htmx/get-contracts-by-project-and-type/', views.get_contracts_by_project_and_type_htmx, name='get_contracts_by_project_and_type_htmx'),
     
-    # SQL Server diagnostic endpoints
-    path('test-sql-connection/', views.test_sql_server_connection, name='test_sql_server_connection'),
-    path('sql-diagnostics/', views.sql_server_diagnostics, name='sql_server_diagnostics'),
-    path('debug-cascading/', views.debug_cascading_dropdowns, name='debug_cascading_dropdowns'),
+    # Bulk actions
+    path('ajax/bulk-actions/', views.bulk_actions, name='bulk_actions'),
 
 ]

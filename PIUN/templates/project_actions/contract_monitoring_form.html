@@ -303,15 +303,23 @@ document.addEventListener('DOMContentLoaded', function() {
     projectSelect.addEventListener('change', updateContractSelectionButton);
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
-    // HTMX error handling for contract selection
+    // HTMX error handling for contract selection (offline-compatible)
     selectContractBtn.addEventListener('htmx:responseError', function(event) {
-        console.log('HTMX failed, showing manual input fallback');
-        alert('Unable to load contracts automatically. Please enter the contract reference number manually.');
+        console.log('HTMX failed - offline mode active');
+        // Show user-friendly offline message instead of alert
+        const modalBody = document.getElementById('contractModalBody');
+        if (modalBody) {
+            modalBody.innerHTML = '<div class="alert alert-info"><i class="bi bi-wifi-off me-2"></i>Offline Mode: Please enter the contract reference number manually in the form.</div>';
+        }
     });
     
     selectContractBtn.addEventListener('htmx:timeout', function(event) {
-        console.log('HTMX timeout, showing manual input fallback');  
-        alert('Contract lookup timed out. Please enter the contract reference number manually.');
+        console.log('HTMX timeout - offline mode fallback');
+        // Show user-friendly timeout message instead of alert
+        const modalBody = document.getElementById('contractModalBody');
+        if (modalBody) {
+            modalBody.innerHTML = '<div class="alert alert-warning"><i class="bi bi-clock me-2"></i>Request timed out. Please enter the contract reference number manually.</div>';
+        }
     });
     
     // Initialize button state on page load
