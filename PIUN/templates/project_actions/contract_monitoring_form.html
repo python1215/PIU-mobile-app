@@ -301,6 +301,17 @@ document.addEventListener('DOMContentLoaded', function() {
     projectSelect.addEventListener('change', updateContractSelectionButton);
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
+    // Add click handler to manually trigger modal after HTMX request
+    selectContractBtn.addEventListener('click', function(event) {
+        console.log('Select Contract button clicked');
+        // Set a timeout to open modal after HTMX processes
+        setTimeout(function() {
+            console.log('Opening modal after delay');
+            const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
+            modal.show();
+        }, 500); // 500ms delay to allow HTMX to process
+    });
+    
     // HTMX success handling - open modal after content loads
     selectContractBtn.addEventListener('htmx:afterSwap', function(event) {
         console.log('HTMX content loaded successfully, opening modal');
