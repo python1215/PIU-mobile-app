@@ -1,77 +1,59 @@
-{% extends 'project_actions/base.html' %}
-{% load static %}
+{% extends "base.html" %}
 {% load widget_tweaks %}
-{% load crispy_forms_tags %}
 
-{% block title %}{{ page_title }}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .form-control, .form-select, .form-control:focus, .form-select:focus {
-        background-color: white !important;
-        border-color: #ced4da !important;
-        color: #333 !important;
-        font-weight: bold !important;
-    }
-    .form-control:focus, .form-select:focus {
-        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5) !important;
-    }
-</style>
+{% block title %}
+    {% if contract_monitoring %}Update Contract Monitoring{% else %}Create Contract Monitoring Record{% endif %} - PIU System
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="background-color: #fdfdf5; min-height: 100vh; padding: 2rem 0;">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-1">{{ page_title }}</h4>
-                        <p class="text-muted mb-0">
-                            {% if form_action == 'Update' %}
-                                Update monitoring record for contract: {{ record.contract_refNo }}
-                            {% else %}
-                                Create a new contract monitoring record
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'main_dashboard' %}" class="btn btn-outline-info me-2">
-                            <i class="bi bi-house-door me-1"></i>Dashboard
-                        </a>
-                        <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Back to List
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Form Section -->
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-text me-2"></i>Contract Monitoring Details
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1" style="color: #2c3e50 !important;">
+                        <i class="bi bi-file-earmark-check me-2"></i>
+                        {% if contract_monitoring %}Update Contract Monitoring{% else %}Create Contract Monitoring Record{% endif %}
+                    </h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'project_actions:contract_monitoring_list' %}">Contract Monitoring</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {% if contract_monitoring %}Update{% else %}Create{% endif %}
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'project_actions:contract_monitoring_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clipboard-data me-2"></i>Contract Monitoring Information
                     </h5>
                 </div>
-                <div class="card-body" style="background-color: #f8f9fa; color: #333;">
-                    <form method="post" enctype="multipart/form-data">
+                <div class="card-body p-4">
+                    <form method="post" id="contractMonitoringForm" novalidate>
                         {% csrf_token %}
                         
-                        <!-- Basic Information -->
+                        <!-- Project and Contract Details -->
                         <div class="section-divider mb-4">
                             <h6 class="section-title" style="color: #2c3e50 !important;">
-                                <i class="bi bi-info-circle me-2"></i>Basic Information
+                                <i class="bi bi-building me-2"></i>Project & Contract Information
                             </h6>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.project.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Project <span class="text-danger">*</span></label>
+                                <label for="{{ form.project.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Select Project <span class="text-danger">*</span></label>
                                 {{ form.project|add_class:"form-select" }}
                                 {% if form.project.errors %}
                                     <div class="text-danger small mt-1">{{ form.project.errors.0 }}</div>
@@ -134,7 +116,6 @@
                                     <div class="text-danger small mt-1">{{ form.type_of_monitoring.errors.0 }}</div>
                                 {% endif %}
                             </div>
-                            
                         </div>
 
                         <!-- Investment and KPI Details -->
@@ -239,7 +220,7 @@
                             </div>
                         </div>
 
-                        <!-- Form Actions -->
+                        <!-- Submit buttons -->
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="d-flex gap-2 justify-content-between">
@@ -265,941 +246,6 @@
     </div>
 </div>
 
-<style>
-    .section-divider {
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .section-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: #2c3e50;
-        margin: 0;
-    }
-    
-    .form-control, .form-select {
-        background-color: white;
-        border: 1px solid #ced4da;
-        color: #333;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        background-color: white;
-        border-color: #3498db;
-        color: #333;
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-    }
-    
-    .form-control::placeholder {
-        color: #6c757d;
-    }
-    
-    .form-select option {
-        background-color: white;
-        color: #333;
-    }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Get form elements
-    const typeOfMonitoringSelect = document.getElementById('id_type_of_monitoring');
-    const typeOfInvestmentSelect = document.getElementById('id_Type_of_Investment');
-    const kpiDescriptionSelect = document.getElementById('id_Kpi_description');
-    
-    // Function to clear and populate dropdown options
-    function populateDropdown(selectElement, options, placeholder = '-- Please select --') {
-        selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-        options.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option.value;
-            optionElement.textContent = option.text;
-            selectElement.appendChild(optionElement);
-        });
-    }
-    
-    // Function to clear dropdown
-    function clearDropdown(selectElement, placeholder = '-- Please select --') {
-        selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-    }
-    
-    // Handle Type of Monitoring change
-    typeOfMonitoringSelect.addEventListener('change', function() {
-        const monitoringTypeId = this.value;
-        
-        // Clear dependent dropdowns
-        clearDropdown(typeOfInvestmentSelect, '-- Select Type of Investment --');
-        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
-        
-        if (monitoringTypeId) {
-            // Show loading state
-            typeOfInvestmentSelect.innerHTML = '<option value="">Loading...</option>';
-            
-            // Get project ID
-            const projectSelect = document.getElementById('id_project');
-            const projectId = projectSelect.value;
-            
-            if (!projectId) {
-                clearDropdown(typeOfInvestmentSelect, '-- Please select a project first --');
-                return;
-            }
-            
-            // Fetch Type of Investment options
-            fetch(`/project_actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}&project_id=${projectId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.options && data.options.length > 0) {
-                        populateDropdown(typeOfInvestmentSelect, data.options, '-- Select Type of Investment --');
-                    } else {
-                        clearDropdown(typeOfInvestmentSelect, '-- No investments available --');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading type of investments:', error);
-                    clearDropdown(typeOfInvestmentSelect, '-- Error loading options --');
-                });
-        }
-    });
-    
-    // Handle Type of Investment change
-    typeOfInvestmentSelect.addEventListener('change', function() {
-        const investmentCode = this.value;
-        
-        // Clear dependent dropdown
-        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
-        
-        if (investmentCode) {
-            // Show loading state
-            kpiDescriptionSelect.innerHTML = '<option value="">Loading...</option>';
-            
-            // Get project ID
-            const projectSelect = document.getElementById('id_project');
-            const projectId = projectSelect.value;
-            
-            if (!projectId) {
-                clearDropdown(kpiDescriptionSelect, '-- Please select a project first --');
-                return;
-            }
-            
-            // Fetch KPI Description options
-            fetch(`/project_actions/ajax/load-kpi-descriptions/?investment_code=${investmentCode}&project_id=${projectId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.options && data.options.length > 0) {
-                        populateDropdown(kpiDescriptionSelect, data.options, '-- Select KPI Description --');
-                    } else {
-                        clearDropdown(kpiDescriptionSelect, '-- No KPI descriptions available --');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading KPI descriptions:', error);
-                    clearDropdown(kpiDescriptionSelect, '-- Error loading options --');
-                });
-        }
-    });
-    
-    // Handle Project change - reset dependent dropdowns
-    const projectSelect = document.getElementById('id_project');
-    projectSelect.addEventListener('change', function() {
-        clearDropdown(typeOfInvestmentSelect, '-- Select Type of Investment --');
-        clearDropdown(kpiDescriptionSelect, '-- Select KPI Description --');
-        
-        // Trigger monitoring type change if both project and monitoring type are selected
-        if (this.value && typeOfMonitoringSelect.value) {
-            typeOfMonitoringSelect.dispatchEvent(new Event('change'));
-        }
-    });
-    
-    // Initialize dropdowns on page load if editing existing record
-    function initializeEditMode() {
-        const projectId = projectSelect.value;
-        const monitoringTypeId = typeOfMonitoringSelect.value;
-        const currentInvestmentValue = typeOfInvestmentSelect.value;
-        const currentKpiValue = kpiDescriptionSelect.value;
-        
-        if (projectId && monitoringTypeId) {
-            // First populate Type of Investment options
-            fetch(`/project_actions/ajax/load-type-of-investments/?monitoring_type_id=${monitoringTypeId}&project_id=${projectId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.options && data.options.length > 0) {
-                        populateDropdown(typeOfInvestmentSelect, data.options, '-- Select Type of Investment --');
-                        
-                        // Restore previously selected value if available
-                        if (currentInvestmentValue) {
-                            typeOfInvestmentSelect.value = currentInvestmentValue;
-                            
-                            // Then populate KPI descriptions for the selected investment
-                            fetch(`/project_actions/ajax/load-kpi-descriptions/?investment_code=${currentInvestmentValue}&project_id=${projectId}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.options && data.options.length > 0) {
-                                        populateDropdown(kpiDescriptionSelect, data.options, '-- Select KPI Description --');
-                                        
-                                        // Restore previously selected KPI value
-                                        if (currentKpiValue) {
-                                            kpiDescriptionSelect.value = currentKpiValue;
-                                        }
-                                    }
-                                })
-                                .catch(error => console.error('Error loading KPI descriptions:', error));
-                        }
-                    } else {
-                        clearDropdown(typeOfInvestmentSelect, '-- No investment types available --');
-                        clearDropdown(kpiDescriptionSelect, '-- Select investment type first --');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading investment types:', error);
-                    clearDropdown(typeOfInvestmentSelect, '-- Error loading options --');
-                    clearDropdown(kpiDescriptionSelect, '-- Error loading options --');
-                });
-        }
-    }
-    
-    // Check if we're in edit mode and initialize accordingly
-    if (typeOfMonitoringSelect.value && projectSelect.value) {
-        initializeEditMode();
-    }
-    
-    // Contract Selection Popup Functionality
-    const contractTypeSelect = document.getElementById('id_type_of_contract');
-    const selectContractBtn = document.getElementById('selectContractBtn');
-    // Find contract reference input field - try multiple methods to ensure we get the right field
-    let contractRefInput = selectContractBtn.parentNode.querySelector('input[name="contract_refNo"]');
-    if (!contractRefInput) {
-        contractRefInput = document.querySelector('input[name="contract_refNo"]');
-    }
-    if (!contractRefInput) {
-        contractRefInput = document.getElementById('id_contract_refNo');
-    }
-    
-    console.log('Contract reference input field found:', contractRefInput);
-    
-    // Enable/disable contract selection button based on project and contract type selection
-    function updateContractSelectionButton() {
-        if (projectSelect.value && contractTypeSelect.value) {
-            selectContractBtn.disabled = false;
-            selectContractBtn.classList.remove('disabled');
-        } else {
-            selectContractBtn.disabled = true;
-            selectContractBtn.classList.add('disabled');
-        }
-    }
-    
-    // Watch for changes in project and contract type dropdowns
-    projectSelect.addEventListener('change', updateContractSelectionButton);
-    contractTypeSelect.addEventListener('change', updateContractSelectionButton);
-    
-    // Handle contract selection button click with improved offline compatibility
-    selectContractBtn.addEventListener('click', function(event) {
-        try {
-            // Prevent any default behavior that might cause issues
-            event.preventDefault();
-            event.stopPropagation();
-            
-            console.log('=== CONTRACT SELECTION DEBUG START ===');
-            console.log('Contract selection button clicked - starting process');
-            
-            // Quick offline detection for immediate fallback
-            const isLikelyOffline = window.location.hostname.includes('127.0.0.1') || 
-                                   window.location.hostname.includes('localhost') ||
-                                   !navigator.onLine;
-            
-            if (isLikelyOffline) {
-                console.log('=== OFFLINE DEPLOYMENT DETECTED - USING MANUAL INPUT ===');
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
-                showManualContractInput();
-                return;
-            }
-            
-
-            
-            // Enhanced debugging for offline environments
-            console.log('Environment check:');
-            console.log('- Current URL:', window.location.href);
-            console.log('- Server accessible:', typeof fetch !== 'undefined');
-            console.log('- Bootstrap available:', typeof bootstrap !== 'undefined');
-            console.log('- jQuery available:', typeof $ !== 'undefined');
-            console.log('- CSRF token present:', document.querySelector('[name=csrfmiddlewaretoken]') ? 'YES' : 'NO');
-            
-            const projectId = projectSelect.value;
-            const contractType = contractTypeSelect.value;
-            
-            console.log('Contract selection clicked:', { projectId, contractType });
-            console.log('Project select element value:', projectSelect.value);
-            console.log('Contract type select element value:', contractTypeSelect.value);
-            
-            if (!projectId || !contractType) {
-                alert('Please select both a project and contract type first.');
-                return;
-            }
-            
-            // Show loading state with error protection
-            try {
-                selectContractBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
-                selectContractBtn.disabled = true;
-            } catch (buttonError) {
-                console.error('Error updating button state:', buttonError);
-            }
-            
-            const url = `/project_actions/ajax/get-contracts-by-project-and-type/?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`;
-            console.log('Fetching contracts from:', url);
-            
-            // Get CSRF token for Django
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            // Timeout handling for contract fetching
-            const controller = new AbortController();
-            let timeoutId;
-            let isResponseProcessed = false;
-            
-            // Set shorter timeout of 2 seconds for offline deployment compatibility
-            timeoutId = setTimeout(() => {
-                if (!isResponseProcessed) {
-                    console.log('=== REQUEST TIMEOUT AFTER 2 SECONDS - ENABLING MANUAL INPUT ===');
-                    controller.abort();
-                    // Immediately show manual input on timeout
-                    selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                    selectContractBtn.disabled = false;
-                    showManualContractInput();
-                }
-            }, 2000);
-        
-            // Fetch contracts with optimized handling for offline deployments
-            fetch(url, { 
-                signal: controller.signal,
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => {
-                isResponseProcessed = true;
-                clearTimeout(timeoutId);
-                console.log('Response received, status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Force immediate JSON parsing for offline environments
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data received:', data);
-                
-                // Immediate button state reset
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
-                
-                if (data.error) {
-                    console.error('Server error:', data.error);
-                    alert('Error loading contracts: ' + data.error);
-                    return;
-                }
-                
-                if (data.contracts && data.contracts.length > 0) {
-                    console.log(`Found ${data.contracts.length} contracts`);
-                    // Use setTimeout to ensure modal shows after button state reset
-                    setTimeout(() => {
-                        showContractSelectionModal(data.contracts, contractType);
-                    }, 100);
-                } else {
-                    console.log('Database accessed successfully, no contracts found for project:', projectId, 'type:', contractType);
-                    console.log('Full response data:', data);
-                    showNoContractsFoundDialog(projectId, contractType);
-                }
-            })
-            .catch(error => {
-                isResponseProcessed = true;
-                clearTimeout(timeoutId);
-                console.log('AJAX request failed, switching to manual input:', error.message);
-                
-                // Immediate button state reset on error
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
-                
-                // Always use manual input fallback for any error to prevent freezing
-                console.log('=== ENABLING MANUAL INPUT FALLBACK ===');
-                showManualContractInput();
-            });
-            
-        } catch (mainError) {
-            console.error('Critical error in contract selection:', mainError);
-            
-            // Emergency button reset
-            try {
-                selectContractBtn.innerHTML = '<i class="bi bi-search me-1"></i>Select Contract';
-                selectContractBtn.disabled = false;
-            } catch (emergencyResetError) {
-                console.error('Emergency button reset failed:', emergencyResetError);
-            }
-            
-            alert('A critical error occurred. Please refresh the page and try again.');
-        }
-    });
-    
-    // Function to show contract selection modal with error handling
-    function showContractSelectionModal(contracts, contractType) {
-        try {
-            console.log('Showing contract selection modal with', contracts.length, 'contracts');
-            
-            const modal = document.getElementById('contractSelectionModal');
-            const modalTitle = document.getElementById('contractModalTitle');
-            const modalBody = document.getElementById('contractModalBody');
-            
-            if (!modal || !modalTitle || !modalBody) {
-                throw new Error('Modal elements not found in DOM');
-            }
-            
-            // Set modal title
-            const typeText = contractType === 'works_contract' ? 'Works Contracts' : 'Goods & Services Contracts';
-            modalTitle.textContent = `Select ${typeText}`;
-            
-            // Clear modal body
-            modalBody.innerHTML = '';
-            
-            // Create contract list
-            const contractList = document.createElement('div');
-            contractList.className = 'list-group';
-            
-            contracts.forEach((contract, index) => {
-                try {
-                    const contractItem = document.createElement('div');
-                    contractItem.className = 'list-group-item';
-                    
-                    // Get status badge class with null checks
-                    let statusClass = 'bg-secondary';
-                    if (contract.status === 'active') statusClass = 'bg-success';
-                    else if (contract.status === 'pending') statusClass = 'bg-warning';
-                    else if (contract.status === 'completed') statusClass = 'bg-secondary';
-                    
-                    // Safe data extraction with fallbacks
-                    const contractRef = contract.contract_refNo || 'N/A';
-                    const contractValue = contract.contract_value ? contract.contract_value.toLocaleString() : '0';
-                    const currency = contract.currency || 'USD';
-                    const contractor = contract.contractor || 'N/A';
-                    const supplier = contract.supplier || 'N/A';
-                    const consultant = contract.consultant || 'N/A';
-                    const startDate = contract.start_date || 'N/A';
-                    const endDate = contract.end_date || 'N/A';
-                    const status = contract.status || 'unknown';
-                    const contractId = contract.id || index;
-                    const detailUrl = contract.detail_url || '#';
-                    
-                    contractItem.innerHTML = `
-                        <div class="d-flex w-100 justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${contractRef}</h6>
-                                <p class="mb-1">
-                                    <strong>Value:</strong> ${currency} ${contractValue}
-                                </p>
-                                <small class="text-muted">
-                                    ${contractType === 'works_contract' ? 
-                                        `Contractor: ${contractor} | Consultant: ${consultant}` :
-                                        `Supplier: ${supplier} | Consultant: ${consultant}`
-                                    }
-                                </small>
-                                <small class="text-muted d-block">
-                                    Duration: ${startDate} to ${endDate}
-                                </small>
-                            </div>
-                            <div class="d-flex flex-column align-items-end">
-                                <span class="badge ${statusClass} mb-2">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
-                                <div class="btn-group-vertical" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary select-contract-btn" 
-                                        data-contract-id="${contractId}"
-                                        data-contract-ref="${contractRef}"
-                                        data-contract-url="${detailUrl}">
-                                        <i class="bi bi-check-circle me-1"></i>Select
-                                    </button>
-                                    <a href="${detailUrl}" target="_blank" class="btn btn-sm btn-outline-info">
-                                        <i class="bi bi-eye me-1"></i>View Details
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-            `;
-            
-                    contractList.appendChild(contractItem);
-                } catch (contractError) {
-                    console.error('Error creating contract item', index, ':', contractError);
-                    // Continue with next contract
-                }
-            });
-            
-            modalBody.appendChild(contractList);
-            
-            // Add event delegation for Select buttons with error handling
-            contractList.addEventListener('click', function(e) {
-                try {
-                    if (e.target.closest('.select-contract-btn')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const btn = e.target.closest('.select-contract-btn');
-                        const contractRef = btn.dataset.contractRef;
-                        const contractUrl = btn.dataset.contractUrl;
-                        
-                        console.log('Select button clicked for contract:', contractRef);
-                        
-                        // Find the contract data
-                        const selectedContract = contracts.find(c => c.contract_refNo === contractRef);
-                        if (selectedContract) {
-                            selectContract(selectedContract);
-                        } else {
-                            console.error('Contract not found:', contractRef);
-                            alert('Error: Selected contract not found in list');
-                        }
-                        return false;
-                    }
-                } catch (selectError) {
-                    console.error('Error in contract selection:', selectError);
-                    alert('Error selecting contract. Please try again.');
-                }
-            });
-            
-            // Show modal with error handling and fallback
-            try {
-                console.log('Attempting to show modal...');
-                
-                // Check if Bootstrap is available
-                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                    const bootstrapModal = new bootstrap.Modal(modal);
-                    bootstrapModal.show();
-                    console.log('Bootstrap modal shown successfully');
-                } else {
-                    // Fallback for when Bootstrap Modal is not available
-                    console.warn('Bootstrap Modal not available, using fallback');
-                    modal.style.display = 'block';
-                    modal.classList.add('show');
-                    modal.setAttribute('aria-hidden', 'false');
-                    document.body.classList.add('modal-open');
-                    
-                    // Create backdrop
-                    const backdrop = document.createElement('div');
-                    backdrop.className = 'modal-backdrop fade show';
-                    backdrop.setAttribute('data-fallback-backdrop', 'true');
-                    document.body.appendChild(backdrop);
-                    
-                    console.log('Fallback modal display activated');
-                }
-            } catch (modalShowError) {
-                console.error('Error showing modal:', modalShowError);
-                
-                // Emergency fallback - force show the modal
-                try {
-                    modal.style.display = 'block';
-                    modal.style.position = 'fixed';
-                    modal.style.top = '10%';
-                    modal.style.left = '10%';
-                    modal.style.right = '10%';
-                    modal.style.zIndex = '9999';
-                    modal.style.backgroundColor = 'white';
-                    modal.style.border = '2px solid #333';
-                    modal.style.borderRadius = '8px';
-                    modal.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
-                    console.log('Emergency modal display activated');
-                } catch (emergencyError) {
-                    console.error('Emergency modal display failed:', emergencyError);
-                    alert('Critical error displaying modal. Contract data loaded in console. Please refresh page.');
-                }
-            }
-            
-        } catch (modalError) {
-            console.error('Error in showContractSelectionModal:', modalError);
-            alert('Error preparing contract selection. Please try again.');
-        }
-    }
-    
-    // Function to select a contract with comprehensive error handling
-    function selectContract(contract) {
-        try {
-        console.log('Selecting contract:', contract);
-        console.log('Contract reference input field:', contractRefInput);
-        
-        if (!contractRefInput) {
-            console.error('Contract reference input field not found!');
-            alert('Error: Could not find contract reference field');
-            return false;
-        }
-        
-        // Set contract reference in the input field
-        contractRefInput.value = contract.contract_refNo;
-        console.log('Set contract reference value to:', contract.contract_refNo);
-        
-        // Store contract details for potential navigation
-        contractRefInput.dataset.contractDetailUrl = contract.detail_url;
-        
-        // Close modal immediately with fallback handling
-        const modal = document.getElementById('contractSelectionModal');
-        try {
-            const bootstrapModal = bootstrap.Modal.getInstance(modal);
-            if (bootstrapModal) {
-                bootstrapModal.hide();
-            } else {
-                // Fallback modal close
-                modal.style.display = 'none';
-                modal.classList.remove('show');
-                modal.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('modal-open');
-                
-                // Remove fallback backdrop if it exists
-                const fallbackBackdrop = document.querySelector('[data-fallback-backdrop="true"]');
-                if (fallbackBackdrop) {
-                    fallbackBackdrop.remove();
-                }
-            }
-        } catch (modalCloseError) {
-            console.error('Error closing modal:', modalCloseError);
-            // Emergency modal close
-            modal.style.display = 'none';
-            document.body.classList.remove('modal-open');
-        }
-        
-        // Show simple success message without links to prevent navigation
-        const successMsg = document.createElement('div');
-        successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
-        successMsg.innerHTML = `
-            <strong>Contract Selected:</strong> ${contract.contract_refNo}
-            <small class="text-muted d-block">Contract reference has been populated</small>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        // Insert success message after contract reference input
-        const inputGroup = contractRefInput.parentNode;
-        inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
-        
-        // Auto-remove success message after 3 seconds
-        setTimeout(() => {
-            if (successMsg.parentNode) {
-                successMsg.parentNode.removeChild(successMsg);
-            }
-        }, 3000);
-        
-        // Trigger change event on the input to ensure form validation updates
-        contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
-        
-            return false; // Prevent any navigation
-        } catch (contractSelectError) {
-            console.error('Error in selectContract function:', contractSelectError);
-            
-            // Emergency fallback - at least try to set the contract reference
-            try {
-                if (contractRefInput && contract && contract.contract_refNo) {
-                    contractRefInput.value = contract.contract_refNo;
-                    alert('Contract selected, but some features may not work properly. Please verify the selection.');
-                } else {
-                    alert('Error selecting contract. Please try again or refresh the page.');
-                }
-            } catch (emergencyError) {
-                console.error('Emergency fallback also failed:', emergencyError);
-                alert('Critical error selecting contract. Please refresh the page and try again.');
-            }
-            
-            return false;
-        }
-    }
-    
-    // Function to show when no contracts are found in database
-    function showNoContractsFoundDialog(projectId, contractType) {
-        console.log('Showing no contracts found dialog for LAN deployment');
-        
-        const projectText = projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown';
-        const contractTypeText = contractType === 'works_contract' ? 'Works Contract' : 'Goods & Services Contract';
-        
-        // Create a user-friendly modal for no contracts found
-        const noContractsModal = document.createElement('div');
-        noContractsModal.className = 'modal fade';
-        noContractsModal.id = 'noContractsModal';
-        noContractsModal.setAttribute('tabindex', '-1');
-        noContractsModal.innerHTML = `
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title">
-                            <i class="bi bi-database-check me-2"></i>No Contracts Found
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Database Connected:</strong> The system successfully connected to the database, 
-                            but no ${contractTypeText.toLowerCase()} records were found for this project.
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Project:</strong></label>
-                            <p class="text-muted">${projectText}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Contract Type:</strong></label>
-                            <p class="text-muted">${contractTypeText}</p>
-                        </div>
-                        
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            <strong>Next Steps:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>If you have a contract reference, enter it manually below</li>
-                                <li>Or create the contract first in the Contract Profiling section</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="manualContractRefNoContracts" class="form-label">
-                                <strong>Contract Reference Number</strong> <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="manualContractRefNoContracts" 
-                                   placeholder="Enter contract reference if you have one..."
-                                   autocomplete="off">
-                            <div class="form-text">Enter the contract reference if it exists but wasn't found in the system.</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle me-1"></i>Cancel
-                        </button>
-                        <button type="button" class="btn btn-info" id="createContractBtn">
-                            <i class="bi bi-plus-circle me-1"></i>Create New Contract
-                        </button>
-                        <button type="button" class="btn btn-primary" id="confirmManualEntryNoContracts">
-                            <i class="bi bi-check-circle me-1"></i>Set Reference
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Add modal to page
-        document.body.appendChild(noContractsModal);
-        
-        // Initialize and show modal
-        const modalInstance = new bootstrap.Modal(noContractsModal, { keyboard: false, backdrop: 'static' });
-        modalInstance.show();
-        
-        // Focus on input field when modal opens
-        noContractsModal.addEventListener('shown.bs.modal', function() {
-            document.getElementById('manualContractRefNoContracts').focus();
-        });
-        
-        // Handle create contract button
-        document.getElementById('createContractBtn').addEventListener('click', function() {
-            const createUrl = contractType === 'works_contract' 
-                ? '/project_actions/contract-profiling-works/add/' 
-                : '/project_actions/contract-profiling-goods-services/add/';
-            window.open(createUrl, '_blank');
-            modalInstance.hide();
-        });
-        
-        // Handle manual entry confirmation
-        document.getElementById('confirmManualEntryNoContracts').addEventListener('click', function() {
-            const contractRefValue = document.getElementById('manualContractRefNoContracts').value.trim();
-            
-            if (!contractRefValue) {
-                alert('Please enter a contract reference number or click "Create New Contract" to add one first.');
-                document.getElementById('manualContractRefNoContracts').focus();
-                return;
-            }
-            
-            if (contractRefValue.length < 3) {
-                alert('Contract reference must be at least 3 characters long.');
-                document.getElementById('manualContractRefNoContracts').focus();
-                return;
-            }
-            
-            // Set the contract reference
-            contractRefInput.value = contractRefValue;
-            
-            // Show success message
-            const successMsg = document.createElement('div');
-            successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
-            successMsg.innerHTML = `
-                <i class="bi bi-check-circle me-2"></i>
-                <strong>Contract Reference Set:</strong> ${contractRefValue}
-                <small class="text-muted d-block">Manually entered - no existing contracts found in database</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            const inputGroup = contractRefInput.parentNode;
-            inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
-            
-            // Auto-remove message after 8 seconds
-            setTimeout(() => {
-                if (successMsg.parentNode) {
-                    successMsg.parentNode.removeChild(successMsg);
-                }
-            }, 8000);
-            
-            // Trigger validation
-            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
-            
-            console.log('Manual contract reference set (no contracts found):', contractRefValue);
-            
-            // Close modal
-            modalInstance.hide();
-        });
-        
-        // Handle Enter key in input field
-        document.getElementById('manualContractRefNoContracts').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('confirmManualEntryNoContracts').click();
-            }
-        });
-        
-        // Clean up modal when hidden
-        noContractsModal.addEventListener('hidden.bs.modal', function() {
-            document.body.removeChild(noContractsModal);
-        });
-    }
-
-    // Improved offline mode function for manual contract entry
-    function showManualContractInput() {
-        console.log('Switching to offline mode for manual contract entry');
-        
-        // Create a user-friendly modal for offline mode
-        const offlineModal = document.createElement('div');
-        offlineModal.className = 'modal fade';
-        offlineModal.id = 'offlineContractModal';
-        offlineModal.setAttribute('tabindex', '-1');
-        offlineModal.innerHTML = `
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">
-                            <i class="bi bi-wifi-off me-2"></i>Offline Mode - Manual Entry
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Working Offline:</strong> Contract lookup requires internet connection. 
-                            Please enter the contract reference manually.
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Project:</strong></label>
-                            <p class="text-muted">${projectSelect.options[projectSelect.selectedIndex]?.text || 'Unknown'}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Contract Type:</strong></label>
-                            <p class="text-muted">${contractTypeSelect.options[contractTypeSelect.selectedIndex]?.text || 'Unknown'}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="manualContractRef" class="form-label">
-                                <strong>Contract Reference Number</strong> <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="manualContractRef" 
-                                   placeholder="Enter contract reference number..."
-                                   autocomplete="off">
-                            <div class="form-text">Enter the complete contract reference number as it appears on your contract documents.</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle me-1"></i>Cancel
-                        </button>
-                        <button type="button" class="btn btn-primary" id="confirmManualEntry">
-                            <i class="bi bi-check-circle me-1"></i>Set Contract Reference
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Add modal to page
-        document.body.appendChild(offlineModal);
-        
-        // Initialize and show modal
-        const modalInstance = new bootstrap.Modal(offlineModal, { keyboard: false, backdrop: 'static' });
-        modalInstance.show();
-        
-        // Focus on input field when modal opens
-        offlineModal.addEventListener('shown.bs.modal', function() {
-            document.getElementById('manualContractRef').focus();
-        });
-        
-        // Handle confirmation
-        document.getElementById('confirmManualEntry').addEventListener('click', function() {
-            const contractRefValue = document.getElementById('manualContractRef').value.trim();
-            
-            if (!contractRefValue) {
-                alert('Please enter a contract reference number.');
-                document.getElementById('manualContractRef').focus();
-                return;
-            }
-            
-            if (contractRefValue.length < 3) {
-                alert('Contract reference must be at least 3 characters long.');
-                document.getElementById('manualContractRef').focus();
-                return;
-            }
-            
-            // Set the contract reference
-            contractRefInput.value = contractRefValue;
-            
-            // Show success message
-            const successMsg = document.createElement('div');
-            successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
-            successMsg.innerHTML = `
-                <i class="bi bi-check-circle me-2"></i>
-                <strong>Contract Reference Set:</strong> ${contractRefValue}
-                <small class="text-muted d-block">Entered manually in offline mode</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            const inputGroup = contractRefInput.parentNode;
-            inputGroup.parentNode.insertBefore(successMsg, inputGroup.nextSibling);
-            
-            // Auto-remove message after 8 seconds
-            setTimeout(() => {
-                if (successMsg.parentNode) {
-                    successMsg.parentNode.removeChild(successMsg);
-                }
-            }, 8000);
-            
-            // Trigger validation
-            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
-            
-            console.log('Manual contract reference set:', contractRefValue);
-            
-            // Close modal
-            modalInstance.hide();
-        });
-        
-        // Handle Enter key in input field
-        document.getElementById('manualContractRef').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('confirmManualEntry').click();
-            }
-        });
-        
-        // Clean up modal when hidden
-        offlineModal.addEventListener('hidden.bs.modal', function() {
-            document.body.removeChild(offlineModal);
-        });
-    }
-    
-    // Initialize button state on page load
-    updateContractSelectionButton();
-});
-</script>
-
 <!-- Contract Selection Modal -->
 <div class="modal fade" id="contractSelectionModal" tabindex="-1" aria-labelledby="contractModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -1220,5 +266,57 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const projectSelect = document.getElementById('id_project');
+    const contractTypeSelect = document.getElementById('id_type_of_contract');
+    const selectContractBtn = document.getElementById('selectContractBtn');
+    const contractRefInput = document.getElementById('id_contract_refNo');
+    
+    // Function to update the contract selection button state
+    function updateContractSelectionButton() {
+        if (projectSelect.value && contractTypeSelect.value) {
+            selectContractBtn.disabled = false;
+            selectContractBtn.classList.remove('disabled');
+        } else {
+            selectContractBtn.disabled = true;
+            selectContractBtn.classList.add('disabled');
+        }
+    }
+    
+    // Watch for changes in project and contract type dropdowns
+    projectSelect.addEventListener('change', updateContractSelectionButton);
+    contractTypeSelect.addEventListener('change', updateContractSelectionButton);
+    
+    // HTMX error handling for contract selection
+    selectContractBtn.addEventListener('htmx:responseError', function(event) {
+        console.log('HTMX failed, showing manual input fallback');
+        alert('Unable to load contracts automatically. Please enter the contract reference number manually.');
+    });
+    
+    selectContractBtn.addEventListener('htmx:timeout', function(event) {
+        console.log('HTMX timeout, showing manual input fallback');  
+        alert('Contract lookup timed out. Please enter the contract reference number manually.');
+    });
+    
+    // Initialize button state on page load
+    updateContractSelectionButton();
+});
+</script>
+
+<style>
+    .section-divider {
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+</style>
 
 {% endblock %}
