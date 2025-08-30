@@ -112,6 +112,13 @@
                             <div class="col-md-4 mb-3">
                                 <label for="{{ form.type_of_monitoring.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Type of Monitoring <span class="text-danger">*</span></label>
                                 {{ form.type_of_monitoring|add_class:"form-select" }}
+                                <script>
+                                    document.getElementById('{{ form.type_of_monitoring.id_for_label }}').setAttribute('hx-get', '{% url "project_actions:htmx_load_investment_kpi" %}');
+                                    document.getElementById('{{ form.type_of_monitoring.id_for_label }}').setAttribute('hx-target', '#investment-kpi-container');
+                                    document.getElementById('{{ form.type_of_monitoring.id_for_label }}').setAttribute('hx-trigger', 'change');
+                                    document.getElementById('{{ form.type_of_monitoring.id_for_label }}').setAttribute('hx-include', '#{{ form.type_of_monitoring.id_for_label }}');
+                                    document.getElementById('{{ form.type_of_monitoring.id_for_label }}').setAttribute('hx-swap', 'innerHTML');
+                                </script>
                                 {% if form.type_of_monitoring.errors %}
                                     <div class="text-danger small mt-1">{{ form.type_of_monitoring.errors.0 }}</div>
                                 {% endif %}
@@ -125,17 +132,23 @@
                             </h6>
                         </div>
 
-                        <div class="row">
+                        <div class="row" id="investment-kpi-container">
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Type_of_Investment.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Type of Investment <span class="text-danger">*</span></label>
-                                {{ form.Type_of_Investment|add_class:"form-select" }}
+                                <select name="{{ form.Type_of_Investment.name }}" class="form-select" id="{{ form.Type_of_Investment.id_for_label }}">
+                                    <option value="">Select Type of Investment</option>
+                                    <!-- Options will be populated via HTMX -->
+                                </select>
                                 {% if form.Type_of_Investment.errors %}
                                     <div class="text-danger small mt-1">{{ form.Type_of_Investment.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Kpi_description.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">KPI Description <span class="text-danger">*</span></label>
-                                {{ form.Kpi_description|add_class:"form-select" }}
+                                <select name="{{ form.Kpi_description.name }}" class="form-select" id="{{ form.Kpi_description.id_for_label }}">
+                                    <option value="">Select KPI Description</option>
+                                    <!-- Options will be populated via HTMX -->
+                                </select>
                                 {% if form.Kpi_description.errors %}
                                     <div class="text-danger small mt-1">{{ form.Kpi_description.errors.0 }}</div>
                                 {% endif %}

@@ -1666,3 +1666,71 @@ def get_contract_status(start_date, end_date):
         return 'completed'
     else:
         return 'active'
+
+
+def htmx_load_investment_kpi(request):
+    """HTMX endpoint for loading investment types and KPI descriptions based on monitoring type"""
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    monitoring_type_id = request.GET.get('type_of_monitoring')
+    
+    if not monitoring_type_id:
+        return HttpResponse('''
+            <div class="col-md-6 mb-3">
+                <label for="id_Type_of_Investment" class="form-label" style="color: #2c3e50 !important;">Type of Investment <span class="text-danger">*</span></label>
+                <select name="Type_of_Investment" class="form-select" id="id_Type_of_Investment">
+                    <option value="">Select Type of Monitoring first</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_Kpi_description" class="form-label" style="color: #2c3e50 !important;">KPI Description <span class="text-danger">*</span></label>
+                <select name="Kpi_description" class="form-select" id="id_Kpi_description">
+                    <option value="">Select Type of Monitoring first</option>
+                </select>
+            </div>
+        ''')
+    
+    try:
+        # Get unique investment types and KPI descriptions for the selected monitoring type
+        kpi_records = KPI_For_Contract.objects.filter(
+            monitoring_type_id=monitoring_type_id
+        ).values('type_of_investment', 'Kpi_description').distinct()
+        
+        investment_options = []
+        kpi_options = []
+        
+        for record in kpi_records:
+            if record['type_of_investment'] and record['type_of_investment'] not in [opt['value'] for opt in investment_options]:
+                investment_options.append({
+                    'value': record['type_of_investment'],
+                    'text': record['type_of_investment']
+                })
+            
+            if record['Kpi_description'] and record['Kpi_description'] not in [opt['value'] for opt in kpi_options]:
+                kpi_options.append({
+                    'value': record['Kpi_description'],
+                    'text': record['Kpi_description']
+                })
+        
+        context = {
+            'investment_options': investment_options,
+            'kpi_options': kpi_options
+        }
+        
+        return render(request, 'project_actions/htmx/investment_kpi_options.html', context)
+        
+    except Exception as e:
+        return HttpResponse(f'''
+            <div class="col-md-6 mb-3">
+                <label for="id_Type_of_Investment" class="form-label" style="color: #2c3e50 !important;">Type of Investment <span class="text-danger">*</span></label>
+                <select name="Type_of_Investment" class="form-select" id="id_Type_of_Investment">
+                    <option value="">Error loading options</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_Kpi_description" class="form-label" style="color: #2c3e50 !important;">KPI Description <span class="text-danger">*</span></label>
+                <select name="Kpi_description" class="form-select" id="id_Kpi_description">
+                    <option value="">Error loading options</option>
+                </select>
+            </div>
+        ''')

@@ -289,7 +289,6 @@ class Activities(models.Model):
         return str(self.activity) 
 
 
-
 #******************** PDO, Outcome and Results  *********************************
 #Project Development Object
 class PDO(models.Model):

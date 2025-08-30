@@ -53,6 +53,7 @@ urlpatterns = [
     path('htmx/load-components/', views.load_project_components, name='load_project_components'),
     path('htmx/load-subcomponents/', views.load_component_subcomponents, name='load_component_subcomponents'),
     path('htmx/load-activities/', views.load_subcomponent_activities, name='load_subcomponent_activities'),
+    path('htmx/load-investment-kpi/', views.htmx_load_investment_kpi, name='htmx_load_investment_kpi'),
 
     path("ajax/load-type-of-investments/", views.load_type_of_investments, name="load_type_of_investments"),
     path("ajax/load-kpi-descriptions/", views.load_kpi_descriptions, name="load_kpi_descriptions"),
