@@ -18,7 +18,7 @@
                     </h4>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'main_dashboard' %}">Home</a></li>
                             <li class="breadcrumb-item"><a href="{% url 'project_actions:contract_monitoring_list' %}">Contract Monitoring</a></li>
                             <li class="breadcrumb-item active" aria-current="page">
                                 {% if contract_monitoring %}Update{% else %}Create{% endif %}
