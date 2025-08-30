@@ -325,6 +325,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize button state on page load
     updateContractSelectionButton();
 });
+
+// Contract selection function (moved from HTMX partial to avoid execution issues)
+function selectContract(contractRef) {
+    try {
+        console.log('Selecting contract:', contractRef);
+        
+        // Find the contract reference input field
+        const contractRefInput = document.querySelector('input[name="contract_refNo"]') || 
+                                document.getElementById('id_contract_refNo');
+        
+        if (contractRefInput) {
+            contractRefInput.value = contractRef;
+            console.log('Contract reference set:', contractRef);
+            
+            // Close the modal
+            const modal = document.getElementById('contractSelectionModal');
+            if (modal) {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                } else {
+                    // Fallback for manual modal closing
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.classList.remove('modal-open');
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) backdrop.remove();
+                }
+            }
+            
+            // Trigger any change events that might be needed
+            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
+            
+        } else {
+            console.error('Contract reference input field not found');
+            alert('Error: Could not find contract reference field. Please enter manually.');
+        }
+        
+    } catch (error) {
+        console.error('Error selecting contract:', error);
+        alert('Error selecting contract. Please try manual entry.');
+    }
+}
 </script>
 
 <style>

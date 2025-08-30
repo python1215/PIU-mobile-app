@@ -3,17 +3,16 @@
         <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
     </div>
 {% elif contracts %}
-    <div class="modal-body">
-        <div class="mb-3">
-            <h6 class="text-primary">
-                {% if contract_type == 'works_contract' %}
-                    Works Contracts for Project: {{ project_id }}
-                {% else %}
-                    Goods & Services Contracts for Project: {{ project_id }}
-                {% endif %}
-            </h6>
-            <p class="text-muted small">Found {{ total_count }} contract{{ total_count|pluralize }}. Click on a contract to select it.</p>
-        </div>
+    <div class="mb-3">
+        <h6 class="text-primary">
+            {% if contract_type == 'works_contract' %}
+                Works Contracts for Project: {{ project_id }}
+            {% else %}
+                Goods & Services Contracts for Project: {{ project_id }}
+            {% endif %}
+        </h6>
+        <p class="text-muted small">Found {{ total_count }} contract{{ total_count|pluralize }}. Click on a contract to select it.</p>
+    </div>
         
         <div class="list-group">
             {% for contract in contracts %}
@@ -64,9 +63,8 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
 {% else %}
-    <div class="modal-body text-center py-4">
+    <div class="text-center py-4">
         <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
         <h6 class="mt-3">No Contracts Found</h6>
         <p class="text-muted">
@@ -77,49 +75,4 @@
             <i class="bi bi-info-circle me-2"></i>
             <strong>Manual Entry Available:</strong> You can manually enter the contract reference number in the form field below.
         </div>
-    </div>
 {% endif %}
-
-<script>
-function selectContract(contractRef) {
-    try {
-        console.log('Selecting contract:', contractRef);
-        
-        // Find the contract reference input field
-        const contractRefInput = document.querySelector('input[name="contract_refNo"]') || 
-                                document.getElementById('id_contract_refNo');
-        
-        if (contractRefInput) {
-            contractRefInput.value = contractRef;
-            console.log('Contract reference set:', contractRef);
-            
-            // Close the modal
-            const modal = document.getElementById('contractSelectionModal');
-            if (modal) {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) {
-                    bsModal.hide();
-                } else {
-                    // Fallback for manual modal closing
-                    modal.style.display = 'none';
-                    modal.setAttribute('aria-hidden', 'true');
-                    document.body.classList.remove('modal-open');
-                    const backdrop = document.querySelector('.modal-backdrop');
-                    if (backdrop) backdrop.remove();
-                }
-            }
-            
-            // Trigger any change events that might be needed
-            contractRefInput.dispatchEvent(new Event('change', { bubbles: true }));
-            
-        } else {
-            console.error('Contract reference input field not found');
-            alert('Error: Could not find contract reference field. Please enter manually.');
-        }
-        
-    } catch (error) {
-        console.error('Error selecting contract:', error);
-        alert('Error selecting contract. Please try manual entry.');
-    }
-}
-</script>
