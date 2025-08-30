@@ -1552,15 +1552,24 @@ def export_goods_services_contracts_pdf(request):
 
 
 @login_required
-def get_contracts_by_project_and_type(request):
-    """AJAX endpoint to fetch contracts by project and contract type"""
+def get_contracts_by_project_and_type_htmx(request):
+    """HTMX endpoint to fetch contracts by project and contract type - returns HTML for offline compatibility"""
     import urllib.parse
+    from datetime import datetime
     
     project_id = request.GET.get('project_id')
     contract_type = request.GET.get('contract_type')
     
+    context = {
+        'contracts': [],
+        'error': None,
+        'contract_type': contract_type,
+        'project_id': project_id
+    }
+    
     if not project_id or not contract_type:
-        return JsonResponse({'error': 'Project ID and contract type are required'}, status=400)
+        context['error'] = 'Project ID and contract type are required'
+        return render(request, 'project_actions/htmx/contract_selection_modal.html', context)
     
     # Decode URL-encoded project ID
     try:
@@ -1572,24 +1581,37 @@ def get_contracts_by_project_and_type(request):
         contracts = []
         
         if contract_type == 'works_contract':
-            # Fetch Works contracts using projectID field (which is a string field, not FK to pk)
+            # Fetch Works contracts using projectID field
             works_contracts = Contract_Profiling_works.objects.filter(
                 projectID__projectID=project_id
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in works_contracts:
-                contracts.append({
+                # Calculate status
+                status = 'unknown'
+                if contract.contract_start_date and contract.contract_end_date:
+                    today = datetime.now().date()
+                    if contract.contract_start_date > today:
+                        status = 'pending'
+                    elif contract.contract_end_date < today:
+                        status = 'completed'
+                    else:
+                        status = 'active'
+                
+                contract_data = {
                     'id': contract.id,
                     'contract_refNo': contract.contract_refNo,
-                    'contract_value': float(contract.contract_value) if contract.contract_value else 0,
+                    'contract_value': contract.contract_value or 0,
                     'currency': contract.currency.currency if contract.currency else 'USD',
                     'contractor': contract.name_of_contractor or 'N/A',
                     'consultant': contract.name_of_consultant or 'N/A',
-                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
-                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
-                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date) if contract.contract_start_date and contract.contract_end_date else 'unknown',
-                    'detail_url': f"/project_actions/contract-profiling-works/{contract.id}/"
-                })
+                    'start_date': contract.contract_start_date,
+                    'end_date': contract.contract_end_date,
+                    'status': status,
+                    'detail_url': f"/project_actions/contract-profiling-works/{contract.id}/",
+                    'type': 'works_contract'
+                }
+                contracts.append(contract_data)
                 
         elif contract_type == 'goods_services':
             # Fetch Goods & Services contracts using projectID field
@@ -1598,41 +1620,39 @@ def get_contracts_by_project_and_type(request):
             ).select_related('projectID', 'project_Category', 'funding_source', 'currency')
             
             for contract in goods_contracts:
-                contracts.append({
+                # Calculate status
+                status = 'unknown'
+                if contract.contract_start_date and contract.contract_end_date:
+                    today = datetime.now().date()
+                    if contract.contract_start_date > today:
+                        status = 'pending'
+                    elif contract.contract_end_date < today:
+                        status = 'completed'
+                    else:
+                        status = 'active'
+                
+                contract_data = {
                     'id': contract.id,
                     'contract_refNo': contract.contract_refNo,
-                    'contract_value': float(contract.contract_value) if contract.contract_value else 0,
+                    'contract_value': contract.contract_value or 0,
                     'currency': contract.currency.currency if contract.currency else 'USD',
                     'supplier': contract.name_of_Supplier or 'N/A',
                     'consultant': contract.name_of_consultant or 'N/A',
-                    'start_date': contract.contract_start_date.strftime('%Y-%m-%d') if contract.contract_start_date else '',
-                    'end_date': contract.contract_end_date.strftime('%Y-%m-%d') if contract.contract_end_date else '',
-                    'status': get_contract_status(contract.contract_start_date, contract.contract_end_date) if contract.contract_start_date and contract.contract_end_date else 'unknown',
-                    'detail_url': f"/project_actions/contract-profiling-goods-services/{contract.id}/"
-                })
+                    'start_date': contract.contract_start_date,
+                    'end_date': contract.contract_end_date,
+                    'status': status,
+                    'detail_url': f"/project_actions/contract-profiling-goods-services/{contract.id}/",
+                    'type': 'goods_services'
+                }
+                contracts.append(contract_data)
         
-        return JsonResponse({
-            'contracts': contracts,
-            'total_count': len(contracts),
-            'contract_type': contract_type,
-            'project_id': project_id,
-            'debug_info': {
-                'original_project_id': request.GET.get('project_id'),
-                'decoded_project_id': project_id,
-                'query_time': timezone.now().isoformat()
-            }
-        })
+        context['contracts'] = contracts
+        context['total_count'] = len(contracts)
+        return render(request, 'project_actions/htmx/contract_selection_modal.html', context)
         
     except Exception as e:
-        return JsonResponse({
-            'error': str(e), 
-            'project_id': project_id,
-            'contract_type': contract_type,
-            'debug_info': {
-                'original_project_id': request.GET.get('project_id'),
-                'error_time': timezone.now().isoformat()
-            }
-        }, status=500)
+        context['error'] = str(e)
+        return render(request, 'project_actions/htmx/contract_selection_modal.html', context)
 
 
 def get_contract_status(start_date, end_date):
