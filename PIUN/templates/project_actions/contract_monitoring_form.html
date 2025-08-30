@@ -81,9 +81,7 @@
                                             hx-target="#contractModalBody"
                                             hx-include="#id_project, #id_type_of_contract"
                                             hx-trigger="click"
-                                            hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#contractSelectionModal">
+                                            hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'>
                                         <i class="bi bi-search me-1"></i>Select Contract
                                     </button>
                                 </div>
@@ -303,23 +301,34 @@ document.addEventListener('DOMContentLoaded', function() {
     projectSelect.addEventListener('change', updateContractSelectionButton);
     contractTypeSelect.addEventListener('change', updateContractSelectionButton);
     
+    // HTMX success handling - open modal after content loads
+    selectContractBtn.addEventListener('htmx:afterSwap', function(event) {
+        console.log('HTMX content loaded successfully, opening modal');
+        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
+        modal.show();
+    });
+    
     // HTMX error handling for contract selection (offline-compatible)
     selectContractBtn.addEventListener('htmx:responseError', function(event) {
         console.log('HTMX failed - offline mode active');
-        // Show user-friendly offline message instead of alert
+        // Show user-friendly offline message and open modal
         const modalBody = document.getElementById('contractModalBody');
         if (modalBody) {
             modalBody.innerHTML = '<div class="alert alert-info"><i class="bi bi-wifi-off me-2"></i>Offline Mode: Please enter the contract reference number manually in the form.</div>';
         }
+        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
+        modal.show();
     });
     
     selectContractBtn.addEventListener('htmx:timeout', function(event) {
         console.log('HTMX timeout - offline mode fallback');
-        // Show user-friendly timeout message instead of alert
+        // Show user-friendly timeout message and open modal
         const modalBody = document.getElementById('contractModalBody');
         if (modalBody) {
             modalBody.innerHTML = '<div class="alert alert-warning"><i class="bi bi-clock me-2"></i>Request timed out. Please enter the contract reference number manually.</div>';
         }
+        const modal = new bootstrap.Modal(document.getElementById('contractSelectionModal'));
+        modal.show();
     });
     
     // Initialize button state on page load
