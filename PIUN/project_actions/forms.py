@@ -629,7 +629,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         """Custom validation for Type_of_Investment field to handle cascading dropdown values"""
         value = self.cleaned_data.get('Type_of_Investment')
         
-        # If a string value is provided, create a temporary KPI_For_Contract instance
+        # If a string value is provided, find the matching KPI_For_Contract instance
         if isinstance(value, str) and value:
             try:
                 from PIU_Financial_mgt.models import KPI_For_Contract
@@ -638,10 +638,12 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                 if kpi:
                     return kpi
                 else:
-                    # Create a temporary object for validation - actual validation done in view
-                    return value
-            except Exception:
-                return value
+                    # If not found, raise validation error
+                    raise ValidationError(f"KPI record with investment type '{value}' not found.")
+            except Exception as e:
+                if "not found" in str(e):
+                    raise e
+                raise ValidationError(f"Error processing Type of Investment: {str(e)}")
         
         return value
     
@@ -649,19 +651,21 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         """Custom validation for Kpi_description field to handle cascading dropdown values"""
         value = self.cleaned_data.get('Kpi_description')
         
-        # If a string value is provided, create a temporary KPI_For_Contract instance
+        # If a string value is provided, find the matching KPI_For_Contract instance
         if isinstance(value, str) and value:
             try:
                 from PIU_Financial_mgt.models import KPI_For_Contract
                 # Try to find existing KPI record with this Kpi_description
-                kpi = KPI_For_Contract.objects.filter(monitoring_Type_Code=value).first()
+                kpi = KPI_For_Contract.objects.filter(Kpi_description=value).first()
                 if kpi:
                     return kpi
                 else:
-                    # Create a temporary object for validation - actual validation done in view
-                    return value
-            except Exception:
-                return value
+                    # If not found, raise validation error
+                    raise ValidationError(f"KPI record with description '{value}' not found.")
+            except Exception as e:
+                if "not found" in str(e):
+                    raise e
+                raise ValidationError(f"Error processing KPI Description: {str(e)}")
         
         return value
 

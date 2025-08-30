@@ -1699,14 +1699,20 @@ def htmx_load_investment_kpi(request):
         investment_options = []
         kpi_options = []
         
+        # Get unique investment types and KPI descriptions with their full records
+        investment_types_seen = set()
+        kpi_descriptions_seen = set()
+        
         for record in kpi_records:
-            if record['type_of_investment'] and record['type_of_investment'] not in [opt['value'] for opt in investment_options]:
+            if record['type_of_investment'] and record['type_of_investment'] not in investment_types_seen:
+                investment_types_seen.add(record['type_of_investment'])
                 investment_options.append({
                     'value': record['type_of_investment'],
                     'text': record['type_of_investment']
                 })
             
-            if record['Kpi_description'] and record['Kpi_description'] not in [opt['value'] for opt in kpi_options]:
+            if record['Kpi_description'] and record['Kpi_description'] not in kpi_descriptions_seen:
+                kpi_descriptions_seen.add(record['Kpi_description'])
                 kpi_options.append({
                     'value': record['Kpi_description'],
                     'text': record['Kpi_description']
