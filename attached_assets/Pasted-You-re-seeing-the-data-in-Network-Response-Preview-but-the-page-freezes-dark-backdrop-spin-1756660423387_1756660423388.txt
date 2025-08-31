@@ -1,0 +1,173 @@
+You’re seeing the data in **Network → Response/Preview** but the page “freezes” (dark backdrop, spinner, no list) because of a markup/event mismatch between your page template and the HTMX response.
+
+Here are the exact culprits in **your files** and the fixes:
+
+---
+
+# What’s going wrong (root causes tied to your code)
+
+1. You open the Bootstrap modal **immediately on click** via `data-bs-toggle="modal"` / `data-bs-target="#contractSelectionModal"` on the button, while **HTMX is still fetching**. That shows the spinner, but if the incoming fragment is shaped like a *modal body* (or contains a `<script>`), Bootstrap’s focus trap/backdrop logic gets confused → looks like a freeze. (Button with both Bootstrap + HTMX on it is here.)&#x20;
+
+2. Your HTMX view renders the partial **`project_actions/htmx/contract_selection_modal.html`** straight into `#contractModalBody`. If that partial still wraps its content in **`<div class="modal-body">…</div>`** or includes a `<script>`, you get a **nested `.modal-body`** (inside your real `.modal-body`) and a script that HTMX won’t run. That exact combo is the classic cause of “modal open + backdrop + nothing updates.” (This is the view that returns that template.)&#x20;
+
+3. Your error handlers are bound on `document.body` and check `e.target.id === 'contractModalBody'`. On many HTMX events, `e.target` is the **trigger** (the button), not the **swap target**, so your friendly error UI won’t show—leaving the spinner up and the page feeling “stuck.” (See modal/error wiring in the page template.)&#x20;
+
+---
+
+# Minimal changes that stop the freeze
+
+## A) Let HTMX finish, then open the modal
+
+Either:
+
+* **Option 1 (recommended):** remove Bootstrap’s auto-open from the button and open the modal on `htmx:afterSwap`.
+* **Option 2:** keep auto-open, but **ensure the partial is fragment-only** (no `.modal-body`, no `<script>`).
+
+### Option 1 (cleanest)
+
+**Change your button** (remove the two Bootstrap attributes):
+
+```html
+<button type="button" 
+        class="btn btn-outline-primary" 
+        id="selectContractBtn"
+        disabled
+        hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
+        hx-target="#contractModalBody"
+        hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
+        hx-trigger="click"
+        hx-swap="innerHTML">
+  <i class="bi bi-search me-1"></i>Select Contract
+</button>
+```
+
+
+
+**Open the modal after the swap completes** (bind on the **target**, not the button):
+
+```html
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl   = document.getElementById('contractSelectionModal');
+  const modalBody = document.getElementById('contractModalBody');
+
+  // Show a spinner as soon as the request starts (fires on the button or document)
+  document.getElementById('selectContractBtn')
+          .addEventListener('htmx:beforeRequest', function () {
+            modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+          });
+
+  // Open only AFTER the list is in the body
+  modalBody.addEventListener('htmx:afterSwap', function () {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+
+  // Robust error/timeout handlers
+  modalBody.addEventListener('htmx:responseError', function () {
+    modalBody.innerHTML = '<div class="alert alert-danger">Couldn’t load contracts. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+  modalBody.addEventListener('htmx:timeout', function () {
+    modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+});
+</script>
+```
+
+(Your page already defines `#contractSelectionModal` and the single **real** `#contractModalBody`; keep that structure.)&#x20;
+
+### Option 2 (keep auto-open)
+
+If you prefer to keep `data-bs-toggle="modal"` and open immediately, then you **must** fix the partial (next section) so it doesn’t nest `.modal-body` or ship a `<script>`.
+
+---
+
+## B) Make your HTMX **partial** fragment-only
+
+Your view renders **`project_actions/htmx/contract_selection_modal.html`**. Ensure that file returns **just** the list/header markup that belongs *inside* `#contractModalBody`—**no** `<div class="modal-body">…</div>`, **no** `<script>…</script>`. The view that renders this is here; the target is `#contractModalBody` in your page. &#x20;
+
+Use a structure like:
+
+```django
+{# project_actions/htmx/contract_selection_modal.html #}
+<div class="mb-3">
+  <h6 class="text-primary">
+    {% if contract_type == 'works_contract' %}Works{% elif contract_type == 'goods_services' %}Goods &amp; Services{% else %}Contracts{% endif %}
+    for Project: {{ project_id }}
+  </h6>
+  <p class="text-muted small">
+    {% if error %}{{ error }}{% else %}Found {{ total_count|default:0 }} contracts. Click on a contract to select it.{% endif %}
+  </p>
+</div>
+
+{% if not error and contracts %}
+  <div class="list-group">
+    {% for c in contracts %}
+      <div class="list-group-item">
+        <div class="d-flex w-100 justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h6 class="mb-1">{{ c.contract_refNo }}</h6>
+            <p class="mb-1"><strong>Value:</strong> {{ c.currency }} {{ c.contract_value }}</p>
+            <small class="text-muted d-block">
+              {% if c.contractor %}Contractor: {{ c.contractor }}{% endif %}
+              {% if c.supplier %}{% if c.contractor %} | {% endif %}Supplier: {{ c.supplier }}{% endif %}
+              {% if c.consultant %} | Consultant: {{ c.consultant }}{% endif %}
+            </small>
+            <small class="text-muted d-block">
+              Duration: {% if c.start_date %}{{ c.start_date|date:"M d, Y" }}{% else %}N/A{% endif %} to
+                        {% if c.end_date %}{{ c.end_date|date:"M d, Y" }}{% else %}N/A{% endif %}
+            </small>
+          </div>
+          <div class="d-flex flex-column align-items-end">
+            {% if c.status %}<span class="badge bg-secondary mb-2">{{ c.status|title }}</span>{% endif %}
+            <div class="btn-group-vertical" role="group">
+              <button type="button" class="btn btn-sm btn-outline-primary"
+                      onclick="selectContract('{{ c.contract_refNo|escapejs }}')">
+                <i class="bi bi-check-circle me-1"></i>Select
+              </button>
+              <a href="{{ c.detail_url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                <i class="bi bi-eye me-1"></i>View Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+```
+
+That’s it—no wrapper, no scripts. (Your global `selectContract()` already lives on the page template and closes the modal correctly.)&#x20;
+
+---
+
+## C) Tiny wiring tidy-up (errors)
+
+Replace the body-level error listeners with **target-level** listeners so the fallback UI actually appears inside the modal body even when HTMX sets a different event target:
+
+```js
+const modalBody = document.getElementById('contractModalBody');
+modalBody.addEventListener('htmx:responseError', /* … */);
+modalBody.addEventListener('htmx:timeout', /* … */);
+```
+
+
+
+---
+
+# Quick self-test checklist
+
+* Click “Select Contract”:
+  – **Option 1:** Button does **not** have `data-bs-toggle`; modal opens on `afterSwap`.
+  – **Option 2:** Button **does** have `data-bs-toggle`, but the HTMX **partial returns only a fragment** (no `.modal-body`, no `<script>`).
+
+* In **Network → Response**, the first tag of the HTMX response is **not** `<div class="modal-body">` and there is **no `<script>`** in the payload. (If you see either, that’s the freeze culprit.)
+
+* In the page source, there is exactly **one** `.modal-body` with id `contractModalBody`—the one inside your modal shell. (This is the one you target with HTMX.)&#x20;
+
+* `selectContract(ref)` is defined **once** on the page (not in the partial), and it closes the modal using `bootstrap.Modal.getOrCreateInstance(modalEl).hide();`.&#x20;
+
+---
+
+If you want, paste the **current contents** of `project_actions/htmx/contract_selection_modal.html` and I’ll trim it into a fragment that will swap cleanly into `#contractModalBody` with your existing view and template. &#x20;

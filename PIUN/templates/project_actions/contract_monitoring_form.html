@@ -77,8 +77,6 @@
                                             class="btn btn-outline-primary" 
                                             id="selectContractBtn" 
                                             disabled
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#contractSelectionModal"
                                             hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
                                             hx-target="#contractModalBody"
                                             hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
@@ -268,10 +266,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="contractModalBody">
-                <div class="text-center p-4">
-                    <div class="spinner-border" role="status"></div>
-                    <div class="mt-2">Loading…</div>
-                </div>
+                <!-- Contract list will be populated here -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -303,17 +298,29 @@ document.addEventListener('DOMContentLoaded', function() {
     contractTypeSelect?.addEventListener('change', updateBtn);
     updateBtn();
 
-    // Robust delegated HTMX error handling
-    document.body.addEventListener('htmx:responseError', function (e) {
-        if (e.target?.id === 'contractModalBody') {
-            e.target.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
-        }
+    // Modal handling - open only after HTMX completes
+    const modalEl = document.getElementById('contractSelectionModal');
+    const modalBody = document.getElementById('contractModalBody');
+
+    // Show spinner as soon as request starts
+    selectContractBtn.addEventListener('htmx:beforeRequest', function () {
+        modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+    });
+
+    // Open modal only AFTER the list is in the body
+    modalBody.addEventListener('htmx:afterSwap', function () {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    });
+
+    // Robust error/timeout handlers on target element
+    modalBody.addEventListener('htmx:responseError', function () {
+        modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
     
-    document.body.addEventListener('htmx:timeout', function (e) {
-        if (e.target?.id === 'contractModalBody') {
-            e.target.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
-        }
+    modalBody.addEventListener('htmx:timeout', function () {
+        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
 });
 
