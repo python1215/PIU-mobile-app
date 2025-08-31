@@ -301,7 +301,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalEl = document.getElementById('contractSelectionModal');
     const modalBody = document.getElementById('contractModalBody');
 
-    modalBody.addEventListener('htmx:beforeRequest', function () {
+    // Show spinner when the request starts (fires on the button)
+    selectContractBtn.addEventListener('htmx:beforeRequest', function () {
         modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
     });
 

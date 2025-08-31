@@ -1,0 +1,113 @@
+You’ve fixed most of the wiring, but two things can still make the page feel “frozen”:
+
+What’s still wrong (and where)
+
+Your HTMX partial is almost certainly still returning a <div class="modal-body">…</div> wrapper and a <script>…</script> block.
+Your view renders project_actions/htmx/contract_selection_modal.html directly into #contractModalBody. If that template still wraps its content in another .modal-body (or includes a <script>), you end up with a .modal-body nested inside your real .modal-body, and HTMX ignores the inline script. That combination regularly leaves Bootstrap’s focus trap/backdrop in a bad state → “freeze”. The view confirms this is the file being returned. 
+ 
+
+You’re listening for htmx:beforeRequest on the target (#contractModalBody).
+HTMX fires beforeRequest on the source element (the button), not the target. That won’t cause the freeze, but it’s why your loading spinner sometimes doesn’t show and the UI can look locked while the request is in-flight. Your afterSwap handler on #contractModalBody is correct and will open the modal at the right time; keep that. 
+
+The minimal, surgical fix
+A) Return a fragment only from the HTMX template
+
+Edit project_actions/htmx/contract_selection_modal.html so it returns just the inner content that belongs inside #contractModalBody — no extra .modal-body, no <script>. Your view already swaps this template into #contractModalBody; don’t nest another body. 
+
+Use a structure like this (entire file content):
+
+<div class="mb-3">
+  {% if contract_type == 'works_contract' %}
+    <h6 class="text-primary">Works Contracts for Project: {{ project_id }}</h6>
+  {% elif contract_type == 'goods_services' %}
+    <h6 class="text-primary">Goods &amp; Services Contracts for Project: {{ project_id }}</h6>
+  {% else %}
+    <h6 class="text-primary">Contracts for Project: {{ project_id }}</h6>
+  {% endif %}
+  <p class="text-muted small">
+    {% if error %}{{ error }}{% else %}Found {{ total_count|default:0 }} contracts. Click on a contract to select it.{% endif %}
+  </p>
+</div>
+
+{% if not error and contracts %}
+  <div class="list-group">
+    {% for c in contracts %}
+      <div class="list-group-item">
+        <div class="d-flex w-100 justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h6 class="mb-1">{{ c.contract_refNo }}</h6>
+            <p class="mb-1"><strong>Value:</strong> {{ c.currency }} {{ c.contract_value }}</p>
+            <small class="text-muted d-block">
+              {% if c.contractor %}Contractor: {{ c.contractor }}{% endif %}
+              {% if c.supplier %}Supplier: {{ c.supplier }}{% endif %}
+              {% if c.consultant %} | Consultant: {{ c.consultant }}{% endif %}
+            </small>
+            <small class="text-muted d-block">
+              Duration:
+              {% if c.start_date %}{{ c.start_date|date:"M d, Y" }}{% else %}N/A{% endif %}
+              to
+              {% if c.end_date %}{{ c.end_date|date:"M d, Y" }}{% else %}N/A{% endif %}
+            </small>
+          </div>
+          <div class="d-flex flex-column align-items-end">
+            {% if c.status %}<span class="badge bg-secondary mb-2">{{ c.status|title }}</span>{% endif %}
+            <div class="btn-group-vertical" role="group">
+              <button type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      onclick="selectContract('{{ c.contract_refNo|escapejs }}')">
+                <i class="bi bi-check-circle me-1"></i>Select
+              </button>
+              <a href="{{ c.detail_url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                <i class="bi bi-eye me-1"></i>View Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+B) Keep your current page-side wiring (it’s almost perfect)
+
+Your button uses HTMX to load into #contractModalBody and does not open the modal directly — good. 
+
+The modal shell (with one real .modal-body having id="contractModalBody") lives in the page — good. 
+
+You open the modal on htmx:afterSwap on the target element and use bootstrap.Modal.getOrCreateInstance — good; keep that. 
+
+(Optional) Move the spinner to a place that will actually fire: attach htmx:beforeRequest to the button or document, not to #contractModalBody. 
+
+Example tweak for the spinner:
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const selectBtn = document.getElementById('selectContractBtn');
+  const modalEl = document.getElementById('contractSelectionModal');
+  const modalBody = document.getElementById('contractModalBody');
+
+  // Show spinner when the request starts (fires on the button)
+  selectBtn.addEventListener('htmx:beforeRequest', function () {
+    modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  });
+
+  // Show the modal only after content is swapped into the body
+  modalBody.addEventListener('htmx:afterSwap', function () {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+});
+</script>
+
+C) Leave selectContract() defined on the page (not in the partial)
+
+You already did this — perfect. The inline onclick="selectContract('…')" in the fragment will now work consistently. 
+
+Why this stops the “freeze”
+
+With no nested .modal-body and no ignored <script>, Bootstrap’s focus trap/backdrop logic stays sane.
+
+Modal opens only after the list is present (on afterSwap), avoiding the “empty shell + dark screen” trap.
+
+Spinner shows reliably (binding beforeRequest to the correct element), so the UI doesn’t look locked while loading.
+
+If you still see the issue after this, dump the actual HTMX response HTML and check the very first tag: if it starts with <div class="modal-body"> or contains <script>…</script>, that’s the culprit — remove both from the partial. The view you shared will keep rendering that partial until you trim it down to a fragment.
