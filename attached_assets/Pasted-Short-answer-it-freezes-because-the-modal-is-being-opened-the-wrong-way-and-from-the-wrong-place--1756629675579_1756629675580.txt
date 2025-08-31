@@ -1,0 +1,77 @@
+Short answer: it “freezes” because the modal is being opened the wrong way and from the wrong place.
+
+What’s wrong (in your template)
+
+You’re opening the Bootstrap modal off a click with a 500 ms timeout (before HTMX has actually swapped in the response). That often shows an empty modal/backdrop and traps focus — which feels like a freeze. See the click handler at lines 304–313. 
+
+You attached the htmx:afterSwap listener to the button, but HTMX fires that event on the target element you swap into (#contractModalBody), not on the button. So your “open the modal after content loads” path never runs. Lines 315–320. 
+
+You repeatedly create new modal instances (new bootstrap.Modal(...)) in multiple handlers. That can stack backdrops and confuse Bootstrap’s focus trap. Lines 309–311, 318–319, 330–331, 341–342. 
+ 
+ 
+
+The HTMX request itself is fine — your button points at the HTMX view and swaps into #contractModalBody. Lines 76–85 and 80–84 show the setup. 
+ 
+
+The server view is also fine and returns the partial. 
+
+The fix (minimal, reliable)
+
+Remove the “open after 500 ms” click handler and the htmx:afterSwap listener on the button.
+
+Listen on the swap target (#contractModalBody) for HTMX events and open the modal there.
+
+Use bootstrap.Modal.getOrCreateInstance(...) consistently.
+
+Drop in this JS (replacing the current modal-related handlers):
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const projectSelect = document.getElementById('id_project');
+  const contractTypeSelect = document.getElementById('id_type_of_contract');
+  const selectContractBtn = document.getElementById('selectContractBtn');
+
+  // Enable/disable button
+  function updateBtn() {
+    const ok = projectSelect.value && contractTypeSelect.value;
+    selectContractBtn.disabled = !ok;
+    selectContractBtn.classList.toggle('disabled', !ok);
+  }
+  projectSelect.addEventListener('change', updateBtn);
+  contractTypeSelect.addEventListener('change', updateBtn);
+  updateBtn();
+
+  // Open modal only after HTMX has swapped the content into #contractModalBody
+  const modalEl = document.getElementById('contractSelectionModal');
+  const modalBody = document.getElementById('contractModalBody');
+
+  modalBody.addEventListener('htmx:beforeRequest', function () {
+    modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  });
+
+  modalBody.addEventListener('htmx:afterSwap', function () {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+
+  modalBody.addEventListener('htmx:responseError', function () {
+    modalBody.innerHTML = '<div class="alert alert-danger">Couldn’t load contracts. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+
+  modalBody.addEventListener('htmx:timeout', function () {
+    modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+});
+</script>
+
+
+(You already have the correct pattern once in your file — listening on #contractModalBody — keep that and delete the older handlers bound to the button. Compare lines 51–59 here to the older section at 304–320.) 
+ 
+
+One more sanity check
+
+Make sure there’s only one #contractSelectionModal and one #contractModalBody on the page, and your HTMX partial does not wrap its content with another .modal or .modal-body. Your button is correctly wired to swap into #contractModalBody (not replace the whole modal), so the response should just be the inner list markup with your “Select” buttons calling selectContract(...). 
+ 
+
+Do those three cleanups and the “freeze” goes away — the modal will open exactly when the list has been swapped in.

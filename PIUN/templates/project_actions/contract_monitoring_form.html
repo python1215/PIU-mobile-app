@@ -287,48 +287,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectContractBtn = document.getElementById('selectContractBtn');
     const contractRefInput = document.getElementById('id_contract_refNo');
     
-    // Function to update the contract selection button state
-    function updateContractSelectionButton() {
-        if (projectSelect.value && contractTypeSelect.value) {
-            selectContractBtn.disabled = false;
-            selectContractBtn.classList.remove('disabled');
-        } else {
-            selectContractBtn.disabled = true;
-            selectContractBtn.classList.add('disabled');
-        }
+    // Enable/disable button
+    function updateBtn() {
+        const ok = projectSelect.value && contractTypeSelect.value;
+        selectContractBtn.disabled = !ok;
+        selectContractBtn.classList.toggle('disabled', !ok);
     }
-    
-    // Watch for changes in project and contract type dropdowns
-    projectSelect.addEventListener('change', updateContractSelectionButton);
-    contractTypeSelect.addEventListener('change', updateContractSelectionButton);
-    
-    // Modal handling - listen on the target element, not the button
+    projectSelect.addEventListener('change', updateBtn);
+    contractTypeSelect.addEventListener('change', updateBtn);
+    updateBtn();
+
+    // Open modal only after HTMX has swapped the content into #contractModalBody
     const modalEl = document.getElementById('contractSelectionModal');
     const modalBody = document.getElementById('contractModalBody');
 
-    // Open modal exactly when #contractModalBody receives new content
-    modalBody.addEventListener('htmx:afterSwap', function(evt) {
-        const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
-        instance.show();
+    modalBody.addEventListener('htmx:beforeRequest', function () {
+        modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
     });
 
-    // Optional: show spinner as request starts (fires on the target)
-    modalBody.addEventListener('htmx:beforeRequest', function() {
-        modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+    modalBody.addEventListener('htmx:afterSwap', function () {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
 
-    // Error/timeouts -> show a friendly message in the body, then show modal
-    modalBody.addEventListener('htmx:responseError', function() {
-        modalBody.innerHTML = '<div class="alert alert-danger">Could not load contracts. Please try again.</div>';
+    modalBody.addEventListener('htmx:responseError', function () {
+        modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
-    modalBody.addEventListener('htmx:timeout', function() {
-        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Please try again.</div>';
+
+    modalBody.addEventListener('htmx:timeout', function () {
+        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
     });
-    
-    // Initialize button state on page load
-    updateContractSelectionButton();
 });
 
 // Contract selection function (moved from HTMX partial to avoid execution issues)
