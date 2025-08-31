@@ -280,62 +280,47 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get form elements
-    const projectSelect = document.getElementById('id_project');
-    const contractTypeSelect = document.getElementById('id_type_of_contract');
-    const selectContractBtn = document.getElementById('selectContractBtn');
-    const contractRefInput = document.getElementById('id_contract_refNo');
-    
-    // Enable/disable button
-    function updateBtn() {
-        const ok = projectSelect?.value && contractTypeSelect?.value;
-        if (selectContractBtn) {
-            selectContractBtn.disabled = !ok;
-            selectContractBtn.classList.toggle('disabled', !ok);
-        }
-    }
-    projectSelect?.addEventListener('change', updateBtn);
-    contractTypeSelect?.addEventListener('change', updateBtn);
-    updateBtn();
+  const projectSelect    = document.getElementById('id_project');
+  const contractTypeSelect = document.getElementById('id_type_of_contract');
+  const selectBtn        = document.getElementById('selectContractBtn');
+  const modalEl          = document.getElementById('contractSelectionModal');
+  const modalBody        = document.getElementById('contractModalBody');
 
-    // Modal handling - open only after HTMX completes
-    const modalEl = document.getElementById('contractSelectionModal');
-    const modalBody = document.getElementById('contractModalBody');
+  // Enable / disable button
+  function updateBtn(){ const ok = projectSelect?.value && contractTypeSelect?.value;
+    selectBtn.disabled = !ok; selectBtn.classList.toggle('disabled', !ok); }
+  projectSelect?.addEventListener('change', updateBtn);
+  contractTypeSelect?.addEventListener('change', updateBtn);
+  updateBtn();
 
-    // Show spinner as soon as request starts
-    selectContractBtn.addEventListener('htmx:beforeRequest', function () {
-        modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
-    });
+  // Spinner at request start (listen on the trigger)
+  selectBtn.addEventListener('htmx:beforeRequest', function () {
+    modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  });
 
-    // Open modal only AFTER the list is in the body
-    modalBody.addEventListener('htmx:afterSwap', function () {
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    });
+  // Open after swap (listen on the TARGET)
+  modalBody.addEventListener('htmx:afterSwap', function () {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
 
-    // Robust error/timeout handlers on target element
-    modalBody.addEventListener('htmx:responseError', function () {
-        modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    });
-    
-    modalBody.addEventListener('htmx:timeout', function () {
-        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    });
+  // Error/timeout fallbacks
+  modalBody.addEventListener('htmx:responseError', function () {
+    modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+  modalBody.addEventListener('htmx:timeout', function () {
+    modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
 });
 
-// Contract selection function (moved from HTMX partial to avoid execution issues)
-function selectContract(contractRef) {
-    const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
-    if (!input) { 
-        alert('Could not find contract reference field.'); 
-        return; 
-    }
-    input.value = contractRef;
-    const modalEl = document.getElementById('contractSelectionModal');
-    const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
-    instance.hide();
-    input.dispatchEvent(new Event('change', { bubbles: true }));
+// Global so the HTMX fragment's buttons can call it
+function selectContract(contractRef){
+  const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
+  if (!input) return alert('Could not find contract reference field.');
+  input.value = contractRef;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('contractSelectionModal')).hide();
+  input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 </script>
 
