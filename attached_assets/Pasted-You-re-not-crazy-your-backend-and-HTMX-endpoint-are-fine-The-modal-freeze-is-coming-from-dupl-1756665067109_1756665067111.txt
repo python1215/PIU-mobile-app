@@ -1,0 +1,161 @@
+You’re not crazy — your backend and HTMX endpoint are fine. The modal “freeze” is coming from **duplicate markup + conflicting open strategies in the same template**.
+
+## The real culprits (in your template)
+
+1. ### You have **multiple copies** of the modal scaffold (same IDs) in `contract_monitoring_form.html`
+
+There are several repeated blocks with the exact same IDs `contractSelectionModal` and `contractModalBody`. When the page has duplicates, HTMX updates one `#contractModalBody` while Bootstrap opens **another** `#contractSelectionModal`. Result: the modal opens with a backdrop but appears “empty/frozen” even though the network response looks good. See the repeated modal blocks here (note the same IDs):   &#x20;
+
+2. ### You also have **multiple copies of the Select button** (same ID) and at least one copy still uses **Bootstrap auto-open**
+
+One version of the button **includes** `data-bs-toggle="modal"` + `data-bs-target="#contractSelectionModal"` (auto-opens immediately); other versions are HTMX-only. Mixing these leads to a race where the modal opens *before* the HTMX swap — often on the “other” duplicate modal — so you see the backdrop with no content. Here’s the copy that still auto-opens:&#x20;
+…and a copy that doesn’t:&#x20;
+
+3. ### An event listener is attached to the **wrong element** in one duplicate
+
+One of the duplicates attaches `htmx:beforeRequest` to **`modalBody`**. HTMX lifecycle events bubble **up from the trigger** (the button), not sideways into unrelated nodes; `modalBody` won’t see `beforeRequest` from a button elsewhere. This doesn’t by itself freeze, but it’s another sign of duplicated, diverging logic:&#x20;
+(Your “good” copy listens on the button for `beforeRequest` and on the target for `afterSwap`: )
+
+---
+
+## What to change (quick, mechanical fixes)
+
+1. **Keep exactly one** modal scaffold and **one** “Select Contract” button in the file.
+   Search your template for these IDs and make sure each appears **once**:
+
+* `id="contractSelectionModal"` — **1 instance only** (not 2–4)&#x20;
+* `id="contractModalBody"` — **1 instance only** (not 2–4)&#x20;
+* `id="selectContractBtn"` — **1 instance only** (not 2–4)&#x20;
+
+> In the browser console, you can verify:
+> `document.querySelectorAll('#contractSelectionModal').length` → should be **1**
+> `document.querySelectorAll('#contractModalBody').length` → should be **1**
+> `document.querySelectorAll('#selectContractBtn').length` → should be **1**
+
+2. **Use one open strategy.** Remove Bootstrap’s auto-open from the button.
+   Delete `data-bs-toggle="modal"` and `data-bs-target="#contractSelectionModal"` from the button (this is the problematic copy):&#x20;
+   Keep the HTMX-only button like this copy: `hx-get`, `hx-target="#contractModalBody"`, `hx-trigger="click"` (no `data-bs-*`).&#x20;
+
+3. **Bind events once, to the right nodes.**
+
+* Spinner on **the button’s** `htmx:beforeRequest` (works; you already have this in one copy).&#x20;
+* Open the modal on **the target’s** `htmx:afterSwap` (works; you already have this).&#x20;
+* Don’t attach `beforeRequest` to `modalBody` (that listener won’t fire).&#x20;
+
+4. Your HTMX fragment `contract_selection_modal.html` is correctly a **fragment** (no nested `.modal-body`, no scripts) — keep it that way.&#x20;
+
+5. Minor safety: in the fragment’s Select button, escape the ref in the inline handler to avoid quote issues:
+
+```django
+onclick="selectContract('{{ contract.contract_refNo|escapejs }}')"
+```
+
+(That’s a polish; not the freeze cause.)&#x20;
+
+---
+
+## A minimal “known-good” wiring (copy/paste to replace duplicates)
+
+**Button (HTMX-only):**
+
+```html
+<button type="button"
+        class="btn btn-outline-primary"
+        id="selectContractBtn"
+        disabled
+        hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
+        hx-target="#contractModalBody"
+        hx-vals='js:{"project_id": document.getElementById("id_project").value,
+                    "contract_type": document.getElementById("id_type_of_contract").value}'
+        hx-trigger="click"
+        hx-swap="innerHTML">
+  <i class="bi bi-search me-1"></i>Select Contract
+</button>
+```
+
+**One modal scaffold (one only):**
+
+```html
+<div class="modal fade" id="contractSelectionModal" tabindex="-1" aria-labelledby="contractModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contractModalTitle">Select Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="contractModalBody"><!-- HTMX injects here --></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+        <small class="text-muted">Click on a contract to select it</small>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+**JS (one block):**
+
+```html
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const projectSelect    = document.getElementById('id_project');
+  const contractTypeSelect = document.getElementById('id_type_of_contract');
+  const selectBtn        = document.getElementById('selectContractBtn');
+  const modalEl          = document.getElementById('contractSelectionModal');
+  const modalBody        = document.getElementById('contractModalBody');
+
+  // Enable / disable button
+  function updateBtn(){ const ok = projectSelect?.value && contractTypeSelect?.value;
+    selectBtn.disabled = !ok; selectBtn.classList.toggle('disabled', !ok); }
+  projectSelect?.addEventListener('change', updateBtn);
+  contractTypeSelect?.addEventListener('change', updateBtn);
+  updateBtn();
+
+  // Spinner at request start (listen on the trigger)
+  selectBtn.addEventListener('htmx:beforeRequest', function () {
+    modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  });
+
+  // Open after swap (listen on the TARGET)
+  modalBody.addEventListener('htmx:afterSwap', function () {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+
+  // Error/timeout fallbacks
+  modalBody.addEventListener('htmx:responseError', function () {
+    modalBody.innerHTML = '<div class="alert alert-danger">Couldn’t load contracts. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+  modalBody.addEventListener('htmx:timeout', function () {
+    modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+});
+
+// Global so the HTMX fragment’s buttons can call it
+function selectContract(contractRef){
+  const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
+  if (!input) return alert('Could not find contract reference field.');
+  input.value = contractRef;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('contractSelectionModal')).hide();
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+</script>
+```
+
+(These match the “good” code paths you already have; the key is **removing the duplicates/conflicts**.) &#x20;
+
+---
+
+## Bonus sanity checks
+
+* In DevTools Elements tab, search “`contractSelectionModal`”. You should see **one** match. If there’s more than one, that’s the freeze. (Your current file shows several.) &#x20;
+* If you *temporarily* add `console.log('afterSwap fired')` to the `modalBody.addEventListener('htmx:afterSwap',…)`, you’ll probably see it log **but the modal that opens is not the one you swapped** — that’s the duplicate-ID symptom.
+
+---
+
+### Why this explains “Network → Preview shows correct content”
+
+The HTMX response is correct and the swap **does** happen — just not into the modal you’re looking at. With duplicate IDs, the browser picks the **first** `#contractModalBody` for the selector, while Bootstrap may be showing **another** `#contractSelectionModal`. That’s exactly why you see the data in the network preview but the popup looks empty/frozen. Cleaning the duplicates resolves it. &#x20;

@@ -51,7 +51,7 @@
                                 class="btn btn-sm btn-outline-primary select-contract-btn" 
                                 data-contract-ref="{{ contract.contract_refNo }}"
                                 data-contract-id="{{ contract.id }}"
-                                onclick="selectContract('{{ contract.contract_refNo }}')">
+                                onclick="selectContract('{{ contract.contract_refNo|escapejs }}')">
                             <i class="bi bi-check-circle me-1"></i>Select
                         </button>
                         <a href="{{ contract.detail_url }}" target="_blank" class="btn btn-sm btn-outline-info">
