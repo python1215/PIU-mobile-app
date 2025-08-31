@@ -77,11 +77,12 @@
                                             class="btn btn-outline-primary" 
                                             id="selectContractBtn" 
                                             disabled
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#contractSelectionModal"
                                             hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
                                             hx-target="#contractModalBody"
-                                            hx-include="#id_project, #id_type_of_contract"
-                                            hx-trigger="click"
                                             hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
+                                            hx-trigger="click"
                                             hx-swap="innerHTML">
                                         <i class="bi bi-search me-1"></i>Select Contract
                                     </button>
@@ -267,7 +268,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="contractModalBody">
-                <!-- Contract list will be populated here -->
+                <div class="text-center p-4">
+                    <div class="spinner-border" role="status"></div>
+                    <div class="mt-2">Loading…</div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -289,35 +293,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Enable/disable button
     function updateBtn() {
-        const ok = projectSelect.value && contractTypeSelect.value;
-        selectContractBtn.disabled = !ok;
-        selectContractBtn.classList.toggle('disabled', !ok);
+        const ok = projectSelect?.value && contractTypeSelect?.value;
+        if (selectContractBtn) {
+            selectContractBtn.disabled = !ok;
+            selectContractBtn.classList.toggle('disabled', !ok);
+        }
     }
-    projectSelect.addEventListener('change', updateBtn);
-    contractTypeSelect.addEventListener('change', updateBtn);
+    projectSelect?.addEventListener('change', updateBtn);
+    contractTypeSelect?.addEventListener('change', updateBtn);
     updateBtn();
 
-    // Open modal only after HTMX has swapped the content into #contractModalBody
-    const modalEl = document.getElementById('contractSelectionModal');
-    const modalBody = document.getElementById('contractModalBody');
-
-    // Show spinner when the request starts (fires on the button)
-    selectContractBtn.addEventListener('htmx:beforeRequest', function () {
-        modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+    // Robust delegated HTMX error handling
+    document.body.addEventListener('htmx:responseError', function (e) {
+        if (e.target?.id === 'contractModalBody') {
+            e.target.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
+        }
     });
-
-    modalBody.addEventListener('htmx:afterSwap', function () {
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    });
-
-    modalBody.addEventListener('htmx:responseError', function () {
-        modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    });
-
-    modalBody.addEventListener('htmx:timeout', function () {
-        modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    
+    document.body.addEventListener('htmx:timeout', function (e) {
+        if (e.target?.id === 'contractModalBody') {
+            e.target.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
+        }
     });
 });
 

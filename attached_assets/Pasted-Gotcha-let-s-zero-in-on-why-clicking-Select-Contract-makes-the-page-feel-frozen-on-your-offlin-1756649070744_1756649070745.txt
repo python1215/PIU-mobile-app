@@ -1,0 +1,204 @@
+Gotcha—let’s zero in on why clicking **Select Contract** makes the page feel “frozen” on your offline build.
+
+Here’s what’s happening in your code and the most likely failure points, in order of probability, plus drop-in fixes.
+
+---
+
+# What’s most likely breaking (and how to fix fast)
+
+### 1) Bootstrap JS isn’t actually loaded in your offline deployment
+
+You call `bootstrap.Modal.getOrCreateInstance(...).show()` right after HTMX swaps in the content. If Bootstrap’s **bundle** isn’t loaded (CDN blocked offline, or only the non-bundle file is loaded), `bootstrap` will be `undefined` → no modal shows and it *feels* frozen even though the HTMX request succeeded.
+Relevant code: the event handler that calls `.show()` after swap, and the modal skeleton are all in your template.&#x20;
+
+**Quick fix A (no extra JS required):** open the modal using data attributes and let HTMX fill the body.
+
+```html
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  id="selectContractBtn"
+  disabled
+  data-bs-toggle="modal"
+  data-bs-target="#contractSelectionModal"
+  hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
+  hx-target="#contractModalBody"
+  hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
+  hx-trigger="click"
+  hx-swap="innerHTML"
+>
+  <i class="bi bi-search me-1"></i>Select Contract
+</button>
+```
+
+Then remove the JS that manually calls `bootstrap.Modal...show()`; the modal will open immediately via Bootstrap, and HTMX will stream the content into `#contractModalBody`. (Spinner tip in point 3.)
+
+**Quick fix B (if you want to keep the JS approach):** guard the call so it never throws when Bootstrap is missing:
+
+```js
+modalBody.addEventListener('htmx:afterSwap', function () {
+  if (window.bootstrap?.Modal) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  } else {
+    // Fallback: open via data API if available
+    modalEl.classList.add('show'); modalEl.style.display='block'; document.body.classList.add('modal-open');
+  }
+});
+```
+
+Also make sure your offline build serves **bootstrap.bundle.min.js** (the *bundle* includes Popper) from your static files, not a CDN.
+
+---
+
+### 2) Your HTMX event listeners are brittle (element-scoped)
+
+You’re listening for HTMX events on specific nodes (`selectContractBtn` for `htmx:beforeRequest`, `modalBody` for `htmx:afterSwap`). That *usually* works, but if anything about targets changes, or if errors abort JS earlier on the page, those listeners won’t run.
+
+**Sturdier fix:** delegate on `document.body` and check the target id. This keeps working even if DOM is swapped.
+
+```js
+document.body.addEventListener('htmx:beforeRequest', function (e) {
+  if (e.target && e.target.id === 'selectContractBtn') {
+    document.getElementById('contractModalBody').innerHTML =
+      '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+  }
+});
+
+document.body.addEventListener('htmx:afterSwap', function (e) {
+  if (e.target && e.target.id === 'contractModalBody') {
+    if (window.bootstrap?.Modal) bootstrap.Modal.getOrCreateInstance(document.getElementById('contractSelectionModal')).show();
+  }
+});
+
+document.body.addEventListener('htmx:responseError', function (e) {
+  if (e.target && e.target.id === 'contractModalBody') {
+    e.target.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
+  }
+});
+```
+
+This replaces the per-element listeners and avoids losing handlers after swaps.&#x20;
+
+---
+
+### 3) Show the modal **and** a spinner immediately (better UX, fewer race conditions)
+
+Open the modal right away (data attributes as in fix A) and put an HTMX indicator inside the body:
+
+```html
+<div class="modal-body" id="contractModalBody">
+  <div class="text-center p-4" hx-indicator="#contractLoading">
+    <div id="contractLoading" class="spinner-border" role="status"></div>
+    <div class="mt-2">Loading…</div>
+  </div>
+</div>
+```
+
+HTMX will replace this with the response; you don’t need JS to inject a spinner anymore.&#x20;
+
+---
+
+### 4) Mixed param mechanisms: `hx-include` + `hx-vals`
+
+In your button you send values via `hx-vals` **and** also set `hx-include`. That’s fine, but it’s easy to drift. Your view expects `project_id` and `contract_type` keys. If the form field names differ, only `hx-vals` will match the view parameters. Keep one source of truth.
+
+**Safer simplification: remove `hx-include` and keep only `hx-vals`.**
+View expects these exact keys (see `get_contracts_by_project_and_type_htmx`).&#x20;
+
+---
+
+### 5) The HTMX partial probably returns a nested `.modal-body`
+
+Your target is `#contractModalBody` (a `.modal-body`). If your partial also wraps its content in `<div class="modal-body"> ... </div>`, you’ll nest modal bodies. This won’t always break, but it can mess with focus trapping and scrolling, which *feels* like a freeze.
+
+**Fix on the partial:** return only the **inner list** (header + list group), not another `.modal-body` wrapper. Your view renders `project_actions/htmx/contract_selection_modal.html`—trim that partial to avoid extra modal scaffolding.&#x20;
+
+---
+
+### 6) Button enable logic vs. actual IDs
+
+You enable the button when `#id_project` and `#id_type_of_contract` have values. That’s correct for standard Django widgets, but if either widget’s id/name deviates (custom widget, crispy-forms, etc.), the button may remain disabled on a real page—even though you *think* you clicked. Since you **do** see network responses, this is probably not your case, but it’s worth double-checking the rendered ids in the offline build.&#x20;
+
+---
+
+# Server-side endpoint looks fine
+
+Your HTMX endpoint `get_contracts_by_project_and_type_htmx` accepts `project_id` and `contract_type`, builds a context, and renders the partial. If you see the response payload with contracts in DevTools → **the server side is good.** The issue is entirely on the client (modal opening / JS / assets loading).&#x20;
+
+---
+
+## Minimal working recipe (copy-paste)
+
+**1) Button (open modal instantly, let HTMX fill content):**
+
+```html
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  id="selectContractBtn"
+  disabled
+  data-bs-toggle="modal"
+  data-bs-target="#contractSelectionModal"
+  hx-get="{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}"
+  hx-target="#contractModalBody"
+  hx-vals='js:{"project_id": document.getElementById("id_project").value, "contract_type": document.getElementById("id_type_of_contract").value}'
+  hx-trigger="click"
+  hx-swap="innerHTML"
+>
+  <i class="bi bi-search me-1"></i>Select Contract
+</button>
+```
+
+**2) Modal body with indicator:**
+
+```html
+<div class="modal-body" id="contractModalBody">
+  <div class="text-center p-4" hx-indicator="#contractLoading">
+    <div id="contractLoading" class="spinner-border" role="status"></div>
+    <div class="mt-2">Loading…</div>
+  </div>
+</div>
+```
+
+**3) Robust delegated HTMX listeners (optional if you keep the data-toggle approach):**
+
+```js
+document.addEventListener('DOMContentLoaded', function() {
+  const projectSelect = document.getElementById('id_project');
+  const contractTypeSelect = document.getElementById('id_type_of_contract');
+  const selectContractBtn = document.getElementById('selectContractBtn');
+
+  function updateBtn() {
+    const ok = projectSelect?.value && contractTypeSelect?.value;
+    if (selectContractBtn) {
+      selectContractBtn.disabled = !ok;
+      selectContractBtn.classList.toggle('disabled', !ok);
+    }
+  }
+  projectSelect?.addEventListener('change', updateBtn);
+  contractTypeSelect?.addEventListener('change', updateBtn);
+  updateBtn();
+
+  document.body.addEventListener('htmx:responseError', function (e) {
+    if (e.target?.id === 'contractModalBody') {
+      e.target.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
+    }
+  });
+});
+```
+
+**4) Ensure Bootstrap is locally served (offline):**
+
+```html
+<!-- In base.html, use static files, not CDN -->
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
+```
+
+(Use your actual static paths.)&#x20;
+
+---
+
+If you apply **Quick fix A** (open via data attributes) *and* load **bootstrap.bundle.min.js** locally, the “freezing” should disappear. Everything else above tightens reliability and UX around it.
+
+If you want, paste your current `contract_selection_modal.html` partial and `base.html` `<script>` section—I’ll tune them to your exact setup.
