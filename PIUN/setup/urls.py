@@ -169,12 +169,6 @@ urlpatterns = [
     path('indicator-type/<int:pk>/edit/', views.indicator_type_update, name='indicator_type_update'),
     path('indicator-type/<int:pk>/delete/', views.indicator_type_delete, name='indicator_type_delete'),
     
-    # PDO (Project Development Objectives) URLs
-    path('pdo/', views.pdo_list, name='pdo_list'),
-    path('pdo/add/', views.pdo_create, name='pdo_create'),
-    path('pdo/<int:pk>/', views.pdo_detail, name='pdo_detail'),
-    path('pdo/<int:pk>/edit/', views.pdo_update, name='pdo_update'),
-    path('pdo/<int:pk>/delete/', views.pdo_delete, name='pdo_delete'),
     
     # Project Outcome URLs
     path('project-outcomes/', views.project_outcome_list, name='project_outcome_list'),

@@ -1,6 +1,6 @@
 from django import forms
 from .models import   ProjectResult,Indicator_Description, Results_Oriented_Monitoring
-from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
+from PIU_Financial_mgt.models import Project, ProjectOutCome, ProjectResult
 from datetime import datetime
 from django.urls import reverse_lazy
 
@@ -11,16 +11,16 @@ class Indicator_DescriptionForm(forms.ModelForm):
         queryset=Project.objects.filter(projectID='NAWEC'),
         widget=forms.Select(
             attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_PDO"),
+                "hx-get": reverse_lazy("monitoring:load_project_outcome"),
                 "hx-target": "#id_pdo",
                 "hx-trigger": "change",
             }
         )
     )
 
-    pdo = forms.ModelChoiceField(
+    project_outcome = forms.ModelChoiceField(
        
-        queryset=PDO.objects.none(),  # Initially empty until a project is selected
+        queryset=ProjectOutCome.objects.none(),  # Initially empty until a project is selected
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_Outcome"),
@@ -78,15 +78,15 @@ class Results_Oriented_MonitoringForm(forms.ModelForm):
         queryset=Project.objects.filter(project__icontains='water'),
         widget=forms.Select(
             attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
+                "hx-get": reverse_lazy("monitoring:load_project_outcome"), 
                 "hx-target": "#id_pdo", 
                 "hx-trigger": "change",  # Trigger when project changes
             }
         )
     )
 
-    pdo = forms.ModelChoiceField(
-        queryset=PDO.objects.none(),  # Initially empty until a project is selected
+    project_outcome = forms.ModelChoiceField(
+        queryset=ProjectOutCome.objects.none(),  # Initially empty until a project is selected
         widget=forms.Select(
             attrs={
                 "hx-get": reverse_lazy("monitoring:load_project_Outcome"), 
@@ -137,7 +137,7 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
         widget=forms.Select()
     )
 
-    pdo = forms.ModelChoiceField(
+    project_outcome = forms.ModelChoiceField(
         queryset=PDO.objects.all(),  # Show all PDOs for editing mode
         widget=forms.Select(),
         required=False

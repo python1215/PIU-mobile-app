@@ -4,7 +4,7 @@ from .models import (
     KPIIndicator, NAWEC_KPI_Monitoring
 )
 from setup.models import Quarter, YEAR, Indicator_Type, Measurement_Unit, Data_Collection_Frequency
-from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
+from PIU_Financial_mgt.models import Project, ProjectOutCome, ProjectResult
 
 
 class CalculateAOForm(forms.ModelForm):

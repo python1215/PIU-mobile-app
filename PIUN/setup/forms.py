@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import *
-from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome, PDO
+from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome
 
 class DonorForm(forms.ModelForm):
     class Meta:
@@ -281,69 +281,13 @@ class TypeOfStakeholderEngagementForm(forms.ModelForm):
         widgets = {
             'stake_holder_engagement': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter stakeholder engagement type'})
         }
-class SetupPDOForm(forms.ModelForm):
-    class Meta:
-        model = SetupPDO
-        fields = [
-            'pdo_title', 'pdo_description', 'pdo_indicator', 'target_value', 
-            'baseline_value', 'target_date', 'responsible_unit', 'status', 'is_active'
-        ]
-        widgets = {
-            'pdo_title': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter PDO title',
-                'maxlength': '300'
-            }),
-            'pdo_description': forms.Textarea(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter detailed description of the PDO',
-                'rows': 4
-            }),
-            'pdo_indicator': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter key performance indicator'
-            }),
-            'target_value': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter target value or outcome'
-            }),
-            'baseline_value': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter baseline value'
-            }),
-            'target_date': forms.DateInput(attrs={
-                'class': 'form-control', 
-                'type': 'date'
-            }),
-            'responsible_unit': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Enter responsible unit or department'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            })
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add help text to fields
-        self.fields['pdo_title'].help_text = "Enter a clear and concise PDO title"
-        self.fields['pdo_description'].help_text = "Provide detailed description of what this PDO aims to achieve"
-        self.fields['target_date'].help_text = "Expected completion date for this PDO"
 
 
 class ProjectOutcomeForm(forms.ModelForm):
     class Meta:
         model = ProjectOutCome
-        fields = ['pdo', 'project_outcome']
+        fields = ['project_outcome']
         widgets = {
-            'pdo': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Select a PDO'
-            }),
             'project_outcome': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter project outcome description',
@@ -354,12 +298,7 @@ class ProjectOutcomeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Add help text to fields
-        self.fields['pdo'].help_text = "Select the related Project Development Objective"
         self.fields['project_outcome'].help_text = "Enter a clear and measurable project outcome"
-        
-        # Customize the PDO queryset to show more descriptive text
-        self.fields['pdo'].queryset = PDO.objects.all().order_by('pdo_statement')
-        self.fields['pdo'].empty_label = "Select a PDO..."
 
 
 class ProjectResultForm(forms.ModelForm):

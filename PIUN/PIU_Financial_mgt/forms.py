@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Component, Subcomponent, Activities, PDO, ProjectOutCome, ProjectResult, Currency
+from .models import Project, Component, Subcomponent, Activities, ProjectOutCome, ProjectResult, Currency
 from setup.models import Donor
 from django.urls import reverse_lazy
 from datetime import datetime
@@ -376,18 +376,10 @@ class updateActivitiesForm(forms.ModelForm):
 #                 pass
 
 
-class PdoForm(forms.ModelForm):
-    class Meta:
-        model = PDO
-        fields = ['project', 'pdo_statement',]
-        widgets = {
-            'Date_Created': forms.DateTimeInput(attrs={'type': 'datetime-local', 'value': datetime.now().strftime('%Y-%m-%dT%H:%M')}),
-        }
-
 class ProjectOutcomeForm(forms.ModelForm):
     class Meta:
         model = ProjectOutCome
-        fields = ['pdo', 'project_outcome',]
+        fields = ['project_outcome',]
         widgets = {
             'Date_Created': forms.DateTimeInput(attrs={'type': 'datetime-local', 'value': datetime.now().strftime('%Y-%m-%dT%H:%M')}),
         }
