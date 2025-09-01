@@ -113,7 +113,7 @@
                         <option value="">All Components</option>
                         {% for component in components %}
                             <option value="{{ component.id }}" {% if request.GET.component == component.id|stringformat:"s" %}selected{% endif %}>
-                                {{ component.Project_Components }}
+                                {{ component.project_components }}
                             </option>
                         {% endfor %}
                     </select>
