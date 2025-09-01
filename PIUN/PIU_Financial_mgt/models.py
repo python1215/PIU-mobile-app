@@ -293,8 +293,26 @@ class Activities(models.Model):
 #******************** Outcome and Results  *********************************
     
 
+class PDO(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    pdo_statement = models.CharField(max_length=200, unique=True, null=False)
+    date = models.DateTimeField(auto_now_add=True)
+    loginUser = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='pdos',
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = ('PDO Statement')
+        verbose_name_plural = ('PDO Statements')
+
+    def __str__(self):
+        return str(self.pdo_statement)
+
 class ProjectOutCome(models.Model):
 
+    pdo = models.ForeignKey(PDO, on_delete=models.CASCADE)
     project_outcome = models.CharField(max_length=200, unique=True, null=False)
     date = models.DateTimeField(auto_now_add=True)
     loginUser = models.ForeignKey(
@@ -351,19 +369,4 @@ class KPI_For_Contract(models.Model):
         return str(self.type_of_investment)
 
 
-class PDO(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    pdo_statement = models.CharField(max_length=200, unique=True, null=False)
-    date = models.DateTimeField(auto_now_add=True)
-    loginUser = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='pdos',
-        on_delete=models.CASCADE,
-    )
 
-    class Meta:
-        verbose_name = ('PDO Statement')
-        verbose_name_plural = ('PDO Statements')
-
-    def __str__(self):
-        return str(self.pdo_statement)

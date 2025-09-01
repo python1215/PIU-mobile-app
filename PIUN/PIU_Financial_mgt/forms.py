@@ -387,7 +387,7 @@ class PdoForm(forms.ModelForm):
 class ProjectOutcomeForm(forms.ModelForm):
     class Meta:
         model = ProjectOutCome
-        fields = ['project_outcome',]
+        fields = ['pdo', 'project_outcome',]
         widgets = {
             'Date_Created': forms.DateTimeInput(attrs={'type': 'datetime-local', 'value': datetime.now().strftime('%Y-%m-%dT%H:%M')}),
         }

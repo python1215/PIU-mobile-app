@@ -1,0 +1,294 @@
+NoReverseMatch at /monitoring/add-results-monitoring/
+Reverse for 'load_project_outcome' not found. 'load_project_outcome' is not a valid view function or pattern name.
+Request Method:	GET
+Request URL:	http://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev/monitoring/add-results-monitoring/
+Django Version:	5.2.1
+Exception Type:	NoReverseMatch
+Exception Value:	
+Reverse for 'load_project_outcome' not found. 'load_project_outcome' is not a valid view function or pattern name.
+Exception Location:	/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/urls/resolvers.py, line 831, in _reverse_with_prefix
+Raised during:	monitoring.views.add_results_monitoring
+Python Executable:	/nix/store/2lcqw1d28vklbk8ikiwad28iq2smwndv-python-wrapped-0.1.0/bin/python3
+Python Version:	3.11.13
+Python Path:	
+['/home/runner/workspace/PIUN',
+ '/home/runner/workspace',
+ '/home/runner/workspace/.pythonlibs/bin',
+ '/nix/store/zz7i75jb78idaz0rb1y1i4rzdyxq28vf-sitecustomize/lib/python/site-packages',
+ '/nix/store/yaps09f01jp3fd1405qlr0qz6haf6z03-python3.11-pip-25.0.1/lib/python3.11/site-packages',
+ '/nix/store/7d088dip86hlzri9sk0h78b63yfmx0a0-python3-3.11.13/lib/python311.zip',
+ '/nix/store/7d088dip86hlzri9sk0h78b63yfmx0a0-python3-3.11.13/lib/python3.11',
+ '/nix/store/7d088dip86hlzri9sk0h78b63yfmx0a0-python3-3.11.13/lib/python3.11/lib-dynload',
+ '/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages',
+ '/nix/store/7d088dip86hlzri9sk0h78b63yfmx0a0-python3-3.11.13/lib/python3.11/site-packages',
+ '/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages',
+ '/nix/store/y0iwy8ma2m45pr23bw4r7lyz69v2b6wf-python3.11-setuptools-80.7.1/lib/python3.11/site-packages']
+Server time:	Mon, 01 Sep 2025 02:24:29 +0000
+Error during template rendering
+In template /home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/forms/templates/django/forms/widgets/attrs.html, error at line 1
+
+Reverse for 'load_project_outcome' not found. 'load_project_outcome' is not a valid view function or pattern name.
+1	{% for name, value in widget.attrs.items %}{% if value is not False %} {{ name }}{% if value is not True %}="{{ value|stringformat:'s' }}"{% endif %}{% endif %}{% endfor %}
+Traceback Switch to copy-and-paste view
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/core/handlers/exception.py, line 55, in inner
+        return inner
+    else:
+        @wraps(get_response)
+        def inner(request):
+            try:
+                response = get_response(request)
+                               ^^^^^^^^^^^^^^^^^^^^^ …
+            except Exception as exc:
+                response = response_for_exception(request, exc)
+            return response
+        return inner
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/core/handlers/base.py, line 197, in _get_response
+        if response is None:
+            wrapped_callback = self.make_view_atomic(callback)
+            # If it is an asynchronous view, run it in a subthread.
+            if iscoroutinefunction(wrapped_callback):
+                wrapped_callback = async_to_sync(wrapped_callback)
+            try:
+                response = wrapped_callback(request, *callback_args, **callback_kwargs)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+            except Exception as e:
+                response = self.process_exception_by_middleware(e, request)
+                if response is None:
+                    raise
+        # Complain if the view returned None (a common error).
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/contrib/auth/decorators.py, line 59, in _view_wrapper
+            def _view_wrapper(request, *args, **kwargs):
+                if iscoroutinefunction(test_func):
+                    test_pass = async_to_sync(test_func)(request.user)
+                else:
+                    test_pass = test_func(request.user)
+                if test_pass:
+                    return view_func(request, *args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+                return _redirect_to_login(request)
+        # Attributes used by LoginRequiredMiddleware.
+        _view_wrapper.login_url = login_url
+        _view_wrapper.redirect_field_name = redirect_field_name
+Local vars
+/home/runner/workspace/PIUN/monitoring/views.py, line 244, in add_results_monitoring
+            return redirect('monitoring:enhanced-results-monitoring-list')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = Results_Oriented_MonitoringForm()
+    
+    context = {'form': form}
+    return render(request, 'monitoring/results_monitoring/add_results_monitoring.html', context)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+@login_required
+def enhanced_results_monitoring_list(request):
+    """Enhanced list view for Results Oriented Monitoring records with comprehensive filtering"""
+    from django.core.paginator import Paginator
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/shortcuts.py, line 25, in render
+def render(
+    request, template_name, context=None, content_type=None, status=None, using=None
+):
+    """
+    Return an HttpResponse whose content is filled with the result of calling
+    django.template.loader.render_to_string() with the passed arguments.
+    """
+    content = loader.render_to_string(template_name, context, request, using=using)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    return HttpResponse(content, content_type, status)
+def redirect(to, *args, permanent=False, preserve_request=False, **kwargs):
+    """
+    Return an HttpResponseRedirect to the appropriate URL for the arguments
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/loader.py, line 62, in render_to_string
+    template_name may be a string or a list of strings.
+    """
+    if isinstance(template_name, (list, tuple)):
+        template = select_template(template_name, using=using)
+    else:
+        template = get_template(template_name, using=using)
+    return template.render(context, request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+def _engine_list(using=None):
+    return engines.all() if using is None else [engines[using]]
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/backends/django.py, line 107, in render
+        return self.template.origin
+    def render(self, context=None, request=None):
+        context = make_context(
+            context, request, autoescape=self.backend.engine.autoescape
+        )
+        try:
+            return self.template.render(context)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+        except TemplateDoesNotExist as exc:
+            reraise(exc, self.backend)
+def copy_exception(exc, backend=None):
+    """
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 171, in render
+    def render(self, context):
+        "Display stage -- can be called many times"
+        with context.render_context.push_state(self):
+            if context.template is None:
+                with context.bind_template(self):
+                    context.template_name = self.name
+                    return self._render(context)
+                                ^^^^^^^^^^^^^^^^^^^^^ …
+            else:
+                return self._render(context)
+    def compile_nodelist(self):
+        """
+        Parse and compile the template source into a nodelist. If debug
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 163, in _render
+    def __repr__(self):
+        return '<%s template_string="%s...">' % (
+            self.__class__.__qualname__,
+            self.source[:20].replace("\n", ""),
+        )
+    def _render(self, context):
+        return self.nodelist.render(context)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def render(self, context):
+        "Display stage -- can be called many times"
+        with context.render_context.push_state(self):
+            if context.template is None:
+                with context.bind_template(self):
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 1016, in render
+class NodeList(list):
+    # Set to True the first time a non-TextNode is inserted by
+    # extend_nodelist().
+    contains_nontext = False
+    def render(self, context):
+        return SafeString("".join([node.render_annotated(context) for node in self]))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def get_nodes_by_type(self, nodetype):
+        "Return a list of all nodes of the given type"
+        nodes = []
+        for node in self:
+            nodes.extend(node.get_nodes_by_type(nodetype))
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 1016, in <listcomp>
+class NodeList(list):
+    # Set to True the first time a non-TextNode is inserted by
+    # extend_nodelist().
+    contains_nontext = False
+    def render(self, context):
+        return SafeString("".join([node.render_annotated(context) for node in self]))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def get_nodes_by_type(self, nodetype):
+        "Return a list of all nodes of the given type"
+        nodes = []
+        for node in self:
+            nodes.extend(node.get_nodes_by_type(nodetype))
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 977, in render_annotated
+        """
+        Render the node. If debug is True and an exception occurs during
+        rendering, the exception is annotated with contextual line information
+        where it occurred in the template. For internal usage this method is
+        preferred over using the render method directly.
+        """
+        try:
+            return self.render(context)
+                        ^^^^^^^^^^^^^^^^^^^^ …
+        except Exception as e:
+            if context.template.engine.debug:
+                # Store the actual node that caused the exception.
+                if not hasattr(e, "_culprit_node"):
+                    e._culprit_node = self
+                if (
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/loader_tags.py, line 159, in render
+                    }
+                    block_context.add_blocks(blocks)
+                break
+        # Call Template._render explicitly so the parser context stays
+        # the same.
+        with context.render_context.push_state(compiled_parent, isolated_context=False):
+            return compiled_parent._render(context)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+class IncludeNode(Node):
+    context_key = "__include_context"
+    def __init__(
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 163, in _render
+    def __repr__(self):
+        return '<%s template_string="%s...">' % (
+            self.__class__.__qualname__,
+            self.source[:20].replace("\n", ""),
+        )
+    def _render(self, context):
+        return self.nodelist.render(context)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def render(self, context):
+        "Display stage -- can be called many times"
+        with context.render_context.push_state(self):
+            if context.template is None:
+                with context.bind_template(self):
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 1016, in render
+class NodeList(list):
+    # Set to True the first time a non-TextNode is inserted by
+    # extend_nodelist().
+    contains_nontext = False
+    def render(self, context):
+        return SafeString("".join([node.render_annotated(context) for node in self]))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def get_nodes_by_type(self, nodetype):
+        "Return a list of all nodes of the given type"
+        nodes = []
+        for node in self:
+            nodes.extend(node.get_nodes_by_type(nodetype))
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 1016, in <listcomp>
+class NodeList(list):
+    # Set to True the first time a non-TextNode is inserted by
+    # extend_nodelist().
+    contains_nontext = False
+    def render(self, context):
+        return SafeString("".join([node.render_annotated(context) for node in self]))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+    def get_nodes_by_type(self, nodetype):
+        "Return a list of all nodes of the given type"
+        nodes = []
+        for node in self:
+            nodes.extend(node.get_nodes_by_type(nodetype))
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/base.py, line 977, in render_annotated
+        """
+        Render the node. If debug is True and an exception occurs during
+        rendering, the exception is annotated with contextual line information
+        where it occurred in the template. For internal usage this method is
+        preferred over using the render method directly.
+        """
+        try:
+            return self.render(context)
+                        ^^^^^^^^^^^^^^^^^^^^ …
+        except Exception as e:
+            if context.template.engine.debug:
+                # Store the actual node that caused the exception.
+                if not hasattr(e, "_culprit_node"):
+                    e._culprit_node = self
+                if (
+Local vars
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/template/loader_tags.py, line 65, in render
+                push = block = block_context.pop(self.name)
+                if block is None:
+                    block = self
+                # Create new block so we can store context without thread-safety issues.
+                block = type(self)(block.name, block.nodelist)
+                block.context = context
+                context["block"] = block
+                result = block.nodelist.render(context)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ …
+                if push is not None:
+                    block_context.push(self.name, push)
+        return result
+    def super(self):
+        if not hasattr(self, "context"):
+Local vars

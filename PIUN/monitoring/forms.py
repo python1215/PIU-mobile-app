@@ -11,7 +11,7 @@ class Indicator_DescriptionForm(forms.ModelForm):
         queryset=Project.objects.filter(projectID='NAWEC'),
         widget=forms.Select(
             attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_outcome"),
+                "hx-get": reverse_lazy("monitoring:load_project_PDO"),
                 "hx-target": "#id_pdo",
                 "hx-trigger": "change",
             }
@@ -78,7 +78,7 @@ class Results_Oriented_MonitoringForm(forms.ModelForm):
         queryset=Project.objects.filter(project__icontains='water'),
         widget=forms.Select(
             attrs={
-                "hx-get": reverse_lazy("monitoring:load_project_outcome"), 
+                "hx-get": reverse_lazy("monitoring:load_project_PDO"), 
                 "hx-target": "#id_pdo", 
                 "hx-trigger": "change",  # Trigger when project changes
             }
