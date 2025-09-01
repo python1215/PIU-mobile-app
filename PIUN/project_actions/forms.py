@@ -598,9 +598,10 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             if start_date > end_date:
                 raise ValidationError("Milestone end date must be after or equal to start date.")
         
-        if monitoring_date:
-            if monitoring_date > timezone.now().date():
-                raise ValidationError("Monitoring date cannot be in the future.")
+        # Allow future monitoring dates for planning purposes
+        # if monitoring_date:
+        #     if monitoring_date > timezone.now().date():
+        #         raise ValidationError("Monitoring date cannot be in the future.")
         
         # Validate image file
         if picture:

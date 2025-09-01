@@ -954,7 +954,14 @@ def contract_monitoring_create(request):
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error saving monitoring record: {error_msg}")
         else:
-            messages.error(request, "Please correct the errors below.", extra_tags='project_actions')
+            # Display specific form errors to help user understand what's wrong
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error, extra_tags='project_actions')
+                    else:
+                        messages.error(request, f"{field}: {error}", extra_tags='project_actions')
+            
             # Log form errors for debugging
             import logging
             logger = logging.getLogger(__name__)
