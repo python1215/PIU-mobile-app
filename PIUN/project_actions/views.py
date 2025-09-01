@@ -771,6 +771,9 @@ def contract_monitoring_list(request):
                 Q(remarks__icontains=search_query)
             )
         
+        # Ensure descending order by monitoring date after all filtering
+        queryset = queryset.order_by('-monitoring_date')
+        
         # Convert to list for pagination and calculate statistics
         queryset_list = list(queryset)
         total_records = len(queryset_list)
