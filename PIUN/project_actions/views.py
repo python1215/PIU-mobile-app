@@ -1014,7 +1014,7 @@ def contract_monitoring_update(request, pk):
             try:
                 # Get available options for the current monitoring type
                 kpi_records = KPI_For_Contract.objects.filter(
-                    monitoring_type_id=record.type_of_monitoring.id
+                    monitoring_type_id=record.type_of_monitoring.monitoring_type_code
                 ).values('type_of_investment', 'Kpi_description').distinct()
                 
                 investment_options = []
