@@ -448,6 +448,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             'Target': forms.Textarea(attrs={'rows': 3}),
             'Achieved_status': forms.Textarea(attrs={'rows': 3}),
             'remarks': forms.Textarea(attrs={'rows': 4}),
+            'picture_of_status': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
 
     def __init__(self, *args, **kwargs):

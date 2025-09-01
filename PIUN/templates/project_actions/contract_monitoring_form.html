@@ -41,7 +41,7 @@
                     </h5>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" id="contractMonitoringForm" novalidate>
+                    <form method="post" id="contractMonitoringForm" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         
                         <!-- Project and Contract Details -->
@@ -227,18 +227,6 @@
                                 {% endif %}
                                 
                                 <!-- Current Picture Preview -->
-                                <!-- Debug info for troubleshooting -->
-                                <div class="mt-2 mb-2 p-2 bg-info-subtle border rounded small">
-                                    <strong>Debug Info:</strong><br>
-                                    Record exists: {{ record|yesno:"yes,no" }}<br>
-                                    {% if record %}
-                                        Picture exists: {{ record.picture_of_status|yesno:"yes,no" }}<br>
-                                        {% if record.picture_of_status %}
-                                            Picture path: {{ record.picture_of_status.name }}<br>
-                                            Picture URL: {{ record.picture_of_status.url }}
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
                                 
                                 {% if record.picture_of_status %}
                                     <div class="mt-3 p-3 border rounded bg-light">
