@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.db import models
-from PIU_Financial_mgt.models import Project, ProjectOutCome, ProjectResult
+from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
 from setup.models import Indicator_Type, YEAR, Quarter, Measurement_Unit, Data_Collection_Frequency
 
 # Indicator Description model
 class Indicator_Description(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    pdo = models.ForeignKey(PDO, on_delete=models.CASCADE)
 
     project_outcome = models.ForeignKey(ProjectOutCome, on_delete=models.CASCADE)
     project_result = models.ForeignKey(ProjectResult, on_delete=models.CASCADE) 
@@ -29,6 +30,7 @@ class Results_Oriented_Monitoring(models.Model):
     year = models.ForeignKey(YEAR, on_delete=models.CASCADE, null=True)
     quarter = models.ForeignKey(Quarter, on_delete=models.CASCADE, verbose_name="Report Frequency")
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    pdo = models.ForeignKey(PDO, on_delete=models.CASCADE)
  
     project_outcome = models.ForeignKey(ProjectOutCome, on_delete=models.CASCADE)
     project_result = models.ForeignKey(ProjectResult, on_delete=models.CASCADE)
