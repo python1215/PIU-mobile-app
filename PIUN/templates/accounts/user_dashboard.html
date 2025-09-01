@@ -11,9 +11,14 @@
                 <h2 class="h4 text-dark mb-0">
                     <i class="bi bi-people me-2"></i>User Management Dashboard
                 </h2>
-                <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
-                    <i class="bi bi-person-plus me-1"></i>Add New User
-                </a>
+                <div>
+                    <a href="{% url 'main_dashboard' %}" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Main Dashboard
+                    </a>
+                    <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
+                        <i class="bi bi-person-plus me-1"></i>Add New User
+                    </a>
+                </div>
             </div>
 
             <!-- Statistics Cards -->
