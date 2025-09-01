@@ -37,7 +37,7 @@ urlpatterns = [
 
     path('NAWEC_KPI/', include('NAWEC_KPI.urls', namespace='NAWEC_KPI')),
     path('Issues_Actions_monitoring/', include('Issues_Actions_monitoring.urls', namespace='Issues_Actions_monitoring')),
-    path('document-management/', include('Project_Documentation_Tracking.urls')),
+    path('document-management/', include('Project_Documentation_Tracking.urls', namespace='Project_Documentation_Tracking')),
 ]
 
 # Serve static and media files during development and production
