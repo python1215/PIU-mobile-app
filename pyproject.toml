@@ -23,4 +23,8 @@ dependencies = [
     "pandas>=2.3.0",
     "matplotlib>=3.10.3",
     "gunicorn>=23.0.0",
+    "oauthlib>=3.3.1",
+    "pyjwt>=2.10.1",
+    "flask-dance>=7.1.0",
+    "flask-login>=0.6.3",
 ]
