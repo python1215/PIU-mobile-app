@@ -61,7 +61,7 @@ class updatesubcomponentForm(forms.ModelForm):
     )
     compID = forms.ModelChoiceField(
         queryset=Component.objects.none(), 
-        required=False,
+        required=True,
         empty_label="Select Component..."
     )
     
