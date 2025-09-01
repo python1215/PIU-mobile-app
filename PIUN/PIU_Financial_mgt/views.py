@@ -359,8 +359,8 @@ def load_project_components(request):
     print(f"POST params: {request.POST}")
     print(f"Is HTMX request: {request.headers.get('HX-Request', 'No')}")
     
-    project_id = request.GET.get("projectID")  # Changed from project_id to projectID
-    print("Received projectID:", project_id)
+    project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
+    print("Received project_id:", project_id)
     
     if project_id:
         # Filter components by the selected project using the correct field reference
