@@ -91,23 +91,15 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.projectID.id_for_label }}" class="form-label">Project</label>
-                                {% if is_edit %}
-                                    <!-- In edit mode, show project as read-only -->
-                                    <input type="text" class="form-control" value="{{ component.projectID.project }}" readonly>
-                                    <small class="text-muted">{{ component.projectID.projectID }}</small>
-                                    <!-- Hidden field to include projectID in form submission -->
-                                    <input type="hidden" name="projectID" value="{{ component.projectID.pk }}">
-                                {% else %}
-                                    {{ form.projectID|add_class:"form-select" }}
-                                {% endif %}
+                                <label for="{{ form.projectID.id_for_label }}" class="form-label">Project <span class="text-danger">*</span></label>
+                                {{ form.projectID|add_class:"form-select" }}
                                 {% if form.projectID.errors %}
                                     <div class="text-danger small">{{ form.projectID.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.project_components.id_for_label }}" class="form-label">Component Name</label>
+                                <label for="{{ form.project_components.id_for_label }}" class="form-label">Component Name <span class="text-danger">*</span></label>
                                 {{ form.project_components|add_class:"form-control" }}
                                 {% if form.project_components.errors %}
                                     <div class="text-danger small">{{ form.project_components.errors.0 }}</div>

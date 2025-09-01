@@ -42,6 +42,23 @@ class addProjectForm(forms.ModelForm):
 
 
 class addComponentForm(forms.ModelForm):
+    projectID = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Select Project...",
+        to_field_name='projectID'
+    )
+    
+    currency = forms.ModelChoiceField(
+        queryset=Currency.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Override the project field to only show project names
+        self.fields['projectID'].label_from_instance = lambda obj: obj.project
+    
     class Meta:
         model = Component
         fields = ['projectID','project_components','component_description','currency','allocation']

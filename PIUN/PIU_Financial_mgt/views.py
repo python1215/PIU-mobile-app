@@ -961,34 +961,18 @@ def edit_component(request, component_id):
     component = get_object_or_404(Component, compID=component_id)
     
     if request.method == 'POST':
-        print(f"=== EDIT COMPONENT DEBUG ===")
-        print(f"POST data: {request.POST}")
-        print(f"Component ID: {component_id}")
-        print(f"Current component: {component.project_components}")
-        
-        # Create a mutable copy of POST data and add the projectID
-        post_data = request.POST.copy()
-        post_data['projectID'] = component.projectID.pk
-        
-        form = addComponentForm(post_data, instance=component)
-        print(f"Form is valid: {form.is_valid()}")
-        print(f"Form errors: {form.errors}")
-        
+        form = addComponentForm(request.POST, instance=component)
         if form.is_valid():
             try:
                 component = form.save(commit=False)
                 component.loginUser = request.user
                 component.save()
-                print(f"Component saved successfully: {component.project_components}")
                 messages.success(request, 'Component updated successfully!')
                 return redirect('PIU_Financial_mgt:components')
             except Exception as e:
-                print(f"Error saving component: {e}")
-                messages.error(request, f'Error saving component: {str(e)}')
-                # Continue to re-render form with error
+                messages.error(request, f'Error updating component: {str(e)}')
         else:
-            print(f"Form errors: {form.errors}")
-            messages.error(request, f'Form validation failed: {form.errors}')
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = addComponentForm(instance=component)
     
