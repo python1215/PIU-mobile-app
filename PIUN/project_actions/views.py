@@ -777,9 +777,9 @@ def contract_monitoring_list(request):
         unique_contracts = len(set(record.contract_refNo for record in queryset_list if record.contract_refNo))
         overdue_milestones = 0  # Simplified for now
         
-        # Simple pagination for list data
+        # Simple pagination for list data - 5 records per page
         from django.core.paginator import Paginator
-        paginator = Paginator(queryset_list, 25)
+        paginator = Paginator(queryset_list, 5)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -790,6 +790,8 @@ def contract_monitoring_list(request):
         context = {
             'page_title': 'Contract Monitoring',
             'monitoring_records': page_obj,
+            'page_obj': page_obj,
+            'is_paginated': page_obj.has_other_pages(),
             'filter_form': filter_form,
             'search_query': search_query,
             'total_records': total_records,
@@ -798,6 +800,7 @@ def contract_monitoring_list(request):
             'sort_by': request.GET.get('sort', '-monitoring_date'),
             'projects': projects,
             'physical_progress_options': physical_progress_options,
+            'current_filters': '&'.join([f'{key}={value}' for key, value in request.GET.items() if key != 'page']),
         }
         
     except Exception as e:

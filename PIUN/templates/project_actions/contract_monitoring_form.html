@@ -82,7 +82,8 @@
                                             hx-vals='js:{"project_id": document.getElementById("id_project").value,
                                                         "contract_type": document.getElementById("id_type_of_contract").value}'
                                             hx-trigger="click"
-                                            hx-swap="innerHTML">
+                                            hx-swap="innerHTML"
+                                            onclick="console.log('Button clicked', {project: document.getElementById('id_project').value, type: document.getElementById('id_type_of_contract').value});">
                                         <i class="bi bi-search me-1"></i>Select Contract
                                     </button>
                                 </div>
@@ -295,22 +296,103 @@ document.addEventListener('DOMContentLoaded', function() {
   // Spinner at request start (listen on the trigger)
   selectBtn.addEventListener('htmx:beforeRequest', function () {
     modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Loading…</div></div>';
+    // Also show modal immediately for faster feedback
+    showModalPlatformIndependent();
+  });
+  
+  // Add click listener as backup for environments where HTMX might not work
+  selectBtn.addEventListener('click', function(e) {
+    const projectId = document.getElementById('id_project').value;
+    const contractType = document.getElementById('id_type_of_contract').value;
+    
+    if (!projectId || !contractType) {
+      alert('Please select both project and contract type first.');
+      return;
+    }
+    
+    // If HTMX doesn't trigger after 2 seconds, manually load the contracts
+    setTimeout(function() {
+      if (modalBody.innerHTML.includes('Loading…')) {
+        // Manual AJAX call as fallback
+        fetch(`{% url 'project_actions:get_contracts_by_project_and_type_htmx' %}?project_id=${encodeURIComponent(projectId)}&contract_type=${encodeURIComponent(contractType)}`)
+          .then(response => response.text())
+          .then(html => {
+            modalBody.innerHTML = html;
+            showModalPlatformIndependent();
+          })
+          .catch(error => {
+            console.error('Fetch error:', error);
+            modalBody.innerHTML = '<div class="alert alert-warning">Could not load contracts. Please try manual entry.</div>';
+            showModalPlatformIndependent();
+          });
+      }
+    }, 2000);
   });
 
-  // Open after swap (listen on the TARGET)
+  // Open after swap (listen on the TARGET) - Platform independent
   modalBody.addEventListener('htmx:afterSwap', function () {
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    try {
+      // Try Bootstrap 5 first
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+      } else if (typeof $ !== 'undefined' && $.fn.modal) {
+        // Fallback to jQuery Bootstrap if available
+        $(modalEl).modal('show');
+      } else {
+        // Manual modal display as last resort
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        modalEl.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'manual-backdrop';
+        document.body.appendChild(backdrop);
+      }
+    } catch (error) {
+      console.error('Modal show error:', error);
+      // Fallback: Just make it visible
+      modalEl.style.display = 'block';
+      modalEl.classList.add('show');
+    }
   });
 
-  // Error/timeout fallbacks
+  // Error/timeout fallbacks - Platform independent
   modalBody.addEventListener('htmx:responseError', function () {
     modalBody.innerHTML = '<div class="alert alert-danger">Couldn\'t load contracts. Try again.</div>';
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    showModalPlatformIndependent();
   });
   modalBody.addEventListener('htmx:timeout', function () {
     modalBody.innerHTML = '<div class="alert alert-warning">Request timed out. Try again.</div>';
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    showModalPlatformIndependent();
   });
+  
+  // Platform independent modal show function
+  function showModalPlatformIndependent() {
+    try {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+      } else if (typeof $ !== 'undefined' && $.fn.modal) {
+        $(modalEl).modal('show');
+      } else {
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        modalEl.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'manual-backdrop';
+        document.body.appendChild(backdrop);
+      }
+    } catch (error) {
+      console.error('Modal show error:', error);
+      modalEl.style.display = 'block';
+      modalEl.classList.add('show');
+    }
+  }
 });
 
 // Global so the HTMX fragment's buttons can call it
@@ -325,11 +407,35 @@ function selectContract(contractRef){
     // Set the value
     input.value = contractRef;
     
-    // Hide the modal
+    // Hide the modal - Platform independent
     const modal = document.getElementById('contractSelectionModal');
     if (modal) {
-      const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
-      modalInstance.hide();
+      try {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+          modalInstance.hide();
+        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+          $(modal).modal('hide');
+        } else {
+          // Manual modal hide
+          modal.style.display = 'none';
+          modal.classList.remove('show');
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('modal-open');
+          
+          // Remove backdrop
+          const backdrop = document.getElementById('manual-backdrop');
+          if (backdrop) {
+            backdrop.remove();
+          }
+        }
+      } catch (error) {
+        console.error('Modal hide error:', error);
+        // Fallback: Just hide it
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+        document.body.classList.remove('modal-open');
+      }
     }
     
     // Trigger change event with multiple fallback approaches for environment independence

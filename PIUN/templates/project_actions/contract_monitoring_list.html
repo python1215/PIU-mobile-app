@@ -242,31 +242,69 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
+                        <!-- Enhanced Pagination with Filter Preservation -->
                         {% if is_paginated %}
                             <nav aria-label="Contract monitoring pagination">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-muted">
+                                        Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records (5 per page)
+                                    </div>
+                                    <div class="pagination-info">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                    </div>
+                                </div>
+                                
                                 <ul class="pagination justify-content-center">
                                     {% if page_obj.has_previous %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.project %}&project={{ request.GET.project }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">First</a>
+                                            <a class="page-link" href="?page=1{% if current_filters %}&{{ current_filters }}{% endif %}" title="Go to first page">
+                                                <i class="bi bi-chevron-double-left"></i> First
+                                            </a>
                                         </li>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.project %}&project={{ request.GET.project }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_filters %}&{{ current_filters }}{% endif %}" title="Go to previous page">
+                                                <i class="bi bi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="bi bi-chevron-double-left"></i> First</span>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
                                         </li>
                                     {% endif %}
 
-                                    <li class="page-item active">
-                                        <span class="page-link">
-                                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                                        </span>
-                                    </li>
+                                    <!-- Page numbers -->
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active" aria-current="page">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if current_filters %}&{{ current_filters }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
 
                                     {% if page_obj.has_next %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.project %}&project={{ request.GET.project }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_filters %}&{{ current_filters }}{% endif %}" title="Go to next page">
+                                                Next <i class="bi bi-chevron-right"></i>
+                                            </a>
                                         </li>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.project %}&project={{ request.GET.project }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Last</a>
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_filters %}&{{ current_filters }}{% endif %}" title="Go to last page">
+                                                Last <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Last <i class="bi bi-chevron-double-right"></i></span>
                                         </li>
                                     {% endif %}
                                 </ul>
