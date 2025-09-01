@@ -16,7 +16,7 @@
         background-color: #007bff;
         border-color: #007bff;
     }
-    .sql-server-form .form-control {
+    .form-control {
         background-color: #f8f9fa;
         border: 1px solid #dee2e6;
     }
@@ -35,72 +35,7 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    {% if is_sql_server_mode %}
-                        <!-- Form -->
-                        <form method="post" enctype="multipart/form-data" class="sql-server-form">
-                            {% csrf_token %}
-                            
-                            <div class="form-group">
-                                <label for="description" class="form-label">Description *</label>
-                                <textarea class="form-control" id="description" name="description" 
-                                          rows="3" required>{{ document.description|default:'' }}</textarea>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="project" class="form-label">Project *</label>
-                                        <select class="form-select" id="project" name="project" required>
-                                            <option value="">Select Project</option>
-                                            {% for project in projects %}
-                                                <option value="{{ project.projectID }}" 
-                                                    {% if document.project_id == project.projectID %}selected{% endif %}>
-                                                    {{ project.project }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="document_type" class="form-label">Document Type *</label>
-                                        <select class="form-select" id="document_type" name="document_type" required>
-                                            <option value="">Select Document Type</option>
-                                            {% for doc_type in document_types %}
-                                                <option value="{{ doc_type.id }}" 
-                                                    {% if document.document_type_id == doc_type.id %}selected{% endif %}>
-                                                    {{ doc_type.document_type }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="document_date" class="form-label">Document Date *</label>
-                                <input type="date" class="form-control" id="document_date" name="document_date" 
-                                       value="{{ document.document_date|date:'Y-m-d'|default:'' }}" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="attachment" class="form-label">Document File</label>
-                                <input type="file" class="form-control" id="attachment" name="attachment" 
-                                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png">
-                                <small class="form-text text-muted">Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG</small>
-                            </div>
-
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Save Document
-                                </button>
-                                <a href="{% url 'Project_Documentation_Tracking:document_list' %}" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                            </div>
-                        </form>
-                    {% else %}
-                        <!-- SQLite Mode Form -->
+                    <!-- Django Form - Platform Independent -->
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             
@@ -177,7 +112,6 @@
                                 </a>
                             </div>
                         </form>
-                    {% endif %}
                 </div>
             </div>
         </div>

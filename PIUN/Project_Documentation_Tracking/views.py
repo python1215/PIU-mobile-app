@@ -79,8 +79,7 @@ def document_list(request):
     search_query = request.GET.get('search')
     if search_query:
         documents = documents.filter(
-            Q(description__icontains=search_query) |
-            Q(attachment_name__icontains=search_query)
+            Q(description__icontains=search_query)
         )
     
     # Pagination using Django
@@ -174,8 +173,8 @@ def document_update(request, pk):
             document.loginUser = request.user  # Update user field
             
             # Update file metadata if new file uploaded
-            if 'document_file' in request.FILES:
-                document.file_size = document.document_file.size
+            if 'attachment' in request.FILES:
+                document.attachment = request.FILES['attachment']
             
             document.save()
             messages.success(request, 'Document updated successfully!')
