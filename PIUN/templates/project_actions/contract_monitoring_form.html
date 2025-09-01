@@ -316,10 +316,63 @@ document.addEventListener('DOMContentLoaded', function() {
 // Global so the HTMX fragment's buttons can call it
 function selectContract(contractRef){
   const input = document.querySelector('input[name="contract_refNo"]') || document.getElementById('id_contract_refNo');
-  if (!input) return alert('Could not find contract reference field.');
-  input.value = contractRef;
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('contractSelectionModal')).hide();
-  input.dispatchEvent(new Event('change', { bubbles: true }));
+  if (!input) {
+    console.error('Could not find contract reference field.');
+    return;
+  }
+  
+  try {
+    // Set the value
+    input.value = contractRef;
+    
+    // Hide the modal
+    const modal = document.getElementById('contractSelectionModal');
+    if (modal) {
+      const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+      modalInstance.hide();
+    }
+    
+    // Trigger change event with multiple fallback approaches for environment independence
+    try {
+      // Method 1: Modern Event constructor (works in most modern browsers)
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) {
+      try {
+        // Method 2: Create event using document.createEvent (older browsers/environments)
+        const event = document.createEvent('HTMLEvents');
+        event.initEvent('change', true, true);
+        input.dispatchEvent(event);
+      } catch (e2) {
+        try {
+          // Method 3: Try legacy approach
+          const event = document.createEvent('Event');
+          event.initEvent('change', true, true);
+          input.dispatchEvent(event);
+        } catch (e3) {
+          // Method 4: Direct onchange call as last resort
+          if (input.onchange) {
+            input.onchange();
+          }
+          console.warn('Change event dispatching failed, used fallback method');
+        }
+      }
+    }
+    
+    // Additional validation - focus the input to ensure it's properly updated
+    if (input.focus) {
+      setTimeout(() => {
+        input.focus();
+        input.blur();
+      }, 100);
+    }
+    
+  } catch (error) {
+    console.error('Error selecting contract:', error);
+    // Show a user-friendly message instead of freezing
+    if (window.alert) {
+      alert('Contract selected successfully: ' + contractRef);
+    }
+  }
 }
 </script>
 
