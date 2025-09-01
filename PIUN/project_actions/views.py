@@ -739,11 +739,11 @@ def contract_monitoring_list(request):
     # Platform independent - using Django ORM exclusively
     
     try:
-        # Use Django ORM exclusively for platform independence
+        # Use Django ORM exclusively for platform independence - most recent first
         queryset = Specific_Contract_Monitoring.objects.all().select_related(
             'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
             'Kpi_description', 'Contract_implementation_Status', 'loginUser'
-        ).order_by('-monitoring_date')
+        ).order_by('-date', '-monitoring_date')
         
         # Apply filtering using Django ORM
         filter_form = SpecificContractMonitoringFilter(request.GET, queryset=Specific_Contract_Monitoring.objects.all())
