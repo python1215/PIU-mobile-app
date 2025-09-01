@@ -1007,12 +1007,52 @@ def contract_monitoring_update(request, pk):
         else:
             form = SpecificContractMonitoringForm(instance=record)
         
+        # Prepare initial values for cascading dropdowns when editing
+        initial_investment_kpi_data = None
+        if record.type_of_monitoring:
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            try:
+                # Get available options for the current monitoring type
+                kpi_records = KPI_For_Contract.objects.filter(
+                    monitoring_type_id=record.type_of_monitoring.id
+                ).values('type_of_investment', 'Kpi_description').distinct()
+                
+                investment_options = []
+                kpi_options = []
+                
+                investment_types_seen = set()
+                kpi_descriptions_seen = set()
+                
+                for kpi_record in kpi_records:
+                    if kpi_record['type_of_investment'] and kpi_record['type_of_investment'] not in investment_types_seen:
+                        investment_types_seen.add(kpi_record['type_of_investment'])
+                        investment_options.append({
+                            'value': kpi_record['type_of_investment'],
+                            'text': kpi_record['type_of_investment'],
+                            'selected': record.Type_of_Investment and record.Type_of_Investment.type_of_investment == kpi_record['type_of_investment']
+                        })
+                    
+                    if kpi_record['Kpi_description'] and kpi_record['Kpi_description'] not in kpi_descriptions_seen:
+                        kpi_descriptions_seen.add(kpi_record['Kpi_description'])
+                        kpi_options.append({
+                            'value': kpi_record['Kpi_description'],
+                            'text': kpi_record['Kpi_description'],
+                            'selected': record.Kpi_description and record.Kpi_description.Kpi_description == kpi_record['Kpi_description']
+                        })
+                
+                initial_investment_kpi_data = {
+                    'investment_options': investment_options,
+                    'kpi_options': kpi_options,
+                }
+            except Exception as e:
+                print(f"Error loading initial investment/KPI data: {e}")
+        
         context = {
             'page_title': f'Update Monitoring Record - {record.contract_refNo}',
             'form': form,
             'form_action': 'Update',
             'record': record,
-            'record': record,
+            'initial_investment_kpi_data': initial_investment_kpi_data,
         }
         
     except Exception as e:
