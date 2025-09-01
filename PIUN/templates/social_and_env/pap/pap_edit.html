@@ -183,14 +183,14 @@
                         </div>
                         
                         <div class="col-md-4">
-                            <label for="{{ form.amount.id_for_label }}" class="form-label required">Compensation Amount ($)</label>
+                            <label for="{{ form.amount.id_for_label }}" class="form-label required">Compensation Amount (D)</label>
                             {% render_field form.amount class="form-control" step="0.01" %}
                             {% if form.amount.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.amount.errors %}{{ error }}{% endfor %}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Current: ${{ pap.amount|floatformat:2 }}</div>
+                            <div class="form-text">Current: D{{ pap.amount|floatformat:2 }}</div>
                         </div>
                         
                         <div class="col-md-4">

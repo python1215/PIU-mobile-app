@@ -324,7 +324,7 @@ class PAPForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01',
                 'min': '0',
-                'placeholder': 'Compensation amount'
+                'placeholder': 'Compensation amount (D)'
             }),
             'area': forms.TextInput(attrs={
                 'class': 'form-control',
