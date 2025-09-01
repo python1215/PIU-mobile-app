@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from .models import *
 from .forms import *
-from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome
+from PIU_Financial_mgt.models import KPI_For_Contract, ProjectOutCome, PDO
 
 @login_required
 def setup_dashboard(request):
@@ -1931,3 +1931,97 @@ def project_result_delete(request, pk):
         'title': f'Delete Project Result: {project_result.project_result}'
     }
     return render(request, 'setup/project_results/project_result_confirm_delete.html', context)
+
+
+# ================== PDO Management Views ==================
+
+@login_required
+def pdo_list(request):
+    """List all PDOs"""
+    pdos = PDO.objects.all().order_by('-date')
+    
+    context = {
+        'pdos': pdos,
+        'title': 'PDO Management'
+    }
+    return render(request, 'setup/pdos/pdo_list.html', context)
+
+@login_required
+def pdo_create(request):
+    """Create a new PDO"""
+    if request.method == 'POST':
+        # Import the form here to avoid circular imports
+        from PIU_Financial_mgt.forms import PdoForm
+        form = PdoForm(request.POST)
+        if form.is_valid():
+            pdo = form.save(commit=False)
+            pdo.loginUser = request.user
+            pdo.save()
+            messages.success(request, 'PDO created successfully!')
+            return redirect('setup:pdo_detail', pk=pdo.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        from PIU_Financial_mgt.forms import PdoForm
+        form = PdoForm()
+    
+    context = {
+        'form': form, 
+        'title': 'Add New PDO',
+        'submit_text': 'Create PDO'
+    }
+    return render(request, 'setup/pdos/pdo_form.html', context)
+
+@login_required
+def pdo_detail(request, pk):
+    """View PDO details"""
+    pdo = get_object_or_404(PDO, pk=pk)
+    
+    context = {
+        'pdo': pdo,
+        'title': f'PDO Details: {pdo.pdo_statement}'
+    }
+    return render(request, 'setup/pdos/pdo_detail.html', context)
+
+@login_required
+def pdo_update(request, pk):
+    """Update an existing PDO"""
+    pdo = get_object_or_404(PDO, pk=pk)
+    
+    if request.method == 'POST':
+        from PIU_Financial_mgt.forms import PdoForm
+        form = PdoForm(request.POST, instance=pdo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'PDO updated successfully!')
+            return redirect('setup:pdo_detail', pk=pdo.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        from PIU_Financial_mgt.forms import PdoForm
+        form = PdoForm(instance=pdo)
+    
+    context = {
+        'form': form, 
+        'pdo': pdo,
+        'title': f'Edit PDO: {pdo.pdo_statement}',
+        'submit_text': 'Update PDO'
+    }
+    return render(request, 'setup/pdos/pdo_form.html', context)
+
+@login_required
+def pdo_delete(request, pk):
+    """Delete a PDO"""
+    pdo = get_object_or_404(PDO, pk=pk)
+    
+    if request.method == 'POST':
+        pdo_title = pdo.pdo_statement
+        pdo.delete()
+        messages.success(request, f'PDO "{pdo_title}" has been deleted successfully!')
+        return redirect('setup:pdo_list')
+    
+    context = {
+        'pdo': pdo,
+        'title': f'Delete PDO: {pdo.pdo_statement}'
+    }
+    return render(request, 'setup/pdos/pdo_confirm_delete.html', context)
