@@ -168,12 +168,20 @@
                                     <tr>
                                         <th>Contract Reference</th>
                                         <th>Project</th>
-                                        <th>Contract Type</th>
-                                        <th>type of monitoring</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Status</th>
-                                        <th>Progress</th>
+                                        <th>Monitoring Date</th>
+                                        <th>Report Frequency</th>
+                                        <th>Type of Monitoring</th>
+                                        <th>Type of Investment</th>
+                                        <th>KPI Description</th>
+                                        <th>Milestone Start</th>
+                                        <th>Milestone End</th>
+                                        <th>Target</th>
+                                        <th>Achieved Status</th>
+                                        <th>Implementation Status</th>
+                                        <th>Picture</th>
+                                        <th>Remarks</th>
+                                        <th>Created Date</th>
+                                        <th>Created By</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -184,14 +192,23 @@
                                                 <strong>{{ record.contract_refNo|default:"N/A" }}</strong>
                                             </td>
                                             <td>{{ record.project.project|default:"N/A" }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary">
-                                                    {{ record.Kpi_description|default:"N/A" }}
-                                                </span>
-                                            </td>
+                                            <td>{{ record.monitoring_date|date:"M d, Y"|default:"N/A" }}</td>
+                                            <td>{{ record.quarter|default:"N/A" }}</td>
                                             <td>{{ record.type_of_monitoring|default:"N/A" }}</td>
+                                            <td>{{ record.Type_of_Investment|default:"N/A" }}</td>
+                                            <td>{{ record.Kpi_description|default:"N/A" }}</td>
                                             <td>{{ record.milestone_start_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>{{ record.milestone_end_date|date:"M d, Y"|default:"N/A" }}</td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 150px;" title="{{ record.Target }}">
+                                                    {{ record.Target|default:"N/A" }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 150px;" title="{{ record.Achieved_status }}">
+                                                    {{ record.Achieved_status|default:"N/A" }}
+                                                </div>
+                                            </td>
                                             <td>
                                                 {% if record.Contract_implementation_Status %}
                                                     {% if record.Contract_implementation_Status.progress_scale == '1. Ongoing' %}
@@ -211,14 +228,22 @@
                                                     <span class="badge bg-secondary">Not Set</span>
                                                 {% endif %}
                                             </td>
+                                            <td class="text-center">
+                                                {% if record.picture_of_status %}
+                                                    <a href="{{ record.picture_of_status.url }}" target="_blank" title="View Image">
+                                                        <i class="bi bi-image text-primary"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <i class="bi bi-image text-muted" title="No Image"></i>
+                                                {% endif %}
+                                            </td>
                                             <td>
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar" role="progressbar" 
-                                                         style="width: {{ record.progress_percentage|default:0 }}%">
-                                                        {{ record.progress_percentage|default:0 }}%
-                                                    </div>
+                                                <div class="text-truncate" style="max-width: 150px;" title="{{ record.remarks }}">
+                                                    {{ record.remarks|default:"N/A" }}
                                                 </div>
                                             </td>
+                                            <td>{{ record.date|date:"M d, Y H:i"|default:"N/A" }}</td>
+                                            <td>{{ record.loginUser.username|default:"N/A" }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{% url 'project_actions:contract_monitoring_detail' record.pk %}" 
