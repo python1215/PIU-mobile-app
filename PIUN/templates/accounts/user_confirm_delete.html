@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Delete User: {{ object.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Confirm User Deletion
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle me-1"></i>Warning!</h6>
+                        This action cannot be undone. All data associated with this user will be permanently deleted.
+                    </div>
+
+                    <h6 class="mb-3">User Details:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Username:</strong> {{ object.username }}</li>
+                        <li><strong>Email:</strong> {{ object.email|default:"Not provided" }}</li>
+                        <li><strong>Full Name:</strong> {{ object.get_full_name|default:"Not provided" }}</li>
+                        <li><strong>Department:</strong> {{ object.department|default:"Not specified" }}</li>
+                        <li><strong>Date Joined:</strong> {{ object.date_joined|date:"F d, Y" }}</li>
+                        <li><strong>Status:</strong> 
+                            {% if object.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                            {% if object.is_staff %}
+                                <span class="badge bg-warning">Staff</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    <p class="text-muted">
+                        Are you sure you want to delete the user <strong>{{ object.username }}</strong>?
+                    </p>
+
+                    <form method="post" class="d-flex justify-content-between">
+                        {% csrf_token %}
+                        <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Yes, Delete User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
