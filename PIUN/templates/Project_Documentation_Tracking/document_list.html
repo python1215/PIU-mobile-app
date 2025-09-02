@@ -142,39 +142,87 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
+                        <!-- Enhanced Pagination -->
                         {% if page_obj.has_other_pages %}
-                        <nav aria-label="Document pagination">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">
-                                            <i class="bi bi-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active">
-                                            <span class="page-link">{{ num }}</span>
-                                        </li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <!-- Page Info -->
+                            <div class="text-muted">
+                                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} documents
+                            </div>
+                            
+                            <!-- Pagination Navigation -->
+                            <nav aria-label="Document pagination">
+                                <ul class="pagination mb-0">
+                                    <!-- First Page -->
+                                    {% if page_obj.number > 1 %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ num }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ num }}</a>
+                                            <a class="page-link" href="?page=1{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" title="First Page">
+                                                <i class="bi bi-chevron-double-left"></i>
+                                            </a>
                                         </li>
                                     {% endif %}
-                                {% endfor %}
-                                
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
+                                    
+                                    <!-- Previous Page -->
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" title="Previous Page">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <!-- Page Numbers -->
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% elif num == page_obj.number|add:'-4' or num == page_obj.number|add:'4' %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    <!-- Next Page -->
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" title="Next Page">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <!-- Last Page -->
+                                    {% if page_obj.number < page_obj.paginator.num_pages %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_filters.project %}&project={{ current_filters.project }}{% endif %}{% if current_filters.document_type %}&document_type={{ current_filters.document_type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" title="Last Page">
+                                                <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            
+                            <!-- Page Size Selector -->
+                            <div class="d-flex align-items-center">
+                                <label class="form-label me-2 mb-0 text-muted">Per page:</label>
+                                <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+                                    <option value="25" {% if request.GET.per_page == '25' %}selected{% endif %}>25</option>
+                                    <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+                                    <option value="100" {% if request.GET.per_page == '100' %}selected{% endif %}>100</option>
+                                </select>
+                            </div>
+                        </div>
                         {% endif %}
 
                     {% else %}
@@ -192,4 +240,19 @@
         </div>
     </div>
 </div>
+
+<script>
+// Page Size Selector Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const pageSizeSelector = document.getElementById('pageSizeSelector');
+    if (pageSizeSelector) {
+        pageSizeSelector.addEventListener('change', function() {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('per_page', this.value);
+            currentUrl.searchParams.set('page', '1'); // Reset to first page when changing page size
+            window.location.href = currentUrl.toString();
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -82,8 +82,16 @@ def document_list(request):
             Q(description__icontains=search_query)
         )
     
-    # Pagination using Django
-    paginator = Paginator(documents, 10)
+    # Dynamic pagination using Django
+    per_page = request.GET.get('per_page', '10')
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 25, 50, 100]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+    
+    paginator = Paginator(documents, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
