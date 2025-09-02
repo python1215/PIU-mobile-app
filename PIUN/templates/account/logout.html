@@ -4,15 +4,15 @@
 {% block head_title %}{% trans "Sign Out" %}{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow">
-        <div class="card-header text-center">
-          <h3>{% trans "Sign Out" %}</h3>
+<div class="container-fluid d-flex justify-content-center align-items-center min-vh-100">
+  <div class="row w-100 justify-content-center">
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <div class="card shadow-lg border-0">
+        <div class="card-header text-center bg-danger text-white">
+          <h3 class="mb-0">{% trans "Sign Out" %}</h3>
         </div>
-        <div class="card-body text-center">
-          <p>{% trans 'Are you sure you want to sign out?' %}</p>
+        <div class="card-body p-4 text-center">
+          <p class="mb-4">{% trans 'Are you sure you want to sign out?' %}</p>
           
           <form method="post" action="{% url 'account_logout' %}">
             {% csrf_token %}
@@ -22,7 +22,8 @@
             {% endif %}
             
             <div class="d-grid gap-2">
-              <button class="btn btn-danger" type="submit">{% trans 'Sign Out' %}</button>
+              <button class="btn btn-danger btn-lg" type="submit">{% trans 'Sign Out' %}</button>
+              <a href="{% url 'main_dashboard' %}" class="btn btn-outline-secondary">{% trans 'Cancel' %}</a>
             </div>
           </form>
         </div>

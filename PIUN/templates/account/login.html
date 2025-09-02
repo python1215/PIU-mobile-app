@@ -6,14 +6,14 @@
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow">
-        <div class="card-header text-center">
-          <h3>{% trans "Sign In" %}</h3>
+<div class="container-fluid d-flex justify-content-center align-items-center min-vh-100">
+  <div class="row w-100 justify-content-center">
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <div class="card shadow-lg border-0">
+        <div class="card-header text-center bg-primary text-white">
+          <h3 class="mb-0">{% trans "Sign In" %}</h3>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <form class="login" method="POST" action="{% url 'account_login' %}">
             {% csrf_token %}
             <div class="mb-3">
@@ -30,12 +30,12 @@
               <label for="{{ form.remember.id_for_label }}" class="form-check-label">{{ form.remember.label }}</label>
             </div>
             {% endif %}
-            <div class="d-grid gap-2">
-              <button class="btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+            <div class="d-grid gap-2 mb-3">
+              <button class="btn btn-primary btn-lg" type="submit">{% trans "Sign In" %}</button>
             </div>
           </form>
-          <div class="text-center mt-3">
-            <p><a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></p>
+          <div class="text-center">
+            <p class="mb-0"><a class="text-decoration-none" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></p>
           </div>
         </div>
       </div>
