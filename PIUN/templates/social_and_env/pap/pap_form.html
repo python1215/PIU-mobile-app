@@ -355,27 +355,63 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleCompensationFields();
     }
 
-    // --- Validation ---
+    // --- Enhanced Validation ---
     if (form) {
         form.addEventListener('submit', function(event) {
             let isValid = true;
+            let invalidFields = [];
+            
+            // Clear previous error highlights
+            form.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            
             const essentialFields = [
-                'id_project','id_pap_identification_number','id_pap_name',
-                'id_sex','id_region','id_location_of_impact','id_amount'
+                {id: 'id_project', name: 'Project'},
+                {id: 'id_pap_identification_number', name: 'PAP ID'},
+                {id: 'id_pap_name', name: 'PAP Name'},
+                {id: 'id_sex', name: 'Gender'},
+                {id: 'id_region', name: 'Region'},
+                {id: 'id_location_of_impact', name: 'Location of Impact'},
+                {id: 'id_amount', name: 'Compensation Amount'}
             ];
-            essentialFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
+            
+            essentialFields.forEach(fieldInfo => {
+                const field = document.getElementById(fieldInfo.id);
                 if (field && !field.value.trim()) {
                     isValid = false;
                     field.classList.add('is-invalid');
+                    invalidFields.push(fieldInfo.name);
+                    
+                    // Add visual border highlight
+                    field.style.border = '2px solid #dc3545';
                 } else if (field) {
                     field.classList.remove('is-invalid');
+                    field.style.border = '';
                 }
             });
+            
             if (!isValid) {
                 event.preventDefault();
+                
+                // Show error message with specific field names
+                const errorMessage = `Please fill in the following required fields:\n• ${invalidFields.join('\n• ')}`;
+                alert(errorMessage);
+                
+                // Focus on first invalid field
                 const firstInvalidField = document.querySelector('.is-invalid');
-                if (firstInvalidField) firstInvalidField.focus();
+                if (firstInvalidField) {
+                    firstInvalidField.focus();
+                    firstInvalidField.scrollIntoView({behavior: 'smooth', block: 'center'});
+                }
+            }
+        });
+        
+        // Remove error styling when user starts typing
+        form.addEventListener('input', function(event) {
+            if (event.target.classList.contains('is-invalid')) {
+                event.target.classList.remove('is-invalid');
+                event.target.style.border = '';
             }
         });
     }

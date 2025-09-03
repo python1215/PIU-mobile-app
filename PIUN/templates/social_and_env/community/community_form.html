@@ -225,18 +225,31 @@ document.addEventListener('DOMContentLoaded', function() {
         calculateTotals();
     }
     
-    // Form validation
+    // Enhanced Form validation
     const form = document.getElementById('community-form');
     form.addEventListener('submit', function(event) {
         let isValid = true;
+        let invalidFields = [];
+        
+        // Clear previous error highlights
+        form.querySelectorAll('.is-invalid').forEach(field => {
+            field.classList.remove('is-invalid');
+            field.style.border = '';
+        });
+        
         const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
         
         requiredFields.forEach(field => {
+            const label = field.closest('.col-md-6, .col-md-3, .col-md-4, .col-12')?.querySelector('label')?.textContent || field.name;
+            
             if (!field.value.trim()) {
                 isValid = false;
                 field.classList.add('is-invalid');
+                field.style.border = '2px solid #dc3545';
+                invalidFields.push(label.replace('*', '').trim());
             } else {
                 field.classList.remove('is-invalid');
+                field.style.border = '';
             }
         });
         
@@ -247,13 +260,34 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (male + female !== total) {
             event.preventDefault();
-            alert('Total participants must equal the sum of male and female participants.');
+            totalField.classList.add('is-invalid');
+            totalField.style.border = '2px solid #dc3545';
+            alert('Error: Total participants must equal the sum of male and female participants.\nMale: ' + male + ', Female: ' + female + ', Total should be: ' + (male + female));
+            totalField.focus();
             return;
         }
         
         if (!isValid) {
             event.preventDefault();
-            document.querySelector('.is-invalid').focus();
+            
+            // Show error message with specific field names
+            const errorMessage = `Please fill in the following required fields:\n• ${invalidFields.join('\n• ')}`;
+            alert(errorMessage);
+            
+            // Focus on first invalid field
+            const firstInvalidField = document.querySelector('.is-invalid');
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+                firstInvalidField.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+        }
+    });
+    
+    // Remove error styling when user starts typing
+    form.addEventListener('input', function(event) {
+        if (event.target.classList.contains('is-invalid')) {
+            event.target.classList.remove('is-invalid');
+            event.target.style.border = '';
         }
     });
 });
