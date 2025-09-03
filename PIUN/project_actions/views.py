@@ -444,25 +444,27 @@ def contract_profiling_works_detail(request, pk):
     return render(request, 'project_actions/contract_profiling_works_detail.html', context)
 
 @login_required
-@transaction.atomic
 def contract_profiling_works_create(request):
     """Create new Works contract"""
     if request.method == 'POST':
         form = ContractProfilingWorksForm(request.POST)
         if form.is_valid():
             try:
-                contract = form.save(commit=False)
-                contract.loginUser = request.user
-                contract.save()
-                
-                messages.success(
-                    request, 
-                    f"Works contract '{contract.contract_refNo}' created successfully!"
-                )
-                return redirect('project_actions:contract_profiling_works_detail', pk=contract.pk)
-                
+                with transaction.atomic():
+                    contract = form.save(commit=False)
+                    contract.loginUser = request.user
+                    contract.save()
+                    
+                    messages.success(
+                        request, 
+                        f"Works contract '{contract.contract_refNo}' created successfully!"
+                    )
+                    return redirect('project_actions:contract_profiling_works_detail', pk=contract.pk)
+                    
             except Exception as e:
                 messages.error(request, f"Error creating contract: {str(e)}")
+                # Clear the form to avoid transaction issues
+                form = ContractProfilingWorksForm()
         else:
             messages.error(request, "Please correct the errors below.")
     else:
