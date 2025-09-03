@@ -406,6 +406,8 @@ class PAPForm(forms.ModelForm):
         self.fields['area'].required = False
         self.fields['compensation_RefNo'].required = False
         self.fields['compensation_date'].required = False
+        # Make document upload optional for all projects
+        self.fields['document_upload'].required = False
         
         # Allow empty choice validation for cascading fields
         self.fields['type_of_investment'].empty_label = "Select Investment Type"
