@@ -1,0 +1,72 @@
+{% extends 'social_and_env/base.html' %}
+
+{% block title %}{{ title }} - PIUN Social & Environmental{% endblock %}
+
+{% block social_env_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {{ title|default:"Delete Grievance Record" }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-warning-triangle me-2"></i>Confirm Deletion
+                    </h5>
+                    <p class="mb-0">Are you sure you want to delete this grievance record? This action cannot be undone.</p>
+                </div>
+                
+                <!-- Grievance Details -->
+                <div class="bg-light p-3 rounded mb-4">
+                    <h6 class="text-danger mb-3">Grievance Details:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Case Number:</strong><br>
+                            <span class="text-primary">{{ grievance.case_no }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Complainant:</strong><br>
+                            {{ grievance.name_of_complainant }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Project:</strong><br>
+                            {{ grievance.project.project|truncatechars:50 }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date Received:</strong><br>
+                            {{ grievance.date_claim_recieved|date:"M d, Y" }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <strong>Complaint Content:</strong><br>
+                            <span class="text-muted">{{ grievance.complaint_content|truncatechars:100 }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'grievance_list' %}" class="btn btn-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <a href="{% url 'grievance_detail' grievance.pk %}" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Delete Grievance
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
