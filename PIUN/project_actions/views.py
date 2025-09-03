@@ -459,7 +459,7 @@ def contract_profiling_works_create(request):
                         request, 
                         f"Works contract '{contract.contract_refNo}' created successfully!"
                     )
-                    return redirect('project_actions:contract_profiling_works_detail', pk=contract.pk)
+                    return redirect('project_actions:contract_profiling_works_list')
                     
             except Exception as e:
                 messages.error(request, f"Error creating contract: {str(e)}")
