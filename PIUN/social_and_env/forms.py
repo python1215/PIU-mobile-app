@@ -328,7 +328,7 @@ class PAPForm(forms.ModelForm):
             }),
             'area': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Area in hectares'
+                'placeholder': 'Area in meter square (M²)'
             }),
             'pap_compensated': forms.Select(attrs={'class': 'form-select'}),
             'compensation_date': forms.DateInput(attrs={

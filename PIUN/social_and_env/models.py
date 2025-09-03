@@ -154,7 +154,7 @@ class PAP(models.Model):
         max_digits=12,
         validators=[MinValueValidator(0)]
     )
-    area = models.CharField(max_length=20, help_text="Area affected (in hectares)")
+    area = models.CharField(max_length=20, help_text="Area affected (in meter square M²)")
     pap_compensated = models.CharField(
         max_length=1, 
         choices=YesOrNo,
