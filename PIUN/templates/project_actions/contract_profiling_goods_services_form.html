@@ -75,9 +75,10 @@ th{% extends 'project_actions/base.html' %}
                                         hx-get="{% url 'project_actions:load_project_components' %}"
                                         hx-target="#id_compID"
                                         hx-swap="innerHTML"
-                                        hx-trigger="change"
+                                        hx-trigger="change delay:100ms"
                                         hx-include="this"
-                                        onchange="clearSubsequentDropdowns(['id_subcompID', 'id_activityID'])">
+                                        hx-on="htmx:error: console.log('HTMX Error:', event.detail); clearSubsequentDropdowns(['id_subcompID', 'id_activityID'])"
+                                        onchange="setTimeout(function() { clearSubsequentDropdowns(['id_subcompID', 'id_activityID']); }, 50);">
                                     <option value="">---------</option>
                                     {% for choice in form.projectID.field.choices %}
                                         {% if choice.0 %}
@@ -99,9 +100,10 @@ th{% extends 'project_actions/base.html' %}
                                         hx-get="{% url 'project_actions:load_component_subcomponents' %}"
                                         hx-target="#id_subcompID"
                                         hx-swap="innerHTML"
-                                        hx-trigger="change"
+                                        hx-trigger="change delay:100ms"
                                         hx-include="this"
-                                        onchange="clearSubsequentDropdowns(['id_activityID'])">
+                                        hx-on="htmx:error: console.log('HTMX Error:', event.detail); clearSubsequentDropdowns(['id_activityID'])"
+                                        onchange="setTimeout(function() { clearSubsequentDropdowns(['id_activityID']); }, 50);">
                                     <option value="">---------</option>
                                     {% for choice in form.compID.field.choices %}
                                         {% if choice.0 %}
@@ -125,8 +127,9 @@ th{% extends 'project_actions/base.html' %}
                                         hx-get="{% url 'project_actions:load_subcomponent_activities' %}"
                                         hx-target="#id_activityID"
                                         hx-swap="innerHTML"
-                                        hx-trigger="change"
-                                        hx-include="this">
+                                        hx-trigger="change delay:100ms"
+                                        hx-include="this"
+                                        hx-on="htmx:error: console.log('HTMX Error:', event.detail)">
                                     <option value="">---------</option>
                                     {% for choice in form.subcompID.field.choices %}
                                         {% if choice.0 %}
@@ -307,15 +310,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Function to clear subsequent dropdowns
+// Function to clear subsequent dropdowns with enhanced error handling
 function clearSubsequentDropdowns(dropdownIds) {
-    dropdownIds.forEach(function(id) {
-        const dropdown = document.getElementById(id);
-        if (dropdown) {
-            // Clear the dropdown by keeping only the first option
-            dropdown.innerHTML = '<option value="">---------</option>';
+    try {
+        if (!Array.isArray(dropdownIds)) {
+            console.log('clearSubsequentDropdowns: dropdownIds is not an array');
+            return;
         }
-    });
+        
+        dropdownIds.forEach(function(id) {
+            try {
+                const dropdown = document.getElementById(id);
+                if (dropdown && dropdown.tagName === 'SELECT') {
+                    // Clear the dropdown by keeping only the first option
+                    dropdown.innerHTML = '<option value="">---------</option>';
+                    // Reset the value to empty
+                    dropdown.value = '';
+                    // Trigger change event to update any dependent elements
+                    const event = new Event('change', { bubbles: true });
+                    dropdown.dispatchEvent(event);
+                } else if (!dropdown) {
+                    console.log('clearSubsequentDropdowns: Element not found:', id);
+                }
+            } catch (e) {
+                console.log('clearSubsequentDropdowns: Error clearing dropdown', id, e);
+            }
+        });
+    } catch (e) {
+        console.log('clearSubsequentDropdowns: General error', e);
+    }
 }
 </script>
 {% endblock %}
