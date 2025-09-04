@@ -540,20 +540,29 @@ def contract_profiling_works_update(request, pk):
     return render(request, 'project_actions/contract_profiling_works_form.html', context)
 
 @login_required
-@require_http_methods(["POST"])
 def contract_profiling_works_delete(request, pk):
-    """Delete Works contract"""
+    """Delete Works contract - supports both GET (confirmation) and POST (actual delete)"""
     try:
         contract = get_object_or_404(Contract_Profiling_works, pk=pk)
-        contract_ref = contract.contract_refNo
-        contract.delete()
         
-        messages.success(request, f"Works contract '{contract_ref}' deleted successfully!")
+        if request.method == 'POST':
+            # Actually delete the contract
+            contract_ref = contract.contract_refNo
+            contract.delete()
+            messages.success(request, f"Works contract '{contract_ref}' deleted successfully!")
+            return redirect('project_actions:contract_profiling_works_list')
+        else:
+            # Show confirmation page
+            context = {
+                'page_title': f'Delete Contract - {contract.contract_refNo}',
+                'contract': contract,
+                'object_type': 'Works Contract',
+            }
+            return render(request, 'project_actions/contract_profiling_works_confirm_delete.html', context)
         
     except Exception as e:
         messages.error(request, f"Error deleting contract: {str(e)}")
-    
-    return redirect('project_actions:contract_profiling_works_list')
+        return redirect('project_actions:contract_profiling_works_list')
 
 # Contract Profiling Goods & Services Views
 @login_required
