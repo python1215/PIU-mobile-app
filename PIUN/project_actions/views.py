@@ -490,16 +490,24 @@ def contract_profiling_works_create(request):
     return render(request, 'project_actions/contract_profiling_works_form.html', context)
 
 @login_required
-@transaction.atomic
 def contract_profiling_works_update(request, pk):
-    """Update existing Works contract"""
+    """Update existing Works contract - Platform independent version"""
     try:
         contract = get_object_or_404(Contract_Profiling_works, pk=pk)
         
         if request.method == 'POST':
             form = ContractProfilingWorksForm(request.POST, instance=contract)
+            # Debug logging for update issues
+            if not form.is_valid():
+                print("🔍 Update form validation errors:")
+                for field, errors in form.errors.items():
+                    print(f"🔍   {field}: {errors}")
+                if form.non_field_errors():
+                    print(f"🔍   Non-field errors: {form.non_field_errors()}")
+            
             if form.is_valid():
                 try:
+                    # Remove transaction.atomic for platform independence
                     form.save()
                     messages.success(
                         request, 
@@ -508,9 +516,13 @@ def contract_profiling_works_update(request, pk):
                     return redirect('project_actions:contract_profiling_works_detail', pk=contract.pk)
                     
                 except Exception as e:
+                    print(f"🔍 Error updating contract: {str(e)}")
                     messages.error(request, f"Error updating contract: {str(e)}")
             else:
                 messages.error(request, "Please correct the errors below.")
+                print("🔍 Update form data received:")
+                for key, value in request.POST.items():
+                    print(f"🔍   {key}: {value}")
         else:
             form = ContractProfilingWorksForm(instance=contract)
         
@@ -523,7 +535,7 @@ def contract_profiling_works_update(request, pk):
         
     except Exception as e:
         messages.error(request, f"Error loading contract: {str(e)}")
-        return redirect('project_actions:contract_profiling_works-list')
+        return redirect('project_actions:contract_profiling_works_list')
     
     return render(request, 'project_actions/contract_profiling_works_form.html', context)
 
@@ -541,7 +553,7 @@ def contract_profiling_works_delete(request, pk):
     except Exception as e:
         messages.error(request, f"Error deleting contract: {str(e)}")
     
-    return redirect('project_actions:contract_profiling_works-list')
+    return redirect('project_actions:contract_profiling_works_list')
 
 # Contract Profiling Goods & Services Views
 @login_required
@@ -1108,7 +1120,7 @@ def export_works_contracts_excel(request):
         
     except Exception as e:
         messages.error(request, f"Error exporting data: {str(e)}")
-        return redirect('project_actions:contract_profiling_works-list')
+        return redirect('project_actions:contract_profiling_works_list')
 
 @login_required
 def export_goods_services_contracts_excel(request):
