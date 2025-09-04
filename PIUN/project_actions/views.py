@@ -445,28 +445,39 @@ def contract_profiling_works_detail(request, pk):
 
 @login_required
 def contract_profiling_works_create(request):
-    """Create new Works contract"""
+    """Create new Works contract - Platform independent version"""
     if request.method == 'POST':
         form = ContractProfilingWorksForm(request.POST)
+        
+        # Debug logging to help diagnose issues
+        if not form.is_valid():
+            print("🔍 Form validation errors:")
+            for field, errors in form.errors.items():
+                print(f"🔍   {field}: {errors}")
+            if form.non_field_errors():
+                print(f"🔍   Non-field errors: {form.non_field_errors()}")
+        
         if form.is_valid():
             try:
-                with transaction.atomic():
-                    contract = form.save(commit=False)
-                    contract.loginUser = request.user
-                    contract.save()
-                    
-                    messages.success(
-                        request, 
-                        f"Works contract '{contract.contract_refNo}' created successfully!"
-                    )
-                    return redirect('project_actions:contract_profiling_works_list')
-                    
+                # Remove transaction.atomic wrapper to avoid database issues
+                contract = form.save(commit=False)
+                contract.loginUser = request.user
+                contract.save()
+                
+                messages.success(
+                    request, 
+                    f"Works contract '{contract.contract_refNo}' created successfully!"
+                )
+                return redirect('project_actions:contract_profiling_works_list')
+                
             except Exception as e:
+                print(f"🔍 Error saving contract: {str(e)}")
                 messages.error(request, f"Error creating contract: {str(e)}")
-                # Clear the form to avoid transaction issues
-                form = ContractProfilingWorksForm()
         else:
             messages.error(request, "Please correct the errors below.")
+            print("🔍 Form data received:")
+            for key, value in request.POST.items():
+                print(f"🔍   {key}: {value}")
     else:
         form = ContractProfilingWorksForm()
     
