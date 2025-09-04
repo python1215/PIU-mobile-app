@@ -203,73 +203,88 @@
 
 <script src="{% static 'js/vendor/chart.min.js' %}"></script>
 <script>
-// Contract Status Pie Chart
-const statusCtx = document.getElementById('contractStatusChart').getContext('2d');
-const statusChart = new Chart(statusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Active', 'Completed', 'Pending', 'On Hold'],
-        datasets: [{
-            data: [{{ active_contracts|default:0 }}, {{ completed_contracts|default:0 }}, {{ pending_contracts|default:0 }}, {{ onhold_contracts|default:0 }}],
-            backgroundColor: [
-                '#28a745',
-                '#17a2b8', 
-                '#ffc107',
-                '#dc3545'
-            ],
-            borderWidth: 2,
-            borderColor: '#fff'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
+// Wait for DOM and Chart.js to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js is not loaded');
+        return;
     }
-});
 
-// Contract Value Trends Chart
-const valueCtx = document.getElementById('contractValueChart').getContext('2d');
-const valueChart = new Chart(valueCtx, {
-    type: 'line',
-    data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Works Contracts',
-            data: [{{ monthly_works_values|default:"0,0,0,0,0,0" }}],
-            borderColor: '#007bff',
-            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-            tension: 0.4
-        }, {
-            label: 'Goods & Services',
-            data: [{{ monthly_goods_values|default:"0,0,0,0,0,0" }}],
-            borderColor: '#28a745',
-            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return '$' + value.toLocaleString();
+    // Contract Status Pie Chart
+    const statusElement = document.getElementById('contractStatusChart');
+    if (statusElement) {
+        const statusCtx = statusElement.getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Completed', 'Pending', 'On Hold'],
+                datasets: [{
+                    data: [{{ active_contracts|default:0 }}, {{ completed_contracts|default:0 }}, {{ pending_contracts|default:0 }}, {{ onhold_contracts|default:0 }}],
+                    backgroundColor: [
+                        '#28a745',
+                        '#17a2b8', 
+                        '#ffc107',
+                        '#dc3545'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
                     }
                 }
             }
-        },
-        plugins: {
-            legend: {
-                position: 'top'
+        });
+    }
+
+    // Contract Value Trends Chart
+    const valueElement = document.getElementById('contractValueChart');
+    if (valueElement) {
+        const valueCtx = valueElement.getContext('2d');
+        const valueChart = new Chart(valueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Works Contracts',
+                    data: [{{ monthly_works_values|default:"0,0,0,0,0,0" }}],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Goods & Services',
+                    data: [{{ monthly_goods_values|default:"0,0,0,0,0,0" }}],
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
             }
-        }
+        });
     }
 });
 </script>

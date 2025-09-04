@@ -116,11 +116,17 @@
     <script>
         // Show loading indicator for HTMX requests
         document.body.addEventListener('htmx:beforeRequest', function(evt) {
-            document.getElementById('loading-indicator').style.display = 'block';
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
         });
         
         document.body.addEventListener('htmx:afterRequest', function(evt) {
-            document.getElementById('loading-indicator').style.display = 'none';
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
         });
         
         // Auto-calculate budget allocations
