@@ -1,0 +1,11 @@
+{% load widget_tweaks %}
+<label class="form-label">Type of Investment</label>
+<select name="type_of_investment" class="form-select" id="id_type_of_investment">
+    <option value="">Select Investment Type</option>
+    {% for investment in investment_types %}
+        <option value="{{ investment.monitoring_Type_Code }}" 
+                {% if selected_value == investment.monitoring_Type_Code %}selected{% endif %}>
+            {{ investment.type_of_investment }}
+        </option>
+    {% endfor %}
+</select>

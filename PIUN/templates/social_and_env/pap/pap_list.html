@@ -72,12 +72,12 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
-            <!-- Filter Form using Django Filter -->
+            <!-- Filter Form using Django Filter with HTMX Cascading -->
             <div class="col-md-3">
                 <label class="form-label">{{ filter.form.project.label }}</label>
-                {% render_field filter.form.project class="form-select" %}
+                {% render_field filter.form.project class="form-select" hx-get="{% url 'load_investment_types_pap' %}" hx-target="#id_type_of_investment_wrapper" hx-trigger="change" %}
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3" id="id_type_of_investment_wrapper">
                 <label class="form-label">{{ filter.form.type_of_investment.label }}</label>
                 {% render_field filter.form.type_of_investment class="form-select" %}
             </div>

@@ -2074,8 +2074,9 @@ def test_cascading_dropdown(request):
 
 @login_required
 def load_investment_types_pap(request):
-    """Load investment types for PAP based on project selection - Database only"""
-    from django.http import HttpResponse, JsonResponse
+    """Load investment types for PAP based on project selection - Enhanced for filter forms"""
+    from django.http import HttpResponse
+    from django.template.loader import render_to_string
     from urllib.parse import unquote
 
     # Get project_id and handle URL encoding (especially for & characters)
@@ -2086,43 +2087,46 @@ def load_investment_types_pap(request):
         # Decode URL-encoded characters (e.g., %26 becomes &)
         project_id = unquote(project_id)
 
-    if not project_id:
-        return HttpResponse('<option value="">Select Investment Type</option>')
+    # Get the selected value to maintain state
+    selected_value = request.GET.get('type_of_investment', '')
 
     try:
         # Debug: Log the project_id being searched
-        print(f"🔍 PAP Investment Types - Searching for project: '{project_id}'")
+        print(f"🔍 PAP Investment Types Filter - Searching for project: '{project_id}'")
         
-        # Get investment types from database only
-        # Handle project lookup by exact projectID match
-        investment_types = KPI_For_Contract.objects.filter(
-            project__projectID=project_id,
-            monitoring_type_id='ESS').distinct().order_by('type_of_investment')
+        if project_id:
+            # Get investment types from database only
+            # Handle project lookup by exact projectID match
+            investment_types = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type_id='ESS').distinct().order_by('type_of_investment')
 
-        print(f"🔍 Found {investment_types.count()} investment types")
-        
-        if investment_types.exists():
-            # Return HTML options from database
-            options = '<option value="">Select Investment Type</option>'
-            for investment in investment_types:
-                print(f"🔍   - {investment.type_of_investment} (Code: {investment.monitoring_Type_Code})")
-                options += f'<option value="{investment.monitoring_Type_Code}">{investment.type_of_investment}</option>'
-            return HttpResponse(options)
+            print(f"🔍 Found {investment_types.count()} investment types")
         else:
-            # Debug: Check if project exists at all
-            from PIU_Financial_mgt.models import Project
-            project_exists = Project.objects.filter(projectID=project_id).exists()
-            if project_exists:
-                message = f'No ESS investment types available for project: {project_id}'
-            else:
-                message = f'Project not found: {project_id}'
-            print(f"🔍 {message}")
-            return HttpResponse(f'<option value="">{message}</option>')
+            # No project selected, show empty list
+            investment_types = KPI_For_Contract.objects.none()
+            print(f"🔍 No project selected, showing empty investment types")
+        
+        # Render using template for consistency
+        context = {
+            'investment_types': investment_types,
+            'selected_value': selected_value,
+        }
+        
+        html = render_to_string('social_and_env/htmx/investment_type_filter.html', context)
+        return HttpResponse(html)
 
     except Exception as e:
         error_msg = f'Database error: {str(e)}'
         print(f"🔍 {error_msg}")
-        return HttpResponse(f'<option value="">{error_msg}</option>')
+        # Return basic HTML on error
+        html = f'''
+        <label class="form-label">Type of Investment</label>
+        <select name="type_of_investment" class="form-select" id="id_type_of_investment">
+            <option value="">Error loading investment types</option>
+        </select>
+        '''
+        return HttpResponse(html)
 
 
 @login_required
