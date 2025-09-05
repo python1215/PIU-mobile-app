@@ -214,6 +214,41 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
+# Enhanced Session Configuration for Platform Independence
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database for sessions
+SESSION_COOKIE_AGE = 24 * 60 * 60  # 24 hours
+SESSION_COOKIE_NAME = 'piu_sessionid'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True  # Refresh session on every request
+SESSION_COOKIE_HTTPONLY = True  # Security: prevent XSS
+SESSION_COOKIE_SAMESITE = 'Lax'  # Cross-site request handling
+
+# Enhanced Authentication Settings for Platform Independence  
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
+
+# Account Management Settings
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300  # 5 minutes
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+
+# Password Validation Settings
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 6,  # Relaxed for offline deployment
+        }
+    },
+]
+
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 16777216  # 16MB
 

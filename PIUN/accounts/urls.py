@@ -18,6 +18,13 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('password/change/', views.change_password, name='change_password'),
     
+    # Platform independence management (admin only)
+    path('admin/activate-all-users/', views.activate_all_users_view, name='activate_all_users'),
+    path('admin/ensure-platform-independence/', views.ensure_platform_independence_view, name='ensure_platform_independence'),
+    
+    # API endpoints
+    path('api/system-status/', views.system_status_api, name='system_status'),
+    
     # Legacy signup (keep for compatibility)
     path('signup/', views.SignUpView.as_view(), name='signup'),
 ]

@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, login
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
+from django.http import JsonResponse
+from django.utils import timezone
 from .forms import CustomUserCreationForm, CustomUserChangeForm, CustomPasswordChangeForm
 from .models import User
+from .utils import ensure_user_can_login, ensure_platform_independence
 
 
 # Helper function to check if user is admin/superuser
@@ -30,7 +33,10 @@ class UserCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return is_admin(self.request.user)
 
     def form_valid(self, form):
-        messages.success(self.request, 'User created successfully!')
+        user = form.save()
+        # Ensure new user can login immediately
+        ensure_user_can_login(user)
+        messages.success(self.request, 'User created successfully and is ready to login!')
         return super().form_valid(form)
 
 
@@ -151,8 +157,63 @@ def user_dashboard(request):
     return render(request, 'accounts/user_dashboard.html', context)
 
 
+# Platform-independent management views
+@login_required
+@user_passes_test(is_admin)
+def activate_all_users_view(request):
+    """Admin view to activate all users for platform independence"""
+    if request.method == 'POST':
+        from .utils import activate_all_users
+        count = activate_all_users()
+        messages.success(request, f'Successfully activated {count} users.')
+    return redirect('accounts:user_list')
+
+@login_required
+@user_passes_test(is_admin) 
+def ensure_platform_independence_view(request):
+    """Admin view to ensure platform independence"""
+    if request.method == 'POST':
+        result = ensure_platform_independence()
+        messages.success(request, 
+            f"Platform independence configured: {result['activated_users']} users activated, "
+            f"{result['cleaned_sessions']} expired sessions cleaned, "
+            f"Admin exists: {result['admin_exists']}")
+    return redirect('accounts:user_list')
+
+def system_status_api(request):
+    """API endpoint to check system authentication status"""
+    from django.contrib.sessions.models import Session
+    
+    # Get user statistics
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    users_with_login = User.objects.filter(last_login__isnull=False).count()
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now()).count()
+    
+    # Check admin existence
+    admin_exists = User.objects.filter(is_superuser=True, is_active=True).exists()
+    
+    status = {
+        'total_users': total_users,
+        'active_users': active_users, 
+        'users_with_login': users_with_login,
+        'active_sessions': active_sessions,
+        'admin_exists': admin_exists,
+        'authentication_ready': active_users > 0 and admin_exists,
+        'timestamp': timezone.now().isoformat()
+    }
+    
+    return JsonResponse(status)
+
 # Legacy view (keep for compatibility)
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy("login")
     template_name = "account/signup.html"
+    
+    def form_valid(self, form):
+        user = form.save()
+        # Ensure new user can login immediately
+        ensure_user_can_login(user)
+        messages.success(self.request, 'Account created successfully! You can now login.')
+        return super().form_valid(form)
