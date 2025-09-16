@@ -132,10 +132,10 @@ class SaveKPICalculationView(View):
                 if quarter_value:
                     try:
                         quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
+                            '1': 10030,  # Quarter 1 (ID: 10030)
+                            '2': 10031,  # Quarter 2 (ID: 10031)
+                            '3': 10032,  # Quarter 3 (ID: 10032)
+                            '4': 10033   # Quarter 4 (ID: 10033)
                         }
                         quarter_id = quarter_mapping.get(str(quarter_value))
                         if quarter_id:
@@ -182,10 +182,10 @@ class SaveKPICalculationView(View):
                     try:
                         # Map quarter string to actual database IDs
                         quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
+                            '1': 10030,  # Quarter 1 (ID: 10030)
+                            '2': 10031,  # Quarter 2 (ID: 10031)
+                            '3': 10032,  # Quarter 3 (ID: 10032)
+                            '4': 10033   # Quarter 4 (ID: 10033)
                         }
                         quarter_id = quarter_mapping.get(str(quarter_value))
                         if quarter_id:
@@ -207,10 +207,10 @@ class SaveKPICalculationView(View):
                         # Convert quarter number to Quarter model instance
                         # Map numeric quarters to existing Quarter records
                         quarter_mapping = {
-                            '1': 10022,  # Quarter 1 (ID: 10022)
-                            '2': 10023,  # Quarter 2 (ID: 10023)
-                            '3': 10024,  # Quarter 3 (ID: 10024)
-                            '4': 10025   # Quarter 4 (ID: 10025)
+                            '1': 10030,  # Quarter 1 (ID: 10030)
+                            '2': 10031,  # Quarter 2 (ID: 10031)
+                            '3': 10032,  # Quarter 3 (ID: 10032)
+                            '4': 10033   # Quarter 4 (ID: 10033)
                         }
                         print(f'[DEBUG] API - Looking for quarter mapping: {quarter_value} -> {quarter_mapping.get(str(quarter_value))}')
                         quarter_id = quarter_mapping.get(str(quarter_value))

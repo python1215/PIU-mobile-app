@@ -2243,10 +2243,10 @@ def performance_report(request):
         if quarter_filter in ['1', '2', '3', '4']:
             # Map numeric quarters to actual Quarter database IDs
             quarter_mapping = {
-                '1': 10022,  # Quarter 1 (ID: 10022)
-                '2': 10023,  # Quarter 2 (ID: 10023)
-                '3': 10024,  # Quarter 3 (ID: 10024)
-                '4': 10025   # Quarter 4 (ID: 10025)
+                '1': 10030,  # Quarter 1 (ID: 10030)
+                '2': 10031,  # Quarter 2 (ID: 10031)
+                '3': 10032,  # Quarter 3 (ID: 10032)
+                '4': 10033   # Quarter 4 (ID: 10033)
             }
             quarter_id = quarter_mapping.get(quarter_filter)
             if quarter_id:
@@ -2310,10 +2310,10 @@ def performance_report(request):
             
             # Map quarter IDs to standard Q1, Q2, Q3, Q4 format
             quarter_mapping = {
-                10022: 'Q1',  # Quarter 1
-                10023: 'Q2',  # Quarter 2  
-                10024: 'Q3',  # Quarter 3
-                10025: 'Q4'   # Quarter 4
+                10030: 'Q1',  # Quarter 1
+                10031: 'Q2',  # Quarter 2  
+                10032: 'Q3',  # Quarter 3
+                10033: 'Q4'   # Quarter 4
             }
             quarter_display = quarter_mapping.get(entry.quarter.id, f"Q{entry.quarter.id}")
             
@@ -2936,10 +2936,10 @@ class SaveKPICalculationView(View):
             try:
                 # Map quarter string to actual database IDs
                 quarter_mapping = {
-                    '1': 10022,  # Quarter 1 (ID: 10022)
-                    '2': 10023,  # Quarter 2 (ID: 10023)
-                    '3': 10024,  # Quarter 3 (ID: 10024)
-                    '4': 10025   # Quarter 4 (ID: 10025)
+                    '1': 10030,  # Quarter 1 (ID: 10030)
+                    '2': 10031,  # Quarter 2 (ID: 10031)
+                    '3': 10032,  # Quarter 3 (ID: 10032)
+                    '4': 10033   # Quarter 4 (ID: 10033)
                 }
                 quarter_id = quarter_mapping.get(str(quarter))
                 if quarter_id:
@@ -3447,7 +3447,7 @@ def calculate_imports_list(request):
     
     # Get filter options
     years = YEAR.objects.all().order_by('-profile_year')
-    quarters = Quarter.objects.filter(id__in=[10022, 10023, 10024, 10025]).order_by('id')
+    quarters = Quarter.objects.filter(id__in=[10030, 10031, 10032, 10033]).order_by('id')
     
     context = {
         'page_obj': page_obj,
