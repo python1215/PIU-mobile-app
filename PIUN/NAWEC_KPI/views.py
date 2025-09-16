@@ -279,6 +279,8 @@ def performance_dashboard(request):
     year_filter = request.GET.get('year')
     quarter_filter = request.GET.get('quarter')
     
+    print(f'[DEBUG] Filter inputs - year_filter: "{year_filter}", quarter_filter: "{quarter_filter}"')
+    
     # Base queryset for recent entries
     entries_queryset = NAWEC_KPI_Monitoring.objects.select_related(
         'indicator_type', 'year', 'quarter', 'project'
@@ -290,29 +292,36 @@ def performance_dashboard(request):
     selected_quarter_code = None
     
     # Apply year filter if provided
-    if year_filter:
+    if year_filter and year_filter.lower() != 'all':
         try:
+            year_obj = None
             # Check if it's a 4-digit year (like 2025) or a database ID
             if len(year_filter) == 4 and year_filter.isdigit():
                 # Filter by profile_year for 4-digit years
                 year_obj = YEAR.objects.filter(profile_year=year_filter).first()
-                if year_obj:
-                    entries_queryset = entries_queryset.filter(year=year_obj)
-                    selected_year_label = year_obj.profile_year
+                print(f'[DEBUG] Year filter (4-digit): "{year_filter}" -> found: {year_obj}')
             else:
                 # Filter by ID for database IDs
                 year_obj = YEAR.objects.filter(id=year_filter).first()
-                if year_obj:
-                    entries_queryset = entries_queryset.filter(year=year_obj)
-                    selected_year_label = year_obj.profile_year
-        except (ValueError, YEAR.DoesNotExist):
-            pass
+                print(f'[DEBUG] Year filter (ID): "{year_filter}" -> found: {year_obj}')
+            
+            if year_obj:
+                entries_queryset = entries_queryset.filter(year=year_obj)
+                selected_year_label = year_obj.profile_year
+                print(f'[DEBUG] Year filter applied: {year_obj} -> queryset count: {entries_queryset.count()}')
+            else:
+                print(f'[DEBUG] Year filter failed: no YEAR object found for "{year_filter}"')
+        except (ValueError, YEAR.DoesNotExist) as e:
+            print(f'[DEBUG] Year filter exception: {e}')
     
     # Apply quarter filter if provided
-    if quarter_filter:
+    if quarter_filter and quarter_filter.lower() != 'all':
         try:
+            quarter_obj = None
             # Try to get quarter by ID first
             quarter_obj = Quarter.objects.filter(id=quarter_filter).first()
+            print(f'[DEBUG] Quarter filter (ID): "{quarter_filter}" -> found: {quarter_obj}')
+            
             if quarter_obj:
                 entries_queryset = entries_queryset.filter(quarter=quarter_obj)
                 selected_quarter_label = quarter_obj.quarter
@@ -320,6 +329,7 @@ def performance_dashboard(request):
                 if "Quarter" in quarter_obj.quarter:
                     quarter_num = quarter_obj.quarter.split()[-1]
                     selected_quarter_code = f"Q{quarter_num}"
+                print(f'[DEBUG] Quarter filter (ID) applied: {quarter_obj} -> queryset count: {entries_queryset.count()}')
             else:
                 # Try to match by quarter number (1, 2, 3, 4)
                 if quarter_filter in ['1', '2', '3', '4']:
@@ -330,8 +340,10 @@ def performance_dashboard(request):
                         '4': 'Quarter 4'
                     }
                     quarter_name = quarter_names.get(quarter_filter)
+                    print(f'[DEBUG] Quarter filter (name lookup): "{quarter_filter}" -> "{quarter_name}"')
                     if quarter_name:
                         quarter_obj = Quarter.objects.filter(quarter=quarter_name).first()
+                        print(f'[DEBUG] Quarter filter (name): "{quarter_name}" -> found: {quarter_obj}')
                         if quarter_obj:
                             entries_queryset = entries_queryset.filter(quarter=quarter_obj)
                             selected_quarter_label = quarter_obj.quarter
@@ -339,13 +351,20 @@ def performance_dashboard(request):
                             if "Quarter" in quarter_obj.quarter:
                                 quarter_num = quarter_obj.quarter.split()[-1]
                                 selected_quarter_code = f"Q{quarter_num}"
-        except (ValueError, Quarter.DoesNotExist):
-            pass
+                            print(f'[DEBUG] Quarter filter (name) applied: {quarter_obj} -> queryset count: {entries_queryset.count()}')
+                        else:
+                            print(f'[DEBUG] Quarter filter failed: no Quarter object found for "{quarter_name}"')
+                else:
+                    print(f'[DEBUG] Quarter filter unrecognized format: "{quarter_filter}"')
+        except (ValueError, Quarter.DoesNotExist) as e:
+            print(f'[DEBUG] Quarter filter exception: {e}')
     
     
     # Get filtered entries count and recent entries with distinct to avoid duplicates
     filtered_entries_count = entries_queryset.count()
     recent_entries = list(entries_queryset.order_by('-date_created').distinct())
+    
+    print(f'[DEBUG] Final queryset - filtered_entries_count: {filtered_entries_count}, recent_entries: {len(recent_entries)}')
     
     # If monitoring entries are empty, build calculation entries as fallback
     calculation_entries = []
