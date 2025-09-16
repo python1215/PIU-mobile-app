@@ -1476,8 +1476,8 @@ def get_pdos_by_project(request):
     project_id = request.GET.get('project')
     
     if project_id:
-        # Get PDOs related to the project - assuming PDO has project field
-        pdos = PDO.objects.filter(project_id=project_id).order_by('pdo_description')
+        # Get PDOs related to the project
+        pdos = PDO.objects.filter(project_id=project_id).order_by('pdo_statement')
     else:
         pdos = PDO.objects.none()
     
@@ -1491,7 +1491,7 @@ def get_pdos_by_project(request):
     '''
     
     for pdo in pdos:
-        html += f'<option value="{pdo.pk}">{pdo.pdo_description}</option>'
+        html += f'<option value="{pdo.pk}">{pdo.pdo_statement}</option>'
     
     html += '''
         </select>
