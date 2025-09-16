@@ -175,7 +175,18 @@ def performance_dashboard(request):
     """Comprehensive Performance Dashboard for NAWEC KPI Analytics"""
     # Basic statistics
     total_indicators = KPIIndicator.objects.count()
-    active_monitoring = NAWEC_KPI_Monitoring.objects.count()
+    
+    # Count actual KPI calculation records instead of just monitoring
+    kpi_calculation_models = [
+        CalculateROA, CalculateNPM, CalculateDSCR, CalculateMWh, CalculateGAF, 
+        CalculateTMH, CalculateATC, CalculateNECD, CalculateNWCD, CalculateTPS, 
+        CalculateTTP, CalculateWQCC, CalculateWQCB, CalculateNRW, CalculateDD,
+        CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR
+    ]
+    
+    active_monitoring = sum(model.objects.count() for model in kpi_calculation_models)
+    if active_monitoring == 0:
+        active_monitoring = NAWEC_KPI_Monitoring.objects.count()
     
     # Calculate average performance using (achieved_value/End_Target_Value)*100
     all_entries = NAWEC_KPI_Monitoring.objects.exclude(
