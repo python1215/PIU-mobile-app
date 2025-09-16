@@ -1481,24 +1481,7 @@ def get_pdos_by_project(request):
     else:
         pdos = PDO.objects.none()
     
-    html = '''
-    <div class="mb-3">
-        <label for="id_pdo" class="form-label">PDO</label>
-        <select name="pdo" id="id_pdo" class="form-control"
-                hx-get="/NAWEC_KPI/get-outcomes-by-pdo/" 
-                hx-target="#project-outcome-field">
-            <option value="">-- Select PDO --</option>
-    '''
-    
-    for pdo in pdos:
-        html += f'<option value="{pdo.pk}">{pdo.pdo_statement}</option>'
-    
-    html += '''
-        </select>
-    </div>
-    '''
-    
-    return HttpResponse(html)
+    return render(request, 'NAWEC_KPI/partials/pdo_options.html', {'pdos': pdos})
 
 @login_required  
 def get_outcomes_by_pdo(request):
@@ -1510,24 +1493,7 @@ def get_outcomes_by_pdo(request):
     else:
         outcomes = ProjectOutCome.objects.none()
     
-    html = '''
-    <div class="mb-3">
-        <label for="id_project_outcome" class="form-label">Project Outcome</label>
-        <select name="project_outcome" id="id_project_outcome" class="form-control"
-                hx-get="/NAWEC_KPI/get-results-by-outcome/" 
-                hx-target="#project-result-field">
-            <option value="">-- Select Project Outcome --</option>
-    '''
-    
-    for outcome in outcomes:
-        html += f'<option value="{outcome.pk}">{outcome.project_outcome}</option>'
-    
-    html += '''
-        </select>
-    </div>
-    '''
-    
-    return HttpResponse(html)
+    return render(request, 'NAWEC_KPI/partials/outcome_options.html', {'outcomes': outcomes})
 
 
 # DSCR CRUD Operations
