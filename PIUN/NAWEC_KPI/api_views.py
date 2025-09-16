@@ -131,17 +131,10 @@ class SaveKPICalculationView(View):
                 quarter_value = input_values.get('quarter')
                 if quarter_value:
                     try:
-                        quarter_mapping = {
-                            '1': 10030,  # Quarter 1 (ID: 10030)
-                            '2': 10031,  # Quarter 2 (ID: 10031)
-                            '3': 10032,  # Quarter 3 (ID: 10032)
-                            '4': 10033   # Quarter 4 (ID: 10033)
-                        }
-                        quarter_id = quarter_mapping.get(str(quarter_value))
-                        if quarter_id:
-                            quarter_instance = Quarter.objects.get(id=quarter_id)
-                            create_data['quarter'] = quarter_instance
-                            print(f'[DEBUG] API - TMH Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
+                        # Dynamic lookup instead of hardcoded IDs
+                        quarter_instance = Quarter.objects.get(quarter=f"Quarter {quarter_value}")
+                        create_data['quarter'] = quarter_instance
+                        print(f'[DEBUG] API - TMH Quarter mapped: {quarter_value} -> {quarter_instance}')
                     except Quarter.DoesNotExist:
                         print(f'[DEBUG] API - TMH Quarter mapping failed for: {quarter_value}')
                         pass
@@ -180,18 +173,10 @@ class SaveKPICalculationView(View):
                 quarter_value = input_values.get('quarter')
                 if quarter_value:
                     try:
-                        # Map quarter string to actual database IDs
-                        quarter_mapping = {
-                            '1': 10030,  # Quarter 1 (ID: 10030)
-                            '2': 10031,  # Quarter 2 (ID: 10031)
-                            '3': 10032,  # Quarter 3 (ID: 10032)
-                            '4': 10033   # Quarter 4 (ID: 10033)
-                        }
-                        quarter_id = quarter_mapping.get(str(quarter_value))
-                        if quarter_id:
-                            quarter_instance = Quarter.objects.get(id=quarter_id)
-                            create_data['quarter'] = quarter_instance
-                            print(f'[DEBUG] API - EI Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
+                        # Dynamic lookup instead of hardcoded IDs
+                        quarter_instance = Quarter.objects.get(quarter=f"Quarter {quarter_value}")
+                        create_data['quarter'] = quarter_instance
+                        print(f'[DEBUG] API - EI Quarter mapped: {quarter_value} -> {quarter_instance}')
                     except Quarter.DoesNotExist:
                         print(f'[DEBUG] API - EI Quarter mapping failed for: {quarter_value}')
                         pass
@@ -204,22 +189,10 @@ class SaveKPICalculationView(View):
                 quarter_value = input_values.get('quarter')
                 if quarter_value:
                     try:
-                        # Convert quarter number to Quarter model instance
-                        # Map numeric quarters to existing Quarter records
-                        quarter_mapping = {
-                            '1': 10030,  # Quarter 1 (ID: 10030)
-                            '2': 10031,  # Quarter 2 (ID: 10031)
-                            '3': 10032,  # Quarter 3 (ID: 10032)
-                            '4': 10033   # Quarter 4 (ID: 10033)
-                        }
-                        print(f'[DEBUG] API - Looking for quarter mapping: {quarter_value} -> {quarter_mapping.get(str(quarter_value))}')
-                        quarter_id = quarter_mapping.get(str(quarter_value))
-                        if quarter_id:
-                            quarter_instance = Quarter.objects.get(id=quarter_id)
-                            create_data['quarter'] = quarter_instance
-                            print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> ID:{quarter_id} -> {quarter_instance}')
-                        else:
-                            print(f'[DEBUG] API - No mapping found for quarter: {quarter_value}')
+                        # Dynamic lookup instead of hardcoded IDs
+                        quarter_instance = Quarter.objects.get(quarter=f"Quarter {quarter_value}")
+                        create_data['quarter'] = quarter_instance
+                        print(f'[DEBUG] API - Quarter mapped: {quarter_value} -> {quarter_instance}')
                     except Quarter.DoesNotExist as e:
                         print(f'[DEBUG] API - Quarter DoesNotExist: {e}')
                         # Try alternative mapping
