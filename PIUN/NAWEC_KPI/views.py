@@ -409,7 +409,7 @@ def performance_dashboard(request):
                         
                         calculation_entries.append({
                             'model_name': model.__name__,
-                            'id': entry.id,
+                            'id': entry.pk,  # Use pk instead of id to work with custom primary keys
                             'year': entry.year,
                             'quarter': entry.quarter,
                             'achieved_value': achieved_value,
