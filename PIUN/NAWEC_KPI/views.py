@@ -1470,6 +1470,64 @@ def get_project_results(request):
     
     return HttpResponse(html)
 
+@login_required
+def get_pdos_by_project(request):
+    """HTMX endpoint to get PDOs filtered by Project"""
+    project_id = request.GET.get('project')
+    
+    if project_id:
+        # Get PDOs related to the project - assuming PDO has project field
+        pdos = PDO.objects.filter(project_id=project_id).order_by('pdo_description')
+    else:
+        pdos = PDO.objects.none()
+    
+    html = '''
+    <div class="mb-3">
+        <label for="id_pdo" class="form-label">PDO</label>
+        <select name="pdo" id="id_pdo" class="form-control"
+                hx-get="/NAWEC_KPI/get-outcomes-by-pdo/" 
+                hx-target="#project-outcome-field">
+            <option value="">-- Select PDO --</option>
+    '''
+    
+    for pdo in pdos:
+        html += f'<option value="{pdo.pk}">{pdo.pdo_description}</option>'
+    
+    html += '''
+        </select>
+    </div>
+    '''
+    
+    return HttpResponse(html)
+
+@login_required  
+def get_outcomes_by_pdo(request):
+    """HTMX endpoint to get Project Outcomes filtered by PDO"""
+    pdo_id = request.GET.get('pdo')
+    
+    if pdo_id:
+        outcomes = ProjectOutCome.objects.filter(pdo_id=pdo_id).order_by('project_outcome')
+    else:
+        outcomes = ProjectOutCome.objects.none()
+    
+    html = '''
+    <div class="mb-3">
+        <label for="id_project_outcome" class="form-label">Project Outcome</label>
+        <select name="project_outcome" id="id_project_outcome" class="form-control"
+                hx-get="/NAWEC_KPI/get-results-by-outcome/" 
+                hx-target="#project-result-field">
+            <option value="">-- Select Project Outcome --</option>
+    '''
+    
+    for outcome in outcomes:
+        html += f'<option value="{outcome.pk}">{outcome.project_outcome}</option>'
+    
+    html += '''
+        </select>
+    </div>
+    '''
+    
+    return HttpResponse(html)
 
 
 # DSCR CRUD Operations

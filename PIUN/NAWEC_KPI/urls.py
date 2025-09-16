@@ -124,6 +124,8 @@ urlpatterns = [
     path('get-kpi-progress-values/<int:kpi_indicator_id>/', views.get_kpi_progress_values, name='get_kpi_progress_values'),
     
     # HTMX endpoints for cascading dropdowns
+    path('get-pdos-by-project/', views.get_pdos_by_project, name='get_pdos_by_project'),
+    path('get-outcomes-by-pdo/', views.get_outcomes_by_pdo, name='get_outcomes_by_pdo'),
     path('get-project-outcomes/', views.get_project_outcomes, name='get_project_outcomes'),
     path('get-project-results/', views.get_project_results, name='get_project_results'),
     path('get-results-by-outcome/', views.get_results_by_outcome, name='get_results_by_outcome'),
