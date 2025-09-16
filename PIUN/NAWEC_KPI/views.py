@@ -272,29 +272,67 @@ def performance_dashboard(request):
         'indicator_type', 'year', 'quarter', 'project'
     )
     
-    # Apply filters if provided
+    # Initialize display labels for template
+    selected_year_label = None
+    selected_quarter_label = None
+    selected_quarter_code = None
+    
+    # Apply year filter if provided
     if year_filter:
-        entries_queryset = entries_queryset.filter(year_id=year_filter)
+        try:
+            # Check if it's a 4-digit year (like 2025) or a database ID
+            if len(year_filter) == 4 and year_filter.isdigit():
+                # Filter by profile_year for 4-digit years
+                year_obj = YEAR.objects.filter(profile_year=year_filter).first()
+                if year_obj:
+                    entries_queryset = entries_queryset.filter(year=year_obj)
+                    selected_year_label = year_obj.profile_year
+            else:
+                # Filter by ID for database IDs
+                year_obj = YEAR.objects.filter(id=year_filter).first()
+                if year_obj:
+                    entries_queryset = entries_queryset.filter(year=year_obj)
+                    selected_year_label = year_obj.profile_year
+        except (ValueError, YEAR.DoesNotExist):
+            pass
+    
+    # Apply quarter filter if provided
     if quarter_filter:
-        # Handle simple numeric quarter values (1, 2, 3, 4)
-        if quarter_filter in ['1', '2', '3', '4']:
-            # Map numeric quarters to actual Quarter database IDs
-            quarter_mapping = {
-                '1': 10022,  # Quarter 1 (ID: 10022)
-                '2': 10023,  # Quarter 2 (ID: 10023)
-                '3': 10024,  # Quarter 3 (ID: 10024)
-                '4': 10025   # Quarter 4 (ID: 10025)
-            }
-            quarter_id = quarter_mapping.get(quarter_filter)
-            if quarter_id:
-                try:
-                    quarter_obj = Quarter.objects.get(id=quarter_id)
-                    entries_queryset = entries_queryset.filter(quarter=quarter_obj)
-                except Quarter.DoesNotExist:
-                    pass
+        try:
+            # Try to get quarter by ID first
+            quarter_obj = Quarter.objects.filter(id=quarter_filter).first()
+            if quarter_obj:
+                entries_queryset = entries_queryset.filter(quarter=quarter_obj)
+                selected_quarter_label = quarter_obj.quarter
+                # Extract quarter number for display (e.g., "Quarter 3" -> "Q3")
+                if "Quarter" in quarter_obj.quarter:
+                    quarter_num = quarter_obj.quarter.split()[-1]
+                    selected_quarter_code = f"Q{quarter_num}"
+            else:
+                # Try to match by quarter number (1, 2, 3, 4)
+                if quarter_filter in ['1', '2', '3', '4']:
+                    quarter_names = {
+                        '1': 'Quarter 1',
+                        '2': 'Quarter 2', 
+                        '3': 'Quarter 3',
+                        '4': 'Quarter 4'
+                    }
+                    quarter_name = quarter_names.get(quarter_filter)
+                    if quarter_name:
+                        quarter_obj = Quarter.objects.filter(quarter=quarter_name).first()
+                        if quarter_obj:
+                            entries_queryset = entries_queryset.filter(quarter=quarter_obj)
+                            selected_quarter_label = quarter_obj.quarter
+                            # Extract quarter number for display (e.g., "Quarter 3" -> "Q3")
+                            if "Quarter" in quarter_obj.quarter:
+                                quarter_num = quarter_obj.quarter.split()[-1]
+                                selected_quarter_code = f"Q{quarter_num}"
+        except (ValueError, Quarter.DoesNotExist):
+            pass
     
     # Get filtered recent entries and calculate performance - convert to list for template evaluation
-    recent_entries = list(entries_queryset.order_by('-date_created')[:20])
+    # Apply ordering and limit to show most relevant entries based on filters
+    recent_entries = list(entries_queryset.order_by('-date_created'))
     
     # Calculate performance and variance for each entry with proper decimal precision
     for entry in recent_entries:
@@ -374,6 +412,9 @@ def performance_dashboard(request):
         'overall_achievement_rate': round(overall_achievement_rate, 2),
         'year_filter': year_filter,
         'quarter_filter': quarter_filter,
+        'selected_year_label': selected_year_label,
+        'selected_quarter_label': selected_quarter_label,
+        'selected_quarter_code': selected_quarter_code,
         'filtered_entries_count': len(recent_entries),
     }
     
