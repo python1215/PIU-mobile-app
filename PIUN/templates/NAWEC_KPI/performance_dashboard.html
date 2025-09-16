@@ -443,8 +443,11 @@
                     <div>
                         <h2 class="text-2xl font-bold text-white">NAWEC KPI Performance Dashboard</h2>
                         <p class="text-sm text-white opacity-70">
-                            {% if year_filter or quarter_filter %}
+                            {% if project_filter or region_filter or district_filter or year_filter or quarter_filter %}
                                 Filtered Results: {{ filtered_entries_count }} entries
+                                {% if project_filter %} • Project: {{ project_filter }}{% endif %}
+                                {% if region_filter %} • Region: {{ region_filter }}{% endif %}
+                                {% if district_filter %} • District: {{ district_filter }}{% endif %}
                                 {% if year_filter %} • Year: {{ year_filter }}{% endif %}
                                 {% if quarter_filter %} • Quarter: {{ quarter_filter }}{% endif %}
                             {% else %}
@@ -475,12 +478,21 @@
             <div class="performance-card p-6">
 
         <!-- Active Filters Info -->
-        {% if year_filter or quarter_filter %}
+        {% if project_filter or region_filter or district_filter or year_filter or quarter_filter %}
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center">
+                    <div class="flex items-center flex-wrap gap-1">
                         <i class="bi bi-funnel-fill text-blue-600 mr-2"></i>
                         <span class="text-sm font-medium text-blue-800">Active Filters:</span>
+                        {% if project_filter %}
+                            <span class="ml-2 px-2 py-1 bg-purple-600 text-white text-xs rounded-full">Project: {{ project_filter }}</span>
+                        {% endif %}
+                        {% if region_filter %}
+                            <span class="ml-2 px-2 py-1 bg-green-600 text-white text-xs rounded-full">Region: {{ region_filter }}</span>
+                        {% endif %}
+                        {% if district_filter %}
+                            <span class="ml-2 px-2 py-1 bg-orange-600 text-white text-xs rounded-full">District: {{ district_filter }}</span>
+                        {% endif %}
                         {% if year_filter %}
                             <span class="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-full">Year: {{ year_filter }}</span>
                         {% endif %}
@@ -500,6 +512,48 @@
             <div class="flex flex-wrap justify-between items-end gap-4 filter-form-responsive">
                 <!-- Filter Form - Left Side -->
                 <form method="GET" class="flex flex-wrap gap-2 items-end filter-controls">
+                    <div class="form-control">
+                        <label class="label py-1">
+                            <span class="label-text text-xs font-medium">Project</span>
+                        </label>
+                        <select name="project" class="select select-bordered select-xs w-40">
+                            <option value="">All Projects</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}" {% if request.GET.project == project.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ project.project|truncatechars:25 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label py-1">
+                            <span class="label-text text-xs font-medium">Region</span>
+                        </label>
+                        <select name="region" class="select select-bordered select-xs w-32">
+                            <option value="">All Regions</option>
+                            {% for region in regions %}
+                                <option value="{{ region.id }}" {% if request.GET.region == region.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ region.region_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label py-1">
+                            <span class="label-text text-xs font-medium">District</span>
+                        </label>
+                        <select name="district" class="select select-bordered select-xs w-32">
+                            <option value="">All Districts</option>
+                            {% for district in districts %}
+                                <option value="{{ district.id }}" {% if request.GET.district == district.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ district.district_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
                     <div class="form-control">
                         <label class="label py-1">
                             <span class="label-text text-xs font-medium">Year</span>

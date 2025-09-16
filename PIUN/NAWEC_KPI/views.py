@@ -13,8 +13,9 @@ from .models import (
 )
 from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, CalculateNPMForm
 
-from setup.models import YEAR, Quarter, Indicator_Type, Measurement_Unit, Data_Collection_Frequency
+from setup.models import YEAR, Quarter, Indicator_Type, Measurement_Unit, Data_Collection_Frequency, Regions, Districts
 from PIU_Financial_mgt.models import Project, PDO, ProjectOutCome, ProjectResult
+from PIU_Mapping_project_Sites.models import projectMapping
 # Using Django ORM exclusively - no SQL Server utilities needed
 
 def calculate_achievement_gauge():
@@ -266,6 +267,9 @@ def performance_dashboard(request):
     # Filter parameters from GET request
     year_filter = request.GET.get('year')
     quarter_filter = request.GET.get('quarter')
+    project_filter = request.GET.get('project')
+    region_filter = request.GET.get('region')
+    district_filter = request.GET.get('district')
     
     # Base queryset for recent entries
     entries_queryset = NAWEC_KPI_Monitoring.objects.select_related(
@@ -330,9 +334,40 @@ def performance_dashboard(request):
         except (ValueError, Quarter.DoesNotExist):
             pass
     
-    # Get filtered recent entries and calculate performance - convert to list for template evaluation
-    # Apply ordering and limit to show most relevant entries based on filters
-    recent_entries = list(entries_queryset.order_by('-date_created'))
+    # Apply project filter if provided
+    if project_filter:
+        try:
+            project_obj = Project.objects.filter(id=project_filter).first()
+            if project_obj:
+                entries_queryset = entries_queryset.filter(project=project_obj)
+        except (ValueError, Project.DoesNotExist):
+            pass
+    
+    # Apply region filter if provided
+    if region_filter:
+        try:
+            region_obj = Regions.objects.filter(id=region_filter).first()
+            if region_obj:
+                # Filter by projects that are mapped to this region through projectMapping
+                mapped_projects = projectMapping.objects.filter(region=region_obj).values_list('project', flat=True)
+                entries_queryset = entries_queryset.filter(project__in=mapped_projects)
+        except (ValueError, Regions.DoesNotExist):
+            pass
+    
+    # Apply district filter if provided  
+    if district_filter:
+        try:
+            district_obj = Districts.objects.filter(id=district_filter).first()
+            if district_obj:
+                # Filter by projects that are mapped to this district through projectMapping
+                mapped_projects = projectMapping.objects.filter(district=district_obj).values_list('project', flat=True)
+                entries_queryset = entries_queryset.filter(project__in=mapped_projects)
+        except (ValueError, Districts.DoesNotExist):
+            pass
+    
+    # Get filtered entries count and recent entries with distinct to avoid duplicates
+    filtered_entries_count = entries_queryset.count()
+    recent_entries = list(entries_queryset.order_by('-date_created').distinct())
     
     # Calculate performance and variance for each entry with proper decimal precision
     for entry in recent_entries:
@@ -395,6 +430,9 @@ def performance_dashboard(request):
     # Get filter data for dropdowns
     years = YEAR.objects.all().order_by('-profile_year')
     quarters = Quarter.objects.all().order_by('quarter')
+    projects = Project.objects.all().order_by('project')
+    regions = Regions.objects.all().order_by('region_name')
+    districts = Districts.objects.all().order_by('district_name')
     
     context = {
         'total_indicators': total_indicators,
@@ -407,15 +445,21 @@ def performance_dashboard(request):
         'recent_entries': recent_entries,
         'years': years,
         'quarters': quarters,
+        'projects': projects,
+        'regions': regions,
+        'districts': districts,
         'overall_target_gir': round(overall_target_gir, 2),
         'overall_actual_gir': round(overall_actual_gir, 2),
         'overall_achievement_rate': round(overall_achievement_rate, 2),
         'year_filter': year_filter,
         'quarter_filter': quarter_filter,
+        'project_filter': project_filter,
+        'region_filter': region_filter,
+        'district_filter': district_filter,
         'selected_year_label': selected_year_label,
         'selected_quarter_label': selected_quarter_label,
         'selected_quarter_code': selected_quarter_code,
-        'filtered_entries_count': len(recent_entries),
+        'filtered_entries_count': filtered_entries_count,
     }
     
     return render(request, 'NAWEC_KPI/performance_dashboard.html', context)
