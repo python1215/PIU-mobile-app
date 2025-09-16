@@ -9,7 +9,7 @@ from .models import (
     KPIIndicator, NAWEC_KPI_Monitoring, CalculateROA, CalculateNPM, CalculateMWh, 
     CalculateGAF, CalculateDSCR, CalculateTMH, CalculateATC, CalculateNECD,
     CalculateNWCD, CalculateTPS, CalculateTTP, CalculateWQCC, CalculateWQCB, CalculateNRW, CalculateDD,
-    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, Month
+    CalculateAO, CalculateDER, CalculateCR, CalculatePARI, CalculateTSQR, CalculateIMPORTS, CalculateIPP, Month
 )
 from .forms import KPIMonitoringDataForm, KPIIndicatorForm, CalculateROAForm, CalculateNPMForm
 
