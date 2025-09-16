@@ -347,6 +347,93 @@ def performance_dashboard(request):
     filtered_entries_count = entries_queryset.count()
     recent_entries = list(entries_queryset.order_by('-date_created').distinct())
     
+    # If monitoring entries are empty, build calculation entries as fallback
+    calculation_entries = []
+    if filtered_entries_count == 0:
+        # Build unified dataset from calculation models
+        for model in kpi_calculation_models:
+            if hasattr(model, '_meta'):
+                # Check if model has year and quarter fields
+                field_names = [f.name for f in model._meta.get_fields()]
+                if 'year' in field_names and 'quarter' in field_names:
+                    model_queryset = model.objects.select_related('year', 'quarter').all()
+                    
+                    # Apply year filter to calculation models
+                    if year_filter:
+                        try:
+                            if len(year_filter) == 4 and year_filter.isdigit():
+                                year_obj = YEAR.objects.filter(profile_year=year_filter).first()
+                                if year_obj:
+                                    model_queryset = model_queryset.filter(year=year_obj)
+                            else:
+                                year_obj = YEAR.objects.filter(id=year_filter).first()
+                                if year_obj:
+                                    model_queryset = model_queryset.filter(year=year_obj)
+                        except:
+                            pass
+                    
+                    # Apply quarter filter to calculation models
+                    if quarter_filter:
+                        try:
+                            quarter_obj = Quarter.objects.filter(id=quarter_filter).first()
+                            if quarter_obj:
+                                model_queryset = model_queryset.filter(quarter=quarter_obj)
+                            elif quarter_filter in ['1', '2', '3', '4']:
+                                quarter_names = {
+                                    '1': 'Quarter 1', '2': 'Quarter 2', 
+                                    '3': 'Quarter 3', '4': 'Quarter 4'
+                                }
+                                quarter_name = quarter_names.get(quarter_filter)
+                                if quarter_name:
+                                    quarter_obj = Quarter.objects.filter(quarter=quarter_name).first()
+                                    if quarter_obj:
+                                        model_queryset = model_queryset.filter(quarter=quarter_obj)
+                        except:
+                            pass
+                    
+                    # Convert calculation records to display format
+                    for entry in model_queryset:
+                        achieved_value = getattr(entry, 'achieved_value', None) or getattr(entry, 'calculated_value', 0)
+                        target_value = getattr(entry, 'End_Target_Value', None) or getattr(entry, 'target_value', 100)
+                        baseline_value = getattr(entry, 'baseline_value', None) or 0
+                        
+                        # Calculate performance percentage
+                        performance_calculated = None
+                        if target_value and target_value != 0 and achieved_value is not None:
+                            performance_calculated = round((achieved_value / target_value) * 100, 2)
+                        
+                        # Calculate variance
+                        variance_calculated = None
+                        if achieved_value is not None and target_value is not None:
+                            variance_calculated = round(achieved_value - target_value, 2)
+                        
+                        calculation_entries.append({
+                            'model_name': model.__name__,
+                            'id': entry.id,
+                            'year': entry.year,
+                            'quarter': entry.quarter,
+                            'achieved_value': achieved_value,
+                            'End_Target_Value': target_value,
+                            'baseline_value': baseline_value,
+                            'performance_calculated': performance_calculated,
+                            'variance_calculated': variance_calculated,
+                            'date_created': getattr(entry, 'date_created', None),
+                            'entry': entry
+                        })
+        
+        # Update filtered_entries_count to include calculation entries
+        filtered_entries_count = len(calculation_entries)
+        
+        # Calculate average performance from calculation entries
+        if calculation_entries:
+            total_performance = 0
+            count = 0
+            for calc_entry in calculation_entries:
+                if calc_entry['performance_calculated'] is not None:
+                    total_performance += calc_entry['performance_calculated']
+                    count += 1
+            filtered_avg_performance = total_performance / count if count > 0 else 0
+    
     # Calculate performance and variance for each entry with proper decimal precision
     for entry in recent_entries:
         if entry.End_Target_Value is not None and entry.End_Target_Value != 0 and entry.achieved_value is not None:
@@ -418,6 +505,7 @@ def performance_dashboard(request):
         'achievement_status': achievement_status,
         'kpi_categories': kpi_categories,
         'recent_entries': recent_entries,
+        'calculation_entries': calculation_entries,  # Add calculation data for display
         'years': years,
         'quarters': quarters,
         'overall_target_gir': round(overall_target_gir, 2),
