@@ -2895,22 +2895,11 @@ def calculate_dd_delete(request, calc_id):
 
 # HTMX Cascading Dropdown Views
 @login_required
-def get_pdos_by_project(request):
-    """HTMX endpoint to get PDOs filtered by project"""
+def get_project_outcomes(request):
+    """HTMX endpoint to get Project Outcomes filtered by project (PDO functionality removed)"""
     project_id = request.GET.get('project')
     if project_id:
-        pdos = PDO.objects.filter(project_id=project_id).order_by('pdo_statement')
-    else:
-        pdos = PDO.objects.none()
-    
-    return render(request, 'NAWEC_KPI/partials/pdo_options.html', {'pdos': pdos})
-
-@login_required
-def get_outcomes_by_pdo(request):
-    """HTMX endpoint to get Project Outcomes filtered by PDO"""
-    pdo_id = request.GET.get('pdo')
-    if pdo_id:
-        outcomes = ProjectOutCome.objects.filter(pdo_id=pdo_id).order_by('project_outcome')
+        outcomes = ProjectOutCome.objects.filter(project_id=project_id).order_by('project_outcome')
     else:
         outcomes = ProjectOutCome.objects.none()
     
