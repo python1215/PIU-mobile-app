@@ -102,4 +102,4 @@ class ProjectMappingFilter(django_filters.FilterSet):
     
     class Meta:
         model = projectMapping
-        fields = ['region', 'district', 'settlement', 'project', 'donor', 'profile_year', 'access']
+        fields = ['region', 'district', 'settlement', 'project', 'donor', 'profile_year', 'access', 'settlement_search']
