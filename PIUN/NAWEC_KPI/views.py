@@ -205,13 +205,18 @@ def performance_dashboard(request):
                 count += 1
         avg_performance = total_performance / count if count > 0 else 0
     
-    # Current quarter entries
+    # Current quarter entries - using most recent year and quarter from database
     try:
-        current_year = YEAR.objects.get(profile_year=2025)  # Current year
-        current_quarter = Quarter.objects.first()  # Get first quarter as default
-        current_quarter_entries = NAWEC_KPI_Monitoring.objects.filter(
-            year=current_year, quarter=current_quarter
-        ).count()
+        # Get the most recent year from database instead of hard-coding
+        current_year = YEAR.objects.order_by('-profile_year').first()
+        # Get the most recent quarter from database instead of using .first()
+        current_quarter = Quarter.objects.order_by('-id').first()
+        
+        current_quarter_entries = 0
+        if current_year and current_quarter:
+            current_quarter_entries = NAWEC_KPI_Monitoring.objects.filter(
+                year=current_year, quarter=current_quarter
+            ).count()
     except:
         current_quarter_entries = 0
     
