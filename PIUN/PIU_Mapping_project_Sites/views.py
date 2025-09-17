@@ -567,16 +567,10 @@ def add_mapping(request):
     else:
         form = MappingForm()
     
-    # Add context for search form dropdowns
-    
     context = {
         'form': form,
         'title': 'Add New Mapping',
         'action': 'Add',
-        'all_regions': Regions.objects.all().order_by('region_name'),
-        'all_districts': Districts.objects.all().order_by('district_name'),
-        'all_settlements': Settlement.objects.all().order_by('settlement_name'),
-        'all_projects': Project.objects.all().order_by('project'),
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_form.html', context)
