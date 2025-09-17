@@ -23,6 +23,84 @@
         </div>
     </div>
 
+    <!-- Search & Filter Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold" style="color: white;">
+                        <i class="bi bi-search"></i> Quick Search & Reference
+                        <small class="text-muted ms-2">(Find existing mappings for reference)</small>
+                    </h6>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-info btn-sm">
+                            <i class="bi bi-list"></i> View All Mappings
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="row g-3" id="reference-search-form">
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <label for="ref-region-filter" class="form-label small font-weight-bold">Region</label>
+                            <select name="region" class="form-select form-select-sm" id="ref-region-filter">
+                                <option value="">All Regions</option>
+                                {% for region in all_regions %}
+                                    <option value="{{ region.pk }}">{{ region.region_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <label for="ref-district-filter" class="form-label small font-weight-bold">District</label>
+                            <select name="district" class="form-select form-select-sm" id="ref-district-filter">
+                                <option value="">All Districts</option>
+                                {% for district in all_districts %}
+                                    <option value="{{ district.pk }}">{{ district.district_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <label for="ref-settlement-filter" class="form-label small font-weight-bold">Settlement</label>
+                            <select name="settlement" class="form-select form-select-sm" id="ref-settlement-filter">
+                                <option value="">All Settlements</option>
+                                {% for settlement in all_settlements %}
+                                    <option value="{{ settlement.pk }}">{{ settlement.settlement_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <label for="ref-project-filter" class="form-label small font-weight-bold">Project</label>
+                            <select name="project" class="form-select form-select-sm" id="ref-project-filter">
+                                <option value="">All Projects</option>
+                                {% for project in all_projects %}
+                                    <option value="{{ project.pk }}">{{ project.project }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4 col-sm-6">
+                            <label for="ref-settlement-search" class="form-label small font-weight-bold">Search Settlement</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       name="settlement_search" 
+                                       id="ref-settlement-search"
+                                       class="form-control" 
+                                       placeholder="Type settlement name..." 
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-lg-1 col-md-4 col-sm-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Form Section -->
     <div class="row">
         <div class="col-12">
@@ -207,15 +285,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => {
                     console.error('Error loading districts:', error);
                 });
+            
+            // Load projects for this region
+            loadProjects(regionId, '', '');
         } else {
             document.getElementById('id_district').innerHTML = '<option value="">---------</option>';
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+            // Load all projects when no region is selected
+            loadProjects('', '', '');
         }
     });
 
     // Handle district change to load settlements
     document.getElementById('id_district').addEventListener('change', function() {
         const districtId = this.value;
+        const regionId = document.getElementById('id_region').value;
+        
         if (districtId) {
             fetch(`/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`)
                 .then(response => response.json())
@@ -232,10 +317,71 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => {
                     console.error('Error loading settlements:', error);
                 });
+            
+            // Load projects for this district
+            loadProjects(regionId, districtId, '');
         } else {
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
+            // Load projects for region only
+            loadProjects(regionId, '', '');
         }
     });
+
+    // Handle settlement change to load projects
+    document.getElementById('id_settlement').addEventListener('change', function() {
+        const settlementId = this.value;
+        const districtId = document.getElementById('id_district').value;
+        const regionId = document.getElementById('id_region').value;
+        
+        // Load projects for this settlement
+        loadProjects(regionId, districtId, settlementId);
+    });
+
+    // Function to load projects based on geographical selection
+    function loadProjects(regionId, districtId, settlementId) {
+        let url = '/PIU_Mapping_project_Sites/load_projects/?';
+        const params = [];
+        
+        if (regionId) params.push(`region_id=${regionId}`);
+        if (districtId) params.push(`district_id=${districtId}`);
+        if (settlementId) params.push(`settlement_id=${settlementId}`);
+        
+        url += params.join('&');
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const projectSelect = document.getElementById('id_project');
+                if (projectSelect) {
+                    // Clear existing options
+                    projectSelect.innerHTML = '<option value="">---------</option>';
+                    
+                    // Add new options
+                    data.projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.project;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    // Show a helpful message if no projects found for the selected area
+                    if (data.projects.length === 0 && (regionId || districtId || settlementId)) {
+                        const noProjectsOption = document.createElement('option');
+                        noProjectsOption.value = '';
+                        noProjectsOption.textContent = 'No projects found in this area';
+                        noProjectsOption.disabled = true;
+                        projectSelect.appendChild(noProjectsOption);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading projects:', error);
+                const projectSelect = document.getElementById('id_project');
+                if (projectSelect) {
+                    projectSelect.innerHTML = '<option value="">Error loading projects</option>';
+                }
+            });
+    }
 
     // Geolocation function for current location
     window.getCurrentLocation = function() {

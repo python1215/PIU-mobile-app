@@ -15,6 +15,7 @@ urlpatterns = [
     path('sitemapping/', views.mappingCreateView, name='sitemapping'),
     path('load_districts/', views.load_districts, name='load_districts'),
     path('load_settlement/', views.load_settlement, name='load_settlement'),
+    path('load_projects/', views.load_projects, name='load_projects'),
     path('togglecor/', views.settlementswithcor, name='togglecor'),
     
     # API endpoints

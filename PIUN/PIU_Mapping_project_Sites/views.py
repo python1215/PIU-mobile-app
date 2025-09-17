@@ -567,9 +567,16 @@ def add_mapping(request):
     else:
         form = MappingForm()
     
+    # Add context for search form dropdowns
+    
     context = {
         'form': form,
-        'title': 'Add New Mapping'
+        'title': 'Add New Mapping',
+        'action': 'Add',
+        'all_regions': Regions.objects.all().order_by('region_name'),
+        'all_districts': Districts.objects.all().order_by('district_name'),
+        'all_settlements': Settlement.objects.all().order_by('settlement_name'),
+        'all_projects': Project.objects.all().order_by('project'),
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_form.html', context)
@@ -652,6 +659,44 @@ def load_settlement(request):
     return JsonResponse({'settlements': [{'settlement_code': s.settlement_code, 'settlement_name': s.settlement_name} for s in settlements]})
 
 
+def load_projects(request):
+    """Load projects based on selected region, district, or settlement"""
+    region_id = request.GET.get('region_id')
+    district_id = request.GET.get('district_id')
+    settlement_id = request.GET.get('settlement_id')
+    
+    # Start with all projects
+    projects_queryset = Project.objects.all()
+    
+    # Filter projects based on existing mappings in the selected geographical area
+    mappings_filter = {}
+    
+    if settlement_id:
+        # If settlement is selected, find projects that have mappings in this settlement
+        # Use settlement__settlement_code since frontend sends settlement codes
+        mappings_filter['settlement__settlement_code'] = settlement_id
+    elif district_id:
+        # If district is selected, find projects that have mappings in this district
+        # Use district__district_code since frontend sends district codes
+        mappings_filter['district__district_code'] = district_id
+    elif region_id:
+        # If region is selected, find projects that have mappings in this region
+        # Frontend sends region IDs (primary keys), so filter by region_id directly
+        mappings_filter['region_id'] = region_id
+    
+    if mappings_filter:
+        # Get projects that have mappings in the selected area
+        project_ids = projectMapping.objects.filter(**mappings_filter).values_list('project__pk', flat=True).distinct()
+        projects_queryset = projects_queryset.filter(pk__in=project_ids)
+    
+    # Order projects by name
+    projects = projects_queryset.order_by('project')
+    
+    return JsonResponse({
+        'projects': [{'id': p.pk, 'project': p.project} for p in projects]
+    })
+
+
 # Placeholder functions for compatibility
 def indexl(request):
     """Leaflet map placeholder - redirect to main map"""
@@ -670,7 +715,7 @@ def togglemarker(request):
 
 def mappingCreateView(request):
     """Mapping create placeholder - redirect to add mapping"""
-    return redirect('PIU_Mapping_project_Sites:add_mapping')
+    return redirect('PIU_Mapping_project_Sites:add-mapping')
 
 
 def settlementswithcor(request):
