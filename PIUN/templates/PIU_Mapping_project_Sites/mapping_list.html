@@ -261,8 +261,18 @@
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-4 col-sm-6">
-                            <label for="{{ filter.settlement_search.field.id_for_label }}" class="form-label small font-weight-bold">Search Settlement</label>
-                            {{ filter.settlement_search }}
+                            <label for="settlement-search" class="form-label small font-weight-bold">Search Settlement</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       name="settlement_search" 
+                                       id="settlement-search"
+                                       class="form-control" 
+                                       placeholder="Type settlement name..." 
+                                       value="{{ request.GET.settlement_search|default:'' }}">
+                            </div>
                         </div>
                         <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-end">
                             <div class="btn-group w-100" role="group">
