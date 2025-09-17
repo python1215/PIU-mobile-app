@@ -24,6 +24,23 @@ from io import BytesIO
 from datetime import datetime
 
 
+def settlement_suggestions(request):
+    """API endpoint for settlement autocomplete suggestions"""
+    query = request.GET.get('q', '').strip()
+    
+    if len(query) < 3:
+        return JsonResponse({'suggestions': []})
+    
+    # Get settlements that contain the query (case-insensitive)
+    settlements = Settlement.objects.filter(
+        settlement_name__icontains=query
+    ).values_list('settlement_name', flat=True).distinct()[:10]
+    
+    return JsonResponse({
+        'suggestions': list(settlements)
+    })
+
+
 def working_map(request):
     """Working map implementation with location focusing"""
     

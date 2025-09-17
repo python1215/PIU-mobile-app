@@ -16,6 +16,9 @@ urlpatterns = [
     path('load_districts/', views.load_districts, name='load_districts'),
     path('load_settlement/', views.load_settlement, name='load_settlement'),
     path('togglecor/', views.settlementswithcor, name='togglecor'),
+    
+    # API endpoints
+    path('api/settlement-suggestions/', views.settlement_suggestions, name='settlement-suggestions'),
 
     # Project Mapping CRUD
     path("mapping/", views.mapping_list, name='mapping-list'),
