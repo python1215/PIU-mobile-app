@@ -186,6 +186,9 @@
 <!-- HTMX Integration for Dynamic Dropdowns -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Load all projects initially when page loads
+    loadProjects('', '', '');
+    
     // Handle region change to load districts
     document.getElementById('id_region').addEventListener('change', function() {
         const regionId = this.value;

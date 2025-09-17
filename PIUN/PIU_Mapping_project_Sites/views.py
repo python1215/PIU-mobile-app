@@ -662,23 +662,24 @@ def load_projects(request):
     # Start with all projects
     projects_queryset = Project.objects.all()
     
-    # Filter projects based on existing mappings in the selected geographical area
-    mappings_filter = {}
-    
-    if settlement_id:
-        # If settlement is selected, find projects that have mappings in this settlement
-        # Use settlement__settlement_code since frontend sends settlement codes
-        mappings_filter['settlement__settlement_code'] = settlement_id
-    elif district_id:
-        # If district is selected, find projects that have mappings in this district
-        # Use district__district_code since frontend sends district codes
-        mappings_filter['district__district_code'] = district_id
-    elif region_id:
-        # If region is selected, find projects that have mappings in this region
-        # Frontend sends region IDs (primary keys), so filter by region_id directly
-        mappings_filter['region_id'] = region_id
-    
-    if mappings_filter:
+    # Only filter if a geographical area is actually selected
+    if settlement_id or district_id or region_id:
+        # Filter projects based on existing mappings in the selected geographical area
+        mappings_filter = {}
+        
+        if settlement_id:
+            # If settlement is selected, find projects that have mappings in this settlement
+            # Use settlement__settlement_code since frontend sends settlement codes
+            mappings_filter['settlement__settlement_code'] = settlement_id
+        elif district_id:
+            # If district is selected, find projects that have mappings in this district
+            # Use district__district_code since frontend sends district codes
+            mappings_filter['district__district_code'] = district_id
+        elif region_id:
+            # If region is selected, find projects that have mappings in this region
+            # Frontend sends region IDs (primary keys), so filter by region_id directly
+            mappings_filter['region_id'] = region_id
+        
         # Get projects that have mappings in the selected area
         project_ids = projectMapping.objects.filter(**mappings_filter).values_list('project__pk', flat=True).distinct()
         projects_queryset = projects_queryset.filter(pk__in=project_ids)
