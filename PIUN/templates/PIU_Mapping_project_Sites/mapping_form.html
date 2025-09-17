@@ -186,9 +186,6 @@
 <!-- HTMX Integration for Dynamic Dropdowns -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Load all projects initially when page loads
-    loadProjects('', '', '');
-    
     // Handle region change to load districts
     document.getElementById('id_region').addEventListener('change', function() {
         const regionId = this.value;
@@ -210,21 +207,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => {
                     console.error('Error loading districts:', error);
                 });
-            
-            // Load projects for this region
-            loadProjects(regionId, '', '');
         } else {
             document.getElementById('id_district').innerHTML = '<option value="">---------</option>';
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
-            // Load all projects when no region is selected
-            loadProjects('', '', '');
         }
     });
 
     // Handle district change to load settlements
     document.getElementById('id_district').addEventListener('change', function() {
         const districtId = this.value;
-        const regionId = document.getElementById('id_region').value;
         
         if (districtId) {
             fetch(`/PIU_Mapping_project_Sites/load_settlement/?district_id=${districtId}`)
@@ -242,71 +233,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => {
                     console.error('Error loading settlements:', error);
                 });
-            
-            // Load projects for this district
-            loadProjects(regionId, districtId, '');
         } else {
             document.getElementById('id_settlement').innerHTML = '<option value="">---------</option>';
-            // Load projects for region only
-            loadProjects(regionId, '', '');
         }
     });
-
-    // Handle settlement change to load projects
-    document.getElementById('id_settlement').addEventListener('change', function() {
-        const settlementId = this.value;
-        const districtId = document.getElementById('id_district').value;
-        const regionId = document.getElementById('id_region').value;
-        
-        // Load projects for this settlement
-        loadProjects(regionId, districtId, settlementId);
-    });
-
-    // Function to load projects based on geographical selection
-    function loadProjects(regionId, districtId, settlementId) {
-        let url = '/PIU_Mapping_project_Sites/load_projects/?';
-        const params = [];
-        
-        if (regionId) params.push(`region_id=${regionId}`);
-        if (districtId) params.push(`district_id=${districtId}`);
-        if (settlementId) params.push(`settlement_id=${settlementId}`);
-        
-        url += params.join('&');
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const projectSelect = document.getElementById('id_project');
-                if (projectSelect) {
-                    // Clear existing options
-                    projectSelect.innerHTML = '<option value="">---------</option>';
-                    
-                    // Add new options
-                    data.projects.forEach(project => {
-                        const option = document.createElement('option');
-                        option.value = project.id;
-                        option.textContent = project.project;
-                        projectSelect.appendChild(option);
-                    });
-                    
-                    // Show a helpful message if no projects found for the selected area
-                    if (data.projects.length === 0 && (regionId || districtId || settlementId)) {
-                        const noProjectsOption = document.createElement('option');
-                        noProjectsOption.value = '';
-                        noProjectsOption.textContent = 'No projects found in this area';
-                        noProjectsOption.disabled = true;
-                        projectSelect.appendChild(noProjectsOption);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading projects:', error);
-                const projectSelect = document.getElementById('id_project');
-                if (projectSelect) {
-                    projectSelect.innerHTML = '<option value="">Error loading projects</option>';
-                }
-            });
-    }
 
     // Geolocation function for current location
     window.getCurrentLocation = function() {
