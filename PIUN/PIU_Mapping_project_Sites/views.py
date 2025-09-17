@@ -343,6 +343,10 @@ def mapping_list(request):
     for district in context['all_districts'][:3]:
         print(f"DEBUG: District in context: {district.pk} - {district.district_name}")
     
+    # Handle HTMX requests - return only the results section
+    if request.headers.get('HX-Request'):
+        return render(request, 'PIU_Mapping_project_Sites/partials/mapping_results.html', context)
+    
     return render(request, 'PIU_Mapping_project_Sites/mapping_list.html', context)
 
 

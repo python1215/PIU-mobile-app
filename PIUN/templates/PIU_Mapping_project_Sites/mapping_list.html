@@ -22,6 +22,8 @@
         </div>
     </div>
 
+    <!-- Results Section (Statistics + Table) -->
+    <div id="results-section">
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
@@ -176,7 +178,10 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="get" class="row g-3" id="filter-form">
+                    <form method="get" class="row g-3" id="filter-form" 
+                          hx-get="{% url 'PIU_Mapping_project_Sites:mapping-list' %}"
+                          hx-target="#results-section"
+                          hx-indicator="#loading-indicator">
                         <div class="col-lg-2 col-md-4 col-sm-6">
                             <label for="region-filter" class="form-label small font-weight-bold">Region</label>
                             <select name="region" class="form-select form-select-sm" id="region-filter">
@@ -279,6 +284,7 @@
                             <div class="btn-group w-100" role="group">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="bi bi-search"></i> Apply Filters
+                                    <span id="loading-indicator" class="htmx-indicator spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
                                 </button>
                                 <a href="{% url 'PIU_Mapping_project_Sites:mapping-list' %}" class="btn btn-secondary btn-sm">
                                     <i class="bi bi-x-circle"></i> Clear
@@ -437,6 +443,7 @@
             </div>
         </div>
     </div>
+    </div> <!-- End of results-section -->
 </div>
 
 <!-- Quick Map Modal -->
@@ -605,6 +612,16 @@ style.textContent = `
     
     .suggestion-item:last-child {
         border-bottom: none;
+    }
+    
+    /* HTMX loading indicator - hidden by default */
+    .htmx-indicator {
+        display: none;
+    }
+    
+    /* Show loading indicator when HTMX is processing */
+    .htmx-request .htmx-indicator {
+        display: inline-block;
     }
 `;
 document.head.appendChild(style);
