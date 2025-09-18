@@ -371,6 +371,11 @@ def performance_dashboard(request):
     
     print(f'[DEBUG] Final queryset - filtered_entries_count: {filtered_entries_count}, recent_entries: {len(recent_entries)}')
     
+    # Debug: Check if we have actual data
+    for i, entry in enumerate(recent_entries[:3]):  # Check first 3 entries
+        print(f'[DEBUG] Entry {i}: achieved_value={getattr(entry, "achieved_value", "N/A")}, End_Target_Value={getattr(entry, "End_Target_Value", "N/A")}, baseline_value={getattr(entry, "baseline_value", "N/A")}')
+        print(f'[DEBUG] Entry {i}: indicator_description={getattr(entry, "indicator_description", "N/A")}')
+    
     # If monitoring entries are empty, build calculation entries as fallback
     calculation_entries = []
     if filtered_entries_count == 0:
