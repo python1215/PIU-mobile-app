@@ -334,10 +334,8 @@
                                         <td>{% if mapping.settlement.settlement_name %}{{ mapping.settlement.settlement_name }}{% else %}N/A{% endif %}</td>
                                         <td>
                                             {% if mapping.project %}
-                                                <span class="badge badge-primary">{{ mapping.project.project|truncatechars:20 }}</span>
-                                            {% elif mapping.project_id %}
-                                                <span class="badge badge-secondary">{{ mapping.project_id|truncatechars:20 }}</span>
-                                                <small class="text-warning d-block">Project record missing</small>
+                                                <span class="badge badge-primary" title="{{ mapping.project.project }}">{{ mapping.project.project|truncatechars:20 }}</span>
+                                                <small class="text-muted d-block">ID: {{ mapping.project.projectID }}</small>
                                             {% else %}
                                                 <span class="text-muted">No project</span>
                                             {% endif %}
