@@ -276,7 +276,7 @@
                                        id="settlement-search"
                                        class="form-control" 
                                        placeholder="Type settlement name..." 
-                                       value="{{ request.GET.settlement_search|default:'' }}"
+                                       value="{% if request.GET.settlement_search %}{{ request.GET.settlement_search }}{% endif %}"
                                        autocomplete="off">
                             </div>
                         </div>
@@ -328,10 +328,10 @@
                                     {% for mapping in mappings %}
                                     <tr>
                                         <td>
-                                            <strong>{{ mapping.region.region_name|default:"N/A" }}</strong>
+                                            <strong>{% if mapping.region.region_name %}{{ mapping.region.region_name }}{% else %}N/A{% endif %}</strong>
                                         </td>
-                                        <td>{{ mapping.district.district_name|default:"N/A" }}</td>
-                                        <td>{{ mapping.settlement.settlement_name|default:"N/A" }}</td>
+                                        <td>{% if mapping.district.district_name %}{{ mapping.district.district_name }}{% else %}N/A{% endif %}</td>
+                                        <td>{% if mapping.settlement.settlement_name %}{{ mapping.settlement.settlement_name }}{% else %}N/A{% endif %}</td>
                                         <td>
                                             {% if mapping.project %}
                                                 <span class="badge badge-primary">{{ mapping.project.project|truncatechars:20 }}</span>
@@ -392,7 +392,7 @@
                                                 <a href="{% url 'PIU_Mapping_project_Sites:delete-mapping' mapping.pk %}" 
                                                    class="btn btn-outline-danger btn-sm" 
                                                    title="Delete Mapping"
-                                                   onclick="return confirm('Are you sure you want to delete this mapping for {{ mapping.settlement.settlement_name|default:\"this location\" }}? This action cannot be undone.')">
+                                                   onclick="return confirm('Are you sure you want to delete this mapping for {% if mapping.settlement.settlement_name %}{{ mapping.settlement.settlement_name }}{% else %}this location{% endif %}? This action cannot be undone.')">
                                                     <i class="bi bi-trash"></i>
                                                 </a>
                                             </div>
