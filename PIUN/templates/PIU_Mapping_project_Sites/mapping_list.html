@@ -375,6 +375,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'PIU_Mapping_project_Sites:mapping-detail' mapping.pk %}" 
+                                                   class="btn btn-outline-info btn-sm" 
+                                                   title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                
                                                 {% if mapping.Latitude and mapping.Longitude %}
                                                     <button type="button" class="btn btn-outline-primary btn-sm" 
                                                             onclick="viewOnMap({{ mapping.Latitude }}, {{ mapping.Longitude }}, {{ mapping.pk }})"
