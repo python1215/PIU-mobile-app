@@ -335,6 +335,9 @@
                                         <td>
                                             {% if mapping.project %}
                                                 <span class="badge badge-primary">{{ mapping.project.project|truncatechars:20 }}</span>
+                                            {% elif mapping.project_id %}
+                                                <span class="badge badge-secondary">{{ mapping.project_id|truncatechars:20 }}</span>
+                                                <small class="text-warning d-block">Project record missing</small>
                                             {% else %}
                                                 <span class="text-muted">No project</span>
                                             {% endif %}
