@@ -464,17 +464,21 @@ def performance_dashboard(request):
             filtered_avg_performance = total_performance / count if count > 0 else 0
     
     # Calculate performance and variance for each entry with proper decimal precision
-    for entry in recent_entries:
+    for i, entry in enumerate(recent_entries):
         if entry.End_Target_Value is not None and entry.End_Target_Value != 0 and entry.achieved_value is not None:
             entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
+            print(f'[DEBUG] Calculation Entry {i}: performance_calculated set to {entry.performance_calculated}%')
         else:
             entry.performance_calculated = None
+            print(f'[DEBUG] Calculation Entry {i}: performance_calculated set to None (missing values)')
             
         # Calculate Variance = achieved_value - End_Target_Value
         if entry.achieved_value is not None and entry.End_Target_Value is not None:
             entry.variance_calculated = round(entry.achieved_value - entry.End_Target_Value, 2)
+            print(f'[DEBUG] Calculation Entry {i}: variance_calculated set to {entry.variance_calculated}')
         else:
             entry.variance_calculated = None
+            print(f'[DEBUG] Calculation Entry {i}: variance_calculated set to None (missing values)')
             
         # Calculate Actual GIR = (Target GIR) * (Performance/100)
         # Using Targeted_Achieved_weight as Target GIR
