@@ -388,6 +388,13 @@
                                                    title="Edit Mapping">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
+                                                
+                                                <a href="{% url 'PIU_Mapping_project_Sites:delete-mapping' mapping.pk %}" 
+                                                   class="btn btn-outline-danger btn-sm" 
+                                                   title="Delete Mapping"
+                                                   onclick="return confirm('Are you sure you want to delete this mapping for {{ mapping.settlement.settlement_name|default:\"this location\" }}? This action cannot be undone.')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
