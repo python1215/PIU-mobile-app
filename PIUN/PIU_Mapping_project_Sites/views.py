@@ -558,12 +558,17 @@ def add_mapping(request):
     if request.method == 'POST':
         form = MappingForm(request.POST)
         if form.is_valid():
-            mapping = form.save(commit=False)
-            mapping.loginUser = request.user
-            mapping.save()
-            form.save_m2m()
-            messages.success(request, 'Mapping added successfully!')
-            return redirect('PIU_Mapping_project_Sites:mapping-list')
+            try:
+                mapping = form.save(commit=False)
+                mapping.loginUser = request.user
+                mapping.save()
+                form.save_m2m()  # Handle ManyToMany relationships
+                messages.success(request, 'Mapping added successfully!')
+                return redirect('PIU_Mapping_project_Sites:mapping-list')
+            except Exception as e:
+                messages.error(request, f'Error saving mapping: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors in the form.')
     else:
         form = MappingForm()
     

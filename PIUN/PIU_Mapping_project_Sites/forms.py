@@ -1,6 +1,7 @@
 from django import forms
 from .models import projectMapping, nawecinfrastructure, settlementwithCoordinates
 from setup.models import Regions, Districts, Settlement
+from PIU_Financial_mgt.models import Donor
 
 class MappingForm(forms.ModelForm):
     region = forms.ModelChoiceField(
@@ -19,6 +20,12 @@ class MappingForm(forms.ModelForm):
         queryset=Settlement.objects.all(),
         required=False,
         empty_label="Select Settlement"
+    )
+    
+    donor = forms.ModelMultipleChoiceField(
+        queryset=Donor.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
     )
 
     class Meta:

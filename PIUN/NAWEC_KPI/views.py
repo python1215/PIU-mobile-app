@@ -284,7 +284,6 @@ def performance_dashboard(request):
     year_filter = request.GET.get('year')
     quarter_filter = request.GET.get('quarter')
     
-    print(f'[DEBUG] Filter inputs - year_filter: "{year_filter}", quarter_filter: "{quarter_filter}"')
     
     # Base queryset for recent entries
     entries_queryset = NAWEC_KPI_Monitoring.objects.select_related(
@@ -369,12 +368,7 @@ def performance_dashboard(request):
     filtered_entries_count = entries_queryset.count()
     recent_entries = list(entries_queryset.order_by('-date_created').distinct())
     
-    print(f'[DEBUG] Final queryset - filtered_entries_count: {filtered_entries_count}, recent_entries: {len(recent_entries)}')
     
-    # Debug: Check if we have actual data
-    for i, entry in enumerate(recent_entries[:3]):  # Check first 3 entries
-        print(f'[DEBUG] Entry {i}: achieved_value={getattr(entry, "achieved_value", "N/A")}, End_Target_Value={getattr(entry, "End_Target_Value", "N/A")}, baseline_value={getattr(entry, "baseline_value", "N/A")}')
-        print(f'[DEBUG] Entry {i}: indicator_description={getattr(entry, "indicator_description", "N/A")}')
     
     # If monitoring entries are empty, build calculation entries as fallback
     calculation_entries = []
@@ -464,21 +458,17 @@ def performance_dashboard(request):
             filtered_avg_performance = total_performance / count if count > 0 else 0
     
     # Calculate performance and variance for each entry with proper decimal precision
-    for i, entry in enumerate(recent_entries):
+    for entry in recent_entries:
         if entry.End_Target_Value is not None and entry.End_Target_Value != 0 and entry.achieved_value is not None:
             entry.performance_calculated = round((entry.achieved_value / entry.End_Target_Value) * 100, 2)
-            print(f'[DEBUG] Calculation Entry {i}: performance_calculated set to {entry.performance_calculated}%')
         else:
             entry.performance_calculated = None
-            print(f'[DEBUG] Calculation Entry {i}: performance_calculated set to None (missing values)')
             
         # Calculate Variance = achieved_value - End_Target_Value
         if entry.achieved_value is not None and entry.End_Target_Value is not None:
             entry.variance_calculated = round(entry.achieved_value - entry.End_Target_Value, 2)
-            print(f'[DEBUG] Calculation Entry {i}: variance_calculated set to {entry.variance_calculated}')
         else:
             entry.variance_calculated = None
-            print(f'[DEBUG] Calculation Entry {i}: variance_calculated set to None (missing values)')
             
         # Calculate Actual GIR = (Target GIR) * (Performance/100)
         # Using Targeted_Achieved_weight as Target GIR
