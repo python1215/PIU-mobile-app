@@ -24,8 +24,9 @@ class MappingForm(forms.ModelForm):
     
     donor = forms.ModelMultipleChoiceField(
         queryset=Donor.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
+        widget=forms.SelectMultiple(attrs={'class': 'form-select', 'size': '6'}),
+        required=False,
+        help_text='Hold Ctrl/Cmd to select multiple donors'
     )
 
     class Meta:

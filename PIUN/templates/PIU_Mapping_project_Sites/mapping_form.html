@@ -148,7 +148,7 @@
                             <!-- Donors -->
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.donor.id_for_label }}" class="form-label">Funding Donors</label>
-                                {{ form.donor|add_class:"form-control" }}
+                                {{ form.donor }}
                                 {% if form.donor.errors %}
                                     <div class="text-danger small">{{ form.donor.errors }}</div>
                                 {% endif %}

@@ -150,10 +150,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="{{ form.donor.id_for_label }}" class="form-label">Donor(s)</label>
-                                {{ form.donor|add_class:"form-select" }}
+                                {{ form.donor }}
                                 {% if form.donor.errors %}
                                     <div class="text-danger small">{{ form.donor.errors }}</div>
                                 {% endif %}
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple donors</div>
                             </div>
                         </div>
 
