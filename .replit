@@ -33,5 +33,9 @@ waitForPort = 5000
 integrations = ["python_log_in_with_replit==1.0.0", "python_database==1.0.0"]
 
 [[ports]]
-localPort = 45329
+localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 36717
+externalPort = 3000
