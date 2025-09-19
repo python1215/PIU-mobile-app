@@ -276,21 +276,6 @@ def mapping_list(request):
     mapping_filter = ProjectMappingFilter(request.GET, queryset=mappings_queryset)
     filtered_mappings = mapping_filter.qs
     
-    # Debug: Log filter parameters to confirm AND logic
-    filter_params = {k: v for k, v in request.GET.items() if v and k != 'page'}
-    if filter_params:
-        print(f"DEBUG: Active filters: {filter_params}")
-        print(f"DEBUG: Total mappings before filter: {mappings_queryset.count()}")
-        print(f"DEBUG: Total mappings after filter: {filtered_mappings.count()}")
-        
-        # Show exact queryset with filters applied
-        print(f"DEBUG: Filtered queryset SQL: {filtered_mappings.query}")
-        
-        # Debug project data for filtered results
-        for mapping in filtered_mappings:
-            print(f"DEBUG: Mapping ID {mapping.id}: project_id='{mapping.project_id}', project_obj={mapping.project}, project_name='{mapping.project.project if mapping.project else 'None'}'")
-    else:
-        print("DEBUG: No filters applied, showing all mappings")
     
     # Handle export requests
     export_format = request.GET.get('export')
@@ -342,10 +327,6 @@ def mapping_list(request):
         'all_access_types': list(all_access_types),
     }
     
-    # Debug: Print context data to verify it's being passed
-    print(f"DEBUG: Context all_districts count: {len(context['all_districts'])}")
-    for district in context['all_districts'][:3]:
-        print(f"DEBUG: District in context: {district.pk} - {district.district_name}")
     
     # Handle HTMX requests - return only the results section
     if request.headers.get('HX-Request'):

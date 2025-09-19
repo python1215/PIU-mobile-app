@@ -166,11 +166,11 @@
                                         <td>{{ mapping.district.district_name|default:"N/A" }}</td>
                                         <td>{{ mapping.settlement.settlement_name|default:"N/A" }}</td>
                                         <td>
-                                            {% for project in mapping.project.all %}
-                                                <span class="badge bg-primary me-1">{{ project.project }}</span>
-                                            {% empty %}
+                                            {% if mapping.project %}
+                                                <span class="badge bg-primary me-1">{{ mapping.project.project }}</span>
+                                            {% else %}
                                                 N/A
-                                            {% endfor %}
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {% for donor in mapping.donor.all %}
