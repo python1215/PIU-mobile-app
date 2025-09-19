@@ -285,6 +285,10 @@ def mapping_list(request):
         
         # Show exact queryset with filters applied
         print(f"DEBUG: Filtered queryset SQL: {filtered_mappings.query}")
+        
+        # Debug project data for filtered results
+        for mapping in filtered_mappings:
+            print(f"DEBUG: Mapping ID {mapping.id}: project_id='{mapping.project_id}', project_obj={mapping.project}, project_name='{mapping.project.project if mapping.project else 'None'}'")
     else:
         print("DEBUG: No filters applied, showing all mappings")
     
