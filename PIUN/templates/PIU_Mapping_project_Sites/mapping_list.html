@@ -638,5 +638,90 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Cascading dropdowns functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('region-filter');
+    const districtSelect = document.getElementById('district-filter');
+    const settlementSelect = document.getElementById('settlement-filter');
+    
+    // Function to clear and reset dropdown
+    function clearDropdown(selectElement, defaultText) {
+        selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+        selectElement.disabled = false;
+    }
+    
+    // Function to show loading state
+    function showLoading(selectElement, text) {
+        selectElement.innerHTML = `<option value="">${text}</option>`;
+        selectElement.disabled = true;
+    }
+    
+    // Region change handler
+    regionSelect.addEventListener('change', function() {
+        const regionId = this.value;
+        
+        // Clear dependent dropdowns
+        clearDropdown(districtSelect, 'All Districts');
+        clearDropdown(settlementSelect, 'All Settlements');
+        
+        if (regionId) {
+            // Show loading state
+            showLoading(districtSelect, 'Loading districts...');
+            
+            // Fetch districts for selected region
+            fetch(`{% url 'PIU_Mapping_project_Sites:load_districts' %}?region_id=${regionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    clearDropdown(districtSelect, 'All Districts');
+                    
+                    // Populate districts
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.district_code;
+                        option.textContent = district.district_name;
+                        districtSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading districts:', error);
+                    clearDropdown(districtSelect, 'Error loading districts');
+                });
+        }
+    });
+    
+    // District change handler
+    districtSelect.addEventListener('change', function() {
+        const districtId = this.value;
+        
+        // Clear dependent dropdown
+        clearDropdown(settlementSelect, 'All Settlements');
+        
+        if (districtId) {
+            // Show loading state
+            showLoading(settlementSelect, 'Loading settlements...');
+            
+            // Fetch settlements for selected district
+            fetch(`{% url 'PIU_Mapping_project_Sites:load_settlement' %}?district_id=${districtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    clearDropdown(settlementSelect, 'All Settlements');
+                    
+                    // Populate settlements
+                    data.settlements.forEach(settlement => {
+                        const option = document.createElement('option');
+                        option.value = settlement.settlement_code;
+                        option.textContent = settlement.settlement_name;
+                        settlementSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading settlements:', error);
+                    clearDropdown(settlementSelect, 'Error loading settlements');
+                });
+        }
+    });
+});
+
 </script>
 {% endblock %}
