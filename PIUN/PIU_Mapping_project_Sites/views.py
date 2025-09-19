@@ -269,8 +269,8 @@ def mapping_list(request):
     
     # Get all mappings with related fields
     mappings_queryset = projectMapping.objects.select_related(
-        'region', 'district', 'settlement', 'profile_year', 'access'
-    ).prefetch_related('project', 'donor').order_by('region__region_name', 'district__district_name', 'settlement__settlement_name')
+        'region', 'district', 'settlement', 'profile_year', 'access', 'project'
+    ).prefetch_related('donor').order_by('region__region_name', 'district__district_name', 'settlement__settlement_name')
     
     # Apply filters
     mapping_filter = ProjectMappingFilter(request.GET, queryset=mappings_queryset)
