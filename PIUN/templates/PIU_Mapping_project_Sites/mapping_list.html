@@ -32,11 +32,11 @@
                     </h6>
                     <div class="btn-group" role="group">
                         <a href="?export=excel{% for key, value in request.GET.items %}{% if key != 'export' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="btn btn-success btn-sm">
+                           class="btn btn-success btn-sm" id="export-excel-btn">
                             <i class="bi bi-file-earmark-excel"></i> Export Excel
                         </a>
                         <a href="?export=pdf{% for key, value in request.GET.items %}{% if key != 'export' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="btn btn-danger btn-sm">
+                           class="btn btn-danger btn-sm" id="export-pdf-btn">
                             <i class="bi bi-file-earmark-pdf"></i> Export PDF
                         </a>
                     </div>
@@ -734,6 +734,75 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
     });
+});
+
+// Function to update export button URLs with current filter parameters
+function updateExportButtons() {
+    const filterForm = document.getElementById('filter-form');
+    const formData = new FormData(filterForm);
+    
+    // Build query string from current form values
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value && value.trim() !== '') {
+            params.append(key, value);
+        }
+    }
+    
+    // Add export parameter and build URLs
+    const excelParams = new URLSearchParams(params);
+    excelParams.set('export', 'excel');
+    
+    const pdfParams = new URLSearchParams(params);
+    pdfParams.set('export', 'pdf');
+    
+    // Update button hrefs
+    const excelBtn = document.getElementById('export-excel-btn');
+    const pdfBtn = document.getElementById('export-pdf-btn');
+    
+    if (excelBtn) {
+        excelBtn.href = '?' + excelParams.toString();
+    }
+    
+    if (pdfBtn) {
+        pdfBtn.href = '?' + pdfParams.toString();
+    }
+    
+    console.log('Updated export URLs:', {
+        excel: excelBtn?.href,
+        pdf: pdfBtn?.href
+    });
+}
+
+// Update export buttons when filters change
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    const regionSelect = document.getElementById('region-filter');
+    const districtSelect = document.getElementById('district-filter');
+    const settlementSelect = document.getElementById('settlement-filter');
+    
+    // Update export buttons on any form change
+    if (filterForm) {
+        filterForm.addEventListener('change', updateExportButtons);
+        filterForm.addEventListener('input', updateExportButtons);
+        filterForm.addEventListener('submit', function() {
+            // Small delay to ensure HTMX has updated
+            setTimeout(updateExportButtons, 100);
+        });
+    }
+    
+    // Also update when cascading dropdowns change
+    [regionSelect, districtSelect, settlementSelect].forEach(select => {
+        if (select) {
+            select.addEventListener('change', function() {
+                setTimeout(updateExportButtons, 200);
+            });
+        }
+    });
+    
+    // Update export buttons on initial page load
+    updateExportButtons();
 });
 
 </script>
