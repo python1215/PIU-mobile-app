@@ -329,8 +329,8 @@ def enhanced_results_monitoring_list(request):
         measurement_units = Measurement_Unit.objects.all().order_by('unit')
         collection_frequencies = Data_Collection_Frequency.objects.all().order_by('frequency')
         
-        # Pagination - 10 records per page
-        paginator = Paginator(monitoring_qs, 10)
+        # Pagination - 5 records per page
+        paginator = Paginator(monitoring_qs, 5)
         page_number = request.GET.get('page')
         monitoring_records = paginator.get_page(page_number)
         
@@ -565,9 +565,51 @@ def export_results_monitoring_excel(request):
         cell.font = header_font
         cell.fill = header_fill
     
-    monitoring_records = Results_Oriented_Monitoring.objects.select_related(
-        'year', 'quarter', 'project', 'pdo', 'indicator_type', 'loginUser'
-    ).all()
+    # Apply the same filtering logic as the list view
+    monitoring_qs = Results_Oriented_Monitoring.objects.select_related(
+        'year', 'quarter', 'project', 'pdo', 'indicator_type', 'loginUser',
+        'project_outcome', 'project_result', 'measurement_unit', 'collection_frequency'
+    )
+    
+    # Apply filters based on GET parameters (same as list view)
+    project_filter = request.GET.get('project', '')
+    year_filter = request.GET.get('year', '')
+    quarter_filter = request.GET.get('quarter', '')
+    indicator_type_filter = request.GET.get('indicator_type', '')
+    pdo_filter = request.GET.get('pdo', '')
+    project_outcome_filter = request.GET.get('project_outcome', '')
+    project_result_filter = request.GET.get('project_result', '')
+    measurement_unit_filter = request.GET.get('measurement_unit', '')
+    collection_frequency_filter = request.GET.get('collection_frequency', '')
+    search_filter = request.GET.get('search', '')
+    
+    # Apply the same filters as list view
+    if project_filter:
+        monitoring_qs = monitoring_qs.filter(project__projectID=project_filter)
+    if year_filter:
+        monitoring_qs = monitoring_qs.filter(year__id=year_filter)
+    if quarter_filter:
+        monitoring_qs = monitoring_qs.filter(quarter__id=quarter_filter)
+    if indicator_type_filter:
+        monitoring_qs = monitoring_qs.filter(indicator_type__id=indicator_type_filter)
+    if pdo_filter:
+        monitoring_qs = monitoring_qs.filter(pdo__id=pdo_filter)
+    if project_outcome_filter:
+        monitoring_qs = monitoring_qs.filter(project_outcome__id=project_outcome_filter)
+    if project_result_filter:
+        monitoring_qs = monitoring_qs.filter(project_result__id=project_result_filter)
+    if measurement_unit_filter:
+        monitoring_qs = monitoring_qs.filter(measurement_unit__id=measurement_unit_filter)
+    if collection_frequency_filter:
+        monitoring_qs = monitoring_qs.filter(collection_frequency__id=collection_frequency_filter)
+    if search_filter:
+        from django.db import models
+        monitoring_qs = monitoring_qs.filter(
+            models.Q(indicator_description__icontains=search_filter) |
+            models.Q(remarks__icontains=search_filter)
+        )
+    
+    monitoring_records = monitoring_qs.order_by('-date_created')
     
     for row, record in enumerate(monitoring_records, 2):
         ws.cell(row=row, column=1, value=record.id)
