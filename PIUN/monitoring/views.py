@@ -889,3 +889,144 @@ def export_results_monitoring_pdf(request):
     response.write(pdf)
     
     return response
+
+
+# Cascade Filtering Views
+@login_required
+def cascade_filtering_demo(request):
+    """Main view to demonstrate cascade filtering functionality"""
+    from .forms import CascadeFilteringForm
+    
+    form = CascadeFilteringForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Cascade Filtering Demo - Project, Monitoring Type, Investment Types & KPI Descriptions'
+    }
+    
+    return render(request, 'monitoring/cascade_filtering_demo.html', context)
+
+
+@login_required
+def load_monitoring_types(request):
+    """Load all monitoring types - this could be static but included for consistency"""
+    from setup.models import Type_of_Monitoring
+    
+    monitoring_types = Type_of_Monitoring.objects.all()
+    
+    context = {
+        'monitoring_types': monitoring_types
+    }
+    
+    return render(request, 'monitoring/htmx/monitoring_types_options.html', context)
+
+
+@login_required
+def load_investment_types_cascade(request):
+    """Load investment types based on selected project and monitoring type"""
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project')
+    monitoring_type_code = request.GET.get('monitoring_type')
+    
+    investment_types = []
+    
+    if project_id and monitoring_type_code:
+        try:
+            # Get investment types for specific project and monitoring type
+            kpi_records = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type__monitoring_type_code=monitoring_type_code
+            ).values('monitoring_Type_Code', 'type_of_investment').distinct()
+            
+            investment_types = [
+                {'code': kpi['monitoring_Type_Code'], 'name': kpi['type_of_investment']}
+                for kpi in kpi_records if kpi['type_of_investment']
+            ]
+            
+        except Exception as e:
+            # Log error but don't break the response
+            print(f"Error loading investment types: {e}")
+    
+    context = {
+        'investment_types': investment_types
+    }
+    
+    return render(request, 'monitoring/htmx/investment_types_options.html', context)
+
+
+@login_required  
+def load_kpi_descriptions_cascade(request):
+    """Load KPI descriptions based on selected investment type"""
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    
+    project_id = request.GET.get('project')
+    monitoring_type_code = request.GET.get('monitoring_type')
+    investment_type_code = request.GET.get('type_of_investment')
+    
+    kpi_descriptions = []
+    
+    if investment_type_code:
+        try:
+            # Get KPI descriptions for the specific investment type
+            kpi_records = KPI_For_Contract.objects.filter(
+                monitoring_Type_Code=investment_type_code
+            ).values('monitoring_Type_Code', 'Kpi_description').distinct()
+            
+            kpi_descriptions = [
+                {'code': kpi['monitoring_Type_Code'], 'description': kpi['Kpi_description']}
+                for kpi in kpi_records if kpi['Kpi_description']
+            ]
+            
+        except Exception as e:
+            # Log error but don't break the response  
+            print(f"Error loading KPI descriptions: {e}")
+    
+    context = {
+        'kpi_descriptions': kpi_descriptions
+    }
+    
+    return render(request, 'monitoring/htmx/kpi_descriptions_options.html', context)
+
+
+@login_required
+def cascade_filtering_results(request):
+    """Display filtered results based on cascade selections"""
+    from PIU_Financial_mgt.models import KPI_For_Contract
+    from .forms import CascadeFilteringForm
+    
+    form = CascadeFilteringForm(request.GET or None)
+    filtered_data = []
+    
+    if form.is_valid():
+        project_id = form.cleaned_data.get('project')
+        monitoring_type = form.cleaned_data.get('monitoring_type')
+        type_of_investment = form.cleaned_data.get('type_of_investment')
+        kpi_description = form.cleaned_data.get('kpi_description')
+        
+        # Build query based on selected filters
+        filters = {}
+        
+        if project_id:
+            filters['project'] = project_id
+            
+        if monitoring_type:
+            filters['monitoring_type'] = monitoring_type
+            
+        if type_of_investment:
+            filters['monitoring_Type_Code'] = type_of_investment
+            
+        if filters:
+            try:
+                filtered_data = KPI_For_Contract.objects.filter(**filters).order_by('project', 'monitoring_type', 'type_of_investment')
+            except Exception as e:
+                messages.error(request, f"Error filtering data: {e}")
+                filtered_data = []
+    
+    context = {
+        'form': form,
+        'filtered_data': filtered_data,
+        'page_title': 'Cascade Filtering Results'
+    }
+    
+    return render(request, 'monitoring/cascade_filtering_results.html', context)
