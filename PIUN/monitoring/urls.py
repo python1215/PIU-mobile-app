@@ -29,4 +29,13 @@ urlpatterns = [
     path('export-indicator-descriptions/', views.export_indicator_descriptions_excel, name='export-indicator-descriptions'),
     path('export-results-monitoring/', views.export_results_monitoring_excel, name='export-results-monitoring'),
     path('export-results-monitoring-pdf/', views.export_results_monitoring_pdf, name='export-results-monitoring-pdf'),
+    
+    # Cascade Filtering Views
+    path('cascade-filtering-demo/', views.cascade_filtering_demo, name='cascade_filtering_demo'),
+    path('cascade-filtering-results/', views.cascade_filtering_results, name='cascade_filtering_results'),
+    
+    # HTMX Cascade Filtering AJAX Views
+    path('load-monitoring-types/', views.load_monitoring_types, name='load_monitoring_types'),
+    path('load-investment-types/', views.load_investment_types_cascade, name='load_investment_types'),
+    path('load-kpi-descriptions/', views.load_kpi_descriptions_cascade, name='load_kpi_descriptions'),
 ]
