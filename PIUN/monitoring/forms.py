@@ -322,3 +322,95 @@ class Nawec_Kpi_MonitoringForm_tes(forms.ModelForm):
                 self.fields['indicator_description'].initial = descriptions[0]
             else:
                 self.fields['indicator_description'].initial = "No description available for the selected type."
+
+
+class CascadeFilteringForm(forms.Form):
+    """Form for cascade filtering based on project and monitoring type"""
+    
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        empty_label="Select Project",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": reverse_lazy("monitoring:load_monitoring_types"),
+            "hx-target": "#id_monitoring_type",
+            "hx-trigger": "change"
+        }),
+        required=True
+    )
+    
+    monitoring_type = forms.ModelChoiceField(
+        queryset=None,  # Will be populated via AJAX
+        empty_label="Select Type of Monitoring",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": reverse_lazy("monitoring:load_investment_types"),
+            "hx-target": "#id_type_of_investment",
+            "hx-include": "[name='project']",
+            "hx-trigger": "change"
+        }),
+        required=False
+    )
+    
+    type_of_investment = forms.ChoiceField(
+        choices=[],  # Will be populated via AJAX
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": reverse_lazy("monitoring:load_kpi_descriptions"),
+            "hx-target": "#id_kpi_description",
+            "hx-include": "[name='project'], [name='monitoring_type']",
+            "hx-trigger": "change"
+        }),
+        required=False
+    )
+    
+    kpi_description = forms.ChoiceField(
+        choices=[],  # Will be populated via AJAX
+        widget=forms.Select(attrs={
+            "class": "form-select"
+        }),
+        required=False
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Import here to avoid circular imports
+        from setup.models import Type_of_Monitoring
+        from PIU_Financial_mgt.models import KPI_For_Contract
+        
+        # Initialize monitoring type queryset
+        self.fields['monitoring_type'].queryset = Type_of_Monitoring.objects.all()
+        
+        # Handle initial data for cascade filtering
+        if self.data:
+            project_id = self.data.get('project')
+            monitoring_type_code = self.data.get('monitoring_type')
+            
+            # Load investment types based on project and monitoring type
+            if project_id and monitoring_type_code:
+                try:
+                    investment_types = KPI_For_Contract.objects.filter(
+                        project__projectID=project_id,
+                        monitoring_type__monitoring_type_code=monitoring_type_code
+                    ).values_list('monitoring_Type_Code', 'type_of_investment').distinct()
+                    
+                    self.fields['type_of_investment'].choices = [('', 'Select Investment Type')] + [
+                        (inv[0], inv[1]) for inv in investment_types if inv[1]
+                    ]
+                except (ValueError, TypeError):
+                    self.fields['type_of_investment'].choices = [('', 'Select Investment Type')]
+            
+            # Load KPI descriptions based on investment type
+            type_of_investment_code = self.data.get('type_of_investment')
+            if type_of_investment_code:
+                try:
+                    kpi_descriptions = KPI_For_Contract.objects.filter(
+                        monitoring_Type_Code=type_of_investment_code
+                    ).values_list('monitoring_Type_Code', 'Kpi_description').distinct()
+                    
+                    self.fields['kpi_description'].choices = [('', 'Select KPI Description')] + [
+                        (kpi[0], kpi[1]) for kpi in kpi_descriptions if kpi[1]
+                    ]
+                except (ValueError, TypeError):
+                    self.fields['kpi_description'].choices = [('', 'Select KPI Description')]
