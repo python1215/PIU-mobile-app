@@ -1,0 +1,4 @@
+<option value="">Select Type of Monitoring</option>
+{% for monitoring_type in monitoring_types %}
+    <option value="{{ monitoring_type.monitoring_type_code }}">{{ monitoring_type.monitoring_type }}</option>
+{% endfor %}

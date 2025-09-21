@@ -1,0 +1,4 @@
+<option value="">Select KPI Description</option>
+{% for kpi in kpi_descriptions %}
+    <option value="{{ kpi.code }}">{{ kpi.description }}</option>
+{% endfor %}
