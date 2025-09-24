@@ -419,7 +419,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         widget=forms.Select(attrs={
             'class': 'form-select',
             'id': 'id_type_of_contract',
-            'hx-get': reverse_lazy('project_actions:load_contracts'),
+            'data-load-contracts-url': '/project_actions/htmx/load-contracts/',
             'hx-target': '#id_contract_selection',
             'hx-include': '[name="project"]',
             'hx-trigger': 'change'
@@ -454,7 +454,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
     class Meta:
         model = Specific_Contract_Monitoring
         fields = [
-            'project', 'contract_refNo', 'monitoring_date', 'quarter',
+            'project', 'type_of_contract', 'contract_selection', 'contract_refNo', 'monitoring_date', 'quarter',
             'type_of_monitoring', 'Type_of_Investment', 'Kpi_description',
             'milestone_start_date', 'milestone_end_date', 'Target',
             'Achieved_status', 'Contract_implementation_Status',
