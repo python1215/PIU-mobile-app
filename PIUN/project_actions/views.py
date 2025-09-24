@@ -112,6 +112,54 @@ def load_subcomponent_activities(request):
         'activities': activities
     })
 
+@login_required
+def load_contracts(request):
+    """Load contracts based on selected project and contract type"""
+    project_id = request.GET.get('project')
+    contract_type = request.GET.get('type_of_contract')
+    
+    contracts = []
+    
+    if project_id and contract_type:
+        try:
+            if contract_type == 'works_contract':
+                # Load works contracts for the selected project
+                from .models import Contract_Profiling_works
+                works_contracts = Contract_Profiling_works.objects.filter(
+                    projectID=project_id
+                ).values('contract_refNo', 'name_of_contractor').order_by('contract_refNo')
+                
+                contracts = [
+                    {
+                        'ref_no': contract['contract_refNo'],
+                        'display_name': f"{contract['contract_refNo']} - {contract['name_of_contractor']}"
+                    }
+                    for contract in works_contracts
+                ]
+                
+            elif contract_type == 'goods_services':
+                # Load goods & services contracts for the selected project
+                from .models import Contract_Profiling_goods_services
+                gs_contracts = Contract_Profiling_goods_services.objects.filter(
+                    projectID=project_id
+                ).values('contract_refNo', 'name_of_contractor').order_by('contract_refNo')
+                
+                contracts = [
+                    {
+                        'ref_no': contract['contract_refNo'],
+                        'display_name': f"{contract['contract_refNo']} - {contract['name_of_contractor']}"
+                    }
+                    for contract in gs_contracts
+                ]
+                
+        except Exception as e:
+            # Log error but don't break the response
+            print(f"Error loading contracts: {e}")
+    
+    return render(request, 'project_actions/htmx/contract_selection_options.html', {
+        'contracts': contracts
+    })
+
 # Dashboard and Overview Views
 @login_required
 def dashboard(request):

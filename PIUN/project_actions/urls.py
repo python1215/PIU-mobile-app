@@ -45,6 +45,7 @@ urlpatterns = [
     path('htmx/load-activities/', views.load_subcomponent_activities, name='load_subcomponent_activities'),
     path('htmx/load-investment-kpi/', views.htmx_load_investment_kpi, name='htmx_load_investment_kpi'),
     path('htmx/get-contracts-by-project-and-type/', views.get_contracts_by_project_and_type_htmx, name='get_contracts_by_project_and_type_htmx'),
+    path('htmx/load-contracts/', views.load_contracts, name='load_contracts'),
     
     # Bulk actions
     path('ajax/bulk-actions/', views.bulk_actions, name='bulk_actions'),

@@ -1,0 +1,4 @@
+<option value="">Select Contract</option>
+{% for contract in contracts %}
+    <option value="{{ contract.ref_no }}">{{ contract.display_name }}</option>
+{% endfor %}

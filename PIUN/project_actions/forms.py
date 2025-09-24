@@ -416,8 +416,27 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             ('goods_services', 'Goods & Services'),
         ],
         required=True,
-        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_type_of_contract'}),
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_type_of_contract',
+            'hx-get': reverse_lazy('project_actions:load_contracts'),
+            'hx-target': '#id_contract_selection',
+            'hx-include': '[name="project"]',
+            'hx-trigger': 'change'
+        }),
         label='Select Type of Contract'
+    )
+    
+    # Add contract selection dropdown
+    contract_selection = forms.ChoiceField(
+        choices=[('', 'Select Contract')],
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_contract_selection',
+            'onchange': 'updateContractRefNo(this.value)'
+        }),
+        label='Select Contract'
     )
     
     # Override cascading dropdown fields as CharFields to handle AJAX values
@@ -508,8 +527,15 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             self._set_contract_type_from_existing_data()
         
         # Add help texts
-        self.fields['contract_refNo'].help_text = 'Reference number of the contract being monitored'
+        self.fields['contract_refNo'].help_text = 'Reference number of the contract being monitored (auto-populated when selecting from dropdown)'
         self.fields['type_of_contract'].help_text = 'Select the type of contract to load available contracts'
+        self.fields['contract_selection'].help_text = 'Choose from available contracts for the selected project and type'
+        
+        # Make contract_refNo read-only initially to encourage using the dropdown
+        self.fields['contract_refNo'].widget.attrs.update({
+            'readonly': False,  # Keep editable for manual entry if needed
+            'placeholder': 'Select a contract from dropdown above or enter manually'
+        })
     
     def _set_contract_type_from_existing_data(self):
         """Determine and set contract type based on existing contract reference"""

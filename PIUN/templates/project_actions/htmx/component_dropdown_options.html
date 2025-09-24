@@ -1,4 +1,12 @@
 <option value="">---------</option>
 {% for component in components %}
-    <option value="{{ component.compID }}">{{ component.project_components }}</option>
+    <option value="{{ component.compID }}" 
+            hx-get="{% url 'project_actions:load_component_subcomponents' %}" 
+            hx-target="#id_subcompID" 
+            hx-trigger="click">
+        {{ component.project_components }}
+    </option>
 {% endfor %}
+{% if not components %}
+    <option value="" disabled>No components available</option>
+{% endif %}
