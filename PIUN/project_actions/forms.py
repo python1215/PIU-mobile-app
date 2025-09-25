@@ -508,7 +508,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
                 'hx-get': '/project_actions/htmx/load-investment-types/',
                 'hx-target': '#id_Type_of_Investment',
                 'hx-trigger': 'change',
-                'hx-include': '[name="project"]',
+                'hx-include': '[name="project"], [name="type_of_monitoring"]',
                 'class': 'form-select'
             })
             
