@@ -173,11 +173,11 @@ def load_investment_types(request):
             # Import models and get investment types
             from PIU_Financial_mgt.models import KPI_For_Contract
             
-            # Get distinct investment types for the project and monitoring type
-            # Use correct field names: project, monitoring_type, type_of_investment
+            # Filter KPI_For_Contract by project_id and monitoring_type_id (Django ORM equivalent of SQL)
+            # SQL: WHERE project_id = 'D309& D6530 -GM' AND monitoring_type_id = 'ESS'
             kpis = KPI_For_Contract.objects.filter(
-                project=project_id,
-                monitoring_type=monitoring_type_id
+                project_id=project_id,
+                monitoring_type_id=monitoring_type_id
             ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
@@ -203,11 +203,11 @@ def load_kpi_descriptions(request):
             # Import models and get KPI descriptions
             from PIU_Financial_mgt.models import KPI_For_Contract
             
-            # Get distinct KPI descriptions for the project, monitoring type, and investment type
-            # Use correct field names: project, monitoring_type, type_of_investment, Kpi_description
+            # Filter KPI_For_Contract by project_id, monitoring_type_id, and type_of_investment (Django ORM equivalent of SQL)
+            # SQL: WHERE project_id = 'D309& D6530 -GM' AND monitoring_type_id = 'ESS' AND type_of_investment = 'Backbone Phase I'
             kpis = KPI_For_Contract.objects.filter(
-                project=project_id,
-                monitoring_type=monitoring_type_id,
+                project_id=project_id,
+                monitoring_type_id=monitoring_type_id,
                 type_of_investment=investment_type
             ).values_list('Kpi_description', flat=True).distinct()
             
