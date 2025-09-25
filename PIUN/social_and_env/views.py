@@ -1201,23 +1201,49 @@ def load_kpi_descriptions(request):
 
 @login_required
 def load_investment_types_esia(request):
-    """Load all available investment types for ESIA form"""
-    from django.http import JsonResponse
+    """Load investment types for ESIA form based on selected project - HTMX compatible"""
+    from django.http import JsonResponse, HttpResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
 
+    project_id = request.GET.get('project_name') or request.GET.get('project_id')
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
+
     try:
-        # Get all distinct investment types for ESS (Environmental and Social Safeguards)
-        investment_types = KPI_For_Contract.objects.filter(
-            monitoring_type_id='ESS'
-        ).values(
-            'monitoring_Type_Code', 'type_of_investment').distinct()
+        if project_id:
+            # Filter investment types by project for ESS (Environmental and Social Safeguards)
+            investment_types = KPI_For_Contract.objects.filter(
+                project__projectID=project_id,
+                monitoring_type_id='ESS'
+            ).values(
+                'monitoring_Type_Code', 'type_of_investment').distinct()
+        else:
+            # Get all distinct investment types for ESS if no project selected
+            investment_types = KPI_For_Contract.objects.filter(
+                monitoring_type_id='ESS'
+            ).values(
+                'monitoring_Type_Code', 'type_of_investment').distinct()
+
         investment_list = [{
             'id': inv['monitoring_Type_Code'] or f'inv_{idx}',
             'name': inv['type_of_investment']
         } for idx, inv in enumerate(investment_types, 1)
                            if inv['type_of_investment']]
-        return JsonResponse({'investment_types': investment_list})
+
+        if is_htmx:
+            # Return HTML options for HTMX
+            options = '<option value="">All Investment Types</option>'
+            for inv in investment_list:
+                options += f'<option value="{inv["id"]}">{inv["name"]}</option>'
+            return HttpResponse(options)
+        else:
+            # Return JSON for regular AJAX
+            return JsonResponse({'investment_types': investment_list})
+            
     except Exception as e:
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({'investment_types': [], 'error': str(e)})
 
 

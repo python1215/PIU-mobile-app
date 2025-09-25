@@ -295,7 +295,13 @@ class ESIAFilter(django_filters.FilterSet):
         queryset=Project.objects.all(),
         label="Project",
         empty_label="All Projects",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            "hx-get": "/social_and_env/ajax/load-investment-types-esia/",
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change",
+            "hx-include": "this"
+        })
     )
 
     type_of_investment = django_filters.ModelChoiceFilter(
