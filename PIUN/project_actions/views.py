@@ -168,16 +168,22 @@ def load_investment_types(request):
     
     investment_types = []
     
-    if project_id and monitoring_type_id:
+    if monitoring_type_id:  # For now, filter by monitoring type only until FK relationships are established
         try:
             # Import models and get investment types
             from PIU_Financial_mgt.models import KPI_For_Contract
+            from setup.models import Type_of_Monitoring
             
-            # Filter KPI_For_Contract by project_id and monitoring_type_id (Django ORM equivalent of SQL)
-            # SQL: WHERE project_id = 'D309& D6530 -GM' AND monitoring_type_id = 'ESS'
+            # Get the monitoring type code from the Type_of_Monitoring model
+            try:
+                monitoring_type_obj = Type_of_Monitoring.objects.get(id=monitoring_type_id)
+                monitoring_code = monitoring_type_obj.monitoring_Type_Code
+            except Type_of_Monitoring.DoesNotExist:
+                monitoring_code = monitoring_type_id  # fallback to direct ID
+            
+            # Filter by monitoring_type_code (current database structure)
             kpis = KPI_For_Contract.objects.filter(
-                project_id=project_id,
-                monitoring_type_id=monitoring_type_id
+                monitoring_Type_Code=monitoring_code
             ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
@@ -198,16 +204,22 @@ def load_kpi_descriptions(request):
     
     kpi_descriptions = []
     
-    if project_id and monitoring_type_id and investment_type:
+    if monitoring_type_id and investment_type:  # Filter by monitoring type and investment type
         try:
             # Import models and get KPI descriptions
             from PIU_Financial_mgt.models import KPI_For_Contract
+            from setup.models import Type_of_Monitoring
             
-            # Filter KPI_For_Contract by project_id, monitoring_type_id, and type_of_investment (Django ORM equivalent of SQL)
-            # SQL: WHERE project_id = 'D309& D6530 -GM' AND monitoring_type_id = 'ESS' AND type_of_investment = 'Backbone Phase I'
+            # Get the monitoring type code from the Type_of_Monitoring model
+            try:
+                monitoring_type_obj = Type_of_Monitoring.objects.get(id=monitoring_type_id)
+                monitoring_code = monitoring_type_obj.monitoring_Type_Code
+            except Type_of_Monitoring.DoesNotExist:
+                monitoring_code = monitoring_type_id  # fallback to direct ID
+            
+            # Filter by monitoring_type_code and type_of_investment (current database structure)
             kpis = KPI_For_Contract.objects.filter(
-                project_id=project_id,
-                monitoring_type_id=monitoring_type_id,
+                monitoring_Type_Code=monitoring_code,
                 type_of_investment=investment_type
             ).values_list('Kpi_description', flat=True).distinct()
             
