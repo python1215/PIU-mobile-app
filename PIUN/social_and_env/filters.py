@@ -172,12 +172,20 @@ class OHSMonitoringFilter(FilterSet):
 class PAPFilter(django_filters.FilterSet):
     project = django_filters.ModelChoiceFilter(
         queryset=Project.objects.all(),
-        label="Project"
+        label="Project",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": "/social_and_env/ajax/load-investment-types-pap/",
+            "hx-target": "#id_type_of_investment",
+            "hx-trigger": "change",
+            "hx-include": "this"
+        })
     )
 
     type_of_investment = django_filters.ModelChoiceFilter(
         queryset=KPI_For_Contract.objects.filter(monitoring_type_id='ESS'),
-        label="Type of Investment"
+        label="Type of Investment",
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     type_of_pap = django_filters.ModelChoiceFilter(
@@ -187,17 +195,32 @@ class PAPFilter(django_filters.FilterSet):
 
     region = django_filters.ModelChoiceFilter(
         queryset=Regions.objects.all(),
-        label="Region"
+        label="Region",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": "/social_and_env/ajax/load-districts/",
+            "hx-target": "#id_district",
+            "hx-trigger": "change",
+            "hx-include": "this"
+        })
     )
 
     district = django_filters.ModelChoiceFilter(
         queryset=Districts.objects.all(),
-        label="District"
+        label="District",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "hx-get": "/social_and_env/ajax/load-settlements/",
+            "hx-target": "#id_pap_Current_Address",
+            "hx-trigger": "change",
+            "hx-include": "this"
+        })
     )
 
     pap_Current_Address = django_filters.ModelChoiceFilter(
         queryset=Settlement.objects.all(),
-        label="Current Address"
+        label="Current Address",
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     pap_category = django_filters.ModelChoiceFilter(
