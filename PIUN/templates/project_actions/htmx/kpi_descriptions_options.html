@@ -1,0 +1,7 @@
+<option value="">Select KPI Description</option>
+{% for kpi_description in kpi_descriptions %}
+    <option value="{{ kpi_description.value }}">{{ kpi_description.label }}</option>
+{% endfor %}
+{% if not kpi_descriptions %}
+    <option value="" disabled>No KPI descriptions available for this selection</option>
+{% endif %}

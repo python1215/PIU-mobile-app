@@ -439,16 +439,26 @@ class SpecificContractMonitoringForm(forms.ModelForm):
         label='Select Contract'
     )
     
-    # Override cascading dropdown fields as CharFields to handle AJAX values
+    # Override cascading dropdown fields as CharFields to handle AJAX values with cascade filtering
     Type_of_Investment = forms.CharField(
         max_length=200,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_Type_of_Investment',
+            'hx-get': '/project_actions/htmx/load-kpi-descriptions/',
+            'hx-target': '#id_Kpi_description',
+            'hx-trigger': 'change',
+            'hx-include': '[name="project"], [name="type_of_monitoring"]'
+        })
     )
     Kpi_description = forms.CharField(
         max_length=200, 
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_Kpi_description'
+        })
     )
     
     class Meta:
@@ -492,6 +502,15 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             self.fields['quarter'].queryset = Quarter.objects.all()
             self.fields['type_of_monitoring'].queryset = Type_of_Monitoring.objects.all()
             self.fields['Contract_implementation_Status'].queryset = Physicalprogress.objects.all()
+            
+            # Add HTMX attributes to type_of_monitoring field for cascade filtering
+            self.fields['type_of_monitoring'].widget.attrs.update({
+                'hx-get': '/project_actions/htmx/load-investment-types/',
+                'hx-target': '#id_Type_of_Investment',
+                'hx-trigger': 'change',
+                'hx-include': '[name="project"]',
+                'class': 'form-select'
+            })
             
             # KPI fields are now CharFields - no need to set querysets
                 

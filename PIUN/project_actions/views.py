@@ -160,6 +160,64 @@ def load_contracts(request):
         'contracts': contracts
     })
 
+@login_required
+def load_investment_types(request):
+    """Load investment types based on selected project and type of monitoring"""
+    project_id = request.GET.get('project')
+    monitoring_type_id = request.GET.get('type_of_monitoring')
+    
+    investment_types = []
+    
+    if project_id and monitoring_type_id:
+        try:
+            # Import models and get investment types
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            
+            # Get distinct investment types for the project and monitoring type
+            kpis = KPI_For_Contract.objects.filter(
+                projectID=project_id,
+                Type_of_Monitoring=monitoring_type_id
+            ).values_list('Type_of_Investment', flat=True).distinct()
+            
+            investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
+            
+        except Exception as e:
+            print(f"Error loading investment types: {e}")
+    
+    return render(request, 'project_actions/htmx/investment_types_options.html', {
+        'investment_types': investment_types
+    })
+
+@login_required  
+def load_kpi_descriptions(request):
+    """Load KPI descriptions based on selected project, monitoring type, and investment type"""
+    project_id = request.GET.get('project')
+    monitoring_type_id = request.GET.get('type_of_monitoring')
+    investment_type = request.GET.get('Type_of_Investment')
+    
+    kpi_descriptions = []
+    
+    if project_id and monitoring_type_id and investment_type:
+        try:
+            # Import models and get KPI descriptions
+            from PIU_Financial_mgt.models import KPI_For_Contract
+            
+            # Get distinct KPI descriptions for the project, monitoring type, and investment type
+            kpis = KPI_For_Contract.objects.filter(
+                projectID=project_id,
+                Type_of_Monitoring=monitoring_type_id,
+                Type_of_Investment=investment_type
+            ).values_list('Kpi_description', flat=True).distinct()
+            
+            kpi_descriptions = [{'value': kpi_desc, 'label': kpi_desc} for kpi_desc in kpis if kpi_desc]
+            
+        except Exception as e:
+            print(f"Error loading KPI descriptions: {e}")
+    
+    return render(request, 'project_actions/htmx/kpi_descriptions_options.html', {
+        'kpi_descriptions': kpi_descriptions
+    })
+
 # Dashboard and Overview Views
 @login_required
 def dashboard(request):

@@ -1,0 +1,7 @@
+<option value="">Select Type of Investment</option>
+{% for investment_type in investment_types %}
+    <option value="{{ investment_type.value }}">{{ investment_type.label }}</option>
+{% endfor %}
+{% if not investment_types %}
+    <option value="" disabled>No investment types available for this selection</option>
+{% endif %}
