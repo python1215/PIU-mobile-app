@@ -176,14 +176,14 @@ def load_investment_types(request):
             
             # Get the monitoring type code from the Type_of_Monitoring model
             try:
-                monitoring_type_obj = Type_of_Monitoring.objects.get(id=monitoring_type_id)
-                monitoring_code = monitoring_type_obj.monitoring_Type_Code
+                monitoring_type_obj = Type_of_Monitoring.objects.get(monitoring_type_code=monitoring_type_id)
+                monitoring_code = monitoring_type_obj.monitoring_type_code
             except Type_of_Monitoring.DoesNotExist:
                 monitoring_code = monitoring_type_id  # fallback to direct ID
             
-            # Filter by monitoring_type_code (current database structure)
+            # Filter by monitoring_type_code with case-insensitive matching
             kpis = KPI_For_Contract.objects.filter(
-                monitoring_Type_Code=monitoring_code
+                monitoring_Type_Code__iexact=monitoring_code
             ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
@@ -212,14 +212,14 @@ def load_kpi_descriptions(request):
             
             # Get the monitoring type code from the Type_of_Monitoring model
             try:
-                monitoring_type_obj = Type_of_Monitoring.objects.get(id=monitoring_type_id)
-                monitoring_code = monitoring_type_obj.monitoring_Type_Code
+                monitoring_type_obj = Type_of_Monitoring.objects.get(monitoring_type_code=monitoring_type_id)
+                monitoring_code = monitoring_type_obj.monitoring_type_code
             except Type_of_Monitoring.DoesNotExist:
                 monitoring_code = monitoring_type_id  # fallback to direct ID
             
-            # Filter by monitoring_type_code and type_of_investment (current database structure)
+            # Filter by monitoring_type_code and type_of_investment with case-insensitive matching
             kpis = KPI_For_Contract.objects.filter(
-                monitoring_Type_Code=monitoring_code,
+                monitoring_Type_Code__iexact=monitoring_code,
                 type_of_investment=investment_type
             ).values_list('Kpi_description', flat=True).distinct()
             
