@@ -168,22 +168,19 @@ def load_investment_types(request):
     
     investment_types = []
     
-    if monitoring_type_id:  # For now, filter by monitoring type only until FK relationships are established
+    if project_id and monitoring_type_id:  # Both project and monitoring type are required
         try:
             # Import models and get investment types
-            from PIU_Financial_mgt.models import KPI_For_Contract
+            from PIU_Financial_mgt.models import KPI_For_Contract, Project
             from setup.models import Type_of_Monitoring
             
-            # Get the monitoring type code from the Type_of_Monitoring model
-            try:
-                monitoring_type_obj = Type_of_Monitoring.objects.get(monitoring_type_code=monitoring_type_id)
-                monitoring_code = monitoring_type_obj.monitoring_type_code
-            except Type_of_Monitoring.DoesNotExist:
-                monitoring_code = monitoring_type_id  # fallback to direct ID
+            # Convert SQL to Django ORM:
+            # SELECT [type_of_investment] FROM [PIU_Financial_mgt_kpi_for_contract]
+            # WHERE project_id = @project_id AND monitoring_type_id = @monitoring_type_id
             
-            # Filter by monitoring_type_code with case-insensitive partial matching
             kpis = KPI_For_Contract.objects.filter(
-                monitoring_Type_Code__icontains=monitoring_code
+                project__projectID=project_id,  # Filter by project foreign key
+                monitoring_type__monitoring_type_code=monitoring_type_id  # Filter by monitoring type foreign key
             ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
@@ -204,23 +201,20 @@ def load_kpi_descriptions(request):
     
     kpi_descriptions = []
     
-    if monitoring_type_id and investment_type:  # Filter by monitoring type and investment type
+    if project_id and monitoring_type_id and investment_type:  # All three parameters are required
         try:
             # Import models and get KPI descriptions
-            from PIU_Financial_mgt.models import KPI_For_Contract
+            from PIU_Financial_mgt.models import KPI_For_Contract, Project
             from setup.models import Type_of_Monitoring
             
-            # Get the monitoring type code from the Type_of_Monitoring model
-            try:
-                monitoring_type_obj = Type_of_Monitoring.objects.get(monitoring_type_code=monitoring_type_id)
-                monitoring_code = monitoring_type_obj.monitoring_type_code
-            except Type_of_Monitoring.DoesNotExist:
-                monitoring_code = monitoring_type_id  # fallback to direct ID
+            # Convert SQL to Django ORM:
+            # SELECT [Kpi_description] FROM [PIU_Financial_mgt_kpi_for_contract]
+            # WHERE project_id = @project_id AND monitoring_type_id = @monitoring_type_id AND [type_of_investment] = @type_of_investment
             
-            # Filter by monitoring_type_code and type_of_investment with case-insensitive partial matching
             kpis = KPI_For_Contract.objects.filter(
-                monitoring_Type_Code__icontains=monitoring_code,
-                type_of_investment=investment_type
+                project__projectID=project_id,  # Filter by project foreign key
+                monitoring_type__monitoring_type_code=monitoring_type_id,  # Filter by monitoring type foreign key
+                type_of_investment=investment_type  # Filter by exact investment type match
             ).values_list('Kpi_description', flat=True).distinct()
             
             kpi_descriptions = [{'value': kpi_desc, 'label': kpi_desc} for kpi_desc in kpis if kpi_desc]
