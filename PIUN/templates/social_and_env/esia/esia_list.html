@@ -132,7 +132,7 @@
                             <td><strong>{{ esia.esiaID }}</strong></td>
                             <td>
                                 <a href="{% url 'esia_detail' esia.pk %}" class="text-decoration-none">
-                                    {{ esia.project_name|truncatechars:30 }}
+                                    {{ esia.project_name }}
                                 </a>
                             </td>
                             <td>{{ esia.type_of_investment|truncatechars:25 }}</td>
