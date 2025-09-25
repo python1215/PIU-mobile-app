@@ -135,28 +135,14 @@
                         <div class="row" id="investment-kpi-container">
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Type_of_Investment.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">Type of Investment <span class="text-danger">*</span></label>
-                                <select name="{{ form.Type_of_Investment.name }}" class="form-select" id="{{ form.Type_of_Investment.id_for_label }}">
-                                    <option value="">Select Type of Investment</option>
-                                    {% if initial_investment_kpi_data and initial_investment_kpi_data.investment_options %}
-                                        {% for option in initial_investment_kpi_data.investment_options %}
-                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.text }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
+                                {{ form.Type_of_Investment|add_class:"form-select" }}
                                 {% if form.Type_of_Investment.errors %}
                                     <div class="text-danger small mt-1">{{ form.Type_of_Investment.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Kpi_description.id_for_label }}" class="form-label" style="color: #2c3e50 !important;">KPI Description <span class="text-danger">*</span></label>
-                                <select name="{{ form.Kpi_description.name }}" class="form-select" id="{{ form.Kpi_description.id_for_label }}">
-                                    <option value="">Select KPI Description</option>
-                                    {% if initial_investment_kpi_data and initial_investment_kpi_data.kpi_options %}
-                                        {% for option in initial_investment_kpi_data.kpi_options %}
-                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.text }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
+                                {{ form.Kpi_description|add_class:"form-select" }}
                                 {% if form.Kpi_description.errors %}
                                     <div class="text-danger small mt-1">{{ form.Kpi_description.errors.0 }}</div>
                                 {% endif %}
