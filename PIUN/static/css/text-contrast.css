@@ -17,6 +17,15 @@
     color: #212529 !important;
 }
 
+/* Override for dark table headers to ensure white text */
+.table-dark th, .table-dark td,
+.table thead.table-dark th,
+table.table thead.table-dark th,
+.table-dark th *,
+.table-dark td * {
+    color: #ffffff !important;
+}
+
 /* Form elements on white backgrounds */
 .bg-white .form-control, .bg-white .form-select, .bg-white .form-check-label,
 .card .form-control, .card .form-select, .card .form-check-label,
