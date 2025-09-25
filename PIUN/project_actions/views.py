@@ -177,10 +177,11 @@ def load_investment_types(request):
             # Convert SQL to Django ORM:
             # SELECT [type_of_investment] FROM [PIU_Financial_mgt_kpi_for_contract]
             # WHERE project_id = @project_id AND monitoring_type_id = @monitoring_type_id
+            # Note: Form sends PRIMARY KEY values, not codes
             
             kpis = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,  # Filter by project foreign key
-                monitoring_type__monitoring_type_code=monitoring_type_id  # Filter by monitoring type foreign key
+                project_id=project_id,  # Filter by project primary key directly
+                monitoring_type_id=monitoring_type_id  # Filter by monitoring type primary key directly
             ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
@@ -210,11 +211,12 @@ def load_kpi_descriptions(request):
             # Convert SQL to Django ORM:
             # SELECT [Kpi_description] FROM [PIU_Financial_mgt_kpi_for_contract]
             # WHERE project_id = @project_id AND monitoring_type_id = @monitoring_type_id AND [type_of_investment] = @type_of_investment
+            # Note: Form sends PRIMARY KEY values, not codes
             
             kpis = KPI_For_Contract.objects.filter(
-                project__projectID=project_id,  # Filter by project foreign key
-                monitoring_type__monitoring_type_code=monitoring_type_id,  # Filter by monitoring type foreign key
-                type_of_investment=investment_type  # Filter by exact investment type match
+                project_id=project_id,  # Filter by project primary key directly
+                monitoring_type_id=monitoring_type_id,  # Filter by monitoring type primary key directly
+                type_of_investment=investment_type  # Filter by exact investment type match (this is a text field)
             ).values_list('Kpi_description', flat=True).distinct()
             
             kpi_descriptions = [{'value': kpi_desc, 'label': kpi_desc} for kpi_desc in kpis if kpi_desc]
