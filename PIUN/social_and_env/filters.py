@@ -114,7 +114,13 @@ class OHSMonitoringFilter(FilterSet):
         queryset=Project.objects.all(), 
         label="Project",
         empty_label="All Projects",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            "hx-get": "/social_and_env/ajax/load-investment-types-ohs/",
+            "hx-target": "#id_Type_of_Investment",
+            "hx-trigger": "change",
+            "hx-include": "this"
+        })
     )
     Type_of_Investment = ModelChoiceFilter(
         queryset=KPI_For_Contract.objects.filter(monitoring_type_id='ESS'),

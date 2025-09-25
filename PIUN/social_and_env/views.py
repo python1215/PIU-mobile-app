@@ -1277,14 +1277,17 @@ def load_investment_types_grievance(request):
 
 @login_required
 def load_investment_types_ohs(request):
-    """Load investment types and KPI descriptions for OHS form based on selected project"""
-    from django.http import JsonResponse
+    """Load investment types and KPI descriptions for OHS form based on selected project - HTMX compatible"""
+    from django.http import JsonResponse, HttpResponse
     from PIU_Financial_mgt.models import KPI_For_Contract
     import logging
 
     logger = logging.getLogger(__name__)
-    project_id = request.GET.get('project_id')
+    project_id = request.GET.get('project_id') or request.GET.get('project')
     logger.debug(f"OHS AJAX called with project_id: {project_id}")
+    
+    # Detect HTMX request
+    is_htmx = request.headers.get('HX-Request') == 'true'
 
     try:
         if project_id:
@@ -1312,22 +1315,35 @@ def load_investment_types_ohs(request):
                 f"Found {len(investment_list)} investments, {len(kpi_list)} KPIs"
             )
 
-            response_data = {
-                'investment_types': investment_list,
-                'kpi_descriptions': kpi_list
-            }
-            logger.debug(f"Returning JSON response: {response_data}")
-            return JsonResponse(response_data)
+            if is_htmx:
+                # Return HTML options for HTMX
+                options = '<option value="">All Investment Types</option>'
+                for inv in investment_list:
+                    options += f'<option value="{inv["id"]}">{inv["name"]}</option>'
+                return HttpResponse(options)
+            else:
+                # Return JSON for regular AJAX
+                response_data = {
+                    'investment_types': investment_list,
+                    'kpi_descriptions': kpi_list
+                }
+                logger.debug(f"Returning JSON response: {response_data}")
+                return JsonResponse(response_data)
         else:
             # No project selected - return empty lists
             logger.debug("No project_id provided, returning empty lists")
-            return JsonResponse({
-                'investment_types': [],
-                'kpi_descriptions': []
-            })
+            if is_htmx:
+                return HttpResponse('<option value="">All Investment Types</option>')
+            else:
+                return JsonResponse({
+                    'investment_types': [],
+                    'kpi_descriptions': []
+                })
 
     except Exception as e:
         logger.error(f"Error in load_investment_types_ohs: {str(e)}")
+        if is_htmx:
+            return HttpResponse(f'<option value="">Error: {str(e)}</option>')
         return JsonResponse({
             'investment_types': [],
             'kpi_descriptions': [],
