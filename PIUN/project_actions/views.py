@@ -174,10 +174,11 @@ def load_investment_types(request):
             from PIU_Financial_mgt.models import KPI_For_Contract
             
             # Get distinct investment types for the project and monitoring type
+            # Use correct field names: project, monitoring_type, type_of_investment
             kpis = KPI_For_Contract.objects.filter(
-                projectID=project_id,
-                Type_of_Monitoring=monitoring_type_id
-            ).values_list('Type_of_Investment', flat=True).distinct()
+                project=project_id,
+                monitoring_type=monitoring_type_id
+            ).values_list('type_of_investment', flat=True).distinct()
             
             investment_types = [{'value': inv_type, 'label': inv_type} for inv_type in kpis if inv_type]
             
@@ -203,10 +204,11 @@ def load_kpi_descriptions(request):
             from PIU_Financial_mgt.models import KPI_For_Contract
             
             # Get distinct KPI descriptions for the project, monitoring type, and investment type
+            # Use correct field names: project, monitoring_type, type_of_investment, Kpi_description
             kpis = KPI_For_Contract.objects.filter(
-                projectID=project_id,
-                Type_of_Monitoring=monitoring_type_id,
-                Type_of_Investment=investment_type
+                project=project_id,
+                monitoring_type=monitoring_type_id,
+                type_of_investment=investment_type
             ).values_list('Kpi_description', flat=True).distinct()
             
             kpi_descriptions = [{'value': kpi_desc, 'label': kpi_desc} for kpi_desc in kpis if kpi_desc]

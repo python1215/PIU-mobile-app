@@ -449,7 +449,7 @@ class SpecificContractMonitoringForm(forms.ModelForm):
             'hx-get': '/project_actions/htmx/load-kpi-descriptions/',
             'hx-target': '#id_Kpi_description',
             'hx-trigger': 'change',
-            'hx-include': '[name="project"], [name="type_of_monitoring"]'
+            'hx-include': '[name="project"], [name="type_of_monitoring"], [name="Type_of_Investment"]'
         })
     )
     Kpi_description = forms.CharField(
