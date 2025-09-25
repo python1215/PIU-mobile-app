@@ -388,7 +388,7 @@ def pap_detail(request, pk):
 
 @login_required
 def export_pap_excel(request):
-    """Export PAP data to Excel format"""
+    """Export filtered PAP data to Excel format"""
     from django.http import HttpResponse
     from openpyxl import Workbook
     from openpyxl.utils import get_column_letter
@@ -396,16 +396,28 @@ def export_pap_excel(request):
     import logging
 
     logger = logging.getLogger(__name__)
-    logger.info("🔍 Starting PAP Excel export")
+    logger.info("🔍 Starting PAP Excel export with filters")
 
     try:
-        # Get PAP data using Django ORM
-        pap_list = PAP.objects.select_related(
+        # Get PAP data using Django ORM with same filtering logic as pap_list view
+        initial_queryset = PAP.objects.select_related(
             'project', 'type_of_investment', 'region', 'district',
             'pap_Current_Address', 'type_of_pap', 'pap_category',
-            'vulnerability_category', 'type_of_impact', 'loginUser').all()
+            'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
+            'loginUser').all()
+
+        # Apply filters using PAPFilter - same as in pap_list view
+        pap_filter = PAPFilter(request.GET, queryset=initial_queryset)
+        pap_list = pap_filter.qs
         
-        logger.info(f"🔍 Found {pap_list.count()} PAP records for export")
+        logger.info(f"🔍 Found {pap_list.count()} filtered PAP records for export")
+        
+        # Log applied filters for debugging
+        applied_filters = {k: v for k, v in request.GET.items() if v}
+        if applied_filters:
+            logger.info(f"🔍 Applied filters: {applied_filters}")
+        else:
+            logger.info("🔍 No filters applied - exporting all records")
 
         # Create workbook and worksheet
         wb = Workbook()
@@ -415,10 +427,10 @@ def export_pap_excel(request):
         # Define headers
         headers = [
             'PAP ID', 'PAP Name', 'Gender', 'Project', 'Region', 'District',
-            'Location of Impact', 'Amount', 'Area', 'Compensated',
+            'Settlement', 'Location of Impact', 'Amount', 'Area', 'Compensated',
             'Compensation Date', 'Compensation Ref No', 'Type of PAP',
             'PAP Category', 'Vulnerability Category', 'Type of Impact',
-            'Type of Investment', 'Pre-Project Situation', 'Remarks',
+            'Type of Investment', 'Nature of Compensation', 'Pre-Project Situation', 'Remarks',
             'Date Created', 'User'
         ]
 
@@ -427,48 +439,58 @@ def export_pap_excel(request):
             ws.cell(row=1, column=col, value=header)
 
         # Write data
-        for row, pap in enumerate(pap_list, 2):
+        row_num = 2
+        for pap in pap_list:
             try:
-                ws.cell(row=row, column=1, value=pap.pap_identification_number or '')
-                ws.cell(row=row, column=2, value=pap.pap_name or '')
-                ws.cell(row=row, column=3, value=pap.sex or '')
-                ws.cell(row=row, column=4, value=pap.project.project if pap.project else '')
-                ws.cell(row=row, column=5, value=pap.region.region_name if pap.region else '')
-                ws.cell(row=row, column=6, value=pap.district.district_name if pap.district else '')
-                ws.cell(row=row, column=7, value=pap.location_of_impact or '')
-                ws.cell(row=row, column=8, value=pap.amount or 0)
-                ws.cell(row=row, column=9, value=pap.area or '')
-                ws.cell(row=row, column=10, value=pap.pap_compensated or '')
-                ws.cell(row=row, column=11, value=pap.compensation_date.strftime('%Y-%m-%d') if pap.compensation_date else '')
-                ws.cell(row=row, column=12, value=pap.compensation_RefNo or '')
-                ws.cell(row=row, column=13, value=pap.type_of_pap.type_of_pap if pap.type_of_pap else '')
-                ws.cell(row=row, column=14, value=pap.pap_category.pap_category if pap.pap_category else '')
-                ws.cell(row=row, column=15, value=pap.vulnerability_category.vulnerability if pap.vulnerability_category else '')
-                ws.cell(row=row, column=16, value=pap.type_of_impact.impact if pap.type_of_impact else '')
-                ws.cell(row=row, column=17, value=pap.type_of_investment.type_of_investment if pap.type_of_investment else '')
-                ws.cell(row=row, column=18, value=pap.pre_project_situation or '')
-                ws.cell(row=row, column=19, value=pap.remarks or '')
-                ws.cell(row=row, column=20, value=pap.date_created.strftime('%Y-%m-%d %H:%M') if pap.date_created else '')
-                ws.cell(row=row, column=21, value=pap.loginUser.username if pap.loginUser else '')
+                ws.cell(row=row_num, column=1, value=pap.pap_identification_number or '')
+                ws.cell(row=row_num, column=2, value=pap.pap_name or '')
+                ws.cell(row=row_num, column=3, value=pap.sex or '')
+                ws.cell(row=row_num, column=4, value=pap.project.project if pap.project else '')
+                ws.cell(row=row_num, column=5, value=pap.region.region_name if pap.region else '')
+                ws.cell(row=row_num, column=6, value=pap.district.district_name if pap.district else '')
+                ws.cell(row=row_num, column=7, value=pap.pap_Current_Address.settlement_name if pap.pap_Current_Address else '')
+                ws.cell(row=row_num, column=8, value=pap.location_of_impact or '')
+                ws.cell(row=row_num, column=9, value=pap.amount or 0)
+                ws.cell(row=row_num, column=10, value=pap.area or '')
+                ws.cell(row=row_num, column=11, value=pap.pap_compensated or '')
+                ws.cell(row=row_num, column=12, value=pap.compensation_date.strftime('%Y-%m-%d') if pap.compensation_date else '')
+                ws.cell(row=row_num, column=13, value=pap.compensation_RefNo or '')
+                ws.cell(row=row_num, column=14, value=pap.type_of_pap.type_of_pap if pap.type_of_pap else '')
+                ws.cell(row=row_num, column=15, value=pap.pap_category.pap_category if pap.pap_category else '')
+                ws.cell(row=row_num, column=16, value=pap.vulnerability_category.vulnerability if pap.vulnerability_category else '')
+                ws.cell(row=row_num, column=17, value=pap.type_of_impact.impact if pap.type_of_impact else '')
+                ws.cell(row=row_num, column=18, value=pap.type_of_investment.type_of_investment if pap.type_of_investment else '')
+                ws.cell(row=row_num, column=19, value=pap.nature_of_compensation.nature_of_settlement if pap.nature_of_compensation else '')
+                ws.cell(row=row_num, column=20, value=pap.pre_project_situation or '')
+                ws.cell(row=row_num, column=21, value=pap.remarks or '')
+                ws.cell(row=row_num, column=22, value=pap.date_created.strftime('%Y-%m-%d %H:%M') if pap.date_created else '')
+                ws.cell(row=row_num, column=23, value=pap.loginUser.username if pap.loginUser else '')
+                row_num += 1
             except Exception as field_error:
-                logger.error(f"🔍 Error processing PAP {pap.pap_identification_number} at row {row}: {field_error}")
+                logger.error(f"🔍 Error processing PAP {pap.pap_identification_number} at row {row_num}: {field_error}")
                 # Continue with next record instead of failing completely
+                row_num += 1
                 continue
 
         # Auto-adjust column widths
         for col in range(1, len(headers) + 1):
             ws.column_dimensions[get_column_letter(col)].width = 15
 
+        # Create filename with filter indication
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        if applied_filters:
+            filename = f'pap_records_filtered_{timestamp}.xlsx'
+        else:
+            filename = f'pap_records_all_{timestamp}.xlsx'
+
         # Create response
         response = HttpResponse(
-            content_type=
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response[
-            'Content-Disposition'] = f'attachment; filename=pap_records_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
 
         wb.save(response)
-        logger.info("🔍 PAP Excel export completed successfully")
+        logger.info(f"🔍 PAP Excel export completed successfully: {filename}")
         return response
 
     except Exception as e:
