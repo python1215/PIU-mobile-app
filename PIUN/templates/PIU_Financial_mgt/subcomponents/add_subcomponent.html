@@ -211,12 +211,63 @@ document.addEventListener('DOMContentLoaded', function() {
             // Verify HTML contains options
             if (html.includes('<option') && html.trim().length > 0) {
                 console.log('Add Subcomponent: Updating component dropdown with HTML');
-                componentSelect.innerHTML = html;
-                console.log('Add Subcomponent: Component dropdown updated successfully');
                 
-                // Verify dropdown was updated
-                const optionCount = componentSelect.options.length;
-                console.log('Add Subcomponent: Dropdown now has', optionCount, 'options');
+                // Enhanced DOM update with multiple fallback methods for offline deployment compatibility
+                try {
+                    // Method 1: Direct innerHTML replacement
+                    componentSelect.innerHTML = html;
+                    console.log('Add Subcomponent: Method 1 (innerHTML) attempted');
+                    
+                    // Verify the update worked
+                    let optionCount = componentSelect.options.length;
+                    console.log('Add Subcomponent: Dropdown now has', optionCount, 'options after innerHTML');
+                    
+                    // If innerHTML failed (still only has 1 option), try manual parsing
+                    if (optionCount <= 1) {
+                        console.log('Add Subcomponent: innerHTML failed, trying manual option parsing');
+                        
+                        // Method 2: Manual option creation for maximum offline compatibility
+                        componentSelect.innerHTML = ''; // Clear first
+                        
+                        // Parse the HTML and create options manually
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString('<select>' + html + '</select>', 'text/html');
+                        const options = doc.querySelectorAll('option');
+                        
+                        options.forEach(option => {
+                            const newOption = document.createElement('option');
+                            newOption.value = option.getAttribute('value') || '';
+                            newOption.textContent = option.textContent;
+                            componentSelect.appendChild(newOption);
+                        });
+                        
+                        optionCount = componentSelect.options.length;
+                        console.log('Add Subcomponent: After manual parsing, dropdown has', optionCount, 'options');
+                    }
+                    
+                    console.log('Add Subcomponent: Component dropdown updated successfully');
+                    
+                } catch (error) {
+                    console.error('Add Subcomponent: Error updating dropdown:', error);
+                    // Method 3: Fallback with simple text parsing
+                    componentSelect.innerHTML = '<option value="">Select a Component</option>';
+                    
+                    // Extract options from HTML text manually
+                    const optionMatches = html.match(/<option[^>]*value="([^"]*)"[^>]*>([^<]*)<\\/option>/g);
+                    if (optionMatches) {
+                        optionMatches.forEach(match => {
+                            const valueMatch = match.match(/value="([^"]*)"/);
+                            const textMatch = match.match(/>([^<]*)</);
+                            if (valueMatch && textMatch) {
+                                const option = document.createElement('option');
+                                option.value = valueMatch[1];
+                                option.textContent = textMatch[1];
+                                componentSelect.appendChild(option);
+                            }
+                        });
+                        console.log('Add Subcomponent: Fallback method added', componentSelect.options.length, 'options');
+                    }
+                }
             } else {
                 console.error('Add Subcomponent: Invalid HTML received:', html);
                 componentSelect.innerHTML = '<option value="">No components found for this project</option>';
