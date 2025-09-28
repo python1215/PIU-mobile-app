@@ -122,4 +122,126 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Add Activity: Component dropdown fallback initialized');
+    
+    const projectSelect = document.getElementById('id_projectID');
+    const componentSelect = document.getElementById('id_compID');
+    const subcomponentSelect = document.getElementById('id_subcompID');
+    
+    if (!projectSelect || !componentSelect) {
+        console.warn('Add Activity: Required dropdown elements not found');
+        return;
+    }
+    
+    // Function to load components via AJAX/fetch with fallback
+    function loadComponents(projectId) {
+        if (!projectId) {
+            // If no project selected, show all components
+            componentSelect.innerHTML = '<option value="">Select Component...</option>';
+            if (subcomponentSelect) {
+                subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
+            }
+            return;
+        }
+        
+        console.log('Add Activity: Loading components for project:', projectId);
+        
+        // Try HTMX first if available
+        if (window.htmx) {
+            console.log('Add Activity: Using HTMX for component loading');
+            htmx.ajax('GET', '{% url "PIU_Financial_mgt:load_project_components" %}?projectID=' + projectId, {
+                target: '#id_compID',
+                swap: 'innerHTML'
+            });
+            return;
+        }
+        
+        // Fallback to regular fetch for offline deployments
+        console.log('Add Activity: Using fetch fallback for component loading');
+        
+        fetch('{% url "PIU_Financial_mgt:load_project_components" %}?projectID=' + projectId, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'HX-Request': 'true'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(html => {
+            console.log('Add Activity: Components loaded successfully');
+            componentSelect.innerHTML = html;
+            
+            // Clear subcomponents when project changes
+            if (subcomponentSelect) {
+                subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Add Activity: Error loading components:', error);
+            
+            // Ultimate fallback - show a message
+            componentSelect.innerHTML = '<option value="">Unable to load components - please refresh page</option>';
+        });
+    }
+    
+    // Function to load subcomponents
+    function loadSubcomponents(componentId) {
+        if (!componentId || !subcomponentSelect) {
+            if (subcomponentSelect) {
+                subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
+            }
+            return;
+        }
+        
+        console.log('Add Activity: Loading subcomponents for component:', componentId);
+        
+        fetch('{% url "PIU_Financial_mgt:load_project_subcomponents" %}?compID=' + componentId, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'HX-Request': 'true'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            console.log('Add Activity: Subcomponents loaded successfully');
+            subcomponentSelect.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Add Activity: Error loading subcomponents:', error);
+            subcomponentSelect.innerHTML = '<option value="">Unable to load subcomponents</option>';
+        });
+    }
+    
+    // Set up event listeners
+    projectSelect.addEventListener('change', function() {
+        const projectId = this.value;
+        console.log('Add Activity: Project changed to:', projectId);
+        loadComponents(projectId);
+    });
+    
+    if (componentSelect) {
+        componentSelect.addEventListener('change', function() {
+            const componentId = this.value;
+            console.log('Add Activity: Component changed to:', componentId);
+            loadSubcomponents(componentId);
+        });
+    }
+    
+    // Load components on page load if a project is already selected
+    const initialProjectId = projectSelect.value;
+    if (initialProjectId) {
+        console.log('Add Activity: Loading initial components for project:', initialProjectId);
+        loadComponents(initialProjectId);
+    }
+});
+</script>
 {% endblock %}
