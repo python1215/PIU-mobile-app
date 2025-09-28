@@ -74,8 +74,6 @@
                                     </div>
                                 {% endif %}
                                 <div class="form-text">Select the component for this subcomponent</div>
-                                <!-- Debug: Show initial component count -->
-                                <small class="text-muted">Components loaded: <span id="component-count">{{ form.compID.queryset.count }}</span></small>
                             </div>
                         </div>
 
@@ -248,22 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
         loadComponents(projectId);
     });
     
-    // Debug: Check initial state
-    console.log('Add Subcomponent: Initial component dropdown state:', componentSelect.options.length, 'options');
-    console.log('Add Subcomponent: Component options:', Array.from(componentSelect.options).map(opt => opt.text));
-    
     // Load components on page load if a project is already selected
     const initialProjectId = projectSelect.value;
     if (initialProjectId) {
         console.log('Add Subcomponent: Loading initial components for project:', initialProjectId);
         loadComponents(initialProjectId);
-    } else {
-        console.log('Add Subcomponent: No project selected initially, keeping existing components');
-        // Update the component count display
-        const countElement = document.getElementById('component-count');
-        if (countElement) {
-            countElement.textContent = componentSelect.options.length;
-        }
     }
 });
 </script>

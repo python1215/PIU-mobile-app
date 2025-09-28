@@ -356,8 +356,8 @@ def load_project_components(request):
     project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
     
     if project_id:
-        # Filter components by the selected project using the correct field reference
-        components = Component.objects.filter(projectID__projectID__icontains=project_id)
+        # Filter components by the selected project using EXACT field reference matching your models
+        components = Component.objects.filter(projectID__projectID=project_id)  # Exact match, not icontains
         # Clean logging - just show component names
         component_names = [comp.project_components for comp in components]
         print(f"Loading {len(component_names)} components for project {project_id}: {component_names}")
@@ -1481,23 +1481,19 @@ def addactivity(request):
 
 @login_required
 def load_project_subcomponents(request):
-    """HTMX view to load subcomponents for selected component"""
+    """HTMX view to load subcomponents for selected component using exact model field names"""
     component_id = request.GET.get('compID')
     subcomponents = Subcomponent.objects.none()
     
     if component_id:
         try:
-            # Convert to int and filter by compID (foreign key)
+            # Convert to int and filter by compID (foreign key) - exact match to your Subcomponent model
             comp_id_int = int(component_id)
             
-            # Try filtering by compID field (most common)
+            # Filter by compID field directly (exact match to your model: compID = models.ForeignKey(Component, ...))
             subcomponents = Subcomponent.objects.filter(compID=comp_id_int)
             
-            # If no results, try compID_id (backup)
-            if not subcomponents.exists():
-                subcomponents = Subcomponent.objects.filter(compID_id=comp_id_int)
-            
-            # Clean logging - just show subcomponent names
+            # Clean logging - just show subcomponent names (using exact field: subcomponent = models.CharField)
             subcomp_names = [sub.subcomponent for sub in subcomponents]
             print(f"Loading {len(subcomp_names)} subcomponents for component {comp_id_int}: {subcomp_names}")
                 
