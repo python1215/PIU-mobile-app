@@ -353,27 +353,18 @@ def add_subcomponent_isolated(request):
 
 @login_required
 def load_project_components(request):
-    print(f"=== LOAD PROJECT COMPONENTS VIEW ===")
-    print(f"Method: {request.method}")
-    print(f"GET params: {request.GET}")
-    print(f"POST params: {request.POST}")
-    print(f"Is HTMX request: {request.headers.get('HX-Request', 'No')}")
-    
     project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
-    print("Received project_id:", project_id)
     
     if project_id:
         # Filter components by the selected project using the correct field reference
         components = Component.objects.filter(projectID__projectID__icontains=project_id)
-        print(f"Returning {components.count()} components for project {project_id}")
+        # Clean logging - just show component names
+        component_names = [comp.project_components for comp in components]
+        print(f"Loading {len(component_names)} components for project {project_id}: {component_names}")
     else:
         # If no project selected, return empty queryset
         components = Component.objects.none()
         print("No project selected, returning empty components")
-    
-    # Show component details for debugging
-    for comp in components:
-        print(f"Component: {comp.project_components}, Project: {comp.projectID}")
     
     return render(request, "htmx/project_components_dropdown.html", {"components": components})
 
@@ -1478,9 +1469,6 @@ def addactivity(request):
 def load_project_subcomponents(request):
     """HTMX view to load subcomponents for selected component"""
     component_id = request.GET.get('compID')
-    print(f"=== LOAD SUBCOMPONENTS DEBUG ===")
-    print(f"Component ID received: {component_id}")
-    
     subcomponents = Subcomponent.objects.none()
     
     if component_id:
@@ -1488,30 +1476,19 @@ def load_project_subcomponents(request):
             # Convert to int and filter by compID (foreign key)
             comp_id_int = int(component_id)
             
-            # Try different ways to query subcomponents
-            print(f"Trying compID_id={comp_id_int}")
-            subcomponents_by_id = Subcomponent.objects.filter(compID_id=comp_id_int)
-            print(f"Found {subcomponents_by_id.count()} subcomponents using compID_id")
+            # Try filtering by compID field (most common)
+            subcomponents = Subcomponent.objects.filter(compID=comp_id_int)
             
-            print(f"Trying compID={comp_id_int}")
-            subcomponents_by_field = Subcomponent.objects.filter(compID=comp_id_int)
-            print(f"Found {subcomponents_by_field.count()} subcomponents using compID")
+            # If no results, try compID_id (backup)
+            if not subcomponents.exists():
+                subcomponents = Subcomponent.objects.filter(compID_id=comp_id_int)
             
-            # Check all subcomponents to see what exists
-            all_subcomps = Subcomponent.objects.all()
-            print(f"Total subcomponents in database: {all_subcomps.count()}")
-            for sub in all_subcomps[:5]:  # Show first 5
-                print(f"- SubcompID: {sub.subcompID}, Component: {sub.compID}, CompID value: {sub.compID.compID if sub.compID else 'None'}")
-            
-            # Use the result that has subcomponents
-            subcomponents = subcomponents_by_field if subcomponents_by_field.exists() else subcomponents_by_id
-            
-            print(f"Final result: {subcomponents.count()} subcomponents for component {comp_id_int}")
-            for sub in subcomponents:
-                print(f"- {sub.subcompID}: {sub.subcomponent}")
+            # Clean logging - just show subcomponent names
+            subcomp_names = [sub.subcomponent for sub in subcomponents]
+            print(f"Loading {len(subcomp_names)} subcomponents for component {comp_id_int}: {subcomp_names}")
                 
         except (ValueError, TypeError) as e:
-            print(f"Error converting component_id to int: {e}")
+            print(f"Error loading subcomponents: {e}")
     
     return render(request, 'PIU_Financial_mgt/htmx/subcomponents_dropdown.html', {'subcomponents': subcomponents})
 
