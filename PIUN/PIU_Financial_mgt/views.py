@@ -358,17 +358,24 @@ def load_project_components(request):
     project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
     
     if project_id:
-        # Enhanced project ID matching - remove all special characters and spaces to match database format
+        # Enhanced project ID matching - try multiple strategies for robust matching
         project_id_clean = project_id.replace('%26', '&').replace('%20', ' ').strip()
-        # Remove all spaces, ampersands, and dashes to match the clean database format
-        project_id_normalized = project_id_clean.replace(' ', '').replace('&', '').replace('-', '')
         
-        # Filter components using normalized project ID
-        components = Component.objects.filter(projectID__projectID__icontains=project_id_normalized).order_by('project_components')
+        # Strategy 1: Try exact match first
+        components = Component.objects.filter(projectID__projectID__exact=project_id_clean).order_by('project_components')
+        
+        # Strategy 2: If no exact match, try removing special characters (normalization)
+        if not components.exists():
+            project_id_normalized = project_id_clean.replace(' ', '').replace('&', '').replace('-', '')
+            components = Component.objects.filter(projectID__projectID__icontains=project_id_normalized).order_by('project_components')
+        
+        # Strategy 3: If still no match, try contains match with original clean ID
+        if not components.exists():
+            components = Component.objects.filter(projectID__projectID__icontains=project_id_clean).order_by('project_components')
         
         # Clean logging - show component names
         component_names = [comp.project_components for comp in components]
-        print(f"HTMX: Loading {len(component_names)} components for project {project_id_clean} (normalized: {project_id_normalized}): {component_names}")
+        print(f"HTMX: Loading {len(component_names)} components for project {project_id_clean}: {component_names}")
     else:
         # If no project selected, return empty queryset
         components = Component.objects.none()
