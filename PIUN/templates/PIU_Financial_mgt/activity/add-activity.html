@@ -42,29 +42,72 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Project</label>
-                    {{ form.projectID|add_class:"form-select" }}
+                    <select name="projectID" class="form-select" onchange="this.form.submit()">
+                        <option value="">Select Project...</option>
+                        {% for project in projects %}
+                            <option value="{{ project.projectID }}" 
+                                {% if selected_project_id == project.projectID %}selected{% endif %}>
+                                {{ project.project }}
+                            </option>
+                        {% endfor %}
+                    </select>
                     {% if form.projectID.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.projectID.errors.0 }}
                         </div>
                     {% endif %}
+                    <small class="text-muted">Select a project to load its components</small>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Component</label>
-                    {{ form.compID|add_class:"form-select" }}
+                    <select name="compID" class="form-select" onchange="this.form.submit()">
+                        <option value="">
+                            {% if not selected_project_id %}
+                                First select a project...
+                            {% else %}
+                                Select Component...
+                            {% endif %}
+                        </option>
+                        {% for component in project_components %}
+                            <option value="{{ component.compID }}"
+                                {% if selected_component_id == component.compID %}selected{% endif %}>
+                                {{ component.component }}
+                            </option>
+                        {% endfor %}
+                    </select>
                     {% if form.compID.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.compID.errors.0 }}
                         </div>
                     {% endif %}
+                    {% if selected_project_id and not project_components %}
+                        <small class="text-warning">No components found for this project</small>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Subcomponent</label>
-                    {{ form.subcompID|add_class:"form-select" }}
+                    <select name="subcompID" class="form-select">
+                        <option value="">
+                            {% if not selected_component_id %}
+                                First select a component...
+                            {% else %}
+                                Select Subcomponent...
+                            {% endif %}
+                        </option>
+                        {% for subcomponent in component_subcomponents %}
+                            <option value="{{ subcomponent.subcompID }}"
+                                {% if selected_subcomponent_id == subcomponent.subcompID %}selected{% endif %}>
+                                {{ subcomponent.subcomponent }}
+                            </option>
+                        {% endfor %}
+                    </select>
                     {% if form.subcompID.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.subcompID.errors.0 }}
                         </div>
+                    {% endif %}
+                    {% if selected_component_id and not component_subcomponents %}
+                        <small class="text-warning">No subcomponents found for this component</small>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
