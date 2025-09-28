@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to load components via AJAX/fetch with fallback
     function loadComponents(projectId) {
         if (!projectId) {
-            // If no project selected, show all components
+            // If no project selected, clear components
             componentSelect.innerHTML = '<option value="">Select Component...</option>';
             if (subcomponentSelect) {
                 subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
@@ -149,46 +149,59 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Add Activity: Loading components for project:', projectId);
         
-        // Try HTMX first if available
-        if (window.htmx) {
-            console.log('Add Activity: Using HTMX for component loading');
-            htmx.ajax('GET', '{% url "PIU_Financial_mgt:load_project_components" %}?projectID=' + projectId, {
-                target: '#id_compID',
-                swap: 'innerHTML'
-            });
-            return;
-        }
+        // Show loading state
+        componentSelect.innerHTML = '<option value="">Loading components...</option>';
         
-        // Fallback to regular fetch for offline deployments
-        console.log('Add Activity: Using fetch fallback for component loading');
+        // Always use fetch for reliability in offline deployments
+        console.log('Add Activity: Using fetch for component loading');
         
-        fetch('{% url "PIU_Financial_mgt:load_project_components" %}?projectID=' + projectId, {
+        const url = '{% url "PIU_Financial_mgt:load_project_components" %}?projectID=' + encodeURIComponent(projectId);
+        console.log('Add Activity: Requesting URL:', url);
+        
+        fetch(url, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'HX-Request': 'true'
-            }
+                'HX-Request': 'true',
+                'Content-Type': 'text/html'
+            },
+            credentials: 'same-origin'
         })
         .then(response => {
+            console.log('Add Activity: Response status:', response.status);
+            console.log('Add Activity: Response headers:', response.headers);
+            
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             return response.text();
         })
         .then(html => {
-            console.log('Add Activity: Components loaded successfully');
-            componentSelect.innerHTML = html;
+            console.log('Add Activity: Raw HTML received:', html);
+            console.log('Add Activity: HTML length:', html.length);
             
-            // Clear subcomponents when project changes
-            if (subcomponentSelect) {
-                subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
+            // Verify HTML contains options
+            if (html.includes('<option') && html.trim().length > 0) {
+                console.log('Add Activity: Updating component dropdown with HTML');
+                componentSelect.innerHTML = html;
+                console.log('Add Activity: Component dropdown updated successfully');
+                
+                // Verify dropdown was updated
+                const optionCount = componentSelect.options.length;
+                console.log('Add Activity: Dropdown now has', optionCount, 'options');
+                
+                // Clear subcomponents when project changes
+                if (subcomponentSelect) {
+                    subcomponentSelect.innerHTML = '<option value="">Select Subcomponent...</option>';
+                }
+            } else {
+                console.error('Add Activity: Invalid HTML received:', html);
+                componentSelect.innerHTML = '<option value="">No components found for this project</option>';
             }
         })
         .catch(error => {
             console.error('Add Activity: Error loading components:', error);
-            
-            // Ultimate fallback - show a message
-            componentSelect.innerHTML = '<option value="">Unable to load components - please refresh page</option>';
+            componentSelect.innerHTML = '<option value="">Error loading components - please try again</option>';
         });
     }
     
