@@ -358,38 +358,23 @@ def load_project_components(request):
     project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
     
     if project_id:
-        # Decode URL-encoded project ID to handle special characters properly
-        decoded_project_id = unquote(project_id)
+        # Enhanced project ID matching - remove all special characters and spaces to match database format
+        project_id_clean = project_id.replace('%26', '&').replace('%20', ' ').strip()
+        # Remove all spaces, ampersands, and dashes to match the clean database format
+        project_id_normalized = project_id_clean.replace(' ', '').replace('&', '').replace('-', '')
         
-        # Try multiple matching strategies for robust offline deployment compatibility
-        components = Component.objects.none()
+        # Filter components using normalized project ID
+        components = Component.objects.filter(projectID__projectID__icontains=project_id_normalized).order_by('project_components')
         
-        # Strategy 1: Exact match with decoded project ID
-        components = Component.objects.filter(projectID__projectID=decoded_project_id)
-        
-        # Strategy 2: If no exact match, try original project ID
-        if not components.exists():
-            components = Component.objects.filter(projectID__projectID=project_id)
-        
-        # Strategy 3: If still no match, try matching against similar project IDs (remove spaces and special chars)
-        if not components.exists():
-            # Clean the project ID by removing spaces and special characters for matching
-            clean_project_id = ''.join(c for c in decoded_project_id if c.isalnum())
-            components = Component.objects.filter(projectID__projectID__exact=clean_project_id)
-            
-            # Strategy 4: Final fallback - search for projects containing similar alphanumeric sequence
-            if not components.exists():
-                components = Component.objects.filter(projectID__projectID__icontains=clean_project_id[:8] if len(clean_project_id) >= 8 else clean_project_id)
-        
-        # Clean logging - just show component names
+        # Clean logging - show component names
         component_names = [comp.project_components for comp in components]
-        print(f"Loading {len(component_names)} components for project {decoded_project_id}: {component_names}")
+        print(f"HTMX: Loading {len(component_names)} components for project {project_id_clean} (normalized: {project_id_normalized}): {component_names}")
     else:
         # If no project selected, return empty queryset
         components = Component.objects.none()
-        print("No project selected, returning empty components")
+        print("HTMX: No project selected, returning empty components")
     
-    return render(request, "htmx/project_components_dropdown.html", {"components": components})
+    return render(request, "PIU_Financial_mgt/htmx/components_dropdown.html", {"components": components})
 
 
 
@@ -1460,36 +1445,6 @@ def export_subcomponents_pdf(request):
 
 @login_required
 def addactivity(request):
-    # Get cascading dropdown selections from GET parameters (for server-side cascading)
-    selected_project_id = request.GET.get('projectID', '') or request.POST.get('projectID', '')
-    selected_component_id = request.GET.get('compID', '') or request.POST.get('compID', '')
-    selected_subcomponent_id = request.GET.get('subcompID', '') or request.POST.get('subcompID', '')
-    
-    # Initialize empty querysets
-    project_components = Component.objects.none()
-    component_subcomponents = Subcomponent.objects.none()
-    
-    # Load components if project is selected
-    if selected_project_id:
-        try:
-            # Enhanced project ID matching - remove all special characters and spaces to match database format
-            project_id_clean = selected_project_id.replace('%26', '&').replace('%20', ' ').strip()
-            # Remove all spaces, ampersands, and dashes to match the clean database format
-            project_id_normalized = project_id_clean.replace(' ', '').replace('&', '').replace('-', '')
-            project_components = Component.objects.filter(projectID__projectID__icontains=project_id_normalized).order_by('project_components')
-            print(f"Loading components for project {project_id_clean} (normalized: {project_id_normalized}): Found {project_components.count()} components")
-        except Exception as e:
-            print(f"Error loading components: {e}")
-    
-    # Load subcomponents if component is selected
-    if selected_component_id:
-        try:
-            component_id_int = int(selected_component_id)
-            component_subcomponents = Subcomponent.objects.filter(compID=component_id_int).order_by('subcomponent')
-            print(f"Loading subcomponents for component {component_id_int}: Found {component_subcomponents.count()} subcomponents")
-        except (ValueError, TypeError) as e:
-            print(f"Error loading subcomponents: {e}")
-    
     if request.method == 'POST':
         # Using standard forms
         form = addActivitiesForm(request.POST)
@@ -1507,11 +1462,7 @@ def addactivity(request):
                 messages.error(request, f'Error saving activity: {str(e)}')
     else:
         # Using standard forms
-        form = addActivitiesForm(initial={
-            'projectID': selected_project_id,
-            'compID': selected_component_id,
-            'subcompID': selected_subcomponent_id,
-        })
+        form = addActivitiesForm()
     
     # Get all projects, currencies, and years for the dropdowns
     projects = Project.objects.all()
@@ -1523,11 +1474,6 @@ def addactivity(request):
         'projects': projects,
         'currencies': currencies,
         'years': years,
-        'selected_project_id': selected_project_id,
-        'selected_component_id': selected_component_id,
-        'selected_subcomponent_id': selected_subcomponent_id,
-        'project_components': project_components,
-        'component_subcomponents': component_subcomponents,
     }
     return render(request, 'PIU_Financial_mgt/activity/add-activity.html', context)
 

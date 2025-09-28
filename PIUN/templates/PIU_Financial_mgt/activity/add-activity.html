@@ -42,11 +42,14 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Project</label>
-                    <select name="projectID" class="form-select" onchange="this.form.submit()">
+                    <select name="projectID" id="id_projectID" class="form-select" 
+                            hx-get="{% url 'PIU_Financial_mgt:load_project_components' %}"
+                            hx-target="#id_compID"
+                            hx-trigger="change"
+                            hx-include="[name='projectID']">
                         <option value="">Select Project...</option>
                         {% for project in projects %}
-                            <option value="{{ project.projectID }}" 
-                                {% if selected_project_id == project.projectID %}selected{% endif %}>
+                            <option value="{{ project.projectID }}">
                                 {{ project.project }}
                             </option>
                         {% endfor %}
@@ -60,54 +63,28 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Component</label>
-                    <select name="compID" class="form-select" onchange="this.form.submit()">
-                        <option value="">
-                            {% if not selected_project_id %}
-                                First select a project...
-                            {% else %}
-                                Select Component...
-                            {% endif %}
-                        </option>
-                        {% for component in project_components %}
-                            <option value="{{ component.compID }}"
-                                {% if selected_component_id == component.compID %}selected{% endif %}>
-                                {{ component.project_components }}
-                            </option>
-                        {% endfor %}
+                    <select name="compID" id="id_compID" class="form-select"
+                            hx-get="{% url 'PIU_Financial_mgt:load_project_subcomponents' %}"
+                            hx-target="#id_subcompID"
+                            hx-trigger="change"
+                            hx-include="[name='compID']">
+                        <option value="">First select a project...</option>
                     </select>
                     {% if form.compID.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.compID.errors.0 }}
                         </div>
                     {% endif %}
-                    {% if selected_project_id and not project_components %}
-                        <small class="text-warning">No components found for this project</small>
-                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Subcomponent</label>
-                    <select name="subcompID" class="form-select">
-                        <option value="">
-                            {% if not selected_component_id %}
-                                First select a component...
-                            {% else %}
-                                Select Subcomponent...
-                            {% endif %}
-                        </option>
-                        {% for subcomponent in component_subcomponents %}
-                            <option value="{{ subcomponent.subcompID }}"
-                                {% if selected_subcomponent_id == subcomponent.subcompID %}selected{% endif %}>
-                                {{ subcomponent.subcomponent }}
-                            </option>
-                        {% endfor %}
+                    <select name="subcompID" id="id_subcompID" class="form-select">
+                        <option value="">First select a component...</option>
                     </select>
                     {% if form.subcompID.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.subcompID.errors.0 }}
                         </div>
-                    {% endif %}
-                    {% if selected_component_id and not component_subcomponents %}
-                        <small class="text-warning">No subcomponents found for this component</small>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
@@ -166,9 +143,22 @@
     </div>
 </div>
 
+<!-- HTMX CDN for cascading dropdowns -->
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
 <script>
-// Server-side cascading dropdowns - no JavaScript required!
-// Form automatically submits when project/component selections change for maximum offline compatibility
-console.log('Add Activity: Using server-side cascading dropdowns for maximum offline compatibility');
+// HTMX-powered cascading dropdowns
+console.log('Add Activity: Using HTMX for cascading dropdowns');
+
+// Clear subcomponents when project changes
+document.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.elt.id === 'id_projectID') {
+        // Clear subcomponents when project changes
+        const subcompSelect = document.getElementById('id_subcompID');
+        if (subcompSelect) {
+            subcompSelect.innerHTML = '<option value="">First select a component...</option>';
+        }
+    }
+});
 </script>
 {% endblock %}
