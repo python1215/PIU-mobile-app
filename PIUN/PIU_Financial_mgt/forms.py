@@ -156,7 +156,8 @@ class addsubcomponentForm(forms.ModelForm):
     projectID = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         widget=forms.Select(attrs={"hx-get": reverse_lazy('PIU_Financial_mgt:load_project_components'), "hx-target": "#id_compID"}),
-        empty_label="Select Project..."
+        empty_label="Select Project...",
+        to_field_name='projectID'  # Ensure form sends the actual projectID, not object ID
     )
     compID = forms.ModelChoiceField(
         queryset=Component.objects.none(),  # Start empty - populate after project selection

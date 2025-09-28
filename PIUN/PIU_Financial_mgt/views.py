@@ -353,14 +353,37 @@ def add_subcomponent_isolated(request):
 
 @login_required
 def load_project_components(request):
+    from urllib.parse import unquote
+    
     project_id = request.GET.get("project_id") or request.GET.get("projectID")  # Accept both parameter names
     
     if project_id:
-        # Filter components by the selected project using EXACT field reference matching your models
-        components = Component.objects.filter(projectID__projectID=project_id)  # Exact match, not icontains
+        # Decode URL-encoded project ID to handle special characters properly
+        decoded_project_id = unquote(project_id)
+        
+        # Try multiple matching strategies for robust offline deployment compatibility
+        components = Component.objects.none()
+        
+        # Strategy 1: Exact match with decoded project ID
+        components = Component.objects.filter(projectID__projectID=decoded_project_id)
+        
+        # Strategy 2: If no exact match, try original project ID
+        if not components.exists():
+            components = Component.objects.filter(projectID__projectID=project_id)
+        
+        # Strategy 3: If still no match, try matching against similar project IDs (remove spaces and special chars)
+        if not components.exists():
+            # Clean the project ID by removing spaces and special characters for matching
+            clean_project_id = ''.join(c for c in decoded_project_id if c.isalnum())
+            components = Component.objects.filter(projectID__projectID__exact=clean_project_id)
+            
+            # Strategy 4: Final fallback - search for projects containing similar alphanumeric sequence
+            if not components.exists():
+                components = Component.objects.filter(projectID__projectID__icontains=clean_project_id[:8] if len(clean_project_id) >= 8 else clean_project_id)
+        
         # Clean logging - just show component names
         component_names = [comp.project_components for comp in components]
-        print(f"Loading {len(component_names)} components for project {project_id}: {component_names}")
+        print(f"Loading {len(component_names)} components for project {decoded_project_id}: {component_names}")
     else:
         # If no project selected, return empty queryset
         components = Component.objects.none()
