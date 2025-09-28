@@ -1291,15 +1291,19 @@ def load_investment_types_ohs(request):
 
     try:
         if project_id:
-            # Get investment types for specific project (using projectID field)
+            # Get investment types for specific project AND monitoring_type_id='ESS' for OHS
             investment_types = KPI_For_Contract.objects.filter(
-                project__projectID=project_id).values(
-                    'monitoring_Type_Code', 'type_of_investment').distinct()
+                project__projectID=project_id,
+                monitoring_type_id='ESS'
+            ).values(
+                'monitoring_Type_Code', 'type_of_investment').distinct()
 
-            # Get KPI descriptions for the project (using correct field name: Kpi_description)
+            # Get KPI descriptions for the project AND monitoring_type_id='ESS' for OHS
             kpi_descriptions = KPI_For_Contract.objects.filter(
-                project__projectID=project_id).values(
-                    'monitoring_Type_Code', 'Kpi_description').distinct()
+                project__projectID=project_id,
+                monitoring_type_id='ESS'
+            ).values(
+                'monitoring_Type_Code', 'Kpi_description').distinct()
 
             investment_list = [{
                 'id': inv['monitoring_Type_Code'],

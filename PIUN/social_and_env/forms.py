@@ -830,26 +830,32 @@ class OHSMonitoringForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set up dynamic querysets for project-based fields
+        # Set up dynamic querysets for project-based fields with ESS monitoring type for OHS
         if 'project' in self.data:
             try:
                 project_id = self.data.get('project')
-                project_kpis = KPI_For_Contract.objects.filter(project_id=project_id)
+                project_kpis = KPI_For_Contract.objects.filter(
+                    project_id=project_id,
+                    monitoring_type_id='ESS'
+                )
                 self.fields['Type_of_Investment'].queryset = project_kpis
                 self.fields['Kpi_description'].queryset = project_kpis
             except (ValueError, TypeError):
-                # If error, show all KPIs to prevent validation failures
-                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
-                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.all()
+                # If error, show ESS KPIs only to prevent validation failures
+                self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(monitoring_type_id='ESS')
+                self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(monitoring_type_id='ESS')
         elif self.instance and self.instance.pk and self.instance.project:
-            # For editing existing records, load KPIs for the selected project
-            project_kpis = KPI_For_Contract.objects.filter(project=self.instance.project)
+            # For editing existing records, load ESS KPIs for the selected project
+            project_kpis = KPI_For_Contract.objects.filter(
+                project=self.instance.project,
+                monitoring_type_id='ESS'
+            )
             self.fields['Type_of_Investment'].queryset = project_kpis
             self.fields['Kpi_description'].queryset = project_kpis
         else:
-            # For new forms, show all KPIs initially
-            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.all()
-            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.all()
+            # For new forms, show only ESS KPIs initially
+            self.fields['Type_of_Investment'].queryset = KPI_For_Contract.objects.filter(monitoring_type_id='ESS')
+            self.fields['Kpi_description'].queryset = KPI_For_Contract.objects.filter(monitoring_type_id='ESS')
         
         # Set up dynamic querysets for geographic cascading
         if 'region' in self.data:
