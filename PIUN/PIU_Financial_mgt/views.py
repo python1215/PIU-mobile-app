@@ -1472,10 +1472,12 @@ def addactivity(request):
     # Load components if project is selected
     if selected_project_id:
         try:
-            # Enhanced project ID matching for special characters
+            # Enhanced project ID matching - remove all special characters and spaces to match database format
             project_id_clean = selected_project_id.replace('%26', '&').replace('%20', ' ').strip()
-            project_components = Component.objects.filter(projectID__projectID__icontains=project_id_clean).order_by('component')
-            print(f"Loading components for project {project_id_clean}: Found {project_components.count()} components")
+            # Remove all spaces, ampersands, and dashes to match the clean database format
+            project_id_normalized = project_id_clean.replace(' ', '').replace('&', '').replace('-', '')
+            project_components = Component.objects.filter(projectID__projectID__icontains=project_id_normalized).order_by('project_components')
+            print(f"Loading components for project {project_id_clean} (normalized: {project_id_normalized}): Found {project_components.count()} components")
         except Exception as e:
             print(f"Error loading components: {e}")
     

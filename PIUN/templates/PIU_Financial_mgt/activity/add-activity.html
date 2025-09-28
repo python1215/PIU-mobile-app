@@ -71,7 +71,7 @@
                         {% for component in project_components %}
                             <option value="{{ component.compID }}"
                                 {% if selected_component_id == component.compID %}selected{% endif %}>
-                                {{ component.component }}
+                                {{ component.project_components }}
                             </option>
                         {% endfor %}
                     </select>
