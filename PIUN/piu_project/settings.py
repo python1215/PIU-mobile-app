@@ -31,11 +31,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# CSRF trusted origins for Replit
+# CSRF trusted origins for Replit and local development
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.replit.app',
     'https://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+    'http://0.0.0.0:5000',
 ]
 
 # Application definition
@@ -74,6 +77,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'piu_project.middleware.URLDecodeMiddleware',  # Handle URL encoding issues
+    'piu_project.middleware.OfflineSecurityMiddleware',  # Handle offline deployment security headers
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

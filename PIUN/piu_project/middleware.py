@@ -55,3 +55,31 @@ class AjaxAuthenticationMiddleware:
         
         response = self.get_response(request)
         return response
+
+
+class OfflineSecurityMiddleware:
+    """
+    Middleware to handle security headers for offline deployments
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        
+        # For offline/local development, remove or modify problematic security headers
+        if request.get_host() in ['localhost:5000', '127.0.0.1:5000', '0.0.0.0:5000'] or not request.is_secure():
+            # Remove Cross-Origin-Opener-Policy header for HTTP/localhost
+            if 'Cross-Origin-Opener-Policy' in response:
+                del response['Cross-Origin-Opener-Policy']
+            
+            # Set to unsafe-none for development if needed
+            response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+            
+            # Also handle CORS for HTMX requests
+            if request.headers.get('HX-Request'):
+                response['Access-Control-Allow-Origin'] = '*'
+                response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+                response['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With, HX-Request, HX-Target, HX-Current-URL'
+        
+        return response
