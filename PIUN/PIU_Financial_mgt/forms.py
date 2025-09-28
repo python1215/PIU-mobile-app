@@ -203,7 +203,7 @@ class addActivitiesForm(forms.ModelForm):
 
     subcompID = forms.ModelChoiceField(
         queryset=Subcomponent.objects.none(), 
-        required=False,
+        required=True,
         empty_label="Select Subcomponent..."
     )
 

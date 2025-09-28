@@ -1440,12 +1440,26 @@ def addactivity(request):
     if request.method == 'POST':
         # Using standard forms
         form = addActivitiesForm(request.POST)
-        if form.is_valid():
-            activity = form.save(commit=False)
-            activity.loginUser = request.user  # Set the logged-in user
-            activity.save()
-            messages.success(request, 'Activity created successfully!')
-            return redirect('PIU_Financial_mgt:activities')  
+        
+        if not form.is_valid():
+            messages.error(request, 'Please correct the errors below.')
+        else:
+            try:
+                activity = form.save(commit=False)
+                activity.loginUser = request.user  # Set the logged-in user
+                activity.save()
+                messages.success(request, 'Activity created successfully!')
+                return redirect('PIU_Financial_mgt:activities')
+            except Exception as e:
+                messages.error(request, f'Error saving activity: {str(e)}')
+                # Re-populate form context on error
+                context = {
+                    'form': form,
+                    'projects': Project.objects.all(),
+                    'currencies': Currency.objects.all(),
+                    'years': YEAR.objects.all(),
+                }
+                return render(request, 'PIU_Financial_mgt/activity/add-activity.html', context)  
     else:
         # Using standard forms
         form = addActivitiesForm()
