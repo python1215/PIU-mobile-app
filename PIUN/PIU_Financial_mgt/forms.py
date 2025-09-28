@@ -159,7 +159,7 @@ class addsubcomponentForm(forms.ModelForm):
         empty_label="Select Project..."
     )
     compID = forms.ModelChoiceField(
-        queryset=Component.objects.all(),  # Show all components initially for offline compatibility
+        queryset=Component.objects.none(),  # Start empty - populate after project selection
         empty_label="Select Component..."
     )
     
@@ -196,13 +196,13 @@ class addActivitiesForm(forms.ModelForm):
     )
 
     compID = forms.ModelChoiceField(
-        queryset=Component.objects.all(),
+        queryset=Component.objects.none(),  # Start empty - populate after project selection
         widget=forms.Select(attrs={"hx-get": reverse_lazy("PIU_Financial_mgt:load_project_subcomponents"), "hx-target": "#id_subcompID"}),
         empty_label="Select Component..."
     )
 
     subcompID = forms.ModelChoiceField(
-        queryset=Subcomponent.objects.all(),  # Show all subcomponents initially for offline compatibility
+        queryset=Subcomponent.objects.none(),  # Start empty - populate after component selection
         required=True,
         empty_label="Select Subcomponent..."
     )
