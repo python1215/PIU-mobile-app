@@ -1460,6 +1460,34 @@ def export_subcomponents_pdf(request):
 
 @login_required
 def addactivity(request):
+    # Get cascading dropdown selections from GET parameters (for server-side cascading)
+    selected_project_id = request.GET.get('projectID', '') or request.POST.get('projectID', '')
+    selected_component_id = request.GET.get('compID', '') or request.POST.get('compID', '')
+    selected_subcomponent_id = request.GET.get('subcompID', '') or request.POST.get('subcompID', '')
+    
+    # Initialize empty querysets
+    project_components = Component.objects.none()
+    component_subcomponents = Subcomponent.objects.none()
+    
+    # Load components if project is selected
+    if selected_project_id:
+        try:
+            # Enhanced project ID matching for special characters
+            project_id_clean = selected_project_id.replace('%26', '&').replace('%20', ' ').strip()
+            project_components = Component.objects.filter(projectID__projectID__icontains=project_id_clean).order_by('component')
+            print(f"Loading components for project {project_id_clean}: Found {project_components.count()} components")
+        except Exception as e:
+            print(f"Error loading components: {e}")
+    
+    # Load subcomponents if component is selected
+    if selected_component_id:
+        try:
+            component_id_int = int(selected_component_id)
+            component_subcomponents = Subcomponent.objects.filter(compID=component_id_int).order_by('subcomponent')
+            print(f"Loading subcomponents for component {component_id_int}: Found {component_subcomponents.count()} subcomponents")
+        except (ValueError, TypeError) as e:
+            print(f"Error loading subcomponents: {e}")
+    
     if request.method == 'POST':
         # Using standard forms
         form = addActivitiesForm(request.POST)
@@ -1475,17 +1503,13 @@ def addactivity(request):
                 return redirect('PIU_Financial_mgt:activities')
             except Exception as e:
                 messages.error(request, f'Error saving activity: {str(e)}')
-                # Re-populate form context on error
-                context = {
-                    'form': form,
-                    'projects': Project.objects.all(),
-                    'currencies': Currency.objects.all(),
-                    'years': YEAR.objects.all(),
-                }
-                return render(request, 'PIU_Financial_mgt/activity/add-activity.html', context)  
     else:
         # Using standard forms
-        form = addActivitiesForm()
+        form = addActivitiesForm(initial={
+            'projectID': selected_project_id,
+            'compID': selected_component_id,
+            'subcompID': selected_subcomponent_id,
+        })
     
     # Get all projects, currencies, and years for the dropdowns
     projects = Project.objects.all()
@@ -1497,6 +1521,11 @@ def addactivity(request):
         'projects': projects,
         'currencies': currencies,
         'years': years,
+        'selected_project_id': selected_project_id,
+        'selected_component_id': selected_component_id,
+        'selected_subcomponent_id': selected_subcomponent_id,
+        'project_components': project_components,
+        'component_subcomponents': component_subcomponents,
     }
     return render(request, 'PIU_Financial_mgt/activity/add-activity.html', context)
 
