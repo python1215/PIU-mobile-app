@@ -159,7 +159,7 @@ class addsubcomponentForm(forms.ModelForm):
         empty_label="Select Project..."
     )
     compID = forms.ModelChoiceField(
-        queryset=Component.objects.none(),
+        queryset=Component.objects.all(),  # Show all components initially for offline compatibility
         empty_label="Select Component..."
     )
     
@@ -202,7 +202,7 @@ class addActivitiesForm(forms.ModelForm):
     )
 
     subcompID = forms.ModelChoiceField(
-        queryset=Subcomponent.objects.none(), 
+        queryset=Subcomponent.objects.all(),  # Show all subcomponents initially for offline compatibility
         required=True,
         empty_label="Select Subcomponent..."
     )
