@@ -41,26 +41,26 @@
                                 <tr>
                                     <th>Project</th>
                                     <th>Total Funding</th>
+                                    <th>Disbursement</th>
+                                    <th>Disbursement Rate</th>
+                                    <th>Physical Progress</th>
+                                    <th>Time Elapsed</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
-                                    <th>Disbursement</th>
-                                    <th>Disbursement Rate (%)</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for progress in progress_records %}
                                 <tr>
-                                    <td>{{ progress.project.project_id }} - {{ progress.project.project_name }}</td>
+                                    <td>{{ progress.project.project_id }}</td>
                                     <td>${{ progress.total_funding|floatformat:2 }}</td>
+                                    <td>${{ progress.disbursement|floatformat:2 }}</td>
+                                    <td>{{ progress.over_all_disbursement_rate }}</td>
+                                    <td>{{ progress.over_all_physical_progress }}</td>
+                                    <td>{{ progress.over_project_time_elapsed }}</td>
                                     <td>{{ progress.start_date|date:"M d, Y" }}</td>
                                     <td>{{ progress.end_date|date:"M d, Y" }}</td>
-                                    <td>${{ progress.disbursement|floatformat:2 }}</td>
-                                    <td>
-                                        <span class="badge {% if progress.over_all_disbursement_rate >= 80 %}bg-success{% elif progress.over_all_disbursement_rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
-                                            {{ progress.over_all_disbursement_rate|floatformat:2 }}%
-                                        </span>
-                                    </td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="{% url 'project_progress:update' progress.id %}" class="btn btn-warning" title="Edit">

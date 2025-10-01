@@ -7,6 +7,7 @@ This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluatio
 Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
+- **October 01, 2025**: Added complete Project Progress CRUD system with comprehensive tracking functionality. Implemented ProjectProgress model with fields for total funding, disbursement amounts/rates, physical progress, time elapsed tracking, and project timelines. Created full CRUD operations (Create, Read, Update, Delete) with forms, views, templates, and URL patterns. Added Project Progress navigation card to main dashboard with green theme and graph-up-arrow icon. System now tracks project implementation progress with disbursement rates, physical progress percentages, and time elapsed metrics.
 - **September 01, 2025**: **Completely removed Project Development Objectives (PDO) from NAWEC M&E Management System**. Removed SetupPDO model from setup app, PDO model from PIU_Financial_mgt app, eliminated all PDO foreign key references from monitoring and NAWEC_KPI models, updated all forms and views to function without PDO dependencies, removed PDO navigation links from main dashboard, deleted PDO templates and URL patterns, and updated ProjectOutcome model to work independently without PDO relationships. System now operates as a streamlined M&E platform focused on project outcomes and results without the PDO hierarchy layer.
 - **August 25, 2025**: Enhanced offline deployment user experience for contract lookup functionality. Replaced alarming "AJAX contract lookup failed" prompt with professional Bootstrap modal featuring clear messaging about offline mode, improved form validation, Enter key support, and better visual design. Users now see a user-friendly "Offline Mode - Manual Entry" interface instead of error messages.
 - **August 25, 2025**: Completed project_actions module cleanup for HTMX consistency. Removed duplicate `load_type_of_investments` and `load_kpi_descriptions` functions that returned JSON responses. Both functions now consistently return HTMX partial templates maintaining dropdown functionality without JavaScript changes. Enhanced error handling with fallback logic and updated templates to match proper data structure. Reduced file size from 1840 to ~1200 lines, eliminating all LSP diagnostics errors.
@@ -32,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Form Handling**: Flask-WTF for validation.
 - **File Handling**: Werkzeug for secure uploads.
 - **Session Management**: Flask session.
-- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, SetupPDO, ProjectOutCome, ProjectResult.
+- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, SetupPDO, ProjectOutCome, ProjectResult, ProjectProgress.
 - **Feature Specifications**:
     - **Dashboard**: Real-time analytics and summary cards.
     - **Project Management**: CRUD operations with status tracking.

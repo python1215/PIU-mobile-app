@@ -22,7 +22,9 @@ def project_progress_create(request):
     if request.method == 'POST':
         form = ProjectProgressForm(request.POST)
         if form.is_valid():
-            form.save()
+            progress = form.save(commit=False)
+            progress.loginuser = request.user
+            progress.save()
             messages.success(request, 'Project progress record created successfully!')
             return redirect('project_progress:list')
         else:

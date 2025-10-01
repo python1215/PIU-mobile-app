@@ -72,13 +72,30 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.over_all_disbursement_rate.id_for_label }}" class="form-label">Overall Disbursement Rate (%) *</label>
-                            {{ form.over_all_disbursement_rate }}
-                            <small class="form-text text-muted">Enter value between 0 and 100</small>
-                            {% if form.over_all_disbursement_rate.errors %}
-                                <div class="text-danger">{{ form.over_all_disbursement_rate.errors }}</div>
-                            {% endif %}
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.over_all_disbursement_rate.id_for_label }}" class="form-label">Overall Disbursement Rate (%) *</label>
+                                {{ form.over_all_disbursement_rate }}
+                                {% if form.over_all_disbursement_rate.errors %}
+                                    <div class="text-danger">{{ form.over_all_disbursement_rate.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.over_all_physical_progress.id_for_label }}" class="form-label">Overall Physical Progress (%) *</label>
+                                {{ form.over_all_physical_progress }}
+                                {% if form.over_all_physical_progress.errors %}
+                                    <div class="text-danger">{{ form.over_all_physical_progress.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Project Time Elapsed (%) *</label>
+                                {{ form.over_project_time_elapsed }}
+                                {% if form.over_project_time_elapsed.errors %}
+                                    <div class="text-danger">{{ form.over_project_time_elapsed.errors }}</div>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">
