@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
+from PIU_Financial_mgt.models import Project
 
 
 # Create your models here.
 class ProjectProgress(models.Model):
-  project = models.ForeignKey('PIU_Financial_mgt.Project',
-                              on_delete=models.CASCADE),
+  project = models.ForeignKey(Project, on_delete=models.CASCADE)
   total_funding = models.DecimalField(max_digits=12, decimal_places=2)
   start_date = models.DateField()
   end_date = models.DateField()
