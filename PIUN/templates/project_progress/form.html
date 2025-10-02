@@ -114,4 +114,92 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form fields
+    const totalFundingField = document.getElementById('id_total_funding');
+    const disbursementField = document.getElementById('id_disbursement');
+    const startDateField = document.getElementById('id_start_date');
+    const endDateField = document.getElementById('id_end_date');
+    const disbursementRateField = document.getElementById('id_over_all_disbursement_rate');
+    const timeElapsedField = document.getElementById('id_over_project_time_elapsed');
+
+    // Calculate disbursement rate
+    function calculateDisbursementRate() {
+        const totalFunding = parseFloat(totalFundingField.value);
+        const disbursement = parseFloat(disbursementField.value);
+        
+        if (totalFunding && disbursement && totalFunding > 0) {
+            const rate = (disbursement / totalFunding * 100).toFixed(2);
+            disbursementRateField.value = rate + '%';
+        } else {
+            disbursementRateField.value = '';
+        }
+    }
+
+    // Calculate time elapsed in years, months, and days
+    function calculateTimeElapsed() {
+        const startDate = startDateField.value;
+        const endDate = endDateField.value;
+        
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (end >= start) {
+                let years = end.getFullYear() - start.getFullYear();
+                let months = end.getMonth() - start.getMonth();
+                let days = end.getDate() - start.getDate();
+                
+                // Adjust for negative days
+                if (days < 0) {
+                    months--;
+                    const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+                
+                // Adjust for negative months
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                
+                // Build the display string
+                const parts = [];
+                if (years > 0) {
+                    parts.push(years + (years === 1 ? ' year' : ' years'));
+                }
+                if (months > 0) {
+                    parts.push(months + (months === 1 ? ' month' : ' months'));
+                }
+                if (days > 0 || parts.length === 0) {
+                    parts.push(days + (days === 1 ? ' day' : ' days'));
+                }
+                
+                timeElapsedField.value = parts.join(' and ');
+            } else {
+                timeElapsedField.value = 'End date must be after start date';
+            }
+        } else {
+            timeElapsedField.value = '';
+        }
+    }
+
+    // Add event listeners
+    if (totalFundingField && disbursementField && disbursementRateField) {
+        totalFundingField.addEventListener('input', calculateDisbursementRate);
+        disbursementField.addEventListener('input', calculateDisbursementRate);
+        // Calculate on page load if values exist
+        calculateDisbursementRate();
+    }
+
+    if (startDateField && endDateField && timeElapsedField) {
+        startDateField.addEventListener('change', calculateTimeElapsed);
+        endDateField.addEventListener('change', calculateTimeElapsed);
+        // Calculate on page load if values exist
+        calculateTimeElapsed();
+    }
+});
+</script>
 {% endblock %}
