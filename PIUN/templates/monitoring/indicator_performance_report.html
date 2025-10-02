@@ -49,15 +49,15 @@
                 <div class="card-body">
                     {% if report_data %}
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered">
+                            <table class="table table-hover table-bordered align-middle">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>Project</th>
-                                        <th>Type of Indicator</th>
-                                        <th>Status</th>
-                                        <th class="text-center">Count</th>
-                                        <th class="text-end">Total Achieved</th>
-                                        <th class="text-end">Avg Percentage (%)</th>
+                                        <th class="text-center" style="width: 25%;">Project</th>
+                                        <th class="text-center" style="width: 20%;">Type of Indicator</th>
+                                        <th class="text-center" style="width: 15%;">Status</th>
+                                        <th class="text-center" style="width: 10%;">Count</th>
+                                        <th class="text-center" style="width: 15%;">Total Achieved</th>
+                                        <th class="text-center" style="width: 15%;">Avg Percentage (%)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -66,38 +66,26 @@
                                             {% for status, status_data in data.status_breakdown.items %}
                                                 <tr>
                                                     {% if forloop.first and forloop.parentloop.first %}
-                                                        <td class="align-middle fw-bold">
-                                                            {{ project }}
-                                                        </td>
-                                                    {% elif forloop.first %}
-                                                        <td class="align-middle fw-bold">
-                                                            {{ project }}
-                                                        </td>
-                                                    {% else %}
-                                                        <td class="align-middle fw-bold">
+                                                        <td class="fw-bold bg-light" rowspan="{% widthratio indicator_types.values|length 1 1 %}">
                                                             {{ project }}
                                                         </td>
                                                     {% endif %}
                                                     
                                                     {% if forloop.first %}
-                                                        <td class="align-middle">
-                                                            {{ indicator_type }}
-                                                        </td>
-                                                    {% else %}
-                                                        <td class="align-middle">
+                                                        <td rowspan="{{ data.status_breakdown.items|length }}">
                                                             {{ indicator_type }}
                                                         </td>
                                                     {% endif %}
                                                     
-                                                    <td>
+                                                    <td class="text-center">
                                                         {% if status == 'On Track' %}
-                                                            <span class="badge bg-success">{{ status }}</span>
+                                                            <span class="badge bg-success w-100">{{ status }}</span>
                                                         {% elif status == 'Needs Attention' %}
-                                                            <span class="badge bg-warning text-dark">{{ status }}</span>
+                                                            <span class="badge bg-warning text-dark w-100">{{ status }}</span>
                                                         {% elif status == 'Off Track' %}
-                                                            <span class="badge bg-danger">{{ status }}</span>
+                                                            <span class="badge bg-danger w-100">{{ status }}</span>
                                                         {% else %}
-                                                            <span class="badge bg-secondary">{{ status }}</span>
+                                                            <span class="badge bg-secondary w-100">{{ status }}</span>
                                                         {% endif %}
                                                     </td>
                                                     <td class="text-center">{{ status_data.count }}</td>
@@ -107,9 +95,9 @@
                                             {% endfor %}
                                             
                                             <!-- Subtotal row for each indicator type -->
-                                            <tr class="table-light fw-bold">
+                                            <tr class="table-primary fw-bold border-top border-dark">
                                                 <td colspan="3" class="text-end">
-                                                    <strong>{{ indicator_type }} Totals:</strong>
+                                                    <i class="bi bi-calculator me-2"></i>{{ indicator_type }} - Subtotal
                                                 </td>
                                                 <td class="text-center">{{ data.total_count }}</td>
                                                 <td class="text-end">{{ data.total_achieved|floatformat:2 }}</td>
