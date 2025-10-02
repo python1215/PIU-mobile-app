@@ -38,4 +38,7 @@ urlpatterns = [
     path('load-monitoring-types/', views.load_monitoring_types, name='load_monitoring_types'),
     path('load-investment-types/', views.load_investment_types_cascade, name='load_investment_types'),
     path('load-kpi-descriptions/', views.load_kpi_descriptions_cascade, name='load_kpi_descriptions'),
+    
+    # Reports
+    path('indicator-performance-report/', views.indicator_performance_report, name='indicator-performance-report'),
 ]
