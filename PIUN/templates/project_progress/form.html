@@ -82,7 +82,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.over_all_disbursement_rate.id_for_label }}" class="form-label">Disbursement Rate (%) <span class="badge bg-info">Auto-calculated</span></label>
+                                <label for="{{ form.over_all_disbursement_rate.id_for_label }}" class="form-label">Disbursement Rate (%)</label>
                                 {{ form.over_all_disbursement_rate }}
                                 {% if form.over_all_disbursement_rate.errors %}
                                     <div class="text-danger">{{ form.over_all_disbursement_rate.errors }}</div>
@@ -92,7 +92,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Time Elapsed <span class="badge bg-info">Auto-calculated</span></label>
+                            <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Time Elapsed</label>
                             {{ form.over_project_time_elapsed }}
                             {% if form.over_project_time_elapsed.errors %}
                                 <div class="text-danger">{{ form.over_project_time_elapsed.errors }}</div>
