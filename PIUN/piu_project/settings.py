@@ -39,6 +39,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.replit.app',
     'https://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev',
+    'https://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev:5000',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
     'http://0.0.0.0:5000',
