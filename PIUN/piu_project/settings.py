@@ -31,6 +31,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Allow app to be displayed in Replit preview iframe
+X_FRAME_OPTIONS = 'ALLOWALL'
+
 # CSRF trusted origins for Replit and local development
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
