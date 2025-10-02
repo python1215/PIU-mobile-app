@@ -53,7 +53,7 @@
                             <tbody>
                                 {% for progress in progress_records %}
                                 <tr>
-                                    <td>{{ progress.project.project_id }}</td>
+                                    <td>{{ project.project.project_id }}</td>
                                     <td>${{ progress.total_funding|floatformat:2 }}</td>
                                     <td>${{ progress.disbursement|floatformat:2 }}</td>
                                     <td>{{ progress.over_all_disbursement_rate }}</td>
