@@ -1030,3 +1030,94 @@ def cascade_filtering_results(request):
     }
     
     return render(request, 'monitoring/cascade_filtering_results.html', context)
+
+
+@login_required
+def indicator_performance_report(request):
+    """
+    Indicator Performance Report showing aggregated metrics by project, indicator type, and status.
+    
+    Columns: Project, Type of Indicator, Count, Total Achieved, Percentage Achieved (grouped by status)
+    Status: On Track (≥80%), Needs Attention (50-79%), Off Track (<50%), No Data (null)
+    """
+    from django.db.models import Count, Sum, Avg, Case, When, FloatField, Q, F, Value, CharField
+    from django.db.models.functions import Coalesce
+    
+    # Define status classification using Case/When
+    status_annotation = Case(
+        When(percentage_achieved_vs_end_target__isnull=True, then=Value('No Data')),
+        When(percentage_achieved_vs_end_target__gte=80, then=Value('On Track')),
+        When(percentage_achieved_vs_end_target__gte=50, then=Value('Needs Attention')),
+        When(percentage_achieved_vs_end_target__lt=50, then=Value('Off Track')),
+        default=Value('No Data'),
+        output_field=CharField()
+    )
+    
+    # Aggregate data by project, indicator type, and status
+    aggregated_data = Results_Oriented_Monitoring.objects.annotate(
+        status=status_annotation
+    ).values(
+        'project__project',
+        'project__projectID', 
+        'indicator_type__indicator_type',
+        'status'
+    ).annotate(
+        count=Count('id'),
+        total_achieved=Sum('achieved_value', filter=Q(achieved_value__isnull=False)),
+        avg_percentage=Avg('percentage_achieved_vs_end_target', filter=Q(percentage_achieved_vs_end_target__isnull=False))
+    ).order_by('project__project', 'indicator_type__indicator_type', 'status')
+    
+    # Structure data for template - group by project and indicator type
+    report_data = {}
+    for row in aggregated_data:
+        project_key = row['project__project']
+        indicator_type = row['indicator_type__indicator_type']
+        status = row['status']
+        
+        if project_key not in report_data:
+            report_data[project_key] = {}
+        
+        if indicator_type not in report_data[project_key]:
+            report_data[project_key][indicator_type] = {
+                'status_breakdown': {},
+                'total_count': 0,
+                'total_achieved': 0,
+                'overall_avg_percentage': 0
+            }
+        
+        # Add status-specific data
+        report_data[project_key][indicator_type]['status_breakdown'][status] = {
+            'count': row['count'],
+            'total_achieved': row['total_achieved'] or 0,
+            'avg_percentage': round(row['avg_percentage'], 2) if row['avg_percentage'] else 0
+        }
+        
+        # Accumulate totals
+        report_data[project_key][indicator_type]['total_count'] += row['count']
+        if row['total_achieved']:
+            report_data[project_key][indicator_type]['total_achieved'] += row['total_achieved']
+    
+    # Calculate overall average percentages for each project/indicator type
+    for project in report_data:
+        for indicator_type in report_data[project]:
+            status_breakdown = report_data[project][indicator_type]['status_breakdown']
+            total_count = report_data[project][indicator_type]['total_count']
+            
+            # Calculate weighted average percentage
+            total_weighted = 0
+            count_with_percentage = 0
+            for status, data in status_breakdown.items():
+                if data['avg_percentage'] > 0:
+                    total_weighted += data['avg_percentage'] * data['count']
+                    count_with_percentage += data['count']
+            
+            if count_with_percentage > 0:
+                report_data[project][indicator_type]['overall_avg_percentage'] = round(total_weighted / count_with_percentage, 2)
+    
+    context = {
+        'page_title': 'Indicator Performance Report',
+        'report_data': report_data,
+        'status_order': ['On Track', 'Needs Attention', 'Off Track', 'No Data']
+    }
+    
+    return render(request, 'monitoring/indicator_performance_report.html', context)
