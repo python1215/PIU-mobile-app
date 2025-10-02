@@ -10,6 +10,10 @@ def project_progress_list(request):
     """List all project progress records"""
     progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')
     
+    # Debug: Print project info
+    for record in progress_records:
+        print(f"DEBUG: Record ID={record.id}, Project={record.project}, Project.project={record.project.project if record.project else 'None'}")
+    
     context = {
         'progress_records': progress_records,
     }
