@@ -72,31 +72,26 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.over_all_disbursement_rate.id_for_label }}" class="form-label">Overall Disbursement Rate (%) *</label>
-                                {{ form.over_all_disbursement_rate }}
-                                {% if form.over_all_disbursement_rate.errors %}
-                                    <div class="text-danger">{{ form.over_all_disbursement_rate.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.over_all_physical_progress.id_for_label }}" class="form-label">Overall Physical Progress (%) *</label>
-                                {{ form.over_all_physical_progress }}
-                                {% if form.over_all_physical_progress.errors %}
-                                    <div class="text-danger">{{ form.over_all_physical_progress.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Project Time Elapsed (%) *</label>
-                                {{ form.over_project_time_elapsed }}
-                                {% if form.over_project_time_elapsed.errors %}
-                                    <div class="text-danger">{{ form.over_project_time_elapsed.errors }}</div>
-                                {% endif %}
-                            </div>
+                        <div class="mb-3">
+                            <label for="{{ form.over_all_physical_progress.id_for_label }}" class="form-label">Overall Physical Progress (%) *</label>
+                            {{ form.over_all_physical_progress }}
+                            {% if form.over_all_physical_progress.errors %}
+                                <div class="text-danger">{{ form.over_all_physical_progress.errors }}</div>
+                            {% endif %}
                         </div>
+
+                        {% if is_edit %}
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Auto-Calculated Values:</h6>
+                            <p class="mb-1"><strong>Disbursement Rate:</strong> {{ progress.over_all_disbursement_rate }}</p>
+                            <p class="mb-0"><strong>Time Elapsed:</strong> {{ progress.over_project_time_elapsed }}</p>
+                            <small class="text-muted">These values are automatically calculated based on the funding and dates.</small>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <small class="text-muted"><i class="bi bi-info-circle"></i> Disbursement Rate and Time Elapsed will be automatically calculated after saving.</small>
+                        </div>
+                        {% endif %}
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-success">
