@@ -16,7 +16,15 @@
                     </h2>
                     <p class="text-muted mb-0">Aggregated Metrics by Project, Indicator Type & Status</p>
                 </div>
-                <div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'monitoring:export-indicator-performance-excel' %}{% if selected_project or selected_indicator_type %}?{% if selected_project %}project={{ selected_project }}{% endif %}{% if selected_project and selected_indicator_type %}&{% endif %}{% if selected_indicator_type %}indicator_type={{ selected_indicator_type }}{% endif %}{% endif %}" 
+                       class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                    </a>
+                    <a href="{% url 'monitoring:export-indicator-performance-pdf' %}{% if selected_project or selected_indicator_type %}?{% if selected_project %}project={{ selected_project }}{% endif %}{% if selected_project and selected_indicator_type %}&{% endif %}{% if selected_indicator_type %}indicator_type={{ selected_indicator_type }}{% endif %}{% endif %}" 
+                       class="btn btn-danger">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                    </a>
                     <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
                     </a>

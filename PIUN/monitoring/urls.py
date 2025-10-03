@@ -41,4 +41,6 @@ urlpatterns = [
     
     # Reports
     path('indicator-performance-report/', views.indicator_performance_report, name='indicator-performance-report'),
+    path('export-indicator-performance-excel/', views.export_indicator_performance_excel, name='export-indicator-performance-excel'),
+    path('export-indicator-performance-pdf/', views.export_indicator_performance_pdf, name='export-indicator-performance-pdf'),
 ]

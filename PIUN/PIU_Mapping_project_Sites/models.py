@@ -13,6 +13,8 @@ class projectMapping(models.Model):
     Total_No_of_Households = models.IntegerField()
     no_of_connected_household = models.IntegerField(null=True)
     no_of_customer_connections = models.IntegerField(null=True)
+    female_households = models.IntegerField(null=True)
+    male_households = models.IntegerField(null=True)
     Latitude = models.FloatField()
     Longitude = models.FloatField()
     access = models.ForeignKey(Access, on_delete=models.CASCADE, related_name='site_mappings')
