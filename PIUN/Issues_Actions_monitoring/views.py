@@ -130,6 +130,8 @@ def issues_list(request):
             issues = issues.filter(year=filter_form.cleaned_data['year'])
         if filter_form.cleaned_data['quarter']:
             issues = issues.filter(quarter=filter_form.cleaned_data['quarter'])
+        if filter_form.cleaned_data.get('issue_action_type'):
+            issues = issues.filter(issue_action_type=filter_form.cleaned_data['issue_action_type'])
         if filter_form.cleaned_data['status']:
             issues = issues.filter(status=filter_form.cleaned_data['status'])
         if filter_form.cleaned_data['priority']:
@@ -288,6 +290,8 @@ def export_issues_excel(request):
             issues = issues.filter(year=filter_form.cleaned_data['year'])
         if filter_form.cleaned_data['quarter']:
             issues = issues.filter(quarter=filter_form.cleaned_data['quarter'])
+        if filter_form.cleaned_data.get('issue_action_type'):
+            issues = issues.filter(issue_action_type=filter_form.cleaned_data['issue_action_type'])
         if filter_form.cleaned_data['status']:
             issues = issues.filter(status=filter_form.cleaned_data['status'])
         if filter_form.cleaned_data['priority']:
@@ -400,6 +404,8 @@ def export_issues_word(request):
             issues = issues.filter(year=filter_form.cleaned_data['year'])
         if filter_form.cleaned_data['quarter']:
             issues = issues.filter(quarter=filter_form.cleaned_data['quarter'])
+        if filter_form.cleaned_data.get('issue_action_type'):
+            issues = issues.filter(issue_action_type=filter_form.cleaned_data['issue_action_type'])
         if filter_form.cleaned_data['status']:
             issues = issues.filter(status=filter_form.cleaned_data['status'])
         if filter_form.cleaned_data['priority']:

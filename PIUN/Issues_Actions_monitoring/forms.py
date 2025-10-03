@@ -121,6 +121,13 @@ class IssueActionsFilterForm(forms.Form):
         empty_label="All Quarters",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    issue_action_type = forms.ModelChoiceField(
+        queryset=Type_of_Monitoring.objects.all(),
+        required=False,
+        empty_label="All Types",
+        label="Issue/Action Type",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     status = forms.ChoiceField(
         choices=[('', 'All Status')] + IssueActions._meta.get_field('status').choices,
         required=False,
