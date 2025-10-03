@@ -154,16 +154,6 @@
                                                     </td>
                                                 </tr>
                                             {% endfor %}
-                                            
-                                            <!-- Subtotal row for each indicator type -->
-                                            <tr class="table-info fw-bold">
-                                                <td colspan="3" class="text-end">
-                                                    <i class="bi bi-calculator me-2"></i>{{ indicator_type }} - Subtotal
-                                                </td>
-                                                <td class="text-center">{{ data.total_count }}</td>
-                                                <td class="text-end">{{ data.total_achieved|floatformat:2|default:"0.00" }}</td>
-                                                <td class="text-end">{{ data.overall_avg_percentage|floatformat:2|default:"0.00" }}%</td>
-                                            </tr>
                                         {% endfor %}
                                     {% endfor %}
                                 </tbody>
