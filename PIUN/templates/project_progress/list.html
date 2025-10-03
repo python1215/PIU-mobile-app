@@ -63,6 +63,9 @@
                                     <td>{{ progress.end_date|date:"M d, Y" }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'project_progress:detail' progress.id %}" class="btn btn-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
                                             <a href="{% url 'project_progress:update' progress.id %}" class="btn btn-warning" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>

@@ -64,6 +64,17 @@ def project_progress_update(request, pk):
 
 
 @login_required
+def project_progress_detail(request, pk):
+    """View detailed information for a project progress record"""
+    progress = get_object_or_404(ProjectProgress, pk=pk)
+    
+    context = {
+        'progress': progress,
+    }
+    return render(request, 'project_progress/detail.html', context)
+
+
+@login_required
 def project_progress_delete(request, pk):
     """Delete project progress record"""
     progress = get_object_or_404(ProjectProgress, pk=pk)

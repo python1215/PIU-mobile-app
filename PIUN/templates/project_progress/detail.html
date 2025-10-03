@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Project Progress Details - PIU M&E System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Project Progress Details
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'project_progress:update' progress.id %}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'project_progress:list' %}" class="btn btn-light btn-sm">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Project Information Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-folder-fill text-primary"></i> Project Information
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Project Name</label>
+                            <p class="fw-bold">{{ progress.project }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">Start Date</label>
+                            <p class="fw-bold">{{ progress.start_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">End Date</label>
+                            <p class="fw-bold">{{ progress.end_date|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Financial Information Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-currency-dollar text-success"></i> Financial Information
+                            </h5>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Total Funding</label>
+                                    <h4 class="text-success mb-0">${{ progress.total_funding|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Total Disbursement</label>
+                                    <h4 class="text-info mb-0">${{ progress.disbursement|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Disbursement Rate</label>
+                                    <h4 class="text-primary mb-0">{{ progress.over_all_disbursement_rate }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Metrics Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-speedometer text-warning"></i> Progress Metrics
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Physical Progress</label>
+                                    <h4 class="text-warning mb-0">{{ progress.over_all_physical_progress }}</h4>
+                                    <div class="progress mt-2" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                             style="width: {{ progress.over_all_physical_progress|cut:'%' }}%;" 
+                                             aria-valuenow="{{ progress.over_all_physical_progress|cut:'%' }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                            {{ progress.over_all_physical_progress }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Time Elapsed</label>
+                                    <h4 class="text-secondary mb-0">{{ progress.over_project_time_elapsed }}</h4>
+                                    <p class="text-muted small mb-0 mt-2">
+                                        <i class="bi bi-calendar-range"></i> 
+                                        From {{ progress.start_date|date:"M d, Y" }} to {{ progress.end_date|date:"M d, Y" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remarks Section -->
+                    {% if progress.remarks %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-chat-left-text text-secondary"></i> Remarks
+                            </h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p class="mb-0">{{ progress.remarks }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Metadata Section -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-info-square text-muted"></i> Record Information
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Created By</label>
+                            <p class="mb-0">{{ progress.loginuser.username|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Last Updated</label>
+                            <p class="mb-0">{{ progress.date_updated|date:"F d, Y - g:i A"|default:"N/A" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="{% url 'project_progress:update' progress.id %}" class="btn btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit Progress
+                                </a>
+                                <a href="{% url 'project_progress:delete' progress.id %}" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                                <a href="{% url 'project_progress:list' %}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
