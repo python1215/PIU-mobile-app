@@ -114,6 +114,27 @@
                         </div>
 
                         <div class="row">
+                            <!-- Gender-Disaggregated Household Data -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.female_households.id_for_label }}" class="form-label">Female Households</label>
+                                {{ form.female_households|add_class:"form-control" }}
+                                {% if form.female_households.errors %}
+                                    <div class="text-danger small">{{ form.female_households.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Number of female-headed households</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.male_households.id_for_label }}" class="form-label">Male Households</label>
+                                {{ form.male_households|add_class:"form-control" }}
+                                {% if form.male_households.errors %}
+                                    <div class="text-danger small">{{ form.male_households.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Number of male-headed households</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <!-- Coordinates -->
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.Latitude.id_for_label }}" class="form-label">Latitude</label>
