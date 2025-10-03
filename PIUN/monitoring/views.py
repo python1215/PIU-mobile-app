@@ -1083,7 +1083,7 @@ def indicator_performance_report(request):
         'status'
     ).annotate(
         count=Count('id'),
-        total_achieved=Sum('achieved_value', filter=Q(achieved_value__isnull=False)),
+        total_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
         avg_percentage=Avg('percentage_achieved_vs_end_target', filter=Q(percentage_achieved_vs_end_target__isnull=False))
     ).order_by('project__project', 'indicator_type__indicator_type', 'status')
     
