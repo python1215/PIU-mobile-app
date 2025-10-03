@@ -478,13 +478,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Household validation function
     function validateHouseholdData() {
-        const femaleHouseholds = parseInt(document.getElementById('id_female_households').value) || 0;
-        const maleHouseholds = parseInt(document.getElementById('id_male_households').value) || 0;
-        const customerConnections = parseInt(document.getElementById('id_no_of_customer_connections').value) || 0;
+        const femaleInput = document.getElementById('id_female_households').value.trim();
+        const maleInput = document.getElementById('id_male_households').value.trim();
+        const connectionsInput = document.getElementById('id_no_of_customer_connections').value.trim();
         
+        // Parse values
+        const femaleHouseholds = femaleInput !== '' ? parseInt(femaleInput) : 0;
+        const maleHouseholds = maleInput !== '' ? parseInt(maleInput) : 0;
+        const customerConnections = connectionsInput !== '' ? parseInt(connectionsInput) : 0;
+        
+        // Calculate total
         const totalGenderHouseholds = femaleHouseholds + maleHouseholds;
         
-        if (totalGenderHouseholds > customerConnections) {
+        // Only validate if at least one gender household value is entered
+        if ((femaleHouseholds > 0 || maleHouseholds > 0) && totalGenderHouseholds > customerConnections) {
             // Show warning modal
             showValidationWarning(femaleHouseholds, maleHouseholds, totalGenderHouseholds, customerConnections);
             return false;
