@@ -570,18 +570,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Attach validation to form submission
+    // Handle form submission with validation
     document.getElementById('mappingForm').addEventListener('submit', function(e) {
+        // Always validate first, regardless of popup mode
         if (!validateHouseholdData()) {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }
-    });
-
-    // Handle form submission for popup mode
-    {% if from_popup %}
-    document.getElementById('mappingForm').addEventListener('submit', function(e) {
+        
+        // Handle form submission for popup mode
+        {% if from_popup %}
         e.preventDefault();
         
         const formData = new FormData(this);
@@ -626,8 +625,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Fallback submission
             this.submit();
         });
+        {% endif %}
     });
-    {% endif %}
 });
 
 // Function to close popup form
