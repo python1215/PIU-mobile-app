@@ -1105,11 +1105,16 @@ def indicator_performance_report(request):
                 'overall_avg_percentage': 0
             }
         
+        # Calculate avg_percentage as (indicators_achieved / count) * 100
+        count = row['count']
+        indicators_achieved = row['total_achieved'] or 0
+        avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
+        
         # Add status-specific data
         report_data[project_key][indicator_type]['status_breakdown'][status] = {
-            'count': row['count'],
-            'total_achieved': row['total_achieved'] or 0,
-            'avg_percentage': round(row['avg_percentage'], 2) if row['avg_percentage'] else 0
+            'count': count,
+            'total_achieved': indicators_achieved,
+            'avg_percentage': avg_percentage
         }
         
         # Accumulate totals
