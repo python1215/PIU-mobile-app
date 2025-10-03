@@ -31,7 +31,7 @@ class MappingForm(forms.ModelForm):
 
     class Meta:
         model = projectMapping
-        fields = ['profile_year', 'region', 'district', 'settlement', 'Total_No_of_Households', 'no_of_customer_connections', 'no_of_connected_household', 'Latitude', 'Longitude', 'project', 'donor', 'access']
+        fields = ['profile_year', 'region', 'district', 'settlement', 'Total_No_of_Households', 'no_of_customer_connections', 'no_of_connected_household', 'female_households', 'male_households', 'Latitude', 'Longitude', 'project', 'donor', 'access']
         widgets = {
             'Date_Created': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
