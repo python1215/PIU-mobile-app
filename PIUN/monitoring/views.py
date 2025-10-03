@@ -1150,3 +1150,232 @@ def indicator_performance_report(request):
     }
     
     return render(request, 'monitoring/indicator_performance_report.html', context)
+
+
+@login_required
+def export_indicator_performance_excel(request):
+    """Export Indicator Performance Report to Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from django.db.models import Count, Sum, Case, When, Q, Value, CharField
+    from PIU_Financial_mgt.models import Project
+    from setup.models import Indicator_Type
+    
+    # Get filter parameters
+    selected_project = request.GET.get('project', '')
+    selected_indicator_type = request.GET.get('indicator_type', '')
+    
+    # Start with base queryset
+    queryset = Results_Oriented_Monitoring.objects.all()
+    
+    # Apply filters if selected
+    if selected_project:
+        queryset = queryset.filter(project__projectID=selected_project)
+    
+    if selected_indicator_type:
+        queryset = queryset.filter(indicator_type__id=selected_indicator_type)
+    
+    # Define status classification
+    status_annotation = Case(
+        When(percentage_achieved_vs_end_target__isnull=True, then=Value('No Data')),
+        When(percentage_achieved_vs_end_target__gte=80, then=Value('On Track')),
+        When(percentage_achieved_vs_end_target__gte=50, then=Value('Needs Attention')),
+        When(percentage_achieved_vs_end_target__lt=50, then=Value('Off Track')),
+        default=Value('No Data'),
+        output_field=CharField()
+    )
+    
+    # Aggregate data
+    aggregated_data = queryset.annotate(
+        status=status_annotation
+    ).values(
+        'project__project',
+        'indicator_type__indicator_type',
+        'status'
+    ).annotate(
+        count=Count('id'),
+        total_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100))
+    ).order_by('project__project', 'indicator_type__indicator_type', 'status')
+    
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Indicator Performance"
+    
+    # Styles
+    header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = ['Project', 'Type of Indicator', 'Status', 'Total Planned by Type of Indicator', 'Total Achieved by Type of Indicator', '% Achieved']
+    ws.append(headers)
+    
+    # Style headers
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        cell.border = border
+    
+    # Add data
+    for row_data in aggregated_data:
+        count = row_data['count']
+        indicators_achieved = row_data['total_achieved'] or 0
+        avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
+        
+        ws.append([
+            row_data['project__project'],
+            row_data['indicator_type__indicator_type'],
+            row_data['status'],
+            count,
+            indicators_achieved,
+            f"{avg_percentage}%"
+        ])
+    
+    # Style data rows
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        for cell in row:
+            cell.border = border
+            cell.alignment = Alignment(horizontal='left' if cell.column < 3 else 'center', vertical='center')
+    
+    # Adjust column widths
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 18
+    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['E'].width = 20
+    ws.column_dimensions['F'].width = 15
+    
+    # Create response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    response['Content-Disposition'] = f'attachment; filename=Indicator_Performance_Report_{timestamp}.xlsx'
+    
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_indicator_performance_pdf(request):
+    """Export Indicator Performance Report to PDF"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from django.db.models import Count, Sum, Case, When, Q, Value, CharField
+    from PIU_Financial_mgt.models import Project
+    from setup.models import Indicator_Type
+    import io
+    
+    # Get filter parameters
+    selected_project = request.GET.get('project', '')
+    selected_indicator_type = request.GET.get('indicator_type', '')
+    
+    # Start with base queryset
+    queryset = Results_Oriented_Monitoring.objects.all()
+    
+    # Apply filters if selected
+    if selected_project:
+        queryset = queryset.filter(project__projectID=selected_project)
+    
+    if selected_indicator_type:
+        queryset = queryset.filter(indicator_type__id=selected_indicator_type)
+    
+    # Define status classification
+    status_annotation = Case(
+        When(percentage_achieved_vs_end_target__isnull=True, then=Value('No Data')),
+        When(percentage_achieved_vs_end_target__gte=80, then=Value('On Track')),
+        When(percentage_achieved_vs_end_target__gte=50, then=Value('Needs Attention')),
+        When(percentage_achieved_vs_end_target__lt=50, then=Value('Off Track')),
+        default=Value('No Data'),
+        output_field=CharField()
+    )
+    
+    # Aggregate data
+    aggregated_data = queryset.annotate(
+        status=status_annotation
+    ).values(
+        'project__project',
+        'indicator_type__indicator_type',
+        'status'
+    ).annotate(
+        count=Count('id'),
+        total_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100))
+    ).order_by('project__project', 'indicator_type__indicator_type', 'status')
+    
+    # Create PDF buffer
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), topMargin=0.5*inch, bottomMargin=0.5*inch)
+    
+    # Container for PDF elements
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title = Paragraph("<b>Indicator Performance Report</b>", styles['Title'])
+    elements.append(title)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Timestamp
+    timestamp_text = Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", styles['Normal'])
+    elements.append(timestamp_text)
+    elements.append(Spacer(1, 0.2*inch))
+    
+    # Table data
+    table_data = [['Project', 'Type of Indicator', 'Status', 'Total Planned', 'Total Achieved', '% Achieved']]
+    
+    for row_data in aggregated_data:
+        count = row_data['count']
+        indicators_achieved = row_data['total_achieved'] or 0
+        avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
+        
+        table_data.append([
+            row_data['project__project'][:35],
+            row_data['indicator_type__indicator_type'],
+            row_data['status'],
+            str(count),
+            str(indicators_achieved),
+            f"{avg_percentage}%"
+        ])
+    
+    # Create table
+    table = Table(table_data, colWidths=[2.5*inch, 1.8*inch, 1.2*inch, 1.0*inch, 1.0*inch, 0.8*inch])
+    
+    # Table style
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1F4E78')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F0F0')]),
+    ]))
+    
+    elements.append(table)
+    
+    # Build PDF
+    doc.build(elements)
+    
+    # Get PDF from buffer
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    response['Content-Disposition'] = f'attachment; filename=Indicator_Performance_Report_{timestamp}.pdf'
+    response.write(pdf)
+    
+    return response
