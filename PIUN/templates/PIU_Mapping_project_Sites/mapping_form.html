@@ -476,6 +476,109 @@ document.addEventListener('DOMContentLoaded', function() {
         getCurrentLocation();
     };
 
+    // Household validation function
+    function validateHouseholdData() {
+        const femaleHouseholds = parseInt(document.getElementById('id_female_households').value) || 0;
+        const maleHouseholds = parseInt(document.getElementById('id_male_households').value) || 0;
+        const customerConnections = parseInt(document.getElementById('id_no_of_customer_connections').value) || 0;
+        
+        const totalGenderHouseholds = femaleHouseholds + maleHouseholds;
+        
+        if (totalGenderHouseholds > customerConnections) {
+            // Show warning modal
+            showValidationWarning(femaleHouseholds, maleHouseholds, totalGenderHouseholds, customerConnections);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Show validation warning modal
+    function showValidationWarning(female, male, total, connections) {
+        const modalHtml = `
+            <div class="modal fade" id="householdValidationModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-warning">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Household Data Validation Warning
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning mb-3">
+                                <strong>Invalid Data Entry Detected</strong>
+                            </div>
+                            <p class="mb-3">The sum of Female and Male Households <strong>cannot exceed</strong> the number of Customer Connections.</p>
+                            
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-danger mb-3">Current Values:</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="bi bi-gender-female text-danger me-2"></i>
+                                            <strong>Female Households:</strong> ${female}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="bi bi-gender-male text-primary me-2"></i>
+                                            <strong>Male Households:</strong> ${male}
+                                        </li>
+                                        <li class="mb-2 pb-2 border-bottom">
+                                            <i class="bi bi-plus-circle me-2"></i>
+                                            <strong>Total (Female + Male):</strong> <span class="text-danger fw-bold">${total}</span>
+                                        </li>
+                                        <li class="mb-0 mt-2">
+                                            <i class="bi bi-plug text-success me-2"></i>
+                                            <strong>Customer Connections:</strong> <span class="text-success fw-bold">${connections}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small>Please adjust the Female Households and/or Male Households values so their sum does not exceed ${connections}.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                <i class="bi bi-pencil me-1"></i>Correct Values
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('householdValidationModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to document
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('householdValidationModal'));
+        modal.show();
+        
+        // Focus on female households field when modal is closed
+        document.getElementById('householdValidationModal').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('id_female_households').focus();
+        });
+    }
+    
+    // Attach validation to form submission
+    document.getElementById('mappingForm').addEventListener('submit', function(e) {
+        if (!validateHouseholdData()) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+
     // Handle form submission for popup mode
     {% if from_popup %}
     document.getElementById('mappingForm').addEventListener('submit', function(e) {
