@@ -339,10 +339,23 @@ def mapping_detail(request, pk):
     """Detail view of a specific project mapping"""
     mapping = get_object_or_404(projectMapping, pk=pk)
     
+    # Calculate percentages
+    total_households = mapping.Total_No_of_Households or 1  # Avoid division by zero
+    access_rate = round((mapping.no_of_connected_household / total_households * 100) if mapping.no_of_connected_household else 0, 1)
+    customer_connection_rate = round((mapping.no_of_customer_connections / total_households * 100) if mapping.no_of_customer_connections else 0, 1)
+    
+    # Calculate male and female household percentages
+    female_percentage = round((mapping.female_households / total_households * 100) if mapping.female_households else 0, 1)
+    male_percentage = round((mapping.male_households / total_households * 100) if mapping.male_households else 0, 1)
+    
     context = {
         'mapping': mapping,
         'projects': [mapping.project] if mapping.project else [],
         'donors': mapping.donor.all(),
+        'access_rate': access_rate,
+        'customer_connection_rate': customer_connection_rate,
+        'female_percentage': female_percentage,
+        'male_percentage': male_percentage,
     }
     
     return render(request, 'PIU_Mapping_project_Sites/mapping_detail.html', context)
