@@ -1042,6 +1042,26 @@ def indicator_performance_report(request):
     """
     from django.db.models import Count, Sum, Avg, Case, When, FloatField, Q, F, Value, CharField
     from django.db.models.functions import Coalesce
+    from PIU_Financial_mgt.models import Project
+    from setup.models import Indicator_Type
+    
+    # Get filter parameters
+    selected_project = request.GET.get('project', '')
+    selected_indicator_type = request.GET.get('indicator_type', '')
+    
+    # Get all projects and indicator types for filter dropdowns
+    projects = Project.objects.all().order_by('project')
+    indicator_types = Indicator_Type.objects.all().order_by('indicator_type')
+    
+    # Start with base queryset
+    queryset = Results_Oriented_Monitoring.objects.all()
+    
+    # Apply filters if selected
+    if selected_project:
+        queryset = queryset.filter(project__projectID=selected_project)
+    
+    if selected_indicator_type:
+        queryset = queryset.filter(indicator_type__id=selected_indicator_type)
     
     # Define status classification using Case/When
     status_annotation = Case(
@@ -1054,7 +1074,7 @@ def indicator_performance_report(request):
     )
     
     # Aggregate data by project, indicator type, and status
-    aggregated_data = Results_Oriented_Monitoring.objects.annotate(
+    aggregated_data = queryset.annotate(
         status=status_annotation
     ).values(
         'project__project',
@@ -1117,7 +1137,11 @@ def indicator_performance_report(request):
     context = {
         'page_title': 'Indicator Performance Report',
         'report_data': report_data,
-        'status_order': ['On Track', 'Needs Attention', 'Off Track', 'No Data']
+        'status_order': ['On Track', 'Needs Attention', 'Off Track', 'No Data'],
+        'projects': projects,
+        'indicator_types': indicator_types,
+        'selected_project': selected_project,
+        'selected_indicator_type': selected_indicator_type,
     }
     
     return render(request, 'monitoring/indicator_performance_report.html', context)
