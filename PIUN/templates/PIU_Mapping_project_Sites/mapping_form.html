@@ -490,15 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate total
         const totalGenderHouseholds = femaleHouseholds + maleHouseholds;
         
-        // Debug logging
-        console.log('Validation Check:', {
-            female: femaleHouseholds,
-            male: maleHouseholds,
-            total: totalGenderHouseholds,
-            connected: connectedHouseholds,
-            shouldValidate: (femaleHouseholds > 0 || maleHouseholds > 0) && totalGenderHouseholds > connectedHouseholds
-        });
-        
         // Only validate if at least one gender household value is entered
         if ((femaleHouseholds > 0 || maleHouseholds > 0) && totalGenderHouseholds > connectedHouseholds) {
             // Show warning modal
@@ -508,6 +499,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return true;
     }
+    
+    // Attach blur event listeners to household fields for real-time validation
+    document.getElementById('id_female_households').addEventListener('blur', function() {
+        validateHouseholdData();
+    });
+    
+    document.getElementById('id_male_households').addEventListener('blur', function() {
+        validateHouseholdData();
+    });
+    
+    document.getElementById('id_no_of_connected_household').addEventListener('blur', function() {
+        validateHouseholdData();
+    });
     
     // Show validation warning modal
     function showValidationWarning(female, male, total, connections) {
