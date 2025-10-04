@@ -1318,6 +1318,26 @@ def export_indicator_performance_pdf(request):
     elements = []
     styles = getSampleStyleSheet()
     
+    # Cell style for text wrapping
+    from reportlab.lib.styles import ParagraphStyle
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        wordWrap='CJK',
+        alignment=1  # Center alignment
+    )
+    
+    cell_style_left = ParagraphStyle(
+        'CellStyleLeft',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        wordWrap='CJK',
+        alignment=0  # Left alignment
+    )
+    
     # Title
     title = Paragraph("<b>Indicator Performance Report</b>", styles['Title'])
     elements.append(title)
@@ -1328,21 +1348,33 @@ def export_indicator_performance_pdf(request):
     elements.append(timestamp_text)
     elements.append(Spacer(1, 0.2*inch))
     
-    # Table data
-    table_data = [['Project', 'Type of Indicator', 'Status', 'Total Planned', 'Total Achieved', '% Achieved']]
+    # Table data - Headers as strings
+    table_data = [[
+        Paragraph('<b>Project</b>', cell_style),
+        Paragraph('<b>Type of Indicator</b>', cell_style),
+        Paragraph('<b>Status</b>', cell_style),
+        Paragraph('<b>Total Planned</b>', cell_style),
+        Paragraph('<b>Total Achieved</b>', cell_style),
+        Paragraph('<b>% Achieved</b>', cell_style)
+    ]]
     
+    # Add data rows with Paragraph objects
     for row_data in aggregated_data:
         count = row_data['count']
         indicators_achieved = row_data['total_achieved'] or 0
         avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
         
-        table_data.append([
-            row_data['project__project'][:35],
-            row_data['indicator_type__indicator_type'],
-            row_data['status'],
-            str(count),
-            str(indicators_achieved),
-            f"{avg_percentage}%"
+        # Skip rows with no project name
+        if not row_data.get('project__project'):
+            continue
+        
+        table_data.append([  # type: ignore
+            Paragraph(str(row_data['project__project'] or ''), cell_style_left),
+            Paragraph(str(row_data['indicator_type__indicator_type'] or ''), cell_style_left),
+            Paragraph(str(row_data['status'] or ''), cell_style),
+            Paragraph(str(count), cell_style),
+            Paragraph(str(indicators_achieved), cell_style),
+            Paragraph(f"{avg_percentage}%", cell_style)
         ])
     
     # Create table
@@ -1350,16 +1382,26 @@ def export_indicator_performance_pdf(request):
     
     # Table style
     table.setStyle(TableStyle([
+        # Header row
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1F4E78')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Data rows
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('VALIGN', (0, 1), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('LEFTPADDING', (0, 1), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 1), (-1, -1), 6),
+        
+        # Grid and alternating colors
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F0F0')]),
     ]))
     
