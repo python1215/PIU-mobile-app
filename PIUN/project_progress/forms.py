@@ -35,7 +35,7 @@ class ProjectProgressForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Explicitly set the queryset for the project field
-        self.fields['project'].queryset = Project.objects.all().order_by('project')
+        self.fields['project'].queryset = Project.objects.all().order_by('project')  # type: ignore
         # Make calculated fields read-only
         self.fields['over_all_disbursement_rate'].required = False
         self.fields['over_project_time_elapsed'].required = False

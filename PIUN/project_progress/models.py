@@ -30,7 +30,7 @@ class ProjectProgress(models.Model):
   def save(self, *args, **kwargs):
     # Calculate over_all_disbursement_rate
     if self.total_funding and self.total_funding > 0:
-      rate = (float(self.disbursement) / float(self.total_funding)) * 100
+      rate = (float(self.disbursement) / float(self.total_funding)) * 100  # type: ignore
       self.over_all_disbursement_rate = f"{rate:.2f}%"
     else:
       self.over_all_disbursement_rate = "0.00%"
@@ -38,7 +38,7 @@ class ProjectProgress(models.Model):
     # Calculate over_project_time_elapsed from start_date to current date
     if self.start_date:
       today = date.today()
-      diff = relativedelta(today, self.start_date)
+      diff = relativedelta(today, self.start_date)  # type: ignore
       self.over_project_time_elapsed = f"{diff.years} years and {diff.months} months"
     else:
       self.over_project_time_elapsed = "N/A"
@@ -48,7 +48,7 @@ class ProjectProgress(models.Model):
       today = date.today()
       if today > self.end_date:
         # Project is overdue - calculate overrun
-        diff = relativedelta(today, self.end_date)
+        diff = relativedelta(today, self.end_date)  # type: ignore
         self.over_project_time_over_run = f"{diff.years} years and {diff.months} months"
       else:
         # Project is on track or not yet due
