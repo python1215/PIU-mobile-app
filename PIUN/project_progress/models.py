@@ -15,6 +15,7 @@ class ProjectProgress(models.Model):
   over_all_disbursement_rate = models.CharField(max_length=10, blank=True)
   over_all_physical_progress = models.CharField(max_length=10)
   over_project_time_elapsed = models.CharField(max_length=50, blank=True)
+  over_project_time_over_run = models.CharField(max_length=50, blank=True)
   date_created = models.DateTimeField(auto_now_add=True,
                                       verbose_name="Date Created")
   loginuser = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -33,7 +34,7 @@ class ProjectProgress(models.Model):
       self.over_all_disbursement_rate = f"{rate:.2f}%"
     else:
       self.over_all_disbursement_rate = "0.00%"
-    
+
     # Calculate over_project_time_elapsed from start_date to current date
     if self.start_date:
       today = date.today()
@@ -41,7 +42,20 @@ class ProjectProgress(models.Model):
       self.over_project_time_elapsed = f"{diff.years} years and {diff.months} months"
     else:
       self.over_project_time_elapsed = "N/A"
-    
+
+    # Calculate over_project_time_over_run
+    if self.end_date:
+      today = date.today()
+      if today > self.end_date:
+        # Project is overdue - calculate overrun
+        diff = relativedelta(today, self.end_date)
+        self.over_project_time_over_run = f"{diff.years} years and {diff.months} months"
+      else:
+        # Project is on track or not yet due
+        self.over_project_time_over_run = "On track"
+    else:
+      self.over_project_time_over_run = "N/A"
+
     super().save(*args, **kwargs)
 
   def __str__(self):
