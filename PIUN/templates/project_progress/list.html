@@ -45,6 +45,7 @@
                                     <th>Disbursement Rate</th>
                                     <th>Physical Progress</th>
                                     <th>Time Elapsed</th>
+                                    <th>Time Overrun</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Actions</th>
@@ -59,6 +60,13 @@
                                     <td>{{ progress.over_all_disbursement_rate }}</td>
                                     <td>{{ progress.over_all_physical_progress }}</td>
                                     <td>{{ progress.over_project_time_elapsed }}</td>
+                                    <td>
+                                        {% if progress.over_project_time_over_run == "On track" %}
+                                            <span class="badge bg-success">{{ progress.over_project_time_over_run }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ progress.over_project_time_over_run }}</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ progress.start_date|date:"M d, Y" }}</td>
                                     <td>{{ progress.end_date|date:"M d, Y" }}</td>
                                     <td>

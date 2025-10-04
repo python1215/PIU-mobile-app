@@ -86,7 +86,7 @@
                                 <i class="bi bi-speedometer text-warning"></i> Progress Metrics
                             </h5>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <label class="text-muted small">Physical Progress</label>
@@ -102,14 +102,34 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <label class="text-muted small">Time Elapsed</label>
                                     <h4 class="text-secondary mb-0">{{ progress.over_project_time_elapsed }}</h4>
                                     <p class="text-muted small mb-0 mt-2">
                                         <i class="bi bi-calendar-range"></i> 
-                                        From {{ progress.start_date|date:"M d, Y" }} to {{ progress.end_date|date:"M d, Y" }}
+                                        From {{ progress.start_date|date:"M d, Y" }} to today
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small">Time Overrun</label>
+                                    {% if progress.over_project_time_over_run == "On track" %}
+                                        <h4 class="text-success mb-0">{{ progress.over_project_time_over_run }}</h4>
+                                    {% else %}
+                                        <h4 class="text-danger mb-0">{{ progress.over_project_time_over_run }}</h4>
+                                    {% endif %}
+                                    <p class="text-muted small mb-0 mt-2">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        {% if progress.over_project_time_over_run == "On track" %}
+                                            Project within schedule
+                                        {% else %}
+                                            Past end date
+                                        {% endif %}
                                     </p>
                                 </div>
                             </div>
