@@ -20,7 +20,7 @@ from io import BytesIO
 @login_required
 def project_progress_list(request):
     """List all project progress records with filtering"""
-    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')
+    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')  # type: ignore
     
     # Apply filters
     filter_form = ProjectProgressFilterForm(request.GET)
@@ -115,7 +115,7 @@ def project_progress_delete(request, pk):
 def export_progress_excel(request):
     """Export project progress to Excel"""
     # Get filtered queryset
-    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')
+    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')  # type: ignore
     
     # Apply same filters as list view
     filter_form = ProjectProgressFilterForm(request.GET)
@@ -125,8 +125,8 @@ def export_progress_excel(request):
     
     # Create workbook
     wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Project Progress"
+    ws = wb.active  # type: ignore
+    ws.title = "Project Progress"  # type: ignore
     
     # Define styles
     header_font = Font(bold=True, color="FFFFFF")
@@ -153,12 +153,12 @@ def export_progress_excel(request):
     
     # Write headers
     for col_num, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col_num)
-        cell.value = header
-        cell.font = header_font
-        cell.fill = header_fill
-        cell.alignment = header_alignment
-        cell.border = border
+        cell = ws.cell(row=1, column=col_num)  # type: ignore
+        cell.value = header  # type: ignore
+        cell.font = header_font  # type: ignore
+        cell.fill = header_fill  # type: ignore
+        cell.alignment = header_alignment  # type: ignore
+        cell.border = border  # type: ignore
     
     # Write data
     for row_num, progress in enumerate(progress_records, 2):
@@ -177,23 +177,23 @@ def export_progress_excel(request):
         ]
         
         for col_num, value in enumerate(data, 1):
-            cell = ws.cell(row=row_num, column=col_num)
-            cell.value = value
-            cell.border = border
+            cell = ws.cell(row=row_num, column=col_num)  # type: ignore
+            cell.value = value  # type: ignore
+            cell.border = border  # type: ignore
             
             # Apply alignment based on data type
             if col_num in [2, 3]:  # Funding and Disbursement
-                cell.alignment = number_alignment
-                cell.number_format = '#,##0.00'
+                cell.alignment = number_alignment  # type: ignore
+                cell.number_format = '#,##0.00'  # type: ignore
             elif col_num in [8, 9, 11]:  # Dates
-                cell.alignment = date_alignment
+                cell.alignment = date_alignment  # type: ignore
                 if isinstance(value, datetime):
-                    cell.number_format = 'YYYY-MM-DD'
+                    cell.number_format = 'YYYY-MM-DD'  # type: ignore
             else:
-                cell.alignment = data_alignment
+                cell.alignment = data_alignment  # type: ignore
     
     # Auto-adjust column widths
-    for column in ws.columns:
+    for column in ws.columns:  # type: ignore
         max_length = 0
         column_letter = column[0].column_letter
         for cell in column:
@@ -203,10 +203,10 @@ def export_progress_excel(request):
             except:
                 pass
         adjusted_width = min(max_length + 2, 50)
-        ws.column_dimensions[column_letter].width = adjusted_width
+        ws.column_dimensions[column_letter].width = adjusted_width  # type: ignore
     
     # Freeze header row
-    ws.freeze_panes = 'A2'
+    ws.freeze_panes = 'A2'  # type: ignore
     
     # Create response
     response = HttpResponse(
@@ -215,7 +215,7 @@ def export_progress_excel(request):
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     response['Content-Disposition'] = f'attachment; filename=Project_Progress_Report_{timestamp}.xlsx'
     
-    wb.save(response)
+    wb.save(response)  # type: ignore
     return response
 
 
@@ -223,7 +223,7 @@ def export_progress_excel(request):
 def export_progress_pdf(request):
     """Export project progress to PDF"""
     # Get filtered queryset
-    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')
+    progress_records = ProjectProgress.objects.all().select_related('project').order_by('-id')  # type: ignore
     
     # Apply same filters as list view
     filter_form = ProjectProgressFilterForm(request.GET)
