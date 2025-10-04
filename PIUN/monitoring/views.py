@@ -1053,8 +1053,12 @@ def indicator_performance_report(request):
     projects = Project.objects.all().order_by('project')
     indicator_types = Indicator_Type.objects.all().order_by('indicator_type')
     
-    # Start with base queryset
-    queryset = Results_Oriented_Monitoring.objects.all()
+    # Start with base queryset - exclude orphaned records with NULL foreign keys
+    queryset = Results_Oriented_Monitoring.objects.exclude(
+        project__isnull=True
+    ).exclude(
+        indicator_type__isnull=True
+    )
     
     # Apply filters if selected
     if selected_project:
@@ -1169,8 +1173,12 @@ def export_indicator_performance_excel(request):
     selected_project = request.GET.get('project', '')
     selected_indicator_type = request.GET.get('indicator_type', '')
     
-    # Start with base queryset
-    queryset = Results_Oriented_Monitoring.objects.all()
+    # Start with base queryset - exclude orphaned records with NULL foreign keys
+    queryset = Results_Oriented_Monitoring.objects.exclude(
+        project__isnull=True
+    ).exclude(
+        indicator_type__isnull=True
+    )
     
     # Apply filters if selected
     if selected_project:
@@ -1286,8 +1294,12 @@ def export_indicator_performance_pdf(request):
     selected_project = request.GET.get('project', '')
     selected_indicator_type = request.GET.get('indicator_type', '')
     
-    # Start with base queryset
-    queryset = Results_Oriented_Monitoring.objects.all()
+    # Start with base queryset - exclude orphaned records with NULL foreign keys
+    queryset = Results_Oriented_Monitoring.objects.exclude(
+        project__isnull=True
+    ).exclude(
+        indicator_type__isnull=True
+    )
     
     # Apply filters if selected
     if selected_project:
