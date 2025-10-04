@@ -91,12 +91,24 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Time Elapsed</label>
-                            {{ form.over_project_time_elapsed }}
-                            {% if form.over_project_time_elapsed.errors %}
-                                <div class="text-danger">{{ form.over_project_time_elapsed.errors }}</div>
-                            {% endif %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.over_project_time_elapsed.id_for_label }}" class="form-label">Time Elapsed</label>
+                                {{ form.over_project_time_elapsed }}
+                                {% if form.over_project_time_elapsed.errors %}
+                                    <div class="text-danger">{{ form.over_project_time_elapsed.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Time from Start Date to today</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.over_project_time_over_run.id_for_label }}" class="form-label">Time Overrun</label>
+                                {{ form.over_project_time_over_run }}
+                                {% if form.over_project_time_over_run.errors %}
+                                    <div class="text-danger">{{ form.over_project_time_over_run.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Time beyond End Date (if overdue)</small>
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -123,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const endDateField = document.getElementById('id_end_date');
     const disbursementRateField = document.getElementById('id_over_all_disbursement_rate');
     const timeElapsedField = document.getElementById('id_over_project_time_elapsed');
+    const timeOverrunField = document.getElementById('id_over_project_time_over_run');
 
     // Calculate disbursement rate
     function calculateDisbursementRate() {
@@ -165,6 +178,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Calculate time overrun from end date to today
+    function calculateTimeOverrun() {
+        const endDate = endDateField.value;
+        
+        if (endDate) {
+            const end = new Date(endDate);
+            const today = new Date();
+            
+            if (today > end) {
+                // Project is overdue - calculate overrun
+                let years = today.getFullYear() - end.getFullYear();
+                let months = today.getMonth() - end.getMonth();
+                
+                // Adjust for negative months
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                
+                // Build the display string (years and months only)
+                timeOverrunField.value = years + ' years and ' + months + ' months';
+            } else {
+                // Project is on track or not yet due
+                timeOverrunField.value = 'On track';
+            }
+        } else {
+            timeOverrunField.value = '';
+        }
+    }
+
     // Add event listeners
     if (totalFundingField && disbursementField && disbursementRateField) {
         totalFundingField.addEventListener('input', calculateDisbursementRate);
@@ -177,6 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
         startDateField.addEventListener('change', calculateTimeElapsed);
         // Calculate on page load if values exist
         calculateTimeElapsed();
+    }
+
+    if (endDateField && timeOverrunField) {
+        endDateField.addEventListener('change', calculateTimeOverrun);
+        // Calculate on page load if values exist
+        calculateTimeOverrun();
     }
 });
 </script>
