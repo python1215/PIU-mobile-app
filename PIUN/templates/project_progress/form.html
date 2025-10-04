@@ -137,26 +137,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Calculate time elapsed in years, months, and days
+    // Calculate time elapsed from start date to today
     function calculateTimeElapsed() {
         const startDate = startDateField.value;
-        const endDate = endDateField.value;
         
-        if (startDate && endDate) {
+        if (startDate) {
             const start = new Date(startDate);
-            const end = new Date(endDate);
+            const today = new Date();
             
-            if (end >= start) {
-                let years = end.getFullYear() - start.getFullYear();
-                let months = end.getMonth() - start.getMonth();
-                let days = end.getDate() - start.getDate();
-                
-                // Adjust for negative days
-                if (days < 0) {
-                    months--;
-                    const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-                    days += prevMonth.getDate();
-                }
+            if (today >= start) {
+                let years = today.getFullYear() - start.getFullYear();
+                let months = today.getMonth() - start.getMonth();
                 
                 // Adjust for negative months
                 if (months < 0) {
@@ -164,21 +155,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     months += 12;
                 }
                 
-                // Build the display string
-                const parts = [];
-                if (years > 0) {
-                    parts.push(years + (years === 1 ? ' year' : ' years'));
-                }
-                if (months > 0) {
-                    parts.push(months + (months === 1 ? ' month' : ' months'));
-                }
-                if (days > 0 || parts.length === 0) {
-                    parts.push(days + (days === 1 ? ' day' : ' days'));
-                }
-                
-                timeElapsedField.value = parts.join(' and ');
+                // Build the display string (years and months only)
+                timeElapsedField.value = years + ' years and ' + months + ' months';
             } else {
-                timeElapsedField.value = 'End date must be after start date';
+                timeElapsedField.value = 'Start date cannot be in the future';
             }
         } else {
             timeElapsedField.value = '';
@@ -193,9 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
         calculateDisbursementRate();
     }
 
-    if (startDateField && endDateField && timeElapsedField) {
+    if (startDateField && timeElapsedField) {
         startDateField.addEventListener('change', calculateTimeElapsed);
-        endDateField.addEventListener('change', calculateTimeElapsed);
         // Calculate on page load if values exist
         calculateTimeElapsed();
     }

@@ -16,7 +16,7 @@ class ProjectProgressForm(forms.ModelForm):
             'disbursement': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'over_all_disbursement_rate': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated after saving'}),
             'over_all_physical_progress': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 60%'}),
-            'over_project_time_elapsed': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated after saving'}),
+            'over_project_time_elapsed': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated from Start Date to today'}),
         }
         labels = {
             'project': 'Project',
