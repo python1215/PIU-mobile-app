@@ -7,7 +7,8 @@ class ProjectProgressForm(forms.ModelForm):
     class Meta:
         model = ProjectProgress
         fields = ['project', 'total_funding', 'start_date', 'end_date', 'disbursement', 
-                  'over_all_disbursement_rate', 'over_all_physical_progress', 'over_project_time_elapsed']
+                  'over_all_disbursement_rate', 'over_all_physical_progress', 'over_project_time_elapsed', 
+                  'over_project_time_over_run']
         widgets = {
             'project': forms.Select(attrs={'class': 'form-select'}),
             'total_funding': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
@@ -17,6 +18,7 @@ class ProjectProgressForm(forms.ModelForm):
             'over_all_disbursement_rate': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated after saving'}),
             'over_all_physical_progress': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 60%'}),
             'over_project_time_elapsed': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated from Start Date to today'}),
+            'over_project_time_over_run': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'Auto-calculated based on End Date'}),
         }
         labels = {
             'project': 'Project',
@@ -27,6 +29,7 @@ class ProjectProgressForm(forms.ModelForm):
             'over_all_disbursement_rate': 'Disbursement Rate (%)',
             'over_all_physical_progress': 'Overall Physical Progress (%)',
             'over_project_time_elapsed': 'Time Elapsed',
+            'over_project_time_over_run': 'Time Overrun',
         }
     
     def __init__(self, *args, **kwargs):
@@ -36,3 +39,4 @@ class ProjectProgressForm(forms.ModelForm):
         # Make calculated fields read-only
         self.fields['over_all_disbursement_rate'].required = False
         self.fields['over_project_time_elapsed'].required = False
+        self.fields['over_project_time_over_run'].required = False
