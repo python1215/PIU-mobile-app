@@ -3,6 +3,16 @@ from .models import ProjectProgress
 from PIU_Financial_mgt.models import Project
 
 
+class ProjectProgressFilterForm(forms.Form):
+    """Form for filtering project progress records"""
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all().order_by('project'),
+        required=False,
+        empty_label="All Projects",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+
 class ProjectProgressForm(forms.ModelForm):
     class Meta:
         model = ProjectProgress
