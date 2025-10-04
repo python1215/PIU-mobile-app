@@ -34,9 +34,10 @@ class ProjectProgress(models.Model):
     else:
       self.over_all_disbursement_rate = "0.00%"
     
-    # Calculate over_project_time_elapsed
-    if self.start_date and self.end_date:
-      diff = relativedelta(self.end_date, self.start_date)
+    # Calculate over_project_time_elapsed from start_date to current date
+    if self.start_date:
+      today = date.today()
+      diff = relativedelta(today, self.start_date)
       self.over_project_time_elapsed = f"{diff.years} years and {diff.months} months"
     else:
       self.over_project_time_elapsed = "N/A"
