@@ -1094,6 +1094,10 @@ def indicator_performance_report(request):
         indicator_type = row['indicator_type__indicator_type']
         status = row['status']
         
+        # Skip rows with missing essential data
+        if not project_key or not indicator_type:
+            continue
+        
         if project_key not in report_data:
             report_data[project_key] = {}
         
@@ -1225,6 +1229,10 @@ def export_indicator_performance_excel(request):
     
     # Add data
     for row_data in aggregated_data:
+        # Skip rows with missing essential data
+        if not row_data.get('project__project') or not row_data.get('indicator_type__indicator_type'):
+            continue
+        
         count = row_data['count']
         indicators_achieved = row_data['total_achieved'] or 0
         avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
