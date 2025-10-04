@@ -199,12 +199,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Build the display string (years and months only)
                 timeOverrunField.value = years + ' years and ' + months + ' months';
+                // Add red styling for overdue projects
+                timeOverrunField.style.color = '#dc3545';
+                timeOverrunField.style.fontWeight = 'bold';
             } else {
                 // Project is on track or not yet due
                 timeOverrunField.value = 'On track';
+                // Add green styling for on-track projects
+                timeOverrunField.style.color = '#198754';
+                timeOverrunField.style.fontWeight = 'bold';
             }
         } else {
             timeOverrunField.value = '';
+            // Reset styling when empty
+            timeOverrunField.style.color = '';
+            timeOverrunField.style.fontWeight = '';
         }
     }
 
