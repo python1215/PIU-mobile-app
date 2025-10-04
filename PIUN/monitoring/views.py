@@ -1360,18 +1360,21 @@ def export_indicator_performance_pdf(request):
     
     # Add data rows with Paragraph objects
     for row_data in aggregated_data:
-        count = row_data['count']
-        indicators_achieved = row_data['total_achieved'] or 0
-        avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
-        
-        # Skip rows with no project name
-        if not row_data.get('project__project'):
+        # Skip rows with missing essential data
+        if not row_data.get('project__project') or not row_data.get('indicator_type__indicator_type'):
             continue
         
+        count = row_data.get('count', 0)
+        if count == 0:  # Skip rows with no data
+            continue
+            
+        indicators_achieved = row_data.get('total_achieved', 0) or 0
+        avg_percentage = round((indicators_achieved / count * 100), 2) if count > 0 else 0
+        
         table_data.append([  # type: ignore
-            Paragraph(str(row_data['project__project'] or ''), cell_style_left),
-            Paragraph(str(row_data['indicator_type__indicator_type'] or ''), cell_style_left),
-            Paragraph(str(row_data['status'] or ''), cell_style),
+            Paragraph(str(row_data['project__project']), cell_style_left),
+            Paragraph(str(row_data['indicator_type__indicator_type']), cell_style_left),
+            Paragraph(str(row_data.get('status', '')), cell_style),
             Paragraph(str(count), cell_style),
             Paragraph(str(indicators_achieved), cell_style),
             Paragraph(f"{avg_percentage}%", cell_style)
