@@ -258,6 +258,16 @@ def export_progress_pdf(request):
         alignment=1  # Center alignment
     )
     
+    # Cell text style with word wrapping
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=7,
+        leading=9,
+        wordWrap='CJK',
+        alignment=0
+    )
+    
     # Title
     title = Paragraph("Project Progress Tracking Report", title_style)
     elements.append(title)
@@ -271,23 +281,24 @@ def export_progress_pdf(request):
     elements.append(report_info)
     elements.append(Spacer(1, 0.3*inch))
     
-    # Table data
+    # Table data - Headers
     table_data = [[
         'Project', 'Total Funding', 'Disbursement', 'Disb. Rate',
         'Progress', 'Time Elapsed', 'Time Overrun', 'Start Date', 'End Date'
     ]]
     
+    # Add data rows with Paragraph objects for text wrapping
     for progress in progress_records:
-        table_data.append([
-            str(progress.project)[:30],
-            f"${float(progress.total_funding):,.2f}",
-            f"${float(progress.disbursement):,.2f}",
-            progress.over_all_disbursement_rate,
-            progress.over_all_physical_progress,
-            progress.over_project_time_elapsed[:20],
-            progress.over_project_time_over_run[:20],
-            progress.start_date.strftime('%Y-%m-%d') if progress.start_date else '',
-            progress.end_date.strftime('%Y-%m-%d') if progress.end_date else '',
+        table_data.append([  # type: ignore
+            Paragraph(str(progress.project), cell_style),
+            Paragraph(f"${float(progress.total_funding):,.2f}", cell_style),
+            Paragraph(f"${float(progress.disbursement):,.2f}", cell_style),
+            Paragraph(progress.over_all_disbursement_rate, cell_style),
+            Paragraph(progress.over_all_physical_progress, cell_style),
+            Paragraph(progress.over_project_time_elapsed, cell_style),
+            Paragraph(progress.over_project_time_over_run, cell_style),
+            Paragraph(progress.start_date.strftime('%Y-%m-%d') if progress.start_date else '', cell_style),
+            Paragraph(progress.end_date.strftime('%Y-%m-%d') if progress.end_date else '', cell_style),
         ])
     
     # Create table
@@ -306,22 +317,19 @@ def export_progress_pdf(request):
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('TOPPADDING', (0, 0), (-1, 0), 12),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
         
         # Data rows
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('ALIGN', (1, 1), (3, -1), 'RIGHT'),  # Numbers
-        ('ALIGN', (7, 1), (8, -1), 'CENTER'),  # Dates
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 7),
         ('TOPPADDING', (0, 1), (-1, -1), 6),
         ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ('LEFTPADDING', (0, 1), (-1, -1), 4),
         ('RIGHTPADDING', (0, 1), (-1, -1), 4),
+        ('VALIGN', (0, 1), (-1, -1), 'TOP'),
         
         # Grid
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         
         # Alternating row colors
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')]),
