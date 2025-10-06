@@ -1,14 +1,9 @@
 import os
 import sys
-from pathlib import Path
 
-# Add PIUN directory to Python path for imports
-BASE_DIR = Path(__file__).resolve().parent
-PIUN_DIR = BASE_DIR / 'PIUN'
-sys.path.insert(0, str(PIUN_DIR))
-
-# Set environment variable for Django to locate the PIUN directory
-os.environ['PIUN_BASE_DIR'] = str(PIUN_DIR)
+# Add PIUN directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'PIUN'))
+os.chdir('PIUN')
 
 from django.core.wsgi import get_wsgi_application
 
