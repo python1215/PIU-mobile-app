@@ -442,7 +442,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-    // Project -> Investment Type (using HTML response format)
+    // Project -> Investment Type is handled by HTMX (remove JavaScript duplicate)
+    // The form field already has hx-get, hx-target, and hx-trigger attributes
+    
+    // Commenting out to prevent duplicate requests that cause flickering
+    /*
     if (projectField && investmentField) {
         projectField.addEventListener('change', function() {
             const projectId = this.value;
@@ -489,6 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+    */
 
     // Region -> District
     if (regionField && districtField) {
