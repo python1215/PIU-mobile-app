@@ -233,11 +233,7 @@ class PAPForm(forms.ModelForm):
         queryset=Project.objects.all(),
         empty_label="Select Project",
         widget=forms.Select(attrs={
-            "class": "form-select",
-            "hx-get": "/social_and_env/ajax/load-investment-types-pap/",
-            "hx-target": "#id_type_of_investment",
-            "hx-trigger": "change",
-            "hx-include": "this"
+            "class": "form-select"
         })
     )
 
