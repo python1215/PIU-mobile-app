@@ -473,9 +473,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.text();
                 })
                 .then(html => {
-                    investmentField.innerHTML = html;
+                    // Extract just the select element from the response (skip the label)
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const selectElement = doc.querySelector('select');
+                    
+                    if (selectElement) {
+                        // Replace only the options, not the entire select element
+                        investmentField.innerHTML = selectElement.innerHTML;
+                    } else {
+                        investmentField.innerHTML = '<option value="">Error loading investment types</option>';
+                    }
                     console.log('✅ Investment types loaded successfully');
-                    console.log('📄 Loaded HTML:', html.substring(0, 200) + '...');
                 })
                 .catch(error => {
                     console.error('❌ Error loading investment types:', error);
