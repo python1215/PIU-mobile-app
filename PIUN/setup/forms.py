@@ -286,8 +286,9 @@ class TypeOfStakeholderEngagementForm(forms.ModelForm):
 class ProjectOutcomeForm(forms.ModelForm):
     class Meta:
         model = ProjectOutCome
-        fields = ['project_outcome']
+        fields = ['pdo', 'project_outcome']
         widgets = {
+            'pdo': forms.Select(attrs={'class': 'form-select'}),
             'project_outcome': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter project outcome description',
