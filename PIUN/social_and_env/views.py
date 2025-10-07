@@ -521,6 +521,15 @@ def pap_add(request):
                         # Use first available for this project as fallback
                         pap.type_of_investment = KPI_For_Contract.objects.filter(
                             project=pap.project).first()
+                
+                # Ensure type_of_investment is set (required field)
+                if not pap.type_of_investment:
+                    # Try to get any investment type for this project
+                    pap.type_of_investment = KPI_For_Contract.objects.filter(
+                        project=pap.project).first()
+                    # If project has no investment types, use any available investment type
+                    if not pap.type_of_investment:
+                        pap.type_of_investment = KPI_For_Contract.objects.first()
 
                 district_value = request.POST.get('district')
                 if district_value:
