@@ -243,7 +243,7 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="text-muted mb-0">Female Households</h6>
-                            <span class="badge bg-pink">{{ mapping.female_households|default:0 }}</span>
+                            <span class="badge bg-pink">{{ female_percentage|floatformat:1 }}%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar" style="width: {{ female_percentage }}%; background-color: #e91e63;"></div>
@@ -254,7 +254,7 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="text-muted mb-0">Male Households</h6>
-                            <span class="badge bg-secondary">{{ mapping.male_households|default:0 }}</span>
+                            <span class="badge bg-secondary">{{ male_percentage|floatformat:1 }}%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ male_percentage }}%"></div>
