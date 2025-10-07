@@ -80,7 +80,7 @@
                                 <tbody>
                                     {% for record in recent_monitoring %}
                                     <tr>
-                                        <td>{{ record.project__project|default:"N/A"|truncatechars:25 }}</td>
+                                        <td>{{ record.project__project|default:"N/A" }}</td>
                                         <td>{{ record.indicator_type__indicator_type|default:"N/A"|truncatechars:30 }}</td>
                                         <td><span class="badge bg-primary">{{ record.count }}</span></td>
                                         <td><span class="badge bg-success">{{ record.total_achieved }}</span></td>
