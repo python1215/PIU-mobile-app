@@ -30,11 +30,11 @@ import io
 
 @login_required
 def monitoring_dashboard(request):
-    """Enhanced monitoring dashboard with real data"""
-    from django.db.models import Count, Avg
+    """Enhanced monitoring dashboard with Indicator Performance Report data"""
+    from django.db.models import Count, Avg, Case, When, Q, Value, CharField
     from django.conf import settings
     from PIU_Financial_mgt.models import Project
-    from setup.models import Quarter
+    from setup.models import Quarter, Indicator_Type
     
     # Get dashboard statistics using Django ORM
     try:
@@ -46,11 +46,36 @@ def monitoring_dashboard(request):
             'recent_monitoring': [],
         }
         
-        # Recent monitoring activities using Django ORM with correct field references
-        recent_monitoring = Results_Oriented_Monitoring.objects.select_related(
-            'project', 
-            'quarter'
-        ).order_by('-date_created')[:5]
+        # Get Indicator Performance Report data for Recent Monitoring Activity
+        # Exclude orphaned records with NULL foreign keys
+        queryset = Results_Oriented_Monitoring.objects.exclude(
+            project__isnull=True
+        ).exclude(
+            indicator_type__isnull=True
+        )
+        
+        # Define status classification
+        status_annotation = Case(
+            When(percentage_achieved_vs_end_target__isnull=True, then=Value('No Data')),
+            When(percentage_achieved_vs_end_target__gte=80, then=Value('On Track')),
+            When(percentage_achieved_vs_end_target__gte=50, then=Value('Needs Attention')),
+            When(percentage_achieved_vs_end_target__lt=50, then=Value('Off Track')),
+            default=Value('No Data'),
+            output_field=CharField()
+        )
+        
+        # Aggregate data by project and indicator type with status
+        recent_monitoring = queryset.annotate(
+            status=status_annotation
+        ).values(
+            'project__project',
+            'indicator_type__indicator_type',
+            'status'
+        ).annotate(
+            count=Count('id'),
+            total_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
+            avg_percentage=Avg('percentage_achieved_vs_end_target', filter=Q(percentage_achieved_vs_end_target__isnull=False))
+        ).order_by('-count')[:10]  # Top 10 by count
         
         stats['recent_monitoring'] = list(recent_monitoring)
         

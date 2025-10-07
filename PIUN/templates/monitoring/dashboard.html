@@ -133,34 +133,42 @@
                 <div class="card-body">
                     {% if recent_monitoring %}
                         <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Indicator Description</th>
-                                        <th>Target Value</th>
-                                        <th>Achieved Value</th>
+                                        <th>Project</th>
+                                        <th>Type of Indicator</th>
+                                        <th>Count</th>
+                                        <th>Total Achieved</th>
+                                        <th>Avg %</th>
                                         <th>Status</th>
-                                        <th>Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for record in recent_monitoring %}
                                     <tr>
-                                        <td>{{ record.indicator_description|default:"N/A"|truncatechars:30 }}</td>
-                                        <td>{{ record.End_Target_Value|default:"N/A" }}</td>
-                                        <td>{{ record.achieved_value|default:"N/A" }}</td>
+                                        <td>{{ record.project__project|default:"N/A"|truncatechars:25 }}</td>
+                                        <td>{{ record.indicator_type__indicator_type|default:"N/A"|truncatechars:30 }}</td>
+                                        <td><span class="badge bg-primary">{{ record.count }}</span></td>
+                                        <td><span class="badge bg-success">{{ record.total_achieved }}</span></td>
                                         <td>
-                                            {% if record.achieved_value and record.End_Target_Value %}
-                                                {% if record.achieved_value >= record.End_Target_Value %}
-                                                    <span class="badge bg-success">Achieved</span>
-                                                {% else %}
-                                                    <span class="badge bg-warning">In Progress</span>
-                                                {% endif %}
+                                            {% if record.avg_percentage %}
+                                                {{ record.avg_percentage|floatformat:1 }}%
                                             {% else %}
-                                                <span class="badge bg-secondary">N/A</span>
+                                                <span class="text-muted">-</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ record.date_created|date:"M j, Y"|default:"N/A" }}</td>
+                                        <td>
+                                            {% if record.status == 'On Track' %}
+                                                <span class="badge bg-success">{{ record.status }}</span>
+                                            {% elif record.status == 'Needs Attention' %}
+                                                <span class="badge bg-warning text-dark">{{ record.status }}</span>
+                                            {% elif record.status == 'Off Track' %}
+                                                <span class="badge bg-danger">{{ record.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ record.status }}</span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
