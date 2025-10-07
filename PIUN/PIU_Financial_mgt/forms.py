@@ -407,7 +407,8 @@ class ProjectOutcomeForm(forms.ModelForm):
         model = ProjectOutCome
         fields = ['pdo', 'project_outcome',]
         widgets = {
-            'Date_Created': forms.DateTimeInput(attrs={'type': 'datetime-local', 'value': datetime.now().strftime('%Y-%m-%dT%H:%M')}),
+            'pdo': forms.Select(attrs={'class': 'form-select'}),
+            'project_outcome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter project outcome description'}),
         }
 
 class ProjectResultForm(forms.ModelForm):
