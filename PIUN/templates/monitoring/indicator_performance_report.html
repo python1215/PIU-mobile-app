@@ -3,6 +3,16 @@
 
 {% block title %}Indicator Performance Report - PIUN{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Fix for offline deployment: Ensure table headers are visible with white text */
+    .table-dark th {
+        color: #fff !important;
+        background-color: #212529 !important;
+    }
+</style>
+{% endblock %}
+
 {% block monitoring_content %}
 <div class="container-fluid">
     <!-- Report Header -->
