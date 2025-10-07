@@ -239,7 +239,7 @@ def dashboard(request):
     """Issues Actions monitoring dashboard"""
     # Statistics
     total_issues = IssueActions.objects.count()
-    open_issues = IssueActions.objects.filter(status='open').count()
+    open_issues = IssueActions.objects.filter(status='incomplete').count()
     in_progress_issues = IssueActions.objects.filter(status='in_progress').count()
     resolved_issues = IssueActions.objects.filter(status='resolved').count()
     critical_issues = IssueActions.objects.filter(priority='critical').count()
