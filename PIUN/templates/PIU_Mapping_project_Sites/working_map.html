@@ -22,10 +22,13 @@
         <div class="layers-header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;"><i class="bi bi-layers"></i> Project Layers</h6>
-                <span style="font-size: 10px; color: #999;">⋮⋮ Drag</span>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button onclick="toggleLayersPanel()" class="toggle-btn" id="layers-toggle-btn" title="Minimize">−</button>
+                    <span style="font-size: 10px; color: #999;">⋮⋮</span>
+                </div>
             </div>
         </div>
-        <div class="layers-content">
+        <div class="layers-content" id="layers-content-panel">
             <div id="layer-controls">
                 <!-- Layer controls will be populated by JavaScript -->
             </div>
@@ -38,10 +41,13 @@
     <div class="legend-header">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;">Color Legend</h6>
-            <span style="font-size: 10px; color: #999;">⋮⋮ Drag</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button onclick="toggleLegendPanel()" class="toggle-btn" id="legend-toggle-btn" title="Minimize">−</button>
+                <span style="font-size: 10px; color: #999;">⋮⋮</span>
+            </div>
         </div>
     </div>
-    <div class="legend-content">
+    <div class="legend-content" id="legend-content-panel">
         <div id="legend-items" style="font-size: 11px; line-height: 1.6;">
             <!-- Legend items will be populated by JavaScript -->
         </div>
@@ -120,6 +126,36 @@
         padding: 10px 12px;
         max-height: 300px;
         overflow-y: auto;
+        transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+    
+    .legend-content.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        padding: 0 12px;
+        overflow: hidden;
+    }
+    
+    /* Toggle button styling */
+    .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s, transform 0.2s;
+    }
+    
+    .toggle-btn:hover {
+        color: #333;
+        transform: scale(1.1);
     }
     
     /* Layers panel styles */
@@ -154,6 +190,14 @@
         padding: 10px 12px;
         max-height: 400px;
         overflow-y: auto;
+        transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+    
+    .layers-content.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        padding: 0 12px;
+        overflow: hidden;
     }
     
     /* Responsive map styles */
@@ -761,6 +805,37 @@ document.addEventListener('DOMContentLoaded', function() {
             handle.style.cursor = 'move';
         }
     }
+    
+    // Toggle functions for legend and layers panels
+    window.toggleLegendPanel = function() {
+        const content = document.getElementById('legend-content-panel');
+        const toggleBtn = document.getElementById('legend-toggle-btn');
+        
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            toggleBtn.textContent = '−';
+            toggleBtn.title = 'Minimize';
+        } else {
+            content.classList.add('collapsed');
+            toggleBtn.textContent = '+';
+            toggleBtn.title = 'Maximize';
+        }
+    };
+    
+    window.toggleLayersPanel = function() {
+        const content = document.getElementById('layers-content-panel');
+        const toggleBtn = document.getElementById('layers-toggle-btn');
+        
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            toggleBtn.textContent = '−';
+            toggleBtn.title = 'Minimize';
+        } else {
+            content.classList.add('collapsed');
+            toggleBtn.textContent = '+';
+            toggleBtn.title = 'Maximize';
+        }
+    };
 });
 </script>
 {% endblock %}
