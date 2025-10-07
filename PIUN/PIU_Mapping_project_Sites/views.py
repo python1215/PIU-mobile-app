@@ -293,6 +293,7 @@ def mapping_list(request):
     total_mappings = filtered_mappings.count()
     total_households = sum(mapping.Total_No_of_Households or 0 for mapping in filtered_mappings)
     total_connected = sum(mapping.no_of_connected_household or 0 for mapping in filtered_mappings)
+    total_female_households = sum(mapping.female_households or 0 for mapping in filtered_mappings)
     
     # Get all dropdown data directly from models
     from setup.models import Regions, Districts, YEAR, Access
@@ -317,6 +318,8 @@ def mapping_list(request):
         'total_households': total_households,
         'total_connected': total_connected,
         'connection_rate': round((total_connected / total_households * 100) if total_households > 0 else 0, 2),
+        'total_female_households': total_female_households,
+        'women_households_rate': round((total_female_households / total_households * 100) if total_households > 0 else 0, 2),
         # Add dropdown data to context - convert QuerySets to lists to prevent consumption issues
         'all_regions': list(all_regions),
         'all_districts': list(all_districts),
