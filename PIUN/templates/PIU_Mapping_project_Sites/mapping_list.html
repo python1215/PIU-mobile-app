@@ -362,18 +362,16 @@
                                         <td>{% if mapping.settlement.settlement_name %}{{ mapping.settlement.settlement_name }}{% else %}N/A{% endif %}</td>
                                         <td>
                                             {% if mapping.project %}
-                                                <span class="badge badge-primary">{{ mapping.project.project }}</span>
+                                                {{ mapping.project.project }}
                                             {% else %}
                                                 <span class="text-muted">No project</span>
                                             {% endif %}
                                         </td>
                                         <td>
                                             {% if mapping.donor.all %}
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    {% for donor in mapping.donor.all %}
-                                                        <span class="badge badge-success">{{ donor.name }}</span>
-                                                    {% endfor %}
-                                                </div>
+                                                {% for donor in mapping.donor.all %}
+                                                    {{ donor.name }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
                                             {% else %}
                                                 <span class="text-muted">No donors</span>
                                             {% endif %}
