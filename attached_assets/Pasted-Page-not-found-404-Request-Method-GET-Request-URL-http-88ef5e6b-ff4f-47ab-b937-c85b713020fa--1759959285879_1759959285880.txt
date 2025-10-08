@@ -1,0 +1,63 @@
+Page not found (404)
+Request Method:	GET
+Request URL:	http://88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev/social_and_env/ohs/detail/12/
+Using the URLconf defined in piu_project.urls, Django tried these URL patterns, in this order:
+
+admin-panel/
+[name='main_dashboard']
+dashboard/ [name='dashboard-alt']
+user-accounts/
+accounts/
+accounts/profile/ [name='profile']
+setup/
+PIU_Financial_mgt/
+project_actions/
+monitoring/
+social_and_env/ [name='social_env_dashboard']
+social_and_env/ esia/ [name='esia_list']
+social_and_env/ esia/add/ [name='esia_add']
+social_and_env/ esia/<str:pk>/ [name='esia_detail']
+social_and_env/ esia/<str:pk>/edit/ [name='esia_edit']
+social_and_env/ esia/<str:pk>/delete/ [name='esia_delete']
+social_and_env/ esia/export/excel/ [name='esia_export_excel']
+social_and_env/ pap/ [name='pap_list']
+social_and_env/ pap/add/ [name='pap_add']
+social_and_env/ pap/<str:pk>/ [name='pap_detail']
+social_and_env/ pap/<str:pk>/edit/ [name='pap_edit']
+social_and_env/ pap/<str:pk>/delete/ [name='pap_delete']
+social_and_env/ pap/export/excel/ [name='export_pap_excel']
+social_and_env/ grievance/ [name='grievance_list']
+social_and_env/ grievance/add/ [name='grievance_add']
+social_and_env/ grievance/<str:pk>/ [name='grievance_detail']
+social_and_env/ grievance/<str:pk>/edit/ [name='grievance_edit']
+social_and_env/ grievance/<str:pk>/delete/ [name='grievance_delete']
+social_and_env/ grievance/export/excel/ [name='export_grievance_excel']
+social_and_env/ ohs/ [name='ohs_list']
+social_and_env/ ohs/add/ [name='ohs_add']
+social_and_env/ ohs/export/excel/ [name='export_ohs_excel']
+social_and_env/ ohs/<str:pk>/ [name='ohs_detail']
+social_and_env/ ohs/<str:pk>/edit/ [name='ohs_edit']
+social_and_env/ ohs/<str:pk>/delete/ [name='ohs_delete']
+social_and_env/ community/ [name='community_list']
+social_and_env/ community/add/ [name='community_add']
+social_and_env/ community/<str:pk>/ [name='community_detail']
+social_and_env/ community/<str:pk>/edit/ [name='community_edit']
+social_and_env/ community/<str:pk>/delete/ [name='community_delete']
+social_and_env/ ajax/load-districts/ [name='load_districts']
+social_and_env/ ajax/load-settlements/ [name='load_settlements']
+social_and_env/ ajax/load-kpi-descriptions/ [name='load_kpi_descriptions']
+social_and_env/ ajax/load-investment-types-esia/ [name='load_investment_types_esia']
+social_and_env/ ajax/load-investment-types-pap/ [name='load_investment_types_pap']
+social_and_env/ ajax/load-investment-types-ohs/ [name='load_investment_types_ohs']
+social_and_env/ ajax/load-investment-types-grievance/ [name='load_investment_types_grievance']
+social_and_env/ ajax/load-kpi-descriptions-ohs/ [name='load_kpi_descriptions_ohs']
+PIU_Mapping_project_Sites/
+NAWEC_KPI/
+Issues_Actions_monitoring/
+document-management/
+project-progress/
+^static/(?P<path>.*)$
+^media/(?P<path>.*)$
+The current path, social_and_env/ohs/detail/12/, didn’t match any of these.
+
+You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
