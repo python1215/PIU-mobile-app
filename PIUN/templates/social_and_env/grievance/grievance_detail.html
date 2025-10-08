@@ -66,11 +66,11 @@
                                 </tr>
                                 <tr>
                                     <th class="text-muted">How Complaint Was Received:</th>
-                                    <td>{{ grievance.how_complaint_was_received|default:"-" }}</td>
+                                    <td>{{ grievance.get_how_complaint_was_received_display|default:"-" }}</td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted">Type of Investment:</th>
-                                    <td>{{ grievance.type_of_investment.type_of_investment|default:"-" }}</td>
+                                    <td>{{ grievance.type_of_investment.Kpi_description|default:"-" }}</td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted">Decision Outcome:</th>
@@ -99,37 +99,23 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <th class="text-muted">Name of Complainant:</th>
-                                    <td>{{ grievance.name_of_Complainant|default:"-" }}</td>
+                                    <td>{{ grievance.name_of_complainant|default:"-" }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Contact Information:</th>
-                                    <td>{{ grievance.contact_information|default:"-" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Age:</th>
-                                    <td>{{ grievance.age|default:"-" }}</td>
+                                    <th class="text-muted">Phone Number:</th>
+                                    <td>{{ grievance.tell_no|default:"-" }}</td>
                                 </tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <th class="text-muted">Location:</th>
-                                    <td>{{ grievance.location|default:"-" }}</td>
+                                    <th class="text-muted">Expected Decision Date:</th>
+                                    <td>{{ grievance.expected_decision_date|date:"F d, Y"|default:"-" }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Vulnerable Group:</th>
-                                    <td>{{ grievance.vulnerable_group|default:"-" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Anonymous:</th>
-                                    <td>
-                                        {% if grievance.anonymous %}
-                                            <span class="badge bg-warning">Yes</span>
-                                        {% else %}
-                                            <span class="badge bg-info">No</span>
-                                        {% endif %}
-                                    </td>
+                                    <th class="text-muted">Days to Resolution:</th>
+                                    <td>{{ grievance.days_to_resolution|default:"-" }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -145,67 +131,87 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <strong>Nature of Complaint:</strong>
-                        <p class="mt-2">{{ grievance.nature_of_complaint|linebreaks|default:"-" }}</p>
+                        <p class="mt-2">{{ grievance.complaint_content|linebreaks|default:"-" }}</p>
                     </div>
                     <div class="mb-3">
-                        <strong>Proposed Solution:</strong>
-                        <p class="mt-2">{{ grievance.proposed_solution|linebreaks|default:"-" }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Action Taken:</strong>
-                        <p class="mt-2">{{ grievance.action_taken|linebreaks|default:"-" }}</p>
+                        <strong>Complaint Acknowledgment Received:</strong>
+                        <p class="mt-2">
+                            {% if grievance.was_recieved_of_complaint_ack == "Y" %}
+                                <span class="badge bg-success">Yes</span>
+                            {% elif grievance.was_recieved_of_complaint_ack == "N" %}
+                                <span class="badge bg-danger">No</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Investigation Details -->
+            <!-- Decision & Communication -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-search"></i> Investigation Details</h5>
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Decision & Communication Details</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <th class="text-muted">Investigation Start Date:</th>
-                                    <td>{{ grievance.Investigation_start_date|date:"F d, Y"|default:"-" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Investigation End Date:</th>
-                                    <td>{{ grievance.Investigation_end_date|date:"F d, Y"|default:"-" }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th class="text-muted">Investigation Duration:</th>
+                                    <th class="text-muted">Decision Communicated to Complainant:</th>
                                     <td>
-                                        {% if grievance.Investigation_start_date and grievance.Investigation_end_date %}
-                                            {{ grievance.Investigation_end_date|timesince:grievance.Investigation_start_date }}
+                                        {% if grievance.was_decison_communicated_to_complainant == "Y" %}
+                                            <span class="badge bg-success">Yes</span>
+                                        {% elif grievance.was_decison_communicated_to_complainant == "N" %}
+                                            <span class="badge bg-danger">No</span>
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Status:</th>
+                                    <th class="text-muted">Communication Method:</th>
+                                    <td>{{ grievance.get_communication_method_display|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted">Complainant Satisfied with Decision:</th>
                                     <td>
-                                        {% if grievance.Investigation_end_date %}
-                                            <span class="badge bg-success">Completed</span>
-                                        {% elif grievance.Investigation_start_date %}
-                                            <span class="badge bg-warning">In Progress</span>
+                                        {% if grievance.was_complainant_satisfied_with_decision == "Y" %}
+                                            <span class="badge bg-success">Yes</span>
+                                        {% elif grievance.was_complainant_satisfied_with_decision == "N" %}
+                                            <span class="badge bg-danger">No</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">Not Started</span>
+                                            -
                                         {% endif %}
                                     </td>
                                 </tr>
                             </table>
                         </div>
                     </div>
+                    {% if grievance.brief_note_for_NO_answer %}
+                    <div class="mt-3">
+                        <strong>Explanation if Not Satisfied:</strong>
+                        <p class="mt-2">{{ grievance.brief_note_for_NO_answer|linebreaks }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
+
+            <!-- Follow-up Actions -->
+            {% if grievance.any_follow_up_action %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-repeat"></i> Follow-up Actions</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ grievance.any_follow_up_action|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Sidebar -->
@@ -227,22 +233,22 @@
                         </div>
                         {% endif %}
                         
-                        {% if grievance.Investigation_start_date %}
+                        {% if grievance.expected_decision_date %}
                         <div class="timeline-item mb-3">
                             <div class="timeline-marker bg-warning"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">Investigation Started</h6>
-                                <small class="text-muted">{{ grievance.Investigation_start_date|date:"M d, Y" }}</small>
+                                <h6 class="mb-1">Expected Decision Date</h6>
+                                <small class="text-muted">{{ grievance.expected_decision_date|date:"M d, Y" }}</small>
                             </div>
                         </div>
                         {% endif %}
                         
-                        {% if grievance.Investigation_end_date %}
+                        {% if grievance.decision_outcome %}
                         <div class="timeline-item mb-3">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">Investigation Completed</h6>
-                                <small class="text-muted">{{ grievance.Investigation_end_date|date:"M d, Y" }}</small>
+                                <h6 class="mb-1">Decision Made</h6>
+                                <small class="text-muted">{{ grievance.decision_outcome }}</small>
                             </div>
                         </div>
                         {% endif %}
