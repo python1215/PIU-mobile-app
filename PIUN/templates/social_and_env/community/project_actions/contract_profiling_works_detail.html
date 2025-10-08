@@ -172,27 +172,27 @@
                             <div class="info-item">
                                 <div class="info-label">Project</div>
                                 <div class="info-value">
-                                    <strong>{{ contract.projectID.projectName|default:"Not specified" }}</strong>
-                                    {% if contract.projectID.projectCode %}
-                                        <small class="text-muted d-block">Code: {{ contract.projectID.projectCode }}</small>
+                                    <strong>{{ contract.projectID|default:"Not specified" }}</strong>
+                                    {% if contract.projectID.projectID %}
+                                        <small class="text-muted d-block">Code: {{ contract.projectID.projectID }}</small>
                                     {% endif %}
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Component</div>
-                                <div class="info-value">{{ contract.compID.compName|default:"Not specified" }}</div>
+                                <div class="info-value">{{ contract.compID|default:"Not specified" }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Subcomponent</div>
-                                <div class="info-value">{{ contract.subcompID.subcompName|default:"Not specified" }}</div>
+                                <div class="info-value">{{ contract.subcompID|default:"Not specified" }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Activity</div>
-                                <div class="info-value">{{ contract.activityID.activityName|default:"Not specified" }}</div>
+                                <div class="info-value">{{ contract.activityID|default:"Not specified" }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Project Category</div>
-                                <div class="info-value">{{ contract.project_Category.categoryName|default:"Not specified" }}</div>
+                                <div class="info-value">{{ contract.project_Category|default:"Not specified" }}</div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -201,13 +201,13 @@
                                 <div class="info-value">
                                     <span class="fs-4 fw-bold text-success">{{ contract.contract_value|floatformat:2 }}</span>
                                     {% if contract.currency %}
-                                        <small class="text-muted">{{ contract.currency.currencyName }}</small>
+                                        <small class="text-muted">{{ contract.currency }}</small>
                                     {% endif %}
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Funding Source</div>
-                                <div class="info-value">{{ contract.funding_source.donorName|default:"Not specified" }}</div>
+                                <div class="info-value">{{ contract.funding_source|default:"Not specified" }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Contractor</div>
