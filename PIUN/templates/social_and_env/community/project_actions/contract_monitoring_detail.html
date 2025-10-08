@@ -75,6 +75,18 @@
                         <p class="text-gray-900 font-semibold">{{ record.contract_refNo|default:"Not specified" }}</p>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Contractor</label>
+                        <p class="text-gray-900 font-semibold">
+                            {% if related_works_contract %}
+                                {{ related_works_contract.name_of_contractor|default:"Not specified" }}
+                            {% elif related_goods_services_contract %}
+                                {{ related_goods_services_contract.name_of_Supplier|default:"Not specified" }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Monitoring Date</label>
                         <p class="text-gray-900 font-semibold">{{ record.monitoring_date|date:"M d, Y"|default:"Not specified" }}</p>
                     </div>
