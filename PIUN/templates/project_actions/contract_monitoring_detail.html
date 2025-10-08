@@ -57,9 +57,9 @@
                             <label class="form-label text-dark fw-semibold">Contractor:</label>
                             <p class="text-dark">
                                 {% if related_works_contract %}
-                                    {{ related_works_contract.contractor|default:"Not specified" }}
+                                    {{ related_works_contract.name_of_contractor|default:"Not specified" }}
                                 {% elif related_goods_services_contract %}
-                                    {{ related_goods_services_contract.contractor|default:"Not specified" }}
+                                    {{ related_goods_services_contract.name_of_Supplier|default:"Not specified" }}
                                 {% else %}
                                     Not specified
                                 {% endif %}
