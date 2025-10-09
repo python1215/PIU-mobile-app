@@ -132,11 +132,11 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-dark fw-semibold">Type of Investment:</label>
-                            <p class="text-dark">{{ monitoring.Type_of_Investment|default:"Not specified" }}</p>
+                            <p class="text-dark">{{ monitoring.Type_of_Investment.type_of_investment|default:"Not specified" }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-dark fw-semibold">KPI Description:</label>
-                            <p class="text-dark">{{ monitoring.Kpi_description|default:"Not specified" }}</p>
+                            <p class="text-dark">{{ monitoring.Kpi_description.Kpi_description|default:"Not specified" }}</p>
                         </div>
                     </div>
                 </div>
