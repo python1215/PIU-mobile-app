@@ -73,12 +73,11 @@
                                         <th>Year</th>
                                         <th>Quarter</th>
                                         <th>Type of Indicator</th>
-                                        <th>Quarter</th>
                                         <th colspan="2" class="text-center">Status:</th>
                                         <th class="text-center">Action</th>
                                     </tr>
                                     <tr>
-                                        <th colspan="5"></th>
+                                        <th colspan="4"></th>
                                         <th class="text-center">Number Achieved</th>
                                         <th class="text-center">Number unachieved</th>
                                         <th class="text-center"></th>
@@ -91,13 +90,6 @@
                                         <td>{{ record.year__profile_year|default:"N/A" }}</td>
                                         <td>{{ record.quarter__quarter|default:"N/A" }}</td>
                                         <td>{{ record.indicator_type__indicator_type|default:"N/A" }}</td>
-                                        <td>
-                                            {% if record.quarter__quarter == 'Q1' %}1st
-                                            {% elif record.quarter__quarter == 'Q2' %}2nd
-                                            {% elif record.quarter__quarter == 'Q3' %}3rd
-                                            {% elif record.quarter__quarter == 'Q4' %}4th
-                                            {% else %}{{ record.quarter__quarter }}{% endif %}
-                                        </td>
                                         <td class="text-center">
                                             <span class="badge bg-success">{{ record.number_achieved|default:"0" }}</span>
                                         </td>
