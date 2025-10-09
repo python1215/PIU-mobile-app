@@ -69,16 +69,14 @@
                             <table class="table table-bordered table-hover">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Project</th>
-                                        <th>Year</th>
-                                        <th>Quarter</th>
                                         <th>Type of Indicator</th>
-                                        <th>Quarter</th>
+                                        <th class="text-center">Total Records</th>
                                         <th colspan="2" class="text-center">Status:</th>
                                         <th class="text-center">Action</th>
                                     </tr>
                                     <tr>
-                                        <th colspan="5"></th>
+                                        <th></th>
+                                        <th class="text-center"></th>
                                         <th class="text-center">Number Achieved</th>
                                         <th class="text-center">Number unachieved</th>
                                         <th class="text-center"></th>
@@ -87,16 +85,9 @@
                                 <tbody>
                                     {% for record in monitoring_data %}
                                     <tr>
-                                        <td>{{ record.project__project|default:"N/A" }}</td>
-                                        <td>{{ record.year__profile_year|default:"N/A" }}</td>
-                                        <td>{{ record.quarter__quarter|default:"N/A" }}</td>
                                         <td>{{ record.indicator_type__indicator_type|default:"N/A" }}</td>
-                                        <td>
-                                            {% if record.quarter__quarter == 'Q1' %}1st
-                                            {% elif record.quarter__quarter == 'Q2' %}2nd
-                                            {% elif record.quarter__quarter == 'Q3' %}3rd
-                                            {% elif record.quarter__quarter == 'Q4' %}4th
-                                            {% else %}{{ record.quarter__quarter }}{% endif %}
+                                        <td class="text-center">
+                                            <span class="badge bg-info">{{ record.total_count|default:"0" }}</span>
                                         </td>
                                         <td class="text-center">
                                             <span class="badge bg-success">{{ record.number_achieved|default:"0" }}</span>
@@ -105,7 +96,7 @@
                                             <span class="badge bg-warning text-dark">{{ record.number_unachieved|default:"0" }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <a href="{% url 'monitoring:dashboard-detail-view' %}?project={{ record.project__project }}&year={{ record.year__profile_year }}&quarter={{ record.quarter__quarter }}&indicator_type={{ record.indicator_type__indicator_type }}" 
+                                            <a href="{% url 'monitoring:dashboard-detail-view' %}?indicator_type={{ record.indicator_type__indicator_type }}" 
                                                class="btn btn-sm btn-primary">
                                                 <i class="bi bi-eye"></i> View
                                             </a>

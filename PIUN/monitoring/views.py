@@ -46,28 +46,20 @@ def monitoring_dashboard(request):
             'monitoring_data': [],
         }
         
-        # Get monitoring data grouped by Project, Year, Quarter, and Type of Indicator
+        # Get monitoring data grouped by Type of Indicator only
         # Exclude orphaned records with NULL foreign keys
         queryset = Results_Oriented_Monitoring.objects.exclude(
-            project__isnull=True
-        ).exclude(
             indicator_type__isnull=True
-        ).exclude(
-            year__isnull=True
-        ).exclude(
-            quarter__isnull=True
         )
         
-        # Aggregate data by project, year, quarter, and indicator type
+        # Aggregate data by indicator type only
         monitoring_data = queryset.values(
-            'project__project',
-            'year__profile_year',
-            'quarter__quarter',
             'indicator_type__indicator_type'
         ).annotate(
             number_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
-            number_unachieved=Count('id', filter=Q(percentage_achieved_vs_end_target__lt=100) | Q(percentage_achieved_vs_end_target__isnull=True))
-        ).order_by('project__project', 'year__profile_year', 'quarter__quarter', 'indicator_type__indicator_type')
+            number_unachieved=Count('id', filter=Q(percentage_achieved_vs_end_target__lt=100) | Q(percentage_achieved_vs_end_target__isnull=True)),
+            total_count=Count('id')
+        ).order_by('indicator_type__indicator_type')
         
         stats['monitoring_data'] = list(monitoring_data)
         
