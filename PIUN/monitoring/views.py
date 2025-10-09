@@ -96,6 +96,51 @@ def monitoring_dashboard(request):
     return render(request, 'monitoring/dashboard.html', context)
 
 @login_required
+def dashboard_detail_view(request):
+    """View to display specific monitoring records based on filters from dashboard"""
+    from PIU_Financial_mgt.models import Project
+    from setup.models import YEAR, Quarter, Indicator_Type
+    
+    # Get filter parameters from URL
+    project_name = request.GET.get('project')
+    year_value = request.GET.get('year')
+    quarter_value = request.GET.get('quarter')
+    indicator_type_name = request.GET.get('indicator_type')
+    
+    # Build filter query
+    filters = {}
+    if project_name:
+        filters['project__project'] = project_name
+    if year_value:
+        filters['year__profile_year'] = year_value
+    if quarter_value:
+        filters['quarter__quarter'] = quarter_value
+    if indicator_type_name:
+        filters['indicator_type__indicator_type'] = indicator_type_name
+    
+    # Get filtered records
+    records = Results_Oriented_Monitoring.objects.filter(**filters).select_related(
+        'project', 'year', 'quarter', 'indicator_type', 'pdo', 'project_outcome', 
+        'project_result', 'measurement_unit', 'collection_frequency', 'loginUser'
+    ).order_by('-date_created')
+    
+    context = {
+        'records': records,
+        'project_name': project_name,
+        'year_value': year_value,
+        'quarter_value': quarter_value,
+        'indicator_type_name': indicator_type_name,
+        'filter_info': {
+            'project': project_name,
+            'year': year_value,
+            'quarter': quarter_value,
+            'indicator_type': indicator_type_name,
+        }
+    }
+    
+    return render(request, 'monitoring/dashboard_detail_view.html', context)
+
+@login_required
 @csrf_exempt
 def get_indicator_descriptions(request):
     if request.method == "POST":

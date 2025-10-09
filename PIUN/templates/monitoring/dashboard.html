@@ -75,11 +75,13 @@
                                         <th>Type of Indicator</th>
                                         <th>Quarter</th>
                                         <th colspan="2" class="text-center">Status:</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                     <tr>
                                         <th colspan="5"></th>
                                         <th class="text-center">Number Achieved</th>
                                         <th class="text-center">Number unachieved</th>
+                                        <th class="text-center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,6 +103,12 @@
                                         </td>
                                         <td class="text-center">
                                             <span class="badge bg-warning text-dark">{{ record.number_unachieved|default:"0" }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'monitoring:dashboard-detail-view' %}?project={{ record.project__project }}&year={{ record.year__profile_year }}&quarter={{ record.quarter__quarter }}&indicator_type={{ record.indicator_type__indicator_type }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
                                         </td>
                                     </tr>
                                     {% endfor %}

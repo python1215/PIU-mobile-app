@@ -7,6 +7,7 @@ urlpatterns = [
     # Basic monitoring views
     path('', views.monitoring_dashboard, name='monitoring_dashboard'),
     path('dashboard/', views.monitoring_dashboard, name='monitoring-dashboard'),
+    path('dashboard-detail-view/', views.dashboard_detail_view, name='dashboard-detail-view'),
     
     # HTMX Load Views
     path('load_project_PDO/', views.load_project_PDO, name='load_project_PDO'),
