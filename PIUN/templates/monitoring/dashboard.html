@@ -73,48 +73,39 @@
                                         <th>Year</th>
                                         <th>Quarter</th>
                                         <th>Type of Indicator</th>
-                                        <th>Indicator Description</th>
-                                        <th>Achieved</th>
-                                        <th>Target</th>
-                                        <th>% Achieved</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th>Quarter</th>
+                                        <th colspan="2" class="text-center">Status:</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="5"></th>
+                                        <th class="text-center">Number Achieved</th>
+                                        <th class="text-center">Number unachieved</th>
+                                        <th class="text-center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for record in monitoring_data %}
                                     <tr>
-                                        <td>{{ record.project.project|default:"N/A" }}</td>
-                                        <td>{{ record.year.profile_year|default:"N/A" }}</td>
-                                        <td>{{ record.quarter.quarter|default:"N/A" }}</td>
-                                        <td>{{ record.indicator_type.indicator_type|default:"N/A" }}</td>
-                                        <td>{{ record.indicator_description|truncatechars:40|default:"-" }}</td>
-                                        <td>{{ record.achieved_value|default:"-" }}</td>
-                                        <td>{{ record.End_Target_Value|default:"-" }}</td>
+                                        <td>{{ record.project__project|default:"N/A" }}</td>
+                                        <td>{{ record.year__profile_year|default:"N/A" }}</td>
+                                        <td>{{ record.quarter__quarter|default:"N/A" }}</td>
+                                        <td>{{ record.indicator_type__indicator_type|default:"N/A" }}</td>
                                         <td>
-                                            {% if record.percentage_achieved_vs_end_target %}
-                                                {{ record.percentage_achieved_vs_end_target|floatformat:1 }}%
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if record.percentage_achieved_vs_end_target %}
-                                                {% if record.percentage_achieved_vs_end_target >= 100 %}
-                                                    <span class="badge bg-success">Achieved</span>
-                                                {% elif record.percentage_achieved_vs_end_target >= 80 %}
-                                                    <span class="badge bg-info">On Track</span>
-                                                {% elif record.percentage_achieved_vs_end_target >= 50 %}
-                                                    <span class="badge bg-warning text-dark">Needs Attention</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Off Track</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="badge bg-secondary">No Data</span>
-                                            {% endif %}
+                                            {% if record.quarter__quarter == 'Q1' %}1st
+                                            {% elif record.quarter__quarter == 'Q2' %}2nd
+                                            {% elif record.quarter__quarter == 'Q3' %}3rd
+                                            {% elif record.quarter__quarter == 'Q4' %}4th
+                                            {% else %}{{ record.quarter__quarter }}{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <a href="{% url 'monitoring:detail-results-monitoring' record.pk %}" 
+                                            <span class="badge bg-success">{{ record.number_achieved|default:"0" }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-warning text-dark">{{ record.number_unachieved|default:"0" }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'monitoring:dashboard-detail-view' %}?project={{ record.project__project }}&year={{ record.year__profile_year }}&quarter={{ record.quarter__quarter }}&indicator_type={{ record.indicator_type__indicator_type }}" 
                                                class="btn btn-sm btn-primary">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
