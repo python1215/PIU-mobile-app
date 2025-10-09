@@ -46,20 +46,11 @@ def monitoring_dashboard(request):
             'monitoring_data': [],
         }
         
-        # Get monitoring data grouped by Type of Indicator only
-        # Exclude orphaned records with NULL foreign keys
-        queryset = Results_Oriented_Monitoring.objects.exclude(
-            indicator_type__isnull=True
-        )
-        
-        # Aggregate data by indicator type only
-        monitoring_data = queryset.values(
-            'indicator_type__indicator_type'
-        ).annotate(
-            number_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
-            number_unachieved=Count('id', filter=Q(percentage_achieved_vs_end_target__lt=100) | Q(percentage_achieved_vs_end_target__isnull=True)),
-            total_count=Count('id')
-        ).order_by('indicator_type__indicator_type')
+        # Get recent monitoring records without grouping
+        monitoring_data = Results_Oriented_Monitoring.objects.select_related(
+            'project', 'year', 'quarter', 'indicator_type', 'pdo', 'project_outcome', 
+            'project_result', 'measurement_unit', 'collection_frequency'
+        ).order_by('-date_created')[:20]  # Show latest 20 records
         
         stats['monitoring_data'] = list(monitoring_data)
         
