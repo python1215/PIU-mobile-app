@@ -160,6 +160,20 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
                   'indicator_type', 'indicator_description', 'measurement_unit', 'collection_frequency',
                   'baseline_value', 'achieved_value', 'End_Target_Value',
                   'percentage_achieved_vs_baseline', 'percentage_achieved_vs_end_target', 'remarks']
+        widgets = {
+            'indicator_description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'remarks': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'percentage_achieved_vs_baseline': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01',
+                'placeholder': 'Enter percentage or auto-calculate'
+            }),
+            'percentage_achieved_vs_end_target': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01',
+                'placeholder': 'Enter percentage or auto-calculate'
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -168,6 +182,10 @@ class updateResults_Oriented_MonitoringForm(forms.ModelForm):
         self.fields['project_outcome'].required = True
         self.fields['project_result'].required = True
         self.fields['pdo'].required = True
+        
+        # Add help text to percentage fields to indicate they're editable
+        self.fields['percentage_achieved_vs_baseline'].help_text = 'You can manually enter or modify this value'
+        self.fields['percentage_achieved_vs_end_target'].help_text = 'You can manually enter or modify this value'
         
         # Set initial querysets - show all options for editing
         self.fields['pdo'].queryset = PDO.objects.all()

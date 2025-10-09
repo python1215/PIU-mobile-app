@@ -231,6 +231,9 @@
                                         <i class="fas fa-percent me-1 text-muted"></i>Percentage progress from baseline
                                     </label>
                                     {{ form.percentage_achieved_vs_baseline|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.percentage_achieved_vs_baseline.help_text %}
+                                        <div class="form-text text-success"><i class="bi bi-pencil-square"></i> {{ form.percentage_achieved_vs_baseline.help_text }}</div>
+                                    {% endif %}
                                     {% if form.percentage_achieved_vs_baseline.errors %}
                                         <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_baseline.errors.0 }}</div>
                                     {% endif %}
@@ -241,6 +244,9 @@
                                         <i class="fas fa-percent me-1 text-muted"></i>Percentage progress towards end target
                                     </label>
                                     {{ form.percentage_achieved_vs_end_target|add_class:"form-control shadow-sm border-2" }}
+                                    {% if form.percentage_achieved_vs_end_target.help_text %}
+                                        <div class="form-text text-success"><i class="bi bi-pencil-square"></i> {{ form.percentage_achieved_vs_end_target.help_text }}</div>
+                                    {% endif %}
                                     {% if form.percentage_achieved_vs_end_target.errors %}
                                         <div class="text-danger small mt-1">{{ form.percentage_achieved_vs_end_target.errors.0 }}</div>
                                     {% endif %}
