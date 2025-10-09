@@ -195,8 +195,8 @@
                                             <td>{{ record.monitoring_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>{{ record.quarter|default:"N/A" }}</td>
                                             <td>{{ record.type_of_monitoring|default:"N/A" }}</td>
-                                            <td>{{ record.Type_of_Investment|default:"N/A" }}</td>
-                                            <td>{{ record.Kpi_description|default:"N/A" }}</td>
+                                            <td>{{ record.Type_of_Investment.type_of_investment|default:"N/A" }}</td>
+                                            <td>{{ record.Kpi_description.Kpi_description|default:"N/A" }}</td>
                                             <td>{{ record.milestone_start_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>{{ record.milestone_end_date|date:"M d, Y"|default:"N/A" }}</td>
                                             <td>
