@@ -55,52 +55,52 @@
             </div>
         </div>
 
-        <!-- Recent Activity -->
+        <!-- Monitoring Data Table -->
         <div class="col-lg-8 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-activity me-2"></i>Recent Monitoring Activity
+                        <i class="bi bi-activity me-2"></i>Monitoring Dashboard
                     </h5>
                 </div>
                 <div class="card-body">
-                    {% if recent_monitoring %}
+                    {% if monitoring_data %}
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover">
+                            <table class="table table-bordered table-hover">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Project</th>
+                                        <th>Year</th>
+                                        <th>Quarter</th>
                                         <th>Type of Indicator</th>
-                                        <th>Total Planned by Type of Indicator</th>
-                                        <th>Total Achieved by Type of Indicator</th>
-                                        <th>% Achieved</th>
-                                        <th>Status</th>
+                                        <th>Quarter</th>
+                                        <th colspan="2" class="text-center">Status:</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="5"></th>
+                                        <th class="text-center">Number Achieved</th>
+                                        <th class="text-center">Number unachieved</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for record in recent_monitoring %}
+                                    {% for record in monitoring_data %}
                                     <tr>
                                         <td>{{ record.project__project|default:"N/A" }}</td>
-                                        <td>{{ record.indicator_type__indicator_type|default:"N/A"|truncatechars:30 }}</td>
-                                        <td><span class="badge bg-primary">{{ record.count }}</span></td>
-                                        <td><span class="badge bg-success">{{ record.total_achieved }}</span></td>
+                                        <td>{{ record.year__profile_year|default:"N/A" }}</td>
+                                        <td>{{ record.quarter__quarter|default:"N/A" }}</td>
+                                        <td>{{ record.indicator_type__indicator_type|default:"N/A" }}</td>
                                         <td>
-                                            {% if record.avg_percentage %}
-                                                {{ record.avg_percentage|floatformat:1 }}%
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
+                                            {% if record.quarter__quarter == 'Q1' %}1st
+                                            {% elif record.quarter__quarter == 'Q2' %}2nd
+                                            {% elif record.quarter__quarter == 'Q3' %}3rd
+                                            {% elif record.quarter__quarter == 'Q4' %}4th
+                                            {% else %}{{ record.quarter__quarter }}{% endif %}
                                         </td>
-                                        <td>
-                                            {% if record.status == 'On Track' %}
-                                                <span class="badge bg-success">{{ record.status }}</span>
-                                            {% elif record.status == 'Needs Attention' %}
-                                                <span class="badge bg-warning text-dark">{{ record.status }}</span>
-                                            {% elif record.status == 'Off Track' %}
-                                                <span class="badge bg-danger">{{ record.status }}</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ record.status }}</span>
-                                            {% endif %}
+                                        <td class="text-center">
+                                            <span class="badge bg-success">{{ record.number_achieved|default:"0" }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-warning text-dark">{{ record.number_unachieved|default:"0" }}</span>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -110,7 +110,7 @@
                     {% else %}
                         <div class="text-center py-4">
                             <i class="bi bi-inbox display-4 text-muted"></i>
-                            <p class="text-muted mt-2">No recent monitoring activity</p>
+                            <p class="text-muted mt-2">No monitoring data available</p>
                             <a href="{% url 'monitoring:add-results-monitoring' %}" class="btn btn-primary">
                                 Add First Record
                             </a>

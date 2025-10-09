@@ -31,7 +31,7 @@ import io
 @login_required
 def monitoring_dashboard(request):
     """Enhanced monitoring dashboard with Indicator Performance Report data"""
-    from django.db.models import Count, Avg, Case, When, Q, Value, CharField
+    from django.db.models import Count, Q
     from django.conf import settings
     from PIU_Financial_mgt.models import Project
     from setup.models import Quarter, Indicator_Type
@@ -43,41 +43,33 @@ def monitoring_dashboard(request):
             'total_indicators': Indicator_Description.objects.count(), 
             'quarterly_reports': Quarter.objects.count(),
             'performance_avg': 0,
-            'recent_monitoring': [],
+            'monitoring_data': [],
         }
         
-        # Get Indicator Performance Report data for Recent Monitoring Activity
+        # Get monitoring data grouped by Project, Year, Quarter, and Type of Indicator
         # Exclude orphaned records with NULL foreign keys
         queryset = Results_Oriented_Monitoring.objects.exclude(
             project__isnull=True
         ).exclude(
             indicator_type__isnull=True
+        ).exclude(
+            year__isnull=True
+        ).exclude(
+            quarter__isnull=True
         )
         
-        # Define status classification
-        status_annotation = Case(
-            When(percentage_achieved_vs_end_target__isnull=True, then=Value('No Data')),
-            When(percentage_achieved_vs_end_target__gte=80, then=Value('On Track')),
-            When(percentage_achieved_vs_end_target__gte=50, then=Value('Needs Attention')),
-            When(percentage_achieved_vs_end_target__lt=50, then=Value('Off Track')),
-            default=Value('No Data'),
-            output_field=CharField()
-        )
-        
-        # Aggregate data by project and indicator type with status
-        recent_monitoring = queryset.annotate(
-            status=status_annotation
-        ).values(
+        # Aggregate data by project, year, quarter, and indicator type
+        monitoring_data = queryset.values(
             'project__project',
-            'indicator_type__indicator_type',
-            'status'
+            'year__profile_year',
+            'quarter__quarter',
+            'indicator_type__indicator_type'
         ).annotate(
-            count=Count('id'),
-            total_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
-            avg_percentage=Avg('percentage_achieved_vs_end_target', filter=Q(percentage_achieved_vs_end_target__isnull=False))
-        ).order_by('-count')[:10]  # Top 10 by count
+            number_achieved=Count('id', filter=Q(percentage_achieved_vs_end_target__gte=100)),
+            number_unachieved=Count('id', filter=Q(percentage_achieved_vs_end_target__lt=100) | Q(percentage_achieved_vs_end_target__isnull=True))
+        ).order_by('project__project', 'year__profile_year', 'quarter__quarter', 'indicator_type__indicator_type')
         
-        stats['recent_monitoring'] = list(recent_monitoring)
+        stats['monitoring_data'] = list(monitoring_data)
         
         # Calculate performance average using Django ORM
         monitoring_count = Results_Oriented_Monitoring.objects.count()
@@ -93,7 +85,7 @@ def monitoring_dashboard(request):
             'total_indicators': 0,
             'quarterly_reports': 0,
             'performance_avg': 0,
-            'recent_monitoring': [],
+            'monitoring_data': [],
         }
     
     context = {
