@@ -398,6 +398,32 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`${fieldId}: ${field.value}`);
         }
     });
+    
+    // Ensure percentage fields are fully editable
+    const percentageBaselineField = document.getElementById('id_percentage_achieved_vs_baseline');
+    const percentageEndTargetField = document.getElementById('id_percentage_achieved_vs_end_target');
+    
+    if (percentageBaselineField) {
+        // Remove any readonly or disabled attributes
+        percentageBaselineField.removeAttribute('readonly');
+        percentageBaselineField.removeAttribute('disabled');
+        percentageBaselineField.classList.remove('bg-light');
+        // Ensure it's editable
+        percentageBaselineField.readOnly = false;
+        percentageBaselineField.disabled = false;
+        console.log('Percentage baseline field set to editable');
+    }
+    
+    if (percentageEndTargetField) {
+        // Remove any readonly or disabled attributes
+        percentageEndTargetField.removeAttribute('readonly');
+        percentageEndTargetField.removeAttribute('disabled');
+        percentageEndTargetField.classList.remove('bg-light');
+        // Ensure it's editable
+        percentageEndTargetField.readOnly = false;
+        percentageEndTargetField.disabled = false;
+        console.log('Percentage end target field set to editable');
+    }
 });
 </script>
 {% endblock content %}
