@@ -154,13 +154,13 @@ def issues_list(request):
         )
     
     # Pagination with configurable page size
-    page_size = request.GET.get('page_size', 15)
+    page_size = request.GET.get('page_size', 10)
     try:
         page_size = int(page_size)
         if page_size not in [10, 15, 25, 50, 100]:
-            page_size = 15
+            page_size = 10
     except (ValueError, TypeError):
-        page_size = 15
+        page_size = 10
     
     paginator = Paginator(issues, page_size)
     page_number = request.GET.get('page')
