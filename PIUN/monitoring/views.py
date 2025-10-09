@@ -34,7 +34,13 @@ def monitoring_dashboard(request):
     from django.db.models import Count, Q
     from django.conf import settings
     from PIU_Financial_mgt.models import Project
-    from setup.models import Quarter, Indicator_Type
+    from setup.models import Quarter, Indicator_Type, YEAR
+    
+    # Get filter parameters from GET request
+    filter_project = request.GET.get('project', '')
+    filter_year = request.GET.get('year', '')
+    filter_quarter = request.GET.get('quarter', '')
+    filter_indicator_type = request.GET.get('indicator_type', '')
     
     # Get dashboard statistics using Django ORM
     try:
@@ -57,6 +63,16 @@ def monitoring_dashboard(request):
         ).exclude(
             quarter__isnull=True
         )
+        
+        # Apply filters if provided
+        if filter_project:
+            queryset = queryset.filter(project__project=filter_project)
+        if filter_year:
+            queryset = queryset.filter(year__profile_year=filter_year)
+        if filter_quarter:
+            queryset = queryset.filter(quarter__quarter=filter_quarter)
+        if filter_indicator_type:
+            queryset = queryset.filter(indicator_type__indicator_type=filter_indicator_type)
         
         # Aggregate data by project, year, quarter, and indicator type
         monitoring_data = queryset.values(
@@ -88,8 +104,22 @@ def monitoring_dashboard(request):
             'monitoring_data': [],
         }
     
+    # Get filter options for the form
+    projects = Project.objects.all().order_by('project')
+    years = YEAR.objects.all().order_by('-profile_year')
+    quarters = Quarter.objects.all().order_by('quarter')
+    indicator_types = Indicator_Type.objects.all().order_by('indicator_type')
+    
     context = {
         'page_title': 'Monitoring Dashboard',
+        'projects': projects,
+        'years': years,
+        'quarters': quarters,
+        'indicator_types': indicator_types,
+        'filter_project': filter_project,
+        'filter_year': filter_year,
+        'filter_quarter': filter_quarter,
+        'filter_indicator_type': filter_indicator_type,
         **stats
     }
     

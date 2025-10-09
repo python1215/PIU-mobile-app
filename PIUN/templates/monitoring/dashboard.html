@@ -23,6 +23,75 @@
         </div>
     </div>
 
+    <!-- Filter Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-funnel me-2"></i>Filter Dashboard
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{% url 'monitoring:monitoring-dashboard' %}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="project" class="form-label">Project</label>
+                            <select name="project" id="project" class="form-select">
+                                <option value="">All Projects</option>
+                                {% for proj in projects %}
+                                    <option value="{{ proj.project }}" {% if filter_project == proj.project %}selected{% endif %}>
+                                        {{ proj.project }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="year" class="form-label">Year</label>
+                            <select name="year" id="year" class="form-select">
+                                <option value="">All Years</option>
+                                {% for yr in years %}
+                                    <option value="{{ yr.profile_year }}" {% if filter_year == yr.profile_year %}selected{% endif %}>
+                                        {{ yr.profile_year }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="quarter" class="form-label">Quarter</label>
+                            <select name="quarter" id="quarter" class="form-select">
+                                <option value="">All Quarters</option>
+                                {% for qtr in quarters %}
+                                    <option value="{{ qtr.quarter }}" {% if filter_quarter == qtr.quarter %}selected{% endif %}>
+                                        {{ qtr.quarter }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="indicator_type" class="form-label">Type of Indicator</label>
+                            <select name="indicator_type" id="indicator_type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for itype in indicator_types %}
+                                    <option value="{{ itype.indicator_type }}" {% if filter_indicator_type == itype.indicator_type %}selected{% endif %}>
+                                        {{ itype.indicator_type }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Apply Filter
+                            </button>
+                            <a href="{% url 'monitoring:monitoring-dashboard' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Clear Filter
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Row -->
     <div class="row">
         <!-- Quick Actions -->
