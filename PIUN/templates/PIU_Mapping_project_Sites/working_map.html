@@ -54,6 +54,54 @@
     </div>
 </div>
 
+<!-- Draggable Filter Panel -->
+<div id="filter-panel" class="filter-panel">
+    <div class="filter-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;"><i class="bi bi-funnel"></i> Filter Locations</h6>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button onclick="toggleFilterPanel()" class="toggle-btn" id="filter-toggle-btn" title="Minimize">−</button>
+                <span style="font-size: 10px; color: #999;">⋮⋮</span>
+            </div>
+        </div>
+    </div>
+    <div class="filter-content" id="filter-content-panel">
+        <div style="padding: 8px 0;">
+            <div class="mb-2">
+                <label for="filter-project" style="font-size: 10px; font-weight: bold; color: #666; display: block; margin-bottom: 3px;">Project:</label>
+                <select id="filter-project" class="form-select form-select-sm" style="font-size: 10px;">
+                    <option value="">All Projects</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label for="filter-region" style="font-size: 10px; font-weight: bold; color: #666; display: block; margin-bottom: 3px;">Region:</label>
+                <select id="filter-region" class="form-select form-select-sm" style="font-size: 10px;">
+                    <option value="">All Regions</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label for="filter-district" style="font-size: 10px; font-weight: bold; color: #666; display: block; margin-bottom: 3px;">District:</label>
+                <select id="filter-district" class="form-select form-select-sm" style="font-size: 10px;">
+                    <option value="">All Districts</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label for="filter-settlement" style="font-size: 10px; font-weight: bold; color: #666; display: block; margin-bottom: 3px;">Settlement:</label>
+                <select id="filter-settlement" class="form-select form-select-sm" style="font-size: 10px;">
+                    <option value="">All Settlements</option>
+                </select>
+            </div>
+            <div class="mt-3" style="display: flex; gap: 4px;">
+                <button onclick="applyLocationFilter()" class="btn btn-primary btn-sm" style="font-size: 10px; flex: 1;">Apply</button>
+                <button onclick="clearLocationFilter()" class="btn btn-secondary btn-sm" style="font-size: 10px; flex: 1;">Clear</button>
+            </div>
+            <div id="filter-status" style="margin-top: 8px; font-size: 9px; color: #666; text-align: center;">
+                <!-- Status message will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -200,6 +248,48 @@
         overflow: hidden;
     }
     
+    /* Filter panel styles */
+    .filter-panel {
+        position: absolute;
+        top: 140px;
+        right: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 220px;
+        max-width: 280px;
+        cursor: move;
+    }
+    
+    .filter-header {
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        cursor: move;
+        user-select: none;
+    }
+    
+    .filter-header:hover {
+        background: #e9ecef;
+    }
+    
+    .filter-content {
+        padding: 10px 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+    
+    .filter-content.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        padding: 0 12px;
+        overflow: hidden;
+    }
+    
     /* Responsive map styles */
     .responsive-map {
         height: calc(100vh - 120px);
@@ -227,7 +317,13 @@
             font-size: 10px;
         }
         
-        .layers-header h6, .legend-header h6 {
+        .filter-panel {
+            min-width: 180px;
+            max-width: 220px;
+            font-size: 10px;
+        }
+        
+        .layers-header h6, .legend-header h6, .filter-header h6 {
             font-size: 11px !important;
         }
         
@@ -603,7 +699,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             var marker = L.marker([location.latitude, location.longitude], {
-                icon: customIcon
+                icon: customIcon,
+                locationData: location  // Store location data for filtering
             }).addTo(layerGroups[project]);
             
             var popupContent = '<div style="min-width: 180px; max-width: 200px; font-family: Arial, sans-serif; font-size: 11px;">';
@@ -731,8 +828,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         const layersPanel = document.getElementById('layers-panel');
         const legendPanel = document.getElementById('legend-panel');
+        const filterPanel = document.getElementById('filter-panel');
         
-        [layersPanel, legendPanel].forEach(function(panel) {
+        [layersPanel, legendPanel, filterPanel].forEach(function(panel) {
             if (!panel) return;
             
             const rect = panel.getBoundingClientRect();
@@ -836,6 +934,205 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleBtn.title = 'Maximize';
         }
     };
+    
+    window.toggleFilterPanel = function() {
+        const content = document.getElementById('filter-content-panel');
+        const toggleBtn = document.getElementById('filter-toggle-btn');
+        
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            toggleBtn.textContent = '−';
+            toggleBtn.title = 'Minimize';
+        } else {
+            content.classList.add('collapsed');
+            toggleBtn.textContent = '+';
+            toggleBtn.title = 'Maximize';
+        }
+    };
+    
+    // Initialize filter panel
+    const filterPanel = document.getElementById('filter-panel');
+    const filterHeader = document.querySelector('.filter-header');
+    if (filterPanel && filterHeader) {
+        makePanelDraggable(filterPanel, filterHeader, 'Filter');
+    }
+    
+    // Populate filter dropdowns with unique values from locations
+    function populateFilterDropdowns() {
+        var projects = new Set();
+        var regions = new Set();
+        var districts = new Set();
+        var settlements = new Set();
+        
+        locations.forEach(function(loc) {
+            loc.projects.forEach(function(p) { projects.add(p); });
+            regions.add(loc.region);
+            districts.add(loc.district);
+            settlements.add(loc.settlement);
+        });
+        
+        // Populate Project dropdown
+        var projectSelect = document.getElementById('filter-project');
+        Array.from(projects).sort().forEach(function(project) {
+            var option = document.createElement('option');
+            option.value = project;
+            option.textContent = project;
+            projectSelect.appendChild(option);
+        });
+        
+        // Populate Region dropdown
+        var regionSelect = document.getElementById('filter-region');
+        Array.from(regions).sort().forEach(function(region) {
+            var option = document.createElement('option');
+            option.value = region;
+            option.textContent = region;
+            regionSelect.appendChild(option);
+        });
+        
+        // Populate District dropdown
+        var districtSelect = document.getElementById('filter-district');
+        Array.from(districts).sort().forEach(function(district) {
+            var option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            districtSelect.appendChild(option);
+        });
+        
+        // Populate Settlement dropdown
+        var settlementSelect = document.getElementById('filter-settlement');
+        Array.from(settlements).sort().forEach(function(settlement) {
+            var option = document.createElement('option');
+            option.value = settlement;
+            option.textContent = settlement;
+            settlementSelect.appendChild(option);
+        });
+    }
+    
+    // Cascading filter logic
+    document.getElementById('filter-project').addEventListener('change', updateCascadingFilters);
+    document.getElementById('filter-region').addEventListener('change', updateCascadingFilters);
+    document.getElementById('filter-district').addEventListener('change', updateCascadingFilters);
+    
+    function updateCascadingFilters() {
+        var selectedProject = document.getElementById('filter-project').value;
+        var selectedRegion = document.getElementById('filter-region').value;
+        var selectedDistrict = document.getElementById('filter-district').value;
+        
+        // Filter locations based on current selections
+        var filteredLocations = locations.filter(function(loc) {
+            var matchProject = !selectedProject || loc.projects.includes(selectedProject);
+            var matchRegion = !selectedRegion || loc.region === selectedRegion;
+            var matchDistrict = !selectedDistrict || loc.district === selectedDistrict;
+            return matchProject && matchRegion && matchDistrict;
+        });
+        
+        // Update Region dropdown if project is selected
+        if (selectedProject) {
+            var regions = new Set();
+            filteredLocations.forEach(function(loc) { regions.add(loc.region); });
+            updateDropdown('filter-region', Array.from(regions).sort(), selectedRegion);
+        }
+        
+        // Update District dropdown if region is selected
+        if (selectedRegion) {
+            var districts = new Set();
+            filteredLocations.forEach(function(loc) { districts.add(loc.district); });
+            updateDropdown('filter-district', Array.from(districts).sort(), selectedDistrict);
+        }
+        
+        // Update Settlement dropdown if district is selected
+        if (selectedDistrict) {
+            var settlements = new Set();
+            filteredLocations.forEach(function(loc) { settlements.add(loc.settlement); });
+            updateDropdown('filter-settlement', Array.from(settlements).sort(), '');
+        }
+    }
+    
+    function updateDropdown(dropdownId, values, selectedValue) {
+        var dropdown = document.getElementById(dropdownId);
+        var currentValue = selectedValue || dropdown.value;
+        
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">All ' + dropdown.previousElementSibling.textContent.replace(':', '') + '</option>';
+        
+        // Add new options
+        values.forEach(function(value) {
+            var option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            if (value === currentValue) {
+                option.selected = true;
+            }
+            dropdown.appendChild(option);
+        });
+    }
+    
+    // Apply location filter
+    window.applyLocationFilter = function() {
+        var selectedProject = document.getElementById('filter-project').value;
+        var selectedRegion = document.getElementById('filter-region').value;
+        var selectedDistrict = document.getElementById('filter-district').value;
+        var selectedSettlement = document.getElementById('filter-settlement').value;
+        
+        var visibleCount = 0;
+        
+        // Iterate through all layer groups and filter markers
+        Object.keys(layerGroups).forEach(function(project) {
+            layerGroups[project].eachLayer(function(marker) {
+                var location = marker.options.locationData;
+                if (location) {
+                    var matchProject = !selectedProject || location.projects.includes(selectedProject);
+                    var matchRegion = !selectedRegion || location.region === selectedRegion;
+                    var matchDistrict = !selectedDistrict || location.district === selectedDistrict;
+                    var matchSettlement = !selectedSettlement || location.settlement === selectedSettlement;
+                    
+                    if (matchProject && matchRegion && matchDistrict && matchSettlement) {
+                        marker.setOpacity(1);
+                        visibleCount++;
+                    } else {
+                        marker.setOpacity(0);
+                    }
+                }
+            });
+        });
+        
+        // Update filter status
+        var statusDiv = document.getElementById('filter-status');
+        statusDiv.textContent = 'Showing ' + visibleCount + ' of ' + locations.length + ' locations';
+        statusDiv.style.color = '#28a745';
+        statusDiv.style.fontWeight = 'bold';
+    };
+    
+    // Clear location filter
+    window.clearLocationFilter = function() {
+        document.getElementById('filter-project').value = '';
+        document.getElementById('filter-region').value = '';
+        document.getElementById('filter-district').value = '';
+        document.getElementById('filter-settlement').value = '';
+        
+        // Reset all dropdowns to original state
+        populateFilterDropdowns();
+        
+        // Show all markers
+        Object.keys(layerGroups).forEach(function(project) {
+            layerGroups[project].eachLayer(function(marker) {
+                marker.setOpacity(1);
+            });
+        });
+        
+        // Update filter status
+        var statusDiv = document.getElementById('filter-status');
+        statusDiv.textContent = 'Filter cleared - showing all locations';
+        statusDiv.style.color = '#666';
+        statusDiv.style.fontWeight = 'normal';
+        
+        setTimeout(function() {
+            statusDiv.textContent = '';
+        }, 3000);
+    };
+    
+    // Populate filter dropdowns on load
+    populateFilterDropdowns();
 });
 </script>
 {% endblock %}
