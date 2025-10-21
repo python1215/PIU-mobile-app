@@ -1093,10 +1093,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     var matchSettlement = !selectedSettlement || location.settlement === selectedSettlement;
                     
                     if (matchProject && matchRegion && matchDistrict && matchSettlement) {
+                        // Show marker by adding it to the map
+                        if (!map.hasLayer(marker)) {
+                            marker.addTo(map);
+                        }
                         marker.setOpacity(1);
                         visibleCount++;
                     } else {
-                        marker.setOpacity(0);
+                        // Hide marker by removing it from the map
+                        if (map.hasLayer(marker)) {
+                            map.removeLayer(marker);
+                        }
                     }
                 }
             });
@@ -1120,9 +1127,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset all dropdowns to original database values
         populateFilterDropdowns(true);
         
-        // Show all markers
+        // Show all markers by adding them back to the map
         Object.keys(layerGroups).forEach(function(project) {
             layerGroups[project].eachLayer(function(marker) {
+                if (!map.hasLayer(marker)) {
+                    marker.addTo(map);
+                }
                 marker.setOpacity(1);
             });
         });
