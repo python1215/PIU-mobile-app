@@ -958,17 +958,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Get all filter data from Django context (as JSON)
-    var allProjects = {{ all_projects_json|safe }};
-    var allRegions = {{ all_regions_json|safe }};
-    var allDistricts = {{ all_districts_json|safe }};
-    var allSettlements = {{ all_settlements_json|safe }};
+    var filterDataProjects = {{ all_projects_json|safe }};
+    var filterDataRegions = {{ all_regions_json|safe }};
+    var filterDataDistricts = {{ all_districts_json|safe }};
+    var filterDataSettlements = {{ all_settlements_json|safe }};
     
     // Store original dropdown values
     var originalDropdownData = {
-        projects: allProjects,
-        regions: allRegions,
-        districts: allDistricts,
-        settlements: allSettlements
+        projects: filterDataProjects,
+        regions: filterDataRegions,
+        districts: filterDataDistricts,
+        settlements: filterDataSettlements
     };
     
     // Populate filter dropdowns with values from database
@@ -981,10 +981,10 @@ document.addEventListener('DOMContentLoaded', function() {
             populateDropdown('filter-settlement', originalDropdownData.settlements, '');
         } else {
             // Initial population with all values
-            populateDropdown('filter-project', allProjects, '');
-            populateDropdown('filter-region', allRegions, '');
-            populateDropdown('filter-district', allDistricts, '');
-            populateDropdown('filter-settlement', allSettlements, '');
+            populateDropdown('filter-project', filterDataProjects, '');
+            populateDropdown('filter-region', filterDataRegions, '');
+            populateDropdown('filter-district', filterDataDistricts, '');
+            populateDropdown('filter-settlement', filterDataSettlements, '');
         }
     }
     
