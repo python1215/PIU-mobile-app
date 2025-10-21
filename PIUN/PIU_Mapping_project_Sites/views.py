@@ -92,6 +92,9 @@ def working_map(request):
                 if mapping_id and str(community.id) == str(mapping_id):
                     is_focused = True
                 
+                # Get donor names from ManyToMany relationship
+                donor_names = ', '.join([str(d.name) for d in community.donor.all()]) if community.donor.exists() else 'Not specified'
+                
                 project_data.append({
                     'id': community.id,
                     'latitude': float(community.Latitude),
@@ -100,6 +103,7 @@ def working_map(request):
                     'region': community.region.region_name if community.region else 'Unknown', 
                     'district': community.district.district_name if community.district else 'Unknown',
                     'projects': project_names,
+                    'donors': donor_names,
                     'total_households': community.Total_No_of_Households or 0,
                     'connected_households': community.no_of_connected_household or 0,
                     'access_type': community.access.access_type if community.access else 'Unknown',
