@@ -51,6 +51,16 @@ def working_map(request):
         Longitude__isnull=False
     ).all()
     
+    # Get all unique regions, districts, and settlements from database
+    all_regions = Regions.objects.all().order_by('region_name').values_list('region_name', flat=True)
+    all_districts = Districts.objects.all().order_by('district_name').values_list('district_name', flat=True)
+    all_settlements = Settlement.objects.all().order_by('settlement_name').values_list('settlement_name', flat=True)
+    
+    # Get all unique projects from projectMapping
+    all_projects = projectMapping.objects.filter(
+        project__isnull=False
+    ).select_related('project').values_list('project__project', flat=True).distinct().order_by('project__project')
+    
     # Check for coordinate parameters to focus on specific location
     focus_lat = request.GET.get('lat')
     focus_lng = request.GET.get('lng')
@@ -119,7 +129,11 @@ def working_map(request):
         'center_lat': center_lat,
         'center_lng': center_lng,
         'zoom_level': zoom_level,
-        'focus_mapping_id': mapping_id
+        'focus_mapping_id': mapping_id,
+        'all_projects_json': json.dumps(list(all_projects)),
+        'all_regions_json': json.dumps(list(all_regions)),
+        'all_districts_json': json.dumps(list(all_districts)),
+        'all_settlements_json': json.dumps(list(all_settlements))
     }
     
     return render(request, 'PIU_Mapping_project_Sites/working_map.html', context)

@@ -957,58 +957,58 @@ document.addEventListener('DOMContentLoaded', function() {
         makePanelDraggable(filterPanel, filterHeader, 'Filter');
     }
     
-    // Populate filter dropdowns with unique values from locations
-    function populateFilterDropdowns() {
-        var projects = new Set();
-        var regions = new Set();
-        var districts = new Set();
-        var settlements = new Set();
+    // Get all filter data from Django context (as JSON)
+    var allProjects = {{ all_projects_json|safe }};
+    var allRegions = {{ all_regions_json|safe }};
+    var allDistricts = {{ all_districts_json|safe }};
+    var allSettlements = {{ all_settlements_json|safe }};
+    
+    // Store original dropdown values
+    var originalDropdownData = {
+        projects: allProjects,
+        regions: allRegions,
+        districts: allDistricts,
+        settlements: allSettlements
+    };
+    
+    // Populate filter dropdowns with values from database
+    function populateFilterDropdowns(resetAll = false) {
+        if (resetAll) {
+            // Reset to all database values
+            populateDropdown('filter-project', originalDropdownData.projects, '');
+            populateDropdown('filter-region', originalDropdownData.regions, '');
+            populateDropdown('filter-district', originalDropdownData.districts, '');
+            populateDropdown('filter-settlement', originalDropdownData.settlements, '');
+        } else {
+            // Initial population with all values
+            populateDropdown('filter-project', allProjects, '');
+            populateDropdown('filter-region', allRegions, '');
+            populateDropdown('filter-district', allDistricts, '');
+            populateDropdown('filter-settlement', allSettlements, '');
+        }
+    }
+    
+    // Helper function to populate a single dropdown
+    function populateDropdown(dropdownId, values, selectedValue) {
+        var dropdown = document.getElementById(dropdownId);
+        var label = dropdown.previousElementSibling.textContent.replace(':', '');
         
-        locations.forEach(function(loc) {
-            loc.projects.forEach(function(p) { projects.add(p); });
-            regions.add(loc.region);
-            districts.add(loc.district);
-            settlements.add(loc.settlement);
-        });
+        // Clear existing options
+        dropdown.innerHTML = '<option value="">All ' + label + 's</option>';
         
-        // Populate Project dropdown
-        var projectSelect = document.getElementById('filter-project');
-        Array.from(projects).sort().forEach(function(project) {
+        // Add options
+        values.forEach(function(value) {
             var option = document.createElement('option');
-            option.value = project;
-            option.textContent = project;
-            projectSelect.appendChild(option);
-        });
-        
-        // Populate Region dropdown
-        var regionSelect = document.getElementById('filter-region');
-        Array.from(regions).sort().forEach(function(region) {
-            var option = document.createElement('option');
-            option.value = region;
-            option.textContent = region;
-            regionSelect.appendChild(option);
-        });
-        
-        // Populate District dropdown
-        var districtSelect = document.getElementById('filter-district');
-        Array.from(districts).sort().forEach(function(district) {
-            var option = document.createElement('option');
-            option.value = district;
-            option.textContent = district;
-            districtSelect.appendChild(option);
-        });
-        
-        // Populate Settlement dropdown
-        var settlementSelect = document.getElementById('filter-settlement');
-        Array.from(settlements).sort().forEach(function(settlement) {
-            var option = document.createElement('option');
-            option.value = settlement;
-            option.textContent = settlement;
-            settlementSelect.appendChild(option);
+            option.value = value;
+            option.textContent = value;
+            if (value === selectedValue) {
+                option.selected = true;
+            }
+            dropdown.appendChild(option);
         });
     }
     
-    // Cascading filter logic
+    // Cascading filter logic - updates dropdowns based on current selections
     document.getElementById('filter-project').addEventListener('change', updateCascadingFilters);
     document.getElementById('filter-region').addEventListener('change', updateCascadingFilters);
     document.getElementById('filter-district').addEventListener('change', updateCascadingFilters);
@@ -1026,45 +1026,51 @@ document.addEventListener('DOMContentLoaded', function() {
             return matchProject && matchRegion && matchDistrict;
         });
         
-        // Update Region dropdown if project is selected
-        if (selectedProject) {
-            var regions = new Set();
-            filteredLocations.forEach(function(loc) { regions.add(loc.region); });
-            updateDropdown('filter-region', Array.from(regions).sort(), selectedRegion);
-        }
+        // Extract unique values from filtered locations
+        var availableRegions = new Set();
+        var availableDistricts = new Set();
+        var availableSettlements = new Set();
         
-        // Update District dropdown if region is selected
-        if (selectedRegion) {
-            var districts = new Set();
-            filteredLocations.forEach(function(loc) { districts.add(loc.district); });
-            updateDropdown('filter-district', Array.from(districts).sort(), selectedDistrict);
-        }
-        
-        // Update Settlement dropdown if district is selected
-        if (selectedDistrict) {
-            var settlements = new Set();
-            filteredLocations.forEach(function(loc) { settlements.add(loc.settlement); });
-            updateDropdown('filter-settlement', Array.from(settlements).sort(), '');
-        }
-    }
-    
-    function updateDropdown(dropdownId, values, selectedValue) {
-        var dropdown = document.getElementById(dropdownId);
-        var currentValue = selectedValue || dropdown.value;
-        
-        // Clear existing options except the first one
-        dropdown.innerHTML = '<option value="">All ' + dropdown.previousElementSibling.textContent.replace(':', '') + '</option>';
-        
-        // Add new options
-        values.forEach(function(value) {
-            var option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            if (value === currentValue) {
-                option.selected = true;
-            }
-            dropdown.appendChild(option);
+        filteredLocations.forEach(function(loc) {
+            availableRegions.add(loc.region);
+            availableDistricts.add(loc.district);
+            availableSettlements.add(loc.settlement);
         });
+        
+        // Update dropdowns based on what's selected
+        // If project is selected, update regions
+        if (selectedProject) {
+            populateDropdown('filter-region', Array.from(availableRegions).sort(), selectedRegion);
+            
+            // If region is also selected, update districts
+            if (selectedRegion) {
+                populateDropdown('filter-district', Array.from(availableDistricts).sort(), selectedDistrict);
+                
+                // If district is also selected, update settlements
+                if (selectedDistrict) {
+                    populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+                } else {
+                    // District not selected, show all settlements for project+region
+                    populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+                }
+            } else {
+                // Region not selected, show all districts for project
+                populateDropdown('filter-district', Array.from(availableDistricts).sort(), '');
+                populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+            }
+        } else if (selectedRegion) {
+            // No project selected, but region is selected
+            populateDropdown('filter-district', Array.from(availableDistricts).sort(), selectedDistrict);
+            
+            if (selectedDistrict) {
+                populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+            } else {
+                populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+            }
+        } else if (selectedDistrict) {
+            // Only district is selected
+            populateDropdown('filter-settlement', Array.from(availableSettlements).sort(), '');
+        }
     }
     
     // Apply location filter
@@ -1105,13 +1111,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Clear location filter
     window.clearLocationFilter = function() {
+        // Reset all dropdown values
         document.getElementById('filter-project').value = '';
         document.getElementById('filter-region').value = '';
         document.getElementById('filter-district').value = '';
         document.getElementById('filter-settlement').value = '';
         
-        // Reset all dropdowns to original state
-        populateFilterDropdowns();
+        // Reset all dropdowns to original database values
+        populateFilterDropdowns(true);
         
         // Show all markers
         Object.keys(layerGroups).forEach(function(project) {
@@ -1131,8 +1138,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     };
     
-    // Populate filter dropdowns on load
-    populateFilterDropdowns();
+    // Populate filter dropdowns on load with all database values
+    populateFilterDropdowns(false);
 });
 </script>
 {% endblock %}
