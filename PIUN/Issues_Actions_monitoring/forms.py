@@ -92,11 +92,30 @@ class IssueActionsForm(forms.ModelForm):
         self.fields['assigned_to'].required = False
         # Make remarks field required
         self.fields['remarks'].required = True
+        # Priority is not required (can be None when status is complete)
+        self.fields['priority'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        status = cleaned_data.get('status')
+        priority = cleaned_data.get('priority')
+        
+        # When status is complete, priority must be None
+        if status == 'complete':
+            cleaned_data['priority'] = None
+        # When status is not complete, priority is required
+        elif not priority and status != 'complete':
+            self.add_error('priority', 'Priority is required when status is not complete.')
+        
+        return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         if self.user:
             instance.loginUser = self.user
+        # Ensure priority is None when status is complete
+        if instance.status == 'complete':
+            instance.priority = None
         if commit:
             instance.save()
         return instance

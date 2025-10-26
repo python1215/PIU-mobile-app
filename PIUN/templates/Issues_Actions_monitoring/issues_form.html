@@ -241,5 +241,65 @@
 .card-header h6 {
     font-weight: 600;
 }
+
+#id_priority:disabled {
+    background-color: #e9ecef;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusField = document.getElementById('id_status');
+    const priorityField = document.getElementById('id_priority');
+    
+    function handleStatusChange() {
+        if (statusField.value === 'complete') {
+            // Status is complete: disable priority and clear its value
+            priorityField.value = '';
+            priorityField.disabled = true;
+            priorityField.style.backgroundColor = '#e9ecef';
+            
+            // Add visual indicator
+            const priorityContainer = priorityField.closest('.mb-3');
+            if (priorityContainer) {
+                let notice = priorityContainer.querySelector('.status-notice');
+                if (!notice) {
+                    notice = document.createElement('div');
+                    notice.className = 'status-notice text-info small mt-1';
+                    notice.innerHTML = '<i class="bi bi-info-circle"></i> Priority is not applicable for completed items';
+                    priorityContainer.appendChild(notice);
+                }
+            }
+        } else {
+            // Status is not complete: enable priority
+            priorityField.disabled = false;
+            priorityField.style.backgroundColor = '';
+            
+            // Remove visual indicator
+            const priorityContainer = priorityField.closest('.mb-3');
+            if (priorityContainer) {
+                const notice = priorityContainer.querySelector('.status-notice');
+                if (notice) {
+                    notice.remove();
+                }
+            }
+            
+            // Set default priority if none selected
+            if (!priorityField.value) {
+                priorityField.value = 'medium';
+            }
+        }
+    }
+    
+    // Initial check on page load
+    if (statusField && priorityField) {
+        handleStatusChange();
+        
+        // Listen for status changes
+        statusField.addEventListener('change', handleStatusChange);
+    }
+});
+</script>
 {% endblock %}

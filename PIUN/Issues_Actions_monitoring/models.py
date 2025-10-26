@@ -50,6 +50,8 @@ class IssueActions(models.Model):
                                        ('high', 'High'),
                                        ('critical', 'Critical')],
                               default='medium',
+                              null=True,
+                              blank=True,
                               verbose_name="Priority")
   assigned_to = models.CharField(max_length=100, verbose_name="Assigned To")
   date_created = models.DateTimeField(auto_now_add=True,
@@ -70,6 +72,12 @@ class IssueActions(models.Model):
     verbose_name = "Issue/Action"
     verbose_name_plural = "Issues/Actions"
     ordering = ['-date_created']
+
+  def save(self, *args, **kwargs):
+    # Automatically set priority to None when status is complete
+    if self.status == 'complete':
+      self.priority = None
+    super().save(*args, **kwargs)
 
   def __str__(self):
     return f"{self.issue_code} - {self.project}"

@@ -83,13 +83,20 @@
                                 <tr>
                                     <th class="text-muted">Priority:</th>
                                     <td>
-                                        {% if issue.priority == 'critical' %}
+                                        {% if issue.status == 'complete' or not issue.priority %}
+                                            <span class="badge bg-secondary fs-6">N/A</span>
+                                            {% if issue.status == 'complete' %}
+                                                <small class="text-muted ms-2">
+                                                    <i class="bi bi-info-circle"></i> Not applicable for completed items
+                                                </small>
+                                            {% endif %}
+                                        {% elif issue.priority == 'critical' %}
                                             <span class="badge bg-danger fs-6">{{ issue.get_priority_display }}</span>
                                         {% elif issue.priority == 'high' %}
                                             <span class="badge bg-warning fs-6">{{ issue.get_priority_display }}</span>
                                         {% elif issue.priority == 'medium' %}
                                             <span class="badge bg-info fs-6">{{ issue.get_priority_display }}</span>
-                                        {% else %}
+                                        {% elif issue.priority == 'low' %}
                                             <span class="badge bg-success fs-6">{{ issue.get_priority_display }}</span>
                                         {% endif %}
                                     </td>

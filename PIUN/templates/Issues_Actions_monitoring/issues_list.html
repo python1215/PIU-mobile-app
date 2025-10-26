@@ -155,14 +155,18 @@
                                         <td>{{ issue.project.project|default:"-" }}</td>
                                         <td>{{ issue.description_of_issue_or_action|truncatechars:60 }}</td>
                                         <td>
-                                            {% if issue.priority == 'critical' %}
+                                            {% if issue.status == 'complete' %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% elif issue.priority == 'critical' %}
                                                 <span class="badge bg-danger">{{ issue.get_priority_display }}</span>
                                             {% elif issue.priority == 'high' %}
                                                 <span class="badge bg-warning">{{ issue.get_priority_display }}</span>
                                             {% elif issue.priority == 'medium' %}
                                                 <span class="badge bg-info">{{ issue.get_priority_display }}</span>
-                                            {% else %}
+                                            {% elif issue.priority == 'low' %}
                                                 <span class="badge bg-success">{{ issue.get_priority_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-light text-dark">-</span>
                                             {% endif %}
                                         </td>
                                         <td>
