@@ -500,3 +500,117 @@ def export_issues_word(request):
     response['Content-Disposition'] = f'attachment; filename=Issues_Actions_Report_{timestamp}.docx'
     
     return response
+
+# ============ Notification Views ============
+
+from django.http import JsonResponse
+from .models import IssueNotification, IssueReminderLog
+from datetime import datetime, timedelta
+
+@login_required
+def get_pending_notifications(request):
+    """API endpoint to fetch pending notifications for current user"""
+    # Get unread notifications
+    notifications = IssueNotification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).select_related('issue').order_by('-created_at')[:20]
+    
+    notifications_data = []
+    for notif in notifications:
+        notifications_data.append({
+            'id': notif.notificationID,
+            'message': notif.message,
+            'type': notif.notification_type,
+            'issue_code': notif.issue.issue_code,
+            'issue_id': notif.issue.issueID,
+            'created_at': notif.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'priority': notif.issue.priority if notif.issue.priority else 'none',
+        })
+    
+    return JsonResponse({'notifications': notifications_data})
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    """Mark a notification as read"""
+    if request.method == 'POST':
+        try:
+            notification = IssueNotification.objects.get(
+                notificationID=notification_id,
+                user=request.user
+            )
+            notification.mark_as_read()
+            return JsonResponse({'success': True})
+        except IssueNotification.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Notification not found'}, status=404)
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
+
+
+@login_required
+def get_pending_reminders(request):
+    """
+    Get pending reminders for incomplete issues based on priority.
+    Low: 1/day, Medium: 2/day, High: 3/day, Critical: 5/day
+    """
+    now = timezone.now()
+    
+    # Get all incomplete issues assigned to current user
+    user_issues = IssueActions.objects.filter(
+        assigned_to=request.user.username,
+        status__in=['incomplete', 'Cancel']
+    ).exclude(priority__isnull=True)
+    
+    reminders_to_send = []
+    
+    for issue in user_issues:
+        notifications_per_day = issue.get_notifications_per_day()
+        
+        if notifications_per_day == 0:
+            continue
+        
+        # Calculate interval between notifications (in hours)
+        hours_between_notifications = 24 / notifications_per_day
+        
+        # Get last reminder sent for this issue
+        last_reminder = IssueReminderLog.objects.filter(
+            issue=issue,
+            user=request.user
+        ).order_by('-sent_at').first()
+        
+        # Check if we should send a reminder
+        should_send = False
+        if not last_reminder:
+            # No reminder sent yet
+            should_send = True
+        else:
+            # Check if enough time has passed since last reminder
+            time_since_last = now - last_reminder.sent_at
+            if time_since_last.total_seconds() / 3600 >= hours_between_notifications:
+                should_send = True
+        
+        if should_send:
+            # Create reminder log
+            IssueReminderLog.objects.create(
+                issue=issue,
+                user=request.user
+            )
+            
+            # Prepare reminder data
+            days_until_due = None
+            if issue.due_date:
+                days_until_due = (issue.due_date - now.date()).days
+            
+            priority_label = issue.get_priority_display() if issue.priority else 'No Priority'
+            reminders_to_send.append({
+                'issue_code': issue.issue_code,
+                'issue_id': issue.issueID,
+                'description': issue.description_of_issue_or_action[:100],
+                'priority': issue.priority,
+                'priority_label': priority_label,
+                'due_date': issue.due_date.strftime('%Y-%m-%d') if issue.due_date else 'Not set',
+                'days_until_due': days_until_due,
+                'notifications_per_day': notifications_per_day
+            })
+    
+    return JsonResponse({'reminders': reminders_to_send})

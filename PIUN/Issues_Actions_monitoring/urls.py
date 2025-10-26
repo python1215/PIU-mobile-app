@@ -24,4 +24,9 @@ urlpatterns = [
     # Export URLs
     path('export/issues/excel/', views.export_issues_excel, name='export_issues_excel'),
     path('export/issues/word/', views.export_issues_word, name='export_issues_word'),
+    
+    # Notification URLs
+    path('api/notifications/', views.get_pending_notifications, name='get_pending_notifications'),
+    path('api/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('api/reminders/', views.get_pending_reminders, name='get_pending_reminders'),
 ]

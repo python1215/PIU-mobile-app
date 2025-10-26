@@ -30,6 +30,8 @@
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
     <!-- Text contrast for white backgrounds -->
     <link href="{% static 'css/text-contrast.css' %}" rel="stylesheet" />
+    <!-- Notification System CSS -->
+    <link href="{% static 'css/notifications.css' %}" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -49,6 +51,10 @@
     <script src="{% static 'js/vendor/bootstrap.bundle.min.js' %}"></script>
     <!-- jQuery -->
     <script src="{% static 'js/vendor/jquery-3.6.0.min.js' %}"></script>
+    <!-- Notification System -->
+    {% if user.is_authenticated %}
+    <script src="{% static 'js/notifications.js' %}"></script>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 </body>

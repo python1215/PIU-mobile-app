@@ -1,0 +1,146 @@
+/* Issue Notification Popups */
+.issue-notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 350px;
+    max-width: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+    border-left: 5px solid #0d6efd;
+    margin-bottom: 10px;
+}
+
+.issue-notification-popup.reminder-popup {
+    border-left: 5px solid #ffc107;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-header {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-header strong {
+    font-size: 14px;
+    color: #212529;
+}
+
+.notification-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.notification-close:hover {
+    background: #e9ecef;
+    color: #212529;
+}
+
+.notification-body {
+    padding: 15px;
+}
+
+.notification-issue-code {
+    font-weight: 600;
+    font-size: 16px;
+    color: #0d6efd;
+    margin-bottom: 8px;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #495057;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.notification-due {
+    font-size: 13px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.notification-info {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
+.notification-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.notification-actions .btn {
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+/* Stacking multiple notifications */
+.issue-notification-popup:nth-child(n+2) {
+    top: calc(20px + (var(--notification-index, 0) * 170px));
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .issue-notification-popup {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* Browser notification fallback styling */
+.notification-permission-prompt {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 15px;
+    max-width: 300px;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification-permission-prompt .btn-close {
+    float: right;
+    margin-left: 10px;
+}

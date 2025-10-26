@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 from PIU_Financial_mgt.models import Project
 from setup.models import YEAR, Quarter, Type_of_Monitoring
 
@@ -81,3 +83,62 @@ class IssueActions(models.Model):
 
   def __str__(self):
     return f"{self.issue_code} - {self.project}"
+  
+  def get_notifications_per_day(self):
+    """Return number of notifications per day based on priority"""
+    priority_notifications = {
+      'low': 1,
+      'medium': 2,
+      'high': 3,
+      'critical': 5
+    }
+    return priority_notifications.get(self.priority, 1) if self.priority else 0
+
+
+class IssueNotification(models.Model):
+  """Track notifications for issues to send reminders based on priority"""
+  notificationID = models.AutoField(primary_key=True)
+  issue = models.ForeignKey(IssueActions, on_delete=models.CASCADE, related_name='notifications')
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+  notification_type = models.CharField(
+    max_length=50,
+    choices=[
+      ('assignment', 'Assignment Notification'),
+      ('reminder', 'Due Date Reminder'),
+      ('status_change', 'Status Change')
+    ]
+  )
+  message = models.TextField()
+  is_read = models.BooleanField(default=False)
+  created_at = models.DateTimeField(auto_now_add=True)
+  read_at = models.DateTimeField(null=True, blank=True)
+  
+  class Meta:
+    verbose_name = "Issue Notification"
+    verbose_name_plural = "Issue Notifications"
+    ordering = ['-created_at']
+  
+  def __str__(self):
+    return f"Notification for {self.user.username} - {self.issue.issue_code}"
+  
+  def mark_as_read(self):
+    """Mark notification as read"""
+    self.is_read = True
+    self.read_at = timezone.now()
+    self.save()
+
+
+class IssueReminderLog(models.Model):
+  """Log when reminders are sent to avoid duplicate notifications"""
+  logID = models.AutoField(primary_key=True)
+  issue = models.ForeignKey(IssueActions, on_delete=models.CASCADE, related_name='reminder_logs')
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+  sent_at = models.DateTimeField(auto_now_add=True)
+  
+  class Meta:
+    verbose_name = "Issue Reminder Log"
+    verbose_name_plural = "Issue Reminder Logs"
+    ordering = ['-sent_at']
+  
+  def __str__(self):
+    return f"Reminder for {self.issue.issue_code} sent to {self.user.username} at {self.sent_at}"
