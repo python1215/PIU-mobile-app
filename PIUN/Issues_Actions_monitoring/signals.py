@@ -26,10 +26,6 @@ def track_assignment_changes(sender, instance, **kwargs):
 def create_issue_notifications(sender, instance, created, **kwargs):
     """Create notifications when issues are assigned or status changes"""
     
-    # Skip if status is complete (no notifications for completed tasks)
-    if instance.status == 'complete':
-        return
-    
     # Get the assigned user
     if not instance.assigned_to:
         return
@@ -47,8 +43,9 @@ def create_issue_notifications(sender, instance, created, **kwargs):
             return
     
     # Create assignment notification if newly created or assigned_to changed
+    # Skip assignment notifications for completed issues
     old_assigned = getattr(instance, '_old_assigned_to', None)
-    if created or (old_assigned != instance.assigned_to and instance.assigned_to):
+    if (created or (old_assigned != instance.assigned_to and instance.assigned_to)) and instance.status != 'complete':
         priority_label = instance.get_priority_display() if instance.priority else 'No Priority'
         message = f"You have been assigned to issue '{instance.issue_code}': {instance.description_of_issue_or_action[:100]}. Priority: {priority_label}, Due: {instance.due_date if instance.due_date else 'Not set'}"
         
@@ -59,7 +56,7 @@ def create_issue_notifications(sender, instance, created, **kwargs):
             message=message
         )
     
-    # Create status change notification
+    # Create status change notification (including transitions to 'complete')
     old_status = getattr(instance, '_old_status', None)
     if not created and old_status and old_status != instance.status:
         message = f"Issue '{instance.issue_code}' status changed from {old_status} to {instance.status}"
