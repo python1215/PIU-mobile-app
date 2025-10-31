@@ -15,7 +15,7 @@
                     </h2>
                     <p class="text-dark mb-0">Contract Reference: {{ monitoring.contract_refNo }}</p>
                 </div>
-                <div>
+                <div class="no-print">
                     <a href="{% url 'main_dashboard' %}" class="btn btn-outline-dark me-2">
                         <i class="bi bi-house-door me-1"></i>Dashboard
                     </a>
@@ -217,18 +217,22 @@
                 <div class="col-12">
                     <div class="d-flex gap-2 flex-wrap">
                         <a href="{% url 'project_actions:contract_monitoring_update' monitoring.id %}" 
-                           class="btn btn-warning">
+                           class="btn btn-warning no-print">
                             <i class="bi bi-pencil me-1"></i>Edit Monitoring
                         </a>
+                        <a href="{% url 'project_actions:contract_monitoring_detail_export_pdf' monitoring.id %}" 
+                           class="btn btn-primary no-print">
+                            <i class="bi bi-file-pdf me-1"></i>Print to PDF
+                        </a>
                         <a href="{% url 'project_actions:contract_monitoring_list' %}" 
-                           class="btn btn-outline-dark">
+                           class="btn btn-outline-dark no-print">
                             <i class="bi bi-list me-1"></i>All Monitoring Records
                         </a>
                         <a href="{% url 'project_actions:contract_monitoring_create' %}" 
-                           class="btn btn-success">
+                           class="btn btn-success no-print">
                             <i class="bi bi-plus-circle me-1"></i>Add New Monitoring
                         </a>
-                        <button type="button" class="btn btn-danger" 
+                        <button type="button" class="btn btn-danger no-print" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#deleteModal">
                             <i class="bi bi-trash me-1"></i>Delete
@@ -295,6 +299,13 @@
 
 img.rounded.shadow {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide buttons and navigation when printing */
+@media print {
+    .no-print {
+        display: none !important;
+    }
 }
 </style>
 {% endblock %}
