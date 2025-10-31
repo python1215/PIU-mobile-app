@@ -317,6 +317,15 @@ class ESIAFilter(django_filters.FilterSet):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
+    number_of_communities = django_filters.NumberFilter(
+        lookup_expr="exact",
+        label="Number of Communities",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter number...'
+        })
+    )
+
     project_locations = django_filters.CharFilter(
         lookup_expr="icontains",
         label="Location"
@@ -339,6 +348,7 @@ class ESIAFilter(django_filters.FilterSet):
         fields = [
             "project_name",
             "type_of_investment",
+            "number_of_communities",
             "project_locations",
             "date_created_after",
             "date_created_before"
