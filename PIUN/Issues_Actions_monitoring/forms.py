@@ -58,9 +58,8 @@ class IssueActionsForm(forms.ModelForm):
             'source_of_issue_or_action': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'priority': forms.Select(attrs={'class': 'form-select'}),
-            'assigned_to': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter assignee name'
+            'assigned_to': forms.Select(attrs={
+                'class': 'form-select'
             }),
             'assign_date': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -88,8 +87,15 @@ class IssueActionsForm(forms.ModelForm):
         self.fields['quarter'].queryset = Quarter.objects.all()
         self.fields['issue_action_type'].queryset = Type_of_Monitoring.objects.all()
         self.fields['source_of_issue_or_action'].queryset = issue_action_source.objects.all()
-        # assigned_to is a CharField, not a ForeignKey
+        
+        # Populate assigned_to with available users
+        # assigned_to is a CharField, so we use choices instead of queryset
+        users = User.objects.all().order_by('username')
+        user_choices = [('', '---------')]  # Empty choice
+        user_choices.extend([(user.username, f"{user.username} ({user.get_full_name() or user.email})") for user in users])
+        self.fields['assigned_to'].widget.choices = user_choices
         self.fields['assigned_to'].required = False
+        
         # Make remarks field required
         self.fields['remarks'].required = True
         # Priority is not required (can be None when status is complete)
