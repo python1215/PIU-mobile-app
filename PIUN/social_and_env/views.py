@@ -2400,3 +2400,357 @@ def export_grievance_excel(request):
     except Exception as e:
         messages.error(request, f'Error exporting grievance data: {str(e)}')
         return redirect('grievance_list')
+
+
+@login_required
+def export_community_excel(request):
+    """Export Community Engagement data to Excel"""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from django.http import HttpResponse
+    from datetime import datetime
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import CommunityEngagementFilter
+        qs = CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'
+        ).all()
+        
+        # Apply filters from request
+        filter_obj = CommunityEngagementFilter(request.GET, queryset=qs)
+        engagements = filter_obj.qs
+
+        # Create workbook and worksheet
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Community Engagement'
+
+        # Define styles
+        header_fill = PatternFill(start_color='366092', end_color='366092', fill_type='solid')
+        header_font = Font(bold=True, color='FFFFFF', size=12)
+        cell_alignment = Alignment(horizontal='left', vertical='top', wrap_text=True)
+
+        # Add headers
+        headers = [
+            'Ref No', 'Project', 'Year', 'Location', 'Date', 
+            'Engagement Type', 'Male Participants', 'Female Participants',
+            'Total Participants', 'Female %', 'Key Issues Discussed',
+            'Follow-up Actions', 'Has Photo', 'Created By', 'Date Created'
+        ]
+
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        # Set column widths
+        column_widths = [15, 30, 10, 25, 12, 25, 10, 10, 10, 10, 40, 40, 10, 15, 18]
+        for col, width in enumerate(column_widths, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = width
+
+        # Add data rows
+        for row, engagement in enumerate(engagements, 2):
+            ws.cell(row=row, column=1, value=engagement.reference_number).alignment = cell_alignment
+            ws.cell(row=row, column=2, value=engagement.project_name.project if engagement.project_name else '').alignment = cell_alignment
+            ws.cell(row=row, column=3, value=str(engagement.year) if engagement.year else '').alignment = cell_alignment
+            ws.cell(row=row, column=4, value=engagement.place_of_event).alignment = cell_alignment
+            ws.cell(row=row, column=5, value=engagement.date_of_consultation.strftime('%Y-%m-%d') if engagement.date_of_consultation else '').alignment = cell_alignment
+            ws.cell(row=row, column=6, value=str(engagement.stake_holder_engagement_Types) if engagement.stake_holder_engagement_Types else '').alignment = cell_alignment
+            ws.cell(row=row, column=7, value=engagement.male).alignment = cell_alignment
+            ws.cell(row=row, column=8, value=engagement.female).alignment = cell_alignment
+            ws.cell(row=row, column=9, value=engagement.total_participants).alignment = cell_alignment
+            ws.cell(row=row, column=10, value=f"{engagement.female_percentage}%").alignment = cell_alignment
+            ws.cell(row=row, column=11, value=engagement.key_issues_discussed).alignment = cell_alignment
+            ws.cell(row=row, column=12, value=engagement.any_follow_up_actions).alignment = cell_alignment
+            ws.cell(row=row, column=13, value='Yes' if engagement.picture else 'No').alignment = cell_alignment
+            ws.cell(row=row, column=14, value=engagement.loginUser.username if engagement.loginUser else '').alignment = cell_alignment
+            ws.cell(row=row, column=15, value=engagement.date_created.strftime('%Y-%m-%d %H:%M') if engagement.date_created else '').alignment = cell_alignment
+
+        # Create HTTP response with Excel file
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="community_engagement_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        
+        wb.save(response)
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting community engagement data: {str(e)}')
+        return redirect('community_list')
+
+
+@login_required
+def export_community_pdf(request):
+    """Export Community Engagement data to PDF"""
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import CommunityEngagementFilter
+        qs = CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'
+        ).all()
+        
+        # Apply filters from request
+        filter_obj = CommunityEngagementFilter(request.GET, queryset=qs)
+        engagements = filter_obj.qs
+
+        # Create PDF buffer
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=landscape(A4),
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.75*inch,
+            bottomMargin=0.5*inch
+        )
+
+        # Container for the 'Flowable' objects
+        elements = []
+
+        # Define styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=12,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=20,
+            alignment=TA_CENTER
+        )
+
+        # Add title
+        elements.append(Paragraph("Community Engagement Report", title_style))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+
+        # Prepare table data
+        data = [[
+            'Ref No', 'Project', 'Location', 'Date', 
+            'Engagement Type', 'M', 'F', 'Total',
+            'F%', 'Key Issues'
+        ]]
+
+        for engagement in engagements:
+            # Truncate long text for better PDF display
+            issues = engagement.key_issues_discussed[:100] + '...' if len(engagement.key_issues_discussed) > 100 else engagement.key_issues_discussed
+            
+            data.append([
+                engagement.reference_number,
+                (engagement.project_name.project[:20] + '...') if engagement.project_name and len(engagement.project_name.project) > 20 else (engagement.project_name.project if engagement.project_name else ''),
+                engagement.place_of_event[:15],
+                engagement.date_of_consultation.strftime('%Y-%m-%d') if engagement.date_of_consultation else '',
+                (str(engagement.stake_holder_engagement_Types)[:15] + '...') if engagement.stake_holder_engagement_Types and len(str(engagement.stake_holder_engagement_Types)) > 15 else str(engagement.stake_holder_engagement_Types) if engagement.stake_holder_engagement_Types else '',
+                str(engagement.male),
+                str(engagement.female),
+                str(engagement.total_participants),
+                f"{engagement.female_percentage}%",
+                issues
+            ])
+
+        # Create table
+        table = Table(data, colWidths=[
+            0.8*inch,  # Ref No
+            1.5*inch,  # Project
+            1.0*inch,  # Location
+            0.8*inch,  # Date
+            1.2*inch,  # Engagement Type
+            0.4*inch,  # M
+            0.4*inch,  # F
+            0.5*inch,  # Total
+            0.5*inch,  # F%
+            2.5*inch   # Key Issues
+        ])
+
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            
+            # Data rows
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('LEFTPADDING', (0, 1), (-1, -1), 4),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 4),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            
+            # Alternating row colors
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ]))
+
+        elements.append(table)
+
+        # Build PDF
+        doc.build(elements)
+
+        # Get PDF value and create response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="community_engagement_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.write(pdf)
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting community engagement to PDF: {str(e)}')
+        return redirect('community_list')
+
+
+@login_required
+def export_community_word(request):
+    """Export Community Engagement data to MS Word"""
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import CommunityEngagementFilter
+        qs = CommunityConsult_Engagement.objects.select_related(
+            'project_name', 'year', 'stake_holder_engagement_Types', 'loginUser'
+        ).all()
+        
+        # Apply filters from request
+        filter_obj = CommunityEngagementFilter(request.GET, queryset=qs)
+        engagements = filter_obj.qs
+
+        # Create document
+        doc = Document()
+
+        # Set document margins
+        sections = doc.sections
+        for section in sections:
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.5)
+            section.right_margin = Inches(0.5)
+
+        # Add title
+        title = doc.add_paragraph()
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title_run = title.add_run("Community Engagement Report")
+        title_run.font.size = Pt(18)
+        title_run.font.bold = True
+        title_run.font.color.rgb = RGBColor(54, 96, 146)
+
+        # Add subtitle
+        subtitle = doc.add_paragraph()
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        subtitle_run = subtitle.add_run(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}"
+        )
+        subtitle_run.font.size = Pt(10)
+        subtitle_run.font.color.rgb = RGBColor(128, 128, 128)
+
+        doc.add_paragraph()  # Spacer
+
+        # Create table
+        table = doc.add_table(rows=1, cols=10)
+        table.style = 'Light Grid Accent 1'
+
+        # Set column widths
+        for i, width in enumerate([0.8, 1.5, 1.0, 0.8, 1.3, 0.5, 0.5, 0.6, 0.5, 2.5]):
+            for cell in table.columns[i].cells:
+                cell.width = Inches(width)
+
+        # Add headers
+        hdr_cells = table.rows[0].cells
+        headers = ['Ref No', 'Project', 'Location', 'Date', 'Engagement Type', 
+                   'Male', 'Female', 'Total', 'F%', 'Key Issues Discussed']
+        
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            # Format header
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.size = Pt(10)
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+            # Header background color (approximation)
+            shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
+            shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
+            if shading_elm_child is None:
+                from docx.oxml import parse_xml
+                shading_elm.append(parse_xml(r'<w:shd {} w:fill="366092"/>'.format('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')))
+
+        # Add data rows
+        for engagement in engagements:
+            row_cells = table.add_row().cells
+            row_cells[0].text = engagement.reference_number
+            row_cells[1].text = engagement.project_name.project if engagement.project_name else ''
+            row_cells[2].text = engagement.place_of_event
+            row_cells[3].text = engagement.date_of_consultation.strftime('%Y-%m-%d') if engagement.date_of_consultation else ''
+            row_cells[4].text = str(engagement.stake_holder_engagement_Types) if engagement.stake_holder_engagement_Types else ''
+            row_cells[5].text = str(engagement.male)
+            row_cells[6].text = str(engagement.female)
+            row_cells[7].text = str(engagement.total_participants)
+            row_cells[8].text = f"{engagement.female_percentage}%"
+            row_cells[9].text = engagement.key_issues_discussed
+
+            # Format cells
+            for cell in row_cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(9)
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Save to buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="community_engagement_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting community engagement to Word: {str(e)}')
+        return redirect('community_list')

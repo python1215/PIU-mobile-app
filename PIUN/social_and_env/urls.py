@@ -45,6 +45,9 @@ urlpatterns = [
     path('community/<str:pk>/', views.community_detail, name='community_detail'),
     path('community/<str:pk>/edit/', views.community_edit, name='community_edit'),
     path('community/<str:pk>/delete/', views.community_delete, name='community_delete'),
+    path('community/export/excel/', views.export_community_excel, name='export_community_excel'),
+    path('community/export/pdf/', views.export_community_pdf, name='export_community_pdf'),
+    path('community/export/word/', views.export_community_word, name='export_community_word'),
     
     # AJAX Cascading Dropdowns
     path('ajax/load-districts/', views.load_districts, name='load_districts'),
