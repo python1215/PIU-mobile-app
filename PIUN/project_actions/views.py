@@ -1025,6 +1025,312 @@ def contract_monitoring_detail(request, pk):
     
     return render(request, 'project_actions/contract_monitoring_detail.html', context)
 
+
+@login_required
+def contract_monitoring_detail_export_pdf(request, pk):
+    """Export single Contract Monitoring detail record to PDF - A4 Portrait"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Get the monitoring record
+        monitoring = get_object_or_404(
+            Specific_Contract_Monitoring.objects.select_related(
+                'project', 'quarter', 'type_of_monitoring', 'Type_of_Investment',
+                'Kpi_description', 'Contract_implementation_Status', 'loginUser'
+            ), 
+            pk=pk
+        )
+        
+        # Get related contracts
+        related_works = Contract_Profiling_works.objects.filter(
+            contract_refNo=monitoring.contract_refNo
+        ).first()
+        related_goods_services = Contract_Profiling_goods_services.objects.filter(
+            contract_refNo=monitoring.contract_refNo
+        ).first()
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.75*inch,
+            leftMargin=0.75*inch,
+            topMargin=0.75*inch,
+            bottomMargin=0.75*inch
+        )
+
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=6,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=20,
+            alignment=TA_CENTER
+        )
+        
+        section_header_style = ParagraphStyle(
+            'SectionHeader',
+            parent=styles['Heading2'],
+            fontSize=12,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=10,
+            spaceBefore=10,
+            fontName='Helvetica-Bold'
+        )
+        
+        label_style = ParagraphStyle(
+            'LabelStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            fontName='Helvetica-Bold',
+            leading=14
+        )
+        
+        value_style = ParagraphStyle(
+            'ValueStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            leading=14,
+            wordWrap='CJK'
+        )
+
+        # Add title
+        elements.append(Paragraph("Contract Monitoring Details", title_style))
+        elements.append(Paragraph(
+            f"Contract Reference: {monitoring.contract_refNo}",
+            subtitle_style
+        ))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+        
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Contract Information Section
+        elements.append(Paragraph("Contract Information", section_header_style))
+        
+        # Determine contract type and details
+        if related_works:
+            contract_type = str(related_works.type_of_contract) if related_works.type_of_contract else "Works Contract"
+            contractor = str(related_works.name_of_contractor) if related_works.name_of_contractor else "Not specified"
+            contract_value = str(related_works.contract_value) if related_works.contract_value else "Not specified"
+            start_date = related_works.contract_start_date.strftime('%B %d, %Y') if related_works.contract_start_date else "Not specified"
+            end_date = related_works.contract_end_date.strftime('%B %d, %Y') if related_works.contract_end_date else "Not specified"
+        elif related_goods_services:
+            contract_type = str(related_goods_services.type_of_contract) if related_goods_services.type_of_contract else "Goods/Services Contract"
+            contractor = str(related_goods_services.name_of_Supplier) if related_goods_services.name_of_Supplier else "Not specified"
+            contract_value = str(related_goods_services.contract_value) if related_goods_services.contract_value else "Not specified"
+            start_date = related_goods_services.contract_start_date.strftime('%B %d, %Y') if related_goods_services.contract_start_date else "Not specified"
+            end_date = related_goods_services.contract_end_date.strftime('%B %d, %Y') if related_goods_services.contract_end_date else "Not specified"
+        else:
+            contract_type = "Not specified"
+            contractor = "Not specified"
+            contract_value = "Not specified"
+            start_date = "Not specified"
+            end_date = "Not specified"
+        
+        contract_data = [
+            [Paragraph('<b>Contract Reference:</b>', label_style), 
+             Paragraph(str(monitoring.contract_refNo) if monitoring.contract_refNo else 'N/A', value_style)],
+            [Paragraph('<b>Contract Type:</b>', label_style), 
+             Paragraph(contract_type, value_style)],
+            [Paragraph('<b>Contractor/Supplier:</b>', label_style), 
+             Paragraph(contractor, value_style)],
+            [Paragraph('<b>Contract Value:</b>', label_style), 
+             Paragraph(contract_value, value_style)],
+            [Paragraph('<b>Contract Start Date:</b>', label_style), 
+             Paragraph(start_date, value_style)],
+            [Paragraph('<b>Contract End Date:</b>', label_style), 
+             Paragraph(end_date, value_style)],
+        ]
+        
+        contract_table = Table(contract_data, colWidths=[2.2*inch, 4.3*inch])
+        contract_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F0F7')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(contract_table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Monitoring Information Section
+        elements.append(Paragraph("Monitoring Information", section_header_style))
+        
+        monitoring_data = [
+            [Paragraph('<b>Project:</b>', label_style), 
+             Paragraph(str(monitoring.project) if monitoring.project else 'N/A', value_style)],
+            [Paragraph('<b>Monitoring Date:</b>', label_style), 
+             Paragraph(monitoring.monitoring_date.strftime('%B %d, %Y') if monitoring.monitoring_date else 'N/A', value_style)],
+            [Paragraph('<b>Quarter:</b>', label_style), 
+             Paragraph(str(monitoring.quarter) if monitoring.quarter else 'N/A', value_style)],
+            [Paragraph('<b>Type of Monitoring:</b>', label_style), 
+             Paragraph(str(monitoring.type_of_monitoring) if monitoring.type_of_monitoring else 'N/A', value_style)],
+            [Paragraph('<b>Type of Investment:</b>', label_style), 
+             Paragraph(str(monitoring.Type_of_Investment.type_of_investment) if monitoring.Type_of_Investment else 'N/A', value_style)],
+            [Paragraph('<b>KPI Description:</b>', label_style), 
+             Paragraph(str(monitoring.Kpi_description.Kpi_description) if monitoring.Kpi_description else 'N/A', value_style)],
+        ]
+        
+        monitoring_table = Table(monitoring_data, colWidths=[2.2*inch, 4.3*inch])
+        monitoring_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F0F7')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(monitoring_table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Milestone Information Section
+        elements.append(Paragraph("Milestone Information", section_header_style))
+        
+        milestone_data = [
+            [Paragraph('<b>Milestone Start Date:</b>', label_style), 
+             Paragraph(monitoring.milestone_start_date.strftime('%B %d, %Y') if monitoring.milestone_start_date else 'N/A', value_style)],
+            [Paragraph('<b>Milestone End Date:</b>', label_style), 
+             Paragraph(monitoring.milestone_end_date.strftime('%B %d, %Y') if monitoring.milestone_end_date else 'N/A', value_style)],
+            [Paragraph('<b>Contract Implementation Status:</b>', label_style), 
+             Paragraph(str(monitoring.Contract_implementation_Status) if monitoring.Contract_implementation_Status else 'N/A', value_style)],
+        ]
+        
+        milestone_table = Table(milestone_data, colWidths=[2.2*inch, 4.3*inch])
+        milestone_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F0F7')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(milestone_table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Target Section
+        if monitoring.Target:
+            elements.append(Paragraph("Target", section_header_style))
+            target_data = [[Paragraph(str(monitoring.Target), value_style)]]
+            target_table = Table(target_data, colWidths=[6.5*inch])
+            target_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FFFEF0')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            elements.append(target_table)
+            elements.append(Spacer(1, 0.15*inch))
+
+        # Achieved Status Section
+        if monitoring.Achieved_status:
+            elements.append(Paragraph("Achieved Status", section_header_style))
+            achieved_data = [[Paragraph(str(monitoring.Achieved_status), value_style)]]
+            achieved_table = Table(achieved_data, colWidths=[6.5*inch])
+            achieved_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#E8F5E9')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            elements.append(achieved_table)
+            elements.append(Spacer(1, 0.15*inch))
+
+        # Remarks Section
+        if monitoring.remarks:
+            elements.append(Paragraph("Remarks", section_header_style))
+            remarks_data = [[Paragraph(str(monitoring.remarks), value_style)]]
+            remarks_table = Table(remarks_data, colWidths=[6.5*inch])
+            remarks_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FFF3CD')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            elements.append(remarks_table)
+
+        # Build PDF
+        doc.build(elements)
+
+        # Get PDF value and create response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="contract_monitoring_{monitoring.contract_refNo}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.write(pdf)
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting Contract Monitoring record to PDF: {str(e)}')
+        return redirect('project_actions:contract_monitoring_detail', pk=pk)
+
+
 @login_required
 @transaction.atomic
 def contract_monitoring_create(request):
