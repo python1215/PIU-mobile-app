@@ -16,8 +16,14 @@
         <a href="{% url 'pap_add' %}" class="btn btn-primary">
             <i class="bi bi-plus me-1"></i>Add PAP Record
         </a>
-        <a href="{% url 'export_pap_excel' %}" class="btn btn-success">
+        <a href="{% url 'export_pap_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success me-1">
             <i class="bi bi-file-excel me-1"></i>Export Excel
+        </a>
+        <a href="{% url 'export_pap_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger me-1">
+            <i class="bi bi-file-pdf me-1"></i>Export PDF
+        </a>
+        <a href="{% url 'export_pap_word' %}?{{ request.GET.urlencode }}" class="btn btn-info">
+            <i class="bi bi-file-word me-1"></i>Export Word
         </a>
     </div>
 </div>
