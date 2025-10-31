@@ -2330,6 +2330,282 @@ def esia_export_excel(request):
         return redirect('esia_list')
 
 
+@login_required
+def esia_export_pdf(request):
+    """Export ESIA data to PDF - A4 Portrait with text wrapping"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Get all ESIA records
+        esias = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.75*inch,
+            bottomMargin=0.5*inch
+        )
+
+        elements = []
+
+        # Define styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=14,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=10,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=colors.grey,
+            spaceAfter=16,
+            alignment=TA_CENTER
+        )
+        
+        cell_style = ParagraphStyle(
+            'CellText',
+            parent=styles['Normal'],
+            fontSize=7,
+            leading=9,
+            wordWrap='CJK'
+        )
+
+        # Add title
+        elements.append(Paragraph("ESIA/ESMP Records Report", title_style))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+
+        # Prepare table data with Paragraphs for text wrapping
+        data = [[
+            Paragraph('<b>Project</b>', cell_style),
+            Paragraph('<b>Investment Type</b>', cell_style),
+            Paragraph('<b>Duration</b>', cell_style),
+            Paragraph('<b>Phase</b>', cell_style),
+            Paragraph('<b>Locations</b>', cell_style),
+            Paragraph('<b>Communities</b>', cell_style),
+            Paragraph('<b>ESIA Findings</b>', cell_style),
+            Paragraph('<b>Created By</b>', cell_style)
+        ]]
+
+        for esia in esias:
+            data.append([
+                Paragraph(esia.project_name.project if esia.project_name else '', cell_style),
+                Paragraph(esia.type_of_investment.type_of_investment if esia.type_of_investment else '', cell_style),
+                Paragraph(f"{esia.project_duration} months", cell_style),
+                Paragraph(f"Phase {esia.project_phase}", cell_style),
+                Paragraph(esia.project_locations, cell_style),
+                Paragraph(str(esia.number_of_communities), cell_style),
+                Paragraph(esia.esia_findings, cell_style),
+                Paragraph(esia.loginUser.username if esia.loginUser else '', cell_style)
+            ])
+
+        # Create table with optimized column widths for A4 Portrait
+        table = Table(data, colWidths=[
+            1.0*inch,  # Project
+            1.0*inch,  # Investment Type
+            0.6*inch,  # Duration
+            0.5*inch,  # Phase
+            0.9*inch,  # Locations
+            0.6*inch,  # Communities
+            2.0*inch,  # ESIA Findings (text wraps here)
+            0.7*inch   # Created By
+        ])
+
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            
+            # Data rows
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('LEFTPADDING', (0, 1), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 3),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            
+            # Alternating row colors
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ]))
+
+        elements.append(table)
+
+        # Build PDF
+        doc.build(elements)
+
+        # Get PDF value and create response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="esia_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.write(pdf)
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting ESIA data to PDF: {str(e)}')
+        return redirect('esia_list')
+
+
+@login_required
+def esia_export_word(request):
+    """Export ESIA data to MS Word - A4 Portrait with text wrapping"""
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Get all ESIA records
+        esias = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+
+        # Create document
+        doc = Document()
+
+        # Set document to A4 Portrait with margins
+        sections = doc.sections
+        for section in sections:
+            section.page_height = Inches(11.69)  # A4 height
+            section.page_width = Inches(8.27)    # A4 width
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.5)
+            section.right_margin = Inches(0.5)
+
+        # Add title
+        title = doc.add_paragraph()
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title_run = title.add_run("ESIA/ESMP Records Report")
+        title_run.font.size = Pt(16)
+        title_run.font.bold = True
+        title_run.font.color.rgb = RGBColor(54, 96, 146)
+
+        # Add subtitle
+        subtitle = doc.add_paragraph()
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        subtitle_run = subtitle.add_run(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}"
+        )
+        subtitle_run.font.size = Pt(9)
+        subtitle_run.font.color.rgb = RGBColor(128, 128, 128)
+
+        doc.add_paragraph()  # Spacer
+
+        # Create table
+        table = doc.add_table(rows=1, cols=8)
+        table.style = 'Light Grid Accent 1'
+        table.allow_autofit = False
+
+        # Set column widths optimized for A4 Portrait
+        column_widths = [1.0, 1.0, 0.6, 0.5, 0.9, 0.6, 2.0, 0.7]
+        for i, width in enumerate(column_widths):
+            for cell in table.columns[i].cells:
+                cell.width = Inches(width)
+
+        # Add headers
+        hdr_cells = table.rows[0].cells
+        headers = ['Project', 'Investment Type', 'Duration', 'Phase', 
+                   'Locations', 'Communities', 'ESIA Findings', 'Created By']
+        
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            # Format header
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.size = Pt(9)
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Header background color
+            shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
+            shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
+            if shading_elm_child is None:
+                from docx.oxml import parse_xml
+                shading_elm.append(parse_xml(r'<w:shd {} w:fill="366092"/>'.format('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')))
+
+        # Add data rows
+        for esia in esias:
+            row_cells = table.add_row().cells
+            row_cells[0].text = esia.project_name.project if esia.project_name else ''
+            row_cells[1].text = esia.type_of_investment.type_of_investment if esia.type_of_investment else ''
+            row_cells[2].text = f"{esia.project_duration} months"
+            row_cells[3].text = f"Phase {esia.project_phase}"
+            row_cells[4].text = esia.project_locations
+            row_cells[5].text = str(esia.number_of_communities)
+            row_cells[6].text = esia.esia_findings
+            row_cells[7].text = esia.loginUser.username if esia.loginUser else ''
+
+            # Format cells with text wrapping
+            for j, cell in enumerate(row_cells):
+                # Enable text wrapping for all cells
+                tc_pr = cell._element.get_or_add_tcPr()
+                tc_w = tc_pr.find(qn('w:tcW'))
+                if tc_w is None:
+                    tc_w = tc_pr.makeelement(qn('w:tcW'))
+                    tc_pr.append(tc_w)
+                tc_w.set(qn('w:w'), str(int(column_widths[j] * 1440)))
+                tc_w.set(qn('w:type'), 'dxa')
+                
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(8)
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Save to buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="esia_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting ESIA data to Word: {str(e)}')
+        return redirect('esia_list')
 
 
 
