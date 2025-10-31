@@ -500,6 +500,284 @@ def export_pap_excel(request):
 
 
 @login_required
+def export_pap_pdf(request):
+    """Export PAP data to PDF - A4 Portrait with text wrapping - filtered records only"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import PAPFilter
+        qs = PAP.objects.select_related(
+            'project', 'type_of_investment', 'region', 'district',
+            'pap_Current_Address', 'type_of_pap', 'pap_category',
+            'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
+            'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = PAPFilter(request.GET, queryset=qs)
+        paps = filter_obj.qs
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
+        )
+
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=6,
+            leading=7,
+            wordWrap='CJK'
+        )
+
+        # Add title
+        elements.append(Paragraph("PAP Records Report", title_style))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+
+        # Prepare table data with Paragraphs for text wrapping
+        data = [[
+            Paragraph('<b>PAP ID</b>', cell_style),
+            Paragraph('<b>Name</b>', cell_style),
+            Paragraph('<b>Gender</b>', cell_style),
+            Paragraph('<b>Project</b>', cell_style),
+            Paragraph('<b>Region</b>', cell_style),
+            Paragraph('<b>District</b>', cell_style),
+            Paragraph('<b>Compensation</b>', cell_style),
+            Paragraph('<b>Amount</b>', cell_style),
+            Paragraph('<b>Created By</b>', cell_style)
+        ]]
+
+        for pap in paps:
+            data.append([
+                Paragraph(pap.pap_identification_number or '', cell_style),
+                Paragraph(pap.pap_name or '', cell_style),
+                Paragraph(pap.sex or '', cell_style),
+                Paragraph(pap.project.project if pap.project else '', cell_style),
+                Paragraph(pap.region.region_name if pap.region else '', cell_style),
+                Paragraph(pap.district.district_name if pap.district else '', cell_style),
+                Paragraph(pap.pap_compensated or '', cell_style),
+                Paragraph(str(pap.amount) if pap.amount else '', cell_style),
+                Paragraph(pap.loginUser.username if pap.loginUser else '', cell_style)
+            ])
+
+        # Create table with optimized column widths for A4 Portrait
+        table = Table(data, colWidths=[
+            0.8*inch,  # PAP ID
+            1.2*inch,  # Name
+            0.6*inch,  # Gender
+            1.0*inch,  # Project
+            0.9*inch,  # Region
+            0.9*inch,  # District
+            0.8*inch,  # Compensation
+            0.7*inch,  # Amount
+            0.8*inch   # Created By
+        ])
+
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            
+            # Data rows
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 6),
+            ('TOPPADDING', (0, 1), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 3),
+            ('LEFTPADDING', (0, 1), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 2),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="pap_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting PAP data to PDF: {str(e)}')
+        return redirect('pap_list')
+
+
+@login_required
+def export_pap_word(request):
+    """Export PAP data to MS Word - A4 Portrait with text wrapping - filtered records only"""
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import PAPFilter
+        qs = PAP.objects.select_related(
+            'project', 'type_of_investment', 'region', 'district',
+            'pap_Current_Address', 'type_of_pap', 'pap_category',
+            'vulnerability_category', 'type_of_impact', 'nature_of_compensation',
+            'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = PAPFilter(request.GET, queryset=qs)
+        paps = filter_obj.qs
+
+        # Create document
+        doc = Document()
+        
+        # Set A4 Portrait dimensions
+        section = doc.sections[0]
+        section.page_height = Inches(11.69)
+        section.page_width = Inches(8.27)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+        section.top_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.5)
+
+        # Add title
+        title = doc.add_heading('PAP Records Report', 0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        subtitle = doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}")
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        doc.add_paragraph()
+
+        # Create table
+        table = doc.add_table(rows=1, cols=9)
+        table.style = 'Table Grid'
+
+        # Define column widths
+        column_widths = [0.8, 1.2, 0.6, 1.0, 0.9, 0.9, 0.8, 0.7, 0.8]
+        for i, width in enumerate(column_widths):
+            for cell in table.columns[i].cells:
+                cell.width = Inches(width)
+
+        # Add headers
+        hdr_cells = table.rows[0].cells
+        headers = ['PAP ID', 'Name', 'Gender', 'Project', 'Region', 'District', 'Compensation', 'Amount', 'Created By']
+        
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            # Format header
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.size = Pt(8)
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Header background color
+            shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
+            shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
+            if shading_elm_child is None:
+                from docx.oxml import parse_xml
+                shading_elm.append(parse_xml(r'<w:shd {} w:fill="366092"/>'.format('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')))
+
+        # Add data rows
+        for pap in paps:
+            row_cells = table.add_row().cells
+            row_cells[0].text = pap.pap_identification_number or ''
+            row_cells[1].text = pap.pap_name or ''
+            row_cells[2].text = pap.sex or ''
+            row_cells[3].text = pap.project.project if pap.project else ''
+            row_cells[4].text = pap.region.region_name if pap.region else ''
+            row_cells[5].text = pap.district.district_name if pap.district else ''
+            row_cells[6].text = pap.pap_compensated or ''
+            row_cells[7].text = str(pap.amount) if pap.amount else ''
+            row_cells[8].text = pap.loginUser.username if pap.loginUser else ''
+
+            # Format cells with text wrapping
+            for j, cell in enumerate(row_cells):
+                # Enable text wrapping for all cells
+                tc_pr = cell._element.get_or_add_tcPr()
+                tc_w = tc_pr.find(qn('w:tcW'))
+                if tc_w is None:
+                    tc_w = tc_pr.makeelement(qn('w:tcW'))
+                    tc_pr.append(tc_w)
+                tc_w.set(qn('w:w'), str(int(column_widths[j] * 1440)))
+                tc_w.set(qn('w:type'), 'dxa')
+                
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(7)
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Save to buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="pap_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting PAP data to Word: {str(e)}')
+        return redirect('pap_list')
+
+
+@login_required
 def pap_add(request):
     """Add new PAP record"""
     if request.method == 'POST':
@@ -2607,6 +2885,280 @@ def export_grievance_excel(request):
 
     except Exception as e:
         messages.error(request, f'Error exporting grievance data: {str(e)}')
+        return redirect('grievance_list')
+
+
+@login_required
+def export_grievance_pdf(request):
+    """Export Grievance data to PDF - A4 Portrait with text wrapping - filtered records only"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import GrievanceFilter
+        qs = GrievianceMonitoringLog.objects.select_related(
+            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
+        ).all()
+        
+        # Apply filters from request
+        filter_obj = GrievanceFilter(request.GET, queryset=qs)
+        grievances = filter_obj.qs
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
+        )
+
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=6,
+            leading=7,
+            wordWrap='CJK'
+        )
+
+        # Add title
+        elements.append(Paragraph("Grievance Management Report", title_style))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+
+        # Prepare table data with Paragraphs for text wrapping
+        data = [[
+            Paragraph('<b>Case No</b>', cell_style),
+            Paragraph('<b>Project</b>', cell_style),
+            Paragraph('<b>Complainant</b>', cell_style),
+            Paragraph('<b>Gender</b>', cell_style),
+            Paragraph('<b>Date Received</b>', cell_style),
+            Paragraph('<b>Complaint Content</b>', cell_style),
+            Paragraph('<b>Decision Outcome</b>', cell_style),
+            Paragraph('<b>Satisfied</b>', cell_style),
+            Paragraph('<b>Created By</b>', cell_style)
+        ]]
+
+        for grievance in grievances:
+            data.append([
+                Paragraph(grievance.case_no or '', cell_style),
+                Paragraph(grievance.project.project if grievance.project else '', cell_style),
+                Paragraph(grievance.name_of_complainant or '', cell_style),
+                Paragraph(grievance.sex or '', cell_style),
+                Paragraph(grievance.date_claim_recieved.strftime('%Y-%m-%d') if grievance.date_claim_recieved else '', cell_style),
+                Paragraph(grievance.complaint_content or '', cell_style),
+                Paragraph(str(grievance.decision_outcome) if grievance.decision_outcome else '', cell_style),
+                Paragraph(grievance.was_complainant_satisfied_with_decision or '', cell_style),
+                Paragraph(grievance.loginUser.username if grievance.loginUser else '', cell_style)
+            ])
+
+        # Create table with optimized column widths for A4 Portrait
+        table = Table(data, colWidths=[
+            0.7*inch,  # Case No
+            1.0*inch,  # Project
+            1.0*inch,  # Complainant
+            0.5*inch,  # Gender
+            0.8*inch,  # Date Received
+            1.5*inch,  # Complaint Content
+            0.9*inch,  # Decision Outcome
+            0.6*inch,  # Satisfied
+            0.7*inch   # Created By
+        ])
+
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            
+            # Data rows
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 6),
+            ('TOPPADDING', (0, 1), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 3),
+            ('LEFTPADDING', (0, 1), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 2),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="grievance_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting Grievance data to PDF: {str(e)}')
+        return redirect('grievance_list')
+
+
+@login_required
+def export_grievance_word(request):
+    """Export Grievance data to MS Word - A4 Portrait with text wrapping - filtered records only"""
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import GrievanceFilter
+        qs = GrievianceMonitoringLog.objects.select_related(
+            'project', 'type_of_investment', 'decision_outcome', 'loginUser'
+        ).all()
+        
+        # Apply filters from request
+        filter_obj = GrievanceFilter(request.GET, queryset=qs)
+        grievances = filter_obj.qs
+
+        # Create document
+        doc = Document()
+        
+        # Set A4 Portrait dimensions
+        section = doc.sections[0]
+        section.page_height = Inches(11.69)
+        section.page_width = Inches(8.27)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+        section.top_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.5)
+
+        # Add title
+        title = doc.add_heading('Grievance Management Report', 0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        subtitle = doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}")
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        doc.add_paragraph()
+
+        # Create table
+        table = doc.add_table(rows=1, cols=9)
+        table.style = 'Table Grid'
+
+        # Define column widths
+        column_widths = [0.7, 1.0, 1.0, 0.5, 0.8, 1.5, 0.9, 0.6, 0.7]
+        for i, width in enumerate(column_widths):
+            for cell in table.columns[i].cells:
+                cell.width = Inches(width)
+
+        # Add headers
+        hdr_cells = table.rows[0].cells
+        headers = ['Case No', 'Project', 'Complainant', 'Gender', 'Date Received', 'Complaint Content', 'Decision Outcome', 'Satisfied', 'Created By']
+        
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            # Format header
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.size = Pt(8)
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Header background color
+            shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
+            shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
+            if shading_elm_child is None:
+                from docx.oxml import parse_xml
+                shading_elm.append(parse_xml(r'<w:shd {} w:fill="366092"/>'.format('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')))
+
+        # Add data rows
+        for grievance in grievances:
+            row_cells = table.add_row().cells
+            row_cells[0].text = grievance.case_no or ''
+            row_cells[1].text = grievance.project.project if grievance.project else ''
+            row_cells[2].text = grievance.name_of_complainant or ''
+            row_cells[3].text = grievance.sex or ''
+            row_cells[4].text = grievance.date_claim_recieved.strftime('%Y-%m-%d') if grievance.date_claim_recieved else ''
+            row_cells[5].text = grievance.complaint_content or ''
+            row_cells[6].text = str(grievance.decision_outcome) if grievance.decision_outcome else ''
+            row_cells[7].text = grievance.was_complainant_satisfied_with_decision or ''
+            row_cells[8].text = grievance.loginUser.username if grievance.loginUser else ''
+
+            # Format cells with text wrapping
+            for j, cell in enumerate(row_cells):
+                # Enable text wrapping for all cells
+                tc_pr = cell._element.get_or_add_tcPr()
+                tc_w = tc_pr.find(qn('w:tcW'))
+                if tc_w is None:
+                    tc_w = tc_pr.makeelement(qn('w:tcW'))
+                    tc_pr.append(tc_w)
+                tc_w.set(qn('w:w'), str(int(column_widths[j] * 1440)))
+                tc_w.set(qn('w:type'), 'dxa')
+                
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(7)
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Save to buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="grievance_records_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting Grievance data to Word: {str(e)}')
         return redirect('grievance_list')
 
 
