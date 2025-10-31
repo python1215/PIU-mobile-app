@@ -1134,13 +1134,13 @@ def contract_monitoring_detail_export_pdf(request, pk):
         
         # Determine contract type and details
         if related_works:
-            contract_type = str(related_works.type_of_contract) if related_works.type_of_contract else "Works Contract"
+            contract_type = "Works Contract"
             contractor = str(related_works.name_of_contractor) if related_works.name_of_contractor else "Not specified"
             contract_value = str(related_works.contract_value) if related_works.contract_value else "Not specified"
             start_date = related_works.contract_start_date.strftime('%B %d, %Y') if related_works.contract_start_date else "Not specified"
             end_date = related_works.contract_end_date.strftime('%B %d, %Y') if related_works.contract_end_date else "Not specified"
         elif related_goods_services:
-            contract_type = str(related_goods_services.type_of_contract) if related_goods_services.type_of_contract else "Goods/Services Contract"
+            contract_type = "Goods/Services Contract"
             contractor = str(related_goods_services.name_of_Supplier) if related_goods_services.name_of_Supplier else "Not specified"
             contract_value = str(related_goods_services.contract_value) if related_goods_services.contract_value else "Not specified"
             start_date = related_goods_services.contract_start_date.strftime('%B %d, %Y') if related_goods_services.contract_start_date else "Not specified"
