@@ -3092,6 +3092,211 @@ def esia_export_word(request):
         return redirect('esia_list')
 
 
+@login_required
+def esia_detail_export_pdf(request, pk):
+    """Export single ESIA detail record to PDF - A4 Portrait"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Get the ESIA record
+        esia = get_object_or_404(ESIA.objects.select_related(
+            'project_name', 'type_of_investment', 'loginUser'),
+            pk=pk)
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.75*inch,
+            leftMargin=0.75*inch,
+            topMargin=0.75*inch,
+            bottomMargin=0.75*inch
+        )
+
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=6,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=20,
+            alignment=TA_CENTER
+        )
+        
+        section_header_style = ParagraphStyle(
+            'SectionHeader',
+            parent=styles['Heading2'],
+            fontSize=12,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=10,
+            spaceBefore=10,
+            fontName='Helvetica-Bold'
+        )
+        
+        label_style = ParagraphStyle(
+            'LabelStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            fontName='Helvetica-Bold',
+            leading=14
+        )
+        
+        value_style = ParagraphStyle(
+            'ValueStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            leading=14,
+            wordWrap='CJK'
+        )
+        
+        findings_style = ParagraphStyle(
+            'FindingsStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            leading=14,
+            wordWrap='CJK',
+            alignment=TA_LEFT
+        )
+
+        # Add title
+        elements.append(Paragraph("ESIA/ESMP Record Details", title_style))
+        elements.append(Paragraph(
+            f"Record #{esia.esiaID}",
+            subtitle_style
+        ))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+        
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Project Information Section
+        elements.append(Paragraph("Project Information", section_header_style))
+        
+        project_data = [
+            [Paragraph('<b>Project:</b>', label_style), 
+             Paragraph(str(esia.project_name) if esia.project_name else 'N/A', value_style)],
+            [Paragraph('<b>Investment Type:</b>', label_style), 
+             Paragraph(str(esia.type_of_investment) if esia.type_of_investment else 'N/A', value_style)],
+            [Paragraph('<b>Project Duration:</b>', label_style), 
+             Paragraph(f"{esia.project_duration} months" if esia.project_duration else 'N/A', value_style)],
+            [Paragraph('<b>Project Phase:</b>', label_style), 
+             Paragraph(f"Phase {esia.project_phase}" if esia.project_phase else 'N/A', value_style)],
+        ]
+        
+        project_table = Table(project_data, colWidths=[2.0*inch, 4.5*inch])
+        project_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F0F7')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(project_table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Impact Information Section
+        elements.append(Paragraph("Impact Information", section_header_style))
+        
+        impact_data = [
+            [Paragraph('<b>Number of Communities:</b>', label_style), 
+             Paragraph(str(esia.number_of_communities) if esia.number_of_communities else 'N/A', value_style)],
+            [Paragraph('<b>Project Locations:</b>', label_style), 
+             Paragraph(str(esia.project_locations) if esia.project_locations else 'N/A', value_style)],
+            [Paragraph('<b>Date Created:</b>', label_style), 
+             Paragraph(esia.date_created.strftime('%B %d, %Y at %H:%M') if esia.date_created else 'N/A', value_style)],
+            [Paragraph('<b>Created By:</b>', label_style), 
+             Paragraph(str(esia.loginUser) if esia.loginUser else 'N/A', value_style)],
+        ]
+        
+        impact_table = Table(impact_data, colWidths=[2.0*inch, 4.5*inch])
+        impact_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F0F7')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(impact_table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # ESIA Findings Section
+        elements.append(Paragraph("ESIA Findings", section_header_style))
+        
+        findings_text = str(esia.esia_findings) if esia.esia_findings else 'No findings recorded'
+        findings_data = [
+            [Paragraph(findings_text, findings_style)]
+        ]
+        
+        findings_table = Table(findings_data, colWidths=[6.5*inch])
+        findings_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FFFEF0')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 12),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(findings_table)
+
+        # Build PDF
+        doc.build(elements)
+
+        # Get PDF value and create response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="esia_record_{esia.esiaID}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.write(pdf)
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting ESIA record to PDF: {str(e)}')
+        return redirect('esia_detail', pk=pk)
 
 
 
