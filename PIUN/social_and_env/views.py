@@ -1993,13 +1993,13 @@ def export_ohs_pdf(request):
 
     try:
         # Apply the same filtering as the list view
-        from .filters import OHSFilter
+        from .filters import OHSMonitoringFilter
         qs = OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter',
             'region', 'district', 'settlement', 'loginUser').all()
         
         # Apply filters from request
-        filter_obj = OHSFilter(request.GET, queryset=qs)
+        filter_obj = OHSMonitoringFilter(request.GET, queryset=qs)
         ohs_records = filter_obj.qs
 
         # Create PDF buffer - A4 Portrait
@@ -2144,13 +2144,13 @@ def export_ohs_word(request):
 
     try:
         # Apply the same filtering as the list view
-        from .filters import OHSFilter
+        from .filters import OHSMonitoringFilter
         qs = OHS_Monitoring.objects.select_related(
             'project', 'Type_of_Investment', 'year_of_report', 'quarter',
             'region', 'district', 'settlement', 'loginUser').all()
         
         # Apply filters from request
-        filter_obj = OHSFilter(request.GET, queryset=qs)
+        filter_obj = OHSMonitoringFilter(request.GET, queryset=qs)
         ohs_records = filter_obj.qs
 
         # Create document
@@ -3177,13 +3177,13 @@ def export_grievance_pdf(request):
 
     try:
         # Apply the same filtering as the list view
-        from .filters import GrievanceFilter
+        from .filters import GrievianceMonitoringLogFilter
         qs = GrievianceMonitoringLog.objects.select_related(
             'project', 'type_of_investment', 'decision_outcome', 'loginUser'
         ).all()
         
         # Apply filters from request
-        filter_obj = GrievanceFilter(request.GET, queryset=qs)
+        filter_obj = GrievianceMonitoringLogFilter(request.GET, queryset=qs)
         grievances = filter_obj.qs
 
         # Create PDF buffer - A4 Portrait
@@ -3328,13 +3328,13 @@ def export_grievance_word(request):
 
     try:
         # Apply the same filtering as the list view
-        from .filters import GrievanceFilter
+        from .filters import GrievianceMonitoringLogFilter
         qs = GrievianceMonitoringLog.objects.select_related(
             'project', 'type_of_investment', 'decision_outcome', 'loginUser'
         ).all()
         
         # Apply filters from request
-        filter_obj = GrievanceFilter(request.GET, queryset=qs)
+        filter_obj = GrievianceMonitoringLogFilter(request.GET, queryset=qs)
         grievances = filter_obj.qs
 
         # Create document
