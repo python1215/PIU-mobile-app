@@ -5,8 +5,12 @@
 {% block extra_css %}
 <style>
     @media print {
-        /* Hide navigation, buttons, and sidebar when printing */
-        .btn-group, .no-print, nav, .card:has(.related-actions) {
+        /* Hide ALL buttons, navigation, and interactive elements when printing */
+        .btn, .btn-group, .btn-sm, .btn-info, .btn-warning, .btn-danger,
+        .no-print, nav, button, 
+        .card-header a, .card-header button,
+        a.btn, a.btn-outline-primary,
+        .card:has(.related-actions) {
             display: none !important;
         }
         
@@ -33,6 +37,12 @@
             color: white !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            padding: 15px !important;
+        }
+        
+        /* Make sure header only shows title, no buttons */
+        .card-header .d-flex {
+            display: block !important;
         }
         
         /* Ensure text is readable */
