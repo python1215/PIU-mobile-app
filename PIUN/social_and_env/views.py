@@ -2484,11 +2484,11 @@ def export_community_excel(request):
 
 @login_required
 def export_community_pdf(request):
-    """Export Community Engagement data to PDF"""
-    from reportlab.lib.pagesizes import A4, landscape
+    """Export Community Engagement data to PDF - A4 Portrait with text wrapping"""
+    from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
     from reportlab.lib.units import inch
     from reportlab.lib.enums import TA_CENTER, TA_LEFT
     from django.http import HttpResponse
@@ -2506,11 +2506,11 @@ def export_community_pdf(request):
         filter_obj = CommunityEngagementFilter(request.GET, queryset=qs)
         engagements = filter_obj.qs
 
-        # Create PDF buffer
+        # Create PDF buffer - A4 Portrait
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
-            pagesize=landscape(A4),
+            pagesize=A4,
             rightMargin=0.5*inch,
             leftMargin=0.5*inch,
             topMargin=0.75*inch,
@@ -2525,9 +2525,9 @@ def export_community_pdf(request):
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=16,
+            fontSize=14,
             textColor=colors.HexColor('#366092'),
-            spaceAfter=12,
+            spaceAfter=10,
             alignment=TA_CENTER,
             fontName='Helvetica-Bold'
         )
@@ -2535,10 +2535,18 @@ def export_community_pdf(request):
         subtitle_style = ParagraphStyle(
             'CustomSubtitle',
             parent=styles['Normal'],
-            fontSize=10,
+            fontSize=9,
             textColor=colors.grey,
-            spaceAfter=20,
+            spaceAfter=16,
             alignment=TA_CENTER
+        )
+        
+        cell_style = ParagraphStyle(
+            'CellText',
+            parent=styles['Normal'],
+            fontSize=7,
+            leading=9,
+            wordWrap='CJK'
         )
 
         # Add title
@@ -2548,42 +2556,46 @@ def export_community_pdf(request):
             subtitle_style
         ))
 
-        # Prepare table data
+        # Prepare table data with Paragraphs for text wrapping
         data = [[
-            'Ref No', 'Project', 'Location', 'Date', 
-            'Engagement Type', 'M', 'F', 'Total',
-            'F%', 'Key Issues'
+            Paragraph('<b>Ref No</b>', cell_style),
+            Paragraph('<b>Project</b>', cell_style),
+            Paragraph('<b>Location</b>', cell_style),
+            Paragraph('<b>Date</b>', cell_style),
+            Paragraph('<b>Type</b>', cell_style),
+            Paragraph('<b>M</b>', cell_style),
+            Paragraph('<b>F</b>', cell_style),
+            Paragraph('<b>Total</b>', cell_style),
+            Paragraph('<b>F%</b>', cell_style),
+            Paragraph('<b>Key Issues</b>', cell_style)
         ]]
 
         for engagement in engagements:
-            # Truncate long text for better PDF display
-            issues = engagement.key_issues_discussed[:100] + '...' if len(engagement.key_issues_discussed) > 100 else engagement.key_issues_discussed
-            
             data.append([
-                engagement.reference_number,
-                (engagement.project_name.project[:20] + '...') if engagement.project_name and len(engagement.project_name.project) > 20 else (engagement.project_name.project if engagement.project_name else ''),
-                engagement.place_of_event[:15],
-                engagement.date_of_consultation.strftime('%Y-%m-%d') if engagement.date_of_consultation else '',
-                (str(engagement.stake_holder_engagement_Types)[:15] + '...') if engagement.stake_holder_engagement_Types and len(str(engagement.stake_holder_engagement_Types)) > 15 else str(engagement.stake_holder_engagement_Types) if engagement.stake_holder_engagement_Types else '',
-                str(engagement.male),
-                str(engagement.female),
-                str(engagement.total_participants),
-                f"{engagement.female_percentage}%",
-                issues
+                Paragraph(engagement.reference_number, cell_style),
+                Paragraph(engagement.project_name.project if engagement.project_name else '', cell_style),
+                Paragraph(engagement.place_of_event, cell_style),
+                Paragraph(engagement.date_of_consultation.strftime('%Y-%m-%d') if engagement.date_of_consultation else '', cell_style),
+                Paragraph(str(engagement.stake_holder_engagement_Types) if engagement.stake_holder_engagement_Types else '', cell_style),
+                Paragraph(str(engagement.male), cell_style),
+                Paragraph(str(engagement.female), cell_style),
+                Paragraph(str(engagement.total_participants), cell_style),
+                Paragraph(f"{engagement.female_percentage}%", cell_style),
+                Paragraph(engagement.key_issues_discussed, cell_style)
             ])
 
-        # Create table
+        # Create table with optimized column widths for A4 Portrait (7.5 inches available width)
         table = Table(data, colWidths=[
-            0.8*inch,  # Ref No
-            1.5*inch,  # Project
-            1.0*inch,  # Location
-            0.8*inch,  # Date
-            1.2*inch,  # Engagement Type
-            0.4*inch,  # M
-            0.4*inch,  # F
-            0.5*inch,  # Total
-            0.5*inch,  # F%
-            2.5*inch   # Key Issues
+            0.6*inch,  # Ref No
+            1.2*inch,  # Project
+            0.8*inch,  # Location
+            0.65*inch, # Date
+            0.9*inch,  # Type
+            0.3*inch,  # M
+            0.3*inch,  # F
+            0.4*inch,  # Total
+            0.35*inch, # F%
+            1.9*inch   # Key Issues (text wraps here)
         ])
 
         # Style the table
@@ -2593,20 +2605,20 @@ def export_community_pdf(request):
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
             
             # Data rows
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
             ('TOPPADDING', (0, 1), (-1, -1), 4),
             ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-            ('LEFTPADDING', (0, 1), (-1, -1), 4),
-            ('RIGHTPADDING', (0, 1), (-1, -1), 4),
+            ('LEFTPADDING', (0, 1), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 3),
             
             # Grid
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
@@ -2638,10 +2650,11 @@ def export_community_pdf(request):
 
 @login_required
 def export_community_word(request):
-    """Export Community Engagement data to MS Word"""
+    """Export Community Engagement data to MS Word - A4 Portrait with text wrapping"""
     from docx import Document
     from docx.shared import Inches, Pt, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
     from django.http import HttpResponse
     from datetime import datetime
     from io import BytesIO
@@ -2660,9 +2673,11 @@ def export_community_word(request):
         # Create document
         doc = Document()
 
-        # Set document margins
+        # Set document to A4 Portrait with margins
         sections = doc.sections
         for section in sections:
+            section.page_height = Inches(11.69)  # A4 height
+            section.page_width = Inches(8.27)    # A4 width
             section.top_margin = Inches(0.5)
             section.bottom_margin = Inches(0.5)
             section.left_margin = Inches(0.5)
@@ -2672,7 +2687,7 @@ def export_community_word(request):
         title = doc.add_paragraph()
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         title_run = title.add_run("Community Engagement Report")
-        title_run.font.size = Pt(18)
+        title_run.font.size = Pt(16)
         title_run.font.bold = True
         title_run.font.color.rgb = RGBColor(54, 96, 146)
 
@@ -2682,7 +2697,7 @@ def export_community_word(request):
         subtitle_run = subtitle.add_run(
             f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}"
         )
-        subtitle_run.font.size = Pt(10)
+        subtitle_run.font.size = Pt(9)
         subtitle_run.font.color.rgb = RGBColor(128, 128, 128)
 
         doc.add_paragraph()  # Spacer
@@ -2690,9 +2705,11 @@ def export_community_word(request):
         # Create table
         table = doc.add_table(rows=1, cols=10)
         table.style = 'Light Grid Accent 1'
+        table.allow_autofit = False
 
-        # Set column widths
-        for i, width in enumerate([0.8, 1.5, 1.0, 0.8, 1.3, 0.5, 0.5, 0.6, 0.5, 2.5]):
+        # Set column widths optimized for A4 Portrait (7.27 inches available width)
+        column_widths = [0.6, 1.1, 0.75, 0.6, 0.85, 0.35, 0.35, 0.4, 0.35, 1.85]
+        for i, width in enumerate(column_widths):
             for cell in table.columns[i].cells:
                 cell.width = Inches(width)
 
@@ -2707,9 +2724,10 @@ def export_community_word(request):
             for paragraph in hdr_cells[i].paragraphs:
                 for run in paragraph.runs:
                     run.font.bold = True
-                    run.font.size = Pt(10)
+                    run.font.size = Pt(9)
                     run.font.color.rgb = RGBColor(255, 255, 255)
-            # Header background color (approximation)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Header background color
             shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
             shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
             if shading_elm_child is None:
@@ -2730,11 +2748,20 @@ def export_community_word(request):
             row_cells[8].text = f"{engagement.female_percentage}%"
             row_cells[9].text = engagement.key_issues_discussed
 
-            # Format cells
-            for cell in row_cells:
+            # Format cells with text wrapping
+            for j, cell in enumerate(row_cells):
+                # Enable text wrapping for all cells
+                tc_pr = cell._element.get_or_add_tcPr()
+                tc_w = tc_pr.find(qn('w:tcW'))
+                if tc_w is None:
+                    tc_w = tc_pr.makeelement(qn('w:tcW'))
+                    tc_pr.append(tc_w)
+                tc_w.set(qn('w:w'), str(int(column_widths[j] * 1440)))  # Convert inches to twips
+                tc_w.set(qn('w:type'), 'dxa')
+                
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
-                        run.font.size = Pt(9)
+                        run.font.size = Pt(8)
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
         # Save to buffer
