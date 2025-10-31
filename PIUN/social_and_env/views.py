@@ -1978,6 +1978,280 @@ def export_ohs_excel(request):
         return redirect('ohs_list')
 
 
+@login_required
+def export_ohs_pdf(request):
+    """Export OHS data to PDF - A4 Portrait with text wrapping - filtered records only"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import OHSFilter
+        qs = OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter',
+            'region', 'district', 'settlement', 'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = OHSFilter(request.GET, queryset=qs)
+        ohs_records = filter_obj.qs
+
+        # Create PDF buffer - A4 Portrait
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
+        )
+
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#366092'),
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            spaceAfter=12,
+            alignment=TA_CENTER
+        )
+        
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=6,
+            leading=7,
+            wordWrap='CJK'
+        )
+
+        # Add title
+        elements.append(Paragraph("OHS Monitoring Report", title_style))
+        elements.append(Paragraph(
+            f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            subtitle_style
+        ))
+
+        # Prepare table data with Paragraphs for text wrapping
+        data = [[
+            Paragraph('<b>Project</b>', cell_style),
+            Paragraph('<b>Region</b>', cell_style),
+            Paragraph('<b>District</b>', cell_style),
+            Paragraph('<b>Date</b>', cell_style),
+            Paragraph('<b>Male</b>', cell_style),
+            Paragraph('<b>Female</b>', cell_style),
+            Paragraph('<b>Youth M</b>', cell_style),
+            Paragraph('<b>Youth F</b>', cell_style),
+            Paragraph('<b>Total</b>', cell_style)
+        ]]
+
+        for ohs in ohs_records:
+            data.append([
+                Paragraph(ohs.project.project if ohs.project else '', cell_style),
+                Paragraph(ohs.region.region_name if ohs.region else '', cell_style),
+                Paragraph(ohs.district.district_name if ohs.district else '', cell_style),
+                Paragraph(ohs.date.strftime('%Y-%m-%d') if ohs.date else '', cell_style),
+                Paragraph(str(ohs.male or 0), cell_style),
+                Paragraph(str(ohs.female or 0), cell_style),
+                Paragraph(str(ohs.youth_male or 0), cell_style),
+                Paragraph(str(ohs.youth_female or 0), cell_style),
+                Paragraph(str(ohs.total_workers or 0), cell_style)
+            ])
+
+        # Create table with optimized column widths for A4 Portrait
+        table = Table(data, colWidths=[
+            1.2*inch,  # Project
+            0.9*inch,  # Region
+            0.9*inch,  # District
+            0.8*inch,  # Date
+            0.6*inch,  # Male
+            0.6*inch,  # Female
+            0.6*inch,  # Youth M
+            0.6*inch,  # Youth F
+            0.6*inch   # Total
+        ])
+
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            
+            # Data rows
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 6),
+            ('TOPPADDING', (0, 1), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 3),
+            ('LEFTPADDING', (0, 1), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 2),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="ohs_monitoring_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting OHS data to PDF: {str(e)}')
+        return redirect('ohs_list')
+
+
+@login_required
+def export_ohs_word(request):
+    """Export OHS data to MS Word - A4 Portrait with text wrapping - filtered records only"""
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from django.http import HttpResponse
+    from datetime import datetime
+    from io import BytesIO
+
+    try:
+        # Apply the same filtering as the list view
+        from .filters import OHSFilter
+        qs = OHS_Monitoring.objects.select_related(
+            'project', 'Type_of_Investment', 'year_of_report', 'quarter',
+            'region', 'district', 'settlement', 'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = OHSFilter(request.GET, queryset=qs)
+        ohs_records = filter_obj.qs
+
+        # Create document
+        doc = Document()
+        
+        # Set A4 Portrait dimensions
+        section = doc.sections[0]
+        section.page_height = Inches(11.69)
+        section.page_width = Inches(8.27)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+        section.top_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.5)
+
+        # Add title
+        title = doc.add_heading('OHS Monitoring Report', 0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        subtitle = doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}")
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        doc.add_paragraph()
+
+        # Create table
+        table = doc.add_table(rows=1, cols=9)
+        table.style = 'Table Grid'
+
+        # Define column widths
+        column_widths = [1.2, 0.9, 0.9, 0.8, 0.6, 0.6, 0.6, 0.6, 0.6]
+        for i, width in enumerate(column_widths):
+            for cell in table.columns[i].cells:
+                cell.width = Inches(width)
+
+        # Add headers
+        hdr_cells = table.rows[0].cells
+        headers = ['Project', 'Region', 'District', 'Date', 'Male', 'Female', 'Youth M', 'Youth F', 'Total']
+        
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            # Format header
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.size = Pt(8)
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Header background color
+            shading_elm = hdr_cells[i]._element.get_or_add_tcPr()
+            shading_elm_child = shading_elm.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}shd')
+            if shading_elm_child is None:
+                from docx.oxml import parse_xml
+                shading_elm.append(parse_xml(r'<w:shd {} w:fill="366092"/>'.format('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')))
+
+        # Add data rows
+        for ohs in ohs_records:
+            row_cells = table.add_row().cells
+            row_cells[0].text = ohs.project.project if ohs.project else ''
+            row_cells[1].text = ohs.region.region_name if ohs.region else ''
+            row_cells[2].text = ohs.district.district_name if ohs.district else ''
+            row_cells[3].text = ohs.date.strftime('%Y-%m-%d') if ohs.date else ''
+            row_cells[4].text = str(ohs.male or 0)
+            row_cells[5].text = str(ohs.female or 0)
+            row_cells[6].text = str(ohs.youth_male or 0)
+            row_cells[7].text = str(ohs.youth_female or 0)
+            row_cells[8].text = str(ohs.total_workers or 0)
+
+            # Format cells with text wrapping
+            for j, cell in enumerate(row_cells):
+                # Enable text wrapping for all cells
+                tc_pr = cell._element.get_or_add_tcPr()
+                tc_w = tc_pr.find(qn('w:tcW'))
+                if tc_w is None:
+                    tc_w = tc_pr.makeelement(qn('w:tcW'))
+                    tc_pr.append(tc_w)
+                tc_w.set(qn('w:w'), str(int(column_widths[j] * 1440)))
+                tc_w.set(qn('w:type'), 'dxa')
+                
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(7)
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Save to buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="ohs_monitoring_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Error exporting OHS data to Word: {str(e)}')
+        return redirect('ohs_list')
+
+
 # ======================== Community Engagement Views ========================
 @login_required
 def community_list(request):
