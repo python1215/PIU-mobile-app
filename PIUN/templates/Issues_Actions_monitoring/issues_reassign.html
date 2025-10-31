@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reassign Issue - {{ issue.issue_code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-info text-white p-3 rounded shadow">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h4 mb-0">
+                            <i class="bi bi-person-fill-gear"></i> Reassign Issue
+                        </h1>
+                        <p class="mb-0 opacity-75">Issue Code: {{ issue.issue_code }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-outline-light">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-fill-gear"></i> Reassign Task</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Current Issue Information -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Current Assignment Information</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Issue Code:</strong> {{ issue.issue_code }}<br>
+                                <strong>Project:</strong> {{ issue.project.project|default:"N/A" }}<br>
+                                <strong>Status:</strong> 
+                                {% if issue.status == 'incomplete' %}
+                                    <span class="badge bg-warning">{{ issue.get_status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Currently Assigned To:</strong> 
+                                <span class="text-primary">{{ issue.assigned_to|default:"Unassigned" }}</span><br>
+                                <strong>Assigned Date:</strong> {{ issue.assign_date|date:"M d, Y"|default:"N/A" }}<br>
+                                <strong>Due Date:</strong> {{ issue.due_date|date:"M d, Y"|default:"N/A" }}
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="mb-0"><strong>Description:</strong> {{ issue.description_of_issue_or_action }}</p>
+                    </div>
+
+                    <!-- Reassignment Form -->
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.assigned_to.id_for_label }}" class="form-label">
+                                <i class="bi bi-person-circle"></i> {{ form.assigned_to.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.assigned_to }}
+                            {% if form.assigned_to.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.assigned_to.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select the user who will be responsible for this issue.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.assign_date.id_for_label }}" class="form-label">
+                                <i class="bi bi-calendar-event"></i> {{ form.assign_date.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.assign_date }}
+                            {% if form.assign_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.assign_date.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Specify the date when this reassignment takes effect.</div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'Issues_Actions_monitoring:issues_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-person-fill-gear"></i> Reassign Issue
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header.bg-info {
+    background-color: #0dcaf0 !important;
+}
+</style>
+{% endblock %}

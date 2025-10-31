@@ -127,6 +127,42 @@ class IssueActionsForm(forms.ModelForm):
         return instance
 
 
+class IssueReassignForm(forms.ModelForm):
+    """Form for reassigning an issue to a different user"""
+    class Meta:
+        model = IssueActions
+        fields = ['assigned_to', 'assign_date']
+        widgets = {
+            'assigned_to': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'assign_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+        labels = {
+            'assigned_to': 'Reassign To',
+            'assign_date': 'Reassignment Date'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Populate assigned_to with available users
+        users = User.objects.all().order_by('username')
+        user_choices = [('', 'Select a user...')]
+        user_choices.extend([(user.username, f"{user.username} ({user.get_full_name() or user.email})") for user in users])
+        self.fields['assigned_to'].widget.choices = user_choices
+        self.fields['assigned_to'].required = True
+        
+        # Set default assign_date to today
+        if not self.instance.pk or not self.instance.assign_date:
+            from django.utils import timezone
+            self.initial['assign_date'] = timezone.now().date()
+
+
 class IssueActionsFilterForm(forms.Form):
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),

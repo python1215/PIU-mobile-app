@@ -201,6 +201,16 @@
                                                    class="btn btn-sm btn-outline-warning" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
+                                                {% if issue.status == 'complete' %}
+                                                <button class="btn btn-sm btn-outline-secondary" title="Reassign (Disabled for completed issues)" disabled>
+                                                    <i class="bi bi-person-fill-gear"></i>
+                                                </button>
+                                                {% else %}
+                                                <a href="{% url 'Issues_Actions_monitoring:issues_reassign' issue.pk %}" 
+                                                   class="btn btn-sm btn-outline-info" title="Reassign Task">
+                                                    <i class="bi bi-person-fill-gear"></i>
+                                                </a>
+                                                {% endif %}
                                                 <a href="{% url 'Issues_Actions_monitoring:issues_delete' issue.pk %}" 
                                                    class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="bi bi-trash"></i>

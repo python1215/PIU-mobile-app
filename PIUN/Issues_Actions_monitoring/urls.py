@@ -20,6 +20,7 @@ urlpatterns = [
     path('issues/<int:pk>/', views.issues_detail, name='issues_detail'),
     path('issues/<int:pk>/update/', views.issues_update, name='issues_update'),
     path('issues/<int:pk>/delete/', views.issues_delete, name='issues_delete'),
+    path('issues/<int:pk>/reassign/', views.issues_reassign, name='issues_reassign'),
     
     # Export URLs
     path('export/issues/excel/', views.export_issues_excel, name='export_issues_excel'),

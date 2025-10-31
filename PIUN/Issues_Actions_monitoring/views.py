@@ -232,6 +232,35 @@ def issues_detail(request, pk):
     return render(request, 'Issues_Actions_monitoring/issues_detail.html', context)
 
 
+@login_required
+def issues_reassign(request, pk):
+    """Reassign issue/action to a different user"""
+    issue = get_object_or_404(IssueActions, pk=pk)
+    
+    # Prevent reassignment of completed issues
+    if issue.status == 'complete':
+        messages.warning(request, 'Cannot reassign a completed issue. Please change the status first.')
+        return redirect('Issues_Actions_monitoring:issues_list')
+    
+    if request.method == 'POST':
+        from .forms import IssueReassignForm
+        form = IssueReassignForm(request.POST, instance=issue)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Issue "{issue.issue_code}" has been reassigned to {issue.assigned_to}!')
+            return redirect('Issues_Actions_monitoring:issues_list')
+    else:
+        from .forms import IssueReassignForm
+        form = IssueReassignForm(instance=issue)
+    
+    context = {
+        'form': form,
+        'issue': issue,
+        'action': 'Reassign'
+    }
+    return render(request, 'Issues_Actions_monitoring/issues_reassign.html', context)
+
+
 # ============ Dashboard View ============
 
 @login_required
