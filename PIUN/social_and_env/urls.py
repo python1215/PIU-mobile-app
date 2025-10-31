@@ -22,6 +22,8 @@ urlpatterns = [
     path('pap/<str:pk>/edit/', views.pap_edit, name='pap_edit'),
     path('pap/<str:pk>/delete/', views.pap_delete, name='pap_delete'),
     path('pap/export/excel/', views.export_pap_excel, name='export_pap_excel'),
+    path('pap/export/pdf/', views.export_pap_pdf, name='export_pap_pdf'),
+    path('pap/export/word/', views.export_pap_word, name='export_pap_word'),
     
     # PAP Document Management - Removed (functions deleted)
     
@@ -32,11 +34,15 @@ urlpatterns = [
     path('grievance/<str:pk>/edit/', views.grievance_edit, name='grievance_edit'),
     path('grievance/<str:pk>/delete/', views.grievance_delete, name='grievance_delete'),
     path('grievance/export/excel/', views.export_grievance_excel, name='export_grievance_excel'),
+    path('grievance/export/pdf/', views.export_grievance_pdf, name='export_grievance_pdf'),
+    path('grievance/export/word/', views.export_grievance_word, name='export_grievance_word'),
     
     # OHS Monitoring
     path('ohs/', views.ohs_list, name='ohs_list'),
     path('ohs/add/', views.ohs_add, name='ohs_add'),
     path('ohs/export/excel/', views.export_ohs_excel, name='export_ohs_excel'),
+    path('ohs/export/pdf/', views.export_ohs_pdf, name='export_ohs_pdf'),
+    path('ohs/export/word/', views.export_ohs_word, name='export_ohs_word'),
     path('ohs/<str:pk>/', views.ohs_detail, name='ohs_detail'),
     path('ohs/<str:pk>/edit/', views.ohs_edit, name='ohs_edit'),
     path('ohs/<str:pk>/delete/', views.ohs_delete, name='ohs_delete'),
