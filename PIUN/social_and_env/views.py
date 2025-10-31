@@ -728,7 +728,7 @@ def social_env_dashboard(request):
                 'project', 'loginUser').order_by('-date_created')[:5])
         recent_esia = list(
             ESIA.objects.select_related(
-                'project', 'loginUser').order_by('-date_created')[:5])
+                'project_name', 'loginUser').order_by('-date_created')[:5])
 
         context = {
             'stats': stats,
