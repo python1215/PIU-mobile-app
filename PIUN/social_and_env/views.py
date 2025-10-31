@@ -2186,15 +2186,18 @@ def load_investment_types_esia(request):
 
 @login_required
 def esia_export_excel(request):
-    """Export ESIA data to Excel"""
+    """Export ESIA data to Excel - filtered records only"""
     import openpyxl
     from django.http import HttpResponse
 
     try:
-        # Get all ESIA records
-        esias = ESIA.objects.select_related('project', 'Type_of_Investment',
-                                            'year_of_report', 'quarter',
-                                            'loginUser').all()
+        # Apply the same filtering as the list view
+        from .filters import ESIAFilter
+        qs = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = ESIAFilter(request.GET, queryset=qs)
+        esias = filter_obj.qs
 
         # Create workbook and worksheet
         wb = openpyxl.Workbook()
@@ -2215,19 +2218,14 @@ def esia_export_excel(request):
         for row, esia in enumerate(esias, 2):
             ws.cell(row=row,
                     column=1,
-                    value=esia.project.project if esia.project else '')
+                    value=esia.project_name.project if esia.project_name else '')
             ws.cell(row=row,
                     column=2,
-                    value=esia.Type_of_Investment.type_of_investment
-                    if esia.Type_of_Investment else '')
-            ws.cell(
-                row=row,
-                column=3,
-                value=esia.year_of_report.year if esia.year_of_report else '')
-            ws.cell(row=row,
-                    column=4,
-                    value=esia.quarter.quarter if esia.quarter else '')
-            ws.cell(row=row, column=5, value=esia.region)
+                    value=esia.type_of_investment.type_of_investment
+                    if esia.type_of_investment else '')
+            ws.cell(row=row, column=3, value='')  # Year removed from model
+            ws.cell(row=row, column=4, value='')  # Quarter removed from model
+            ws.cell(row=row, column=5, value=esia.project_locations)
             ws.cell(row=row, column=6, value=esia.number_of_communities)
             ws.cell(row=row, column=7, value=esia.esia_findings)
             ws.cell(row=row,
@@ -2256,7 +2254,7 @@ def esia_export_excel(request):
 
 @login_required
 def esia_export_pdf(request):
-    """Export ESIA data to PDF - A4 Portrait with text wrapping"""
+    """Export ESIA data to PDF - A4 Portrait with text wrapping - filtered records only"""
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -2268,8 +2266,13 @@ def esia_export_pdf(request):
     from io import BytesIO
 
     try:
-        # Get all ESIA records
-        esias = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        # Apply the same filtering as the list view
+        from .filters import ESIAFilter
+        qs = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = ESIAFilter(request.GET, queryset=qs)
+        esias = filter_obj.qs
 
         # Create PDF buffer - A4 Portrait
         buffer = BytesIO()
@@ -2408,7 +2411,7 @@ def esia_export_pdf(request):
 
 @login_required
 def esia_export_word(request):
-    """Export ESIA data to MS Word - A4 Portrait with text wrapping"""
+    """Export ESIA data to MS Word - A4 Portrait with text wrapping - filtered records only"""
     from docx import Document
     from docx.shared import Inches, Pt, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -2418,8 +2421,13 @@ def esia_export_word(request):
     from io import BytesIO
 
     try:
-        # Get all ESIA records
-        esias = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        # Apply the same filtering as the list view
+        from .filters import ESIAFilter
+        qs = ESIA.objects.select_related('project_name', 'type_of_investment', 'loginUser').all()
+        
+        # Apply filters from request
+        filter_obj = ESIAFilter(request.GET, queryset=qs)
+        esias = filter_obj.qs
 
         # Create document
         doc = Document()
