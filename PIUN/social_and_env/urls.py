@@ -11,6 +11,7 @@ urlpatterns = [
     path('esia/<str:pk>/', views.esia_detail, name='esia_detail'),
     path('esia/<str:pk>/edit/', views.esia_edit, name='esia_edit'),
     path('esia/<str:pk>/delete/', views.esia_delete, name='esia_delete'),
+    path('esia/<str:pk>/export-pdf/', views.esia_detail_export_pdf, name='esia_detail_export_pdf'),
     path('esia/export/excel/', views.esia_export_excel, name='esia_export_excel'),
     path('esia/export/pdf/', views.esia_export_pdf, name='esia_export_pdf'),
     path('esia/export/word/', views.esia_export_word, name='esia_export_word'),
