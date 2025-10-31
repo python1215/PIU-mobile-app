@@ -1,5 +1,6 @@
 {% extends 'social_and_env/base.html' %}
 {% load widget_tweaks %}
+{% load humanize %}
 
 {% block title %}Dashboard - PIUN Social & Environmental{% endblock %}
 
@@ -101,7 +102,7 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6">
-                        <h4 class="text-success">D{{ total_compensation|floatformat:2 }}</h4>
+                        <h4 class="text-success">D{{ total_compensation|floatformat:2|intcomma }}</h4>
                         <small class="text-muted">Total Compensation</small>
                     </div>
                     <div class="col-6">

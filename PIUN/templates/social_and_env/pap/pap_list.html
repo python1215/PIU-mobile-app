@@ -1,5 +1,6 @@
 {% extends 'social_and_env/base.html' %}
 {% load widget_tweaks %}
+{% load humanize %}
 
 {% block title %}PAP Records - PIUN Social & Environmental{% endblock %}
 
@@ -58,7 +59,7 @@
     <div class="col-md-3">
         <div class="card bg-info text-white">
             <div class="card-body text-center">
-                <h4 class="mb-0">D{{ stats.total_compensation|floatformat:0 }}</h4>
+                <h4 class="mb-0">D{{ stats.total_compensation|floatformat:0|intcomma }}</h4>
                 <small>Total Compensation</small>
             </div>
         </div>
