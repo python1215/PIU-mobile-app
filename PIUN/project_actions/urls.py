@@ -25,6 +25,7 @@ urlpatterns = [
     path('contract-monitoring/', views.contract_monitoring_list, name='contract_monitoring_list'),
     path('contract-monitoring/create/', views.contract_monitoring_create, name='contract_monitoring_create'),
     path('contract-monitoring/<int:pk>/', views.contract_monitoring_detail, name='contract_monitoring_detail'),
+    path('contract-monitoring/<int:pk>/export-pdf/', views.contract_monitoring_detail_export_pdf, name='contract_monitoring_detail_export_pdf'),
     path('contract-monitoring/<int:pk>/update/', views.contract_monitoring_update, name='contract_monitoring_update'),
     path('contract-monitoring/<int:pk>/delete/', views.contract_monitoring_delete, name='contract_monitoring_delete'),
     
