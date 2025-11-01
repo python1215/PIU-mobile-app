@@ -92,7 +92,7 @@ class IssueActionsForm(forms.ModelForm):
         # assigned_to is a CharField, so we use choices instead of queryset
         users = User.objects.all().order_by('username')
         user_choices = [('', '---------')]  # Empty choice
-        user_choices.extend([(user.username, f"{user.username} ({user.get_full_name() or user.email})") for user in users])
+        user_choices.extend([(user.username, user.get_full_name() or user.username) for user in users])
         self.fields['assigned_to'].widget.choices = user_choices
         self.fields['assigned_to'].required = False
         
@@ -153,7 +153,7 @@ class IssueReassignForm(forms.ModelForm):
         # Populate assigned_to with available users
         users = User.objects.all().order_by('username')
         user_choices = [('', 'Select a user...')]
-        user_choices.extend([(user.username, f"{user.username} ({user.get_full_name() or user.email})") for user in users])
+        user_choices.extend([(user.username, user.get_full_name() or user.username) for user in users])
         self.fields['assigned_to'].widget.choices = user_choices
         self.fields['assigned_to'].required = True
         
