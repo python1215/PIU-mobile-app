@@ -70,7 +70,7 @@
                                     <table class="table table-borderless">
                                         <tr>
                                             <th class="text-muted" width="40%">Assigned To:</th>
-                                            <td>{{ issue.assigned_to.username|default:"Unassigned" }}</td>
+                                            <td>{{ issue.get_assigned_to_name }}</td>
                                         </tr>
                                         <tr>
                                             <th class="text-muted">Due Date:</th>

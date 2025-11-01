@@ -142,11 +142,7 @@
                         <tr>
                             <th class="text-muted">Assigned To:</th>
                             <td>
-                                {% if issue.assigned_to %}
-                                    <i class="bi bi-person-circle"></i> {{ issue.assigned_to }}
-                                {% else %}
-                                    <span class="text-muted"><i class="bi bi-person-x"></i> Unassigned</span>
-                                {% endif %}
+                                <i class="bi bi-person-circle"></i> {{ issue.get_assigned_to_name }}
                             </td>
                         </tr>
                         <tr>

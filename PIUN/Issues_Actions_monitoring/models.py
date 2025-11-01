@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from PIU_Financial_mgt.models import Project
@@ -93,6 +94,18 @@ class IssueActions(models.Model):
       'critical': 5
     }
     return priority_notifications.get(self.priority, 1) if self.priority else 0
+  
+  def get_assigned_to_name(self):
+    """Return the full name of the assigned user, or username if full name not available"""
+    if not self.assigned_to:
+      return "Unassigned"
+    
+    User = get_user_model()
+    try:
+      user = User.objects.get(username=self.assigned_to)
+      return user.get_full_name() or user.username
+    except User.DoesNotExist:
+      return self.assigned_to
 
 
 class IssueNotification(models.Model):

@@ -178,7 +178,7 @@
                                                 <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ issue.assigned_to|default:"Unassigned" }}</td>
+                                        <td>{{ issue.get_assigned_to_name }}</td>
                                         <td>{{ issue.assign_date|date:"M d, Y"|default:"-" }}</td>
                                         <td>
                                             {% if issue.due_date %}

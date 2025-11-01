@@ -49,7 +49,7 @@
                             </div>
                             <div class="col-md-6">
                                 <strong>Currently Assigned To:</strong> 
-                                <span class="text-primary">{{ issue.assigned_to|default:"Unassigned" }}</span><br>
+                                <span class="text-primary">{{ issue.get_assigned_to_name }}</span><br>
                                 <strong>Assigned Date:</strong> {{ issue.assign_date|date:"M d, Y"|default:"N/A" }}<br>
                                 <strong>Due Date:</strong> {{ issue.due_date|date:"M d, Y"|default:"N/A" }}
                             </div>

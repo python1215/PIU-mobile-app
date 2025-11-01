@@ -224,7 +224,7 @@
                                                 <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ issue.assigned_to.username|default:"Unassigned" }}</td>
+                                        <td>{{ issue.get_assigned_to_name }}</td>
                                         <td>{{ issue.date_created|date:"M d, Y" }}</td>
                                         <td>
                                             <a href="{% url 'Issues_Actions_monitoring:issues_detail' issue.pk %}" 
