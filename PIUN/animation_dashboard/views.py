@@ -181,8 +181,13 @@ def upload_media(request):
             media_item = form.save(commit=False)
             media_item.uploaded_by = request.user
             media_item.save()
-            messages.success(request, f'{media_item.get_media_type_display()} uploaded successfully!')
+            messages.success(request, f'{media_item.get_media_type_display()} "{media_item.title}" uploaded successfully!')
             return redirect('animation_dashboard:media_gallery')
+        else:
+            # Add error messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = MediaItemForm()
     
