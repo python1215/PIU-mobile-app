@@ -475,7 +475,23 @@ def contract_profiling_works_list(request):
         
         # Convert to list for pagination and calculate statistics
         queryset_list = list(queryset)
-        total_value = sum(getattr(contract, 'contract_value', 0) or 0 for contract in queryset_list)
+        
+        # Calculate totals per currency
+        from collections import defaultdict
+        currency_totals_dict = defaultdict(float)
+        for contract in queryset_list:
+            currency_code = contract.currency.currency if contract.currency else 'Unknown'
+            contract_val = getattr(contract, 'contract_value', 0) or 0
+            currency_totals_dict[currency_code] += float(contract_val)
+        
+        # Convert to list of dicts for template
+        currency_totals = [
+            {'currency': curr, 'total': total}
+            for curr, total in sorted(currency_totals_dict.items())
+        ]
+        
+        # Legacy total_value (sum of all, regardless of currency - for backwards compatibility)
+        total_value = sum(currency_totals_dict.values())
         active_contracts = 0  # Simplified for now
         
         # Pagination
@@ -490,6 +506,7 @@ def contract_profiling_works_list(request):
             'search_query': search_query,
             'total_contracts': len(queryset_list),
             'total_value': total_value,
+            'currency_totals': currency_totals,
             'active_contracts': active_contracts,
             'sort_by': request.GET.get("sort", "-id"),
         }
@@ -503,6 +520,7 @@ def contract_profiling_works_list(request):
             'search_query': '',
             'total_contracts': 0,
             'total_value': 0,
+            'currency_totals': [],
             'active_contracts': 0,
         }
     
@@ -711,7 +729,23 @@ def contract_profiling_goods_services_list(request):
         # Convert to list for pagination and calculate statistics
         queryset_list = list(queryset)
         total_contracts = len(queryset_list)
-        total_value = sum(getattr(contract, 'contract_value', 0) or 0 for contract in queryset_list)
+        
+        # Calculate totals per currency
+        from collections import defaultdict
+        currency_totals_dict = defaultdict(float)
+        for contract in queryset_list:
+            currency_code = contract.currency.currency if contract.currency else 'Unknown'
+            contract_val = getattr(contract, 'contract_value', 0) or 0
+            currency_totals_dict[currency_code] += float(contract_val)
+        
+        # Convert to list of dicts for template
+        currency_totals = [
+            {'currency': curr, 'total': total}
+            for curr, total in sorted(currency_totals_dict.items())
+        ]
+        
+        # Legacy total_value (sum of all, regardless of currency - for backwards compatibility)
+        total_value = sum(currency_totals_dict.values())
         active_contracts = 0  # Simplified for now
         
         # Pagination
@@ -726,6 +760,7 @@ def contract_profiling_goods_services_list(request):
             'search_query': search_query,
             'total_contracts': total_contracts,
             'total_value': total_value,
+            'currency_totals': currency_totals,
             'active_contracts': active_contracts,
             'sort_by': request.GET.get("sort", "-id"),
         }
@@ -739,6 +774,7 @@ def contract_profiling_goods_services_list(request):
             'search_query': '',
             'total_contracts': 0,
             'total_value': 0,
+            'currency_totals': [],
             'active_contracts': 0,
         }
     

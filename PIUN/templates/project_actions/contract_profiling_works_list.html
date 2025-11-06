@@ -64,9 +64,15 @@
                             <div class="card bg-info text-white h-100">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between">
-                                        <div>
+                                        <div class="w-100">
                                             <h6 class="card-title">Total Value</h6>
-                                            <h3 class="mb-0">{{ total_value|default:0|floatformat:0|intcomma }}</h3>
+                                            {% if currency_totals %}
+                                                {% for item in currency_totals %}
+                                                    <h3 class="mb-1">{{ item.currency }} {{ item.total|floatformat:0|intcomma }}</h3>
+                                                {% endfor %}
+                                            {% else %}
+                                                <h3 class="mb-0">0</h3>
+                                            {% endif %}
                                         </div>
                                         <div class="align-self-center">
                                             <i class="fas fa-coins fa-2x opacity-75"></i>
