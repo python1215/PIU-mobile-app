@@ -39,7 +39,7 @@
                                 <img src="{{ media_item.file.url }}" alt="{{ media_item.title }}" class="img-fluid rounded" style="max-height: 600px;">
                             {% else %}
                                 <video controls class="w-100 rounded" style="max-height: 600px;">
-                                    <source src="{{ media_item.file.url }}" type="video/{{ media_item.file.name|split:'.'|last }}">
+                                    <source src="{{ media_item.file.url }}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             {% endif %}
