@@ -127,13 +127,9 @@
                                         <i class="bi bi-image"></i>
                                     </span>
                                 {% else %}
-                                    {% if item.thumbnail %}
-                                        <img src="{{ item.thumbnail.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 100%; object-fit: cover;">
-                                    {% else %}
-                                        <div class="d-flex align-items-center justify-content-center h-100 bg-dark">
-                                            <i class="bi bi-camera-video text-white" style="font-size: 3rem;"></i>
-                                        </div>
-                                    {% endif %}
+                                    <div class="d-flex align-items-center justify-content-center h-100 bg-dark">
+                                        <i class="bi bi-camera-video text-white" style="font-size: 3rem;"></i>
+                                    </div>
                                     <span class="position-absolute top-0 end-0 m-2 badge bg-info">
                                         <i class="bi bi-play-circle"></i>
                                     </span>
@@ -142,7 +138,7 @@
                             <div class="card-body">
                                 <h6 class="card-title text-truncate" title="{{ item.title }}">{{ item.title }}</h6>
                                 <p class="card-text small text-muted">
-                                    {{ item.created_at|date:"M d, Y" }}
+                                    <i class="bi bi-calendar me-1"></i>{{ item.uploaded_date|date:"M d, Y" }}
                                 </p>
                             </div>
                         </div>
