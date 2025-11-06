@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Projects by Closing Date - Animation Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'animation_dashboard:dashboard' %}">
+                    <i class="bi bi-film me-1"></i>Animation Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Projects by Closing Date</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="bi bi-calendar-event me-2"></i>
+                NAWEC PIU PROJECTS by Closing Date
+            </h2>
+            <p class="text-muted">Projects organized by scheduled closure timeline</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'animation_dashboard:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Projects with Closing Dates</h5>
+                    <h2 class="mb-0">{{ total_projects }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Projects without Closing Dates</h5>
+                    <h2 class="mb-0">{{ projects_without_date }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Year Groups -->
+    {% if year_groups %}
+        {% for year_group in year_groups %}
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #dc3545; color: white;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="bi bi-calendar4-range me-2"></i>
+                                Year {{ year_group.year }}
+                            </h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-light text-dark fs-6">
+                                {{ year_group.projects_count }} Project{{ year_group.projects_count|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for quarter_name, projects in year_group.quarters.items %}
+                        <div class="mb-4">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-calendar3 me-1"></i>{{ quarter_name }} - {{ year_group.year }}
+                                <span class="badge bg-primary ms-2">{{ projects|length }} Project{{ projects|length|pluralize }}</span>
+                            </h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Project ID</th>
+                                            <th>Project Name</th>
+                                            <th>Funding</th>
+                                            <th>Donors</th>
+                                            <th>Closure Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in projects %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td><code>{{ project.projectID }}</code></td>
+                                                <td>{{ project.project }}</td>
+                                                <td>
+                                                    <strong class="text-success">
+                                                        {{ project.currency.currency|default:"N/A" }} {{ project.funding|floatformat:2|intcomma }}
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    {% for donor in project.donors.all %}
+                                                        <span class="badge bg-secondary me-1">{{ donor.donor }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ project.closure_Date|date:"M d, Y" }}</strong>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle me-2"></i>
+            No projects with closing dates found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

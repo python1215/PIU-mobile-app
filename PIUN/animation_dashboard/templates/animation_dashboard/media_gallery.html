@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Media Gallery - Animation Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'animation_dashboard:dashboard' %}">
+                    <i class="bi bi-film me-1"></i>Animation Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Media Gallery</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="bi bi-images me-2"></i>
+                Media Gallery
+            </h2>
+            <p class="text-muted">Browse all pictures and videos</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'animation_dashboard:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-label">Filter by Type:</label>
+                            <select name="type" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Media</option>
+                                <option value="image" {% if media_type == 'image' %}selected{% endif %}>Pictures Only</option>
+                                <option value="video" {% if media_type == 'video' %}selected{% endif %}>Videos Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="badge bg-primary fs-6">{{ total_count }} Items</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Grid -->
+    {% if media_items %}
+        <div class="row">
+            {% for item in media_items %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 hover-shadow">
+                        <div class="position-relative" style="height: 250px; overflow: hidden;">
+                            {% if item.media_type == 'image' %}
+                                <img src="{{ item.file.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 100%; object-fit: cover; cursor: pointer;" onclick="viewMedia('{{ item.file.url }}', 'image', '{{ item.title }}')">
+                                <span class="position-absolute top-0 end-0 m-2 badge bg-success">
+                                    <i class="bi bi-image"></i> Image
+                                </span>
+                            {% else %}
+                                {% if item.thumbnail %}
+                                    <img src="{{ item.thumbnail.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 100%; object-fit: cover; cursor: pointer;" onclick="viewMedia('{{ item.file.url }}', 'video', '{{ item.title }}')">
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-center h-100 bg-dark" style="cursor: pointer;" onclick="viewMedia('{{ item.file.url }}', 'video', '{{ item.title }}')">
+                                        <i class="bi bi-camera-video text-white" style="font-size: 4rem;"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="position-absolute top-0 end-0 m-2 badge bg-info">
+                                    <i class="bi bi-play-circle"></i> Video
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ item.title }}</h6>
+                            {% if item.description %}
+                                <p class="card-text small text-muted">{{ item.description|truncatewords:15 }}</p>
+                            {% endif %}
+                            {% if item.project %}
+                                <p class="small mb-1">
+                                    <strong>Project:</strong> {{ item.project.project }}
+                                </p>
+                            {% endif %}
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>{{ item.created_at|date:"M d, Y" }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if media_items.has_other_pages %}
+            <nav aria-label="Media pagination">
+                <ul class="pagination justify-content-center">
+                    {% if media_items.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if media_type %}&type={{ media_type }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ media_items.previous_page_number }}{% if media_type %}&type={{ media_type }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ media_items.number }} of {{ media_items.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if media_items.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ media_items.next_page_number }}{% if media_type %}&type={{ media_type }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ media_items.paginator.num_pages }}{% if media_type %}&type={{ media_type }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle me-2"></i>
+            No media items found. Try changing your filters.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Media Viewer Modal -->
+<div class="modal fade" id="mediaViewerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mediaTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" id="mediaContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewMedia(url, type, title) {
+    document.getElementById('mediaTitle').textContent = title;
+    const content = document.getElementById('mediaContent');
+    
+    if (type === 'image') {
+        content.innerHTML = `<img src="${url}" class="img-fluid" alt="${title}">`;
+    } else {
+        content.innerHTML = `
+            <video controls class="w-100" style="max-height: 70vh;">
+                <source src="${url}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('mediaViewerModal'));
+    modal.show();
+}
+</script>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

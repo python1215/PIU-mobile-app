@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'Issues_Actions_monitoring',
     'Project_Documentation_Tracking',
     'project_progress',
+    'animation_dashboard',
 ]
 
 MIDDLEWARE = [
