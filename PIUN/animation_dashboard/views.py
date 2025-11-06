@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from django.core.paginator import Paginator
 from PIU_Financial_mgt.models import Project
 from .models import MediaItem
+from .forms import MediaItemForm
 
 
 @login_required
@@ -168,3 +170,77 @@ def projects_by_funding(request):
         'total_projects': total_projects,
     }
     return render(request, 'animation_dashboard/projects_by_funding.html', context)
+
+
+@login_required
+def upload_media(request):
+    """Upload new media item (picture or video)"""
+    if request.method == 'POST':
+        form = MediaItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            media_item = form.save(commit=False)
+            media_item.uploaded_by = request.user
+            media_item.save()
+            messages.success(request, f'{media_item.get_media_type_display()} uploaded successfully!')
+            return redirect('animation_dashboard:media_gallery')
+    else:
+        form = MediaItemForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Upload Media',
+    }
+    return render(request, 'animation_dashboard/media_upload.html', context)
+
+
+@login_required
+def media_detail(request, pk):
+    """View details of a media item"""
+    media_item = get_object_or_404(MediaItem, pk=pk)
+    
+    context = {
+        'media_item': media_item,
+        'page_title': media_item.title,
+    }
+    return render(request, 'animation_dashboard/media_detail.html', context)
+
+
+@login_required
+def edit_media(request, pk):
+    """Edit existing media item"""
+    media_item = get_object_or_404(MediaItem, pk=pk)
+    
+    if request.method == 'POST':
+        form = MediaItemForm(request.POST, request.FILES, instance=media_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{media_item.get_media_type_display()} updated successfully!')
+            return redirect('animation_dashboard:media_detail', pk=media_item.pk)
+    else:
+        form = MediaItemForm(instance=media_item)
+    
+    context = {
+        'form': form,
+        'media_item': media_item,
+        'page_title': f'Edit: {media_item.title}',
+    }
+    return render(request, 'animation_dashboard/media_edit.html', context)
+
+
+@login_required
+def delete_media(request, pk):
+    """Delete media item"""
+    media_item = get_object_or_404(MediaItem, pk=pk)
+    
+    if request.method == 'POST':
+        media_type = media_item.get_media_type_display()
+        title = media_item.title
+        media_item.delete()
+        messages.success(request, f'{media_type} "{title}" deleted successfully!')
+        return redirect('animation_dashboard:media_gallery')
+    
+    context = {
+        'media_item': media_item,
+        'page_title': f'Delete: {media_item.title}',
+    }
+    return render(request, 'animation_dashboard/media_delete.html', context)
