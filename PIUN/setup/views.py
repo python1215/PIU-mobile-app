@@ -20,6 +20,7 @@ def setup_dashboard(request):
         'total_monitoring_types': Type_of_Monitoring.objects.count(),
         'total_kpi_contracts': 0,  # Moved to PIU_Financial_mgt
         'total_quarters': Quarter.objects.count(),
+        'total_years': YEAR.objects.count(),
         'total_measurement_units': Measurement_Unit.objects.count(),
         'total_physical_progress': Physicalprogress.objects.count(),
         'total_type_of_impact': TypeOfImpact.objects.count(),
@@ -181,6 +182,69 @@ def contributors_delete(request, pk):
     
     context = {'contributor': contributor}
     return render(request, 'setup/contributors/contributors_confirm_delete.html', context)
+
+# ============ YEAR CRUD OPERATIONS ============
+
+@login_required
+def year_list(request):
+    years = YEAR.objects.all().order_by('-profile_year')
+    paginator = Paginator(years, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'years': page_obj,
+        'total_years': YEAR.objects.count(),
+    }
+    return render(request, 'setup/years/year_list.html', context)
+
+@login_required
+def year_create(request):
+    if request.method == 'POST':
+        form = YearForm(request.POST)
+        if form.is_valid():
+            year = form.save(commit=False)
+            year.loginUser = request.user
+            year.save()
+            messages.success(request, 'Year created successfully!')
+            return redirect('setup:year_list')
+    else:
+        form = YearForm()
+    
+    context = {'form': form, 'title': 'Add New Year'}
+    return render(request, 'setup/years/year_form.html', context)
+
+@login_required
+def year_detail(request, pk):
+    year = get_object_or_404(YEAR, id=pk)
+    context = {'year': year}
+    return render(request, 'setup/years/year_detail.html', context)
+
+@login_required
+def year_update(request, pk):
+    year = get_object_or_404(YEAR, id=pk)
+    if request.method == 'POST':
+        form = YearForm(request.POST, instance=year)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Year updated successfully!')
+            return redirect('setup:year_detail', pk=year.id)
+    else:
+        form = YearForm(instance=year)
+    
+    context = {'form': form, 'year': year, 'title': 'Edit Year'}
+    return render(request, 'setup/years/year_form.html', context)
+
+@login_required
+def year_delete(request, pk):
+    year = get_object_or_404(YEAR, id=pk)
+    if request.method == 'POST':
+        year.delete()
+        messages.success(request, 'Year deleted successfully!')
+        return redirect('setup:year_list')
+    
+    context = {'year': year}
+    return render(request, 'setup/years/year_confirm_delete.html', context)
 
 # ============ PROJECT CATEGORY CRUD OPERATIONS ============
 

@@ -1,0 +1,73 @@
+{% extends 'setup/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}{{ title }} - Setup{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:setup_dashboard' %}">
+                        <i class="bi bi-gear me-1"></i>Setup Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'setup:year_list' %}">Years</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-calendar-fill me-2"></i>{{ title }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.profile_year.id_for_label }}" class="form-label">
+                            Profile Year <span class="text-danger">*</span>
+                        </label>
+                        {{ form.profile_year|add_class:"form-control" }}
+                        {% if form.profile_year.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.profile_year.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Enter a 4-digit year (e.g., 2024, 2025)
+                        </small>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'setup:year_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save Year
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -49,6 +49,13 @@ urlpatterns = [
     path('quarters/<int:pk>/edit/', views.quarter_update, name='quarter_update'),
     path('quarters/<int:pk>/delete/', views.quarter_delete, name='quarter_delete'),
     
+    # Year URLs
+    path('years/', views.year_list, name='year_list'),
+    path('years/add/', views.year_create, name='year_create'),
+    path('years/<int:pk>/', views.year_detail, name='year_detail'),
+    path('years/<int:pk>/edit/', views.year_update, name='year_update'),
+    path('years/<int:pk>/delete/', views.year_delete, name='year_delete'),
+    
     # Measurement Unit URLs
     path('measurement-units/', views.measurement_unit_list, name='measurement_unit_list'),
     path('measurement-units/add/', views.measurement_unit_create, name='measurement_unit_create'),

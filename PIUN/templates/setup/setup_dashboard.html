@@ -152,6 +152,21 @@
                         <div class="col-md-6 mb-3">
                             <div class="card setup-card h-100">
                                 <div class="card-body text-center">
+                                    <i class="bi bi-calendar-fill fs-1 mb-2" style="color: #0dcaf0;"></i>
+                                    <h6 class="card-title">Years</h6>
+                                    <p class="card-text small text-muted">Manage profile years</p>
+                                    <span class="badge bg-info mb-2">{{ total_years }} Years</span>
+                                    <div>
+                                        <a href="{% url 'setup:year_list' %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-right me-1"></i>Manage
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card setup-card h-100">
+                                <div class="card-body text-center">
                                     <i class="bi bi-people fs-1 mb-2" style="color: #6f42c1;"></i>
                                     <h6 class="card-title">Contributors</h6>
                                     <p class="card-text small text-muted">Manage project contributors</p>
