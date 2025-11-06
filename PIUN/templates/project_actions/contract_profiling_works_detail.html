@@ -37,7 +37,7 @@
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <h6 class="card-title">Contract Value</h6>
-                                            <h4 class="mb-0">{{ contract.currency.currency_name|default:"GMD" }} {{ contract.contract_value|floatformat:2|intcomma }}</h4>
+                                            <h4 class="mb-0">{{ contract.currency.currency|default:"GMD" }} {{ contract.contract_value|floatformat:2|intcomma }}</h4>
                                         </div>
                                         <div class="align-self-center">
                                             <i class="bi bi-cash-stack fa-2x opacity-75"></i>
@@ -153,7 +153,7 @@
                             </div>
                             <div class="info-item mb-3">
                                 <label class="fw-bold" style="color: #000 !important;">Contract Value:</label>
-                                <p class="mb-0 text-success fw-bold">{{ contract.currency.currency_name|default:"GMD" }} {{ contract.contract_value|floatformat:2|intcomma }}</p>
+                                <p class="mb-0 text-success fw-bold">{{ contract.currency.currency|default:"GMD" }} {{ contract.contract_value|floatformat:2|intcomma }}</p>
                             </div>
                             <div class="info-item mb-3">
                                 <label class="fw-bold" style="color: #000 !important;">Amendments:</label>

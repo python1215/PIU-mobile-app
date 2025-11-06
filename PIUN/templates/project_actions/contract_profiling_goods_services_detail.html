@@ -1,6 +1,7 @@
 {% extends 'project_actions/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load humanize %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -47,7 +48,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label" style="color: #000 !important;">Contract Value</label>
                             <p class="fw-bold text-success">
-                                {{ contract.currency.currency_code|default:"USD" }} {{ contract.contract_value|floatformat:2|default:"0.00" }}
+                                {{ contract.currency.currency|default:"USD" }} {{ contract.contract_value|floatformat:2|intcomma|default:"0.00" }}
                             </p>
                         </div>
                     </div>
