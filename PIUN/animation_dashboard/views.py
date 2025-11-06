@@ -9,12 +9,22 @@ from .models import MediaItem
 @login_required
 def animation_dashboard(request):
     """Main Animation Dashboard with media gallery and reports"""
-    media_items = MediaItem.objects.all()[:12]  # Latest 12 items
+    # Handle case where MediaItem table doesn't exist yet (migrations pending)
+    try:
+        media_items = MediaItem.objects.all()[:12]  # Latest 12 items
+        total_media = MediaItem.objects.count()
+        total_images = MediaItem.objects.filter(media_type='image').count()
+        total_videos = MediaItem.objects.filter(media_type='video').count()
+    except:
+        media_items = []
+        total_media = 0
+        total_images = 0
+        total_videos = 0
     
     context = {
-        'total_media': MediaItem.objects.count(),
-        'total_images': MediaItem.objects.filter(media_type='image').count(),
-        'total_videos': MediaItem.objects.filter(media_type='video').count(),
+        'total_media': total_media,
+        'total_images': total_images,
+        'total_videos': total_videos,
         'media_items': media_items,
     }
     return render(request, 'animation_dashboard/dashboard.html', context)
@@ -25,19 +35,25 @@ def media_gallery(request):
     """Full media gallery with filtering"""
     media_type = request.GET.get('type', '')
     
-    media_items = MediaItem.objects.all()
-    
-    if media_type:
-        media_items = media_items.filter(media_type=media_type)
-    
-    paginator = Paginator(media_items, 24)  # 24 items per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # Handle case where MediaItem table doesn't exist yet (migrations pending)
+    try:
+        media_items = MediaItem.objects.all()
+        
+        if media_type:
+            media_items = media_items.filter(media_type=media_type)
+        
+        paginator = Paginator(media_items, 24)  # 24 items per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        total_count = media_items.count()
+    except:
+        page_obj = []
+        total_count = 0
     
     context = {
         'media_items': page_obj,
         'media_type': media_type,
-        'total_count': media_items.count(),
+        'total_count': total_count,
     }
     return render(request, 'animation_dashboard/media_gallery.html', context)
 
