@@ -68,23 +68,23 @@ def projects_by_donors(request):
     donor_groups = {}
     for project in projects:
         for donor in project.donors.all():
-            if donor.donor not in donor_groups:
-                donor_groups[donor.donor] = {
+            if donor.name not in donor_groups:
+                donor_groups[donor.name] = {
                     'donor': donor,
                     'projects': [],
                     'total_funding': 0,
                     'currencies': {}
                 }
-            donor_groups[donor.donor]['projects'].append(project)
+            donor_groups[donor.name]['projects'].append(project)
             
             # Track funding by currency
             currency_symbol = project.currency.currency if project.currency else 'N/A'
-            if currency_symbol not in donor_groups[donor.donor]['currencies']:
-                donor_groups[donor.donor]['currencies'][currency_symbol] = 0
-            donor_groups[donor.donor]['currencies'][currency_symbol] += float(project.funding)
+            if currency_symbol not in donor_groups[donor.name]['currencies']:
+                donor_groups[donor.name]['currencies'][currency_symbol] = 0
+            donor_groups[donor.name]['currencies'][currency_symbol] += float(project.funding)
     
     # Sort by donor name
-    sorted_donors = sorted(donor_groups.values(), key=lambda x: x['donor'].donor)
+    sorted_donors = sorted(donor_groups.values(), key=lambda x: x['donor'].name)
     
     context = {
         'donor_groups': sorted_donors,
