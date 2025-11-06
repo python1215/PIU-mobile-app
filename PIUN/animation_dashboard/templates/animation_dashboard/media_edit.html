@@ -1,0 +1,135 @@
+{% extends 'main_dashboard.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block page_title %}Edit Media - Animation Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-pencil me-2"></i>Edit Media</h2>
+                    <p class="text-muted">Update details for: {{ media_item.title }}</p>
+                </div>
+                <a href="{% url 'animation_dashboard:media_detail' media_item.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Details
+                </a>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="row">
+                <!-- Form Column -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header" style="background-color: #366092; color: white;">
+                            <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Media Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Title Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                                        {{ form.title.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.title.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Description Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.description.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Media Type Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.media_type.id_for_label }}" class="form-label">
+                                        {{ form.media_type.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.media_type }}
+                                    {% if form.media_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.media_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Current: {{ media_item.get_media_type_display }}</small>
+                                </div>
+
+                                <!-- File Upload Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.file.id_for_label }}" class="form-label">
+                                        {{ form.file.label }}
+                                    </label>
+                                    <p class="text-muted small">
+                                        <strong>Current file:</strong> {{ media_item.file.name|slice:"17:" }}<br>
+                                        Leave empty to keep the current file, or upload a new one to replace it.
+                                    </p>
+                                    {{ form.file }}
+                                    {% if form.file.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.file.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'animation_dashboard:media_detail' media_item.pk %}" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Media Preview Column -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Current Media</h6>
+                        </div>
+                        <div class="card-body text-center p-3">
+                            {% if media_item.media_type == 'image' %}
+                                <img src="{{ media_item.file.url }}" alt="{{ media_item.title }}" class="img-fluid rounded mb-2" style="max-height: 200px;">
+                            {% else %}
+                                <video controls class="w-100 rounded mb-2" style="max-height: 200px;">
+                                    <source src="{{ media_item.file.url }}" type="video/{{ media_item.file.name|split:'.'|last }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+                            <p class="small text-muted mb-0">{{ media_item.title }}</p>
+                            <span class="badge bg-primary">{{ media_item.get_media_type_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

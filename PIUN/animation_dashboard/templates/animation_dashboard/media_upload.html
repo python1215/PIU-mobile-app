@@ -1,0 +1,154 @@
+{% extends 'main_dashboard.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block page_title %}Upload Media - Animation Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-cloud-upload me-2"></i>Upload Media</h2>
+                    <p class="text-muted">Upload pictures or videos to the Animation Dashboard</p>
+                </div>
+                <a href="{% url 'animation_dashboard:media_gallery' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Gallery
+                </a>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header" style="background-color: #366092; color: white;">
+                            <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Upload New Media</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data" id="mediaUploadForm">
+                                {% csrf_token %}
+                                
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Title Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                                        {{ form.title.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.title.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Enter a descriptive title for this media</small>
+                                </div>
+
+                                <!-- Description Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.description.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Optional: Add a detailed description</small>
+                                </div>
+
+                                <!-- Media Type Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.media_type.id_for_label }}" class="form-label">
+                                        {{ form.media_type.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.media_type }}
+                                    {% if form.media_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.media_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Select whether this is an image or video</small>
+                                </div>
+
+                                <!-- File Upload Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.file.id_for_label }}" class="form-label">
+                                        {{ form.file.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.file }}
+                                    {% if form.file.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.file.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        Supported images: JPG, PNG, GIF, BMP, WEBP, SVG<br>
+                                        Supported videos: MP4, AVI, MOV, WMV, FLV, WEBM, MKV<br>
+                                        Maximum file size: 100MB
+                                    </small>
+                                </div>
+
+                                <!-- File Preview -->
+                                <div class="mb-3" id="filePreview" style="display: none;">
+                                    <label class="form-label">Preview</label>
+                                    <div class="border rounded p-3 text-center">
+                                        <img id="imagePreview" style="max-width: 100%; max-height: 300px; display: none;">
+                                        <video id="videoPreview" controls style="max-width: 100%; max-height: 300px; display: none;"></video>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'animation_dashboard:media_gallery' %}" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-cloud-upload me-2"></i>Upload Media
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File preview functionality
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const filePreview = document.getElementById('filePreview');
+        const imagePreview = document.getElementById('imagePreview');
+        const videoPreview = document.getElementById('videoPreview');
+        
+        // Reset previews
+        imagePreview.style.display = 'none';
+        videoPreview.style.display = 'none';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.type.startsWith('image/')) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            } else if (file.type.startsWith('video/')) {
+                videoPreview.src = e.target.result;
+                videoPreview.style.display = 'block';
+            }
+            filePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

@@ -9,6 +9,10 @@ urlpatterns = [
     
     # Media Gallery
     path('media/', views.media_gallery, name='media_gallery'),
+    path('media/upload/', views.upload_media, name='upload_media'),
+    path('media/<int:pk>/', views.media_detail, name='media_detail'),
+    path('media/<int:pk>/edit/', views.edit_media, name='edit_media'),
+    path('media/<int:pk>/delete/', views.delete_media, name='delete_media'),
     
     # Custom Reports
     path('reports/by-donors/', views.projects_by_donors, name='projects_by_donors'),
