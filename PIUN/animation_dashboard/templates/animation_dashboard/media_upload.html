@@ -92,8 +92,12 @@
                                     <small class="text-muted">
                                         Supported images: JPG, PNG, GIF, BMP, WEBP, SVG<br>
                                         Supported videos: MP4, AVI, MOV, WMV, FLV, WEBM, MKV<br>
-                                        Maximum file size: 100MB
+                                        <strong>Maximum file size: 500MB</strong>
                                     </small>
+                                    <div id="fileSizeWarning" class="alert alert-danger mt-2" style="display: none;">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <strong>File too large!</strong> <span id="fileSizeMessage"></span>
+                                    </div>
                                 </div>
 
                                 <!-- File Preview -->
@@ -124,10 +128,33 @@
 </div>
 
 <script>
-// File preview functionality
+// File preview and size validation functionality
 document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
     const file = e.target.files[0];
+    const fileSizeWarning = document.getElementById('fileSizeWarning');
+    const fileSizeMessage = document.getElementById('fileSizeMessage');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    // Hide warning by default
+    fileSizeWarning.style.display = 'none';
+    submitButton.disabled = false;
+    
     if (file) {
+        // Check file size (500MB = 524,288,000 bytes)
+        const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        
+        if (file.size > maxSize) {
+            // Show warning and disable submit
+            fileSizeMessage.textContent = `Your file is ${fileSizeMB}MB, which exceeds the maximum allowed size of 500MB. Please select a smaller file.`;
+            fileSizeWarning.style.display = 'block';
+            submitButton.disabled = true;
+            
+            // Clear the file input
+            e.target.value = '';
+            return;
+        }
+        
         const filePreview = document.getElementById('filePreview');
         const imagePreview = document.getElementById('imagePreview');
         const videoPreview = document.getElementById('videoPreview');
@@ -148,6 +175,22 @@ document.getElementById('{{ form.file.id_for_label }}').addEventListener('change
             filePreview.style.display = 'block';
         };
         reader.readAsDataURL(file);
+    }
+});
+
+// Form submit validation
+document.getElementById('mediaUploadForm').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+    const file = fileInput.files[0];
+    
+    if (file) {
+        const maxSize = 500 * 1024 * 1024; // 500MB
+        if (file.size > maxSize) {
+            e.preventDefault();
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            alert(`File size (${fileSizeMB}MB) exceeds the maximum allowed size of 500MB. Please select a smaller file.`);
+            return false;
+        }
     }
 });
 </script>

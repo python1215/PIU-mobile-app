@@ -84,7 +84,8 @@
                                     </label>
                                     <p class="text-muted small">
                                         <strong>Current file:</strong> {{ media_item.file.name|slice:"17:" }}<br>
-                                        Leave empty to keep the current file, or upload a new one to replace it.
+                                        Leave empty to keep the current file, or upload a new one to replace it.<br>
+                                        <strong>Maximum file size: 500MB</strong>
                                     </p>
                                     {{ form.file }}
                                     {% if form.file.errors %}
@@ -92,6 +93,10 @@
                                             {{ form.file.errors }}
                                         </div>
                                     {% endif %}
+                                    <div id="fileSizeWarning" class="alert alert-danger mt-2" style="display: none;">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <strong>File too large!</strong> <span id="fileSizeMessage"></span>
+                                    </div>
                                 </div>
 
                                 <!-- Buttons -->
@@ -132,4 +137,35 @@
         </div>
     </div>
 </div>
+
+<script>
+// File size validation for edit form
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const fileSizeWarning = document.getElementById('fileSizeWarning');
+    const fileSizeMessage = document.getElementById('fileSizeMessage');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    // Hide warning by default
+    fileSizeWarning.style.display = 'none';
+    submitButton.disabled = false;
+    
+    if (file) {
+        // Check file size (500MB = 524,288,000 bytes)
+        const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        
+        if (file.size > maxSize) {
+            // Show warning and disable submit
+            fileSizeMessage.textContent = `Your file is ${fileSizeMB}MB, which exceeds the maximum allowed size of 500MB. Please select a smaller file.`;
+            fileSizeWarning.style.display = 'block';
+            submitButton.disabled = true;
+            
+            // Clear the file input
+            e.target.value = '';
+            return;
+        }
+    }
+});
+</script>
 {% endblock %}
