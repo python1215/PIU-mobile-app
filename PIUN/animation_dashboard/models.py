@@ -9,14 +9,11 @@ class MediaItem(models.Model):
     ]
     
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
     file = models.FileField(upload_to='animation_media/')
-    thumbnail = models.ImageField(upload_to='animation_media/thumbnails/', blank=True, null=True)
-    project = models.ForeignKey('PIU_Financial_mgt.Project', on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    loginUser = models.ForeignKey(
+    uploaded_date = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
@@ -24,7 +21,7 @@ class MediaItem(models.Model):
     class Meta:
         verbose_name = 'Media Item'
         verbose_name_plural = 'Media Items'
-        ordering = ['-created_at']
+        ordering = ['-uploaded_date']
     
     def __str__(self):
         return self.title
