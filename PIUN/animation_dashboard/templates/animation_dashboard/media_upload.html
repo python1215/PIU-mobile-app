@@ -191,6 +191,14 @@ document.getElementById('mediaUploadForm').addEventListener('submit', function(e
             alert(`File size (${fileSizeMB}MB) exceeds the maximum allowed size of 500MB. Please select a smaller file.`);
             return false;
         }
+        
+        // Show loading message for large files
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (file.size > 10 * 1024 * 1024) { // > 10MB
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Uploading... Please wait';
+            console.log('Uploading file:', file.name, 'Size:', (file.size / (1024 * 1024)).toFixed(2) + 'MB');
+        }
     }
 });
 </script>
