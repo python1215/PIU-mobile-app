@@ -67,13 +67,13 @@ class MediaItemForm(forms.ModelForm):
                     f'Please upload a valid video file. Supported formats: {", ".join(video_extensions).upper()}'
                 )
             
-            # Check file size (max 500MB)
-            max_size = 500 * 1024 * 1024  # 500MB in bytes
+            # Check file size (max 50MB for deployment compatibility)
+            max_size = 50 * 1024 * 1024  # 50MB in bytes
             if file.size > max_size:
                 file_size_mb = file.size / (1024 * 1024)
                 raise forms.ValidationError(
-                    f'File size ({file_size_mb:.2f}MB) exceeds the maximum allowed size of 500MB. '
-                    f'Please upload a smaller file.'
+                    f'File size ({file_size_mb:.2f}MB) exceeds the maximum allowed size of 50MB. '
+                    f'Please upload a smaller file or compress your video.'
                 )
         
         return file

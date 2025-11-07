@@ -264,8 +264,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB in bytes
+# File upload settings - reduced to 50MB for Replit deployment compatibility
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB in bytes
 
 # File upload handlers - stream large files directly to disk
 FILE_UPLOAD_HANDLERS = [
@@ -274,7 +274,7 @@ FILE_UPLOAD_HANDLERS = [
 
 # Temporary file upload settings
 FILE_UPLOAD_TEMP_DIR = None  # Use system temp directory
-DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB in bytes
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB in bytes
 
 # Additional settings for production
 # SECURE_SSL_REDIRECT = True

@@ -92,11 +92,15 @@
                                     <small class="text-muted">
                                         Supported images: JPG, PNG, GIF, BMP, WEBP, SVG<br>
                                         Supported videos: MP4, AVI, MOV, WMV, FLV, WEBM, MKV<br>
-                                        <strong>Maximum file size: 500MB</strong>
+                                        <strong>Maximum file size: 50MB</strong>
                                     </small>
                                     <div id="fileSizeWarning" class="alert alert-danger mt-2" style="display: none;">
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                         <strong>File too large!</strong> <span id="fileSizeMessage"></span>
+                                    </div>
+                                    <div class="alert alert-info mt-2">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>Tip:</strong> For large videos, use a video compressor tool to reduce file size while maintaining quality.
                                     </div>
                                 </div>
 
@@ -140,13 +144,13 @@ document.getElementById('{{ form.file.id_for_label }}').addEventListener('change
     submitButton.disabled = false;
     
     if (file) {
-        // Check file size (500MB = 524,288,000 bytes)
-        const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+        // Check file size (50MB = 52,428,800 bytes)
+        const maxSize = 50 * 1024 * 1024; // 50MB in bytes
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         
         if (file.size > maxSize) {
             // Show warning and disable submit
-            fileSizeMessage.textContent = `Your file is ${fileSizeMB}MB, which exceeds the maximum allowed size of 500MB. Please select a smaller file.`;
+            fileSizeMessage.textContent = `Your file is ${fileSizeMB}MB, which exceeds the maximum allowed size of 50MB. Please compress your video or select a smaller file.`;
             fileSizeWarning.style.display = 'block';
             submitButton.disabled = true;
             
@@ -184,17 +188,17 @@ document.getElementById('mediaUploadForm').addEventListener('submit', function(e
     const file = fileInput.files[0];
     
     if (file) {
-        const maxSize = 500 * 1024 * 1024; // 500MB
+        const maxSize = 50 * 1024 * 1024; // 50MB
         if (file.size > maxSize) {
             e.preventDefault();
             const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            alert(`File size (${fileSizeMB}MB) exceeds the maximum allowed size of 500MB. Please select a smaller file.`);
+            alert(`File size (${fileSizeMB}MB) exceeds the maximum allowed size of 50MB. Please compress your video or select a smaller file.`);
             return false;
         }
         
         // Show loading message for large files
         const submitButton = document.querySelector('button[type="submit"]');
-        if (file.size > 10 * 1024 * 1024) { // > 10MB
+        if (file.size > 5 * 1024 * 1024) { // > 5MB
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Uploading... Please wait';
             console.log('Uploading file:', file.name, 'Size:', (file.size / (1024 * 1024)).toFixed(2) + 'MB');
