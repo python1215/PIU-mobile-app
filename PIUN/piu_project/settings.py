@@ -266,6 +266,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB in bytes
+
+# File upload handlers - stream large files directly to disk
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+# Temporary file upload settings
+FILE_UPLOAD_TEMP_DIR = None  # Use system temp directory
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB in bytes
 
 # Additional settings for production
