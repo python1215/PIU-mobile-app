@@ -415,7 +415,7 @@
                     {% if item.media_type == 'image' %}
                         <img src="{{ item.file_url }}" alt="{{ item.title }}">
                     {% else %}
-                        <video controls autoplay muted loop>
+                        <video controls autoplay muted class="slideshow-video">
                             <source src="{{ item.file_url }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -466,6 +466,7 @@
         let progressTimer = null;
         let isPlaying = true;
         let progressValue = 0;
+        let currentVideo = null;
         
         function showSlide(n) {
             const slides = document.querySelectorAll('.slide');
@@ -477,16 +478,25 @@
                 currentSlide = totalSlides;
             }
             
-            // Hide all slides
+            // Hide all slides and pause any playing videos
             slides.forEach(slide => {
                 slide.classList.remove('active');
+                const video = slide.querySelector('video');
+                if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
             });
             
             // Show current slide
-            slides[currentSlide - 1].classList.add('active');
+            const activeSlide = slides[currentSlide - 1];
+            activeSlide.classList.add('active');
             
             // Update counter
             document.getElementById('currentSlide').textContent = currentSlide;
+            
+            // Check if current slide has a video
+            currentVideo = activeSlide.querySelector('.slideshow-video');
             
             // Reset progress bar
             resetProgress();
@@ -525,8 +535,22 @@
         }
         
         function startSlideshow() {
-            slideshowTimer = setInterval(nextSlide, slideInterval);
-            startProgress();
+            // Check if current slide has a video
+            if (currentVideo) {
+                // Set up video end event listener
+                currentVideo.onended = () => {
+                    if (isPlaying) {
+                        nextSlide();
+                    }
+                };
+                // Play the video
+                currentVideo.play();
+                startVideoProgress();
+            } else {
+                // Normal timer for images and reports
+                slideshowTimer = setInterval(nextSlide, slideInterval);
+                startProgress();
+            }
         }
         
         function stopSlideshow() {
@@ -550,6 +574,17 @@
                     progressValue = 100;
                 }
                 progressBar.style.width = progressValue + '%';
+            }, 100);
+        }
+        
+        function startVideoProgress() {
+            const progressBar = document.getElementById('progressBar');
+            
+            progressTimer = setInterval(() => {
+                if (currentVideo && currentVideo.duration) {
+                    const progress = (currentVideo.currentTime / currentVideo.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                }
             }, 100);
         }
         
