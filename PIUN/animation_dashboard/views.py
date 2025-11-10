@@ -249,3 +249,99 @@ def delete_media(request, pk):
         'page_title': f'Delete: {media_item.title}',
     }
     return render(request, 'animation_dashboard/media_delete.html', context)
+
+
+@login_required
+def slideshow(request):
+    """Full-screen auto-rotating slideshow of reports and media"""
+    from collections import defaultdict
+    from setup.models import Donor
+    
+    # Prepare slideshow items list
+    slideshow_items = []
+    
+    # === SLIDE 1: Projects by Donors Report ===
+    projects = Project.objects.all()
+    donors_data = defaultdict(lambda: {'projects': [], 'totals_by_currency': defaultdict(float)})
+    
+    for project in projects:
+        if hasattr(project, 'donor') and project.donor:
+            donor_name = project.donor.donor_name
+            donors_data[donor_name]['projects'].append({
+                'project_name': project.project_name,
+                'total_funding': project.total_funding or 0,
+                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+            })
+            currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+            donors_data[donor_name]['totals_by_currency'][currency] += (project.total_funding or 0)
+    
+    slideshow_items.append({
+        'type': 'report',
+        'report_type': 'donors',
+        'title': 'NAWEC PIU Projects by Donors',
+        'data': dict(donors_data)
+    })
+    
+    # === SLIDE 2: Projects by Closing Date Report ===
+    closing_data = defaultdict(lambda: defaultdict(list))
+    for project in projects:
+        if project.closing_date:
+            year = project.closing_date.year
+            quarter = (project.closing_date.month - 1) // 3 + 1
+            quarter_name = f"Q{quarter}"
+            closing_data[year][quarter_name].append({
+                'project_name': project.project_name,
+                'closing_date': project.closing_date.strftime('%b %d, %Y'),
+                'total_funding': project.total_funding or 0,
+                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+            })
+    
+    slideshow_items.append({
+        'type': 'report',
+        'report_type': 'closing_date',
+        'title': 'NAWEC PIU Projects by Closing Date',
+        'data': {year: dict(quarters) for year, quarters in closing_data.items()}
+    })
+    
+    # === SLIDE 3: Projects by Funding Amount Report ===
+    projects_funding = []
+    for project in projects:
+        if project.total_funding:
+            projects_funding.append({
+                'project_name': project.project_name,
+                'total_funding': project.total_funding,
+                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD',
+                'donor': project.donor.donor_name if hasattr(project, 'donor') and project.donor else 'N/A'
+            })
+    
+    projects_funding.sort(key=lambda x: x['total_funding'], reverse=True)
+    
+    slideshow_items.append({
+        'type': 'report',
+        'report_type': 'funding',
+        'title': 'NAWEC PIU Projects by Funding Amount',
+        'data': projects_funding[:10]  # Top 10
+    })
+    
+    # === SLIDES 4+: Media Items (Images and Videos) ===
+    try:
+        media_items = MediaItem.objects.all().order_by('-uploaded_date')
+        for media in media_items:
+            slideshow_items.append({
+                'type': 'media',
+                'media_type': media.media_type,
+                'title': media.title,
+                'description': media.description or '',
+                'file_url': media.file.url,
+                'uploaded_date': media.uploaded_date.strftime('%b %d, %Y'),
+                'uploaded_by': media.uploaded_by.username
+            })
+    except:
+        pass  # Skip if MediaItem table doesn't exist
+    
+    context = {
+        'slideshow_items': slideshow_items,
+        'total_slides': len(slideshow_items),
+        'page_title': 'Animation Slideshow',
+    }
+    return render(request, 'animation_dashboard/slideshow.html', context)
