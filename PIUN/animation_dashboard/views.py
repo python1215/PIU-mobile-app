@@ -276,11 +276,19 @@ def slideshow(request):
             currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
             donors_data[donor_name]['totals_by_currency'][currency] += funding_value
     
+    # Convert nested defaultdicts to regular dicts for template rendering
+    donors_data_converted = {}
+    for donor_name, donor_info in donors_data.items():
+        donors_data_converted[donor_name] = {
+            'projects': donor_info['projects'],
+            'totals_by_currency': dict(donor_info['totals_by_currency'])
+        }
+    
     slideshow_items.append({
         'type': 'report',
         'report_type': 'donors',
         'title': 'NAWEC PIU Projects by Donors',
-        'data': dict(donors_data)
+        'data': donors_data_converted
     })
     
     # === SLIDE 2: Projects by Closing Date Report ===
