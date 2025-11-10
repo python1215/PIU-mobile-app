@@ -261,8 +261,8 @@
     </div>
     
     <!-- Exit Button -->
-    <a href="{% url 'main_dashboard' %}" class="exit-button">
-        <i class="bi bi-house-door me-2"></i>Back to Main Dashboard
+    <a href="{% url 'animation_dashboard:dashboard' %}" class="exit-button">
+        <i class="bi bi-x-circle me-2"></i>Exit Slideshow
     </a>
     
     <!-- Slideshow Container -->
@@ -567,7 +567,7 @@
                 e.preventDefault();
                 togglePlayPause();
             } else if (e.key === 'Escape') {
-                window.location.href = "{% url 'main_dashboard' %}";
+                window.location.href = "{% url 'animation_dashboard:dashboard' %}";
             } else if (e.key === 'c' || e.key === 'C') {
                 toggleControls();
             }
