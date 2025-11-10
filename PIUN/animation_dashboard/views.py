@@ -265,15 +265,15 @@ def slideshow(request):
     donors_data = defaultdict(lambda: {'projects': [], 'totals_by_currency': defaultdict(float)})
     
     for project in projects:
-        if hasattr(project, 'donor') and project.donor:
-            donor_name = project.donor.donor_name
+        if hasattr(project, 'donors') and project.donors:
+            donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
             donors_data[donor_name]['projects'].append({
-                'project_name': project.project_name,
-                'total_funding': project.total_funding or 0,
+                'project_name': project.project,
+                'total_funding': project.funding or 0,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
             })
             currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
-            donors_data[donor_name]['totals_by_currency'][currency] += (project.total_funding or 0)
+            donors_data[donor_name]['totals_by_currency'][currency] += (project.funding or 0)
     
     slideshow_items.append({
         'type': 'report',
@@ -285,14 +285,14 @@ def slideshow(request):
     # === SLIDE 2: Projects by Closing Date Report ===
     closing_data = defaultdict(lambda: defaultdict(list))
     for project in projects:
-        if project.closing_date:
-            year = project.closing_date.year
-            quarter = (project.closing_date.month - 1) // 3 + 1
+        if hasattr(project, 'closure_Date') and project.closure_Date:
+            year = project.closure_Date.year
+            quarter = (project.closure_Date.month - 1) // 3 + 1
             quarter_name = f"Q{quarter}"
             closing_data[year][quarter_name].append({
-                'project_name': project.project_name,
-                'closing_date': project.closing_date.strftime('%b %d, %Y'),
-                'total_funding': project.total_funding or 0,
+                'project_name': project.project,
+                'closing_date': project.closure_Date.strftime('%b %d, %Y'),
+                'total_funding': project.funding or 0,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
             })
     
@@ -306,12 +306,16 @@ def slideshow(request):
     # === SLIDE 3: Projects by Funding Amount Report ===
     projects_funding = []
     for project in projects:
-        if project.total_funding:
+        if hasattr(project, 'funding') and project.funding:
+            donor_name = 'N/A'
+            if hasattr(project, 'donors') and project.donors:
+                donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
+            
             projects_funding.append({
-                'project_name': project.project_name,
-                'total_funding': project.total_funding,
+                'project_name': project.project,
+                'total_funding': project.funding,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD',
-                'donor': project.donor.donor_name if hasattr(project, 'donor') and project.donor else 'N/A'
+                'donor': donor_name
             })
     
     projects_funding.sort(key=lambda x: x['total_funding'], reverse=True)
