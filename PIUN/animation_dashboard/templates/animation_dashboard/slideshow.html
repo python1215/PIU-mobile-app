@@ -150,7 +150,7 @@
             position: fixed;
             bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(100px);
             background: rgba(0, 0, 0, 0.8);
             padding: 15px 30px;
             border-radius: 50px;
@@ -158,6 +158,13 @@
             gap: 20px;
             align-items: center;
             z-index: 1000;
+            transition: transform 0.3s ease;
+            opacity: 0;
+        }
+        
+        .slideshow-controls.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
         
         .slideshow-controls button {
@@ -182,6 +189,33 @@
             font-size: 1.2rem;
             min-width: 100px;
             text-align: center;
+        }
+        
+        /* Toggle Controls Button */
+        .toggle-controls-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        
+        .toggle-controls-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .toggle-controls-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
         .progress-bar-container {
@@ -376,8 +410,13 @@
         {% endfor %}
     </div>
     
+    <!-- Toggle Controls Button -->
+    <button class="toggle-controls-btn" onclick="toggleControls()" id="toggleBtn">
+        <i class="bi bi-chevron-up me-1"></i>Show Controls
+    </button>
+    
     <!-- Controls -->
-    <div class="slideshow-controls">
+    <div class="slideshow-controls" id="slideshowControls">
         <button onclick="previousSlide()" title="Previous">
             <i class="bi bi-chevron-left"></i>
         </button>
@@ -496,6 +535,28 @@
             }
         }
         
+        // Toggle controls visibility
+        function toggleControls() {
+            const controls = document.getElementById('slideshowControls');
+            const toggleBtn = document.getElementById('toggleBtn');
+            
+            if (controls.classList.contains('visible')) {
+                controls.classList.remove('visible');
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Show Controls';
+            } else {
+                controls.classList.add('visible');
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Hide Controls';
+                
+                // Auto-hide after 3 seconds of no interaction
+                setTimeout(() => {
+                    if (controls.classList.contains('visible')) {
+                        controls.classList.remove('visible');
+                        toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Show Controls';
+                    }
+                }, 3000);
+            }
+        }
+        
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
@@ -506,7 +567,9 @@
                 e.preventDefault();
                 togglePlayPause();
             } else if (e.key === 'Escape') {
-                window.location.href = "{% url 'animation_dashboard:dashboard' %}";
+                window.location.href = "{% url 'main_dashboard' %}";
+            } else if (e.key === 'c' || e.key === 'C') {
+                toggleControls();
             }
         });
         
