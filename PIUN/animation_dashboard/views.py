@@ -261,26 +261,25 @@ def slideshow(request):
     slideshow_items = []
     
     # === SLIDE 1: Projects by Donors Report ===
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related('donors', 'currency').all()
     donors_data = defaultdict(lambda: {'projects': [], 'totals_by_currency': defaultdict(float)})
     
     for project in projects:
         # Get donors (ManyToMany field)
-        try:
-            project_donors = project.donors.all()
+        project_donors = project.donors.all()
+        
+        if project_donors.exists():
             for donor in project_donors:
-                donor_name = donor.name if hasattr(donor, 'name') else str(donor)
+                donor_name = donor.name
                 funding_value = float(project.funding) if project.funding else 0.0
                 
                 donors_data[donor_name]['projects'].append({
                     'project_name': project.project,
                     'total_funding': funding_value,
-                    'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+                    'currency': project.currency.currency if project.currency else 'GMD'
                 })
-                currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+                currency = project.currency.currency if project.currency else 'GMD'
                 donors_data[donor_name]['totals_by_currency'][currency] += funding_value
-        except:
-            pass  # Skip projects with no donors
     
     # Convert nested defaultdicts to regular dicts for template rendering
     donors_data_converted = {}
@@ -300,7 +299,7 @@ def slideshow(request):
     # === SLIDE 2: Projects by Closing Date Report ===
     closing_data = defaultdict(lambda: defaultdict(list))
     for project in projects:
-        if hasattr(project, 'closure_Date') and project.closure_Date:
+        if project.closure_Date:
             year = project.closure_Date.year
             quarter = (project.closure_Date.month - 1) // 3 + 1
             quarter_name = f"Q{quarter}"
@@ -309,7 +308,7 @@ def slideshow(request):
                 'project_name': project.project,
                 'closing_date': project.closure_Date.strftime('%b %d, %Y'),
                 'total_funding': funding_value,
-                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+                'currency': project.currency.currency if project.currency else 'GMD'
             })
     
     slideshow_items.append({
@@ -322,22 +321,19 @@ def slideshow(request):
     # === SLIDE 3: Projects by Funding Amount Report ===
     projects_funding = []
     for project in projects:
-        if hasattr(project, 'funding') and project.funding:
-            # Get donor names (ManyToMany field), default to 'N/A' if not available
+        if project.funding:
+            # Get donor names (ManyToMany field)
             donor_names = []
-            try:
-                project_donors = project.donors.all()
-                for donor in project_donors:
-                    donor_names.append(donor.name if hasattr(donor, 'name') else str(donor))
-            except:
-                pass
+            project_donors = project.donors.all()
+            for donor in project_donors:
+                donor_names.append(donor.name)
             
             donor_display = ', '.join(donor_names) if donor_names else 'N/A'
-            funding_value = float(project.funding) if project.funding else 0.0
+            funding_value = float(project.funding)
             projects_funding.append({
                 'project_name': project.project,
                 'total_funding': funding_value,
-                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD',
+                'currency': project.currency.currency if project.currency else 'GMD',
                 'donor': donor_display
             })
     
