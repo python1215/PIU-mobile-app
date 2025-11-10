@@ -265,8 +265,15 @@ def slideshow(request):
     donors_data = defaultdict(lambda: {'projects': [], 'totals_by_currency': defaultdict(float)})
     
     for project in projects:
-        if hasattr(project, 'donors') and project.donors:
-            donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
+        # Get donor name, skip projects without donors
+        donor_name = None
+        try:
+            if project.donors is not None and hasattr(project.donors, 'donor_name'):
+                donor_name = project.donors.donor_name
+        except:
+            pass
+        
+        if donor_name:
             funding_value = float(project.funding) if project.funding else 0.0
             donors_data[donor_name]['projects'].append({
                 'project_name': project.project,
@@ -317,9 +324,13 @@ def slideshow(request):
     projects_funding = []
     for project in projects:
         if hasattr(project, 'funding') and project.funding:
+            # Get donor name, default to 'N/A' if not available
             donor_name = 'N/A'
-            if hasattr(project, 'donors') and project.donors:
-                donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
+            try:
+                if project.donors is not None and hasattr(project.donors, 'donor_name'):
+                    donor_name = project.donors.donor_name
+            except:
+                pass
             
             funding_value = float(project.funding) if project.funding else 0.0
             projects_funding.append({
