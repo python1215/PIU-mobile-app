@@ -69,50 +69,62 @@
         
         /* Report Slides Styling */
         .report-content {
-            max-width: 90%;
+            max-width: 95%;
             margin: 0 auto;
-            max-height: calc(100vh - 150px);
+            max-height: calc(100vh - 120px);
             overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: flex-start;
         }
         
         .report-card {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            flex: 1 1 calc(50% - 10px);
+            max-height: calc(100vh - 140px);
+            overflow: hidden;
         }
         
         .report-card h3 {
             color: #1e3c72;
             border-bottom: 2px solid #2a5298;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
+            padding-bottom: 3px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
         }
         
         .report-card h5 {
-            font-size: 1rem;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            margin-bottom: 3px;
         }
         
         .report-card table {
             width: 100%;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
         .report-card table th {
             background: #1e3c72;
             color: white;
-            padding: 8px 10px;
-            font-size: 0.9rem;
+            padding: 5px 8px;
+            font-size: 0.8rem;
         }
         
         .report-card table td {
-            padding: 6px 10px;
+            padding: 4px 8px;
             border-bottom: 1px solid #ddd;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
+        }
+        
+        .report-card tfoot td {
+            font-size: 0.8rem;
+            font-weight: bold;
         }
         
         .top-project {
