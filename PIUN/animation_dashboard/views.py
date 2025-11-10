@@ -267,13 +267,14 @@ def slideshow(request):
     for project in projects:
         if hasattr(project, 'donors') and project.donors:
             donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
+            funding_value = float(project.funding) if project.funding else 0.0
             donors_data[donor_name]['projects'].append({
                 'project_name': project.project,
-                'total_funding': project.funding or 0,
+                'total_funding': funding_value,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
             })
             currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
-            donors_data[donor_name]['totals_by_currency'][currency] += (project.funding or 0)
+            donors_data[donor_name]['totals_by_currency'][currency] += funding_value
     
     slideshow_items.append({
         'type': 'report',
@@ -289,10 +290,11 @@ def slideshow(request):
             year = project.closure_Date.year
             quarter = (project.closure_Date.month - 1) // 3 + 1
             quarter_name = f"Q{quarter}"
+            funding_value = float(project.funding) if project.funding else 0.0
             closing_data[year][quarter_name].append({
                 'project_name': project.project,
                 'closing_date': project.closure_Date.strftime('%b %d, %Y'),
-                'total_funding': project.funding or 0,
+                'total_funding': funding_value,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
             })
     
@@ -311,9 +313,10 @@ def slideshow(request):
             if hasattr(project, 'donors') and project.donors:
                 donor_name = project.donors.donor_name if hasattr(project.donors, 'donor_name') else str(project.donors)
             
+            funding_value = float(project.funding) if project.funding else 0.0
             projects_funding.append({
                 'project_name': project.project,
-                'total_funding': project.funding,
+                'total_funding': funding_value,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD',
                 'donor': donor_name
             })
