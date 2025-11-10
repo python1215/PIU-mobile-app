@@ -265,23 +265,22 @@ def slideshow(request):
     donors_data = defaultdict(lambda: {'projects': [], 'totals_by_currency': defaultdict(float)})
     
     for project in projects:
-        # Get donor name, skip projects without donors
-        donor_name = None
+        # Get donors (ManyToMany field)
         try:
-            if project.donors is not None and hasattr(project.donors, 'donor_name'):
-                donor_name = project.donors.donor_name
+            project_donors = project.donors.all()
+            for donor in project_donors:
+                donor_name = donor.name if hasattr(donor, 'name') else str(donor)
+                funding_value = float(project.funding) if project.funding else 0.0
+                
+                donors_data[donor_name]['projects'].append({
+                    'project_name': project.project,
+                    'total_funding': funding_value,
+                    'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+                })
+                currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
+                donors_data[donor_name]['totals_by_currency'][currency] += funding_value
         except:
-            pass
-        
-        if donor_name:
-            funding_value = float(project.funding) if project.funding else 0.0
-            donors_data[donor_name]['projects'].append({
-                'project_name': project.project,
-                'total_funding': funding_value,
-                'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
-            })
-            currency = project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD'
-            donors_data[donor_name]['totals_by_currency'][currency] += funding_value
+            pass  # Skip projects with no donors
     
     # Convert nested defaultdicts to regular dicts for template rendering
     donors_data_converted = {}
@@ -324,20 +323,22 @@ def slideshow(request):
     projects_funding = []
     for project in projects:
         if hasattr(project, 'funding') and project.funding:
-            # Get donor name, default to 'N/A' if not available
-            donor_name = 'N/A'
+            # Get donor names (ManyToMany field), default to 'N/A' if not available
+            donor_names = []
             try:
-                if project.donors is not None and hasattr(project.donors, 'donor_name'):
-                    donor_name = project.donors.donor_name
+                project_donors = project.donors.all()
+                for donor in project_donors:
+                    donor_names.append(donor.name if hasattr(donor, 'name') else str(donor))
             except:
                 pass
             
+            donor_display = ', '.join(donor_names) if donor_names else 'N/A'
             funding_value = float(project.funding) if project.funding else 0.0
             projects_funding.append({
                 'project_name': project.project,
                 'total_funding': funding_value,
                 'currency': project.currency.currency if hasattr(project, 'currency') and project.currency else 'GMD',
-                'donor': donor_name
+                'donor': donor_display
             })
     
     projects_funding.sort(key=lambda x: x['total_funding'], reverse=True)
