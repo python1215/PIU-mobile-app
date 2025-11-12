@@ -12,7 +12,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="{% static 'css/vendor/leaflet.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/vendor/leaflet.css' %}?v=1.9.4" />
     
     <style>
         body {
@@ -514,9 +514,16 @@
     </div>
     
     <!-- Leaflet JS -->
-    <script src="{% static 'js/vendor/leaflet.js' %}"></script>
+    <script src="{% static 'js/vendor/leaflet.js' %}?v=1.9.4"></script>
     
     <script>
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library failed to load from:', "{% static 'js/vendor/leaflet.js' %}");
+        } else {
+            console.log('Leaflet', L.version, 'loaded successfully');
+        }
+        
         let currentSlide = 1;
         const totalSlides = {{ total_slides }};
         const slideInterval = 30000; // 30 seconds
@@ -573,10 +580,19 @@
         }
         
         function initializeSlideshowMap(mapElement) {
+            // Check if Leaflet is available
+            if (typeof L === 'undefined') {
+                console.error('Cannot initialize map: Leaflet library not loaded');
+                mapElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#721c24;background:#f8d7da;padding:20px;text-align:center;"><div><i class="bi bi-exclamation-triangle" style="font-size:3rem;"></i><h3>Map Library Not Loaded</h3><p>Please check your internet connection or static files configuration.</p></div></div>';
+                return;
+            }
+            
             const markers = JSON.parse(mapElement.dataset.markers || '[]');
             const centerLat = parseFloat(mapElement.dataset.centerLat);
             const centerLng = parseFloat(mapElement.dataset.centerLng);
             const zoom = parseInt(mapElement.dataset.zoom);
+            
+            console.log('Initializing map with Leaflet', L.version);
             
             // Initialize map without tiles for offline compatibility
             slideshowMap = L.map('slideshow-map', {
