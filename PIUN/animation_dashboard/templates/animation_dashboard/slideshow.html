@@ -398,6 +398,39 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                    {% elif item.report_type == 'project_map' %}
+                        <!-- Project Sites Map -->
+                        <div class="report-card" style="flex: 1 1 100%; max-width: 100%;">
+                            <h3><i class="bi bi-geo-alt-fill me-2"></i>Project Sites Map - {{ item.total_sites }} Locations</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: calc(100vh - 200px); overflow: hidden;">
+                                {% for region, region_data in item.data.items %}
+                                <div style="background: #f8f9fa; border-radius: 8px; padding: 10px; border: 2px solid #1e3c72;">
+                                    <h5 style="color: #1e3c72; margin-bottom: 5px; font-size: 0.9rem;">
+                                        <i class="bi bi-pin-map-fill me-1"></i>{{ region }}
+                                    </h5>
+                                    <div style="font-size: 0.7rem; margin-bottom: 8px; color: #666;">
+                                        <strong>{{ region_data.total_sites }}</strong> sites | 
+                                        <strong>{{ region_data.total_households|intcomma }}</strong> HH | 
+                                        <span style="color: {% if region_data.connection_rate >= 75 %}green{% elif region_data.connection_rate >= 50 %}orange{% else %}red{% endif %};">
+                                            {{ region_data.connection_rate }}% connected
+                                        </span>
+                                    </div>
+                                    <div style="max-height: 150px; overflow-y: auto; font-size: 0.65rem;">
+                                        {% for site in region_data.sites %}
+                                        <div style="border-left: 3px solid #2a5298; padding-left: 5px; margin-bottom: 5px; background: white; padding: 3px;">
+                                            <strong>{{ site.settlement }}</strong> ({{ site.district }})<br>
+                                            <span style="color: #666;">{{ site.project }}</span><br>
+                                            <span style="font-size: 0.6rem; color: #999;">
+                                                {{ site.connected_households }}/{{ site.total_households }} HH | {{ site.access_type }}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 

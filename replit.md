@@ -1,31 +1,10 @@
 # PIU Monitoring & Evaluation System
 
 ## Overview
-This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluation System built using Flask. The system provides a web-based platform for tracking project progress, monitoring activities, managing performance indicators, and generating reports. It's designed to support organizational excellence through effective project management and evaluation. Key capabilities include managing projects, activities, KPIs, issues, social/environmental impacts, and contracts.
+This is a comprehensive Project Implementation Unit (PIU) Monitoring & Evaluation System built using Flask. The system provides a web-based platform for tracking project progress, monitoring activities, managing performance indicators, and generating reports. It's designed to support organizational excellence through effective project management and evaluation, including managing projects, activities, KPIs, issues, social/environmental impacts, and contracts.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
-
-## Recent Updates
-- **November 07, 2025**: Adjusted media upload size limit to 50MB for deployment compatibility. The Replit environment has a 60-second request timeout which prevents larger files from uploading successfully. Added helpful tips in upload forms suggesting users compress large videos before uploading. File size validation includes both client-side (JavaScript) and server-side (Django form validation) checks.
-- **November 06, 2025**: Initially increased media upload size limit to 500MB, but reduced to 50MB after discovering timeout constraints in deployment environment. Implemented comprehensive file size validation with both client-side and server-side checks. Users now receive immediate feedback when attempting to upload files exceeding 500MB limit through red alert banner displaying actual file size and maximum allowed size. Upload button automatically disables and file input clears when oversized files are selected. Updated both upload and edit forms with validation JavaScript and enhanced error messaging showing exact file sizes in MB format.
-- **November 06, 2025**: Added comprehensive Animation Dashboard to NAWEC M&E Platform. Created new animation_dashboard module with media gallery for pictures/videos and three custom reports: (1) NAWEC PIU Projects by Donors - groups projects by funding organizations with currency-separated totals, (2) NAWEC PIU Projects by Closing Date - organizes projects by year and quarter based on closure dates, (3) NAWEC PIU Projects by Funding Amount - displays projects ranked by funding with top 3 highlighted. Implemented MediaItem model for media management, professional dashboard UI with statistics cards, media viewer modal for full-screen image/video preview, and complete filtering/pagination. Added purple gradient navigation card to main dashboard. Module includes views.py with 5 view functions, urls.py with namespace routing, and 5 professional Bootstrap templates with responsive design.
-- **November 06, 2025**: Added complete YEAR CRUD system to System Setup Dashboard. Implemented full Create, Read, Update, Delete operations for Profile Year (YEAR model) with dedicated views in setup/views.py, URL patterns in setup/urls.py, and professional templates (year_list.html, year_form.html, year_detail.html, year_confirm_delete.html) in templates/setup/years/ directory. Added Years card to Core Setup section of Setup Dashboard with calendar icon and year count badge. YearForm already existed in setup/forms.py. YEAR management now integrated alongside Donors, Contributors, Project Categories, and Quarters in Setup Dashboard.
-- **November 06, 2025**: Implemented multi-currency support for Contract Profiling totals. Updated contract_profiling_works_list and contract_profiling_goods_services_list views to calculate and display currency-specific totals separately instead of combining different currencies. Contract Details pages now display the exact currency symbol selected during data entry (using contract.currency.currency field). All contract values display with thousand separator formatting (intcomma) for professional presentation. System now shows separate totals for GMD, USD, EUR, etc., never mixing different currencies.
-- **October 31, 2025**: Added comprehensive export functionality to Community Engagement and ESIA/ESMP modules with A4 Portrait formatting and text wrapping. Implemented Excel, PDF, and MS Word export capabilities with professional formatting, automatic text wrapping for lengthy content, and color-coded headers. All exports use A4 portrait orientation and respect current filter settings with timestamped filenames. Excel export includes styled headers with wrap_text=True alignment and optimized column widths. PDF export uses ReportLab Paragraph objects for automatic text wrapping with 7.5-inch column layout. Word export explicitly sets A4 dimensions (8.27" × 11.69") with cell-level text wrapping using tcW properties. Export buttons appear as grouped button set (Excel/PDF/Word) in both the Community Engagement and ESIA/ESMP list page headers.
-- **October 31, 2025**: Enhanced currency formatting across all contract displays by adding Django's humanize module for thousand separator formatting. All monetary values now display with commas (e.g., GMD 50,400,000.00 instead of GMD 50400000.00), improving readability for large financial values throughout the system.
-- **October 02, 2025**: Fixed Results Monitoring forms to display all 11 projects instead of filtering to only water-related projects. Removed hardcoded `project__icontains='water'` filter from both `Results_Oriented_MonitoringForm` (Add) and `updateResults_Oriented_MonitoringForm` (Update) in monitoring/forms.py. Previously saved projects now display correctly when editing existing records. Made system fully platform-independent using PIUN_BASE_DIR environment variable in settings.py to support running from any directory while maintaining Django ORM exclusively.
-- **October 01, 2025**: Added complete Project Progress CRUD system with comprehensive tracking functionality. Implemented ProjectProgress model with fields for total funding, disbursement amounts/rates, physical progress, time elapsed tracking, and project timelines. Created full CRUD operations (Create, Read, Update, Delete) with forms, views, templates, and URL patterns. Added Project Progress navigation card to main dashboard with green theme and graph-up-arrow icon. System now tracks project implementation progress with disbursement rates, physical progress percentages, and time elapsed metrics.
-- **September 01, 2025**: **Completely removed Project Development Objectives (PDO) from NAWEC M&E Management System**. Removed SetupPDO model from setup app, PDO model from PIU_Financial_mgt app, eliminated all PDO foreign key references from monitoring and NAWEC_KPI models, updated all forms and views to function without PDO dependencies, removed PDO navigation links from main dashboard, deleted PDO templates and URL patterns, and updated ProjectOutcome model to work independently without PDO relationships. System now operates as a streamlined M&E platform focused on project outcomes and results without the PDO hierarchy layer.
-- **August 25, 2025**: Enhanced offline deployment user experience for contract lookup functionality. Replaced alarming "AJAX contract lookup failed" prompt with professional Bootstrap modal featuring clear messaging about offline mode, improved form validation, Enter key support, and better visual design. Users now see a user-friendly "Offline Mode - Manual Entry" interface instead of error messages.
-- **August 25, 2025**: Completed project_actions module cleanup for HTMX consistency. Removed duplicate `load_type_of_investments` and `load_kpi_descriptions` functions that returned JSON responses. Both functions now consistently return HTMX partial templates maintaining dropdown functionality without JavaScript changes. Enhanced error handling with fallback logic and updated templates to match proper data structure. Reduced file size from 1840 to ~1200 lines, eliminating all LSP diagnostics errors.
-- **August 24, 2025**: Cleaned up subcomponent template structure by consolidating duplicate folders. Removed unused `subcomponent` folder and moved all templates to unified `subcomponents` folder. Updated all view references to use consistent template paths. Removed unused template files including `add-subcomponent-new.html`. Fixed AttributeError in subcomponents view and optimized Create Monitoring Record for offline deployment compatibility.
-- **August 23, 2025**: Added complete ProjectResult CRUD system integrated with Core Setup. Implemented full CRUD operations (Create, Read, Update, Delete) for ProjectResult model from PIU_Financial_mgt app, with comprehensive forms, views, templates, and navigation integration. Added ProjectResult setup card to Core Setup dashboard with orange/red theme and trophy icon. Enhanced project hierarchy display showing PDO → Outcome → Result relationships.
-- **August 23, 2025**: Added complete ProjectOutcome CRUD system integrated with Core Setup. Implemented full CRUD operations (Create, Read, Update, Delete) for ProjectOutcome model from PIU_Financial_mgt app, with comprehensive forms, views, templates, and navigation integration. Added ProjectOutcome setup card to Core Setup dashboard with pink/magenta theme and target icon. Enhanced PDO system with comprehensive navigation links and "Back to Core Setup" functionality across all templates.
-- **August 23, 2025**: Added comprehensive Excel and PDF export functionality with A4 portrait formatting. Fixed JavaScript freezing issue in offline deployments by optimizing timeout/promise handling. Implemented professional PDF reports using ReportLab with proper A4 dimensions, color-coded headers, and optimized column widths. All export functions support current page filters and provide timestamped file downloads.
-- **August 20, 2025**: Fixed critical cascading dropdown validation errors in PAP forms. Replaced entire social_and_env module with updated files featuring HTMX-powered cascading dropdowns, enhanced form validation with auto-selection of valid options, and implemented form reset functionality that clears all fields on page refresh/reload. Added comprehensive offline fallback with 25+ investment types for project D309D6530GM.
-- **August 19, 2025**: Fixed Investment Type cascading dropdown for PAP forms with project 'D309D6530GM'. Removed duplicate `load_investment_types_pap` functions, enhanced AJAX endpoint with offline fallback mechanisms, and added comprehensive JavaScript fallback with 20+ investment type options for offline scenarios.
-- **August 15, 2025**: Converted to SQLite-only database configuration. Removed all MS SQL Server dependencies and configurations per user request.
 
 ## System Architecture
 
@@ -33,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Frontend Framework**: Bootstrap 5 with a dark theme and custom CSS overrides.
 - **JavaScript**: Vanilla JavaScript with Chart.js for data visualization.
 - **Template Engine**: Jinja2.
-- **Design Principles**: Responsive design utilizing cards, tables, forms, and charts. Interactive maps with dynamic color assignments, layer controls, and draggable legends are integrated for project site visualization.
+- **Design Principles**: Responsive design utilizing cards, tables, forms, charts, and interactive maps with dynamic color assignments, layer controls, and draggable legends.
 
 ### Technical Implementations
 - **Backend Framework**: Flask (Python).
@@ -41,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Form Handling**: Flask-WTF for validation.
 - **File Handling**: Werkzeug for secure uploads.
 - **Session Management**: Flask session.
-- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, SetupPDO, ProjectOutCome, ProjectResult, ProjectProgress.
+- **Core Models**: Project, Activity, KPI_For_Contract, Issues_Actions, Social_and_env, Contract_Profiling, ProjectOutCome, ProjectResult, ProjectProgress.
 - **Feature Specifications**:
     - **Dashboard**: Real-time analytics and summary cards.
     - **Project Management**: CRUD operations with status tracking.
@@ -49,18 +28,20 @@ Preferred communication style: Simple, everyday language.
     - **Performance Indicators**: KPI tracking with specialized calculation popups (e.g., ROA, NPM, DSCR, TMH) and dynamic target setting.
     - **Document Management**: Upload and organization of project documents.
     - **Reporting**: Generation of project reports (PDF/Excel) and specialized KPI performance reports with quarterly comparisons.
-    - **Social & Environmental Monitoring**: Tracking for ESIA/ESMP, grievance, OHS, PAP, and community engagement. Includes geographic data (regions, districts, LGAs, settlements).
+    - **Social & Environmental Monitoring**: Tracking for ESIA/ESMP, grievance, OHS, PAP, and community engagement, including geographic data.
     - **Contract Management**: Profiling and monitoring for works and goods/services.
     - **Financial Management**: Budget tracking, component, and subcomponent management.
+    - **Animation Dashboard**: Media gallery and custom project reports (by Donors, Closing Date, Funding Amount).
+    - **Setup Management**: CRUD operations for ProjectOutcome, ProjectResult, and Profile Year.
 
 ### System Design Choices
-- **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, Social & Environmental Monitoring, Setup Management (ProjectOutcome and ProjectResult CRUD operations), Animation Dashboard (media gallery and custom project reports), and Core Setup configurations.
+- **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, Social & Environmental Monitoring, Setup Management, Animation Dashboard, and Core Setup configurations.
 - **Data Flow**: User interaction via web forms, data validation with Flask-WTF, persistence via SQLAlchemy, secure file storage, Chart.js for visualization, and system-generated reports.
 - **Database Strategy**: SQLite database using Django ORM exclusively for simplicity and reliability.
-- **Deployment**: Configurable via environment variables for database URI, session secret, and upload folder. Includes provisions for secure production deployment with proxy fix and file size limits.
-- **Data Consistency**: Automated validation and error handling for data integrity (e.g., project funding vs. component allocation).
-- **Filtering & Search**: Comprehensive filtering options across modules (project, region, district, year, quarter, etc.) and text search.
-- **Export Functionality**: Excel and PDF export capabilities for various reports and lists.
+- **Deployment**: Configurable via environment variables for database URI, session secret, and upload folder, with provisions for secure production deployment.
+- **Data Consistency**: Automated validation and error handling for data integrity.
+- **Filtering & Search**: Comprehensive filtering options across modules and text search.
+- **Export Functionality**: Excel, PDF, and MS Word export capabilities for various reports and lists with A4 portrait formatting and text wrapping.
 
 ## External Dependencies
 
@@ -69,7 +50,7 @@ Preferred communication style: Simple, everyday language.
 - SQLAlchemy
 - Flask-WTF
 - Werkzeug
-- PyODBC (for SQL Server)
+- PyODBC (for SQL Server, though SQLite is primary)
 
 ### Frontend Libraries
 - Bootstrap 5
@@ -81,4 +62,3 @@ Preferred communication style: Simple, everyday language.
 - SQLite database (primary)
 - Django ORM
 - Local file system (for document storage)
-```

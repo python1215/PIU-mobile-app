@@ -256,6 +256,7 @@ def slideshow(request):
     """Full-screen auto-rotating slideshow of reports and media"""
     from collections import defaultdict
     from setup.models import Donor
+    from PIU_Mapping_project_Sites.models import projectMapping
     
     # Prepare slideshow items list
     slideshow_items = []
@@ -346,7 +347,60 @@ def slideshow(request):
         'data': projects_funding[:10]  # Top 10
     })
     
-    # === SLIDES 4+: Media Items (Images and Videos) ===
+    # === SLIDE 4: Interactive Project Sites Map ===
+    project_sites = projectMapping.objects.select_related(
+        'region', 'district', 'settlement', 'project', 'access'
+    ).prefetch_related('donor').filter(
+        Latitude__isnull=False,
+        Longitude__isnull=False
+    ).all()
+    
+    # Group sites by region
+    sites_by_region = defaultdict(lambda: {'sites': [], 'total_households': 0, 'total_connected': 0})
+    
+    for site in project_sites:
+        region_name = site.region.region_name if site.region else 'Unknown'
+        
+        site_data = {
+            'settlement': site.settlement.settlement_name if site.settlement else 'Unknown',
+            'district': site.district.district_name if site.district else 'Unknown',
+            'project': site.project.project if site.project else 'No Project',
+            'donors': ', '.join([d.name for d in site.donor.all()]) if site.donor.exists() else 'N/A',
+            'total_households': site.Total_No_of_Households or 0,
+            'connected_households': site.no_of_connected_household or 0,
+            'access_type': site.access.access_type if site.access else 'Unknown',
+            'latitude': float(site.Latitude),
+            'longitude': float(site.Longitude),
+        }
+        
+        sites_by_region[region_name]['sites'].append(site_data)
+        sites_by_region[region_name]['total_households'] += site.Total_No_of_Households or 0
+        sites_by_region[region_name]['total_connected'] += site.no_of_connected_household or 0
+    
+    # Calculate connection rates
+    map_data = {}
+    for region, region_info in sites_by_region.items():
+        total_hh = region_info['total_households']
+        total_conn = region_info['total_connected']
+        connection_rate = round((total_conn / total_hh * 100) if total_hh > 0 else 0, 1)
+        
+        map_data[region] = {
+            'sites': region_info['sites'],
+            'total_sites': len(region_info['sites']),
+            'total_households': total_hh,
+            'total_connected': total_conn,
+            'connection_rate': connection_rate
+        }
+    
+    slideshow_items.append({
+        'type': 'report',
+        'report_type': 'project_map',
+        'title': 'NAWEC PIU Project Sites Map',
+        'data': map_data,
+        'total_sites': project_sites.count()
+    })
+    
+    # === SLIDES 5+: Media Items (Images and Videos) ===
     try:
         media_items = MediaItem.objects.all().order_by('-uploaded_date')
         for media in media_items:
