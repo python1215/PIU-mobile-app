@@ -11,6 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
         body {
@@ -130,6 +132,22 @@
         .top-project {
             background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
             font-weight: bold;
+        }
+        
+        /* Map Slide Styles */
+        #slideshow-map {
+            width: 100%;
+            height: calc(100vh - 150px);
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        
+        .leaflet-popup-content {
+            font-size: 0.85rem;
         }
         
         /* Media Slides Styling */
@@ -399,39 +417,21 @@
                             </table>
                         </div>
                         
-                    {% elif item.report_type == 'project_map' %}
-                        <!-- Project Sites Map -->
-                        <div class="report-card" style="flex: 1 1 100%; max-width: 100%;">
-                            <h3><i class="bi bi-geo-alt-fill me-2"></i>Project Sites Map - {{ item.total_sites }} Locations</h3>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: calc(100vh - 200px); overflow: hidden;">
-                                {% for region, region_data in item.data.items %}
-                                <div style="background: #f8f9fa; border-radius: 8px; padding: 10px; border: 2px solid #1e3c72;">
-                                    <h5 style="color: #1e3c72; margin-bottom: 5px; font-size: 0.9rem;">
-                                        <i class="bi bi-pin-map-fill me-1"></i>{{ region }}
-                                    </h5>
-                                    <div style="font-size: 0.7rem; margin-bottom: 8px; color: #666;">
-                                        <strong>{{ region_data.total_sites }}</strong> sites | 
-                                        <strong>{{ region_data.total_households|intcomma }}</strong> HH | 
-                                        <span style="color: {% if region_data.connection_rate >= 75 %}green{% elif region_data.connection_rate >= 50 %}orange{% else %}red{% endif %};">
-                                            {{ region_data.connection_rate }}% connected
-                                        </span>
-                                    </div>
-                                    <div style="max-height: 150px; overflow-y: auto; font-size: 0.65rem;">
-                                        {% for site in region_data.sites %}
-                                        <div style="border-left: 3px solid #2a5298; padding-left: 5px; margin-bottom: 5px; background: white; padding: 3px;">
-                                            <strong>{{ site.settlement }}</strong> ({{ site.district }})<br>
-                                            <span style="color: #666;">{{ site.project }}</span><br>
-                                            <span style="font-size: 0.6rem; color: #999;">
-                                                {{ site.connected_households }}/{{ site.total_households }} HH | {{ site.access_type }}
-                                            </span>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
                     {% endif %}
+                </div>
+                
+            {% elif item.type == 'map' %}
+                <!-- Map Slide -->
+                <div class="slide-header">
+                    <h1><i class="bi bi-geo-alt-fill me-3"></i>{{ item.title }}</h1>
+                    <div class="subtitle">{{ item.total_sites }} Project Locations in The Gambia</div>
+                </div>
+                
+                <div class="report-content" style="max-width: 95%;">
+                    <div id="slideshow-map" data-markers='{{ item.markers_json|safe }}' 
+                         data-center-lat="{{ item.center_lat }}" 
+                         data-center-lng="{{ item.center_lng }}" 
+                         data-zoom="{{ item.zoom_level }}"></div>
                 </div>
                 
             {% else %}
@@ -491,6 +491,9 @@
         </div>
     </div>
     
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
         let currentSlide = 1;
         const totalSlides = {{ total_slides }};
@@ -500,6 +503,7 @@
         let isPlaying = true;
         let progressValue = 0;
         let currentVideo = null;
+        let slideshowMap = null;
         
         function showSlide(n) {
             const slides = document.querySelectorAll('.slide');
@@ -531,8 +535,60 @@
             // Check if current slide has a video
             currentVideo = activeSlide.querySelector('.slideshow-video');
             
+            // Check if current slide has a map
+            const mapElement = activeSlide.querySelector('#slideshow-map');
+            if (mapElement && !slideshowMap) {
+                initializeSlideshowMap(mapElement);
+            } else if (slideshowMap && mapElement) {
+                // Refresh map view if it already exists
+                setTimeout(() => {
+                    slideshowMap.invalidateSize();
+                }, 100);
+            }
+            
             // Reset progress bar
             resetProgress();
+        }
+        
+        function initializeSlideshowMap(mapElement) {
+            const markers = JSON.parse(mapElement.dataset.markers || '[]');
+            const centerLat = parseFloat(mapElement.dataset.centerLat);
+            const centerLng = parseFloat(mapElement.dataset.centerLng);
+            const zoom = parseInt(mapElement.dataset.zoom);
+            
+            // Initialize map
+            slideshowMap = L.map('slideshow-map').setView([centerLat, centerLng], zoom);
+            
+            // Add tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(slideshowMap);
+            
+            // Add markers
+            markers.forEach(marker => {
+                const popupContent = `
+                    <div style="font-size: 0.85rem;">
+                        <h6 style="margin: 0 0 8px 0; color: #1e3c72; font-weight: bold;">${marker.settlement}</h6>
+                        <p style="margin: 0 0 5px 0;"><strong>Region:</strong> ${marker.region}</p>
+                        <p style="margin: 0 0 5px 0;"><strong>District:</strong> ${marker.district}</p>
+                        <p style="margin: 0 0 5px 0;"><strong>Project:</strong> ${marker.project}</p>
+                        <p style="margin: 0 0 5px 0;"><strong>Donors:</strong> ${marker.donors}</p>
+                        <p style="margin: 0 0 5px 0;"><strong>Households:</strong> ${marker.connected_households}/${marker.total_households} connected</p>
+                        <p style="margin: 0;"><strong>Access:</strong> ${marker.access_type}</p>
+                    </div>
+                `;
+                
+                L.marker([marker.latitude, marker.longitude])
+                    .addTo(slideshowMap)
+                    .bindPopup(popupContent);
+            });
+            
+            // Fit bounds to show all markers
+            if (markers.length > 0) {
+                const bounds = L.latLngBounds(markers.map(m => [m.latitude, m.longitude]));
+                slideshowMap.fitBounds(bounds, { padding: [50, 50] });
+            }
         }
         
         function nextSlide() {
