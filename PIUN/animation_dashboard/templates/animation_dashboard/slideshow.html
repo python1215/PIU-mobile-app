@@ -141,6 +141,11 @@
             border-radius: 10px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             position: relative;
+            background: 
+                linear-gradient(90deg, rgba(200,220,240,0.3) 1px, transparent 1px),
+                linear-gradient(rgba(200,220,240,0.3) 1px, transparent 1px),
+                linear-gradient(135deg, #e8f4f8 0%, #d4e9f2 100%);
+            background-size: 50px 50px, 50px 50px, 100% 100%;
         }
         
         .leaflet-popup-content-wrapper {
@@ -638,14 +643,14 @@
                 errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
             });
             
-            // Detect tile loading errors and add offline background
+            // Detect tile loading errors and add offline indicator
             let tilesLoaded = false;
             let tileLoadTimeout = setTimeout(() => {
                 if (!tilesLoaded) {
                     console.log('Slideshow map tiles not loading - using offline mode');
-                    addSlideshowOfflineBackground();
+                    addSlideshowOfflineIndicator();
                 }
-            }, 3000);
+            }, 2000);
             
             tileLayer.on('load', () => {
                 tilesLoaded = true;
@@ -656,36 +661,18 @@
                 if (!tilesLoaded) {
                     console.log('Slideshow tile loading error - switching to offline mode');
                     clearTimeout(tileLoadTimeout);
-                    addSlideshowOfflineBackground();
+                    addSlideshowOfflineIndicator();
                 }
             });
             
             tileLayer.addTo(slideshowMap);
             
-            // Function to add offline background for slideshow
-            function addSlideshowOfflineBackground() {
+            // Function to add offline indicator for slideshow (background already in CSS)
+            function addSlideshowOfflineIndicator() {
                 const mapContainer = document.getElementById('slideshow-map');
-                if (mapContainer && !mapContainer.querySelector('.offline-background')) {
-                    const offlineDiv = document.createElement('div');
-                    offlineDiv.className = 'offline-background';
-                    offlineDiv.style.cssText = `
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: 
-                            linear-gradient(90deg, rgba(200,220,240,0.3) 1px, transparent 1px),
-                            linear-gradient(rgba(200,220,240,0.3) 1px, transparent 1px),
-                            linear-gradient(135deg, #e8f4f8 0%, #d4e9f2 100%);
-                        background-size: 50px 50px, 50px 50px, 100% 100%;
-                        z-index: 0;
-                        pointer-events: none;
-                    `;
-                    mapContainer.appendChild(offlineDiv);
-                    
-                    // Add offline indicator
+                if (mapContainer && !mapContainer.querySelector('.offline-indicator')) {
                     const indicator = document.createElement('div');
+                    indicator.className = 'offline-indicator';
                     indicator.style.cssText = `
                         position: absolute;
                         top: 50px;
