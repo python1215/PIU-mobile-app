@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from django.core.paginator import Paginator
 from PIU_Financial_mgt.models import Project
+from PIU_Mapping_project_Sites.models import projectMapping
 from .models import MediaItem
 from .forms import MediaItemForm
+import json
 
 
 @login_required
@@ -405,3 +407,42 @@ def slideshow(request):
         'page_title': 'Animation Slideshow',
     }
     return render(request, 'animation_dashboard/slideshow.html', context)
+
+
+@login_required
+def project_sites_map(request):
+    """Interactive map of all NAWEC PIU project sites"""
+    # Get all project sites with coordinates
+    project_sites = projectMapping.objects.select_related(
+        'region', 'district', 'settlement', 'project', 'access'
+    ).prefetch_related('donor').filter(
+        Latitude__isnull=False,
+        Longitude__isnull=False
+    ).all()
+    
+    # Prepare markers data
+    map_markers = []
+    for site in project_sites:
+        map_markers.append({
+            'id': site.id,
+            'latitude': float(site.Latitude),
+            'longitude': float(site.Longitude),
+            'settlement': site.settlement.settlement_name if site.settlement else 'Unknown',
+            'region': site.region.region_name if site.region else 'Unknown',
+            'district': site.district.district_name if site.district else 'Unknown',
+            'project': site.project.project if site.project else 'No Project',
+            'donors': ', '.join([d.name for d in site.donor.all()]) if site.donor.exists() else 'N/A',
+            'total_households': site.Total_No_of_Households or 0,
+            'connected_households': site.no_of_connected_household or 0,
+            'access_type': site.access.access_type if site.access else 'Unknown',
+        })
+    
+    context = {
+        'markers_json': json.dumps(map_markers),
+        'total_sites': project_sites.count(),
+        'center_lat': 13.4667,  # Gambia center
+        'center_lng': -15.3100,
+        'zoom_level': 9,
+        'page_title': 'Interactive Project Sites Map',
+    }
+    return render(request, 'animation_dashboard/project_sites_map.html', context)

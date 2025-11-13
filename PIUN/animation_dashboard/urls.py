@@ -18,6 +18,7 @@ urlpatterns = [
     path('reports/by-donors/', views.projects_by_donors, name='projects_by_donors'),
     path('reports/by-closing-date/', views.projects_by_closing_date, name='projects_by_closing_date'),
     path('reports/by-funding/', views.projects_by_funding, name='projects_by_funding'),
+    path('reports/project-sites-map/', views.project_sites_map, name='project_sites_map'),
     
     # Slideshow
     path('slideshow/', views.slideshow, name='slideshow'),
