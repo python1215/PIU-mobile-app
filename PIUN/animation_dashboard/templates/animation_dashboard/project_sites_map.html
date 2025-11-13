@@ -63,9 +63,12 @@
                          data-zoom="{{ zoom_level }}"
                          style="height: 75vh; min-height: 500px; position: relative;">
                         <!-- Map Legend -->
-                        <div id="map-legend">
-                            <h6><i class="bi bi-palette-fill me-2"></i>Project Legend</h6>
-                            <div id="legend-items"></div>
+                        <div id="map-legend" class="minimized">
+                            <h6 onclick="toggleLegend()">
+                                <span><i class="bi bi-palette-fill me-2"></i>Project Legend</span>
+                                <i class="bi bi-chevron-down legend-toggle-icon" id="legend-toggle"></i>
+                            </h6>
+                            <div id="legend-items" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -143,20 +146,50 @@
         top: 10px;
         right: 10px;
         background: white;
-        padding: 15px;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         z-index: 1000;
         max-width: 250px;
+        transition: all 0.3s ease;
+    }
+    
+    #map-legend.minimized {
+        padding: 8px 12px;
+    }
+    
+    #map-legend.expanded {
+        padding: 15px;
     }
     
     #map-legend h6 {
-        margin: 0 0 10px 0;
+        margin: 0;
         font-size: 0.9rem;
         font-weight: bold;
         color: #333;
-        border-bottom: 2px solid #1e3c72;
-        padding-bottom: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    #map-legend h6:hover {
+        color: #1e3c72;
+    }
+    
+    .legend-toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .legend-toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+    
+    #legend-items {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 2px solid #1e3c72;
+        max-height: 400px;
+        overflow-y: auto;
     }
     
     .legend-item {
@@ -385,6 +418,26 @@
         }
         
         console.log('Map initialized successfully with', markers.length, 'markers');
+    }
+    
+    function toggleLegend() {
+        const legend = document.getElementById('map-legend');
+        const legendItems = document.getElementById('legend-items');
+        const toggleIcon = document.getElementById('legend-toggle');
+        
+        if (legend.classList.contains('minimized')) {
+            // Expand legend
+            legend.classList.remove('minimized');
+            legend.classList.add('expanded');
+            legendItems.style.display = 'block';
+            toggleIcon.classList.add('rotated');
+        } else {
+            // Minimize legend
+            legend.classList.remove('expanded');
+            legend.classList.add('minimized');
+            legendItems.style.display = 'none';
+            toggleIcon.classList.remove('rotated');
+        }
     }
     
     function toggleFullscreen() {
