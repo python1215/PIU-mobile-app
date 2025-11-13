@@ -61,7 +61,12 @@
                          data-center-lat="{{ center_lat }}" 
                          data-center-lng="{{ center_lng }}" 
                          data-zoom="{{ zoom_level }}"
-                         style="height: 75vh; min-height: 500px;">
+                         style="height: 75vh; min-height: 500px; position: relative;">
+                        <!-- Map Legend -->
+                        <div id="map-legend">
+                            <h6><i class="bi bi-palette-fill me-2"></i>Project Legend</h6>
+                            <div id="legend-items"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,6 +141,61 @@
     .leaflet-popup-content {
         font-size: 0.9rem;
     }
+    
+    /* Custom house marker styles */
+    .custom-house-marker {
+        background: none;
+        border: none;
+    }
+    
+    .house-pin-marker {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        transition: transform 0.2s;
+    }
+    
+    .house-pin-marker:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    }
+    
+    /* Map legend panel */
+    #map-legend {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        max-width: 250px;
+    }
+    
+    #map-legend h6 {
+        margin: 0 0 10px 0;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #333;
+        border-bottom: 2px solid #1e3c72;
+        padding-bottom: 5px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+    }
+    
+    .legend-color {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        margin-right: 8px;
+        flex-shrink: 0;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
 </style>
 
 <script>
@@ -156,6 +216,72 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeMap();
         });
+    }
+    
+    // Color palette and assignment functions
+    const colorPalette = [
+        '#2E7D32', // Green - Used for ECOWAS
+        '#F57C00', // Orange - Used for Restoration
+        '#1976D2', // Blue - Used for Access
+        '#D32F2F', // Red - Used for Rehabilitation
+        '#7B1FA2', // Purple
+        '#00796B', // Teal
+        '#5D4037', // Brown
+        '#FF5722', // Deep Orange
+        '#3F51B5', // Indigo
+        '#E91E63', // Pink
+        '#009688', // Cyan
+        '#FF9800', // Amber
+        '#4CAF50', // Light Green
+        '#9C27B0', // Violet
+        '#607D8B', // Blue Grey
+        '#795548', // Dark Brown
+        '#8BC34A', // Lime
+        '#00BCD4', // Light Blue
+        '#FFC107', // Yellow
+        '#9E9E9E', // Grey - Reserved for 'No Project'
+        '#757575'  // Dark Grey - Fallback
+    ];
+    
+    function getProjectColor(projectName, existingColors) {
+        // Predefined colors for known projects
+        const knownProjects = {
+            'ECOWAS Regional Electricity Access Project': '#2E7D32',
+            'Gambia Electricity Restoration and Modernization Project': '#F57C00', 
+            'Gambia Electricity Access Project': '#1976D2',
+            'The Gambia Electricity System Rehabilitation and Expansion Project': '#D32F2F',
+            'No Project': '#757575'
+        };
+        
+        // Return known color if project exists
+        if (knownProjects[projectName]) {
+            return knownProjects[projectName];
+        }
+        
+        // Find next available color for new projects
+        for (let i = 0; i < colorPalette.length; i++) {
+            const color = colorPalette[i];
+            if (!existingColors.includes(color)) {
+                return color;
+            }
+        }
+        
+        // Fallback: generate color based on project name hash
+        return generateHashColor(projectName);
+    }
+    
+    function generateHashColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        // Generate HSL color with good saturation and lightness
+        const hue = Math.abs(hash) % 360;
+        const saturation = 60 + (Math.abs(hash) % 30); // 60-90%
+        const lightness = 35 + (Math.abs(hash) % 25);  // 35-60%
+        
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
     
     function initializeMap() {
@@ -183,34 +309,96 @@
         offlinePane.style.width = '100%';
         offlinePane.style.height = '100%';
         
-        // Add markers with custom icons
+        // Group markers by project and assign colors
+        const projectGroups = {};
+        const projectColors = {};
+        const usedColors = [];
+        const allProjects = new Set();
+        
         markers.forEach(marker => {
-            const popupContent = `
-                <div style="font-size: 0.9rem;">
-                    <h6 style="margin: 0 0 10px 0; color: #1e3c72; font-weight: bold; border-bottom: 2px solid #1e3c72; padding-bottom: 5px;">${marker.settlement}</h6>
-                    <p style="margin: 0 0 5px 0;"><strong>Region:</strong> ${marker.region}</p>
-                    <p style="margin: 0 0 5px 0;"><strong>District:</strong> ${marker.district}</p>
-                    <p style="margin: 0 0 5px 0;"><strong>Project:</strong> ${marker.project}</p>
-                    <p style="margin: 0 0 5px 0;"><strong>Donors:</strong> ${marker.donors}</p>
-                    <p style="margin: 0 0 5px 0;"><strong>Households:</strong> ${marker.connected_households}/${marker.total_households} connected</p>
-                    <p style="margin: 0;"><strong>Access Type:</strong> ${marker.access_type}</p>
-                </div>
+            const project = marker.project || 'No Project';
+            if (!projectGroups[project]) {
+                projectGroups[project] = [];
+            }
+            projectGroups[project].push(marker);
+            allProjects.add(project);
+        });
+        
+        // Assign colors to projects
+        Array.from(allProjects).forEach(project => {
+            const color = getProjectColor(project, usedColors);
+            projectColors[project] = color;
+            usedColors.push(color);
+        });
+        
+        console.log('Project color assignments:', projectColors);
+        
+        // Build legend
+        const legendItems = document.getElementById('legend-items');
+        legendItems.innerHTML = '';
+        
+        Array.from(allProjects).forEach(project => {
+            const color = projectColors[project];
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <div class="legend-color" style="background-color: ${color};"></div>
+                <span style="color: #333; font-weight: 500;">${project}</span>
             `;
+            legendItems.appendChild(legendItem);
+        });
+        
+        // Add colored house markers for each project
+        Object.keys(projectGroups).forEach(project => {
+            const color = projectColors[project];
+            const projectMarkers = projectGroups[project];
             
-            // Create custom marker with explicit icon path
-            const customIcon = L.icon({
-                iconUrl: "{% static 'images/marker-icon.png' %}",
-                iconRetinaUrl: "{% static 'images/marker-icon-2x.png' %}",
-                shadowUrl: "{% static 'images/marker-shadow.png' %}",
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
+            projectMarkers.forEach(marker => {
+                // Create custom house icon marker with pin shape
+                const customIcon = L.divIcon({
+                    className: 'custom-house-marker',
+                    html: `
+                        <div class="house-pin-marker">
+                            <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Pin shape background -->
+                                <path fill="${color}" stroke="#fff" stroke-width="2" 
+                                      d="M15 0C6.716 0 0 6.716 0 15c0 9.75 15 30 15 30s15-20.25 15-30C30 6.716 23.284 0 15 0z"/>
+                                <!-- House icon inside -->
+                                <g transform="translate(9, 7)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                                    </svg>
+                                </g>
+                            </svg>
+                        </div>
+                    `,
+                    iconSize: [30, 45],
+                    iconAnchor: [15, 45],
+                    popupAnchor: [0, -45]
+                });
+                
+                const popupContent = `
+                    <div style="min-width: 180px; font-family: Arial, sans-serif; font-size: 11px;">
+                        <div style="background: #f8f9fa; padding: 6px 8px; margin: -8px -12px 8px -12px; border-bottom: 1px solid #dee2e6;">
+                            <h6 style="margin: 0; font-weight: bold; color: #333; font-size: 12px;">${marker.settlement}</h6>
+                        </div>
+                        <div style="margin-bottom: 6px;">
+                            <div style="color: ${color}; font-weight: bold; font-size: 11px;">${project}</div>
+                        </div>
+                        <div style="line-height: 1.6;">
+                            <div style="margin-bottom: 4px;"><strong>Region:</strong> ${marker.region}</div>
+                            <div style="margin-bottom: 4px;"><strong>District:</strong> ${marker.district}</div>
+                            <div style="margin-bottom: 4px;"><strong>Donors:</strong> ${marker.donors}</div>
+                            <div style="margin-bottom: 4px;"><strong>Households:</strong> ${marker.connected_households}/${marker.total_households} connected</div>
+                            <div><strong>Access:</strong> ${marker.access_type}</div>
+                        </div>
+                    </div>
+                `;
+                
+                L.marker([marker.latitude, marker.longitude], { icon: customIcon })
+                    .addTo(projectMap)
+                    .bindPopup(popupContent);
             });
-            
-            L.marker([marker.latitude, marker.longitude], { icon: customIcon })
-                .addTo(projectMap)
-                .bindPopup(popupContent);
         });
         
         // Fit bounds to show all markers
