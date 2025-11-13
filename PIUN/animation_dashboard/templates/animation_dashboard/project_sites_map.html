@@ -42,8 +42,8 @@
                             </h5>
                             <p class="mb-0 small">Click any marker to view detailed project information</p>
                         </div>
-                        <div class="badge bg-white text-dark fs-6 px-3 py-2">
-                            <i class="bi bi-wifi-off me-1"></i>Offline Compatible
+                        <div class="badge bg-success text-white fs-6 px-3 py-2">
+                            <i class="bi bi-geo-alt-fill me-1"></i>Interactive Map
                         </div>
                     </div>
                 </div>
@@ -109,29 +109,8 @@
 
 <style>
     #project-map {
-        background: 
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            #e8f4f8;
-        background-size: 50px 50px;
         position: relative;
         border-radius: 8px;
-    }
-    
-    #project-map::before {
-        content: 'OFFLINE MAP - Project Locations Only';
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(30, 60, 114, 0.9);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
-        z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     
     .leaflet-popup-content-wrapper {
@@ -293,21 +272,19 @@
         
         console.log('Initializing map with', markers.length, 'markers');
         
-        // Initialize map without tiles for offline compatibility
+        // Initialize map with OpenStreetMap tiles
         projectMap = L.map('project-map', {
             center: [centerLat, centerLng],
             zoom: zoom,
             zoomControl: true,
-            attributionControl: false
+            attributionControl: true
         });
         
-        // Create a custom pane for offline background
-        const offlinePane = projectMap.createPane('offlinePane');
-        offlinePane.style.zIndex = 0;
-        offlinePane.style.backgroundColor = '#e8f4f8';
-        offlinePane.style.position = 'absolute';
-        offlinePane.style.width = '100%';
-        offlinePane.style.height = '100%';
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(projectMap);
         
         // Group markers by project and assign colors
         const projectGroups = {};
