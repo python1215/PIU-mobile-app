@@ -1,0 +1,142 @@
+/* CSS Fix for Issues & Actions Management Table Headers */
+
+/* Ensure table headers have strong contrast and visibility */
+.table-dark th, 
+.table-dark td {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-color: #32383e !important;
+}
+
+/* Override any conflicting Bootstrap styles */
+table.table thead.table-dark th {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #32383e !important;
+    font-weight: 600 !important;
+    padding: 0.75rem !important;
+}
+
+/* Ensure proper hover states for table rows */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075) !important;
+    color: #212529 !important;
+}
+
+/* Fix for Issues Actions specific tables */
+.issues-actions-table .table-dark th {
+    background-color: #343a40 !important;
+    color: #ffffff !important;
+    border-color: #495057 !important;
+    text-align: center !important;
+}
+
+.issues-actions-table .table-dark td {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+    border-color: #495057 !important;
+}
+
+/* Alternative: Use Bootstrap primary for better visibility */
+.table-primary-header th {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    border-color: #0a58ca !important;
+    font-weight: 600 !important;
+}
+
+/* Status badges styling */
+.badge {
+    font-size: 0.875em !important;
+}
+
+.badge-incomplete {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-complete {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+
+.badge-cancel {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+/* Priority badges */
+.badge-critical {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.badge-high {
+    background-color: #fd7e14 !important;
+    color: #fff !important;
+}
+
+.badge-medium {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-low {
+    background-color: #6c757d !important;
+    color: #fff !important;
+}
+
+/* Ensure text is visible in all card contexts */
+.issues-actions-module .card-body {
+    color: #212529 !important;
+}
+
+.issues-actions-module .card-header {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Button styling within the module */
+.issues-actions-module .btn-group .btn {
+    font-size: 0.875rem !important;
+    padding: 0.25rem 0.5rem !important;
+}
+
+/* Responsive table improvements */
+@media (max-width: 768px) {
+    .table-responsive .table-dark th,
+    .table-responsive .table-dark td {
+        font-size: 0.875rem !important;
+        padding: 0.5rem !important;
+    }
+}
+
+/* Grievance Management Table Styling */
+.grievance-table {
+    min-width: 1400px; /* Ensure table doesn't get too cramped */
+}
+
+.grievance-table th {
+    white-space: nowrap;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.3rem;
+    vertical-align: middle;
+    min-width: 80px;
+}
+
+.grievance-table td {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.3rem;
+    vertical-align: middle;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badge styling for better visibility */
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
