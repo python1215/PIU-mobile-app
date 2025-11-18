@@ -643,3 +643,9 @@ def get_pending_reminders(request):
             })
     
     return JsonResponse({'reminders': reminders_to_send})
+
+
+@login_required
+def test_notifications(request):
+    """Test page for notification system"""
+    return render(request, 'Issues_Actions_monitoring/test_notifications.html')
