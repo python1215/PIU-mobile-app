@@ -30,25 +30,27 @@
             {% if user.is_authenticated %}
                 <!-- Notification Bell Icon -->
                 <div class="nav-item dropdown me-3">
-                    <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 0.5rem 0.75rem;">
                         <i class="bi bi-bell-fill" style="font-size: 1.2rem;"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notification-count" style="display: none; font-size: 0.65rem;">
                             0
                         </span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
-                        <h6 class="dropdown-header d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-bell"></i> Notifications</span>
-                            <a href="{% url 'Issues_Actions_monitoring:test_notifications' %}" class="badge bg-primary text-decoration-none" style="font-size: 0.7rem;">View All</a>
-                        </h6>
-                        <div class="dropdown-divider"></div>
-                        <div id="notification-list">
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 350px; max-height: 400px; overflow-y: auto; position: absolute; margin-top: 0.5rem;">
+                        <li>
+                            <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bell"></i> Notifications</span>
+                                <a href="{% url 'Issues_Actions_monitoring:test_notifications' %}" class="badge bg-primary text-decoration-none" style="font-size: 0.7rem;">View All</a>
+                            </h6>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li id="notification-list">
                             <div class="text-center text-muted py-3" id="no-notifications">
                                 <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                 <p class="mb-0 mt-2">No new notifications</p>
                             </div>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
                 
                 <div class="nav-item dropdown">

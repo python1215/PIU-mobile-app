@@ -85,6 +85,7 @@ class NavbarNotificationBell {
     }
 
     createNotificationElement(notif) {
+        const li = document.createElement('li');
         const div = document.createElement('div');
         div.className = 'notification-item dropdown-item-text border-bottom';
         div.style.cssText = 'padding: 12px 16px; cursor: pointer; transition: background 0.2s;';
@@ -131,7 +132,8 @@ class NavbarNotificationBell {
             window.location.href = `/Issues_Actions_monitoring/issues/${notif.issue_id}/`;
         });
         
-        return div;
+        li.appendChild(div);
+        return li;
     }
 
     async markAsRead(notificationId) {
