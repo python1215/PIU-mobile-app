@@ -144,3 +144,42 @@
     float: right;
     margin-left: 10px;
 }
+
+/* Navbar notification bell badge pulse animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+#notification-count {
+    animation: pulse 2s infinite;
+}
+
+/* Notification dropdown custom scrollbar */
+#notification-list {
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d #f8f9fa;
+}
+
+#notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#notification-list::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+#notification-list::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 3px;
+}
+
+#notification-list::-webkit-scrollbar-thumb:hover {
+    background: #495057;
+}
