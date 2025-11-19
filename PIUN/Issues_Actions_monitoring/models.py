@@ -81,6 +81,10 @@ class IssueActions(models.Model):
     # Automatically set priority to 'done' when status is complete to stop notifications
     if self.status == 'complete':
       self.priority = 'done'
+    # If reopening a completed issue (status changing from complete to incomplete),
+    # reset priority to medium as default (user can manually adjust)
+    elif self.status == 'incomplete' and self.priority == 'done':
+      self.priority = 'medium'
     super().save(*args, **kwargs)
 
   def __str__(self):

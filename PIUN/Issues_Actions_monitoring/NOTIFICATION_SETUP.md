@@ -55,17 +55,22 @@ crontab -e
 Add one of these lines based on your needs:
 
 ```bash
-# Run every hour (recommended for all priority levels)
+# Run every hour (for Low/Medium priorities only - max ~12 notifications/day)
 0 * * * * cd /path/to/PIUN && /path/to/python manage.py send_issue_notifications
 
-# Run every 30 minutes (better for high/critical priorities)
+# Run every 30 minutes (supports up to High priority - ~16 notifications/day)
 */30 * * * * cd /path/to/PIUN && /path/to/python manage.py send_issue_notifications
 
-# Run every 15 minutes (best for critical priorities)
+# Run every 15 minutes (required for Critical priority - full 20 notifications/day)
 */15 * * * * cd /path/to/PIUN && /path/to/python manage.py send_issue_notifications
 ```
 
-**Recommended:** Run every hour for balanced performance
+**Important:** 
+- For **Critical priority** (20 notifications/day): Must run at least every **15 minutes**
+- For **High priority** (10 notifications/day): Run at least every **30 minutes**
+- For **Low/Medium priority**: Every **hour** is sufficient
+
+**Recommended:** Run every **15 minutes** to support all priority levels
 
 #### For Windows Task Scheduler
 
@@ -186,9 +191,29 @@ IssueNotification.objects.filter(created_at__lt=cutoff, is_read=True).delete()
 - Consider reducing cron frequency
 - Implement notification preferences per user (future enhancement)
 
+## Important Notes
+
+### Reopening Completed Issues
+When an issue's status changes from `complete` back to `incomplete`:
+- Priority automatically resets from `'done'` to `'medium'`
+- User should manually adjust priority if needed
+- Notifications will resume at the new priority level
+
+### Notification Frequency vs Cron Schedule
+The maximum notifications per day depends on how often the command runs:
+
+| Cron Frequency | Max Notifications/Day | Supports Priorities |
+|----------------|----------------------|-------------------- |
+| Every hour     | ~12                  | Low, Medium only    |
+| Every 30 min   | ~24                  | Low, Medium, High   |
+| Every 15 min   | ~48                  | All (including Critical) |
+
+**Critical Priority Requirement:** To achieve 20 notifications/day for critical issues, the command must run at least every **72 minutes** (preferably every 15 minutes for better distribution).
+
 ## Future Enhancements
 - Email notifications
 - SMS notifications (Twilio integration)
 - User notification preferences
 - Notification scheduling (business hours only)
 - Escalation rules (notify supervisor if overdue)
+- Store original priority when marking complete (for smarter reopening)
