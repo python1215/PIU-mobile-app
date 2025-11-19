@@ -51,7 +51,8 @@ class IssueActions(models.Model):
   priority = models.CharField(max_length=20,
                               choices=[('low', 'Low'), ('medium', 'Medium'),
                                        ('high', 'High'),
-                                       ('critical', 'Critical')],
+                                       ('critical', 'Critical'),
+                                       ('done', 'Done')],
                               default='medium',
                               null=True,
                               blank=True,
@@ -77,23 +78,32 @@ class IssueActions(models.Model):
     ordering = ['-date_created']
 
   def save(self, *args, **kwargs):
-    # Automatically set priority to None when status is complete
+    # Automatically set priority to 'done' when status is complete to stop notifications
     if self.status == 'complete':
-      self.priority = None
+      self.priority = 'done'
     super().save(*args, **kwargs)
 
   def __str__(self):
     return f"{self.issue_code} - {self.project}"
   
   def get_notifications_per_day(self):
-    """Return number of notifications per day based on priority"""
+    """Return number of notifications per day (24 hours) based on priority"""
     priority_notifications = {
-      'low': 1,
-      'medium': 2,
-      'high': 3,
-      'critical': 5
+      'low': 2,
+      'medium': 5,
+      'high': 10,
+      'critical': 20,
+      'done': 0
     }
-    return priority_notifications.get(self.priority, 1) if self.priority else 0
+    return priority_notifications.get(self.priority, 0) if self.priority else 0
+  
+  def get_notification_interval_minutes(self):
+    """Calculate interval in minutes between notifications based on priority"""
+    notifications_per_day = self.get_notifications_per_day()
+    if notifications_per_day == 0:
+      return None
+    # 24 hours = 1440 minutes
+    return 1440 // notifications_per_day
   
   def get_assigned_to_name(self):
     """Return the full name of the assigned user, or username if full name not available"""
