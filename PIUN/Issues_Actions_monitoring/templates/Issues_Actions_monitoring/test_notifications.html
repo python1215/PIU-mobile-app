@@ -98,7 +98,7 @@ async function requestPermission() {
 }
 
 async function testFetchNotifications() {
-    log('Fetching notifications...');
+    log('Fetching notifications...', 'info');
     try {
         const response = await fetch('/Issues_Actions_monitoring/api/notifications/');
         log(`Response status: ${response.status}`, response.ok ? 'success' : 'error');
@@ -110,17 +110,33 @@ async function testFetchNotifications() {
         }
         
         const data = await response.json();
-        log(`Found ${data.notifications.length} notifications`, 'success');
+        log(`✓ Found ${data.notifications.length} notifications for you`, 'success');
         
         if (data.notifications.length > 0) {
-            data.notifications.forEach(notif => {
-                log(`• ${notif.issue_code}: ${notif.message} (Priority: ${notif.priority})`, 'info');
+            log('<hr><strong>Your Notifications:</strong>', 'info');
+            data.notifications.forEach((notif, index) => {
+                const priorityColors = {
+                    'critical': 'danger',
+                    'high': 'warning',
+                    'medium': 'info',
+                    'low': 'success'
+                };
+                const badge = priorityColors[notif.priority] || 'secondary';
+                log(`
+                    <div class="alert alert-${badge} mb-2" role="alert">
+                        <strong>${index + 1}. Issue: ${notif.issue_code}</strong>
+                        <span class="badge bg-${badge} ms-2">${notif.priority.toUpperCase()}</span><br>
+                        <small><i class="bi bi-clock"></i> ${notif.created_at}</small><br>
+                        <p class="mb-0 mt-1">${notif.message}</p>
+                    </div>
+                `, 'info');
             });
         } else {
-            log('No unread notifications found', 'warning');
+            log('<div class="alert alert-warning">📭 No unread notifications found</div>', 'warning');
         }
     } catch (error) {
-        log(`Fetch error: ${error.message}`, 'error');
+        log(`❌ Fetch error: ${error.message}`, 'error');
+        console.error('Full error:', error);
     }
 }
 
