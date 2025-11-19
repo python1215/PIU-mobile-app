@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
     - **Financial Management**: Budget tracking, component, and subcomponent management.
     - **Animation Dashboard**: Media gallery and custom project reports (by Donors, Closing Date, Funding Amount).
     - **Setup Management**: CRUD operations for ProjectOutcome, ProjectResult, and Profile Year.
+    - **Notification System**: Automated priority-based notification frequency system with navbar bell icon, dropdown, and periodic reminders via Django management command.
 
 ### System Design Choices
 - **Module Structure**: Organized into specialized modules like Issues & Actions, NAWEC KPI Management, PIU Financial Management, Project Site Mapping, Project Documentation Tracking, Accounts Management, Social & Environmental Monitoring, Setup Management, Animation Dashboard, and Core Setup configurations.
@@ -42,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Data Consistency**: Automated validation and error handling for data integrity.
 - **Filtering & Search**: Comprehensive filtering options across modules and text search.
 - **Export Functionality**: Excel, PDF, and MS Word export capabilities for various reports and lists with A4 portrait formatting and text wrapping.
+- **Notification System**: Priority-based automated reminders (Low: 2/day, Medium: 5/day, High: 10/day, Critical: 20/day) via Django management command scheduled with cron. Notifications shown in navbar bell icon with auto-refresh and unread count badge.
 
 ## External Dependencies
 
