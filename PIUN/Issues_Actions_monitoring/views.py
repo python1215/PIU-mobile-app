@@ -539,22 +539,30 @@ from datetime import datetime, timedelta
 @login_required
 def get_pending_notifications(request):
     """API endpoint to fetch pending notifications for current user"""
-    # Get unread notifications
-    notifications = IssueNotification.objects.filter(
-        user=request.user,
-        is_read=False
-    ).select_related('issue').order_by('-created_at')[:20]
+    # Get all incomplete issues assigned to current user
+    incomplete_issues = IssueActions.objects.filter(
+        assigned_to=request.user.username,
+        status='incomplete'
+    ).order_by('-priority', '-due_date')[:50]
     
     notifications_data = []
-    for notif in notifications:
+    for issue in incomplete_issues:
+        # Create notification message
+        priority_text = issue.priority.upper() if issue.priority else 'NORMAL'
+        due_info = f" - Due: {issue.due_date.strftime('%Y-%m-%d')}" if issue.due_date else ""
+        
+        description = issue.description_of_issue_or_action[:100] if issue.description_of_issue_or_action else "No description"
+        message = f"{priority_text} Priority: {description}{due_info}"
+        
         notifications_data.append({
-            'id': notif.notificationID,
-            'message': notif.message,
-            'type': notif.notification_type,
-            'issue_code': notif.issue.issue_code,
-            'issue_id': notif.issue.issueID,
-            'created_at': notif.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'priority': notif.issue.priority if notif.issue.priority else 'none',
+            'id': issue.issueID,
+            'message': message,
+            'type': 'incomplete_issue',
+            'issue_code': issue.issue_code,
+            'issue_id': issue.issueID,
+            'created_at': issue.date_created.strftime('%Y-%m-%d %H:%M:%S') if issue.date_created else datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'priority': issue.priority if issue.priority else 'medium',
+            'due_date': issue.due_date.strftime('%Y-%m-%d') if issue.due_date else None,
         })
     
     return JsonResponse({'notifications': notifications_data})
@@ -562,17 +570,22 @@ def get_pending_notifications(request):
 
 @login_required
 def mark_notification_read(request, notification_id):
-    """Mark a notification as read"""
+    """Mark a notification as read - now redirects to issue detail"""
     if request.method == 'POST':
         try:
-            notification = IssueNotification.objects.get(
-                notificationID=notification_id,
-                user=request.user
+            # Since we're now showing incomplete issues directly,
+            # this endpoint just acknowledges the click
+            # The issue will only disappear from notifications when status changes to 'complete'
+            issue = IssueActions.objects.get(
+                issueID=notification_id,
+                assigned_to=request.user.username
             )
-            notification.mark_as_read()
-            return JsonResponse({'success': True})
-        except IssueNotification.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Notification not found'}, status=404)
+            return JsonResponse({
+                'success': True,
+                'message': 'Issue will remain in notifications until status is set to Complete'
+            })
+        except IssueActions.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Issue not found'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
 
 

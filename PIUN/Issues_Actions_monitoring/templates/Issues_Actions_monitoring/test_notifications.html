@@ -113,26 +113,30 @@ async function testFetchNotifications() {
         log(`✓ Found ${data.notifications.length} notifications for you`, 'success');
         
         if (data.notifications.length > 0) {
-            log('<hr><strong>Your Notifications:</strong>', 'info');
+            log('<hr><strong>Your Incomplete Issues (Persistent Notifications):</strong>', 'info');
+            log('<small class="text-muted">These will remain visible until you mark the issue status as "Complete"</small>', 'info');
             data.notifications.forEach((notif, index) => {
                 const priorityColors = {
                     'critical': 'danger',
                     'high': 'warning',
                     'medium': 'info',
-                    'low': 'success'
+                    'low': 'success',
+                    'done': 'secondary'
                 };
                 const badge = priorityColors[notif.priority] || 'secondary';
+                const dueDate = notif.due_date ? `<br><small><i class="bi bi-calendar"></i> Due: ${notif.due_date}</small>` : '';
                 log(`
                     <div class="alert alert-${badge} mb-2" role="alert">
                         <strong>${index + 1}. Issue: ${notif.issue_code}</strong>
                         <span class="badge bg-${badge} ms-2">${notif.priority.toUpperCase()}</span><br>
-                        <small><i class="bi bi-clock"></i> ${notif.created_at}</small><br>
+                        <small><i class="bi bi-clock"></i> Created: ${notif.created_at}</small>${dueDate}<br>
                         <p class="mb-0 mt-1">${notif.message}</p>
                     </div>
                 `, 'info');
             });
+            log('<hr><small class="text-success"><i class="bi bi-info-circle"></i> To remove an issue from notifications, change its status to "Complete"</small>', 'success');
         } else {
-            log('<div class="alert alert-warning">📭 No unread notifications found</div>', 'warning');
+            log('<div class="alert alert-success">✅ No incomplete issues! All your assigned issues are complete.</div>', 'success');
         }
     } catch (error) {
         log(`❌ Fetch error: ${error.message}`, 'error');
