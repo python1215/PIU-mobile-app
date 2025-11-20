@@ -564,6 +564,11 @@
             // Check if current slide has a video
             currentVideo = activeSlide.querySelector('.slideshow-video');
             
+            // If video exists, play it automatically
+            if (currentVideo && isPlaying) {
+                currentVideo.play();
+            }
+            
             // Check if current slide has a map
             const mapElement = activeSlide.querySelector('#slideshow-map');
             if (mapElement && !slideshowMap) {
@@ -865,7 +870,12 @@
             document.getElementById('progressBar').style.width = '0%';
             clearInterval(progressTimer);
             if (isPlaying) {
-                startProgress();
+                // Check if current slide has a video
+                if (currentVideo) {
+                    startVideoProgress();
+                } else {
+                    startProgress();
+                }
             }
         }
         
