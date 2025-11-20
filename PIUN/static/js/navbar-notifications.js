@@ -10,6 +10,7 @@ class NavbarNotificationBell {
         this.notificationList = document.getElementById('notification-list');
         this.noNotifications = document.getElementById('no-notifications');
         this.notificationDropdown = document.getElementById('notificationDropdown');
+        this.bellIcon = this.notificationDropdown ? this.notificationDropdown.querySelector('i.bi-bell-fill') : null;
         
         if (!this.countBadge || !this.notificationList) {
             console.warn('Notification bell elements not found');
@@ -46,10 +47,24 @@ class NavbarNotificationBell {
             const count = data.notifications.length;
             
             if (count > 0) {
+                // Show badge
                 this.countBadge.textContent = count > 99 ? '99+' : count;
                 this.countBadge.style.display = 'inline-block';
+                
+                // Make bell icon RED
+                if (this.bellIcon) {
+                    this.bellIcon.style.color = '#dc3545'; // Bootstrap red
+                    this.bellIcon.classList.add('notification-active');
+                }
             } else {
+                // Hide badge
                 this.countBadge.style.display = 'none';
+                
+                // Reset bell icon to white
+                if (this.bellIcon) {
+                    this.bellIcon.style.color = 'white';
+                    this.bellIcon.classList.remove('notification-active');
+                }
             }
         } catch (error) {
             console.error('Error fetching notification count:', error);

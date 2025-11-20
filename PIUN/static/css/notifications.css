@@ -161,6 +161,21 @@
     animation: pulse 2s infinite;
 }
 
+/* Red bell icon animation when notifications are present */
+@keyframes bellPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.bi-bell-fill.notification-active {
+    animation: bellPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px rgba(220, 53, 69, 0.5));
+}
+
 /* Notification dropdown custom scrollbar */
 #notification-list {
     scrollbar-width: thin;
