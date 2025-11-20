@@ -98,9 +98,15 @@
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                         <strong>File too large!</strong> <span id="fileSizeMessage"></span>
                                     </div>
-                                    <div class="alert alert-info mt-2">
-                                        <i class="bi bi-info-circle me-2"></i>
-                                        <strong>Tip:</strong> For large videos, use a video compressor tool to reduce file size while maintaining quality.
+                                    <div class="alert alert-warning mt-2">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>Important:</strong> For best results, keep videos under <strong>25MB</strong>. Larger files may timeout during upload.
+                                        <br><small>Use a video compressor to reduce file size while maintaining quality.</small>
+                                    </div>
+                                    <div id="uploadTimeWarning" class="alert alert-danger mt-2" style="display: none;">
+                                        <i class="bi bi-clock-fill me-2"></i>
+                                        <strong>Large File Warning!</strong> Your file is <span id="uploadFileSizeMB"></span>MB. 
+                                        Upload may timeout. Consider compressing the video first.
                                     </div>
                                 </div>
 
@@ -146,8 +152,10 @@ document.getElementById('{{ form.file.id_for_label }}').addEventListener('change
     if (file) {
         // Check file size (50MB = 52,428,800 bytes)
         const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+        const recommendedSize = 25 * 1024 * 1024; // 25MB recommended
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         
+        // Hard limit: 50MB
         if (file.size > maxSize) {
             // Show warning and disable submit
             fileSizeMessage.textContent = `Your file is ${fileSizeMB}MB, which exceeds the maximum allowed size of 50MB. Please compress your video or select a smaller file.`;
@@ -157,6 +165,16 @@ document.getElementById('{{ form.file.id_for_label }}').addEventListener('change
             // Clear the file input
             e.target.value = '';
             return;
+        }
+        
+        // Soft warning: 25MB+ (may timeout)
+        const uploadTimeWarning = document.getElementById('uploadTimeWarning');
+        const uploadFileSizeMB = document.getElementById('uploadFileSizeMB');
+        if (file.size > recommendedSize && file.type.startsWith('video/')) {
+            uploadFileSizeMB.textContent = fileSizeMB;
+            uploadTimeWarning.style.display = 'block';
+        } else {
+            uploadTimeWarning.style.display = 'none';
         }
         
         const filePreview = document.getElementById('filePreview');
