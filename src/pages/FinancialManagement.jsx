@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiSearch, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-function ProjectModal({ project, onClose, onSave, donors, contributors }) {
+const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors }) {
   const [formData, setFormData] = useState(() => {
     if (project) {
       return {
@@ -24,28 +24,64 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
     };
   });
 
-  const handleDonorToggle = (donorId) => {
-    const currentIds = formData.donorIds || [];
-    if (currentIds.includes(donorId)) {
-      setFormData({ ...formData, donorIds: currentIds.filter(id => id !== donorId) });
-    } else {
-      setFormData({ ...formData, donorIds: [...currentIds, donorId] });
-    }
-  };
+  const handleDonorToggle = useCallback((donorId) => {
+    setFormData(prev => {
+      const currentIds = prev.donorIds || [];
+      if (currentIds.includes(donorId)) {
+        return { ...prev, donorIds: currentIds.filter(id => id !== donorId) };
+      }
+      return { ...prev, donorIds: [...currentIds, donorId] };
+    });
+  }, []);
 
-  const handleContributorToggle = (contributorId) => {
-    const currentIds = formData.contributorIds || [];
-    if (currentIds.includes(contributorId)) {
-      setFormData({ ...formData, contributorIds: currentIds.filter(id => id !== contributorId) });
-    } else {
-      setFormData({ ...formData, contributorIds: [...currentIds, contributorId] });
-    }
-  };
+  const handleContributorToggle = useCallback((contributorId) => {
+    setFormData(prev => {
+      const currentIds = prev.contributorIds || [];
+      if (currentIds.includes(contributorId)) {
+        return { ...prev, contributorIds: currentIds.filter(id => id !== contributorId) };
+      }
+      return { ...prev, contributorIds: [...currentIds, contributorId] };
+    });
+  }, []);
 
-  const handleSubmit = (e) => {
+  const handleFieldChange = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     onSave(formData);
-  };
+  }, [formData, onSave]);
+
+  const donorList = useMemo(() => donors.map(donor => (
+    <div key={donor.donorId} className="form-check">
+      <input
+        type="checkbox"
+        className="form-check-input"
+        id={`donor-${donor.donorId}`}
+        checked={(formData.donorIds || []).includes(donor.donorId)}
+        onChange={() => handleDonorToggle(donor.donorId)}
+      />
+      <label className="form-check-label" htmlFor={`donor-${donor.donorId}`}>
+        {donor.name}
+      </label>
+    </div>
+  )), [donors, formData.donorIds, handleDonorToggle]);
+
+  const contributorList = useMemo(() => contributors.map(contributor => (
+    <div key={contributor.id} className="form-check">
+      <input
+        type="checkbox"
+        className="form-check-input"
+        id={`contributor-${contributor.id}`}
+        checked={(formData.contributorIds || []).includes(contributor.id)}
+        onChange={() => handleContributorToggle(contributor.id)}
+      />
+      <label className="form-check-label" htmlFor={`contributor-${contributor.id}`}>
+        {contributor.name}
+      </label>
+    </div>
+  )), [contributors, formData.contributorIds, handleContributorToggle]);
 
   return (
     <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -66,7 +102,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <input
                     type="text"
                     value={formData.projectId}
-                    onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                    onChange={(e) => handleFieldChange('projectId', e.target.value)}
                     className="form-control"
                     placeholder="e.g., PRJ-001"
                     required
@@ -79,7 +115,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <input
                     type="text"
                     value={formData.project}
-                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                    onChange={(e) => handleFieldChange('project', e.target.value)}
                     className="form-control"
                     placeholder="Enter project name"
                     required
@@ -91,7 +127,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <input
                     type="number"
                     value={formData.funding}
-                    onChange={(e) => setFormData({ ...formData, funding: e.target.value })}
+                    onChange={(e) => handleFieldChange('funding', e.target.value)}
                     className="form-control"
                     placeholder="0.00"
                     step="0.01"
@@ -103,7 +139,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <input
                     type="date"
                     value={formData.effectivenessDate || ''}
-                    onChange={(e) => setFormData({ ...formData, effectivenessDate: e.target.value })}
+                    onChange={(e) => handleFieldChange('effectivenessDate', e.target.value)}
                     className="form-control"
                   />
                 </div>
@@ -113,7 +149,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <input
                     type="date"
                     value={formData.closureDate || ''}
-                    onChange={(e) => setFormData({ ...formData, closureDate: e.target.value })}
+                    onChange={(e) => handleFieldChange('closureDate', e.target.value)}
                     className="form-control"
                   />
                 </div>
@@ -123,22 +159,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                     {donors.length === 0 ? (
                       <p className="text-muted small mb-0">No donors available. Add donors in System Setup.</p>
-                    ) : (
-                      donors.map(donor => (
-                        <div key={donor.donorId} className="form-check">
-                          <input
-                            type="checkbox"
-                            className="form-check-input"
-                            id={`donor-${donor.donorId}`}
-                            checked={(formData.donorIds || []).includes(donor.donorId)}
-                            onChange={() => handleDonorToggle(donor.donorId)}
-                          />
-                          <label className="form-check-label" htmlFor={`donor-${donor.donorId}`}>
-                            {donor.name}
-                          </label>
-                        </div>
-                      ))
-                    )}
+                    ) : donorList}
                   </div>
                   <small className="text-muted">Selected: {(formData.donorIds || []).length}</small>
                 </div>
@@ -148,22 +169,7 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
                   <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                     {contributors.length === 0 ? (
                       <p className="text-muted small mb-0">No contributors available. Add contributors in System Setup.</p>
-                    ) : (
-                      contributors.map(contributor => (
-                        <div key={contributor.id} className="form-check">
-                          <input
-                            type="checkbox"
-                            className="form-check-input"
-                            id={`contributor-${contributor.id}`}
-                            checked={(formData.contributorIds || []).includes(contributor.id)}
-                            onChange={() => handleContributorToggle(contributor.id)}
-                          />
-                          <label className="form-check-label" htmlFor={`contributor-${contributor.id}`}>
-                            {contributor.name}
-                          </label>
-                        </div>
-                      ))
-                    )}
+                    ) : contributorList}
                   </div>
                   <small className="text-muted">Selected: {(formData.contributorIds || []).length}</small>
                 </div>
@@ -183,7 +189,97 @@ function ProjectModal({ project, onClose, onSave, donors, contributors }) {
       </div>
     </div>
   );
-}
+});
+
+const ProjectRow = memo(function ProjectRow({ project, onEdit, onDelete }) {
+  return (
+    <tr>
+      <td className="px-4 py-3 fw-medium">{project.projectId}</td>
+      <td className="px-4 py-3">{project.project}</td>
+      <td className="px-4 py-3">
+        {project.currency?.currency} {project.funding?.toLocaleString()}
+      </td>
+      <td className="px-4 py-3">{project.effectivenessDate || '-'}</td>
+      <td className="px-4 py-3">{project.closureDate || '-'}</td>
+      <td className="px-4 py-3 text-end">
+        <div className="btn-group">
+          <Link
+            to={`/projects/${project.projectId}`}
+            className="btn btn-sm btn-outline-secondary"
+          >
+            <FiEye size={16} />
+          </Link>
+          <button
+            onClick={() => onEdit(project)}
+            className="btn btn-sm btn-outline-secondary"
+          >
+            <FiEdit2 size={16} />
+          </button>
+          <button
+            onClick={() => onDelete(project.projectId)}
+            className="btn btn-sm btn-outline-danger"
+          >
+            <FiTrash2 size={16} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onEdit, onDelete }) {
+  return (
+    <tr>
+      {activeTab === 'components' && (
+        <><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+      )}
+      {activeTab === 'subcomponents' && (
+        <><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+      )}
+      {activeTab === 'activities' && (
+        <><td>{item.activityId}</td><td>{item.activity}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+      )}
+      {activeTab === 'pdos' && (
+        <><td>{item.id}</td><td>{item.pdoStatement}</td></>
+      )}
+      {activeTab === 'outcomes' && (
+        <><td>{item.id}</td><td>{item.projectOutcome}</td></>
+      )}
+      <td>
+        <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
+        <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
+      </td>
+    </tr>
+  );
+});
+
+const TabButton = memo(function TabButton({ tab, isActive, onClick }) {
+  const Icon = tab.icon;
+  return (
+    <li className="nav-item">
+      <button 
+        className={`nav-link ${isActive ? 'active' : ''}`}
+        onClick={onClick}
+      >
+        <Icon className="me-2" />
+        {tab.label}
+      </button>
+    </li>
+  );
+});
+
+const StatCard = memo(function StatCard({ title, value, bgClass }) {
+  return (
+    <div className="col-md-4">
+      <div className={`card ${bgClass} text-white`}>
+        <div className="card-body">
+          <h6>{title}</h6>
+          <h3>{value}</h3>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 function FinancialManagement() {
   const [activeTab, setActiveTab] = useState('projects');
@@ -198,16 +294,10 @@ function FinancialManagement() {
   const [selectedProject, setSelectedProject] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({});
   const [editingProject, setEditingProject] = useState(null);
   const [projectSearch, setProjectSearch] = useState('');
 
-  useEffect(() => {
-    loadProjects();
-    loadDonorsAndContributors();
-  }, []);
-
-  const loadDonorsAndContributors = async () => {
+  const loadDonorsAndContributors = useCallback(async () => {
     try {
       const [donorRes, contributorRes] = await Promise.all([
         axios.get('/api/donors').catch(() => ({ data: [] })),
@@ -218,15 +308,9 @@ function FinancialManagement() {
     } catch (error) {
       console.error('Error loading donors/contributors:', error);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (selectedProject) {
-      loadFinancialData();
-    }
-  }, [selectedProject]);
-
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     try {
       const res = await axios.get('/api/projects');
       setProjects(res.data);
@@ -238,9 +322,10 @@ function FinancialManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadFinancialData = async () => {
+  const loadFinancialData = useCallback(async () => {
+    if (!selectedProject) return;
     setLoading(true);
     try {
       const [compRes, subRes, actRes, pdoRes, outRes] = await Promise.all([
@@ -260,18 +345,29 @@ function FinancialManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedProject]);
 
-  const tabs = [
+  useEffect(() => {
+    loadProjects();
+    loadDonorsAndContributors();
+  }, [loadProjects, loadDonorsAndContributors]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      loadFinancialData();
+    }
+  }, [selectedProject, loadFinancialData]);
+
+  const tabs = useMemo(() => [
     { id: 'projects', label: 'Projects', icon: FiFolder },
     { id: 'components', label: 'Components', icon: FiLayers },
     { id: 'subcomponents', label: 'Subcomponents', icon: FiLayers },
     { id: 'activities', label: 'Activities', icon: FiDollarSign },
     { id: 'pdos', label: 'PDO Statements', icon: FiDollarSign },
     { id: 'outcomes', label: 'Outcomes', icon: FiDollarSign }
-  ];
+  ], []);
 
-  const handleCreateProject = async (data) => {
+  const handleCreateProject = useCallback(async (data) => {
     try {
       await axios.post('/api/projects', data);
       toast.success('Project created successfully');
@@ -280,9 +376,9 @@ function FinancialManagement() {
     } catch (error) {
       toast.error('Failed to create project');
     }
-  };
+  }, [loadProjects]);
 
-  const handleUpdateProject = async (data) => {
+  const handleUpdateProject = useCallback(async (data) => {
     try {
       await axios.put(`/api/projects/${editingProject.projectId}`, data);
       toast.success('Project updated successfully');
@@ -291,9 +387,9 @@ function FinancialManagement() {
     } catch (error) {
       toast.error('Failed to update project');
     }
-  };
+  }, [editingProject, loadProjects]);
 
-  const handleDeleteProject = async (projectId) => {
+  const handleDeleteProject = useCallback(async (projectId) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
         await axios.delete(`/api/projects/${projectId}`);
@@ -303,31 +399,75 @@ function FinancialManagement() {
         toast.error('Failed to delete project');
       }
     }
-  };
+  }, [loadProjects]);
 
-  const handleProjectSave = (data) => {
+  const handleProjectSave = useCallback((data) => {
     if (editingProject) {
       handleUpdateProject(data);
     } else {
       handleCreateProject(data);
     }
-  };
+  }, [editingProject, handleUpdateProject, handleCreateProject]);
 
-  const filteredProjects = projects.filter(
-    (p) =>
-      p.project?.toLowerCase().includes(projectSearch.toLowerCase()) ||
-      p.projectId?.toLowerCase().includes(projectSearch.toLowerCase())
-  );
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setEditingProject(null);
+  }, []);
 
-  const formatCurrency = (amount) => {
+  const handleEditProject = useCallback((project) => {
+    setEditingProject(project);
+  }, []);
+
+  const handleTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+  }, []);
+
+  const handleSearchChange = useCallback((e) => {
+    setProjectSearch(e.target.value);
+  }, []);
+
+  const handleProjectSelect = useCallback((e) => {
+    setSelectedProject(e.target.value);
+  }, []);
+
+  const handleShowModal = useCallback(() => {
+    setShowModal(true);
+  }, []);
+
+  const filteredProjects = useMemo(() => {
+    const searchLower = projectSearch.toLowerCase();
+    return projects.filter(
+      (p) =>
+        p.project?.toLowerCase().includes(searchLower) ||
+        p.projectId?.toLowerCase().includes(searchLower)
+    );
+  }, [projects, projectSearch]);
+
+  const formatCurrency = useCallback((amount) => {
     return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(amount || 0);
-  };
+  }, []);
 
-  const getTotalAllocation = () => {
+  const totalAllocation = useMemo(() => {
     return components.reduce((sum, c) => sum + (parseFloat(c.allocation) || 0), 0);
-  };
+  }, [components]);
 
-  const renderProjectsTable = () => {
+  const currentTabData = useMemo(() => {
+    switch (activeTab) {
+      case 'components': return components;
+      case 'subcomponents': return subcomponents;
+      case 'activities': return activities;
+      case 'pdos': return pdos;
+      case 'outcomes': return outcomes;
+      default: return [];
+    }
+  }, [activeTab, components, subcomponents, activities, pdos, outcomes]);
+
+  const dataTotal = useMemo(() => {
+    if (!['components', 'subcomponents', 'activities'].includes(activeTab)) return 0;
+    return currentTabData.reduce((sum, item) => sum + (parseFloat(item.allocation) || 0), 0);
+  }, [activeTab, currentTabData]);
+
+  const projectsTable = useMemo(() => {
     if (loading) {
       return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
     }
@@ -342,7 +482,7 @@ function FinancialManagement() {
             <input
               type="text"
               value={projectSearch}
-              onChange={(e) => setProjectSearch(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search projects..."
               className="form-control border-start-0"
             />
@@ -362,37 +502,12 @@ function FinancialManagement() {
             </thead>
             <tbody>
               {filteredProjects.map((project) => (
-                <tr key={project.projectId}>
-                  <td className="px-4 py-3 fw-medium">{project.projectId}</td>
-                  <td className="px-4 py-3">{project.project}</td>
-                  <td className="px-4 py-3">
-                    {project.currency?.currency} {project.funding?.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3">{project.effectivenessDate || '-'}</td>
-                  <td className="px-4 py-3">{project.closureDate || '-'}</td>
-                  <td className="px-4 py-3 text-end">
-                    <div className="btn-group">
-                      <Link
-                        to={`/projects/${project.projectId}`}
-                        className="btn btn-sm btn-outline-secondary"
-                      >
-                        <FiEye size={16} />
-                      </Link>
-                      <button
-                        onClick={() => setEditingProject(project)}
-                        className="btn btn-sm btn-outline-secondary"
-                      >
-                        <FiEdit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project.projectId)}
-                        className="btn btn-sm btn-outline-danger"
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <ProjectRow
+                  key={project.projectId}
+                  project={project}
+                  onEdit={handleEditProject}
+                  onDelete={handleDeleteProject}
+                />
               ))}
             </tbody>
           </table>
@@ -402,17 +517,12 @@ function FinancialManagement() {
         </div>
       </div>
     );
-  };
+  }, [loading, projectSearch, filteredProjects, handleSearchChange, handleEditProject, handleDeleteProject]);
 
-  const renderTable = () => {
+  const dataTable = useMemo(() => {
     if (loading) {
       return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
     }
-
-    const data = activeTab === 'components' ? components :
-                 activeTab === 'subcomponents' ? subcomponents :
-                 activeTab === 'activities' ? activities :
-                 activeTab === 'pdos' ? pdos : outcomes;
 
     return (
       <div className="table-responsive">
@@ -428,39 +538,24 @@ function FinancialManagement() {
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {currentTabData.length === 0 ? (
               <tr><td colSpan="5" className="text-center text-muted">No data available</td></tr>
             ) : (
-              data.map((item, index) => (
-                <tr key={index}>
-                  {activeTab === 'components' && (
-                    <><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
-                  )}
-                  {activeTab === 'subcomponents' && (
-                    <><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
-                  )}
-                  {activeTab === 'activities' && (
-                    <><td>{item.activityId}</td><td>{item.activity}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
-                  )}
-                  {activeTab === 'pdos' && (
-                    <><td>{item.id}</td><td>{item.pdoStatement}</td></>
-                  )}
-                  {activeTab === 'outcomes' && (
-                    <><td>{item.id}</td><td>{item.projectOutcome}</td></>
-                  )}
-                  <td>
-                    <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-                    <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
-                  </td>
-                </tr>
+              currentTabData.map((item, index) => (
+                <DataRow
+                  key={item.id || item.compId || item.subcompId || item.activityId || index}
+                  item={item}
+                  activeTab={activeTab}
+                  formatCurrency={formatCurrency}
+                />
               ))
             )}
           </tbody>
-          {(activeTab === 'components' || activeTab === 'subcomponents' || activeTab === 'activities') && data.length > 0 && (
+          {['components', 'subcomponents', 'activities'].includes(activeTab) && currentTabData.length > 0 && (
             <tfoot className="table-secondary">
               <tr>
                 <td colSpan={activeTab === 'activities' ? 2 : 3} className="fw-bold">Total</td>
-                <td className="text-end fw-bold">{formatCurrency(data.reduce((sum, item) => sum + (parseFloat(item.allocation) || 0), 0))}</td>
+                <td className="text-end fw-bold">{formatCurrency(dataTotal)}</td>
                 <td></td>
               </tr>
             </tfoot>
@@ -468,7 +563,24 @@ function FinancialManagement() {
         </table>
       </div>
     );
-  };
+  }, [loading, activeTab, currentTabData, formatCurrency, dataTotal]);
+
+  const tabButtons = useMemo(() => (
+    <ul className="nav nav-tabs mb-4">
+      {tabs.map(tab => (
+        <TabButton
+          key={tab.id}
+          tab={tab}
+          isActive={activeTab === tab.id}
+          onClick={() => handleTabChange(tab.id)}
+        />
+      ))}
+    </ul>
+  ), [tabs, activeTab, handleTabChange]);
+
+  const projectOptions = useMemo(() => (
+    projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)
+  ), [projects]);
 
   return (
     <div className="container-fluid">
@@ -476,11 +588,11 @@ function FinancialManagement() {
         <h2>Financial Management</h2>
         <div className="d-flex gap-3">
           {activeTab !== 'projects' && (
-            <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
-              {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+            <select className="form-select" value={selectedProject} onChange={handleProjectSelect} style={{ width: '250px' }}>
+              {projectOptions}
             </select>
           )}
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={handleShowModal}>
             <FiPlus className="me-2" /> Add New
           </button>
         </div>
@@ -488,60 +600,24 @@ function FinancialManagement() {
 
       {activeTab !== 'projects' && (
         <div className="row mb-4">
-          <div className="col-md-4">
-            <div className="card bg-primary text-white">
-              <div className="card-body">
-                <h6>Total Components</h6>
-                <h3>{components.length}</h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card bg-success text-white">
-              <div className="card-body">
-                <h6>Total Allocation</h6>
-                <h3>${formatCurrency(getTotalAllocation())}</h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card bg-info text-white">
-              <div className="card-body">
-                <h6>Total Activities</h6>
-                <h3>{activities.length}</h3>
-              </div>
-            </div>
-          </div>
+          <StatCard title="Total Components" value={components.length} bgClass="bg-primary" />
+          <StatCard title="Total Allocation" value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
+          <StatCard title="Total Activities" value={activities.length} bgClass="bg-info" />
         </div>
       )}
 
-      <ul className="nav nav-tabs mb-4">
-        {tabs.map(tab => (
-          <li className="nav-item" key={tab.id}>
-            <button 
-              className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <tab.icon className="me-2" />
-              {tab.label}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {tabButtons}
 
       <div className="card">
         <div className="card-body">
-          {activeTab === 'projects' ? renderProjectsTable() : renderTable()}
+          {activeTab === 'projects' ? projectsTable : dataTable}
         </div>
       </div>
 
       {(showModal || editingProject) && activeTab === 'projects' && (
         <ProjectModal
           project={editingProject}
-          onClose={() => {
-            setShowModal(false);
-            setEditingProject(null);
-          }}
+          onClose={handleCloseModal}
           onSave={handleProjectSave}
           donors={donors}
           contributors={contributors}

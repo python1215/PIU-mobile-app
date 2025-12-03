@@ -2,6 +2,59 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { projectAPI, issueAPI } from '../services/api';
 import { FiArrowLeft, FiCalendar, FiDollarSign, FiAlertCircle, FiUsers, FiUserCheck } from 'react-icons/fi';
+import { useMemo, useCallback, memo } from 'react';
+
+const InfoCard = memo(function InfoCard({ icon: Icon, label, value }) {
+  return (
+    <div className="card border-0 shadow-sm h-100">
+      <div className="card-body">
+        <div className="d-flex align-items-center gap-2 text-muted mb-2">
+          <Icon />
+          <span className="fw-medium">{label}</span>
+        </div>
+        <h4 className="fw-bold text-dark mb-0">{value}</h4>
+      </div>
+    </div>
+  );
+});
+
+const DonorBadge = memo(function DonorBadge({ donor }) {
+  return (
+    <span className="badge bg-light text-dark border px-3 py-2">
+      {donor.name}
+    </span>
+  );
+});
+
+const ContributorBadge = memo(function ContributorBadge({ contributor }) {
+  return (
+    <span className="badge bg-light text-dark border px-3 py-2">
+      {contributor.name}
+    </span>
+  );
+});
+
+const IssueRow = memo(function IssueRow({ issue, getPriorityBadge }) {
+  return (
+    <tr>
+      <td className="px-4 py-3 fw-medium">{issue.issueCode}</td>
+      <td className="px-4 py-3" style={{ maxWidth: '300px' }}>
+        <span className="text-truncate d-block">{issue.descriptionOfIssueOrAction}</span>
+      </td>
+      <td className="px-4 py-3">
+        <span className={`badge ${issue.status === 'complete' ? 'bg-success' : 'bg-warning text-dark'}`}>
+          {issue.status}
+        </span>
+      </td>
+      <td className="px-4 py-3">
+        <span className={`badge ${getPriorityBadge(issue.priority)}`}>
+          {issue.priority}
+        </span>
+      </td>
+      <td className="px-4 py-3">{issue.assignedTo || '-'}</td>
+    </tr>
+  );
+});
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -21,6 +74,59 @@ function ProjectDetail() {
       return response.data;
     },
   });
+
+  const getPriorityBadge = useCallback((priority) => {
+    const badges = {
+      critical: 'bg-danger',
+      high: 'bg-warning text-dark',
+      medium: 'bg-primary',
+      low: 'bg-secondary',
+    };
+    return badges[priority] || badges.medium;
+  }, []);
+
+  const fundingDisplay = useMemo(() => {
+    if (!project) return 'N/A';
+    const currency = project.currency?.currency || '';
+    const funding = project.funding?.toLocaleString() || 'N/A';
+    return `${currency} ${funding}`;
+  }, [project?.currency?.currency, project?.funding]);
+
+  const donorsList = useMemo(() => {
+    if (!project?.donors || project.donors.length === 0) {
+      return <p className="text-muted mb-0">No donors assigned</p>;
+    }
+    return (
+      <div className="d-flex flex-wrap gap-2">
+        {project.donors.map((donor) => (
+          <DonorBadge key={donor.donorId} donor={donor} />
+        ))}
+      </div>
+    );
+  }, [project?.donors]);
+
+  const contributorsList = useMemo(() => {
+    if (!project?.contributors || project.contributors.length === 0) {
+      return <p className="text-muted mb-0">No contributors assigned</p>;
+    }
+    return (
+      <div className="d-flex flex-wrap gap-2">
+        {project.contributors.map((contributor) => (
+          <ContributorBadge key={contributor.id} contributor={contributor} />
+        ))}
+      </div>
+    );
+  }, [project?.contributors]);
+
+  const issueRows = useMemo(() => {
+    return issues.map((issue) => (
+      <IssueRow
+        key={issue.issueId}
+        issue={issue}
+        getPriorityBadge={getPriorityBadge}
+      />
+    ));
+  }, [issues, getPriorityBadge]);
 
   if (isLoading) {
     return (
@@ -43,21 +149,11 @@ function ProjectDetail() {
     );
   }
 
-  const getPriorityBadge = (priority) => {
-    const badges = {
-      critical: 'bg-danger',
-      high: 'bg-warning text-dark',
-      medium: 'bg-primary',
-      low: 'bg-secondary',
-    };
-    return badges[priority] || badges.medium;
-  };
-
   return (
     <div>
       <div className="d-flex align-items-center gap-3 mb-4">
         <Link
-          to="/projects"
+          to="/financial"
           className="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
           style={{ width: '42px', height: '42px' }}
         >
@@ -71,45 +167,13 @@ function ProjectDetail() {
 
       <div className="row g-4 mb-4">
         <div className="col-12 col-md-4">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-2 text-muted mb-2">
-                <FiDollarSign />
-                <span className="fw-medium">Funding</span>
-              </div>
-              <h4 className="fw-bold text-dark mb-0">
-                {project.currency?.currency} {project.funding?.toLocaleString() || 'N/A'}
-              </h4>
-            </div>
-          </div>
+          <InfoCard icon={FiDollarSign} label="Funding" value={fundingDisplay} />
         </div>
-
         <div className="col-12 col-md-4">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-2 text-muted mb-2">
-                <FiCalendar />
-                <span className="fw-medium">Effectiveness Date</span>
-              </div>
-              <h4 className="fw-bold text-dark mb-0">
-                {project.effectivenessDate || 'Not Set'}
-              </h4>
-            </div>
-          </div>
+          <InfoCard icon={FiCalendar} label="Effectiveness Date" value={project.effectivenessDate || 'Not Set'} />
         </div>
-
         <div className="col-12 col-md-4">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-2 text-muted mb-2">
-                <FiCalendar />
-                <span className="fw-medium">Closure Date</span>
-              </div>
-              <h4 className="fw-bold text-dark mb-0">
-                {project.closureDate || 'Not Set'}
-              </h4>
-            </div>
-          </div>
+          <InfoCard icon={FiCalendar} label="Closure Date" value={project.closureDate || 'Not Set'} />
         </div>
       </div>
 
@@ -122,17 +186,7 @@ function ProjectDetail() {
                 <span className="fw-medium">Donors</span>
                 <span className="badge bg-primary ms-auto">{project.donors?.length || 0}</span>
               </div>
-              {project.donors && project.donors.length > 0 ? (
-                <div className="d-flex flex-wrap gap-2">
-                  {project.donors.map((donor) => (
-                    <span key={donor.donorId} className="badge bg-light text-dark border px-3 py-2">
-                      {donor.name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted mb-0">No donors assigned</p>
-              )}
+              {donorsList}
             </div>
           </div>
         </div>
@@ -145,17 +199,7 @@ function ProjectDetail() {
                 <span className="fw-medium">Contributors</span>
                 <span className="badge bg-success ms-auto">{project.contributors?.length || 0}</span>
               </div>
-              {project.contributors && project.contributors.length > 0 ? (
-                <div className="d-flex flex-wrap gap-2">
-                  {project.contributors.map((contributor) => (
-                    <span key={contributor.id} className="badge bg-light text-dark border px-3 py-2">
-                      {contributor.name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted mb-0">No contributors assigned</p>
-              )}
+              {contributorsList}
             </div>
           </div>
         </div>
@@ -182,25 +226,7 @@ function ProjectDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {issues.map((issue) => (
-                    <tr key={issue.issueId}>
-                      <td className="px-4 py-3 fw-medium">{issue.issueCode}</td>
-                      <td className="px-4 py-3" style={{ maxWidth: '300px' }}>
-                        <span className="text-truncate d-block">{issue.descriptionOfIssueOrAction}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`badge ${issue.status === 'complete' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                          {issue.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`badge ${getPriorityBadge(issue.priority)}`}>
-                          {issue.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">{issue.assignedTo || '-'}</td>
-                    </tr>
-                  ))}
+                  {issueRows}
                 </tbody>
               </table>
             </div>

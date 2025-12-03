@@ -3,10 +3,11 @@ import { projectAPI, issueAPI } from '../services/api';
 import { FiFolder, FiAlertCircle, FiCheckCircle, FiClock } from 'react-icons/fi';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { useMemo, memo } from 'react';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-function StatCard({ icon: Icon, label, value, color, bgColor }) {
+const StatCard = memo(function StatCard({ icon: Icon, label, value, color, bgColor }) {
   return (
     <div className="card border-0 shadow-sm h-100">
       <div className="card-body d-flex align-items-center gap-3">
@@ -23,7 +24,24 @@ function StatCard({ icon: Icon, label, value, color, bgColor }) {
       </div>
     </div>
   );
-}
+});
+
+const ProjectRow = memo(function ProjectRow({ project }) {
+  return (
+    <tr>
+      <td className="px-4 py-3 fw-medium">{project.projectId}</td>
+      <td className="px-4 py-3">{project.project}</td>
+      <td className="px-4 py-3">
+        {project.currency?.currency} {project.funding?.toLocaleString()}
+      </td>
+      <td className="px-4 py-3">
+        <span className="badge bg-success bg-opacity-10 text-success">
+          Active
+        </span>
+      </td>
+    </tr>
+  );
+});
 
 function Dashboard() {
   const { data: projects = [] } = useQuery({
@@ -42,20 +60,22 @@ function Dashboard() {
     },
   });
 
-  const completeIssues = issues.filter(i => i.status === 'complete').length;
-  const incompleteIssues = issues.filter(i => i.status === 'incomplete').length;
-  const criticalIssues = issues.filter(i => i.priority === 'critical').length;
+  const { completeIssues, incompleteIssues, criticalIssues } = useMemo(() => ({
+    completeIssues: issues.filter(i => i.status === 'complete').length,
+    incompleteIssues: issues.filter(i => i.status === 'incomplete').length,
+    criticalIssues: issues.filter(i => i.priority === 'critical').length,
+  }), [issues]);
 
-  const issueStatusData = {
+  const issueStatusData = useMemo(() => ({
     labels: ['Complete', 'Incomplete'],
     datasets: [{
       data: [completeIssues, incompleteIssues],
       backgroundColor: ['#198754', '#ffc107'],
       borderWidth: 0,
     }],
-  };
+  }), [completeIssues, incompleteIssues]);
 
-  const priorityData = {
+  const priorityData = useMemo(() => ({
     labels: ['Low', 'Medium', 'High', 'Critical'],
     datasets: [{
       label: 'Issues by Priority',
@@ -67,7 +87,25 @@ function Dashboard() {
       ],
       backgroundColor: ['#6c757d', '#0d6efd', '#ffc107', '#dc3545'],
     }],
-  };
+  }), [issues]);
+
+  const doughnutOptions = useMemo(() => ({
+    plugins: { legend: { position: 'bottom' } }
+  }), []);
+
+  const barOptions = useMemo(() => ({
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } },
+    maintainAspectRatio: true
+  }), []);
+
+  const recentProjects = useMemo(() => projects.slice(0, 5), [projects]);
+
+  const projectRows = useMemo(() => (
+    recentProjects.map((project) => (
+      <ProjectRow key={project.projectId} project={project} />
+    ))
+  ), [recentProjects]);
 
   return (
     <div>
@@ -123,7 +161,7 @@ function Dashboard() {
             </div>
             <div className="card-body d-flex justify-content-center align-items-center">
               <div style={{ maxWidth: '280px', width: '100%' }}>
-                <Doughnut data={issueStatusData} options={{ plugins: { legend: { position: 'bottom' } } }} />
+                <Doughnut data={issueStatusData} options={doughnutOptions} />
               </div>
             </div>
           </div>
@@ -135,11 +173,7 @@ function Dashboard() {
               <h5 className="mb-0 fw-semibold">Issues by Priority</h5>
             </div>
             <div className="card-body">
-              <Bar data={priorityData} options={{ 
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } },
-                maintainAspectRatio: true
-              }} />
+              <Bar data={priorityData} options={barOptions} />
             </div>
           </div>
         </div>
@@ -161,20 +195,7 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {projects.slice(0, 5).map((project) => (
-                  <tr key={project.projectId}>
-                    <td className="px-4 py-3 fw-medium">{project.projectId}</td>
-                    <td className="px-4 py-3">{project.project}</td>
-                    <td className="px-4 py-3">
-                      {project.currency?.currency} {project.funding?.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="badge bg-success bg-opacity-10 text-success">
-                        Active
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {projectRows}
               </tbody>
             </table>
             {projects.length === 0 && (

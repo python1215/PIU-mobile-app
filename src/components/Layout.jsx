@@ -17,7 +17,7 @@ import {
   FiFile,
   FiMapPin
 } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 
 const navItems = [
   { path: '/', icon: FiHome, label: 'Dashboard' },
@@ -32,29 +32,82 @@ const navItems = [
   { path: '/kpi', icon: FiBarChart2, label: 'KPI Monitoring' },
 ];
 
+const NavItem = memo(function NavItem({ item, isActive, sidebarOpen }) {
+  const Icon = item.icon;
+  return (
+    <li className="nav-item">
+      <Link
+        to={item.path}
+        className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
+          isActive
+            ? 'bg-primary bg-opacity-10 text-primary'
+            : 'text-secondary'
+        }`}
+        style={{ transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+      >
+        <Icon size={20} />
+        {sidebarOpen && <span className="fw-medium">{item.label}</span>}
+      </Link>
+    </li>
+  );
+});
+
+const UserAvatar = memo(function UserAvatar({ username }) {
+  return (
+    <div 
+      className="rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold d-flex align-items-center justify-content-center"
+      style={{ width: '40px', height: '40px', minWidth: '40px' }}
+    >
+      {username?.[0]?.toUpperCase() || 'U'}
+    </div>
+  );
+});
+
 function Layout() {
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
-  };
+  }, [logout, navigate]);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
+  const navList = useMemo(() => (
+    navItems.map((item) => (
+      <NavItem
+        key={item.path}
+        item={item}
+        isActive={location.pathname === item.path}
+        sidebarOpen={sidebarOpen}
+      />
+    ))
+  ), [location.pathname, sidebarOpen]);
+
+  const sidebarStyle = useMemo(() => ({
+    width: sidebarOpen ? '280px' : '80px',
+    transition: 'width 0.3s ease',
+    minHeight: '100vh'
+  }), [sidebarOpen]);
 
   return (
     <div className="d-flex vh-100 bg-light">
       <aside 
         className={`bg-white shadow-sm d-flex flex-column ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-        style={{ width: sidebarOpen ? '280px' : '80px', transition: 'width 0.3s ease', minHeight: '100vh' }}
+        style={sidebarStyle}
       >
         <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
           {sidebarOpen && (
             <h4 className="mb-0 text-primary fw-bold">PIU Manager</h4>
           )}
           <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={toggleSidebar}
             className="btn btn-light btn-sm rounded-circle"
             style={{ width: '40px', height: '40px' }}
           >
@@ -64,38 +117,13 @@ function Layout() {
 
         <nav className="flex-grow-1 py-3 overflow-auto">
           <ul className="nav flex-column gap-1 px-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <li key={item.path} className="nav-item">
-                  <Link
-                    to={item.path}
-                    className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
-                      isActive
-                        ? 'bg-primary bg-opacity-10 text-primary'
-                        : 'text-secondary'
-                    }`}
-                    style={{ transition: 'all 0.2s', whiteSpace: 'nowrap' }}
-                  >
-                    <Icon size={20} />
-                    {sidebarOpen && <span className="fw-medium">{item.label}</span>}
-                  </Link>
-                </li>
-              );
-            })}
+            {navList}
           </ul>
         </nav>
 
         <div className="p-3 border-top">
           <div className={`d-flex align-items-center ${sidebarOpen ? 'gap-3' : 'justify-content-center'}`}>
-            <div 
-              className="rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold d-flex align-items-center justify-content-center"
-              style={{ width: '40px', height: '40px', minWidth: '40px' }}
-            >
-              {user?.username?.[0]?.toUpperCase() || 'U'}
-            </div>
+            <UserAvatar username={user?.username} />
             {sidebarOpen && (
               <div className="flex-grow-1 overflow-hidden">
                 <p className="mb-0 fw-medium text-dark text-truncate">{user?.username}</p>
@@ -124,4 +152,4 @@ function Layout() {
   );
 }
 
-export default Layout;
+export default memo(Layout);
