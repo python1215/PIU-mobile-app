@@ -109,13 +109,32 @@
                 <div class="card-header bg-gradient-info text-white py-3" style="border-radius: 15px 15px 0 0;">
                     <h5 class="mb-0">
                         <i class="fas fa-analytics me-2"></i>Performance Analysis
+                        {% if is_reversed_indicator %}
+                        <span class="badge bg-warning text-dark ms-2 fs-6">Lower is Better</span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
+                    {% if is_reversed_indicator %}
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> For this indicator, a <strong>lower achieved value</strong> indicates better performance. 
+                        Status is "Achieved" when Achieved ≤ Target.
+                    </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="text-muted small fw-bold">PERFORMANCE VS TARGET</label>
                             <div class="d-flex align-items-center">
+                                {% if is_reversed_indicator %}
+                                {# For reversed indicators, show comparison differently #}
+                                <div class="me-3">
+                                    <span class="fs-5">Achieved: <strong>{{ record.achieved_value|floatformat:2 }}</strong></span>
+                                    <span class="mx-2">vs</span>
+                                    <span class="fs-5">Target: <strong>{{ record.End_Target_Value|floatformat:2 }}</strong></span>
+                                </div>
+                                <span class="badge bg-{{ status_color }} fs-6">{{ status|title }}</span>
+                                {% else %}
                                 <div class="progress flex-grow-1 me-3" style="height: 25px;">
                                     <div class="progress-bar bg-{{ status_color }}" role="progressbar" 
                                          style="width: {% if performance_vs_target > 100 %}100{% else %}{{ performance_vs_target|floatformat:0 }}{% endif %}%" 
@@ -125,6 +144,7 @@
                                     </div>
                                 </div>
                                 <span class="badge bg-{{ status_color }} fs-6">{{ status|title }}</span>
+                                {% endif %}
                             </div>
                         </div>
                         {% if record.baseline_value %}
@@ -204,6 +224,14 @@
                 </div>
                 <div class="card-body text-center">
                     {% if record.achieved_value and record.End_Target_Value %}
+                    {% if is_reversed_indicator %}
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Achieved: <strong class="text-{{ status_color }}">{{ record.achieved_value|floatformat:2 }}</strong></h5>
+                        <h5 class="text-muted mb-1">Target: <strong>{{ record.End_Target_Value|floatformat:2 }}</strong></h5>
+                        <p class="text-muted mb-0 small mt-2"><i class="fas fa-arrow-down me-1"></i>Lower is Better</p>
+                    </div>
+                    <span class="badge bg-{{ status_color }} fs-5 px-3 py-2">{{ status|title }}</span>
+                    {% else %}
                     <div class="mb-3">
                         <h3 class="text-{{ status_color }} mb-1">{{ performance_vs_target|floatformat:1 }}%</h3>
                         <p class="text-muted mb-0">Target Achievement</p>
@@ -214,6 +242,7 @@
                         </div>
                     </div>
                     <span class="badge bg-{{ status_color }} fs-6 px-3 py-2">{{ status|title }} Performance</span>
+                    {% endif %}
                     {% else %}
                     <div class="text-muted">
                         <i class="fas fa-info-circle fa-3x mb-3"></i>

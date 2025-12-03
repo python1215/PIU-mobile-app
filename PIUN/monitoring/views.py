@@ -591,6 +591,14 @@ def detail_results_monitoring(request, pk):
         performance_vs_baseline = 0
         variance_from_target = 0
         
+        # Check if this is a special indicator with reversed logic
+        # For these indicators: lower achieved value is better (achieved < target = success)
+        indicator_desc = record.indicator_description or ""
+        is_reversed_indicator = (
+            "Total System Collapses" in indicator_desc or 
+            "Nationwide transmission & distribution losses" in indicator_desc
+        )
+        
         # Safe calculations with None checks
         if record.End_Target_Value and record.achieved_value:
             try:
@@ -605,19 +613,35 @@ def detail_results_monitoring(request, pk):
             except (ValueError, ZeroDivisionError):
                 pass
         
-        # Safe status determination
-        if performance_vs_target >= 100:
-            status = 'excellent'
-            status_color = 'success'
-        elif performance_vs_target >= 75:
-            status = 'good'
-            status_color = 'warning'
-        elif performance_vs_target >= 50:
-            status = 'fair'
-            status_color = 'info'
+        # Status determination based on indicator type
+        if is_reversed_indicator:
+            # Reversed logic: lower is better - Achieved <= Target = success
+            if record.achieved_value is not None and record.End_Target_Value is not None:
+                achieved = float(record.achieved_value)
+                target = float(record.End_Target_Value)
+                if achieved <= target:
+                    status = 'achieved'
+                    status_color = 'success'
+                else:
+                    status = 'not_achieved'
+                    status_color = 'danger'
+            else:
+                status = 'pending'
+                status_color = 'secondary'
         else:
-            status = 'needs_improvement'
-            status_color = 'danger'
+            # Standard logic: higher is better
+            if performance_vs_target >= 100:
+                status = 'excellent'
+                status_color = 'success'
+            elif performance_vs_target >= 75:
+                status = 'good'
+                status_color = 'warning'
+            elif performance_vs_target >= 50:
+                status = 'fair'
+                status_color = 'info'
+            else:
+                status = 'needs_improvement'
+                status_color = 'danger'
         
         context = {
             'record': record,
@@ -627,6 +651,7 @@ def detail_results_monitoring(request, pk):
             'variance_from_target': variance_from_target,
             'status': status,
             'status_color': status_color,
+            'is_reversed_indicator': is_reversed_indicator,
         }
         
         return render(request, 'monitoring/results_monitoring/detail_results_monitoring.html', context)
