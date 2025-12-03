@@ -116,21 +116,23 @@ The application follows a microservices pattern with three main components:
 - **NawecInfrastructure**: Infrastructure data
 - **SettlementWithCoordinates**: Settlements with GPS coordinates
 
-## React Pages (12 Pages)
+## React Pages (10 Main Navigation Pages)
 
 1. **Dashboard** (`/`) - Real-time analytics with charts and statistics
-2. **Projects** (`/projects`) - Project list and management
-3. **ProjectDetail** (`/projects/:id`) - Individual project details
-4. **Donors** (`/donors`) - Donor/funding source management
-5. **SystemSetup** (`/setup`) - Reference data management (regions, years, currencies, etc.)
-6. **FinancialManagement** (`/financial`) - Components, subcomponents, activities, PDOs
-7. **MonitoringEvaluation** (`/monitoring`) - Results-oriented monitoring with progress tracking
-8. **ProjectActions** (`/project-actions`) - Works and goods contract profiling
-9. **SocialEnvironmental** (`/social-environmental`) - ESIA, PAP, grievances, OHS, community engagement
-10. **Documentation** (`/documentation`) - Document management and tracking
-11. **ProjectMap** (`/map`) - Geographic visualization with Leaflet
-12. **Issues** (`/issues`) - Issues and actions tracking
-13. **KPIMonitoring** (`/kpi`) - KPI tracking and monitoring
+2. **SystemSetup** (`/setup`) - Reference data management including:
+   - Donors (first tab) - Donor/funding source management
+   - Regions, Years, Quarters, Currencies, Categories, Document Types
+3. **FinancialManagement** (`/financial`) - Financial operations including:
+   - Projects (first tab) - Project list and management
+   - Components, Subcomponents, Activities, PDO Statements, Outcomes
+4. **ProjectDetail** (`/projects/:id`) - Individual project details
+5. **MonitoringEvaluation** (`/monitoring`) - Results-oriented monitoring with progress tracking
+6. **ProjectActions** (`/project-actions`) - Works and goods contract profiling
+7. **SocialEnvironmental** (`/social-environmental`) - ESIA, PAP, grievances, OHS, community engagement
+8. **Documentation** (`/documentation`) - Document management and tracking
+9. **ProjectMap** (`/map`) - Geographic visualization with Leaflet
+10. **Issues** (`/issues`) - Issues and actions tracking
+11. **KPIMonitoring** (`/kpi`) - KPI tracking and monitoring
 
 ## REST API Endpoints
 
