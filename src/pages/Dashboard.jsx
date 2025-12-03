@@ -6,15 +6,20 @@ import { Doughnut, Bar } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-function StatCard({ icon: Icon, label, value, color }) {
+function StatCard({ icon: Icon, label, value, color, bgColor }) {
   return (
-    <div className="card flex items-center gap-4">
-      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color}`}>
-        <Icon size={24} className="text-white" />
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
-        <p className="text-gray-500 text-sm">{label}</p>
+    <div className="card border-0 shadow-sm h-100">
+      <div className="card-body d-flex align-items-center gap-3">
+        <div 
+          className={`rounded-3 d-flex align-items-center justify-content-center ${bgColor}`}
+          style={{ width: '56px', height: '56px', minWidth: '56px' }}
+        >
+          <Icon size={24} className={color} />
+        </div>
+        <div>
+          <h3 className="mb-0 fw-bold text-dark">{value}</h3>
+          <p className="mb-0 text-muted small">{label}</p>
+        </div>
       </div>
     </div>
   );
@@ -45,7 +50,7 @@ function Dashboard() {
     labels: ['Complete', 'Incomplete'],
     datasets: [{
       data: [completeIssues, incompleteIssues],
-      backgroundColor: ['#10b981', '#f59e0b'],
+      backgroundColor: ['#198754', '#ffc107'],
       borderWidth: 0,
     }],
   };
@@ -60,96 +65,122 @@ function Dashboard() {
         issues.filter(i => i.priority === 'high').length,
         issues.filter(i => i.priority === 'critical').length,
       ],
-      backgroundColor: ['#6366f1', '#3b82f6', '#f59e0b', '#ef4444'],
+      backgroundColor: ['#6c757d', '#0d6efd', '#ffc107', '#dc3545'],
     }],
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Welcome to PIU Project Management System</p>
+    <div>
+      <div className="mb-4">
+        <h1 className="h2 fw-bold text-dark">Dashboard</h1>
+        <p className="text-muted mb-0">Welcome to PIU Project Management System</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={FiFolder}
-          label="Total Projects"
-          value={projects.length}
-          color="bg-primary-500"
-        />
-        <StatCard
-          icon={FiAlertCircle}
-          label="Open Issues"
-          value={incompleteIssues}
-          color="bg-amber-500"
-        />
-        <StatCard
-          icon={FiCheckCircle}
-          label="Resolved Issues"
-          value={completeIssues}
-          color="bg-emerald-500"
-        />
-        <StatCard
-          icon={FiClock}
-          label="Critical Issues"
-          value={criticalIssues}
-          color="bg-red-500"
-        />
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-sm-6 col-xl-3">
+          <StatCard
+            icon={FiFolder}
+            label="Total Projects"
+            value={projects.length}
+            color="text-primary"
+            bgColor="bg-primary bg-opacity-10"
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-xl-3">
+          <StatCard
+            icon={FiAlertCircle}
+            label="Open Issues"
+            value={incompleteIssues}
+            color="text-warning"
+            bgColor="bg-warning bg-opacity-10"
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-xl-3">
+          <StatCard
+            icon={FiCheckCircle}
+            label="Resolved Issues"
+            value={completeIssues}
+            color="text-success"
+            bgColor="bg-success bg-opacity-10"
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-xl-3">
+          <StatCard
+            icon={FiClock}
+            label="Critical Issues"
+            value={criticalIssues}
+            color="text-danger"
+            bgColor="bg-danger bg-opacity-10"
+          />
+        </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Issue Status</h2>
-          <div className="w-64 mx-auto">
-            <Doughnut data={issueStatusData} options={{ plugins: { legend: { position: 'bottom' } } }} />
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-header bg-white border-0 py-3">
+              <h5 className="mb-0 fw-semibold">Issue Status</h5>
+            </div>
+            <div className="card-body d-flex justify-content-center align-items-center">
+              <div style={{ maxWidth: '280px', width: '100%' }}>
+                <Doughnut data={issueStatusData} options={{ plugins: { legend: { position: 'bottom' } } }} />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="card">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Issues by Priority</h2>
-          <Bar data={priorityData} options={{ 
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
-          }} />
+        <div className="col-12 col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-header bg-white border-0 py-3">
+              <h5 className="mb-0 fw-semibold">Issues by Priority</h5>
+            </div>
+            <div className="card-body">
+              <Bar data={priorityData} options={{ 
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } },
+                maintainAspectRatio: true
+              }} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Recent Projects */}
-      <div className="card">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Projects</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="table-header">Project ID</th>
-                <th className="table-header">Name</th>
-                <th className="table-header">Funding</th>
-                <th className="table-header">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.slice(0, 5).map((project) => (
-                <tr key={project.projectId} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="table-cell font-medium">{project.projectId}</td>
-                  <td className="table-cell">{project.project}</td>
-                  <td className="table-cell">
-                    {project.currency?.currency} {project.funding?.toLocaleString()}
-                  </td>
-                  <td className="table-cell">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                      Active
-                    </span>
-                  </td>
+      <div className="card border-0 shadow-sm">
+        <div className="card-header bg-white border-0 py-3">
+          <h5 className="mb-0 fw-semibold">Recent Projects</h5>
+        </div>
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th className="border-0 px-4 py-3">Project ID</th>
+                  <th className="border-0 px-4 py-3">Name</th>
+                  <th className="border-0 px-4 py-3">Funding</th>
+                  <th className="border-0 px-4 py-3">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {projects.length === 0 && (
-            <p className="text-center text-gray-500 py-8">No projects found</p>
-          )}
+              </thead>
+              <tbody>
+                {projects.slice(0, 5).map((project) => (
+                  <tr key={project.projectId}>
+                    <td className="px-4 py-3 fw-medium">{project.projectId}</td>
+                    <td className="px-4 py-3">{project.project}</td>
+                    <td className="px-4 py-3">
+                      {project.currency?.currency} {project.funding?.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="badge bg-success bg-opacity-10 text-success">
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {projects.length === 0 && (
+              <p className="text-center text-muted py-5 mb-0">No projects found</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

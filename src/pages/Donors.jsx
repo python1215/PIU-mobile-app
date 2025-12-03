@@ -13,36 +13,41 @@ function DonorModal({ donor, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-md p-6 mx-4">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">
-          {donor ? 'Edit Donor' : 'Add New Donor'}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Donor Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input-field"
-              placeholder="Enter donor name"
-              required
-            />
+    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content border-0 shadow">
+          <div className="modal-header border-0 pb-0">
+            <h5 className="modal-title fw-bold">
+              {donor ? 'Edit Donor' : 'Add New Donor'}
+            </h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary flex-1">
-              {donor ? 'Update' : 'Create'}
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label className="form-label fw-medium">Donor Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="form-control"
+                  placeholder="Enter donor name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer border-0 pt-0">
+              <button type="button" onClick={onClose} className="btn btn-outline-secondary">
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                {donor ? 'Update' : 'Create'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -104,74 +109,86 @@ function Donors() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Donors</h1>
-          <p className="text-gray-500 mt-1">Manage project donors and contributors</p>
+          <h1 className="h2 fw-bold text-dark mb-1">Donors</h1>
+          <p className="text-muted mb-0">Manage project donors and contributors</p>
         </div>
-        <button onClick={() => setModalOpen(true)} className="btn-primary flex items-center gap-2">
+        <button onClick={() => setModalOpen(true)} className="btn btn-primary d-flex align-items-center gap-2">
           <FiPlus /> Add Donor
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search donors..."
-          className="input-field pl-10"
-        />
+      <div className="mb-4">
+        <div className="input-group" style={{ maxWidth: '400px' }}>
+          <span className="input-group-text bg-white border-end-0">
+            <FiSearch className="text-muted" />
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search donors..."
+            className="form-control border-start-0"
+          />
+        </div>
       </div>
 
-      {/* Donors Grid */}
       {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <div className="d-flex justify-content-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="row g-4">
           {filteredDonors.map((donor) => (
-            <div key={donor.donorId} className="card flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <FiUsers className="text-primary-600" size={20} />
+            <div key={donor.donorId} className="col-12 col-md-6 col-lg-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center gap-3">
+                    <div 
+                      className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                      style={{ width: '48px', height: '48px', minWidth: '48px' }}
+                    >
+                      <FiUsers className="text-primary" size={20} />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 fw-semibold text-dark">{donor.name}</h6>
+                      <small className="text-muted">ID: {donor.donorId}</small>
+                    </div>
+                  </div>
+                  <div className="btn-group">
+                    <button
+                      onClick={() => setEditingDonor(donor)}
+                      className="btn btn-sm btn-outline-secondary"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this donor?')) {
+                          deleteMutation.mutate(donor.donorId);
+                        }
+                      }}
+                      className="btn btn-sm btn-outline-danger"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-800">{donor.name}</p>
-                  <p className="text-sm text-gray-500">ID: {donor.donorId}</p>
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setEditingDonor(donor)}
-                  className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
-                >
-                  <FiEdit2 size={18} />
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete this donor?')) {
-                      deleteMutation.mutate(donor.donorId);
-                    }
-                  }}
-                  className="p-2 hover:bg-red-100 rounded-lg text-red-600"
-                >
-                  <FiTrash2 size={18} />
-                </button>
               </div>
             </div>
           ))}
           {filteredDonors.length === 0 && (
-            <p className="text-center text-gray-500 col-span-full py-8">No donors found</p>
+            <div className="col-12">
+              <p className="text-center text-muted py-5">No donors found</p>
+            </div>
           )}
         </div>
       )}
 
-      {/* Modal */}
       {(modalOpen || editingDonor) && (
         <DonorModal
           donor={editingDonor}

@@ -1,16 +1,6 @@
-@import "tailwindcss";
-
 :root {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  --bs-primary: #0d6efd;
+  --bs-primary-rgb: 13, 110, 253;
 }
 
 * {
@@ -21,85 +11,119 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #f3f4f6;
+  background-color: #f8f9fa;
   min-height: 100vh;
 }
 
-.btn-primary {
-  background-color: var(--color-primary-600);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.rounded-4 {
+  border-radius: 1rem !important;
+}
+
+.rounded-3 {
+  border-radius: 0.5rem !important;
+}
+
+.fw-medium {
+  font-weight: 500 !important;
+}
+
+.bg-opacity-10 {
+  --bs-bg-opacity: 0.1 !important;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn {
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
-.btn-primary:hover {
-  background-color: var(--color-primary-700);
+.nav-link {
+  transition: all 0.2s ease;
 }
 
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: #d1d5db;
-}
-
-.btn-danger {
-  background-color: #dc2626;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.btn-danger:hover {
-  background-color: #b91c1c;
-}
-
-.input-field {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.input-field:focus {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+.nav-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .card {
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
 }
 
-.table-header {
-  background-color: #f9fafb;
-  text-align: left;
-  font-size: 0.75rem;
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table > tbody > tr {
+  transition: background-color 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.badge {
   font-weight: 500;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1.5rem;
+  padding: 0.35rem 0.65rem;
 }
 
-.table-cell {
-  padding: 1rem 1.5rem;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  color: #111827;
+.modal.show.d-block {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show.d-block .modal-dialog {
+  margin: 1rem;
+  max-height: calc(100vh - 2rem);
+}
+
+.modal.show.d-block .modal-content {
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.spinner-border-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-width: 0.15em;
+}
+
+.progress {
+  background-color: #e9ecef;
+  border-radius: 0.25rem;
+}
+
+.progress-bar {
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  aside {
+    position: fixed !important;
+    z-index: 1040;
+    height: 100vh;
+  }
+  
+  aside.sidebar-closed {
+    transform: translateX(-100%);
+  }
 }

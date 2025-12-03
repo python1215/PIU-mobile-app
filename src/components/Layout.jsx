@@ -32,45 +32,43 @@ function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div className="d-flex vh-100 bg-light">
       <aside 
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } bg-white shadow-lg transition-all duration-300 flex flex-col`}
+        className={`bg-white shadow-sm d-flex flex-column ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+        style={{ width: sidebarOpen ? '280px' : '80px', transition: 'width 0.3s ease' }}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
           {sidebarOpen && (
-            <h1 className="text-xl font-bold text-primary-600">PIU Manager</h1>
+            <h4 className="mb-0 text-primary fw-bold">PIU Manager</h4>
           )}
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="btn btn-light btn-sm rounded-circle"
+            style={{ width: '40px', height: '40px' }}
           >
-            {sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+            {sidebarOpen ? <FiX size={18} /> : <FiMenu size={18} />}
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+        <nav className="flex-grow-1 py-3">
+          <ul className="nav flex-column gap-1 px-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
               
               return (
-                <li key={item.path}>
+                <li key={item.path} className="nav-item">
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
                       isActive
-                        ? 'bg-primary-50 text-primary-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-primary bg-opacity-10 text-primary'
+                        : 'text-secondary'
                     }`}
+                    style={{ transition: 'all 0.2s' }}
                   >
                     <Icon size={20} />
-                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                    {sidebarOpen && <span className="fw-medium">{item.label}</span>}
                   </Link>
                 </li>
               );
@@ -78,34 +76,35 @@ function Layout() {
           </ul>
         </nav>
 
-        {/* User section */}
-        <div className="p-4 border-t border-gray-100">
-          <div className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'}`}>
-            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold">
+        <div className="p-3 border-top">
+          <div className={`d-flex align-items-center ${sidebarOpen ? 'gap-3' : 'justify-content-center'}`}>
+            <div 
+              className="rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold d-flex align-items-center justify-content-center"
+              style={{ width: '40px', height: '40px', minWidth: '40px' }}
+            >
               {user?.username?.[0]?.toUpperCase() || 'U'}
             </div>
             {sidebarOpen && (
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">{user?.username}</p>
-                <p className="text-sm text-gray-500">{user?.email}</p>
+              <div className="flex-grow-1 overflow-hidden">
+                <p className="mb-0 fw-medium text-dark text-truncate">{user?.username}</p>
+                <p className="mb-0 small text-muted text-truncate">{user?.email}</p>
               </div>
             )}
           </div>
           <button
             onClick={handleLogout}
-            className={`mt-4 flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors ${
-              sidebarOpen ? '' : 'justify-center'
-            } w-full px-4 py-2 rounded-lg hover:bg-gray-50`}
+            className={`btn btn-outline-danger w-100 mt-3 d-flex align-items-center gap-2 ${
+              sidebarOpen ? '' : 'justify-content-center'
+            }`}
           >
-            <FiLogOut size={20} />
+            <FiLogOut size={18} />
             {sidebarOpen && <span>Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
+      <main className="flex-grow-1 overflow-auto">
+        <div className="container-fluid p-4">
           <Outlet />
         </div>
       </main>
