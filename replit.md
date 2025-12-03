@@ -45,6 +45,11 @@ The application follows a microservices pattern with three main components:
 - **State**: Zustand with persist middleware for auth
 - **API Client**: Axios with interceptors for JWT tokens
 - **Pages**: 15 React pages for all modules
+- **Performance Optimizations**: 
+  - React.memo for component memoization (StatCard, ProjectRow, NavItem, etc.)
+  - useMemo for computed values and derived data (filtered lists, chart data, totals)
+  - useCallback for stable function references (event handlers, API calls)
+  - Zustand selectors for minimal auth store subscriptions
 
 #### Backend (Spring Boot)
 - **Framework**: Spring Boot 3.2 with Java 21
