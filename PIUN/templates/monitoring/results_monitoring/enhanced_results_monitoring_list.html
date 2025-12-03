@@ -283,7 +283,7 @@
                                 <th>Project Outcome</th>
                                 <th>Project Result</th>
                                 <th>Indicator Type</th>
-                                <th>Indicator Description</th>
+                                <th style="min-width: 250px;">Indicator Description</th>
                                 <th>Measurement Unit</th>
                                 <th>Collection Frequency</th>
                                 <th>Baseline</th>
@@ -316,7 +316,7 @@
                                     <td>
                                         <span class="badge bg-primary">{{ record.indicator_type.indicator_type }}</span>
                                     </td>
-                                    <td>{{ record.indicator_description|truncatechars:35 }}</td>
+                                    <td style="white-space: normal; word-wrap: break-word; max-width: 300px;">{{ record.indicator_description }}</td>
                                     <td>
                                         <span class="badge bg-info">{{ record.measurement_unit.unit }}</span>
                                     </td>
