@@ -569,10 +569,7 @@ function SystemSetup() {
   return (
     <div className="container-fluid">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div>
-          <h2 className="mb-1 fw-bold text-dark">System Setup</h2>
-          <p className="text-muted mb-0">Manage reference data and configuration settings</p>
-        </div>
+        <h2 className="mb-0 fw-bold text-dark">System Setup</h2>
         <button className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm" onClick={handleAdd}>
           <FiPlus className="me-2" /> Add New
         </button>
