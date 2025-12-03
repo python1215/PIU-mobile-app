@@ -593,10 +593,10 @@ def detail_results_monitoring(request, pk):
         
         # Check if this is a special indicator with reversed logic
         # For these indicators: lower achieved value is better (achieved < target = success)
-        indicator_desc = record.indicator_description or ""
+        indicator_desc = (record.indicator_description or "").lower()
         is_reversed_indicator = (
-            "Total System Collapses" in indicator_desc or 
-            "Nationwide transmission & distribution losses" in indicator_desc
+            "total system collapses" in indicator_desc or 
+            "nationwide transmission & distribution losses" in indicator_desc
         )
         
         # Safe calculations with None checks

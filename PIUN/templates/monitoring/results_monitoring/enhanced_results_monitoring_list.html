@@ -356,8 +356,8 @@
                                     </td>
                                     <td>
                                         {% if record.percentage_achieved_vs_baseline %}
-                                            {% with indicator_desc=record.indicator_description|default:"" %}
-                                                {% if "Total System Collapses" in indicator_desc or "Nationwide transmission & distribution losses" in indicator_desc %}
+                                            {% with indicator_desc=record.indicator_description|default:""|lower %}
+                                                {% if "total system collapses" in indicator_desc or "nationwide transmission & distribution losses" in indicator_desc %}
                                                     {# Reversed logic: lower is better for these indicators #}
                                                     {% if record.achieved_value and record.baseline_value and record.achieved_value <= record.baseline_value %}
                                                         <span class="badge bg-success">{{ record.percentage_achieved_vs_baseline|floatformat:1 }}%</span>
@@ -383,12 +383,10 @@
                                     </td>
                                     <td>
                                         {% if record.percentage_achieved_vs_end_target %}
-                                            {% with indicator_desc=record.indicator_description|default:"" %}
-                                                {% if "Total System Collapses" in indicator_desc or "Nationwide transmission & distribution losses" in indicator_desc %}
+                                            {% with indicator_desc=record.indicator_description|default:""|lower %}
+                                                {% if "total system collapses" in indicator_desc or "nationwide transmission & distribution losses" in indicator_desc %}
                                                     {# Reversed logic: lower is better - Achieved < Target = success #}
-                                                    {% if record.achieved_value and record.End_Target_Value and record.achieved_value < record.End_Target_Value %}
-                                                        <span class="badge bg-success">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}% - Achieved</span>
-                                                    {% elif record.achieved_value and record.End_Target_Value and record.achieved_value == record.End_Target_Value %}
+                                                    {% if record.achieved_value and record.End_Target_Value and record.achieved_value <= record.End_Target_Value %}
                                                         <span class="badge bg-success">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}% - Achieved</span>
                                                     {% else %}
                                                         <span class="badge bg-danger">{{ record.percentage_achieved_vs_end_target|floatformat:1 }}% - Not Achieved</span>
