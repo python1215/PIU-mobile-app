@@ -93,6 +93,7 @@ com/piun/piuproject/model/ImpactType.class
 com/piun/piuproject/model/GrievanceMonitoringLog.class
 com/piun/piuproject/config/WebConfig.class
 com/piun/piuproject/model/District.class
+com/piun/piuproject/repository/ContributorRepository.class
 com/piun/piuproject/model/Component.class
 com/piun/piuproject/security/JwtTokenProvider.class
 com/piun/piuproject/model/StakeholderEngagementType.class

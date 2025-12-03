@@ -4,16 +4,43 @@ import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiS
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-function ProjectModal({ project, onClose, onSave }) {
-  const [formData, setFormData] = useState(
-    project || {
+function ProjectModal({ project, onClose, onSave, donors, contributors }) {
+  const [formData, setFormData] = useState(() => {
+    if (project) {
+      return {
+        ...project,
+        donorIds: project.donors?.map(d => d.donorId) || [],
+        contributorIds: project.contributors?.map(c => c.id) || [],
+      };
+    }
+    return {
       projectId: '',
       project: '',
       funding: '',
       effectivenessDate: '',
       closureDate: '',
+      donorIds: [],
+      contributorIds: [],
+    };
+  });
+
+  const handleDonorToggle = (donorId) => {
+    const currentIds = formData.donorIds || [];
+    if (currentIds.includes(donorId)) {
+      setFormData({ ...formData, donorIds: currentIds.filter(id => id !== donorId) });
+    } else {
+      setFormData({ ...formData, donorIds: [...currentIds, donorId] });
     }
-  );
+  };
+
+  const handleContributorToggle = (contributorId) => {
+    const currentIds = formData.contributorIds || [];
+    if (currentIds.includes(contributorId)) {
+      setFormData({ ...formData, contributorIds: currentIds.filter(id => id !== contributorId) });
+    } else {
+      setFormData({ ...formData, contributorIds: [...currentIds, contributorId] });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,7 +49,7 @@ function ProjectModal({ project, onClose, onSave }) {
 
   return (
     <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-dialog modal-dialog-centered modal-lg">
         <div className="modal-content border-0 shadow">
           <div className="modal-header border-0 pb-0">
             <h5 className="modal-title fw-bold">
@@ -33,45 +60,45 @@ function ProjectModal({ project, onClose, onSave }) {
 
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label fw-medium">Project ID</label>
-                <input
-                  type="text"
-                  value={formData.projectId}
-                  onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-                  className="form-control"
-                  placeholder="e.g., PRJ-001"
-                  required
-                  disabled={!!project}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label fw-medium">Project Name</label>
-                <input
-                  type="text"
-                  value={formData.project}
-                  onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                  className="form-control"
-                  placeholder="Enter project name"
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label fw-medium">Funding Amount</label>
-                <input
-                  type="number"
-                  value={formData.funding}
-                  onChange={(e) => setFormData({ ...formData, funding: e.target.value })}
-                  className="form-control"
-                  placeholder="0.00"
-                  step="0.01"
-                />
-              </div>
-
               <div className="row g-3">
-                <div className="col-6">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">Project ID</label>
+                  <input
+                    type="text"
+                    value={formData.projectId}
+                    onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                    className="form-control"
+                    placeholder="e.g., PRJ-001"
+                    required
+                    disabled={!!project}
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">Project Name</label>
+                  <input
+                    type="text"
+                    value={formData.project}
+                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                    className="form-control"
+                    placeholder="Enter project name"
+                    required
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">Funding Amount</label>
+                  <input
+                    type="number"
+                    value={formData.funding}
+                    onChange={(e) => setFormData({ ...formData, funding: e.target.value })}
+                    className="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="col-md-4">
                   <label className="form-label fw-medium">Effectiveness Date</label>
                   <input
                     type="date"
@@ -80,7 +107,8 @@ function ProjectModal({ project, onClose, onSave }) {
                     className="form-control"
                   />
                 </div>
-                <div className="col-6">
+
+                <div className="col-md-4">
                   <label className="form-label fw-medium">Closure Date</label>
                   <input
                     type="date"
@@ -88,6 +116,56 @@ function ProjectModal({ project, onClose, onSave }) {
                     onChange={(e) => setFormData({ ...formData, closureDate: e.target.value })}
                     className="form-control"
                   />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">Donors (Multi-select)</label>
+                  <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                    {donors.length === 0 ? (
+                      <p className="text-muted small mb-0">No donors available. Add donors in System Setup.</p>
+                    ) : (
+                      donors.map(donor => (
+                        <div key={donor.donorId} className="form-check">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id={`donor-${donor.donorId}`}
+                            checked={(formData.donorIds || []).includes(donor.donorId)}
+                            onChange={() => handleDonorToggle(donor.donorId)}
+                          />
+                          <label className="form-check-label" htmlFor={`donor-${donor.donorId}`}>
+                            {donor.name}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <small className="text-muted">Selected: {(formData.donorIds || []).length}</small>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">Contributors (Multi-select)</label>
+                  <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                    {contributors.length === 0 ? (
+                      <p className="text-muted small mb-0">No contributors available. Add contributors in System Setup.</p>
+                    ) : (
+                      contributors.map(contributor => (
+                        <div key={contributor.id} className="form-check">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id={`contributor-${contributor.id}`}
+                            checked={(formData.contributorIds || []).includes(contributor.id)}
+                            onChange={() => handleContributorToggle(contributor.id)}
+                          />
+                          <label className="form-check-label" htmlFor={`contributor-${contributor.id}`}>
+                            {contributor.name}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <small className="text-muted">Selected: {(formData.contributorIds || []).length}</small>
                 </div>
               </div>
             </div>
@@ -115,6 +193,8 @@ function FinancialManagement() {
   const [activities, setActivities] = useState([]);
   const [pdos, setPdos] = useState([]);
   const [outcomes, setOutcomes] = useState([]);
+  const [donors, setDonors] = useState([]);
+  const [contributors, setContributors] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -124,7 +204,21 @@ function FinancialManagement() {
 
   useEffect(() => {
     loadProjects();
+    loadDonorsAndContributors();
   }, []);
+
+  const loadDonorsAndContributors = async () => {
+    try {
+      const [donorRes, contributorRes] = await Promise.all([
+        axios.get('/api/donors').catch(() => ({ data: [] })),
+        axios.get('/api/setup/contributors').catch(() => ({ data: [] }))
+      ]);
+      setDonors(donorRes.data);
+      setContributors(contributorRes.data);
+    } catch (error) {
+      console.error('Error loading donors/contributors:', error);
+    }
+  };
 
   useEffect(() => {
     if (selectedProject) {
@@ -449,6 +543,8 @@ function FinancialManagement() {
             setEditingProject(null);
           }}
           onSave={handleProjectSave}
+          donors={donors}
+          contributors={contributors}
         />
       )}
     </div>
