@@ -6,8 +6,10 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/User.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Subcomponent.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DonorRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SpaController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/UserRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/service/AuthService.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/WebConfig.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Donor.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Project.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtAuthenticationFilter.java

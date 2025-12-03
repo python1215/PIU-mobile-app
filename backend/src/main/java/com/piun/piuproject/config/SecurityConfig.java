@@ -44,6 +44,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/health").permitAll()
+                .requestMatchers("/", "/index.html", "/favicon.ico", "/vite.svg").permitAll()
+                .requestMatchers("/assets/**").permitAll()
+                .requestMatchers("/login", "/dashboard", "/projects/**", "/donors/**", "/issues/**", "/kpi/**", "/users/**", "/settings", "/profile").permitAll()
                 .anyRequest().authenticated()
             );
 

@@ -1,11 +1,13 @@
 com/piun/piuproject/repository/ComponentRepository.class
 com/piun/piuproject/model/Quarter.class
 com/piun/piuproject/controller/AuthController.class
+com/piun/piuproject/controller/SpaController.class
 com/piun/piuproject/model/IssueAction.class
 com/piun/piuproject/controller/DonorController.class
 com/piun/piuproject/model/Project.class
 com/piun/piuproject/model/User.class
 com/piun/piuproject/config/DatabaseConfig.class
+com/piun/piuproject/config/WebConfig.class
 com/piun/piuproject/repository/IssueActionRepository.class
 com/piun/piuproject/model/Component.class
 com/piun/piuproject/service/AuthService.class
@@ -24,6 +26,7 @@ com/piun/piuproject/controller/ProjectController.class
 com/piun/piuproject/repository/UserRepository.class
 com/piun/piuproject/model/KPIIndicator.class
 com/piun/piuproject/model/Currency.class
+com/piun/piuproject/config/WebConfig$1.class
 com/piun/piuproject/service/CustomUserDetailsService.class
 com/piun/piuproject/dto/AuthRequest.class
 com/piun/piuproject/repository/ProjectRepository.class
