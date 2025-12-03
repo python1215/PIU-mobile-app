@@ -116,7 +116,8 @@
                         <select name="project" id="filter_project" class="form-control form-control-sm"
                                 hx-get="{% url 'monitoring:load_filter_pdo' %}"
                                 hx-trigger="change"
-                                hx-target="#filter_pdo">
+                                hx-target="#filter_pdo"
+                                hx-include="[name='project']">
                             <option value="">All Projects</option>
                             {% for project in projects %}
                                 <option value="{{ project.pk }}" {% if request.GET.project == project.pk|stringformat:"s" %}selected{% endif %}>
@@ -167,7 +168,8 @@
                         <select name="pdo" id="filter_pdo" class="form-control form-control-sm"
                                 hx-get="{% url 'monitoring:load_filter_outcome' %}"
                                 hx-trigger="change"
-                                hx-target="#filter_project_outcome">
+                                hx-target="#filter_project_outcome"
+                                hx-include="[name='pdo']">
                             <option value="">All PDOs</option>
                             {% for pdo in pdos %}
                                 <option value="{{ pdo.pk }}" {% if request.GET.pdo == pdo.pk|stringformat:"s" %}selected{% endif %}>
@@ -184,7 +186,8 @@
                         <select name="project_outcome" id="filter_project_outcome" class="form-control form-control-sm"
                                 hx-get="{% url 'monitoring:load_filter_result' %}"
                                 hx-trigger="change"
-                                hx-target="#filter_project_result">
+                                hx-target="#filter_project_result"
+                                hx-include="[name='project_outcome']">
                             <option value="">All Outcomes</option>
                             {% for outcome in project_outcomes %}
                                 <option value="{{ outcome.pk }}" {% if request.GET.project_outcome == outcome.pk|stringformat:"s" %}selected{% endif %}>

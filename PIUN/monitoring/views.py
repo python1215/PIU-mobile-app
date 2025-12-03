@@ -220,9 +220,12 @@ def load_project_Result(request):
 @login_required
 def load_filter_pdo(request):
     """HTMX endpoint for filter: Load PDOs based on selected project"""
-    project_id = request.GET.get("filter_project")
+    # HTMX sends the value with the field's 'name' attribute, not 'id'
+    project_id = request.GET.get("project")
+    print(f"Filter PDO - Received project_id: {project_id}")
     if project_id:
         pdos = PDO.objects.filter(project__projectID=project_id).order_by('pdo_statement')
+        print(f"Filter PDO - Found {pdos.count()} PDOs for project {project_id}")
     else:
         pdos = PDO.objects.all().order_by('pdo_statement')
     return render(request, "monitoring/results_monitoring/filter_pdo_options.html", {"pdos": pdos})
@@ -231,9 +234,11 @@ def load_filter_pdo(request):
 @login_required
 def load_filter_outcome(request):
     """HTMX endpoint for filter: Load Outcomes based on selected PDO"""
-    pdo_id = request.GET.get("filter_pdo")
+    pdo_id = request.GET.get("pdo")
+    print(f"Filter Outcome - Received pdo_id: {pdo_id}")
     if pdo_id:
         outcomes = ProjectOutCome.objects.filter(pdo__id=pdo_id).order_by('project_outcome')
+        print(f"Filter Outcome - Found {outcomes.count()} outcomes for PDO {pdo_id}")
     else:
         outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
     return render(request, "monitoring/results_monitoring/filter_outcome_options.html", {"outcomes": outcomes})
@@ -242,9 +247,11 @@ def load_filter_outcome(request):
 @login_required
 def load_filter_result(request):
     """HTMX endpoint for filter: Load Results based on selected Outcome"""
-    outcome_id = request.GET.get("filter_project_outcome")
+    outcome_id = request.GET.get("project_outcome")
+    print(f"Filter Result - Received outcome_id: {outcome_id}")
     if outcome_id:
         results = ProjectResult.objects.filter(project_outcome__id=outcome_id).order_by('project_result')
+        print(f"Filter Result - Found {results.count()} results for outcome {outcome_id}")
     else:
         results = ProjectResult.objects.all().order_by('project_result')
     return render(request, "monitoring/results_monitoring/filter_result_options.html", {"results": results})
