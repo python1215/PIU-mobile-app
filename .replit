@@ -2,7 +2,7 @@ modules = ["python-3.11", "python3", "java-21", "nodejs-20", "java-21-openjdk", 
 
 [nix]
 channel = "stable-24_05"
-packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib", "maven", "jdk21"]
+packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -33,12 +33,24 @@ waitForPort = 5000
 integrations = ["python_log_in_with_replit==1.0.0", "python_database==1.0.0"]
 
 [[ports]]
+localPort = 3000
+externalPort = 3002
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
 localPort = 33761
 externalPort = 3001
+
+[[ports]]
+localPort = 35863
+externalPort = 3000
 
 [userenv]
 
