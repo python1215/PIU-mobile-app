@@ -21,8 +21,6 @@ import { useState } from 'react';
 
 const navItems = [
   { path: '/', icon: FiHome, label: 'Dashboard' },
-  { path: '/projects', icon: FiFolder, label: 'Projects' },
-  { path: '/donors', icon: FiUsers, label: 'Donors' },
   { path: '/setup', icon: FiSettings, label: 'System Setup' },
   { path: '/financial', icon: FiDollarSign, label: 'Financial Management' },
   { path: '/monitoring', icon: FiTrendingUp, label: 'Monitoring & Evaluation' },
