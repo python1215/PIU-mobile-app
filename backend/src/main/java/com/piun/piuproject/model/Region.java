@@ -1,5 +1,6 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Region {
     @Column(name = "description", length = 100)
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL)
     private List<District> districts;
 
