@@ -1,10 +1,13 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contributors")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Contributor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +21,7 @@ public class Contributor {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     public Contributor() {}

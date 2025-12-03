@@ -1,5 +1,7 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Donor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +30,6 @@ public class Donor {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "login_user_id", nullable = false)
+    @JsonIgnore
     private User loginUser;
 }

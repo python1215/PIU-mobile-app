@@ -21,6 +21,17 @@ public class IssueActionController {
     private final IssueActionRepository issueActionRepository;
     private final UserRepository userRepository;
 
+    private User getOrCreateDefaultUser() {
+        return userRepository.findByUsername("system")
+            .orElseGet(() -> {
+                User defaultUser = new User();
+                defaultUser.setUsername("system");
+                defaultUser.setEmail("system@piun.local");
+                defaultUser.setPasswordHash("disabled");
+                return userRepository.save(defaultUser);
+            });
+    }
+
     @GetMapping
     public ResponseEntity<List<IssueAction>> getAllIssues() {
         return ResponseEntity.ok(issueActionRepository.findAllByOrderByDateCreatedDesc());
@@ -46,8 +57,13 @@ public class IssueActionController {
     @PostMapping
     public ResponseEntity<IssueAction> createIssue(@RequestBody IssueAction issue,
                                                     @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        User user;
+        if (userDetails != null) {
+            user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseGet(this::getOrCreateDefaultUser);
+        } else {
+            user = getOrCreateDefaultUser();
+        }
         
         issue.setLoginUser(user);
         issue.setDateCreated(LocalDateTime.now());

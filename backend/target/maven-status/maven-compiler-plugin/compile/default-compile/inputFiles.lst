@@ -96,8 +96,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Activity.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/service/AuthService.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DocumentTypeRepository.java
-/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Donor.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PhysicalProgress.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Donor.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectMappingController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ProjectCategory.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PAPType.java

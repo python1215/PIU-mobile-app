@@ -21,6 +21,17 @@ public class DonorController {
     private final DonorRepository donorRepository;
     private final UserRepository userRepository;
 
+    private User getOrCreateDefaultUser() {
+        return userRepository.findByUsername("system")
+            .orElseGet(() -> {
+                User defaultUser = new User();
+                defaultUser.setUsername("system");
+                defaultUser.setEmail("system@piun.local");
+                defaultUser.setPasswordHash("disabled");
+                return userRepository.save(defaultUser);
+            });
+    }
+
     @GetMapping
     public ResponseEntity<List<Donor>> getAllDonors() {
         return ResponseEntity.ok(donorRepository.findAllByOrderByDateCreatedDesc());
@@ -36,8 +47,13 @@ public class DonorController {
     @PostMapping
     public ResponseEntity<Donor> createDonor(@RequestBody Donor donor,
                                               @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        User user;
+        if (userDetails != null) {
+            user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseGet(this::getOrCreateDefaultUser);
+        } else {
+            user = getOrCreateDefaultUser();
+        }
         
         donor.setLoginUser(user);
         donor.setDateCreated(LocalDateTime.now());
