@@ -141,6 +141,8 @@ function FinancialManagement() {
       }
     } catch (error) {
       console.error('Error loading projects:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
