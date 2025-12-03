@@ -1,11 +1,13 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,10 +19,12 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Project {
     @Id
     @Column(name = "project_id", length = 15)
+    @EqualsAndHashCode.Include
     private String projectId;
 
     @NotBlank
@@ -41,7 +45,6 @@ public class Project {
         joinColumns = @JoinColumn(name = "project_id"),
         inverseJoinColumns = @JoinColumn(name = "donor_id")
     )
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "loginUser"})
     private Set<Donor> donors = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -50,7 +53,6 @@ public class Project {
         joinColumns = @JoinColumn(name = "project_id"),
         inverseJoinColumns = @JoinColumn(name = "contributor_id")
     )
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
     private Set<Contributor> contributors = new HashSet<>();
 
     @Column(name = "effectiveness_date")
@@ -67,6 +69,6 @@ public class Project {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "login_user_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "passwordHash"})
+    @JsonIgnore
     private User loginUser;
 }

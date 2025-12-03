@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,11 +15,13 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Donor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "donor_id")
+    @EqualsAndHashCode.Include
     private Long donorId;
 
     @NotBlank
