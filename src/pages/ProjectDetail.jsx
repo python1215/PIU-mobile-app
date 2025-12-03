@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { projectAPI, issueAPI } from '../services/api';
-import { FiArrowLeft, FiCalendar, FiDollarSign, FiAlertCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiDollarSign, FiAlertCircle, FiUsers, FiUserCheck } from 'react-icons/fi';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -108,6 +108,54 @@ function ProjectDetail() {
               <h4 className="fw-bold text-dark mb-0">
                 {project.closureDate || 'Not Set'}
               </h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-md-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <div className="d-flex align-items-center gap-2 text-muted mb-3">
+                <FiUsers />
+                <span className="fw-medium">Donors</span>
+                <span className="badge bg-primary ms-auto">{project.donors?.length || 0}</span>
+              </div>
+              {project.donors && project.donors.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {project.donors.map((donor) => (
+                    <span key={donor.donorId} className="badge bg-light text-dark border px-3 py-2">
+                      {donor.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted mb-0">No donors assigned</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-md-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <div className="d-flex align-items-center gap-2 text-muted mb-3">
+                <FiUserCheck />
+                <span className="fw-medium">Contributors</span>
+                <span className="badge bg-success ms-auto">{project.contributors?.length || 0}</span>
+              </div>
+              {project.contributors && project.contributors.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {project.contributors.map((contributor) => (
+                    <span key={contributor.id} className="badge bg-light text-dark border px-3 py-2">
+                      {contributor.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted mb-0">No contributors assigned</p>
+              )}
             </div>
           </div>
         </div>
