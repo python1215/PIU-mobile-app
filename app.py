@@ -6,13 +6,14 @@ import subprocess
 import threading
 import time
 import requests
-from flask import Flask, request, Response, send_from_directory
+from flask import Flask, request, Response, send_from_directory, send_file
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-app = Flask(__name__, static_folder='dist', static_url_path='')
+app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dist')
 BACKEND_URL = "http://localhost:8080"
 JAR_PATH = "/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
 backend_ready = False
@@ -21,7 +22,7 @@ def start_backend():
     global backend_ready
     
     try:
-        requests.get(f"{BACKEND_URL}/api/auth/test", timeout=2)
+        requests.get(BACKEND_URL, timeout=2)
         backend_ready = True
         print("[SPRING BOOT] Already running!")
         return
@@ -67,7 +68,7 @@ thread.start()
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     """Serve static assets directly from dist/assets"""
-    return send_from_directory('dist/assets', filename)
+    return send_from_directory(os.path.join(DIST_DIR, 'assets'), filename)
 
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy_api(path):
@@ -109,10 +110,15 @@ def health():
     """Health check endpoint"""
     return {"status": "healthy", "backend_ready": backend_ready}
 
-@app.route('/', defaults={'path': ''})
+@app.route('/')
+def serve_index():
+    """Serve index.html for root"""
+    return send_file(os.path.join(DIST_DIR, 'index.html'))
+
 @app.route('/<path:path>')
 def serve_spa(path):
-    """Serve React SPA for all other routes"""
-    if path and os.path.exists(os.path.join('dist', path)):
-        return send_from_directory('dist', path)
-    return send_from_directory('dist', 'index.html')
+    """Serve React SPA - check for static file, otherwise return index.html"""
+    file_path = os.path.join(DIST_DIR, path)
+    if os.path.isfile(file_path):
+        return send_from_directory(DIST_DIR, path)
+    return send_file(os.path.join(DIST_DIR, 'index.html'))
