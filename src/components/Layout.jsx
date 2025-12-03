@@ -8,7 +8,14 @@ import {
   FiBarChart2, 
   FiLogOut,
   FiMenu,
-  FiX
+  FiX,
+  FiSettings,
+  FiDollarSign,
+  FiTrendingUp,
+  FiFileText,
+  FiShield,
+  FiFile,
+  FiMapPin
 } from 'react-icons/fi';
 import { useState } from 'react';
 
@@ -16,6 +23,13 @@ const navItems = [
   { path: '/', icon: FiHome, label: 'Dashboard' },
   { path: '/projects', icon: FiFolder, label: 'Projects' },
   { path: '/donors', icon: FiUsers, label: 'Donors' },
+  { path: '/setup', icon: FiSettings, label: 'System Setup' },
+  { path: '/financial', icon: FiDollarSign, label: 'Financial Management' },
+  { path: '/monitoring', icon: FiTrendingUp, label: 'Monitoring & Evaluation' },
+  { path: '/project-actions', icon: FiFileText, label: 'Project Actions' },
+  { path: '/social-environmental', icon: FiShield, label: 'Social & Environmental' },
+  { path: '/documentation', icon: FiFile, label: 'Documentation' },
+  { path: '/map', icon: FiMapPin, label: 'Project Map' },
   { path: '/issues', icon: FiAlertCircle, label: 'Issues & Actions' },
   { path: '/kpi', icon: FiBarChart2, label: 'KPI Monitoring' },
 ];
@@ -35,7 +49,7 @@ function Layout() {
     <div className="d-flex vh-100 bg-light">
       <aside 
         className={`bg-white shadow-sm d-flex flex-column ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-        style={{ width: sidebarOpen ? '280px' : '80px', transition: 'width 0.3s ease' }}
+        style={{ width: sidebarOpen ? '280px' : '80px', transition: 'width 0.3s ease', minHeight: '100vh' }}
       >
         <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
           {sidebarOpen && (
@@ -50,7 +64,7 @@ function Layout() {
           </button>
         </div>
 
-        <nav className="flex-grow-1 py-3">
+        <nav className="flex-grow-1 py-3 overflow-auto">
           <ul className="nav flex-column gap-1 px-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -65,7 +79,7 @@ function Layout() {
                         ? 'bg-primary bg-opacity-10 text-primary'
                         : 'text-secondary'
                     }`}
-                    style={{ transition: 'all 0.2s' }}
+                    style={{ transition: 'all 0.2s', whiteSpace: 'nowrap' }}
                   >
                     <Icon size={20} />
                     {sidebarOpen && <span className="fw-medium">{item.label}</span>}

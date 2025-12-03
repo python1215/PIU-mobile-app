@@ -9,6 +9,13 @@ import ProjectDetail from './pages/ProjectDetail';
 import Donors from './pages/Donors';
 import Issues from './pages/Issues';
 import KPIMonitoring from './pages/KPIMonitoring';
+import SystemSetup from './pages/SystemSetup';
+import FinancialManagement from './pages/FinancialManagement';
+import MonitoringEvaluation from './pages/MonitoringEvaluation';
+import ProjectActions from './pages/ProjectActions';
+import SocialEnvironmental from './pages/SocialEnvironmental';
+import Documentation from './pages/Documentation';
+import ProjectMap from './pages/ProjectMap';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -34,6 +41,13 @@ function App() {
         <Route path="donors" element={<Donors />} />
         <Route path="issues" element={<Issues />} />
         <Route path="kpi" element={<KPIMonitoring />} />
+        <Route path="setup" element={<SystemSetup />} />
+        <Route path="financial" element={<FinancialManagement />} />
+        <Route path="monitoring" element={<MonitoringEvaluation />} />
+        <Route path="project-actions" element={<ProjectActions />} />
+        <Route path="social-environmental" element={<SocialEnvironmental />} />
+        <Route path="documentation" element={<Documentation />} />
+        <Route path="map" element={<ProjectMap />} />
       </Route>
     </Routes>
   );
