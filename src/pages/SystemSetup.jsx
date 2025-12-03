@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave }) {
@@ -125,6 +125,8 @@ function SystemSetup() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [search, setSearch] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const tabConfig = useMemo(() => ({
     donors: { endpoint: '/api/donors', idField: 'donorId', nameField: 'name', label: 'Donors', cardView: true, bgClass: 'bg-primary',
@@ -217,37 +219,67 @@ function SystemSetup() {
       fields: [{ name: 'projectResult', label: 'Project Result' }] },
   }), []);
 
-  const tabs = useMemo(() => [
-    { id: 'donors', label: 'Donors' },
-    { id: 'contributors', label: 'Contributors' },
-    { id: 'regions', label: 'Regions' },
-    { id: 'lgas', label: 'LGAs' },
-    { id: 'districts', label: 'Districts' },
-    { id: 'wards', label: 'Wards' },
-    { id: 'settlements', label: 'Settlements' },
-    { id: 'years', label: 'Years' },
-    { id: 'quarters', label: 'Quarters' },
-    { id: 'currencies', label: 'Currencies' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'documentTypes', label: 'Doc Types' },
-    { id: 'monitoringTypes', label: 'Monitoring Types' },
-    { id: 'papTypes', label: 'PAP Types' },
-    { id: 'papCategories', label: 'PAP Categories' },
-    { id: 'impactTypes', label: 'Impact Types' },
-    { id: 'settlementNatures', label: 'Settlement Nature' },
-    { id: 'decisionOutcomes', label: 'Decision Outcomes' },
-    { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' },
-    { id: 'accessTypes', label: 'Access Types' },
-    { id: 'dataFrequencies', label: 'Data Frequency' },
-    { id: 'investmentTypes', label: 'Investment Types' },
-    { id: 'indicatorTypes', label: 'Indicator Types' },
-    { id: 'physicalProgress', label: 'Physical Progress' },
-    { id: 'measurementUnits', label: 'Measurement Units' },
-    { id: 'vulnerabilityCategories', label: 'Vulnerability' },
-    { id: 'kpiContracts', label: 'KPI Contracts' },
-    { id: 'pdos', label: 'PDO Setup' },
-    { id: 'outcomes', label: 'Outcomes' },
-    { id: 'results', label: 'Results' },
+  const menuGroups = useMemo(() => [
+    { 
+      label: 'Stakeholders', 
+      items: [
+        { id: 'donors', label: 'Donors' },
+        { id: 'contributors', label: 'Contributors' },
+      ]
+    },
+    { 
+      label: 'Geography', 
+      items: [
+        { id: 'regions', label: 'Regions' },
+        { id: 'lgas', label: 'LGAs' },
+        { id: 'districts', label: 'Districts' },
+        { id: 'wards', label: 'Wards' },
+        { id: 'settlements', label: 'Settlements' },
+      ]
+    },
+    { 
+      label: 'Time & Finance', 
+      items: [
+        { id: 'years', label: 'Years' },
+        { id: 'quarters', label: 'Quarters' },
+        { id: 'currencies', label: 'Currencies' },
+        { id: 'investmentTypes', label: 'Investment Types' },
+      ]
+    },
+    { 
+      label: 'Project Setup', 
+      items: [
+        { id: 'categories', label: 'Categories' },
+        { id: 'documentTypes', label: 'Document Types' },
+        { id: 'monitoringTypes', label: 'Monitoring Types' },
+        { id: 'indicatorTypes', label: 'Indicator Types' },
+        { id: 'measurementUnits', label: 'Measurement Units' },
+        { id: 'physicalProgress', label: 'Physical Progress' },
+        { id: 'dataFrequencies', label: 'Data Frequency' },
+      ]
+    },
+    { 
+      label: 'Social & PAP', 
+      items: [
+        { id: 'papTypes', label: 'PAP Types' },
+        { id: 'papCategories', label: 'PAP Categories' },
+        { id: 'impactTypes', label: 'Impact Types' },
+        { id: 'settlementNatures', label: 'Settlement Nature' },
+        { id: 'vulnerabilityCategories', label: 'Vulnerability' },
+        { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' },
+        { id: 'accessTypes', label: 'Access Types' },
+        { id: 'decisionOutcomes', label: 'Decision Outcomes' },
+      ]
+    },
+    { 
+      label: 'Results Framework', 
+      items: [
+        { id: 'pdos', label: 'PDO Setup' },
+        { id: 'outcomes', label: 'Outcomes' },
+        { id: 'results', label: 'Results' },
+        { id: 'kpiContracts', label: 'KPI Contracts' },
+      ]
+    },
   ], []);
 
   const loadData = useCallback(async () => {
@@ -334,11 +366,26 @@ function SystemSetup() {
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
     setSearch('');
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
   }, []);
 
   const handleSearchChange = useCallback((e) => {
     setSearch(e.target.value);
   }, []);
+
+  const toggleDropdown = useCallback((groupLabel) => {
+    setActiveDropdown(prev => prev === groupLabel ? null : groupLabel);
+  }, []);
+
+  const getActiveGroupLabel = useMemo(() => {
+    for (const group of menuGroups) {
+      if (group.items.some(item => item.id === activeTab)) {
+        return group.label;
+      }
+    }
+    return '';
+  }, [menuGroups, activeTab]);
 
   if (loading) {
     return (
@@ -353,32 +400,63 @@ function SystemSetup() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>System Setup</h2>
+        <h2 className="mb-0">System Setup</h2>
         <button className="btn btn-primary" onClick={handleAdd}>
           <FiPlus className="me-2" /> Add New
         </button>
       </div>
 
-      <div className="mb-4" style={{ overflowX: 'auto' }}>
-        <ul className="nav nav-tabs flex-nowrap" style={{ whiteSpace: 'nowrap' }}>
-          {tabs.map(tab => (
-            <li className="nav-item" key={tab.id}>
-              <button
-                className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => handleTabChange(tab.id)}
-                style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
-              >
-                {tab.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <nav className="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4 p-0">
+        <div className="container-fluid p-0">
+          <button 
+            className="navbar-toggler w-100 d-lg-none border-0 py-3 px-4 d-flex justify-content-between align-items-center"
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span className="fw-medium text-primary">
+              {getActiveGroupLabel} / {currentConfig.label}
+            </span>
+            <FiMenu size={20} />
+          </button>
+          
+          <div className={`collapse navbar-collapse ${mobileMenuOpen ? 'show' : ''}`}>
+            <ul className="navbar-nav w-100 flex-wrap">
+              {menuGroups.map((group) => (
+                <li className="nav-item dropdown" key={group.label}>
+                  <button
+                    className={`nav-link dropdown-toggle px-3 py-3 border-0 bg-transparent ${
+                      group.items.some(item => item.id === activeTab) ? 'text-primary fw-semibold' : 'text-dark'
+                    }`}
+                    onClick={() => toggleDropdown(group.label)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {group.label}
+                    <FiChevronDown size={14} className="ms-1" />
+                  </button>
+                  <ul className={`dropdown-menu shadow border-0 ${activeDropdown === group.label ? 'show' : ''}`}>
+                    {group.items.map((item) => (
+                      <li key={item.id}>
+                        <button
+                          className={`dropdown-item py-2 ${activeTab === item.id ? 'active bg-primary text-white' : ''}`}
+                          onClick={() => handleTabChange(item.id)}
+                        >
+                          {item.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </nav>
 
-      <div className="card">
-        <div className="card-body">
-          <div className="mb-4">
-            <div className="input-group" style={{ maxWidth: '400px' }}>
+      <div className="card border-0 shadow-sm">
+        <div className="card-header bg-white border-bottom py-3">
+          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <h5 className="mb-0 text-primary fw-semibold">{currentConfig.label}</h5>
+            <div className="input-group" style={{ maxWidth: '300px' }}>
               <span className="input-group-text bg-white border-end-0">
                 <FiSearch className="text-muted" />
               </span>
@@ -386,12 +464,13 @@ function SystemSetup() {
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
-                placeholder={`Search ${currentConfig.label}...`}
+                placeholder="Search..."
                 className="form-control border-start-0"
               />
             </div>
           </div>
-
+        </div>
+        <div className="card-body">
           {currentConfig.cardView ? (
             <CardGrid
               data={filteredData}
