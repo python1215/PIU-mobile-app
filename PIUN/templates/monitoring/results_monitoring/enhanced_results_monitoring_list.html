@@ -112,8 +112,11 @@
             <form method="get" action="{% url 'monitoring:enhanced-results-monitoring-list' %}">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label for="project" class="form-label small fw-bold">Project</label>
-                        <select name="project" id="project" class="form-control form-control-sm">
+                        <label for="filter_project" class="form-label small fw-bold">Project</label>
+                        <select name="project" id="filter_project" class="form-control form-control-sm"
+                                hx-get="{% url 'monitoring:load_filter_pdo' %}"
+                                hx-trigger="change"
+                                hx-target="#filter_pdo">
                             <option value="">All Projects</option>
                             {% for project in projects %}
                                 <option value="{{ project.pk }}" {% if request.GET.project == project.pk|stringformat:"s" %}selected{% endif %}>
@@ -160,8 +163,11 @@
                     </div>
                     
                     <div class="col-md-3">
-                        <label for="pdo" class="form-label small fw-bold">PDO</label>
-                        <select name="pdo" id="pdo" class="form-control form-control-sm">
+                        <label for="filter_pdo" class="form-label small fw-bold">PDO</label>
+                        <select name="pdo" id="filter_pdo" class="form-control form-control-sm"
+                                hx-get="{% url 'monitoring:load_filter_outcome' %}"
+                                hx-trigger="change"
+                                hx-target="#filter_project_outcome">
                             <option value="">All PDOs</option>
                             {% for pdo in pdos %}
                                 <option value="{{ pdo.pk }}" {% if request.GET.pdo == pdo.pk|stringformat:"s" %}selected{% endif %}>
@@ -174,8 +180,11 @@
                 
                 <div class="row g-3 mt-2">
                     <div class="col-md-3">
-                        <label for="project_outcome" class="form-label small fw-bold">Project Outcome</label>
-                        <select name="project_outcome" id="project_outcome" class="form-control form-control-sm">
+                        <label for="filter_project_outcome" class="form-label small fw-bold">Project Outcome</label>
+                        <select name="project_outcome" id="filter_project_outcome" class="form-control form-control-sm"
+                                hx-get="{% url 'monitoring:load_filter_result' %}"
+                                hx-trigger="change"
+                                hx-target="#filter_project_result">
                             <option value="">All Outcomes</option>
                             {% for outcome in project_outcomes %}
                                 <option value="{{ outcome.pk }}" {% if request.GET.project_outcome == outcome.pk|stringformat:"s" %}selected{% endif %}>
@@ -186,8 +195,8 @@
                     </div>
                     
                     <div class="col-md-3">
-                        <label for="project_result" class="form-label small fw-bold">Project Result</label>
-                        <select name="project_result" id="project_result" class="form-control form-control-sm">
+                        <label for="filter_project_result" class="form-label small fw-bold">Project Result</label>
+                        <select name="project_result" id="filter_project_result" class="form-control form-control-sm">
                             <option value="">All Results</option>
                             {% for result in project_results %}
                                 <option value="{{ result.pk }}" {% if request.GET.project_result == result.pk|stringformat:"s" %}selected{% endif %}>

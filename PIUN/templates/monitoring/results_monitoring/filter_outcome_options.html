@@ -1,0 +1,4 @@
+<option value="">All Outcomes</option>
+{% for outcome in outcomes %}
+    <option value="{{ outcome.pk }}">{{ outcome.project_outcome|truncatechars:30 }}</option>
+{% endfor %}

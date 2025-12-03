@@ -215,6 +215,41 @@ def load_project_Result(request):
     print("projectResults:", projectResults)
     return render(request, "monitoring/result_oriented_monitoring/get_projectResult.html", {"projectResults": projectResults})
 
+
+# ====== Filter-specific HTMX views for Enhanced Results Monitoring List ======
+@login_required
+def load_filter_pdo(request):
+    """HTMX endpoint for filter: Load PDOs based on selected project"""
+    project_id = request.GET.get("filter_project")
+    if project_id:
+        pdos = PDO.objects.filter(project__projectID=project_id).order_by('pdo_statement')
+    else:
+        pdos = PDO.objects.all().order_by('pdo_statement')
+    return render(request, "monitoring/results_monitoring/filter_pdo_options.html", {"pdos": pdos})
+
+
+@login_required
+def load_filter_outcome(request):
+    """HTMX endpoint for filter: Load Outcomes based on selected PDO"""
+    pdo_id = request.GET.get("filter_pdo")
+    if pdo_id:
+        outcomes = ProjectOutCome.objects.filter(pdo__id=pdo_id).order_by('project_outcome')
+    else:
+        outcomes = ProjectOutCome.objects.all().order_by('project_outcome')
+    return render(request, "monitoring/results_monitoring/filter_outcome_options.html", {"outcomes": outcomes})
+
+
+@login_required
+def load_filter_result(request):
+    """HTMX endpoint for filter: Load Results based on selected Outcome"""
+    outcome_id = request.GET.get("filter_project_outcome")
+    if outcome_id:
+        results = ProjectResult.objects.filter(project_outcome__id=outcome_id).order_by('project_result')
+    else:
+        results = ProjectResult.objects.all().order_by('project_result')
+    return render(request, "monitoring/results_monitoring/filter_result_options.html", {"results": results})
+
+
 @login_required
 def load_indicator_type(request):
     # Get the project_result_id from the GET request

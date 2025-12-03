@@ -1,0 +1,4 @@
+<option value="">All Results</option>
+{% for result in results %}
+    <option value="{{ result.pk }}">{{ result.project_result|truncatechars:30 }}</option>
+{% endfor %}

@@ -14,6 +14,11 @@ urlpatterns = [
     path('load_project_Outcome/', views.load_project_Outcome, name='load_project_Outcome'),
     path('load_project_Result/', views.load_project_Result, name='load_project_Result'),
     path('load_indicator_type/', views.load_indicator_type, name='load_indicator_type'),
+    
+    # HTMX Filter Cascade Views for Enhanced Results Monitoring List
+    path('load-filter-pdo/', views.load_filter_pdo, name='load_filter_pdo'),
+    path('load-filter-outcome/', views.load_filter_outcome, name='load_filter_outcome'),
+    path('load-filter-result/', views.load_filter_result, name='load_filter_result'),
 
     # Enhanced CRUD Views
     path('add-indicator-description/', views.add_indicator_description, name='add-indicator-description'),
