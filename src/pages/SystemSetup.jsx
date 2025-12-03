@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData }) {
@@ -11,6 +11,15 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
         if (f.type === 'select' && f.relationField && item[f.relationField]) {
           initial[f.name] = item[f.relationField][f.valueField] || '';
         }
+        if (f.type === 'cascadeParent' && f.childField) {
+          const childField = fields.find(cf => cf.name === f.childField);
+          if (childField && item[childField.relationField]) {
+            const childItem = item[childField.relationField];
+            if (childItem && childItem[f.parentRelation]) {
+              initial[f.name] = childItem[f.parentRelation][f.valueField] || '';
+            }
+          }
+        }
       });
       return initial;
     }
@@ -19,71 +28,112 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
     return initial;
   });
 
+  const getFilteredOptions = useCallback((field) => {
+    if (!field.filterBy) return relatedData[field.dataKey] || [];
+    const parentValue = formData[field.filterBy];
+    if (!parentValue) return relatedData[field.dataKey] || [];
+    return (relatedData[field.dataKey] || []).filter(opt => {
+      const parentObj = opt[field.filterField];
+      return parentObj && parentObj[field.filterValue] === parentValue;
+    });
+  }, [formData, relatedData]);
+
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
     const submitData = { ...formData };
     fields.forEach(f => {
       if (f.type === 'select' && f.relationField) {
-        const selectedItem = relatedData[f.dataKey]?.find(
+        const options = getFilteredOptions(f);
+        const selectedItem = options.find(
           d => String(d[f.valueField]) === String(formData[f.name])
         );
         if (selectedItem) {
           submitData[f.relationField] = selectedItem;
         }
       }
+      if (f.type === 'cascadeParent') {
+        delete submitData[f.name];
+      }
     });
     onSave(submitData);
-  }, [formData, onSave, fields, relatedData]);
+  }, [formData, onSave, fields, getFilteredOptions]);
 
-  const handleChange = useCallback((name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = useCallback((name, value, field) => {
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      if (field && field.clearsField) {
+        newData[field.clearsField] = '';
+      }
+      return newData;
+    });
   }, []);
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content border-0 shadow">
-          <div className="modal-header border-0 pb-0">
-            <h5 className="modal-title fw-bold">{item ? `Edit ${title}` : `Add New ${title}`}</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
+    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div className="modal-dialog modal-dialog-centered modal-md" onClick={e => e.stopPropagation()}>
+        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+          <div className="modal-header bg-primary text-white border-0 py-3 px-4">
+            <h5 className="modal-title fw-semibold">
+              {item ? `Edit ${title}` : `Add New ${title}`}
+            </h5>
+            <button type="button" className="btn btn-link text-white p-0" onClick={onClose}>
+              <FiX size={24} />
+            </button>
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="modal-body">
-              {fields.map(field => (
-                <div className="mb-3" key={field.name}>
-                  <label className="form-label fw-medium">{field.label}</label>
-                  {field.type === 'select' ? (
-                    <select
-                      value={formData[field.name] || ''}
-                      onChange={(e) => handleChange(field.name, e.target.value)}
-                      className="form-select"
-                      required={field.required !== false}
-                      disabled={field.disableOnEdit && !!item}
-                    >
-                      <option value="">-- Select {field.label} --</option>
-                      {(relatedData[field.dataKey] || []).map(opt => (
-                        <option key={opt[field.valueField]} value={opt[field.valueField]}>
-                          {opt[field.displayField]}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={field.type || 'text'}
-                      value={formData[field.name] || ''}
-                      onChange={(e) => handleChange(field.name, e.target.value)}
-                      className="form-control"
-                      placeholder={field.placeholder || ''}
-                      required={field.required !== false}
-                      disabled={field.disableOnEdit && !!item}
-                    />
-                  )}
-                </div>
-              ))}
+            <div className="modal-body p-4">
+              <div className="row g-3">
+                {fields.map(field => (
+                  <div className={`col-12 ${field.halfWidth ? 'col-md-6' : ''}`} key={field.name}>
+                    <label className="form-label fw-semibold text-dark mb-2">
+                      {field.label}
+                      {field.required !== false && <span className="text-danger ms-1">*</span>}
+                    </label>
+                    {field.type === 'select' || field.type === 'cascadeParent' ? (
+                      <select
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value, field)}
+                        className="form-select form-select-lg border-2"
+                        required={field.required !== false && field.type !== 'cascadeParent'}
+                        disabled={field.disableOnEdit && !!item}
+                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
+                      >
+                        <option value="">-- Select {field.label} --</option>
+                        {(field.type === 'cascadeParent' 
+                          ? (relatedData[field.dataKey] || [])
+                          : getFilteredOptions(field)
+                        ).map(opt => (
+                          <option key={opt[field.valueField]} value={opt[field.valueField]}>
+                            {opt[field.displayField]}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={field.type || 'text'}
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value)}
+                        className="form-control form-control-lg border-2"
+                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                        required={field.required !== false}
+                        disabled={field.disableOnEdit && !!item}
+                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
+                      />
+                    )}
+                    {field.helpText && (
+                      <small className="text-muted mt-1 d-block">{field.helpText}</small>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="modal-footer border-0 pt-0">
-              <button type="button" onClick={onClose} className="btn btn-outline-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary">{item ? 'Update' : 'Create'}</button>
+            <div className="modal-footer bg-light border-0 py-3 px-4">
+              <button type="button" onClick={onClose} className="btn btn-outline-secondary btn-lg px-4 rounded-pill">
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary btn-lg px-4 rounded-pill">
+                {item ? 'Update' : 'Create'}
+              </button>
             </div>
           </form>
         </div>
@@ -94,7 +144,15 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
 
 const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idField }) {
   if (data.length === 0) {
-    return <p className="text-center text-muted py-5">No data available</p>;
+    return (
+      <div className="text-center py-5">
+        <div className="text-muted mb-3">
+          <FiUsers size={48} className="opacity-25" />
+        </div>
+        <p className="text-muted mb-0">No data available</p>
+        <small className="text-muted">Click "Add New" to create your first entry</small>
+      </div>
+    );
   }
 
   const getCellValue = (item, col) => {
@@ -106,20 +164,38 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
 
   return (
     <div className="table-responsive">
-      <table className="table table-striped table-hover">
-        <thead className="table-dark">
+      <table className="table table-hover align-middle mb-0">
+        <thead className="bg-light">
           <tr>
-            {columns.map(col => <th key={col.key + (col.nested || '')}>{col.label}</th>)}
-            <th>Actions</th>
+            {columns.map(col => (
+              <th key={col.key + (col.nested || '')} className="fw-semibold text-dark border-0 py-3">
+                {col.label}
+              </th>
+            ))}
+            <th className="fw-semibold text-dark border-0 py-3" style={{ width: '120px' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={item[idField] || index}>
-              {columns.map(col => <td key={col.key + (col.nested || '')}>{getCellValue(item, col)}</td>)}
-              <td>
-                {onEdit && <button onClick={() => onEdit(item)} className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>}
-                {onDelete && <button onClick={() => onDelete(item)} className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>}
+            <tr key={item[idField] || index} className="border-bottom">
+              {columns.map(col => (
+                <td key={col.key + (col.nested || '')} className="py-3">
+                  {getCellValue(item, col)}
+                </td>
+              ))}
+              <td className="py-3">
+                <div className="btn-group btn-group-sm">
+                  {onEdit && (
+                    <button onClick={() => onEdit(item)} className="btn btn-outline-primary border-0">
+                      <FiEdit2 size={16} />
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button onClick={() => onDelete(item)} className="btn btn-outline-danger border-0">
+                      <FiTrash2 size={16} />
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
@@ -131,27 +207,43 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
 
 const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDelete, bgClass = 'bg-primary' }) {
   if (data.length === 0) {
-    return <p className="text-center text-muted py-5">No data available</p>;
+    return (
+      <div className="text-center py-5">
+        <div className="text-muted mb-3">
+          <FiUsers size={48} className="opacity-25" />
+        </div>
+        <p className="text-muted mb-0">No data available</p>
+        <small className="text-muted">Click "Add New" to create your first entry</small>
+      </div>
+    );
   }
 
   return (
     <div className="row g-4">
       {data.map((item) => (
         <div key={item[idField]} className="col-12 col-md-6 col-lg-4">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body d-flex align-items-center justify-content-between">
+          <div className="card border-0 shadow-sm h-100 rounded-3">
+            <div className="card-body d-flex align-items-center justify-content-between p-3">
               <div className="d-flex align-items-center gap-3">
-                <div className={`rounded-circle ${bgClass} bg-opacity-10 d-flex align-items-center justify-content-center`} style={{ width: '48px', height: '48px', minWidth: '48px' }}>
-                  <FiUsers className={bgClass.replace('bg-', 'text-')} size={20} />
+                <div className={`rounded-circle ${bgClass} bg-opacity-10 d-flex align-items-center justify-content-center`} style={{ width: '52px', height: '52px', minWidth: '52px' }}>
+                  <FiUsers className={bgClass.replace('bg-', 'text-')} size={22} />
                 </div>
                 <div>
-                  <h6 className="mb-0 fw-semibold text-dark">{item[nameField]}</h6>
+                  <h6 className="mb-1 fw-semibold text-dark">{item[nameField]}</h6>
                   <small className="text-muted">ID: {item[idField]}</small>
                 </div>
               </div>
-              <div className="btn-group">
-                {onEdit && <button onClick={() => onEdit(item)} className="btn btn-sm btn-outline-secondary"><FiEdit2 size={16} /></button>}
-                {onDelete && <button onClick={() => onDelete(item)} className="btn btn-sm btn-outline-danger"><FiTrash2 size={16} /></button>}
+              <div className="btn-group btn-group-sm">
+                {onEdit && (
+                  <button onClick={() => onEdit(item)} className="btn btn-outline-secondary border-0">
+                    <FiEdit2 size={16} />
+                  </button>
+                )}
+                {onDelete && (
+                  <button onClick={() => onDelete(item)} className="btn btn-outline-danger border-0">
+                    <FiTrash2 size={16} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -178,33 +270,38 @@ function SystemSetup() {
       fields: [{ name: 'name', label: 'Contributor Name', placeholder: 'Enter contributor name' }] },
     regions: { endpoint: '/api/setup/regions', idField: 'regionCode', label: 'Regions',
       columns: [{ key: 'regionCode', label: 'Code' }, { key: 'regionName', label: 'Name' }, { key: 'description', label: 'Description' }],
-      fields: [{ name: 'regionCode', label: 'Region Code', disableOnEdit: true }, { name: 'regionName', label: 'Region Name' }, { name: 'description', label: 'Description', required: false }] },
+      fields: [
+        { name: 'regionCode', label: 'Region Code', disableOnEdit: true, halfWidth: true },
+        { name: 'regionName', label: 'Region Name', halfWidth: true },
+        { name: 'description', label: 'Description', required: false }
+      ] },
     lgas: { endpoint: '/api/setup/lgas', idField: 'lgaCode', label: 'LGAs',
       columns: [{ key: 'lgaCode', label: 'Code' }, { key: 'lgaName', label: 'Name' }, { key: 'region', label: 'Region', nested: 'regionName' }],
       fields: [
-        { name: 'lgaCode', label: 'LGA Code', disableOnEdit: true },
-        { name: 'lgaName', label: 'LGA Name' },
+        { name: 'lgaCode', label: 'LGA Code', disableOnEdit: true, halfWidth: true },
+        { name: 'lgaName', label: 'LGA Name', halfWidth: true },
         { name: 'regionCode', label: 'Region', type: 'select', dataKey: 'regions', valueField: 'regionCode', displayField: 'regionName', relationField: 'region' }
       ] },
     districts: { endpoint: '/api/setup/districts', idField: 'districtCode', label: 'Districts',
       columns: [{ key: 'districtCode', label: 'Code' }, { key: 'districtName', label: 'Name' }, { key: 'lga', label: 'LGA', nested: 'lgaName' }],
       fields: [
-        { name: 'districtCode', label: 'District Code', disableOnEdit: true },
-        { name: 'districtName', label: 'District Name' },
-        { name: 'lgaCode', label: 'LGA', type: 'select', dataKey: 'lgas', valueField: 'lgaCode', displayField: 'lgaName', relationField: 'lga' }
+        { name: 'districtCode', label: 'District Code', disableOnEdit: true, halfWidth: true },
+        { name: 'districtName', label: 'District Name', halfWidth: true },
+        { name: 'regionFilter', label: 'Region', type: 'cascadeParent', dataKey: 'regions', valueField: 'regionCode', displayField: 'regionName', childField: 'lgaCode', parentRelation: 'region', clearsField: 'lgaCode', required: false, helpText: 'Filter LGAs by region' },
+        { name: 'lgaCode', label: 'LGA', type: 'select', dataKey: 'lgas', valueField: 'lgaCode', displayField: 'lgaName', relationField: 'lga', filterBy: 'regionFilter', filterField: 'region', filterValue: 'regionCode' }
       ] },
     wards: { endpoint: '/api/setup/wards', idField: 'wardCode', label: 'Wards',
       columns: [{ key: 'wardCode', label: 'Code' }, { key: 'wardName', label: 'Name' }, { key: 'district', label: 'District', nested: 'districtName' }],
       fields: [
-        { name: 'wardCode', label: 'Ward Code', disableOnEdit: true },
-        { name: 'wardName', label: 'Ward Name' },
+        { name: 'wardCode', label: 'Ward Code', disableOnEdit: true, halfWidth: true },
+        { name: 'wardName', label: 'Ward Name', halfWidth: true },
         { name: 'districtCode', label: 'District', type: 'select', dataKey: 'districts', valueField: 'districtCode', displayField: 'districtName', relationField: 'district' }
       ] },
     settlements: { endpoint: '/api/setup/settlements', idField: 'settlementCode', label: 'Settlements',
       columns: [{ key: 'settlementCode', label: 'Code' }, { key: 'settlementName', label: 'Name' }, { key: 'ward', label: 'Ward', nested: 'wardName' }],
       fields: [
-        { name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true },
-        { name: 'settlementName', label: 'Settlement Name' },
+        { name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true, halfWidth: true },
+        { name: 'settlementName', label: 'Settlement Name', halfWidth: true },
         { name: 'wardCode', label: 'Ward', type: 'select', dataKey: 'wards', valueField: 'wardCode', displayField: 'wardName', relationField: 'ward' }
       ] },
     years: { endpoint: '/api/setup/years', idField: 'id', label: 'Years',
@@ -224,7 +321,10 @@ function SystemSetup() {
       fields: [{ name: 'documentType', label: 'Document Type' }] },
     monitoringTypes: { endpoint: '/api/setup/monitoring-types', idField: 'monitoringTypeCode', label: 'Monitoring Types',
       columns: [{ key: 'monitoringTypeCode', label: 'Code' }, { key: 'monitoringType', label: 'Monitoring Type' }],
-      fields: [{ name: 'monitoringTypeCode', label: 'Type Code', disableOnEdit: true }, { name: 'monitoringType', label: 'Monitoring Type' }] },
+      fields: [
+        { name: 'monitoringTypeCode', label: 'Type Code', disableOnEdit: true, halfWidth: true },
+        { name: 'monitoringType', label: 'Monitoring Type', halfWidth: true }
+      ] },
     papTypes: { endpoint: '/api/setup/pap-types', idField: 'id', label: 'Type of PAP',
       columns: [{ key: 'id', label: 'ID' }, { key: 'typeOfPap', label: 'Type of PAP' }],
       fields: [{ name: 'typeOfPap', label: 'Type of PAP' }] },
@@ -266,7 +366,10 @@ function SystemSetup() {
       fields: [{ name: 'vulnerability', label: 'Vulnerability Category' }] },
     kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
       columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'kpiName', label: 'KPI Name' }],
-      fields: [{ name: 'kpiCode', label: 'KPI Code' }, { name: 'kpiName', label: 'KPI Name' }] },
+      fields: [
+        { name: 'kpiCode', label: 'KPI Code', halfWidth: true },
+        { name: 'kpiName', label: 'KPI Name', halfWidth: true }
+      ] },
     pdos: { endpoint: '/api/setup/pdos', idField: 'id', label: 'PDO Setup',
       columns: [{ key: 'id', label: 'ID' }, { key: 'pdoStatement', label: 'PDO Statement' }],
       fields: [{ name: 'pdoStatement', label: 'PDO Statement' }] },
@@ -452,9 +555,12 @@ function SystemSetup() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-muted mb-0">Loading data...</p>
         </div>
       </div>
     );
@@ -462,14 +568,17 @@ function SystemSetup() {
 
   return (
     <div className="container-fluid">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">System Setup</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+          <h2 className="mb-1 fw-bold text-dark">System Setup</h2>
+          <p className="text-muted mb-0">Manage reference data and configuration settings</p>
+        </div>
+        <button className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm" onClick={handleAdd}>
           <FiPlus className="me-2" /> Add New
         </button>
       </div>
 
-      <nav className="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4 p-0">
+      <nav className="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4 p-0">
         <div className="container-fluid p-0">
           <button 
             className="navbar-toggler w-100 d-lg-none border-0 py-3 px-4 d-flex justify-content-between align-items-center"
@@ -496,11 +605,11 @@ function SystemSetup() {
                     {group.label}
                     <FiChevronDown size={14} className="ms-1" />
                   </button>
-                  <ul className={`dropdown-menu shadow border-0 ${activeDropdown === group.label ? 'show' : ''}`}>
+                  <ul className={`dropdown-menu shadow-lg border-0 rounded-3 ${activeDropdown === group.label ? 'show' : ''}`}>
                     {group.items.map((item) => (
                       <li key={item.id}>
                         <button
-                          className={`dropdown-item py-2 ${activeTab === item.id ? 'active bg-primary text-white' : ''}`}
+                          className={`dropdown-item py-2 px-4 ${activeTab === item.id ? 'active bg-primary text-white rounded' : ''}`}
                           onClick={() => handleTabChange(item.id)}
                         >
                           {item.label}
@@ -515,12 +624,12 @@ function SystemSetup() {
         </div>
       </nav>
 
-      <div className="card border-0 shadow-sm">
-        <div className="card-header bg-white border-bottom py-3">
+      <div className="card border-0 shadow-sm rounded-3">
+        <div className="card-header bg-white border-bottom py-3 px-4">
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <h5 className="mb-0 text-primary fw-semibold">{currentConfig.label}</h5>
-            <div className="input-group" style={{ maxWidth: '300px' }}>
-              <span className="input-group-text bg-white border-end-0">
+            <h5 className="mb-0 text-primary fw-bold">{currentConfig.label}</h5>
+            <div className="input-group" style={{ maxWidth: '320px' }}>
+              <span className="input-group-text bg-white border-end-0 rounded-start-pill">
                 <FiSearch className="text-muted" />
               </span>
               <input
@@ -528,12 +637,12 @@ function SystemSetup() {
                 value={search}
                 onChange={handleSearchChange}
                 placeholder="Search..."
-                className="form-control border-start-0"
+                className="form-control border-start-0 rounded-end-pill"
               />
             </div>
           </div>
         </div>
-        <div className="card-body">
+        <div className="card-body p-4">
           {currentConfig.cardView ? (
             <CardGrid
               data={filteredData}
