@@ -108,16 +108,18 @@
                             <div class="row g-4">
                                 <div class="col-lg-6 col-md-6 mb-4">
                                     <label for="id_pdo" class="form-label fw-semibold mb-2">
-                                        PDO
+                                        PDO <span class="text-danger">*</span>
                                     </label>
                                     <select name="pdo" 
                                             id="id_pdo"
                                             hx-get="{% url 'monitoring:load_project_Outcome' %}" 
                                             hx-trigger="change" 
                                             hx-target="#id_project_outcome"
-                                            class="form-select form-select-lg">
-                                        <option value="">---------</option>
+                                            class="form-select form-select-lg"
+                                            required>
+                                        <option value="">-- Select PDO --</option>
                                     </select>
+                                    <small class="text-muted">PDO options load based on selected Project</small>
                                     {% if form.pdo.errors %}
                                         <div class="text-danger small mt-2">{{ form.pdo.errors.0 }}</div>
                                     {% endif %}
@@ -125,17 +127,18 @@
 
                                 <div class="col-lg-6 col-md-6 mb-4">
                                     <label for="id_project_outcome" class="form-label fw-semibold mb-2">
-                                        Project Outcome
+                                        Project Outcome <span class="text-danger">*</span>
                                     </label>
                                     <select name="project_outcome" 
                                             id="id_project_outcome" 
                                             hx-get="{% url 'monitoring:load_project_Result' %}" 
                                             hx-trigger="change" 
                                             hx-target="#id_project_result"
-                                            hx-include="[name='project_outcome']"
-                                            class="form-select form-select-lg">
-                                        <option value="">---------</option>
+                                            class="form-select form-select-lg"
+                                            required>
+                                        <option value="">-- Select Outcome --</option>
                                     </select>
+                                    <small class="text-muted">Outcomes load based on selected PDO</small>
                                     {% if form.project_outcome.errors %}
                                         <div class="text-danger small mt-2">{{ form.project_outcome.errors.0 }}</div>
                                     {% endif %}
@@ -143,13 +146,15 @@
 
                                 <div class="col-lg-12 col-md-12 mb-4" style="white-space: normal;">
                                     <label for="id_project_result" class="form-label fw-semibold mb-2">
-                                        Project Result
+                                        Project Result <span class="text-danger">*</span>
                                     </label>
                                     <select name="project_result" 
                                             id="id_project_result" 
-                                            class="form-select form-select-lg">
-                                        <option value="">---------</option>
+                                            class="form-select form-select-lg"
+                                            required>
+                                        <option value="">-- Select Result --</option>
                                     </select>
+                                    <small class="text-muted">Results load based on selected Outcome</small>
                                     {% if form.project_result.errors %}
                                         <div class="text-danger small mt-2">{{ form.project_result.errors.0 }}</div>
                                     {% endif %}
