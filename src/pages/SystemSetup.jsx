@@ -1,534 +1,354 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiUsers, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-function DonorModal({ donor, onClose, onSave }) {
-  const [name, setName] = useState(donor?.name || '');
+const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave }) {
+  const [formData, setFormData] = useState(() => {
+    if (item) return { ...item };
+    const initial = {};
+    fields.forEach(f => { initial[f.name] = ''; });
+    return initial;
+  });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    onSave({ name });
-  };
+    onSave(formData);
+  }, [formData, onSave]);
+
+  const handleChange = useCallback((name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
 
   return (
     <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content border-0 shadow">
           <div className="modal-header border-0 pb-0">
-            <h5 className="modal-title fw-bold">
-              {donor ? 'Edit Donor' : 'Add New Donor'}
-            </h5>
+            <h5 className="modal-title fw-bold">{item ? `Edit ${title}` : `Add New ${title}`}</h5>
             <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
-
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label fw-medium">Donor Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="form-control"
-                  placeholder="Enter donor name"
-                  required
-                />
-              </div>
+              {fields.map(field => (
+                <div className="mb-3" key={field.name}>
+                  <label className="form-label fw-medium">{field.label}</label>
+                  <input
+                    type={field.type || 'text'}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    className="form-control"
+                    placeholder={field.placeholder || ''}
+                    required={field.required !== false}
+                    disabled={field.disableOnEdit && !!item}
+                  />
+                </div>
+              ))}
             </div>
-
             <div className="modal-footer border-0 pt-0">
-              <button type="button" onClick={onClose} className="btn btn-outline-secondary">
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {donor ? 'Update' : 'Create'}
-              </button>
+              <button type="button" onClick={onClose} className="btn btn-outline-secondary">Cancel</button>
+              <button type="submit" className="btn btn-primary">{item ? 'Update' : 'Create'}</button>
             </div>
           </form>
         </div>
       </div>
     </div>
   );
-}
+});
 
-function ContributorModal({ contributor, onClose, onSave }) {
-  const [name, setName] = useState(contributor?.name || '');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ name });
-  };
+const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idField }) {
+  if (data.length === 0) {
+    return <p className="text-center text-muted py-5">No data available</p>;
+  }
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content border-0 shadow">
-          <div className="modal-header border-0 pb-0">
-            <h5 className="modal-title fw-bold">
-              {contributor ? 'Edit Contributor' : 'Add New Contributor'}
-            </h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label fw-medium">Contributor Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="form-control"
-                  placeholder="Enter contributor name"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer border-0 pt-0">
-              <button type="button" onClick={onClose} className="btn btn-outline-secondary">
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {contributor ? 'Update' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+    <div className="table-responsive">
+      <table className="table table-striped table-hover">
+        <thead className="table-dark">
+          <tr>
+            {columns.map(col => <th key={col.key}>{col.label}</th>)}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={item[idField] || index}>
+              {columns.map(col => <td key={col.key}>{item[col.key] || '-'}</td>)}
+              <td>
+                {onEdit && <button onClick={() => onEdit(item)} className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>}
+                {onDelete && <button onClick={() => onDelete(item)} className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
+});
+
+const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDelete, bgClass = 'bg-primary' }) {
+  if (data.length === 0) {
+    return <p className="text-center text-muted py-5">No data available</p>;
+  }
+
+  return (
+    <div className="row g-4">
+      {data.map((item) => (
+        <div key={item[idField]} className="col-12 col-md-6 col-lg-4">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body d-flex align-items-center justify-content-between">
+              <div className="d-flex align-items-center gap-3">
+                <div className={`rounded-circle ${bgClass} bg-opacity-10 d-flex align-items-center justify-content-center`} style={{ width: '48px', height: '48px', minWidth: '48px' }}>
+                  <FiUsers className={bgClass.replace('bg-', 'text-')} size={20} />
+                </div>
+                <div>
+                  <h6 className="mb-0 fw-semibold text-dark">{item[nameField]}</h6>
+                  <small className="text-muted">ID: {item[idField]}</small>
+                </div>
+              </div>
+              <div className="btn-group">
+                {onEdit && <button onClick={() => onEdit(item)} className="btn btn-sm btn-outline-secondary"><FiEdit2 size={16} /></button>}
+                {onDelete && <button onClick={() => onDelete(item)} className="btn btn-sm btn-outline-danger"><FiTrash2 size={16} /></button>}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
 
 function SystemSetup() {
   const [activeTab, setActiveTab] = useState('donors');
-  const [regions, setRegions] = useState([]);
-  const [years, setYears] = useState([]);
-  const [quarters, setQuarters] = useState([]);
-  const [currencies, setCurrencies] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [documentTypes, setDocumentTypes] = useState([]);
-  const [donors, setDonors] = useState([]);
-  const [contributors, setContributors] = useState([]);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [editingDonor, setEditingDonor] = useState(null);
-  const [editingContributor, setEditingContributor] = useState(null);
-  const [donorSearch, setDonorSearch] = useState('');
-  const [contributorSearch, setContributorSearch] = useState('');
+  const [editingItem, setEditingItem] = useState(null);
+  const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const tabConfig = useMemo(() => ({
+    donors: { endpoint: '/api/donors', idField: 'donorId', nameField: 'name', label: 'Donors', cardView: true, bgClass: 'bg-primary',
+      fields: [{ name: 'name', label: 'Donor Name', placeholder: 'Enter donor name' }] },
+    contributors: { endpoint: '/api/setup/contributors', idField: 'id', nameField: 'name', label: 'Contributors', cardView: true, bgClass: 'bg-success',
+      fields: [{ name: 'name', label: 'Contributor Name', placeholder: 'Enter contributor name' }] },
+    regions: { endpoint: '/api/setup/regions', idField: 'regionCode', label: 'Regions',
+      columns: [{ key: 'regionCode', label: 'Code' }, { key: 'regionName', label: 'Name' }, { key: 'description', label: 'Description' }],
+      fields: [{ name: 'regionCode', label: 'Region Code', disableOnEdit: true }, { name: 'regionName', label: 'Region Name' }, { name: 'description', label: 'Description', required: false }] },
+    lgas: { endpoint: '/api/setup/lgas', idField: 'lgaCode', label: 'LGAs',
+      columns: [{ key: 'lgaCode', label: 'Code' }, { key: 'lgaName', label: 'Name' }],
+      fields: [{ name: 'lgaCode', label: 'LGA Code', disableOnEdit: true }, { name: 'lgaName', label: 'LGA Name' }] },
+    districts: { endpoint: '/api/setup/districts', idField: 'districtCode', label: 'Districts',
+      columns: [{ key: 'districtCode', label: 'Code' }, { key: 'districtName', label: 'Name' }],
+      fields: [{ name: 'districtCode', label: 'District Code', disableOnEdit: true }, { name: 'districtName', label: 'District Name' }] },
+    wards: { endpoint: '/api/setup/wards', idField: 'wardCode', label: 'Wards',
+      columns: [{ key: 'wardCode', label: 'Code' }, { key: 'wardName', label: 'Name' }],
+      fields: [{ name: 'wardCode', label: 'Ward Code', disableOnEdit: true }, { name: 'wardName', label: 'Ward Name' }] },
+    settlements: { endpoint: '/api/setup/settlements', idField: 'settlementCode', label: 'Settlements',
+      columns: [{ key: 'settlementCode', label: 'Code' }, { key: 'settlementName', label: 'Name' }],
+      fields: [{ name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true }, { name: 'settlementName', label: 'Settlement Name' }] },
+    years: { endpoint: '/api/setup/years', idField: 'id', label: 'Years',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'profileYear', label: 'Profile Year' }],
+      fields: [{ name: 'profileYear', label: 'Profile Year', placeholder: 'e.g., 2025' }] },
+    quarters: { endpoint: '/api/setup/quarters', idField: 'id', label: 'Quarters',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'quarter', label: 'Quarter' }],
+      fields: [{ name: 'quarter', label: 'Quarter', placeholder: 'e.g., Q1' }] },
+    currencies: { endpoint: '/api/setup/currencies', idField: 'id', label: 'Currencies',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'currency', label: 'Currency' }],
+      fields: [{ name: 'currency', label: 'Currency', placeholder: 'e.g., USD' }] },
+    categories: { endpoint: '/api/setup/categories', idField: 'categoryId', label: 'Project Categories',
+      columns: [{ key: 'categoryId', label: 'ID' }, { key: 'category', label: 'Category' }, { key: 'categoryDescription', label: 'Description' }],
+      fields: [{ name: 'category', label: 'Category Name' }, { name: 'categoryDescription', label: 'Description', required: false }] },
+    documentTypes: { endpoint: '/api/setup/document-types', idField: 'id', label: 'Document Types',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'documentType', label: 'Document Type' }],
+      fields: [{ name: 'documentType', label: 'Document Type' }] },
+    monitoringTypes: { endpoint: '/api/setup/monitoring-types', idField: 'monitoringTypeCode', label: 'Monitoring Types',
+      columns: [{ key: 'monitoringTypeCode', label: 'Code' }, { key: 'monitoringType', label: 'Monitoring Type' }],
+      fields: [{ name: 'monitoringTypeCode', label: 'Type Code', disableOnEdit: true }, { name: 'monitoringType', label: 'Monitoring Type' }] },
+    papTypes: { endpoint: '/api/setup/pap-types', idField: 'id', label: 'Type of PAP',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'typeOfPap', label: 'Type of PAP' }],
+      fields: [{ name: 'typeOfPap', label: 'Type of PAP' }] },
+    papCategories: { endpoint: '/api/setup/pap-categories', idField: 'id', label: 'PAP Categories',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'papCategory', label: 'PAP Category' }],
+      fields: [{ name: 'papCategory', label: 'PAP Category' }] },
+    impactTypes: { endpoint: '/api/setup/impact-types', idField: 'id', label: 'Type of Impact',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'impact', label: 'Impact' }],
+      fields: [{ name: 'impact', label: 'Type of Impact' }] },
+    settlementNatures: { endpoint: '/api/setup/settlement-natures', idField: 'id', label: 'Nature of Settlement',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'natureOfSettlement', label: 'Nature of Settlement' }],
+      fields: [{ name: 'natureOfSettlement', label: 'Nature of Settlement' }] },
+    decisionOutcomes: { endpoint: '/api/setup/decision-outcomes', idField: 'id', label: 'Decision Outcomes',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'outcome', label: 'Outcome' }],
+      fields: [{ name: 'outcome', label: 'Decision Outcome' }] },
+    stakeholderEngagements: { endpoint: '/api/setup/stakeholder-engagements', idField: 'id', label: 'Stakeholder Engagement',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'engagementType', label: 'Engagement Type' }],
+      fields: [{ name: 'engagementType', label: 'Stakeholder Engagement Type' }] },
+    accessTypes: { endpoint: '/api/setup/access-types', idField: 'id', label: 'Access Types',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'accessType', label: 'Access Type' }],
+      fields: [{ name: 'accessType', label: 'Access Type' }] },
+    dataFrequencies: { endpoint: '/api/setup/data-frequencies', idField: 'id', label: 'Data Collection Frequency',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'frequency', label: 'Frequency' }],
+      fields: [{ name: 'frequency', label: 'Data Collection Frequency' }] },
+    investmentTypes: { endpoint: '/api/setup/investment-types', idField: 'id', label: 'Type of Investment',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'nameOfInvestment', label: 'Investment Type' }],
+      fields: [{ name: 'nameOfInvestment', label: 'Type of Investment' }] },
+    indicatorTypes: { endpoint: '/api/setup/indicator-types', idField: 'id', label: 'Indicator Types',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'indicatorType', label: 'Indicator Type' }],
+      fields: [{ name: 'indicatorType', label: 'Indicator Type' }] },
+    physicalProgress: { endpoint: '/api/setup/physical-progress', idField: 'id', label: 'Physical Progress',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'progressScale', label: 'Progress Scale' }],
+      fields: [{ name: 'progressScale', label: 'Physical Progress Scale' }] },
+    measurementUnits: { endpoint: '/api/setup/measurement-units', idField: 'id', label: 'Measurement Units',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'unit', label: 'Unit' }],
+      fields: [{ name: 'unit', label: 'Measurement Unit' }] },
+    vulnerabilityCategories: { endpoint: '/api/setup/vulnerability-categories', idField: 'id', label: 'Vulnerability Categories',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'vulnerability', label: 'Vulnerability' }],
+      fields: [{ name: 'vulnerability', label: 'Vulnerability Category' }] },
+    kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'kpiName', label: 'KPI Name' }],
+      fields: [{ name: 'kpiCode', label: 'KPI Code' }, { name: 'kpiName', label: 'KPI Name' }] },
+    pdos: { endpoint: '/api/setup/pdos', idField: 'id', label: 'PDO Setup',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'pdoStatement', label: 'PDO Statement' }],
+      fields: [{ name: 'pdoStatement', label: 'PDO Statement' }] },
+    outcomes: { endpoint: '/api/setup/outcomes', idField: 'id', label: 'Project Outcomes',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'projectOutcome', label: 'Project Outcome' }],
+      fields: [{ name: 'projectOutcome', label: 'Project Outcome' }] },
+    results: { endpoint: '/api/setup/results', idField: 'id', label: 'Project Results',
+      columns: [{ key: 'id', label: 'ID' }, { key: 'projectResult', label: 'Project Result' }],
+      fields: [{ name: 'projectResult', label: 'Project Result' }] },
+  }), []);
 
-  const loadData = async () => {
+  const tabs = useMemo(() => [
+    { id: 'donors', label: 'Donors' },
+    { id: 'contributors', label: 'Contributors' },
+    { id: 'regions', label: 'Regions' },
+    { id: 'lgas', label: 'LGAs' },
+    { id: 'districts', label: 'Districts' },
+    { id: 'wards', label: 'Wards' },
+    { id: 'settlements', label: 'Settlements' },
+    { id: 'years', label: 'Years' },
+    { id: 'quarters', label: 'Quarters' },
+    { id: 'currencies', label: 'Currencies' },
+    { id: 'categories', label: 'Categories' },
+    { id: 'documentTypes', label: 'Doc Types' },
+    { id: 'monitoringTypes', label: 'Monitoring Types' },
+    { id: 'papTypes', label: 'PAP Types' },
+    { id: 'papCategories', label: 'PAP Categories' },
+    { id: 'impactTypes', label: 'Impact Types' },
+    { id: 'settlementNatures', label: 'Settlement Nature' },
+    { id: 'decisionOutcomes', label: 'Decision Outcomes' },
+    { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' },
+    { id: 'accessTypes', label: 'Access Types' },
+    { id: 'dataFrequencies', label: 'Data Frequency' },
+    { id: 'investmentTypes', label: 'Investment Types' },
+    { id: 'indicatorTypes', label: 'Indicator Types' },
+    { id: 'physicalProgress', label: 'Physical Progress' },
+    { id: 'measurementUnits', label: 'Measurement Units' },
+    { id: 'vulnerabilityCategories', label: 'Vulnerability' },
+    { id: 'kpiContracts', label: 'KPI Contracts' },
+    { id: 'pdos', label: 'PDO Setup' },
+    { id: 'outcomes', label: 'Outcomes' },
+    { id: 'results', label: 'Results' },
+  ], []);
+
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [regionsRes, yearsRes, quartersRes, currenciesRes, categoriesRes, docTypesRes, donorsRes, contributorsRes] = await Promise.all([
-        axios.get('/api/setup/regions').catch(() => ({ data: [] })),
-        axios.get('/api/setup/years').catch(() => ({ data: [] })),
-        axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
-        axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
-        axios.get('/api/setup/categories').catch(() => ({ data: [] })),
-        axios.get('/api/setup/document-types').catch(() => ({ data: [] })),
-        axios.get('/api/donors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/contributors').catch(() => ({ data: [] }))
-      ]);
-      setRegions(regionsRes.data);
-      setYears(yearsRes.data);
-      setQuarters(quartersRes.data);
-      setCurrencies(currenciesRes.data);
-      setCategories(categoriesRes.data);
-      setDocumentTypes(docTypesRes.data);
-      setDonors(donorsRes.data);
-      setContributors(contributorsRes.data);
+      const results = await Promise.all(
+        Object.entries(tabConfig).map(async ([key, config]) => {
+          try {
+            const res = await axios.get(config.endpoint);
+            return [key, res.data];
+          } catch {
+            return [key, []];
+          }
+        })
+      );
+      const newData = {};
+      results.forEach(([key, value]) => { newData[key] = value; });
+      setData(newData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [tabConfig]);
 
-  const tabs = [
-    { id: 'donors', label: 'Donors', data: donors },
-    { id: 'contributors', label: 'Contributors', data: contributors },
-    { id: 'regions', label: 'Regions', data: regions },
-    { id: 'years', label: 'Years', data: years },
-    { id: 'quarters', label: 'Quarters', data: quarters },
-    { id: 'currencies', label: 'Currencies', data: currencies },
-    { id: 'categories', label: 'Categories', data: categories },
-    { id: 'documentTypes', label: 'Document Types', data: documentTypes }
-  ];
+  useEffect(() => { loadData(); }, [loadData]);
 
-  const handleCreateDonor = async (data) => {
-    try {
-      await axios.post('/api/donors', data);
-      toast.success('Donor created successfully');
-      setShowModal(false);
-      loadData();
-    } catch (error) {
-      toast.error('Failed to create donor');
-    }
-  };
+  const currentConfig = useMemo(() => tabConfig[activeTab], [tabConfig, activeTab]);
+  const currentData = useMemo(() => data[activeTab] || [], [data, activeTab]);
 
-  const handleUpdateDonor = async (data) => {
-    try {
-      await axios.put(`/api/donors/${editingDonor.donorId}`, data);
-      toast.success('Donor updated successfully');
-      setEditingDonor(null);
-      loadData();
-    } catch (error) {
-      toast.error('Failed to update donor');
-    }
-  };
+  const filteredData = useMemo(() => {
+    if (!search) return currentData;
+    const searchLower = search.toLowerCase();
+    return currentData.filter(item =>
+      Object.values(item).some(val =>
+        String(val).toLowerCase().includes(searchLower)
+      )
+    );
+  }, [currentData, search]);
 
-  const handleDeleteDonor = async (donorId) => {
-    if (confirm('Are you sure you want to delete this donor?')) {
-      try {
-        await axios.delete(`/api/donors/${donorId}`);
-        toast.success('Donor deleted successfully');
-        loadData();
-      } catch (error) {
-        toast.error('Failed to delete donor');
-      }
-    }
-  };
-
-  const handleDonorSave = (data) => {
-    if (editingDonor) {
-      handleUpdateDonor(data);
-    } else {
-      handleCreateDonor(data);
-    }
-  };
-
-  const filteredDonors = donors.filter((d) =>
-    d.name?.toLowerCase().includes(donorSearch.toLowerCase())
-  );
-
-  const handleCreateContributor = async (data) => {
-    try {
-      await axios.post('/api/setup/contributors', data);
-      toast.success('Contributor created successfully');
-      setShowModal(false);
-      loadData();
-    } catch (error) {
-      toast.error('Failed to create contributor');
-    }
-  };
-
-  const handleUpdateContributor = async (data) => {
-    try {
-      await axios.put(`/api/setup/contributors/${editingContributor.id}`, data);
-      toast.success('Contributor updated successfully');
-      setEditingContributor(null);
-      loadData();
-    } catch (error) {
-      toast.error('Failed to update contributor');
-    }
-  };
-
-  const handleDeleteContributor = async (id) => {
-    if (confirm('Are you sure you want to delete this contributor?')) {
-      try {
-        await axios.delete(`/api/setup/contributors/${id}`);
-        toast.success('Contributor deleted successfully');
-        loadData();
-      } catch (error) {
-        toast.error('Failed to delete contributor');
-      }
-    }
-  };
-
-  const handleContributorSave = (data) => {
-    if (editingContributor) {
-      handleUpdateContributor(data);
-    } else {
-      handleCreateContributor(data);
-    }
-  };
-
-  const filteredContributors = contributors.filter((c) =>
-    c.name?.toLowerCase().includes(contributorSearch.toLowerCase())
-  );
-
-  const handleAdd = () => {
-    setFormData({});
+  const handleAdd = useCallback(() => {
+    setEditingItem(null);
     setShowModal(true);
-  };
+  }, []);
 
-  const handleSave = async () => {
+  const handleEdit = useCallback((item) => {
+    setEditingItem(item);
+    setShowModal(true);
+  }, []);
+
+  const handleDelete = useCallback(async (item) => {
+    if (!confirm(`Are you sure you want to delete this ${currentConfig.label}?`)) return;
     try {
-      const endpoints = {
-        regions: '/api/setup/regions',
-        years: '/api/setup/years',
-        quarters: '/api/setup/quarters',
-        currencies: '/api/setup/currencies',
-        categories: '/api/setup/categories',
-        documentTypes: '/api/setup/document-types'
-      };
-      await axios.post(endpoints[activeTab], formData);
-      toast.success('Item added successfully');
-      setShowModal(false);
+      await axios.delete(`${currentConfig.endpoint}/${item[currentConfig.idField]}`);
+      toast.success('Deleted successfully');
       loadData();
-    } catch (error) {
+    } catch {
+      toast.error('Failed to delete');
+    }
+  }, [currentConfig, loadData]);
+
+  const handleSave = useCallback(async (formData) => {
+    try {
+      if (editingItem) {
+        await axios.put(`${currentConfig.endpoint}/${editingItem[currentConfig.idField]}`, formData);
+        toast.success('Updated successfully');
+      } else {
+        await axios.post(currentConfig.endpoint, formData);
+        toast.success('Created successfully');
+      }
+      setShowModal(false);
+      setEditingItem(null);
+      loadData();
+    } catch {
       toast.error('Failed to save');
     }
-  };
+  }, [currentConfig, editingItem, loadData]);
 
-  const renderDonorsTable = () => {
-    if (loading) {
-      return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
-    }
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setEditingItem(null);
+  }, []);
 
+  const handleTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+    setSearch('');
+  }, []);
+
+  const handleSearchChange = useCallback((e) => {
+    setSearch(e.target.value);
+  }, []);
+
+  if (loading) {
     return (
-      <div>
-        <div className="mb-4">
-          <div className="input-group" style={{ maxWidth: '400px' }}>
-            <span className="input-group-text bg-white border-end-0">
-              <FiSearch className="text-muted" />
-            </span>
-            <input
-              type="text"
-              value={donorSearch}
-              onChange={(e) => setDonorSearch(e.target.value)}
-              placeholder="Search donors..."
-              className="form-control border-start-0"
-            />
-          </div>
-        </div>
-        <div className="row g-4">
-          {filteredDonors.map((donor) => (
-            <div key={donor.donorId} className="col-12 col-md-6 col-lg-4">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-3">
-                    <div 
-                      className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
-                      style={{ width: '48px', height: '48px', minWidth: '48px' }}
-                    >
-                      <FiUsers className="text-primary" size={20} />
-                    </div>
-                    <div>
-                      <h6 className="mb-0 fw-semibold text-dark">{donor.name}</h6>
-                      <small className="text-muted">ID: {donor.donorId}</small>
-                    </div>
-                  </div>
-                  <div className="btn-group">
-                    <button
-                      onClick={() => setEditingDonor(donor)}
-                      className="btn btn-sm btn-outline-secondary"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDonor(donor.donorId)}
-                      className="btn btn-sm btn-outline-danger"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          {filteredDonors.length === 0 && (
-            <div className="col-12">
-              <p className="text-center text-muted py-5">No donors found</p>
-            </div>
-          )}
+      <div className="d-flex justify-content-center py-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
-  };
-
-  const renderContributorsTable = () => {
-    if (loading) {
-      return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
-    }
-
-    return (
-      <div>
-        <div className="mb-4">
-          <div className="input-group" style={{ maxWidth: '400px' }}>
-            <span className="input-group-text bg-white border-end-0">
-              <FiSearch className="text-muted" />
-            </span>
-            <input
-              type="text"
-              value={contributorSearch}
-              onChange={(e) => setContributorSearch(e.target.value)}
-              placeholder="Search contributors..."
-              className="form-control border-start-0"
-            />
-          </div>
-        </div>
-        <div className="row g-4">
-          {filteredContributors.map((contributor) => (
-            <div key={contributor.id} className="col-12 col-md-6 col-lg-4">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-3">
-                    <div 
-                      className="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
-                      style={{ width: '48px', height: '48px', minWidth: '48px' }}
-                    >
-                      <FiUsers className="text-success" size={20} />
-                    </div>
-                    <div>
-                      <h6 className="mb-0 fw-semibold text-dark">{contributor.name}</h6>
-                      <small className="text-muted">ID: {contributor.id}</small>
-                    </div>
-                  </div>
-                  <div className="btn-group">
-                    <button
-                      onClick={() => setEditingContributor(contributor)}
-                      className="btn btn-sm btn-outline-secondary"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteContributor(contributor.id)}
-                      className="btn btn-sm btn-outline-danger"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          {filteredContributors.length === 0 && (
-            <div className="col-12">
-              <p className="text-center text-muted py-5">No contributors found</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const renderTable = () => {
-    const currentTab = tabs.find(t => t.id === activeTab);
-    const data = currentTab?.data || [];
-
-    if (loading) {
-      return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
-    }
-
-    return (
-      <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead className="table-dark">
-            <tr>
-              {activeTab === 'regions' && <><th>Code</th><th>Name</th><th>Description</th></>}
-              {activeTab === 'years' && <><th>ID</th><th>Profile Year</th></>}
-              {activeTab === 'quarters' && <><th>ID</th><th>Quarter</th></>}
-              {activeTab === 'currencies' && <><th>ID</th><th>Currency</th></>}
-              {activeTab === 'categories' && <><th>ID</th><th>Category</th><th>Description</th></>}
-              {activeTab === 'documentTypes' && <><th>ID</th><th>Document Type</th></>}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length === 0 ? (
-              <tr><td colSpan="4" className="text-center text-muted">No data available</td></tr>
-            ) : (
-              data.map((item, index) => (
-                <tr key={index}>
-                  {activeTab === 'regions' && <><td>{item.regionCode}</td><td>{item.regionName}</td><td>{item.description}</td></>}
-                  {activeTab === 'years' && <><td>{item.id}</td><td>{item.profileYear}</td></>}
-                  {activeTab === 'quarters' && <><td>{item.id}</td><td>{item.quarter}</td></>}
-                  {activeTab === 'currencies' && <><td>{item.id}</td><td>{item.currency}</td></>}
-                  {activeTab === 'categories' && <><td>{item.categoryId}</td><td>{item.category}</td><td>{item.categoryDescription}</td></>}
-                  {activeTab === 'documentTypes' && <><td>{item.id}</td><td>{item.documentType}</td></>}
-                  <td>
-                    <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-                    <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderForm = () => {
-    return (
-      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Add New {activeTab.replace(/([A-Z])/g, ' $1').trim()}</h5>
-              <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-            </div>
-            <div className="modal-body">
-              {activeTab === 'regions' && (
-                <>
-                  <div className="mb-3">
-                    <label className="form-label">Region Code</label>
-                    <input type="text" className="form-control" value={formData.regionCode || ''} onChange={e => setFormData({...formData, regionCode: e.target.value})} />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Region Name</label>
-                    <input type="text" className="form-control" value={formData.regionName || ''} onChange={e => setFormData({...formData, regionName: e.target.value})} />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Description</label>
-                    <input type="text" className="form-control" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
-                  </div>
-                </>
-              )}
-              {activeTab === 'years' && (
-                <div className="mb-3">
-                  <label className="form-label">Profile Year</label>
-                  <input type="text" className="form-control" value={formData.profileYear || ''} onChange={e => setFormData({...formData, profileYear: e.target.value})} />
-                </div>
-              )}
-              {activeTab === 'quarters' && (
-                <div className="mb-3">
-                  <label className="form-label">Quarter</label>
-                  <input type="text" className="form-control" value={formData.quarter || ''} onChange={e => setFormData({...formData, quarter: e.target.value})} />
-                </div>
-              )}
-              {activeTab === 'currencies' && (
-                <div className="mb-3">
-                  <label className="form-label">Currency</label>
-                  <input type="text" className="form-control" value={formData.currency || ''} onChange={e => setFormData({...formData, currency: e.target.value})} />
-                </div>
-              )}
-              {activeTab === 'categories' && (
-                <>
-                  <div className="mb-3">
-                    <label className="form-label">Category</label>
-                    <input type="text" className="form-control" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Description</label>
-                    <input type="text" className="form-control" value={formData.categoryDescription || ''} onChange={e => setFormData({...formData, categoryDescription: e.target.value})} />
-                  </div>
-                </>
-              )}
-              {activeTab === 'documentTypes' && (
-                <div className="mb-3">
-                  <label className="form-label">Document Type</label>
-                  <input type="text" className="form-control" value={formData.documentType || ''} onChange={e => setFormData({...formData, documentType: e.target.value})} />
-                </div>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  }
 
   return (
     <div className="container-fluid">
@@ -539,48 +359,67 @@ function SystemSetup() {
         </button>
       </div>
 
-      <ul className="nav nav-tabs mb-4">
-        {tabs.map(tab => (
-          <li className="nav-item" key={tab.id}>
-            <button 
-              className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="mb-4" style={{ overflowX: 'auto' }}>
+        <ul className="nav nav-tabs flex-nowrap" style={{ whiteSpace: 'nowrap' }}>
+          {tabs.map(tab => (
+            <li className="nav-item" key={tab.id}>
+              <button
+                className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => handleTabChange(tab.id)}
+                style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+              >
+                {tab.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="card">
         <div className="card-body">
-          {activeTab === 'donors' && renderDonorsTable()}
-          {activeTab === 'contributors' && renderContributorsTable()}
-          {activeTab !== 'donors' && activeTab !== 'contributors' && renderTable()}
+          <div className="mb-4">
+            <div className="input-group" style={{ maxWidth: '400px' }}>
+              <span className="input-group-text bg-white border-end-0">
+                <FiSearch className="text-muted" />
+              </span>
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                placeholder={`Search ${currentConfig.label}...`}
+                className="form-control border-start-0"
+              />
+            </div>
+          </div>
+
+          {currentConfig.cardView ? (
+            <CardGrid
+              data={filteredData}
+              idField={currentConfig.idField}
+              nameField={currentConfig.nameField}
+              bgClass={currentConfig.bgClass}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <DataTable
+              columns={currentConfig.columns}
+              data={filteredData}
+              idField={currentConfig.idField}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </div>
 
-      {showModal && activeTab !== 'donors' && activeTab !== 'contributors' && renderForm()}
-      
-      {(showModal || editingDonor) && activeTab === 'donors' && (
-        <DonorModal
-          donor={editingDonor}
-          onClose={() => {
-            setShowModal(false);
-            setEditingDonor(null);
-          }}
-          onSave={handleDonorSave}
-        />
-      )}
-
-      {(showModal || editingContributor) && activeTab === 'contributors' && (
-        <ContributorModal
-          contributor={editingContributor}
-          onClose={() => {
-            setShowModal(false);
-            setEditingContributor(null);
-          }}
-          onSave={handleContributorSave}
+      {showModal && (
+        <GenericModal
+          title={currentConfig.label}
+          fields={currentConfig.fields}
+          item={editingItem}
+          onClose={handleCloseModal}
+          onSave={handleSave}
         />
       )}
     </div>
