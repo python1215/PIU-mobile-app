@@ -40,6 +40,14 @@ public class Project {
     )
     private Set<Donor> donors = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "project_contributors",
+        joinColumns = @JoinColumn(name = "project_id"),
+        inverseJoinColumns = @JoinColumn(name = "contributor_id")
+    )
+    private Set<Contributor> contributors = new HashSet<>();
+
     @Column(name = "effectiveness_date")
     private LocalDate effectivenessDate;
 

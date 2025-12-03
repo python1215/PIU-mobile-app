@@ -40,6 +40,39 @@ public class SetupController {
     @Autowired
     private DocumentTypeRepository documentTypeRepository;
 
+    @Autowired
+    private ContributorRepository contributorRepository;
+
+    @GetMapping("/contributors")
+    public List<Contributor> getAllContributors() {
+        return contributorRepository.findAll();
+    }
+
+    @PostMapping("/contributors")
+    public Contributor createContributor(@RequestBody Contributor contributor) {
+        return contributorRepository.save(contributor);
+    }
+
+    @PutMapping("/contributors/{id}")
+    public ResponseEntity<Contributor> updateContributor(@PathVariable Long id, @RequestBody Contributor contributorDetails) {
+        return contributorRepository.findById(id)
+            .map(contributor -> {
+                contributor.setName(contributorDetails.getName());
+                return ResponseEntity.ok(contributorRepository.save(contributor));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/contributors/{id}")
+    public ResponseEntity<Void> deleteContributor(@PathVariable Long id) {
+        return contributorRepository.findById(id)
+            .map(contributor -> {
+                contributorRepository.delete(contributor);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/regions")
     public List<Region> getAllRegions() {
         return regionRepository.findAll();
