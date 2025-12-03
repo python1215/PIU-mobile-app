@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
@@ -27,6 +27,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
     fields.forEach(f => { initial[f.name] = ''; });
     return initial;
   });
+  const [saving, setSaving] = useState(false);
 
   const getFilteredOptions = useCallback((field) => {
     if (!field.filterBy) return relatedData[field.dataKey] || [];
@@ -38,8 +39,11 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
     });
   }, [formData, relatedData]);
 
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    
     const submitData = { ...formData };
     fields.forEach(f => {
       if (f.type === 'select' && f.relationField) {
@@ -55,8 +59,13 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
         delete submitData[f.name];
       }
     });
-    onSave(submitData);
-  }, [formData, onSave, fields, getFilteredOptions]);
+    
+    try {
+      await onSave(submitData);
+    } finally {
+      setSaving(false);
+    }
+  }, [formData, onSave, fields, getFilteredOptions, saving]);
 
   const handleChange = useCallback((name, value, field) => {
     setFormData(prev => {
@@ -76,7 +85,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
             <h5 className="modal-title fw-semibold">
               {item ? `Edit ${title}` : `Add New ${title}`}
             </h5>
-            <button type="button" className="btn btn-link text-white p-0" onClick={onClose}>
+            <button type="button" className="btn btn-link text-white p-0" onClick={onClose} disabled={saving}>
               <FiX size={24} />
             </button>
           </div>
@@ -95,7 +104,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                         onChange={(e) => handleChange(field.name, e.target.value, field)}
                         className="form-select form-select-lg border-2"
                         required={field.required !== false && field.type !== 'cascadeParent'}
-                        disabled={field.disableOnEdit && !!item}
+                        disabled={(field.disableOnEdit && !!item) || saving}
                         style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
                       >
                         <option value="">-- Select {field.label} --</option>
@@ -116,7 +125,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                         className="form-control form-control-lg border-2"
                         placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
                         required={field.required !== false}
-                        disabled={field.disableOnEdit && !!item}
+                        disabled={(field.disableOnEdit && !!item) || saving}
                         style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
                       />
                     )}
@@ -128,11 +137,18 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
               </div>
             </div>
             <div className="modal-footer bg-light border-0 py-3 px-4">
-              <button type="button" onClick={onClose} className="btn btn-outline-secondary btn-lg px-4 rounded-pill">
+              <button type="button" onClick={onClose} className="btn btn-outline-secondary btn-lg px-4 rounded-pill" disabled={saving}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary btn-lg px-4 rounded-pill">
-                {item ? 'Update' : 'Create'}
+              <button type="submit" className="btn btn-primary btn-lg px-4 rounded-pill" disabled={saving}>
+                {saving ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Saving...
+                  </>
+                ) : (
+                  item ? 'Update' : 'Create'
+                )}
               </button>
             </div>
           </form>
@@ -256,12 +272,14 @@ const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDe
 function SystemSetup() {
   const [activeTab, setActiveTab] = useState('donors');
   const [data, setData] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loadedTabs, setLoadedTabs] = useState({});
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [search, setSearch] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const initialLoadDone = useRef(false);
 
   const tabConfig = useMemo(() => ({
     donors: { endpoint: '/api/donors', idField: 'donorId', nameField: 'name', label: 'Donors', cardView: true, bgClass: 'bg-primary',
@@ -382,92 +400,72 @@ function SystemSetup() {
   }), []);
 
   const menuGroups = useMemo(() => [
-    { 
-      label: 'Stakeholders', 
-      items: [
-        { id: 'donors', label: 'Donors' },
-        { id: 'contributors', label: 'Contributors' },
-      ]
-    },
-    { 
-      label: 'Geography', 
-      items: [
-        { id: 'regions', label: 'Regions' },
-        { id: 'lgas', label: 'LGAs' },
-        { id: 'districts', label: 'Districts' },
-        { id: 'wards', label: 'Wards' },
-        { id: 'settlements', label: 'Settlements' },
-      ]
-    },
-    { 
-      label: 'Time & Finance', 
-      items: [
-        { id: 'years', label: 'Years' },
-        { id: 'quarters', label: 'Quarters' },
-        { id: 'currencies', label: 'Currencies' },
-        { id: 'investmentTypes', label: 'Investment Types' },
-      ]
-    },
-    { 
-      label: 'Project Setup', 
-      items: [
-        { id: 'categories', label: 'Categories' },
-        { id: 'documentTypes', label: 'Document Types' },
-        { id: 'monitoringTypes', label: 'Monitoring Types' },
-        { id: 'indicatorTypes', label: 'Indicator Types' },
-        { id: 'measurementUnits', label: 'Measurement Units' },
-        { id: 'physicalProgress', label: 'Physical Progress' },
-        { id: 'dataFrequencies', label: 'Data Frequency' },
-      ]
-    },
-    { 
-      label: 'Social & PAP', 
-      items: [
-        { id: 'papTypes', label: 'PAP Types' },
-        { id: 'papCategories', label: 'PAP Categories' },
-        { id: 'impactTypes', label: 'Impact Types' },
-        { id: 'settlementNatures', label: 'Settlement Nature' },
-        { id: 'vulnerabilityCategories', label: 'Vulnerability' },
-        { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' },
-        { id: 'accessTypes', label: 'Access Types' },
-        { id: 'decisionOutcomes', label: 'Decision Outcomes' },
-      ]
-    },
-    { 
-      label: 'Results Framework', 
-      items: [
-        { id: 'pdos', label: 'PDO Setup' },
-        { id: 'outcomes', label: 'Outcomes' },
-        { id: 'results', label: 'Results' },
-        { id: 'kpiContracts', label: 'KPI Contracts' },
-      ]
-    },
+    { label: 'Stakeholders', items: [{ id: 'donors', label: 'Donors' }, { id: 'contributors', label: 'Contributors' }] },
+    { label: 'Geography', items: [{ id: 'regions', label: 'Regions' }, { id: 'lgas', label: 'LGAs' }, { id: 'districts', label: 'Districts' }, { id: 'wards', label: 'Wards' }, { id: 'settlements', label: 'Settlements' }] },
+    { label: 'Time & Finance', items: [{ id: 'years', label: 'Years' }, { id: 'quarters', label: 'Quarters' }, { id: 'currencies', label: 'Currencies' }, { id: 'investmentTypes', label: 'Investment Types' }] },
+    { label: 'Project Setup', items: [{ id: 'categories', label: 'Categories' }, { id: 'documentTypes', label: 'Document Types' }, { id: 'monitoringTypes', label: 'Monitoring Types' }, { id: 'indicatorTypes', label: 'Indicator Types' }, { id: 'measurementUnits', label: 'Measurement Units' }, { id: 'physicalProgress', label: 'Physical Progress' }, { id: 'dataFrequencies', label: 'Data Frequency' }] },
+    { label: 'Social & PAP', items: [{ id: 'papTypes', label: 'PAP Types' }, { id: 'papCategories', label: 'PAP Categories' }, { id: 'impactTypes', label: 'Impact Types' }, { id: 'settlementNatures', label: 'Settlement Nature' }, { id: 'vulnerabilityCategories', label: 'Vulnerability' }, { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' }, { id: 'accessTypes', label: 'Access Types' }, { id: 'decisionOutcomes', label: 'Decision Outcomes' }] },
+    { label: 'Results Framework', items: [{ id: 'pdos', label: 'PDO Setup' }, { id: 'outcomes', label: 'Outcomes' }, { id: 'results', label: 'Results' }, { id: 'kpiContracts', label: 'KPI Contracts' }] },
   ], []);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadTabData = useCallback(async (tabKey) => {
+    const config = tabConfig[tabKey];
+    if (!config) return;
+    
     try {
-      const results = await Promise.all(
-        Object.entries(tabConfig).map(async ([key, config]) => {
-          try {
-            const res = await axios.get(config.endpoint);
-            return [key, res.data];
-          } catch {
-            return [key, []];
-          }
-        })
-      );
-      const newData = {};
-      results.forEach(([key, value]) => { newData[key] = value; });
-      setData(newData);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+      const res = await axios.get(config.endpoint);
+      setData(prev => ({ ...prev, [tabKey]: res.data }));
+      setLoadedTabs(prev => ({ ...prev, [tabKey]: true }));
+    } catch {
+      setData(prev => ({ ...prev, [tabKey]: [] }));
+      setLoadedTabs(prev => ({ ...prev, [tabKey]: true }));
     }
   }, [tabConfig]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  const loadRelatedData = useCallback(async () => {
+    const relatedTabs = ['regions', 'lgas', 'districts', 'wards'];
+    const promises = relatedTabs.map(async (tabKey) => {
+      if (loadedTabs[tabKey]) return;
+      const config = tabConfig[tabKey];
+      try {
+        const res = await axios.get(config.endpoint);
+        return { key: tabKey, data: res.data };
+      } catch {
+        return { key: tabKey, data: [] };
+      }
+    });
+    
+    const results = await Promise.all(promises);
+    const newData = {};
+    const newLoaded = {};
+    results.forEach(result => {
+      if (result) {
+        newData[result.key] = result.data;
+        newLoaded[result.key] = true;
+      }
+    });
+    
+    if (Object.keys(newData).length > 0) {
+      setData(prev => ({ ...prev, ...newData }));
+      setLoadedTabs(prev => ({ ...prev, ...newLoaded }));
+    }
+  }, [tabConfig, loadedTabs]);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
+      setLoading(true);
+      loadTabData(activeTab).then(() => {
+        loadRelatedData().finally(() => setLoading(false));
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialLoadDone.current && !loadedTabs[activeTab]) {
+      loadTabData(activeTab);
+    }
+  }, [activeTab, loadedTabs, loadTabData]);
 
   const currentConfig = useMemo(() => tabConfig[activeTab], [tabConfig, activeTab]);
   const currentData = useMemo(() => data[activeTab] || [], [data, activeTab]);
@@ -497,32 +495,57 @@ function SystemSetup() {
 
   const handleDelete = useCallback(async (item) => {
     if (!confirm(`Are you sure you want to delete this ${currentConfig.label}?`)) return;
+    
+    const idField = currentConfig.idField;
+    const itemId = item[idField];
+    
+    setData(prev => ({
+      ...prev,
+      [activeTab]: prev[activeTab].filter(i => i[idField] !== itemId)
+    }));
+    
     try {
-      await axios.delete(`${currentConfig.endpoint}/${item[currentConfig.idField]}`);
+      await axios.delete(`${currentConfig.endpoint}/${itemId}`);
       toast.success('Deleted successfully');
-      loadData();
     } catch {
+      loadTabData(activeTab);
       toast.error('Failed to delete');
     }
-  }, [currentConfig, loadData]);
+  }, [currentConfig, activeTab, loadTabData]);
 
   const handleSave = useCallback(async (formData) => {
+    const idField = currentConfig.idField;
+    
     try {
       if (editingItem) {
-        await axios.put(`${currentConfig.endpoint}/${editingItem[currentConfig.idField]}`, formData);
+        const res = await axios.put(`${currentConfig.endpoint}/${editingItem[idField]}`, formData);
+        const updatedItem = res.data;
+        
+        setData(prev => ({
+          ...prev,
+          [activeTab]: prev[activeTab].map(item => 
+            item[idField] === editingItem[idField] ? updatedItem : item
+          )
+        }));
         toast.success('Updated successfully');
       } else {
-        await axios.post(currentConfig.endpoint, formData);
+        const res = await axios.post(currentConfig.endpoint, formData);
+        const newItem = res.data;
+        
+        setData(prev => ({
+          ...prev,
+          [activeTab]: [...(prev[activeTab] || []), newItem]
+        }));
         toast.success('Created successfully');
       }
       setShowModal(false);
       setEditingItem(null);
-      loadData();
     } catch (error) {
       console.error('Save error:', error);
       toast.error('Failed to save');
+      throw error;
     }
-  }, [currentConfig, editingItem, loadData]);
+  }, [currentConfig, editingItem, activeTab]);
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -552,6 +575,8 @@ function SystemSetup() {
     }
     return '';
   }, [menuGroups, activeTab]);
+
+  const stableRelatedData = useMemo(() => data, [data]);
 
   if (loading) {
     return (
@@ -668,7 +693,7 @@ function SystemSetup() {
           item={editingItem}
           onClose={handleCloseModal}
           onSave={handleSave}
-          relatedData={data}
+          relatedData={stableRelatedData}
         />
       )}
     </div>
