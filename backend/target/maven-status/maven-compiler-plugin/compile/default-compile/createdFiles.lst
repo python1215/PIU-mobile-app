@@ -25,6 +25,7 @@ com/piun/piuproject/model/MonitoringType.class
 com/piun/piuproject/repository/YearRepository.class
 com/piun/piuproject/controller/ProjectController.class
 com/piun/piuproject/repository/TypeOfImpactRepository.class
+com/piun/piuproject/model/KPIContractSetup.class
 com/piun/piuproject/repository/OHSMonitoringRepository.class
 com/piun/piuproject/repository/DataCollectionFrequencyRepository.class
 com/piun/piuproject/model/TypeOfPAP.class
@@ -114,8 +115,8 @@ com/piun/piuproject/repository/ContributorRepository.class
 com/piun/piuproject/model/Component.class
 com/piun/piuproject/security/JwtTokenProvider.class
 com/piun/piuproject/repository/VulnerabilityCategoryRepository.class
-com/piun/piuproject/model/StakeholderEngagementType.class
 com/piun/piuproject/model/Ward.class
+com/piun/piuproject/model/StakeholderEngagementType.class
 com/piun/piuproject/controller/FinancialController.class
 com/piun/piuproject/repository/WardRepository.class
 com/piun/piuproject/model/PAPCategory.class
@@ -128,6 +129,7 @@ com/piun/piuproject/model/Currency.class
 com/piun/piuproject/model/DocumentVersion.class
 com/piun/piuproject/model/PhysicalProgress.class
 com/piun/piuproject/repository/SettlementRepository.class
+com/piun/piuproject/repository/KPIContractSetupRepository.class
 com/piun/piuproject/model/ContractProfilingWorks.class
 com/piun/piuproject/service/CustomUserDetailsService.class
 com/piun/piuproject/model/TypeOfImpact.class

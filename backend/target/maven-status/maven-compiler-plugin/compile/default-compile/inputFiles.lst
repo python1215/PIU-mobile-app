@@ -43,6 +43,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIForContract.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/TypeOfPAP.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/VulnerabilityCategory.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIContractSetup.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtAuthenticationEntryPoint.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/User.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/LGA.java
@@ -123,6 +124,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PAPType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtAuthenticationFilter.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIContractSetupRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/AuthResponse.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DocumentVersionRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/SecurityConfig.java

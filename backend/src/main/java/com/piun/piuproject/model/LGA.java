@@ -1,6 +1,8 @@
 package com.piun.piuproject.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 
 @Entity
 @Table(name = "lgas")
@@ -16,6 +18,10 @@ public class LGA {
     @JoinColumn(name = "region_code")
     private Region region;
 
+    @OneToMany(mappedBy = "lga", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<District> districts;
+
     public LGA() {}
 
     public LGA(String lgaCode, String lgaName, Region region) {
@@ -30,4 +36,6 @@ public class LGA {
     public void setLgaName(String lgaName) { this.lgaName = lgaName; }
     public Region getRegion() { return region; }
     public void setRegion(Region region) { this.region = region; }
+    public List<District> getDistricts() { return districts; }
+    public void setDistricts(List<District> districts) { this.districts = districts; }
 }

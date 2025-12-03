@@ -16,18 +16,19 @@ public class Settlement {
     @JoinColumn(name = "district_code")
     private District district;
 
-    @Column(name = "ward_code", length = 10)
-    private String wardCode;
+    @ManyToOne
+    @JoinColumn(name = "ward_code")
+    private Ward ward;
 
     @Column(name = "ea", length = 10)
     private String ea;
 
     public Settlement() {}
 
-    public Settlement(String settlementCode, String settlementName, District district) {
+    public Settlement(String settlementCode, String settlementName, Ward ward) {
         this.settlementCode = settlementCode;
         this.settlementName = settlementName;
-        this.district = district;
+        this.ward = ward;
     }
 
     public String getSettlementCode() { return settlementCode; }
@@ -36,8 +37,8 @@ public class Settlement {
     public void setSettlementName(String settlementName) { this.settlementName = settlementName; }
     public District getDistrict() { return district; }
     public void setDistrict(District district) { this.district = district; }
-    public String getWardCode() { return wardCode; }
-    public void setWardCode(String wardCode) { this.wardCode = wardCode; }
+    public Ward getWard() { return ward; }
+    public void setWard(Ward ward) { this.ward = ward; }
     public String getEa() { return ea; }
     public void setEa(String ea) { this.ea = ea; }
 }

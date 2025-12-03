@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface SettlementRepository extends JpaRepository<Settlement, String> {
-    List<Settlement> findByDistrict_DistrictCode(String districtCode);
+    List<Settlement> findByWard_WardCode(String wardCode);
 }

@@ -19,7 +19,7 @@ public class Region {
 
     @JsonIgnore
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL)
-    private List<District> districts;
+    private List<LGA> lgas;
 
     public Region() {}
 
@@ -35,6 +35,6 @@ public class Region {
     public void setRegionName(String regionName) { this.regionName = regionName; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public List<District> getDistricts() { return districts; }
-    public void setDistricts(List<District> districts) { this.districts = districts; }
+    public List<LGA> getLgas() { return lgas; }
+    public void setLgas(List<LGA> lgas) { this.lgas = lgas; }
 }

@@ -38,7 +38,7 @@ public class SetupController {
     @Autowired private MeasurementUnitRepository measurementUnitRepository;
     @Autowired private PAPCategoryRepository papCategoryRepository;
     @Autowired private VulnerabilityCategoryRepository vulnerabilityCategoryRepository;
-    @Autowired private KPIForContractRepository kpiForContractRepository;
+    @Autowired private KPIContractSetupRepository kpiContractSetupRepository;
     @Autowired private PDORepository pdoRepository;
     @Autowired private ProjectOutcomeRepository projectOutcomeRepository;
     @Autowired private ProjectResultRepository projectResultRepository;
@@ -87,6 +87,15 @@ public class SetupController {
     @PostMapping("/lgas")
     public LGA createLGA(@RequestBody LGA lga) { return lgaRepository.save(lga); }
 
+    @PutMapping("/lgas/{id}")
+    public ResponseEntity<LGA> updateLGA(@PathVariable String id, @RequestBody LGA details) {
+        return lgaRepository.findById(id).map(l -> { 
+            l.setLgaName(details.getLgaName()); 
+            l.setRegion(details.getRegion()); 
+            return ResponseEntity.ok(lgaRepository.save(l)); 
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/lgas/{id}")
     public ResponseEntity<Void> deleteLGA(@PathVariable String id) {
         return lgaRepository.findById(id).map(l -> { lgaRepository.delete(l); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -96,11 +105,20 @@ public class SetupController {
     @GetMapping("/districts")
     public List<District> getAllDistricts() { return districtRepository.findAll(); }
 
-    @GetMapping("/districts/region/{regionCode}")
-    public List<District> getDistrictsByRegion(@PathVariable String regionCode) { return districtRepository.findByRegion_RegionCode(regionCode); }
+    @GetMapping("/districts/lga/{lgaCode}")
+    public List<District> getDistrictsByLGA(@PathVariable String lgaCode) { return districtRepository.findByLga_LgaCode(lgaCode); }
 
     @PostMapping("/districts")
     public District createDistrict(@RequestBody District district) { return districtRepository.save(district); }
+
+    @PutMapping("/districts/{id}")
+    public ResponseEntity<District> updateDistrict(@PathVariable String id, @RequestBody District details) {
+        return districtRepository.findById(id).map(d -> { 
+            d.setDistrictName(details.getDistrictName()); 
+            d.setLga(details.getLga()); 
+            return ResponseEntity.ok(districtRepository.save(d)); 
+        }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/districts/{id}")
     public ResponseEntity<Void> deleteDistrict(@PathVariable String id) {
@@ -117,6 +135,15 @@ public class SetupController {
     @PostMapping("/wards")
     public Ward createWard(@RequestBody Ward ward) { return wardRepository.save(ward); }
 
+    @PutMapping("/wards/{id}")
+    public ResponseEntity<Ward> updateWard(@PathVariable String id, @RequestBody Ward details) {
+        return wardRepository.findById(id).map(w -> { 
+            w.setWardName(details.getWardName()); 
+            w.setDistrict(details.getDistrict()); 
+            return ResponseEntity.ok(wardRepository.save(w)); 
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/wards/{id}")
     public ResponseEntity<Void> deleteWard(@PathVariable String id) {
         return wardRepository.findById(id).map(w -> { wardRepository.delete(w); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -126,11 +153,20 @@ public class SetupController {
     @GetMapping("/settlements")
     public List<Settlement> getAllSettlements() { return settlementRepository.findAll(); }
 
-    @GetMapping("/settlements/district/{districtCode}")
-    public List<Settlement> getSettlementsByDistrict(@PathVariable String districtCode) { return settlementRepository.findByDistrict_DistrictCode(districtCode); }
+    @GetMapping("/settlements/ward/{wardCode}")
+    public List<Settlement> getSettlementsByWard(@PathVariable String wardCode) { return settlementRepository.findByWard_WardCode(wardCode); }
 
     @PostMapping("/settlements")
     public Settlement createSettlement(@RequestBody Settlement settlement) { return settlementRepository.save(settlement); }
+
+    @PutMapping("/settlements/{id}")
+    public ResponseEntity<Settlement> updateSettlement(@PathVariable String id, @RequestBody Settlement details) {
+        return settlementRepository.findById(id).map(s -> { 
+            s.setSettlementName(details.getSettlementName()); 
+            s.setWard(details.getWard()); 
+            return ResponseEntity.ok(settlementRepository.save(s)); 
+        }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/settlements/{id}")
     public ResponseEntity<Void> deleteSettlement(@PathVariable String id) {
@@ -212,6 +248,11 @@ public class SetupController {
     @PostMapping("/monitoring-types")
     public MonitoringType createMonitoringType(@RequestBody MonitoringType type) { return monitoringTypeRepository.save(type); }
 
+    @PutMapping("/monitoring-types/{id}")
+    public ResponseEntity<MonitoringType> updateMonitoringType(@PathVariable String id, @RequestBody MonitoringType details) {
+        return monitoringTypeRepository.findById(id).map(m -> { m.setMonitoringType(details.getMonitoringType()); return ResponseEntity.ok(monitoringTypeRepository.save(m)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/monitoring-types/{id}")
     public ResponseEntity<Void> deleteMonitoringType(@PathVariable String id) {
         return monitoringTypeRepository.findById(id).map(m -> { monitoringTypeRepository.delete(m); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -241,6 +282,11 @@ public class SetupController {
     @PostMapping("/pap-types")
     public TypeOfPAP createPAPType(@RequestBody TypeOfPAP type) { return typeOfPAPRepository.save(type); }
 
+    @PutMapping("/pap-types/{id}")
+    public ResponseEntity<TypeOfPAP> updatePAPType(@PathVariable Long id, @RequestBody TypeOfPAP details) {
+        return typeOfPAPRepository.findById(id).map(t -> { t.setTypeOfPap(details.getTypeOfPap()); return ResponseEntity.ok(typeOfPAPRepository.save(t)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/pap-types/{id}")
     public ResponseEntity<Void> deletePAPType(@PathVariable Long id) {
         return typeOfPAPRepository.findById(id).map(t -> { typeOfPAPRepository.delete(t); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -252,6 +298,11 @@ public class SetupController {
 
     @PostMapping("/pap-categories")
     public PAPCategory createPAPCategory(@RequestBody PAPCategory category) { return papCategoryRepository.save(category); }
+
+    @PutMapping("/pap-categories/{id}")
+    public ResponseEntity<PAPCategory> updatePAPCategory(@PathVariable Long id, @RequestBody PAPCategory details) {
+        return papCategoryRepository.findById(id).map(c -> { c.setPapCategory(details.getPapCategory()); return ResponseEntity.ok(papCategoryRepository.save(c)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/pap-categories/{id}")
     public ResponseEntity<Void> deletePAPCategory(@PathVariable Long id) {
@@ -265,6 +316,11 @@ public class SetupController {
     @PostMapping("/impact-types")
     public TypeOfImpact createImpactType(@RequestBody TypeOfImpact type) { return typeOfImpactRepository.save(type); }
 
+    @PutMapping("/impact-types/{id}")
+    public ResponseEntity<TypeOfImpact> updateImpactType(@PathVariable Long id, @RequestBody TypeOfImpact details) {
+        return typeOfImpactRepository.findById(id).map(t -> { t.setImpact(details.getImpact()); return ResponseEntity.ok(typeOfImpactRepository.save(t)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/impact-types/{id}")
     public ResponseEntity<Void> deleteImpactType(@PathVariable Long id) {
         return typeOfImpactRepository.findById(id).map(t -> { typeOfImpactRepository.delete(t); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -276,6 +332,11 @@ public class SetupController {
 
     @PostMapping("/settlement-natures")
     public NatureOfSettlement createSettlementNature(@RequestBody NatureOfSettlement nature) { return natureOfSettlementRepository.save(nature); }
+
+    @PutMapping("/settlement-natures/{id}")
+    public ResponseEntity<NatureOfSettlement> updateSettlementNature(@PathVariable Long id, @RequestBody NatureOfSettlement details) {
+        return natureOfSettlementRepository.findById(id).map(n -> { n.setNatureOfSettlement(details.getNatureOfSettlement()); return ResponseEntity.ok(natureOfSettlementRepository.save(n)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/settlement-natures/{id}")
     public ResponseEntity<Void> deleteSettlementNature(@PathVariable Long id) {
@@ -289,6 +350,11 @@ public class SetupController {
     @PostMapping("/decision-outcomes")
     public DecisionOutcome createDecisionOutcome(@RequestBody DecisionOutcome outcome) { return decisionOutcomeRepository.save(outcome); }
 
+    @PutMapping("/decision-outcomes/{id}")
+    public ResponseEntity<DecisionOutcome> updateDecisionOutcome(@PathVariable Long id, @RequestBody DecisionOutcome details) {
+        return decisionOutcomeRepository.findById(id).map(o -> { o.setOutcome(details.getOutcome()); return ResponseEntity.ok(decisionOutcomeRepository.save(o)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/decision-outcomes/{id}")
     public ResponseEntity<Void> deleteDecisionOutcome(@PathVariable Long id) {
         return decisionOutcomeRepository.findById(id).map(o -> { decisionOutcomeRepository.delete(o); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -300,6 +366,11 @@ public class SetupController {
 
     @PostMapping("/stakeholder-engagements")
     public StakeholderEngagement createStakeholderEngagement(@RequestBody StakeholderEngagement engagement) { return stakeholderEngagementRepository.save(engagement); }
+
+    @PutMapping("/stakeholder-engagements/{id}")
+    public ResponseEntity<StakeholderEngagement> updateStakeholderEngagement(@PathVariable Long id, @RequestBody StakeholderEngagement details) {
+        return stakeholderEngagementRepository.findById(id).map(e -> { e.setEngagementType(details.getEngagementType()); return ResponseEntity.ok(stakeholderEngagementRepository.save(e)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/stakeholder-engagements/{id}")
     public ResponseEntity<Void> deleteStakeholderEngagement(@PathVariable Long id) {
@@ -313,6 +384,11 @@ public class SetupController {
     @PostMapping("/access-types")
     public AccessType createAccessType(@RequestBody AccessType type) { return accessTypeRepository.save(type); }
 
+    @PutMapping("/access-types/{id}")
+    public ResponseEntity<AccessType> updateAccessType(@PathVariable Long id, @RequestBody AccessType details) {
+        return accessTypeRepository.findById(id).map(a -> { a.setAccessType(details.getAccessType()); return ResponseEntity.ok(accessTypeRepository.save(a)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/access-types/{id}")
     public ResponseEntity<Void> deleteAccessType(@PathVariable Long id) {
         return accessTypeRepository.findById(id).map(a -> { accessTypeRepository.delete(a); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -324,6 +400,11 @@ public class SetupController {
 
     @PostMapping("/data-frequencies")
     public DataCollectionFrequency createDataFrequency(@RequestBody DataCollectionFrequency freq) { return dataCollectionFrequencyRepository.save(freq); }
+
+    @PutMapping("/data-frequencies/{id}")
+    public ResponseEntity<DataCollectionFrequency> updateDataFrequency(@PathVariable Long id, @RequestBody DataCollectionFrequency details) {
+        return dataCollectionFrequencyRepository.findById(id).map(f -> { f.setFrequency(details.getFrequency()); return ResponseEntity.ok(dataCollectionFrequencyRepository.save(f)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/data-frequencies/{id}")
     public ResponseEntity<Void> deleteDataFrequency(@PathVariable Long id) {
@@ -337,6 +418,11 @@ public class SetupController {
     @PostMapping("/investment-types")
     public InvestmentType createInvestmentType(@RequestBody InvestmentType type) { return investmentTypeRepository.save(type); }
 
+    @PutMapping("/investment-types/{id}")
+    public ResponseEntity<InvestmentType> updateInvestmentType(@PathVariable Long id, @RequestBody InvestmentType details) {
+        return investmentTypeRepository.findById(id).map(t -> { t.setNameOfInvestment(details.getNameOfInvestment()); return ResponseEntity.ok(investmentTypeRepository.save(t)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/investment-types/{id}")
     public ResponseEntity<Void> deleteInvestmentType(@PathVariable Long id) {
         return investmentTypeRepository.findById(id).map(t -> { investmentTypeRepository.delete(t); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -348,6 +434,11 @@ public class SetupController {
 
     @PostMapping("/indicator-types")
     public IndicatorType createIndicatorType(@RequestBody IndicatorType type) { return indicatorTypeRepository.save(type); }
+
+    @PutMapping("/indicator-types/{id}")
+    public ResponseEntity<IndicatorType> updateIndicatorType(@PathVariable Long id, @RequestBody IndicatorType details) {
+        return indicatorTypeRepository.findById(id).map(t -> { t.setIndicatorType(details.getIndicatorType()); return ResponseEntity.ok(indicatorTypeRepository.save(t)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/indicator-types/{id}")
     public ResponseEntity<Void> deleteIndicatorType(@PathVariable Long id) {
@@ -361,6 +452,11 @@ public class SetupController {
     @PostMapping("/physical-progress")
     public PhysicalProgress createPhysicalProgress(@RequestBody PhysicalProgress progress) { return physicalProgressRepository.save(progress); }
 
+    @PutMapping("/physical-progress/{id}")
+    public ResponseEntity<PhysicalProgress> updatePhysicalProgress(@PathVariable Long id, @RequestBody PhysicalProgress details) {
+        return physicalProgressRepository.findById(id).map(p -> { p.setProgressScale(details.getProgressScale()); return ResponseEntity.ok(physicalProgressRepository.save(p)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/physical-progress/{id}")
     public ResponseEntity<Void> deletePhysicalProgress(@PathVariable Long id) {
         return physicalProgressRepository.findById(id).map(p -> { physicalProgressRepository.delete(p); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -372,6 +468,11 @@ public class SetupController {
 
     @PostMapping("/measurement-units")
     public MeasurementUnit createMeasurementUnit(@RequestBody MeasurementUnit unit) { return measurementUnitRepository.save(unit); }
+
+    @PutMapping("/measurement-units/{id}")
+    public ResponseEntity<MeasurementUnit> updateMeasurementUnit(@PathVariable Long id, @RequestBody MeasurementUnit details) {
+        return measurementUnitRepository.findById(id).map(u -> { u.setUnit(details.getUnit()); return ResponseEntity.ok(measurementUnitRepository.save(u)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/measurement-units/{id}")
     public ResponseEntity<Void> deleteMeasurementUnit(@PathVariable Long id) {
@@ -385,6 +486,11 @@ public class SetupController {
     @PostMapping("/vulnerability-categories")
     public VulnerabilityCategory createVulnerabilityCategory(@RequestBody VulnerabilityCategory category) { return vulnerabilityCategoryRepository.save(category); }
 
+    @PutMapping("/vulnerability-categories/{id}")
+    public ResponseEntity<VulnerabilityCategory> updateVulnerabilityCategory(@PathVariable Long id, @RequestBody VulnerabilityCategory details) {
+        return vulnerabilityCategoryRepository.findById(id).map(v -> { v.setVulnerability(details.getVulnerability()); return ResponseEntity.ok(vulnerabilityCategoryRepository.save(v)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/vulnerability-categories/{id}")
     public ResponseEntity<Void> deleteVulnerabilityCategory(@PathVariable Long id) {
         return vulnerabilityCategoryRepository.findById(id).map(v -> { vulnerabilityCategoryRepository.delete(v); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -392,14 +498,19 @@ public class SetupController {
 
     // KPI Contracts
     @GetMapping("/kpi-contracts")
-    public List<KPIForContract> getAllKPIContracts() { return kpiForContractRepository.findAll(); }
+    public List<KPIContractSetup> getAllKPIContracts() { return kpiContractSetupRepository.findAll(); }
 
     @PostMapping("/kpi-contracts")
-    public KPIForContract createKPIContract(@RequestBody KPIForContract kpi) { return kpiForContractRepository.save(kpi); }
+    public KPIContractSetup createKPIContract(@RequestBody KPIContractSetup kpi) { return kpiContractSetupRepository.save(kpi); }
+
+    @PutMapping("/kpi-contracts/{id}")
+    public ResponseEntity<KPIContractSetup> updateKPIContract(@PathVariable Long id, @RequestBody KPIContractSetup details) {
+        return kpiContractSetupRepository.findById(id).map(k -> { k.setKpiCode(details.getKpiCode()); k.setKpiName(details.getKpiName()); return ResponseEntity.ok(kpiContractSetupRepository.save(k)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/kpi-contracts/{id}")
     public ResponseEntity<Void> deleteKPIContract(@PathVariable Long id) {
-        return kpiForContractRepository.findById(id).map(k -> { kpiForContractRepository.delete(k); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
+        return kpiContractSetupRepository.findById(id).map(k -> { kpiContractSetupRepository.delete(k); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 
     // PDO Statements
@@ -408,6 +519,11 @@ public class SetupController {
 
     @PostMapping("/pdos")
     public PDO createPDO(@RequestBody PDO pdo) { return pdoRepository.save(pdo); }
+
+    @PutMapping("/pdos/{id}")
+    public ResponseEntity<PDO> updatePDO(@PathVariable Long id, @RequestBody PDO details) {
+        return pdoRepository.findById(id).map(p -> { p.setPdoStatement(details.getPdoStatement()); return ResponseEntity.ok(pdoRepository.save(p)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/pdos/{id}")
     public ResponseEntity<Void> deletePDO(@PathVariable Long id) {
@@ -421,6 +537,11 @@ public class SetupController {
     @PostMapping("/outcomes")
     public ProjectOutcome createOutcome(@RequestBody ProjectOutcome outcome) { return projectOutcomeRepository.save(outcome); }
 
+    @PutMapping("/outcomes/{id}")
+    public ResponseEntity<ProjectOutcome> updateOutcome(@PathVariable Long id, @RequestBody ProjectOutcome details) {
+        return projectOutcomeRepository.findById(id).map(o -> { o.setProjectOutcome(details.getProjectOutcome()); return ResponseEntity.ok(projectOutcomeRepository.save(o)); }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/outcomes/{id}")
     public ResponseEntity<Void> deleteOutcome(@PathVariable Long id) {
         return projectOutcomeRepository.findById(id).map(o -> { projectOutcomeRepository.delete(o); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
@@ -432,6 +553,11 @@ public class SetupController {
 
     @PostMapping("/results")
     public ProjectResult createResult(@RequestBody ProjectResult result) { return projectResultRepository.save(result); }
+
+    @PutMapping("/results/{id}")
+    public ResponseEntity<ProjectResult> updateResult(@PathVariable Long id, @RequestBody ProjectResult details) {
+        return projectResultRepository.findById(id).map(r -> { r.setProjectResult(details.getProjectResult()); return ResponseEntity.ok(projectResultRepository.save(r)); }).orElse(ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/results/{id}")
     public ResponseEntity<Void> deleteResult(@PathVariable Long id) {

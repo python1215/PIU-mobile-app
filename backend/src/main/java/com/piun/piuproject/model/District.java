@@ -15,27 +15,33 @@ public class District {
     private String districtName;
 
     @ManyToOne
-    @JoinColumn(name = "region_code")
-    private Region region;
+    @JoinColumn(name = "lga_code")
+    private LGA lga;
 
     @OneToMany(mappedBy = "district", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Settlement> settlements;
 
+    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Ward> wards;
+
     public District() {}
 
-    public District(String districtCode, String districtName, Region region) {
+    public District(String districtCode, String districtName, LGA lga) {
         this.districtCode = districtCode;
         this.districtName = districtName;
-        this.region = region;
+        this.lga = lga;
     }
 
     public String getDistrictCode() { return districtCode; }
     public void setDistrictCode(String districtCode) { this.districtCode = districtCode; }
     public String getDistrictName() { return districtName; }
     public void setDistrictName(String districtName) { this.districtName = districtName; }
-    public Region getRegion() { return region; }
-    public void setRegion(Region region) { this.region = region; }
+    public LGA getLga() { return lga; }
+    public void setLga(LGA lga) { this.lga = lga; }
     public List<Settlement> getSettlements() { return settlements; }
     public void setSettlements(List<Settlement> settlements) { this.settlements = settlements; }
+    public List<Ward> getWards() { return wards; }
+    public void setWards(List<Ward> wards) { this.wards = wards; }
 }

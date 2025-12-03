@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface DistrictRepository extends JpaRepository<District, String> {
-    List<District> findByRegion_RegionCode(String regionCode);
+    List<District> findByLga_LgaCode(String lgaCode);
 }
