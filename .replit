@@ -1,8 +1,8 @@
-modules = ["python-3.11", "python3", "postgresql-16", "java-21", "nodejs-20"]
+modules = ["python-3.11", "python3", "java-21", "nodejs-20", "java-21-openjdk", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
+packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib", "maven", "jdk21"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -39,3 +39,8 @@ externalPort = 80
 [[ports]]
 localPort = 33761
 externalPort = 3001
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "piu-project-microservices-jwt-secret-key-must-be-at-least-32-bytes-long"
