@@ -3,9 +3,17 @@ import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave }) {
+const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData }) {
   const [formData, setFormData] = useState(() => {
-    if (item) return { ...item };
+    if (item) {
+      const initial = { ...item };
+      fields.forEach(f => {
+        if (f.type === 'select' && f.relationField && item[f.relationField]) {
+          initial[f.name] = item[f.relationField][f.valueField] || '';
+        }
+      });
+      return initial;
+    }
     const initial = {};
     fields.forEach(f => { initial[f.name] = ''; });
     return initial;
@@ -13,8 +21,19 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    onSave(formData);
-  }, [formData, onSave]);
+    const submitData = { ...formData };
+    fields.forEach(f => {
+      if (f.type === 'select' && f.relationField) {
+        const selectedItem = relatedData[f.dataKey]?.find(
+          d => String(d[f.valueField]) === String(formData[f.name])
+        );
+        if (selectedItem) {
+          submitData[f.relationField] = selectedItem;
+        }
+      }
+    });
+    onSave(submitData);
+  }, [formData, onSave, fields, relatedData]);
 
   const handleChange = useCallback((name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -33,15 +52,32 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
               {fields.map(field => (
                 <div className="mb-3" key={field.name}>
                   <label className="form-label fw-medium">{field.label}</label>
-                  <input
-                    type={field.type || 'text'}
-                    value={formData[field.name] || ''}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="form-control"
-                    placeholder={field.placeholder || ''}
-                    required={field.required !== false}
-                    disabled={field.disableOnEdit && !!item}
-                  />
+                  {field.type === 'select' ? (
+                    <select
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleChange(field.name, e.target.value)}
+                      className="form-select"
+                      required={field.required !== false}
+                      disabled={field.disableOnEdit && !!item}
+                    >
+                      <option value="">-- Select {field.label} --</option>
+                      {(relatedData[field.dataKey] || []).map(opt => (
+                        <option key={opt[field.valueField]} value={opt[field.valueField]}>
+                          {opt[field.displayField]}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type || 'text'}
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleChange(field.name, e.target.value)}
+                      className="form-control"
+                      placeholder={field.placeholder || ''}
+                      required={field.required !== false}
+                      disabled={field.disableOnEdit && !!item}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -61,19 +97,26 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
     return <p className="text-center text-muted py-5">No data available</p>;
   }
 
+  const getCellValue = (item, col) => {
+    if (col.nested) {
+      return item[col.key]?.[col.nested] || '-';
+    }
+    return item[col.key] || '-';
+  };
+
   return (
     <div className="table-responsive">
       <table className="table table-striped table-hover">
         <thead className="table-dark">
           <tr>
-            {columns.map(col => <th key={col.key}>{col.label}</th>)}
+            {columns.map(col => <th key={col.key + (col.nested || '')}>{col.label}</th>)}
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={item[idField] || index}>
-              {columns.map(col => <td key={col.key}>{item[col.key] || '-'}</td>)}
+              {columns.map(col => <td key={col.key + (col.nested || '')}>{getCellValue(item, col)}</td>)}
               <td>
                 {onEdit && <button onClick={() => onEdit(item)} className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>}
                 {onDelete && <button onClick={() => onDelete(item)} className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>}
@@ -137,17 +180,33 @@ function SystemSetup() {
       columns: [{ key: 'regionCode', label: 'Code' }, { key: 'regionName', label: 'Name' }, { key: 'description', label: 'Description' }],
       fields: [{ name: 'regionCode', label: 'Region Code', disableOnEdit: true }, { name: 'regionName', label: 'Region Name' }, { name: 'description', label: 'Description', required: false }] },
     lgas: { endpoint: '/api/setup/lgas', idField: 'lgaCode', label: 'LGAs',
-      columns: [{ key: 'lgaCode', label: 'Code' }, { key: 'lgaName', label: 'Name' }],
-      fields: [{ name: 'lgaCode', label: 'LGA Code', disableOnEdit: true }, { name: 'lgaName', label: 'LGA Name' }] },
+      columns: [{ key: 'lgaCode', label: 'Code' }, { key: 'lgaName', label: 'Name' }, { key: 'region', label: 'Region', nested: 'regionName' }],
+      fields: [
+        { name: 'lgaCode', label: 'LGA Code', disableOnEdit: true },
+        { name: 'lgaName', label: 'LGA Name' },
+        { name: 'regionCode', label: 'Region', type: 'select', dataKey: 'regions', valueField: 'regionCode', displayField: 'regionName', relationField: 'region' }
+      ] },
     districts: { endpoint: '/api/setup/districts', idField: 'districtCode', label: 'Districts',
-      columns: [{ key: 'districtCode', label: 'Code' }, { key: 'districtName', label: 'Name' }],
-      fields: [{ name: 'districtCode', label: 'District Code', disableOnEdit: true }, { name: 'districtName', label: 'District Name' }] },
+      columns: [{ key: 'districtCode', label: 'Code' }, { key: 'districtName', label: 'Name' }, { key: 'lga', label: 'LGA', nested: 'lgaName' }],
+      fields: [
+        { name: 'districtCode', label: 'District Code', disableOnEdit: true },
+        { name: 'districtName', label: 'District Name' },
+        { name: 'lgaCode', label: 'LGA', type: 'select', dataKey: 'lgas', valueField: 'lgaCode', displayField: 'lgaName', relationField: 'lga' }
+      ] },
     wards: { endpoint: '/api/setup/wards', idField: 'wardCode', label: 'Wards',
-      columns: [{ key: 'wardCode', label: 'Code' }, { key: 'wardName', label: 'Name' }],
-      fields: [{ name: 'wardCode', label: 'Ward Code', disableOnEdit: true }, { name: 'wardName', label: 'Ward Name' }] },
+      columns: [{ key: 'wardCode', label: 'Code' }, { key: 'wardName', label: 'Name' }, { key: 'district', label: 'District', nested: 'districtName' }],
+      fields: [
+        { name: 'wardCode', label: 'Ward Code', disableOnEdit: true },
+        { name: 'wardName', label: 'Ward Name' },
+        { name: 'districtCode', label: 'District', type: 'select', dataKey: 'districts', valueField: 'districtCode', displayField: 'districtName', relationField: 'district' }
+      ] },
     settlements: { endpoint: '/api/setup/settlements', idField: 'settlementCode', label: 'Settlements',
-      columns: [{ key: 'settlementCode', label: 'Code' }, { key: 'settlementName', label: 'Name' }],
-      fields: [{ name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true }, { name: 'settlementName', label: 'Settlement Name' }] },
+      columns: [{ key: 'settlementCode', label: 'Code' }, { key: 'settlementName', label: 'Name' }, { key: 'ward', label: 'Ward', nested: 'wardName' }],
+      fields: [
+        { name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true },
+        { name: 'settlementName', label: 'Settlement Name' },
+        { name: 'wardCode', label: 'Ward', type: 'select', dataKey: 'wards', valueField: 'wardCode', displayField: 'wardName', relationField: 'ward' }
+      ] },
     years: { endpoint: '/api/setup/years', idField: 'id', label: 'Years',
       columns: [{ key: 'id', label: 'ID' }, { key: 'profileYear', label: 'Profile Year' }],
       fields: [{ name: 'profileYear', label: 'Profile Year', placeholder: 'e.g., 2025' }] },
@@ -314,9 +373,12 @@ function SystemSetup() {
     if (!search) return currentData;
     const searchLower = search.toLowerCase();
     return currentData.filter(item =>
-      Object.values(item).some(val =>
-        String(val).toLowerCase().includes(searchLower)
-      )
+      Object.values(item).some(val => {
+        if (typeof val === 'object' && val !== null) {
+          return Object.values(val).some(v => String(v).toLowerCase().includes(searchLower));
+        }
+        return String(val).toLowerCase().includes(searchLower);
+      })
     );
   }, [currentData, search]);
 
@@ -353,7 +415,8 @@ function SystemSetup() {
       setShowModal(false);
       setEditingItem(null);
       loadData();
-    } catch {
+    } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save');
     }
   }, [currentConfig, editingItem, loadData]);
@@ -499,6 +562,7 @@ function SystemSetup() {
           item={editingItem}
           onClose={handleCloseModal}
           onSave={handleSave}
+          relatedData={data}
         />
       )}
     </div>
