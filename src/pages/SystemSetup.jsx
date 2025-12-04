@@ -81,96 +81,98 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
   
   return (
     <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${isLargeForm ? 'modal-lg' : 'modal-md'}`} onClick={e => e.stopPropagation()}>
-        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-          <div className="modal-header border-0 py-3 px-4" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)' }}>
+      <div 
+        className="modal-dialog modal-dialog-centered modal-dialog-scrollable" 
+        onClick={e => e.stopPropagation()}
+        style={{ 
+          maxWidth: isLargeForm ? '700px' : '500px',
+          width: '95%',
+          margin: '1rem auto'
+        }}
+      >
+        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden', maxHeight: '90vh' }}>
+          <div className="modal-header border-0 py-2 py-md-3 px-3 px-md-4" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)' }}>
             <div className="d-flex align-items-center">
-              <div className="rounded-circle bg-white bg-opacity-25 p-2 me-3">
-                <FiEdit2 className="text-white" size={20} />
+              <div className="rounded-circle bg-white bg-opacity-25 p-1 p-md-2 me-2 me-md-3">
+                <FiEdit2 className="text-white" size={16} />
               </div>
               <div>
-                <h5 className="modal-title fw-bold text-white mb-0">
+                <h6 className="modal-title fw-bold text-white mb-0" style={{ fontSize: '1rem' }}>
                   {item ? `Edit ${title}` : `Add New ${title}`}
-                </h5>
-                <small className="text-white text-opacity-75">
+                </h6>
+                <small className="text-white text-opacity-75 d-none d-md-block" style={{ fontSize: '0.75rem' }}>
                   {item ? 'Update the information below' : 'Fill in the details to create a new entry'}
                 </small>
               </div>
             </div>
-            <button type="button" className="btn btn-link text-white p-0 opacity-75" onClick={onClose} disabled={saving} style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.target.style.opacity = 1} onMouseOut={e => e.target.style.opacity = 0.75}>
-              <FiX size={24} />
+            <button type="button" className="btn btn-link text-white p-0" onClick={onClose} disabled={saving}>
+              <FiX size={20} />
             </button>
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="modal-body p-4" style={{ maxHeight: '60vh', overflowY: 'auto', background: '#f8f9fa' }}>
-              <div className="card border-0 shadow-sm" style={{ borderRadius: '12px' }}>
-                <div className="card-body p-4">
-                  <div className="row g-4">
-                    {fields.map((field, index) => (
-                      <div className={`col-12 ${field.halfWidth ? 'col-md-6' : ''}`} key={field.name}>
-                        <div className="form-floating-custom">
-                          <label className="form-label fw-semibold text-secondary mb-2" style={{ fontSize: '0.875rem', letterSpacing: '0.5px' }}>
-                            {field.label}
-                            {field.required !== false && <span className="text-danger ms-1">*</span>}
-                          </label>
-                          {field.type === 'select' || field.type === 'cascadeParent' ? (
-                            <select
-                              value={formData[field.name] || ''}
-                              onChange={(e) => handleChange(field.name, e.target.value, field)}
-                              className="form-select border-2 shadow-sm"
-                              required={field.required !== false && field.type !== 'cascadeParent'}
-                              disabled={(field.disableOnEdit && !!item) || saving}
-                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                            >
-                              <option value="">Select {field.label}...</option>
-                              {(field.type === 'cascadeParent' 
-                                ? (relatedData[field.dataKey] || [])
-                                : getFilteredOptions(field)
-                              ).map(opt => (
-                                <option key={opt[field.valueField]} value={opt[field.valueField]}>
-                                  {opt[field.displayField]}
-                                </option>
-                              ))}
-                            </select>
-                          ) : field.type === 'textarea' ? (
-                            <textarea
-                              value={formData[field.name] || ''}
-                              onChange={(e) => handleChange(field.name, e.target.value)}
-                              className="form-control border-2 shadow-sm"
-                              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
-                              required={field.required !== false}
-                              disabled={(field.disableOnEdit && !!item) || saving}
-                              rows={3}
-                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', resize: 'vertical', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                            />
-                          ) : (
-                            <input
-                              type={field.type || 'text'}
-                              value={formData[field.name] || ''}
-                              onChange={(e) => handleChange(field.name, e.target.value)}
-                              className="form-control border-2 shadow-sm"
-                              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
-                              required={field.required !== false}
-                              disabled={(field.disableOnEdit && !!item) || saving}
-                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                            />
-                          )}
-                          {field.helpText && (
-                            <small className="text-muted mt-2 d-block" style={{ fontSize: '0.8rem' }}>{field.helpText}</small>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+            <div className="modal-body p-3 p-md-4" style={{ overflowY: 'auto', background: '#f8f9fa', maxHeight: 'calc(90vh - 140px)' }}>
+              <div className="row g-3">
+                {fields.map((field, index) => (
+                  <div className={`col-12 ${field.halfWidth ? 'col-sm-6' : ''}`} key={field.name}>
+                    <label className="form-label fw-medium text-dark mb-1" style={{ fontSize: '0.85rem' }}>
+                      {field.label}
+                      {field.required !== false && <span className="text-danger ms-1">*</span>}
+                    </label>
+                    {field.type === 'select' || field.type === 'cascadeParent' ? (
+                      <select
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value, field)}
+                        className="form-select"
+                        required={field.required !== false && field.type !== 'cascadeParent'}
+                        disabled={(field.disableOnEdit && !!item) || saving}
+                        style={{ borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.9rem' }}
+                      >
+                        <option value="">Select {field.label}...</option>
+                        {(field.type === 'cascadeParent' 
+                          ? (relatedData[field.dataKey] || [])
+                          : getFilteredOptions(field)
+                        ).map(opt => (
+                          <option key={opt[field.valueField]} value={opt[field.valueField]}>
+                            {opt[field.displayField]}
+                          </option>
+                        ))}
+                      </select>
+                    ) : field.type === 'textarea' ? (
+                      <textarea
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value)}
+                        className="form-control"
+                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
+                        required={field.required !== false}
+                        disabled={(field.disableOnEdit && !!item) || saving}
+                        rows={2}
+                        style={{ borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.9rem', resize: 'vertical' }}
+                      />
+                    ) : (
+                      <input
+                        type={field.type || 'text'}
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value)}
+                        className="form-control"
+                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
+                        required={field.required !== false}
+                        disabled={(field.disableOnEdit && !!item) || saving}
+                        style={{ borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.9rem' }}
+                      />
+                    )}
+                    {field.helpText && (
+                      <small className="text-muted mt-1 d-block" style={{ fontSize: '0.75rem' }}>{field.helpText}</small>
+                    )}
                   </div>
-                </div>
+                ))}
               </div>
             </div>
-            <div className="modal-footer border-0 py-3 px-4 bg-white">
-              <div className="d-flex gap-3 w-100 justify-content-end">
-                <button type="button" onClick={onClose} className="btn btn-light px-4 py-2 fw-semibold" disabled={saving} style={{ borderRadius: '10px', minWidth: '100px' }}>
+            <div className="modal-footer border-top py-2 px-3 px-md-4 bg-white">
+              <div className="d-flex gap-2 w-100 justify-content-end">
+                <button type="button" onClick={onClose} className="btn btn-outline-secondary px-3 py-2" disabled={saving} style={{ borderRadius: '8px', fontSize: '0.9rem' }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2" disabled={saving} style={{ borderRadius: '10px', minWidth: '120px', background: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)', border: 'none' }}>
+                <button type="submit" className="btn btn-primary px-3 py-2 d-flex align-items-center gap-2" disabled={saving} style={{ borderRadius: '8px', fontSize: '0.9rem' }}>
                   {saving ? (
                     <>
                       <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -178,7 +180,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                     </>
                   ) : (
                     <>
-                      <FiPlus size={18} />
+                      <FiPlus size={16} />
                       {item ? 'Update' : 'Create'}
                     </>
                   )}
