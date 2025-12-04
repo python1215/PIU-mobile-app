@@ -77,90 +77,113 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
     });
   }, []);
 
+  const isLargeForm = fields.length > 3;
+  
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
-      <div className="modal-dialog modal-dialog-centered modal-md" onClick={e => e.stopPropagation()}>
-        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-          <div className="modal-header bg-primary text-white border-0 py-3 px-4">
-            <h5 className="modal-title fw-semibold">
-              {item ? `Edit ${title}` : `Add New ${title}`}
-            </h5>
-            <button type="button" className="btn btn-link text-white p-0" onClick={onClose} disabled={saving}>
+    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={onClose}>
+      <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${isLargeForm ? 'modal-lg' : 'modal-md'}`} onClick={e => e.stopPropagation()}>
+        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+          <div className="modal-header border-0 py-3 px-4" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)' }}>
+            <div className="d-flex align-items-center">
+              <div className="rounded-circle bg-white bg-opacity-25 p-2 me-3">
+                <FiEdit2 className="text-white" size={20} />
+              </div>
+              <div>
+                <h5 className="modal-title fw-bold text-white mb-0">
+                  {item ? `Edit ${title}` : `Add New ${title}`}
+                </h5>
+                <small className="text-white text-opacity-75">
+                  {item ? 'Update the information below' : 'Fill in the details to create a new entry'}
+                </small>
+              </div>
+            </div>
+            <button type="button" className="btn btn-link text-white p-0 opacity-75" onClick={onClose} disabled={saving} style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.target.style.opacity = 1} onMouseOut={e => e.target.style.opacity = 0.75}>
               <FiX size={24} />
             </button>
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="modal-body p-4">
-              <div className="row g-3">
-                {fields.map(field => (
-                  <div className={`col-12 ${field.halfWidth ? 'col-md-6' : ''}`} key={field.name}>
-                    <label className="form-label fw-semibold text-dark mb-2">
-                      {field.label}
-                      {field.required !== false && <span className="text-danger ms-1">*</span>}
-                    </label>
-                    {field.type === 'select' || field.type === 'cascadeParent' ? (
-                      <select
-                        value={formData[field.name] || ''}
-                        onChange={(e) => handleChange(field.name, e.target.value, field)}
-                        className="form-select form-select-lg border-2"
-                        required={field.required !== false && field.type !== 'cascadeParent'}
-                        disabled={(field.disableOnEdit && !!item) || saving}
-                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
-                      >
-                        <option value="">-- Select {field.label} --</option>
-                        {(field.type === 'cascadeParent' 
-                          ? (relatedData[field.dataKey] || [])
-                          : getFilteredOptions(field)
-                        ).map(opt => (
-                          <option key={opt[field.valueField]} value={opt[field.valueField]}>
-                            {opt[field.displayField]}
-                          </option>
-                        ))}
-                      </select>
-                    ) : field.type === 'textarea' ? (
-                      <textarea
-                        value={formData[field.name] || ''}
-                        onChange={(e) => handleChange(field.name, e.target.value)}
-                        className="form-control form-control-lg border-2"
-                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                        required={field.required !== false}
-                        disabled={(field.disableOnEdit && !!item) || saving}
-                        rows={3}
-                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
-                      />
-                    ) : (
-                      <input
-                        type={field.type || 'text'}
-                        value={formData[field.name] || ''}
-                        onChange={(e) => handleChange(field.name, e.target.value)}
-                        className="form-control form-control-lg border-2"
-                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                        required={field.required !== false}
-                        disabled={(field.disableOnEdit && !!item) || saving}
-                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
-                      />
-                    )}
-                    {field.helpText && (
-                      <small className="text-muted mt-1 d-block">{field.helpText}</small>
-                    )}
+            <div className="modal-body p-4" style={{ maxHeight: '60vh', overflowY: 'auto', background: '#f8f9fa' }}>
+              <div className="card border-0 shadow-sm" style={{ borderRadius: '12px' }}>
+                <div className="card-body p-4">
+                  <div className="row g-4">
+                    {fields.map((field, index) => (
+                      <div className={`col-12 ${field.halfWidth ? 'col-md-6' : ''}`} key={field.name}>
+                        <div className="form-floating-custom">
+                          <label className="form-label fw-semibold text-secondary mb-2" style={{ fontSize: '0.875rem', letterSpacing: '0.5px' }}>
+                            {field.label}
+                            {field.required !== false && <span className="text-danger ms-1">*</span>}
+                          </label>
+                          {field.type === 'select' || field.type === 'cascadeParent' ? (
+                            <select
+                              value={formData[field.name] || ''}
+                              onChange={(e) => handleChange(field.name, e.target.value, field)}
+                              className="form-select border-2 shadow-sm"
+                              required={field.required !== false && field.type !== 'cascadeParent'}
+                              disabled={(field.disableOnEdit && !!item) || saving}
+                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                            >
+                              <option value="">Select {field.label}...</option>
+                              {(field.type === 'cascadeParent' 
+                                ? (relatedData[field.dataKey] || [])
+                                : getFilteredOptions(field)
+                              ).map(opt => (
+                                <option key={opt[field.valueField]} value={opt[field.valueField]}>
+                                  {opt[field.displayField]}
+                                </option>
+                              ))}
+                            </select>
+                          ) : field.type === 'textarea' ? (
+                            <textarea
+                              value={formData[field.name] || ''}
+                              onChange={(e) => handleChange(field.name, e.target.value)}
+                              className="form-control border-2 shadow-sm"
+                              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
+                              required={field.required !== false}
+                              disabled={(field.disableOnEdit && !!item) || saving}
+                              rows={3}
+                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', resize: 'vertical', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                            />
+                          ) : (
+                            <input
+                              type={field.type || 'text'}
+                              value={formData[field.name] || ''}
+                              onChange={(e) => handleChange(field.name, e.target.value)}
+                              className="form-control border-2 shadow-sm"
+                              placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
+                              required={field.required !== false}
+                              disabled={(field.disableOnEdit && !!item) || saving}
+                              style={{ borderColor: '#e9ecef', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.95rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                            />
+                          )}
+                          {field.helpText && (
+                            <small className="text-muted mt-2 d-block" style={{ fontSize: '0.8rem' }}>{field.helpText}</small>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
-            <div className="modal-footer bg-light border-0 py-3 px-4">
-              <button type="button" onClick={onClose} className="btn btn-outline-secondary btn-lg px-4 rounded-pill" disabled={saving}>
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary btn-lg px-4 rounded-pill" disabled={saving}>
-                {saving ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Saving...
-                  </>
-                ) : (
-                  item ? 'Update' : 'Create'
-                )}
-              </button>
+            <div className="modal-footer border-0 py-3 px-4 bg-white">
+              <div className="d-flex gap-3 w-100 justify-content-end">
+                <button type="button" onClick={onClose} className="btn btn-light px-4 py-2 fw-semibold" disabled={saving} style={{ borderRadius: '10px', minWidth: '100px' }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2" disabled={saving} style={{ borderRadius: '10px', minWidth: '120px', background: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)', border: 'none' }}>
+                  {saving ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FiPlus size={18} />
+                      {item ? 'Update' : 'Create'}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         </div>
