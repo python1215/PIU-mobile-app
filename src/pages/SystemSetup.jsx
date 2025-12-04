@@ -117,6 +117,17 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                           </option>
                         ))}
                       </select>
+                    ) : field.type === 'textarea' ? (
+                      <textarea
+                        value={formData[field.name] || ''}
+                        onChange={(e) => handleChange(field.name, e.target.value)}
+                        className="form-control form-control-lg border-2"
+                        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                        required={field.required !== false}
+                        disabled={(field.disableOnEdit && !!item) || saving}
+                        rows={3}
+                        style={{ borderColor: '#dee2e6', borderRadius: '10px' }}
+                      />
                     ) : (
                       <input
                         type={field.type || 'text'}
@@ -383,11 +394,15 @@ function SystemSetup() {
       columns: [{ key: 'id', label: 'ID' }, { key: 'vulnerability', label: 'Vulnerability' }],
       fields: [{ name: 'vulnerability', label: 'Vulnerability Category' }] },
     kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'kpiName', label: 'KPI Name' }],
+      columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'kpiName', label: 'KPI Name' }, { key: 'typeOfInvestment', label: 'Investment Type' }],
       fields: [
-        { name: 'kpiCode', label: 'KPI Code', halfWidth: true },
-        { name: 'kpiName', label: 'KPI Name', halfWidth: true }
-      ] },
+        { name: 'kpiCode', label: 'Monitoring Type Code', halfWidth: true },
+        { name: 'project', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'projectName', relationField: 'project', halfWidth: true },
+        { name: 'typeOfInvestment', label: 'Type of Investment', type: 'textarea' },
+        { name: 'kpiDescription', label: 'KPI Description', type: 'textarea' },
+        { name: 'monitoringType', label: 'Monitoring Type', type: 'select', dataKey: 'monitoringTypes', valueField: 'id', displayField: 'monitoringType', relationField: 'monitoringType' }
+      ],
+      relatedDataKeys: ['projects', 'monitoringTypes'] },
     pdos: { endpoint: '/api/setup/pdos', idField: 'id', label: 'PDO Setup',
       columns: [{ key: 'id', label: 'ID' }, { key: 'pdoStatement', label: 'PDO Statement' }],
       fields: [{ name: 'pdoStatement', label: 'PDO Statement' }] },
@@ -423,7 +438,7 @@ function SystemSetup() {
   }, [tabConfig]);
 
   const loadRelatedData = useCallback(async () => {
-    const relatedTabs = ['regions', 'lgas', 'districts', 'wards'];
+    const relatedTabs = ['regions', 'lgas', 'districts', 'wards', 'monitoringTypes'];
     const promises = relatedTabs.map(async (tabKey) => {
       if (loadedTabs[tabKey]) return;
       const config = tabConfig[tabKey];
@@ -434,6 +449,11 @@ function SystemSetup() {
         return { key: tabKey, data: [] };
       }
     });
+    
+    // Also load projects separately for KPI contracts
+    promises.push(
+      axios.get('/api/projects').then(res => ({ key: 'projects', data: res.data })).catch(() => ({ key: 'projects', data: [] }))
+    );
     
     const results = await Promise.all(promises);
     const newData = {};

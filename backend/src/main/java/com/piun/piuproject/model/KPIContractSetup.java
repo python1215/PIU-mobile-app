@@ -1,6 +1,7 @@
 package com.piun.piuproject.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "kpi_contract_setup")
@@ -15,6 +16,27 @@ public class KPIContractSetup {
     @Column(name = "kpi_name", length = 255)
     private String kpiName;
 
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @Column(name = "type_of_investment", columnDefinition = "TEXT")
+    private String typeOfInvestment;
+
+    @Column(name = "kpi_description", columnDefinition = "TEXT")
+    private String kpiDescription;
+
+    @ManyToOne
+    @JoinColumn(name = "monitoring_type_id")
+    private MonitoringType monitoringType;
+
+    @Column(name = "date_created")
+    private LocalDateTime dateCreated = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public KPIContractSetup() {}
 
     public KPIContractSetup(String kpiCode, String kpiName) {
@@ -28,4 +50,16 @@ public class KPIContractSetup {
     public void setKpiCode(String kpiCode) { this.kpiCode = kpiCode; }
     public String getKpiName() { return kpiName; }
     public void setKpiName(String kpiName) { this.kpiName = kpiName; }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
+    public String getTypeOfInvestment() { return typeOfInvestment; }
+    public void setTypeOfInvestment(String typeOfInvestment) { this.typeOfInvestment = typeOfInvestment; }
+    public String getKpiDescription() { return kpiDescription; }
+    public void setKpiDescription(String kpiDescription) { this.kpiDescription = kpiDescription; }
+    public MonitoringType getMonitoringType() { return monitoringType; }
+    public void setMonitoringType(MonitoringType monitoringType) { this.monitoringType = monitoringType; }
+    public LocalDateTime getDateCreated() { return dateCreated; }
+    public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

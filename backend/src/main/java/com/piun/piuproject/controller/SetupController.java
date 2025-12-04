@@ -505,7 +505,15 @@ public class SetupController {
 
     @PutMapping("/kpi-contracts/{id}")
     public ResponseEntity<KPIContractSetup> updateKPIContract(@PathVariable Long id, @RequestBody KPIContractSetup details) {
-        return kpiContractSetupRepository.findById(id).map(k -> { k.setKpiCode(details.getKpiCode()); k.setKpiName(details.getKpiName()); return ResponseEntity.ok(kpiContractSetupRepository.save(k)); }).orElse(ResponseEntity.notFound().build());
+        return kpiContractSetupRepository.findById(id).map(k -> { 
+            k.setKpiCode(details.getKpiCode()); 
+            k.setKpiName(details.getKpiName()); 
+            k.setProject(details.getProject());
+            k.setTypeOfInvestment(details.getTypeOfInvestment());
+            k.setKpiDescription(details.getKpiDescription());
+            k.setMonitoringType(details.getMonitoringType());
+            return ResponseEntity.ok(kpiContractSetupRepository.save(k)); 
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/kpi-contracts/{id}")
