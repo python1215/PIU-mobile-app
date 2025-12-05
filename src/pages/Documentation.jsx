@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiFile, FiDownload, FiEye } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function Documentation() {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
@@ -74,13 +76,13 @@ function Documentation() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Documentation Tracking</h2>
+        <h2>{t('documentation.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> Upload Document
+            <FiPlus className="me-2" /> {t('documentation.upload')}
           </button>
         </div>
       </div>
@@ -92,7 +94,7 @@ function Documentation() {
               <div className="d-flex align-items-center">
                 <FiFile size={32} className="me-3" />
                 <div>
-                  <h6>Total Documents</h6>
+                  <h6>{t('documentation.totalDocuments')}</h6>
                   <h3>{documents.length}</h3>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { FiTrendingUp, FiTarget, FiActivity, FiBarChart2 } from 'react-icons/fi';
@@ -29,6 +30,7 @@ function StatCard({ icon: Icon, label, value, trend, bgColor, textColor }) {
 }
 
 function KPIMonitoring() {
+  const { t } = useTranslation();
   const kpiData = {
     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
     datasets: [
@@ -78,8 +80,8 @@ function KPIMonitoring() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="h2 fw-bold text-dark">KPI Monitoring</h1>
-        <p className="text-muted mb-0">Track key performance indicators</p>
+        <h1 className="h2 fw-bold text-dark">{t('kpi.title')}</h1>
+        <p className="text-muted mb-0">{t('kpi.subtitle')}</p>
       </div>
 
       <div className="row g-4 mb-4">

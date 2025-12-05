@@ -263,6 +263,8 @@
   },
   "monitoring": {
     "title": "Monitoramento & Avaliação",
+    "addResult": "Adicionar Resultado",
+    "totalIndicators": "Total de Indicadores",
     "resultsMonitoring": "Monitoramento de Resultados",
     "addMonitoring": "Adicionar Registro de Monitoramento",
     "editMonitoring": "Editar Registro de Monitoramento",
@@ -383,6 +385,8 @@
   },
   "documentation": {
     "title": "Documentação",
+    "upload": "Enviar Documento",
+    "totalDocuments": "Total de Documentos",
     "documents": "Documentos",
     "addDocument": "Adicionar Documento",
     "editDocument": "Editar Documento",
@@ -414,6 +418,7 @@
   },
   "issues": {
     "title": "Problemas & Ações",
+    "subtitle": "Acompanhar e gerenciar problemas do projeto",
     "addIssue": "Adicionar Problema",
     "editIssue": "Editar Problema",
     "issueTitle": "Título do Problema",
@@ -444,6 +449,7 @@
   },
   "kpi": {
     "title": "Monitoramento KPI",
+    "subtitle": "Acompanhar indicadores-chave de desempenho",
     "addKPI": "Adicionar KPI",
     "editKPI": "Editar KPI",
     "kpiName": "Nome do KPI",

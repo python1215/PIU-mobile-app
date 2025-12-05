@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiTrendingUp, FiTarget } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function MonitoringEvaluation() {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [monitoring, setMonitoring] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
@@ -60,13 +62,13 @@ function MonitoringEvaluation() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Monitoring & Evaluation</h2>
+        <h2>{t('monitoring.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> Add Result
+            <FiPlus className="me-2" /> {t('monitoring.addResult')}
           </button>
         </div>
       </div>
@@ -78,7 +80,7 @@ function MonitoringEvaluation() {
               <div className="d-flex align-items-center">
                 <FiTarget size={32} className="me-3" />
                 <div>
-                  <h6>Total Indicators</h6>
+                  <h6>{t('monitoring.totalIndicators')}</h6>
                   <h3>{monitoring.length}</h3>
                 </div>
               </div>

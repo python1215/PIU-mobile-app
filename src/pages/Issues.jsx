@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { issueAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -125,6 +126,7 @@ function IssueModal({ issue, onClose, onSave }) {
 }
 
 function Issues() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -198,11 +200,11 @@ function Issues() {
     <div>
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-          <h1 className="h2 fw-bold text-dark mb-1">Issues & Actions</h1>
-          <p className="text-muted mb-0">Track and manage project issues</p>
+          <h1 className="h2 fw-bold text-dark mb-1">{t('issues.title')}</h1>
+          <p className="text-muted mb-0">{t('issues.subtitle')}</p>
         </div>
         <button onClick={() => setModalOpen(true)} className="btn btn-primary d-flex align-items-center gap-2">
-          <FiPlus /> Add Issue
+          <FiPlus /> {t('issues.addIssue')}
         </button>
       </div>
 
@@ -215,7 +217,7 @@ function Issues() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search issues..."
+            placeholder={t('table.search')}
             className="form-control border-start-0"
           />
         </div>

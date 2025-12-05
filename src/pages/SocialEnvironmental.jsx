@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function SocialEnvironmental() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('esia');
   const [projects, setProjects] = useState([]);
   const [esia, setEsia] = useState([]);
@@ -125,7 +127,7 @@ function SocialEnvironmental() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Social & Environmental</h2>
+        <h2>{t('socialEnvironmental.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}

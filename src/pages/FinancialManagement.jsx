@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiSearch, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -282,6 +283,7 @@ const StatCard = memo(function StatCard({ title, value, bgClass }) {
 });
 
 function FinancialManagement() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('projects');
   const [projects, setProjects] = useState([]);
   const [components, setComponents] = useState([]);
@@ -585,7 +587,7 @@ function FinancialManagement() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Financial Management</h2>
+        <h2>{t('financial.title')}</h2>
         <div className="d-flex gap-3">
           {activeTab !== 'projects' && (
             <select className="form-select" value={selectedProject} onChange={handleProjectSelect} style={{ width: '250px' }}>
@@ -593,7 +595,7 @@ function FinancialManagement() {
             </select>
           )}
           <button className="btn btn-primary" onClick={handleShowModal}>
-            <FiPlus className="me-2" /> Add New
+            <FiPlus className="me-2" /> {t('common.addNew')}
           </button>
         </div>
       </div>
