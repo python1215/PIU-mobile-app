@@ -1,5 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
+import LanguageSelector from './LanguageSelector';
 import { 
   FiHome, 
   FiFolder, 
@@ -19,20 +21,20 @@ import {
 } from 'react-icons/fi';
 import { useState, useCallback, useMemo, memo } from 'react';
 
-const navItems = [
-  { path: '/', icon: FiHome, label: 'Dashboard' },
-  { path: '/setup', icon: FiSettings, label: 'System Setup' },
-  { path: '/financial', icon: FiDollarSign, label: 'Financial Management' },
-  { path: '/monitoring', icon: FiTrendingUp, label: 'Monitoring & Evaluation' },
-  { path: '/project-actions', icon: FiFileText, label: 'Project Actions' },
-  { path: '/social-environmental', icon: FiShield, label: 'Social & Environmental' },
-  { path: '/documentation', icon: FiFile, label: 'Documentation' },
-  { path: '/map', icon: FiMapPin, label: 'Project Map' },
-  { path: '/issues', icon: FiAlertCircle, label: 'Issues & Actions' },
-  { path: '/kpi', icon: FiBarChart2, label: 'KPI Monitoring' },
+const navItemsConfig = [
+  { path: '/', icon: FiHome, labelKey: 'nav.dashboard' },
+  { path: '/setup', icon: FiSettings, labelKey: 'nav.systemSetup' },
+  { path: '/financial', icon: FiDollarSign, labelKey: 'nav.financialManagement' },
+  { path: '/monitoring', icon: FiTrendingUp, labelKey: 'nav.monitoring' },
+  { path: '/project-actions', icon: FiFileText, labelKey: 'nav.projectActions' },
+  { path: '/social-environmental', icon: FiShield, labelKey: 'nav.socialEnvironmental' },
+  { path: '/documentation', icon: FiFile, labelKey: 'nav.documentation' },
+  { path: '/map', icon: FiMapPin, labelKey: 'nav.projectMap' },
+  { path: '/issues', icon: FiAlertCircle, labelKey: 'nav.issues' },
+  { path: '/kpi', icon: FiBarChart2, labelKey: 'nav.kpi' },
 ];
 
-const NavItem = memo(function NavItem({ item, isActive, sidebarOpen }) {
+const NavItem = memo(function NavItem({ item, isActive, sidebarOpen, t }) {
   const Icon = item.icon;
   return (
     <li className="nav-item">
@@ -46,7 +48,7 @@ const NavItem = memo(function NavItem({ item, isActive, sidebarOpen }) {
         style={{ transition: 'all 0.2s', whiteSpace: 'nowrap' }}
       >
         <Icon size={20} />
-        {sidebarOpen && <span className="fw-medium">{item.label}</span>}
+        {sidebarOpen && <span className="fw-medium">{t(item.labelKey)}</span>}
       </Link>
     </li>
   );
@@ -63,7 +65,9 @@ const UserAvatar = memo(function UserAvatar({ username }) {
   );
 });
 
+
 function Layout() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
@@ -80,15 +84,16 @@ function Layout() {
   }, []);
 
   const navList = useMemo(() => (
-    navItems.map((item) => (
+    navItemsConfig.map((item) => (
       <NavItem
         key={item.path}
         item={item}
         isActive={location.pathname === item.path}
         sidebarOpen={sidebarOpen}
+        t={t}
       />
     ))
-  ), [location.pathname, sidebarOpen]);
+  ), [location.pathname, sidebarOpen, t]);
 
   const sidebarStyle = useMemo(() => ({
     width: sidebarOpen ? '280px' : '80px',
@@ -122,6 +127,12 @@ function Layout() {
         </nav>
 
         <div className="p-3 border-top">
+          {sidebarOpen && (
+            <div className="mb-3">
+              <LanguageSelector />
+            </div>
+          )}
+          
           <div className={`d-flex align-items-center ${sidebarOpen ? 'gap-3' : 'justify-content-center'}`}>
             <UserAvatar username={user?.username} />
             {sidebarOpen && (
@@ -138,7 +149,7 @@ function Layout() {
             }`}
           >
             <FiLogOut size={18} />
-            {sidebarOpen && <span>Logout</span>}
+            {sidebarOpen && <span>{t('auth.logout')}</span>}
           </button>
         </div>
       </aside>

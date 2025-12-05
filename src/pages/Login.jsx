@@ -3,41 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../services/api';
-import { changeLanguage, languages } from '../i18n';
+import LanguageSelector from '../components/LanguageSelector';
 import toast from 'react-hot-toast';
-import { FiLogIn, FiGlobe, FiCheck } from 'react-icons/fi';
-
-function LanguageSelector() {
-  const { i18n, t } = useTranslation();
-  const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
-
-  return (
-    <div className="d-flex justify-content-center mb-4">
-      <div className="btn-group" role="group" aria-label={t('common.selectLanguage')}>
-        {languages.map((lang) => (
-          <button
-            key={lang.code}
-            type="button"
-            onClick={() => changeLanguage(lang.code)}
-            className={`btn ${
-              i18n.language === lang.code 
-                ? 'btn-primary' 
-                : 'btn-outline-primary bg-white'
-            } d-flex align-items-center gap-2 px-3 py-2`}
-            style={{ 
-              minWidth: '110px',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <span style={{ fontSize: '1.1rem' }}>{lang.flag}</span>
-            <span className="fw-medium" style={{ fontSize: '0.85rem' }}>{lang.name}</span>
-            {i18n.language === lang.code && <FiCheck size={14} />}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { FiLogIn } from 'react-icons/fi';
 
 function Login() {
   const { t } = useTranslation();
@@ -74,7 +42,7 @@ function Login() {
         <div className="row justify-content-center">
           <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
             <div className="text-center mb-4">
-              <LanguageSelector />
+              <LanguageSelector variant="buttons" />
             </div>
             
             <div 

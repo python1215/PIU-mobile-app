@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData }) {
+const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData, t }) {
   const [formData, setFormData] = useState(() => {
     if (item) {
       const initial = { ...item };
@@ -98,11 +99,8 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
               </div>
               <div>
                 <h6 className="modal-title fw-bold text-white mb-0" style={{ fontSize: '1rem' }}>
-                  {item ? `Edit ${title}` : `Add New ${title}`}
+                  {item ? `${t('common.edit')} ${title}` : `${t('common.addNew')} ${title}`}
                 </h6>
-                <small className="text-white text-opacity-75 d-none d-md-block" style={{ fontSize: '0.75rem' }}>
-                  {item ? 'Update the information below' : 'Fill in the details to create a new entry'}
-                </small>
               </div>
             </div>
             <button type="button" className="btn btn-link text-white p-0" onClick={onClose} disabled={saving}>
@@ -170,18 +168,18 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
             <div className="modal-footer border-top py-2 px-3 px-md-4 bg-white">
               <div className="d-flex gap-2 w-100 justify-content-end">
                 <button type="button" onClick={onClose} className="btn btn-outline-secondary px-3 py-2" disabled={saving} style={{ borderRadius: '8px', fontSize: '0.9rem' }}>
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="btn btn-primary px-3 py-2 d-flex align-items-center gap-2" disabled={saving} style={{ borderRadius: '8px', fontSize: '0.9rem' }}>
                   {saving ? (
                     <>
                       <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                      Saving...
+                      {t('common.loading')}
                     </>
                   ) : (
                     <>
                       <FiPlus size={16} />
-                      {item ? 'Update' : 'Create'}
+                      {item ? t('common.update') : t('common.create')}
                     </>
                   )}
                 </button>
@@ -194,15 +192,14 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
   );
 });
 
-const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idField }) {
+const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idField, t }) {
   if (data.length === 0) {
     return (
       <div className="text-center py-5">
         <div className="text-muted mb-3">
           <FiUsers size={48} className="opacity-25" />
         </div>
-        <p className="text-muted mb-0">No data available</p>
-        <small className="text-muted">Click "Add New" to create your first entry</small>
+        <p className="text-muted mb-0">{t('common.noData')}</p>
       </div>
     );
   }
@@ -224,7 +221,7 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
                 {col.label}
               </th>
             ))}
-            <th className="fw-semibold text-dark border-0 py-3" style={{ width: '120px' }}>Actions</th>
+            <th className="fw-semibold text-dark border-0 py-3" style={{ width: '120px' }}>{t('common.actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -257,15 +254,14 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
   );
 });
 
-const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDelete, bgClass = 'bg-primary' }) {
+const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDelete, bgClass = 'bg-primary', t }) {
   if (data.length === 0) {
     return (
       <div className="text-center py-5">
         <div className="text-muted mb-3">
           <FiUsers size={48} className="opacity-25" />
         </div>
-        <p className="text-muted mb-0">No data available</p>
-        <small className="text-muted">Click "Add New" to create your first entry</small>
+        <p className="text-muted mb-0">{t('common.noData')}</p>
       </div>
     );
   }
@@ -306,6 +302,7 @@ const CardGrid = memo(function CardGrid({ data, idField, nameField, onEdit, onDe
 });
 
 function SystemSetup() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('donors');
   const [data, setData] = useState({});
   const [loadedTabs, setLoadedTabs] = useState({});
@@ -628,9 +625,9 @@ function SystemSetup() {
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
         <div className="text-center">
           <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{t('common.loading')}</span>
           </div>
-          <p className="text-muted mb-0">Loading data...</p>
+          <p className="text-muted mb-0">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -639,9 +636,9 @@ function SystemSetup() {
   return (
     <div className="container-fluid">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h2 className="mb-0 fw-bold text-dark">System Setup</h2>
+        <h2 className="mb-0 fw-bold text-dark">{t('setup.title')}</h2>
         <button className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm" onClick={handleAdd}>
-          <FiPlus className="me-2" /> Add New
+          <FiPlus className="me-2" /> {t('common.addNew')}
         </button>
       </div>
 
@@ -703,7 +700,7 @@ function SystemSetup() {
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
-                placeholder="Search..."
+                placeholder={t('table.search')}
                 className="form-control border-start-0 rounded-end-pill"
               />
             </div>
@@ -718,6 +715,7 @@ function SystemSetup() {
               bgClass={currentConfig.bgClass}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              t={t}
             />
           ) : (
             <DataTable
@@ -726,6 +724,7 @@ function SystemSetup() {
               idField={currentConfig.idField}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              t={t}
             />
           )}
         </div>
@@ -739,6 +738,7 @@ function SystemSetup() {
           onClose={handleCloseModal}
           onSave={handleSave}
           relatedData={stableRelatedData}
+          t={t}
         />
       )}
     </div>
