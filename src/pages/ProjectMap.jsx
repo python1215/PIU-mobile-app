@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { FiPlus, FiMapPin, FiHome, FiUsers } from 'react-icons/fi';
@@ -13,6 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 function ProjectMap() {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [mappings, setMappings] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
@@ -81,14 +83,14 @@ function ProjectMap() {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Project Site Mapping</h2>
+        <h2>{t('map.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
-            <option value="">All Projects</option>
+            <option value="">{t('map.showAllProjects')}</option>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> Add Location
+            <FiPlus className="me-2" /> {t('map.addLocation')}
           </button>
         </div>
       </div>
@@ -100,7 +102,7 @@ function ProjectMap() {
               <div className="d-flex align-items-center">
                 <FiMapPin size={32} className="me-3" />
                 <div>
-                  <h6>Mapped Sites</h6>
+                  <h6>{t('map.mappedSites')}</h6>
                   <h3>{mappings.length}</h3>
                 </div>
               </div>
@@ -113,7 +115,7 @@ function ProjectMap() {
               <div className="d-flex align-items-center">
                 <FiHome size={32} className="me-3" />
                 <div>
-                  <h6>Total Households</h6>
+                  <h6>{t('map.totalHouseholds')}</h6>
                   <h3>{stats.totalHouseholds.toLocaleString()}</h3>
                 </div>
               </div>
@@ -126,7 +128,7 @@ function ProjectMap() {
               <div className="d-flex align-items-center">
                 <FiUsers size={32} className="me-3" />
                 <div>
-                  <h6>Connected</h6>
+                  <h6>{t('map.connected')}</h6>
                   <h3>{stats.connected.toLocaleString()}</h3>
                 </div>
               </div>
@@ -139,7 +141,7 @@ function ProjectMap() {
               <div className="d-flex align-items-center">
                 <FiMapPin size={32} className="me-3" />
                 <div>
-                  <h6>Regions Covered</h6>
+                  <h6>{t('map.regionsCovered')}</h6>
                   <h3>{stats.regions}</h3>
                 </div>
               </div>
@@ -148,63 +150,79 @@ function ProjectMap() {
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-8">
-          <div className="card">
-            <div className="card-header">
-              <h5>Project Sites Map</h5>
+      <div className="card">
+        <div className="card-body p-0">
+          {loading ? (
+            <div className="text-center p-5">
+              <div className="spinner-border" role="status"></div>
             </div>
-            <div className="card-body p-0">
-              {loading ? (
-                <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
-              ) : (
-                <MapContainer center={center} zoom={7} style={{ height: '500px', width: '100%' }}>
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  {mappings.filter(m => m.latitude && m.longitude).map((mapping, index) => (
-                    <Marker key={index} position={[mapping.latitude, mapping.longitude]}>
-                      <Popup>
-                        <strong>{mapping.settlement?.settlementName || 'Unknown'}</strong><br />
-                        Region: {mapping.region?.regionName}<br />
-                        District: {mapping.district?.districtName}<br />
-                        Households: {mapping.totalHouseholds}<br />
-                        Connected: {mapping.connectedHouseholds}
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              )}
+          ) : (
+            <div style={{ height: '500px' }}>
+              <MapContainer center={center} zoom={7} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
+                {mappings.map((mapping) => {
+                  if (mapping.latitude && mapping.longitude) {
+                    return (
+                      <Marker key={mapping.id} position={[mapping.latitude, mapping.longitude]}>
+                        <Popup>
+                          <strong>{mapping.settlement?.settlementName || t('map.unknownLocation')}</strong>
+                          <br />
+                          {t('setup.region')}: {mapping.region?.regionName || '-'}
+                          <br />
+                          {t('map.totalHouseholds')}: {mapping.totalHouseholds || 0}
+                        </Popup>
+                      </Marker>
+                    );
+                  }
+                  return null;
+                })}
+              </MapContainer>
             </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card">
-            <div className="card-header">
-              <h5>Site List</h5>
-            </div>
-            <div className="card-body" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-              {mappings.length === 0 ? (
-                <p className="text-muted text-center">No sites mapped yet</p>
-              ) : (
-                <ul className="list-group">
-                  {mappings.map((mapping, index) => (
-                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>{mapping.settlement?.settlementName || 'Unknown'}</strong>
-                        <br />
-                        <small className="text-muted">{mapping.region?.regionName} - {mapping.district?.districtName}</small>
-                      </div>
-                      <span className="badge bg-primary rounded-pill">{mapping.totalHouseholds}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">{t('map.addLocation')}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p className="text-muted">{t('map.addLocationDescription')}</p>
+                <div className="mb-3">
+                  <label className="form-label">{t('projects.selectProject')}</label>
+                  <select className="form-select">
+                    <option value="">{t('common.select')}</option>
+                    {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">{t('map.latitude')}</label>
+                  <input type="number" className="form-control" step="0.000001" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">{t('map.longitude')}</label>
+                  <input type="number" className="form-control" step="0.000001" />
+                </div>
+              </div>
+              <div className="modal-footer border-0 pt-0">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
+                  {t('common.save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

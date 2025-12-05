@@ -5,7 +5,7 @@ import { FiTrendingUp, FiTarget, FiActivity, FiBarChart2 } from 'react-icons/fi'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-function StatCard({ icon: Icon, label, value, trend, bgColor, textColor }) {
+function StatCard({ icon: Icon, label, value, trend, bgColor }) {
   return (
     <div className="card border-0 shadow-sm h-100">
       <div className="card-body">
@@ -67,7 +67,7 @@ function KPIMonitoring() {
       },
       title: {
         display: true,
-        text: 'KPI Performance Trends',
+        text: t('kpi.performanceTrends'),
       },
     },
     scales: {
@@ -88,7 +88,7 @@ function KPIMonitoring() {
         <div className="col-12 col-sm-6 col-xl-3">
           <StatCard
             icon={FiTrendingUp}
-            label="Return on Assets (ROA)"
+            label={t('kpi.returnOnAssets')}
             value="2.5%"
             trend={15}
             bgColor="bg-primary"
@@ -97,7 +97,7 @@ function KPIMonitoring() {
         <div className="col-12 col-sm-6 col-xl-3">
           <StatCard
             icon={FiTarget}
-            label="Net Profit Margin"
+            label={t('kpi.netProfitMargin')}
             value="3.2%"
             trend={20}
             bgColor="bg-success"
@@ -106,7 +106,7 @@ function KPIMonitoring() {
         <div className="col-12 col-sm-6 col-xl-3">
           <StatCard
             icon={FiActivity}
-            label="Debt Service Coverage"
+            label={t('kpi.debtServiceCoverage')}
             value="1.2x"
             trend={8}
             bgColor="bg-warning"
@@ -115,7 +115,7 @@ function KPIMonitoring() {
         <div className="col-12 col-sm-6 col-xl-3">
           <StatCard
             icon={FiBarChart2}
-            label="MWh Generated"
+            label={t('kpi.mwhGenerated')}
             value="45,230"
             trend={12}
             bgColor="bg-info"
@@ -125,7 +125,7 @@ function KPIMonitoring() {
 
       <div className="card border-0 shadow-sm mb-4">
         <div className="card-header bg-white border-0 py-3">
-          <h5 className="mb-0 fw-semibold">Performance Trends</h5>
+          <h5 className="mb-0 fw-semibold">{t('kpi.performanceTrends')}</h5>
         </div>
         <div className="card-body">
           <Line data={kpiData} options={chartOptions} />
@@ -134,23 +134,23 @@ function KPIMonitoring() {
 
       <div className="card border-0 shadow-sm">
         <div className="card-header bg-white border-0 py-3">
-          <h5 className="mb-0 fw-semibold">KPI Details</h5>
+          <h5 className="mb-0 fw-semibold">{t('kpi.kpiDetails')}</h5>
         </div>
         <div className="card-body p-0">
           <div className="table-responsive">
             <table className="table table-hover mb-0">
               <thead className="table-light">
                 <tr>
-                  <th className="border-0 px-4 py-3">Indicator</th>
-                  <th className="border-0 px-4 py-3">Baseline</th>
-                  <th className="border-0 px-4 py-3">Target</th>
-                  <th className="border-0 px-4 py-3">Achieved</th>
-                  <th className="border-0 px-4 py-3" style={{ minWidth: '150px' }}>Progress</th>
+                  <th className="border-0 px-4 py-3">{t('kpi.indicator')}</th>
+                  <th className="border-0 px-4 py-3">{t('kpi.baseline')}</th>
+                  <th className="border-0 px-4 py-3">{t('kpi.target')}</th>
+                  <th className="border-0 px-4 py-3">{t('kpi.achieved')}</th>
+                  <th className="border-0 px-4 py-3" style={{ minWidth: '150px' }}>{t('kpi.progress')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-4 py-3 fw-medium">Return on Assets (ROA)</td>
+                  <td className="px-4 py-3 fw-medium">{t('kpi.returnOnAssets')}</td>
                   <td className="px-4 py-3">-12%</td>
                   <td className="px-4 py-3">6%</td>
                   <td className="px-4 py-3">2.5%</td>
@@ -161,7 +161,7 @@ function KPIMonitoring() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 fw-medium">Net Profit Margin</td>
+                  <td className="px-4 py-3 fw-medium">{t('kpi.netProfitMargin')}</td>
                   <td className="px-4 py-3">-15%</td>
                   <td className="px-4 py-3">10%</td>
                   <td className="px-4 py-3">3.2%</td>
@@ -172,24 +172,24 @@ function KPIMonitoring() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 fw-medium">Debt Service Coverage Ratio</td>
-                  <td className="px-4 py-3">0.5x</td>
+                  <td className="px-4 py-3 fw-medium">{t('kpi.debtServiceCoverage')}</td>
+                  <td className="px-4 py-3">0.8x</td>
                   <td className="px-4 py-3">1.5x</td>
                   <td className="px-4 py-3">1.2x</td>
                   <td className="px-4 py-3">
                     <div className="progress" style={{ height: '8px' }}>
-                      <div className="progress-bar bg-warning" style={{ width: '70%' }}></div>
+                      <div className="progress-bar bg-warning" style={{ width: '57%' }}></div>
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 fw-medium">MWh Generated</td>
+                  <td className="px-4 py-3 fw-medium">{t('kpi.mwhGenerated')}</td>
                   <td className="px-4 py-3">30,000</td>
-                  <td className="px-4 py-3">60,000</td>
+                  <td className="px-4 py-3">50,000</td>
                   <td className="px-4 py-3">45,230</td>
                   <td className="px-4 py-3">
                     <div className="progress" style={{ height: '8px' }}>
-                      <div className="progress-bar bg-info" style={{ width: '75%' }}></div>
+                      <div className="progress-bar bg-info" style={{ width: '76%' }}></div>
                     </div>
                   </td>
                 </tr>

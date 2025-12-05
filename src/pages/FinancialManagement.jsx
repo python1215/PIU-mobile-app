@@ -361,47 +361,47 @@ function FinancialManagement() {
   }, [selectedProject, loadFinancialData]);
 
   const tabs = useMemo(() => [
-    { id: 'projects', label: 'Projects', icon: FiFolder },
-    { id: 'components', label: 'Components', icon: FiLayers },
-    { id: 'subcomponents', label: 'Subcomponents', icon: FiLayers },
-    { id: 'activities', label: 'Activities', icon: FiDollarSign },
-    { id: 'pdos', label: 'PDO Statements', icon: FiDollarSign },
-    { id: 'outcomes', label: 'Outcomes', icon: FiDollarSign }
-  ], []);
+    { id: 'projects', label: t('financial.projects'), icon: FiFolder },
+    { id: 'components', label: t('financial.components'), icon: FiLayers },
+    { id: 'subcomponents', label: t('financial.subcomponents'), icon: FiLayers },
+    { id: 'activities', label: t('financial.activities'), icon: FiDollarSign },
+    { id: 'pdos', label: t('financial.pdoStatements'), icon: FiDollarSign },
+    { id: 'outcomes', label: t('financial.outcomes'), icon: FiDollarSign }
+  ], [t]);
 
   const handleCreateProject = useCallback(async (data) => {
     try {
       await axios.post('/api/projects', data);
-      toast.success('Project created successfully');
+      toast.success(t('messages.createSuccess'));
       setShowModal(false);
       loadProjects();
     } catch (error) {
-      toast.error('Failed to create project');
+      toast.error(t('messages.createError'));
     }
-  }, [loadProjects]);
+  }, [loadProjects, t]);
 
   const handleUpdateProject = useCallback(async (data) => {
     try {
       await axios.put(`/api/projects/${editingProject.projectId}`, data);
-      toast.success('Project updated successfully');
+      toast.success(t('messages.updateSuccess'));
       setEditingProject(null);
       loadProjects();
     } catch (error) {
-      toast.error('Failed to update project');
+      toast.error(t('messages.updateError'));
     }
-  }, [editingProject, loadProjects]);
+  }, [editingProject, loadProjects, t]);
 
   const handleDeleteProject = useCallback(async (projectId) => {
-    if (confirm('Are you sure you want to delete this project?')) {
+    if (confirm(t('messages.confirmDelete'))) {
       try {
         await axios.delete(`/api/projects/${projectId}`);
-        toast.success('Project deleted successfully');
+        toast.success(t('messages.deleteSuccess'));
         loadProjects();
       } catch (error) {
-        toast.error('Failed to delete project');
+        toast.error(t('messages.deleteError'));
       }
     }
-  }, [loadProjects]);
+  }, [loadProjects, t]);
 
   const handleProjectSave = useCallback((data) => {
     if (editingProject) {
@@ -485,7 +485,7 @@ function FinancialManagement() {
               type="text"
               value={projectSearch}
               onChange={handleSearchChange}
-              placeholder="Search projects..."
+              placeholder={t('common.search')}
               className="form-control border-start-0"
             />
           </div>
@@ -494,12 +494,12 @@ function FinancialManagement() {
           <table className="table table-hover mb-0">
             <thead className="table-light">
               <tr>
-                <th className="border-0 px-4 py-3">Project ID</th>
-                <th className="border-0 px-4 py-3">Name</th>
-                <th className="border-0 px-4 py-3">Funding</th>
-                <th className="border-0 px-4 py-3">Effectiveness Date</th>
-                <th className="border-0 px-4 py-3">Closure Date</th>
-                <th className="border-0 px-4 py-3 text-end">Actions</th>
+                <th className="border-0 px-4 py-3">{t('projects.projectId')}</th>
+                <th className="border-0 px-4 py-3">{t('common.name')}</th>
+                <th className="border-0 px-4 py-3">{t('projects.funding')}</th>
+                <th className="border-0 px-4 py-3">{t('projects.effectivenessDate')}</th>
+                <th className="border-0 px-4 py-3">{t('projects.closureDate')}</th>
+                <th className="border-0 px-4 py-3 text-end">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -514,7 +514,7 @@ function FinancialManagement() {
             </tbody>
           </table>
           {filteredProjects.length === 0 && (
-            <p className="text-center text-muted py-5 mb-0">No projects found</p>
+            <p className="text-center text-muted py-5 mb-0">{t('table.noData')}</p>
           )}
         </div>
       </div>
@@ -531,17 +531,17 @@ function FinancialManagement() {
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
-              {activeTab === 'components' && <><th>ID</th><th>Component Name</th><th>Description</th><th className="text-end">Allocation</th></>}
-              {activeTab === 'subcomponents' && <><th>ID</th><th>Subcomponent</th><th>Description</th><th className="text-end">Allocation</th></>}
-              {activeTab === 'activities' && <><th>ID</th><th>Activity</th><th className="text-end">Allocation</th></>}
-              {activeTab === 'pdos' && <><th>ID</th><th>PDO Statement</th></>}
-              {activeTab === 'outcomes' && <><th>ID</th><th>Project Outcome</th></>}
-              <th>Actions</th>
+              {activeTab === 'components' && <><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'subcomponents' && <><th>ID</th><th>{t('financial.subcomponent')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'activities' && <><th>ID</th><th>{t('financial.activity')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
+              {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {currentTabData.length === 0 ? (
-              <tr><td colSpan="5" className="text-center text-muted">No data available</td></tr>
+              <tr><td colSpan="5" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               currentTabData.map((item, index) => (
                 <DataRow
@@ -556,7 +556,7 @@ function FinancialManagement() {
           {['components', 'subcomponents', 'activities'].includes(activeTab) && currentTabData.length > 0 && (
             <tfoot className="table-secondary">
               <tr>
-                <td colSpan={activeTab === 'activities' ? 2 : 3} className="fw-bold">Total</td>
+                <td colSpan={activeTab === 'activities' ? 2 : 3} className="fw-bold">{t('common.total')}</td>
                 <td className="text-end fw-bold">{formatCurrency(dataTotal)}</td>
                 <td></td>
               </tr>
@@ -602,9 +602,9 @@ function FinancialManagement() {
 
       {activeTab !== 'projects' && (
         <div className="row mb-4">
-          <StatCard title="Total Components" value={components.length} bgClass="bg-primary" />
-          <StatCard title="Total Allocation" value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
-          <StatCard title="Total Activities" value={activities.length} bgClass="bg-info" />
+          <StatCard title={t('financial.totalComponents')} value={components.length} bgClass="bg-primary" />
+          <StatCard title={t('financial.totalAllocation')} value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
+          <StatCard title={t('financial.totalActivities')} value={activities.length} bgClass="bg-info" />
         </div>
       )}
 

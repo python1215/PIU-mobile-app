@@ -13,7 +13,6 @@ function ProjectActions() {
   const [selectedProject, setSelectedProject] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     loadProjects();
@@ -77,7 +76,7 @@ function ProjectActions() {
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> Add Contract
+            <FiPlus className="me-2" /> {activeTab === 'works' ? t('projectActions.addWorksContract') : t('projectActions.addGoodsContract')}
           </button>
         </div>
       </div>
@@ -89,7 +88,7 @@ function ProjectActions() {
               <div className="d-flex align-items-center">
                 <FiFileText size={32} className="me-3" />
                 <div>
-                  <h6>Works Contracts</h6>
+                  <h6>{t('projectActions.worksContracts')}</h6>
                   <h3>{works.length}</h3>
                 </div>
               </div>
@@ -102,7 +101,7 @@ function ProjectActions() {
               <div className="d-flex align-items-center">
                 <FiPackage size={32} className="me-3" />
                 <div>
-                  <h6>Goods & Services</h6>
+                  <h6>{t('projectActions.goodsContracts')}</h6>
                   <h3>{goods.length}</h3>
                 </div>
               </div>
@@ -112,7 +111,7 @@ function ProjectActions() {
         <div className="col-md-4">
           <div className="card bg-info text-white">
             <div className="card-body">
-              <h6>Total Contract Value</h6>
+              <h6>{t('projectActions.totalValue')}</h6>
               <h3>${formatCurrency(getTotalContractValue())}</h3>
             </div>
           </div>
@@ -122,12 +121,12 @@ function ProjectActions() {
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'works' ? 'active' : ''}`} onClick={() => setActiveTab('works')}>
-            <FiFileText className="me-2" /> Works Contracts
+            <FiFileText className="me-2" /> {t('projectActions.worksContracts')}
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'goods' ? 'active' : ''}`} onClick={() => setActiveTab('goods')}>
-            <FiPackage className="me-2" /> Goods & Services
+            <FiPackage className="me-2" /> {t('projectActions.goodsContracts')}
           </button>
         </li>
       </ul>
@@ -141,19 +140,19 @@ function ProjectActions() {
               <table className="table table-striped table-hover">
                 <thead className="table-dark">
                   <tr>
-                    <th>Contract Ref</th>
-                    <th>{activeTab === 'works' ? 'Contractor' : 'Supplier'}</th>
-                    <th>Consultant</th>
-                    <th className="text-end">Contract Value</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Duration</th>
-                    <th>Actions</th>
+                    <th>{t('projectActions.contractNumber')}</th>
+                    <th>{activeTab === 'works' ? t('projectActions.contractor') : t('projectActions.supplier')}</th>
+                    <th>{t('common.consultant')}</th>
+                    <th className="text-end">{t('projectActions.contractValue')}</th>
+                    <th>{t('common.startDate')}</th>
+                    <th>{t('common.endDate')}</th>
+                    <th>{t('common.duration')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(activeTab === 'works' ? works : goods).length === 0 ? (
-                    <tr><td colSpan="8" className="text-center text-muted">No contracts available</td></tr>
+                    <tr><td colSpan="8" className="text-center text-muted">{t('table.noData')}</td></tr>
                   ) : (
                     (activeTab === 'works' ? works : goods).map((item, index) => (
                       <tr key={index}>
@@ -177,6 +176,47 @@ function ProjectActions() {
           )}
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{activeTab === 'works' ? t('projectActions.addWorksContract') : t('projectActions.addGoodsContract')}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">{t('projectActions.contractNumber')}</label>
+                  <input type="text" className="form-control" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">{activeTab === 'works' ? t('projectActions.contractor') : t('projectActions.supplier')}</label>
+                  <input type="text" className="form-control" />
+                </div>
+                <div className="row">
+                  <div className="col-md-6">
+                    <label className="form-label">{t('projectActions.contractValue')}</label>
+                    <input type="number" className="form-control" />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">{t('common.duration')}</label>
+                    <input type="text" className="form-control" />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
+                  {t('common.save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

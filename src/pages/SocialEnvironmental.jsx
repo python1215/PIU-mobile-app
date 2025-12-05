@@ -62,11 +62,11 @@ function SocialEnvironmental() {
   };
 
   const tabs = [
-    { id: 'esia', label: 'ESIA', icon: FiShield, data: esia },
-    { id: 'pap', label: 'PAP Monitoring', icon: FiUsers, data: pap },
-    { id: 'grievance', label: 'Grievances', icon: FiAlertTriangle, data: grievances },
-    { id: 'ohs', label: 'OHS Monitoring', icon: FiHeart, data: ohs },
-    { id: 'engagement', label: 'Community Engagement', icon: FiUsers, data: engagements }
+    { id: 'esia', label: t('socialEnvironmental.esia'), icon: FiShield, data: esia },
+    { id: 'pap', label: t('socialEnvironmental.pap'), icon: FiUsers, data: pap },
+    { id: 'grievance', label: t('socialEnvironmental.grievances'), icon: FiAlertTriangle, data: grievances },
+    { id: 'ohs', label: t('socialEnvironmental.ohs'), icon: FiHeart, data: ohs },
+    { id: 'engagement', label: t('socialEnvironmental.communityEngagement'), icon: FiUsers, data: engagements }
   ];
 
   const renderTable = () => {
@@ -74,7 +74,7 @@ function SocialEnvironmental() {
       return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
     }
 
-    const currentTab = tabs.find(t => t.id === activeTab);
+    const currentTab = tabs.find(tab => tab.id === activeTab);
     const data = currentTab?.data || [];
 
     return (
@@ -82,17 +82,17 @@ function SocialEnvironmental() {
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
-              {activeTab === 'esia' && <><th>ID</th><th>Duration (months)</th><th>Phase</th><th>Locations</th><th>Communities</th><th>Findings</th></>}
-              {activeTab === 'pap' && <><th>PAP ID</th><th>Name</th><th>Sex</th><th>Location</th><th>Amount</th><th>Compensated</th></>}
-              {activeTab === 'grievance' && <><th>Case No</th><th>Complainant</th><th>Date Received</th><th>Outcome</th><th>Satisfied</th></>}
-              {activeTab === 'ohs' && <><th>ID</th><th>Date</th><th>Region</th><th>Male</th><th>Female</th><th>Youth</th></>}
-              {activeTab === 'engagement' && <><th>Ref</th><th>Place</th><th>Date</th><th>Male</th><th>Female</th><th>Total</th></>}
-              <th>Actions</th>
+              {activeTab === 'esia' && <><th>ID</th><th>{t('socialEnvironmental.projectDuration')}</th><th>{t('socialEnvironmental.projectPhase')}</th><th>{t('socialEnvironmental.locations')}</th><th>{t('socialEnvironmental.communities')}</th><th>{t('socialEnvironmental.findings')}</th></>}
+              {activeTab === 'pap' && <><th>{t('socialEnvironmental.papId')}</th><th>{t('common.name')}</th><th>{t('socialEnvironmental.sex')}</th><th>{t('socialEnvironmental.location')}</th><th>{t('socialEnvironmental.amount')}</th><th>{t('socialEnvironmental.compensated')}</th></>}
+              {activeTab === 'grievance' && <><th>{t('socialEnvironmental.caseNo')}</th><th>{t('socialEnvironmental.complainant')}</th><th>{t('socialEnvironmental.dateReceived')}</th><th>{t('socialEnvironmental.outcome')}</th><th>{t('socialEnvironmental.satisfied')}</th></>}
+              {activeTab === 'ohs' && <><th>ID</th><th>{t('common.date')}</th><th>{t('setup.region')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('socialEnvironmental.youth')}</th></>}
+              {activeTab === 'engagement' && <><th>{t('socialEnvironmental.reference')}</th><th>{t('socialEnvironmental.place')}</th><th>{t('common.date')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('common.total')}</th></>}
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {data.length === 0 ? (
-              <tr><td colSpan="7" className="text-center text-muted">No data available</td></tr>
+              <tr><td colSpan="7" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               data.map((item, index) => (
                 <tr key={index}>
@@ -100,10 +100,10 @@ function SocialEnvironmental() {
                     <><td>{item.id}</td><td>{item.projectDuration}</td><td>{item.projectPhase}</td><td>{item.projectLocations}</td><td>{item.numberOfCommunities}</td><td className="text-truncate" style={{maxWidth: '200px'}}>{item.esiaFindings}</td></>
                   )}
                   {activeTab === 'pap' && (
-                    <><td>{item.papIdentificationNumber}</td><td>{item.papName}</td><td>{item.sex}</td><td>{item.locationOfImpact}</td><td>${item.amount}</td><td><span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`}>{item.papCompensated === 'Y' ? 'Yes' : 'No'}</span></td></>
+                    <><td>{item.papIdentificationNumber}</td><td>{item.papName}</td><td>{item.sex}</td><td>{item.locationOfImpact}</td><td>${item.amount}</td><td><span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`}>{item.papCompensated === 'Y' ? t('common.yes') : t('common.no')}</span></td></>
                   )}
                   {activeTab === 'grievance' && (
-                    <><td>{item.caseNo}</td><td>{item.nameOfComplainant}</td><td>{item.dateClaimReceived}</td><td>{item.decisionOutcome?.outcome}</td><td><span className={`badge bg-${item.complainantSatisfied === 'Y' ? 'success' : 'danger'}`}>{item.complainantSatisfied === 'Y' ? 'Yes' : 'No'}</span></td></>
+                    <><td>{item.caseNo}</td><td>{item.nameOfComplainant}</td><td>{item.dateClaimReceived}</td><td>{item.decisionOutcome?.outcome}</td><td><span className={`badge bg-${item.complainantSatisfied === 'Y' ? 'success' : 'danger'}`}>{item.complainantSatisfied === 'Y' ? t('common.yes') : t('common.no')}</span></td></>
                   )}
                   {activeTab === 'ohs' && (
                     <><td>{item.id}</td><td>{item.monitoringDate}</td><td>{item.region?.regionName}</td><td>{item.male}</td><td>{item.female}</td><td>{(item.youthMale || 0) + (item.youthFemale || 0)}</td></>
@@ -133,7 +133,7 @@ function SocialEnvironmental() {
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> Add New
+            <FiPlus className="me-2" /> {t('common.addNew')}
           </button>
         </div>
       </div>
@@ -171,6 +171,30 @@ function SocialEnvironmental() {
           {renderTable()}
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{t('common.addNew')}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p className="text-muted">{t('common.formPlaceholder')}</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
+                  {t('common.save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

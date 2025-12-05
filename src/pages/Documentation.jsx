@@ -67,7 +67,7 @@ function Documentation() {
   const getTypeStats = () => {
     const stats = {};
     documents.forEach(doc => {
-      const type = doc.documentType?.documentType || 'Unknown';
+      const type = doc.documentType?.documentType || t('common.unknown');
       stats[type] = (stats[type] || 0) + 1;
     });
     return stats;
@@ -115,9 +115,9 @@ function Documentation() {
 
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h5>Document Library</h5>
+          <h5>{t('documentation.documentLibrary')}</h5>
           <div className="btn-group">
-            <button className="btn btn-sm btn-outline-secondary active">All</button>
+            <button className="btn btn-sm btn-outline-secondary active">{t('common.all')}</button>
             {documentTypes.slice(0, 4).map(type => (
               <button key={type.id} className="btn btn-sm btn-outline-secondary">{type.documentType}</button>
             ))}
@@ -132,29 +132,29 @@ function Documentation() {
                 <thead className="table-dark">
                   <tr>
                     <th>ID</th>
-                    <th>Document Type</th>
-                    <th>Description</th>
-                    <th>Document Date</th>
-                    <th>Date Created</th>
-                    <th>Actions</th>
+                    <th>{t('documentation.documentType')}</th>
+                    <th>{t('common.description')}</th>
+                    <th>{t('documentation.documentDate')}</th>
+                    <th>{t('common.dateCreated')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {documents.length === 0 ? (
-                    <tr><td colSpan="6" className="text-center text-muted">No documents available</td></tr>
+                    <tr><td colSpan="6" className="text-center text-muted">{t('table.noData')}</td></tr>
                   ) : (
                     documents.map((doc, index) => (
                       <tr key={index}>
                         <td>{doc.id}</td>
-                        <td><span className="badge bg-primary">{doc.documentType?.documentType || 'Unknown'}</span></td>
+                        <td><span className="badge bg-primary">{doc.documentType?.documentType || t('common.unknown')}</span></td>
                         <td>{doc.description}</td>
                         <td>{formatDate(doc.documentDate)}</td>
                         <td>{formatDate(doc.dateCreated)}</td>
                         <td>
-                          <button className="btn btn-sm btn-outline-info me-1" title="View"><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-success me-1" title="Download"><FiDownload /></button>
-                          <button className="btn btn-sm btn-outline-primary me-1" title="Edit"><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger" title="Delete"><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info me-1" title={t('common.view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-success me-1" title={t('common.download')}><FiDownload /></button>
+                          <button className="btn btn-sm btn-outline-primary me-1" title={t('common.edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger" title={t('common.delete')}><FiTrash2 /></button>
                         </td>
                       </tr>
                     ))
@@ -171,35 +171,35 @@ function Documentation() {
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Upload New Document</h5>
+                <h5 className="modal-title">{t('documentation.uploadNewDocument')}</h5>
                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
               <div className="modal-body">
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Document Type</label>
-                    <select className="form-select" value={formData.documentTypeId || ''} onChange={e => setFormData({...formData, documentTypeId: e.target.value})}>
-                      <option value="">Select Type</option>
-                      {documentTypes.map(type => <option key={type.id} value={type.id}>{type.documentType}</option>)}
-                    </select>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Document Date</label>
-                    <input type="date" className="form-control" value={formData.documentDate || ''} onChange={e => setFormData({...formData, documentDate: e.target.value})} />
-                  </div>
+                <div className="mb-3">
+                  <label className="form-label">{t('documentation.documentType')}</label>
+                  <select className="form-select">
+                    <option value="">{t('common.select')}</option>
+                    {documentTypes.map(type => (
+                      <option key={type.id} value={type.id}>{type.documentType}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea className="form-control" rows="3" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+                  <label className="form-label">{t('common.description')}</label>
+                  <textarea className="form-control" rows={3}></textarea>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Attachment</label>
+                  <label className="form-label">{t('documentation.file')}</label>
                   <input type="file" className="form-control" />
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="button" className="btn btn-primary">Upload</button>
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
+                  {t('documentation.upload')}
+                </button>
               </div>
             </div>
           </div>

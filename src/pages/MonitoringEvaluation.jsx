@@ -93,7 +93,7 @@ function MonitoringEvaluation() {
               <div className="d-flex align-items-center">
                 <FiTrendingUp size={32} className="me-3" />
                 <div>
-                  <h6>On Track</h6>
+                  <h6>{t('monitoring.onTrack')}</h6>
                   <h3>{monitoring.filter(m => calculateProgress(m.baselineValue, m.achievedValue, m.endTargetValue) >= 75).length}</h3>
                 </div>
               </div>
@@ -106,7 +106,7 @@ function MonitoringEvaluation() {
               <div className="d-flex align-items-center">
                 <FiTrendingUp size={32} className="me-3" />
                 <div>
-                  <h6>At Risk</h6>
+                  <h6>{t('monitoring.atRisk')}</h6>
                   <h3>{monitoring.filter(m => {
                     const p = calculateProgress(m.baselineValue, m.achievedValue, m.endTargetValue);
                     return p >= 50 && p < 75;
@@ -122,7 +122,7 @@ function MonitoringEvaluation() {
               <div className="d-flex align-items-center">
                 <FiTrendingUp size={32} className="me-3" />
                 <div>
-                  <h6>Off Track</h6>
+                  <h6>{t('monitoring.offTrack')}</h6>
                   <h3>{monitoring.filter(m => calculateProgress(m.baselineValue, m.achievedValue, m.endTargetValue) < 50).length}</h3>
                 </div>
               </div>
@@ -133,7 +133,7 @@ function MonitoringEvaluation() {
 
       <div className="card">
         <div className="card-header">
-          <h5>Results Oriented Monitoring</h5>
+          <h5>{t('monitoring.resultsMonitoring')}</h5>
         </div>
         <div className="card-body">
           {loading ? (
@@ -143,18 +143,18 @@ function MonitoringEvaluation() {
               <table className="table table-striped table-hover">
                 <thead className="table-dark">
                   <tr>
-                    <th>Indicator Description</th>
-                    <th className="text-center">Baseline</th>
-                    <th className="text-center">Achieved</th>
-                    <th className="text-center">Target</th>
-                    <th className="text-center">Progress</th>
-                    <th>Remarks</th>
-                    <th>Actions</th>
+                    <th>{t('monitoring.indicatorDescription')}</th>
+                    <th className="text-center">{t('monitoring.baseline')}</th>
+                    <th className="text-center">{t('monitoring.achieved')}</th>
+                    <th className="text-center">{t('monitoring.target')}</th>
+                    <th className="text-center">{t('monitoring.progress')}</th>
+                    <th>{t('common.remarks')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monitoring.length === 0 ? (
-                    <tr><td colSpan="7" className="text-center text-muted">No monitoring data available</td></tr>
+                    <tr><td colSpan="7" className="text-center text-muted">{t('table.noData')}</td></tr>
                   ) : (
                     monitoring.map((item, index) => {
                       const progress = calculateProgress(item.baselineValue, item.achievedValue, item.endTargetValue);
@@ -190,6 +190,47 @@ function MonitoringEvaluation() {
           )}
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{t('monitoring.addResult')}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">{t('monitoring.indicatorDescription')}</label>
+                  <textarea className="form-control" rows={3}></textarea>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label className="form-label">{t('monitoring.baseline')}</label>
+                    <input type="number" className="form-control" />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">{t('monitoring.achieved')}</label>
+                    <input type="number" className="form-control" />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">{t('monitoring.target')}</label>
+                    <input type="number" className="form-control" />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
+                  {t('common.save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
