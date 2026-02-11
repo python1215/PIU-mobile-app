@@ -422,7 +422,7 @@ function SystemSetup() {
         { name: 'project', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'project', relationField: 'project', halfWidth: true },
         { name: 'typeOfInvestment', label: 'Type of Investment', type: 'textarea' },
         { name: 'kpiDescription', label: 'KPI Description', type: 'textarea' },
-        { name: 'monitoringType', label: 'Monitoring Type', type: 'select', dataKey: 'monitoringTypes', valueField: 'id', displayField: 'monitoringType', relationField: 'monitoringType' }
+        { name: 'monitoringType', label: 'Monitoring Type', type: 'select', dataKey: 'monitoringTypes', valueField: 'monitoringTypeCode', displayField: 'monitoringType', relationField: 'monitoringType' }
       ],
       relatedDataKeys: ['projects', 'monitoringTypes'] },
     pdos: { endpoint: '/api/setup/pdos', idField: 'id', label: 'PDO Setup',
