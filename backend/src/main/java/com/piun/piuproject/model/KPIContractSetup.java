@@ -1,5 +1,6 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,17 +11,15 @@ public class KPIContractSetup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "monitoring_type_code", length = 15)
-    private String monitoringTypeCode;
-
     @Column(name = "kpi_code", length = 50)
     private String kpiCode;
 
     @Column(name = "kpi_name", length = 255)
     private String kpiName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Project project;
 
     @Column(name = "type_of_investment", columnDefinition = "TEXT")
@@ -29,9 +28,13 @@ public class KPIContractSetup {
     @Column(name = "kpi_description", columnDefinition = "TEXT")
     private String kpiDescription;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "monitoring_type_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MonitoringType monitoringType;
+
+    @Column(name = "monitoring_type_code", length = 15)
+    private String monitoringTypeCode;
 
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
@@ -49,8 +52,6 @@ public class KPIContractSetup {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getMonitoringTypeCode() { return monitoringTypeCode; }
-    public void setMonitoringTypeCode(String monitoringTypeCode) { this.monitoringTypeCode = monitoringTypeCode; }
     public String getKpiCode() { return kpiCode; }
     public void setKpiCode(String kpiCode) { this.kpiCode = kpiCode; }
     public String getKpiName() { return kpiName; }
@@ -59,6 +60,8 @@ public class KPIContractSetup {
     public void setProject(Project project) { this.project = project; }
     public String getTypeOfInvestment() { return typeOfInvestment; }
     public void setTypeOfInvestment(String typeOfInvestment) { this.typeOfInvestment = typeOfInvestment; }
+    public String getMonitoringTypeCode() { return monitoringTypeCode; }
+    public void setMonitoringTypeCode(String monitoringTypeCode) { this.monitoringTypeCode = monitoringTypeCode; }
     public String getKpiDescription() { return kpiDescription; }
     public void setKpiDescription(String kpiDescription) { this.kpiDescription = kpiDescription; }
     public MonitoringType getMonitoringType() { return monitoringType; }
