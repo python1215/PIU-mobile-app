@@ -415,14 +415,14 @@ function SystemSetup() {
     vulnerabilityCategories: { endpoint: '/api/setup/vulnerability-categories', idField: 'id', label: 'Vulnerability Categories',
       columns: [{ key: 'id', label: 'ID' }, { key: 'vulnerability', label: 'Vulnerability' }],
       fields: [{ name: 'vulnerability', label: 'Vulnerability Category' }] },
-    kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'kpiName', label: 'KPI Name' }, { key: 'typeOfInvestment', label: 'Investment Type' }],
+    kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'monitoringTypeCode', label: 'KPI Contracts',
+      columns: [{ key: 'monitoringTypeCode', label: 'KPI Code' }, { key: 'project', label: 'Project', nested: 'project' }, { key: 'typeOfInvestment', label: 'Investment Type' }],
       fields: [
-        { name: 'kpiCode', label: 'Monitoring Type Code', halfWidth: true },
-        { name: 'project', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'projectName', relationField: 'project', halfWidth: true },
+        { name: 'monitoringTypeCode', label: 'Monitoring Type Code', halfWidth: true },
+        { name: 'project_id', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'project', relationField: 'project', halfWidth: true },
         { name: 'typeOfInvestment', label: 'Type of Investment', type: 'textarea' },
         { name: 'kpiDescription', label: 'KPI Description', type: 'textarea' },
-        { name: 'monitoringType', label: 'Monitoring Type', type: 'select', dataKey: 'monitoringTypes', valueField: 'id', displayField: 'monitoringType', relationField: 'monitoringType' }
+        { name: 'monitoringType_id', label: 'Monitoring Type', type: 'select', dataKey: 'monitoringTypes', valueField: 'monitoringTypeCode', displayField: 'monitoringType', relationField: 'monitoringType' }
       ],
       relatedDataKeys: ['projects', 'monitoringTypes'] },
     pdos: { endpoint: '/api/setup/pdos', idField: 'id', label: 'PDO Setup',

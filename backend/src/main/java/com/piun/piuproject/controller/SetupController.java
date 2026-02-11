@@ -42,6 +42,7 @@ public class SetupController {
     @Autowired private PDORepository pdoRepository;
     @Autowired private ProjectOutcomeRepository projectOutcomeRepository;
     @Autowired private ProjectResultRepository projectResultRepository;
+    @Autowired private ProjectRepository projectRepository;
 
     // Contributors
     @GetMapping("/contributors")
@@ -501,17 +502,33 @@ public class SetupController {
     public List<KPIContractSetup> getAllKPIContracts() { return kpiContractSetupRepository.findAll(); }
 
     @PostMapping("/kpi-contracts")
-    public KPIContractSetup createKPIContract(@RequestBody KPIContractSetup kpi) { return kpiContractSetupRepository.save(kpi); }
+    public KPIContractSetup createKPIContract(@RequestBody KPIContractSetup kpi) {
+        if (kpi.getProject() != null && kpi.getProject().getProjectId() != null) {
+            Project project = projectRepository.findById(kpi.getProject().getProjectId()).orElse(null);
+            kpi.setProject(project);
+        }
+        if (kpi.getMonitoringType() != null && kpi.getMonitoringType().getMonitoringTypeCode() != null) {
+            MonitoringType type = monitoringTypeRepository.findById(kpi.getMonitoringType().getMonitoringTypeCode()).orElse(null);
+            kpi.setMonitoringType(type);
+        }
+        return kpiContractSetupRepository.save(kpi);
+    }
 
     @PutMapping("/kpi-contracts/{id}")
     public ResponseEntity<KPIContractSetup> updateKPIContract(@PathVariable Long id, @RequestBody KPIContractSetup details) {
         return kpiContractSetupRepository.findById(id).map(k -> { 
             k.setKpiCode(details.getKpiCode()); 
             k.setKpiName(details.getKpiName()); 
-            k.setProject(details.getProject());
+            if (details.getProject() != null && details.getProject().getProjectId() != null) {
+                Project project = projectRepository.findById(details.getProject().getProjectId()).orElse(null);
+                k.setProject(project);
+            }
             k.setTypeOfInvestment(details.getTypeOfInvestment());
             k.setKpiDescription(details.getKpiDescription());
-            k.setMonitoringType(details.getMonitoringType());
+            if (details.getMonitoringType() != null && details.getMonitoringType().getMonitoringTypeCode() != null) {
+                MonitoringType type = monitoringTypeRepository.findById(details.getMonitoringType().getMonitoringTypeCode()).orElse(null);
+                k.setMonitoringType(type);
+            }
             return ResponseEntity.ok(kpiContractSetupRepository.save(k)); 
         }).orElse(ResponseEntity.notFound().build());
     }
