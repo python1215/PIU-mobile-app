@@ -418,6 +418,7 @@ function SystemSetup() {
     kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
       columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'project', label: 'Project', nested: 'project' }, { key: 'typeOfInvestment', label: 'Investment Type' }],
       fields: [
+        { name: 'monitoringTypeCode', label: 'Monitoring Type Code', halfWidth: true },
         { name: 'kpiCode', label: 'KPI Code', halfWidth: true },
         { name: 'project', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'project', relationField: 'project', halfWidth: true },
         { name: 'typeOfInvestment', label: 'Type of Investment', type: 'textarea' },

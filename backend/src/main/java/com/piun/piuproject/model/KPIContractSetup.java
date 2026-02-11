@@ -10,6 +10,9 @@ public class KPIContractSetup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "monitoring_type_code", length = 15)
+    private String monitoringTypeCode;
+
     @Column(name = "kpi_code", length = 50)
     private String kpiCode;
 
@@ -46,6 +49,8 @@ public class KPIContractSetup {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public String getMonitoringTypeCode() { return monitoringTypeCode; }
+    public void setMonitoringTypeCode(String monitoringTypeCode) { this.monitoringTypeCode = monitoringTypeCode; }
     public String getKpiCode() { return kpiCode; }
     public void setKpiCode(String kpiCode) { this.kpiCode = kpiCode; }
     public String getKpiName() { return kpiName; }
