@@ -429,7 +429,9 @@ function FinancialManagement() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    data.project = { projectId: selectedProject };
+    const projectId = data.projectId;
+    delete data.projectId;
+    data.project = { projectId };
     
     try {
       if (editingItem) {
@@ -445,7 +447,7 @@ function FinancialManagement() {
     } catch (error) {
       toast.error('Error saving component');
     }
-  }, [selectedProject, editingItem, loadFinancialData]);
+  }, [editingItem, loadFinancialData]);
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -675,7 +677,7 @@ function FinancialManagement() {
 
       {showComponentModal && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content border-0 shadow">
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title fw-bold">{editingItem ? 'Edit Component' : 'Add Component'}</h5>
@@ -683,21 +685,29 @@ function FinancialManagement() {
               </div>
               <form onSubmit={handleComponentSave}>
                 <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">Component ID</label>
-                    <input name="compId" defaultValue={editingItem?.compId} className="form-control" required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">Component Name</label>
-                    <input name="projectComponents" defaultValue={editingItem?.projectComponents} className="form-control" required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">Description</label>
-                    <textarea name="componentDescription" defaultValue={editingItem?.componentDescription} className="form-control" rows="3"></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">Allocation</label>
-                    <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" required />
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Project</label>
+                      <select name="projectId" defaultValue={selectedProject} className="form-select" required>
+                        {projectOptions}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Component ID</label>
+                      <input name="compId" defaultValue={editingItem?.compId} className="form-control" placeholder="e.g., COMP-001" required />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Component Name</label>
+                      <input name="projectComponents" defaultValue={editingItem?.projectComponents} className="form-control" placeholder="Enter component name" required />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Description</label>
+                      <textarea name="componentDescription" defaultValue={editingItem?.componentDescription} className="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Allocation</label>
+                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="0.00" required />
+                    </div>
                   </div>
                 </div>
                 <div className="modal-footer border-0 pt-0">
