@@ -101,12 +101,21 @@ public class ProjectActionsController {
             @RequestBody ContractProfilingGoods goodsDetails) {
         return goodsRepository.findById(id)
             .map(goods -> {
-                goods.setContractRefNo(goodsDetails.getContractRefNo());
+                goods.setProject(goodsDetails.getProject());
+                goods.setComponent(goodsDetails.getComponent());
+                goods.setSubcomponent(goodsDetails.getSubcomponent());
+                goods.setActivity(goodsDetails.getActivity());
+                goods.setProjectCategory(goodsDetails.getProjectCategory());
+                goods.setFundingSource(goodsDetails.getFundingSource());
+                goods.setCurrency(goodsDetails.getCurrency());
                 goods.setContractValue(goodsDetails.getContractValue());
+                goods.setAmendments(goodsDetails.getAmendments());
+                goods.setContractRefNo(goodsDetails.getContractRefNo());
                 goods.setNameOfSupplier(goodsDetails.getNameOfSupplier());
                 goods.setNameOfConsultant(goodsDetails.getNameOfConsultant());
                 goods.setContractStartDate(goodsDetails.getContractStartDate());
                 goods.setContractEndDate(goodsDetails.getContractEndDate());
+                goods.setDuration(goodsDetails.getDuration());
                 goods.setRemarks(goodsDetails.getRemarks());
                 return ResponseEntity.ok(goodsRepository.save(goods));
             })

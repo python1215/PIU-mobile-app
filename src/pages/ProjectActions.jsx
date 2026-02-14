@@ -256,6 +256,63 @@ function ProjectActions() {
     }
   };
 
+  const handleGoodsSave = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    const payload = {
+      project: { projectId: worksFormProject || selectedProject },
+      component: data.componentId ? { id: parseInt(data.componentId) } : null,
+      subcomponent: data.subcomponentId ? { subcompId: parseInt(data.subcomponentId) } : null,
+      activity: data.activityId ? { activityId: parseInt(data.activityId) } : null,
+      projectCategory: data.projectCategoryId ? { categoryId: parseInt(data.projectCategoryId) } : null,
+      fundingSource: data.fundingSourceId ? { donorId: parseInt(data.fundingSourceId) } : null,
+      currency: data.currencyId ? { id: parseInt(data.currencyId) } : null,
+      contractValue: data.contractValue ? parseFloat(data.contractValue) : null,
+      amendments: data.amendments === 'true',
+      contractRefNo: data.contractRefNo || null,
+      nameOfSupplier: data.nameOfSupplier || null,
+      nameOfConsultant: data.nameOfConsultant || null,
+      contractStartDate: data.contractStartDate || null,
+      contractEndDate: data.contractEndDate || null,
+      duration: data.duration || null,
+      remarks: data.remarks || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/project-actions/goods/${editingItem.id}`, payload);
+        toast.success(t('common.updateSuccess') || 'Updated successfully');
+      } else {
+        await axios.post('/api/project-actions/goods', payload);
+        toast.success(t('common.createSuccess') || 'Created successfully');
+      }
+      const savedProject = worksFormProject || selectedProject;
+      handleCloseModal();
+      if (savedProject !== selectedProject) {
+        setSelectedProject(savedProject);
+      } else {
+        loadContracts();
+      }
+    } catch (error) {
+      console.error('Error saving goods contract:', error);
+      toast.error('Error saving goods contract');
+    }
+  };
+
+  const handleDeleteGoods = async (id) => {
+    if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
+    try {
+      await axios.delete(`/api/project-actions/goods/${id}`);
+      toast.success(t('common.deleteSuccess') || 'Deleted successfully');
+      loadContracts();
+    } catch (error) {
+      console.error('Error deleting goods:', error);
+      toast.error('Error deleting record');
+    }
+  };
+
   const handleDeleteMonitoring = async (id) => {
     if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
     try {
@@ -343,35 +400,53 @@ function ProjectActions() {
   const renderGoodsTable = () => {
     return (
       <div className="table-responsive">
-        <table className="table table-striped table-hover">
+        <table className="table table-striped table-hover" style={{ fontSize: '0.85rem' }}>
           <thead className="table-dark">
             <tr>
+              <th>{t('financial.project')}</th>
+              <th>{t('financial.components')}</th>
+              <th>{t('financial.subcomponents')}</th>
+              <th>{t('financial.activities')}</th>
+              <th>{t('projectActions.projectCategory')}</th>
+              <th>{t('projectActions.fundingSource')}</th>
+              <th>{t('financial.currency')}</th>
+              <th className="text-end">{t('projectActions.contractValue')}</th>
+              <th>{t('projectActions.amendments')}</th>
               <th>{t('projectActions.contractNumber')}</th>
               <th>{t('projectActions.supplier')}</th>
               <th>{t('projectActions.nameOfConsultant')}</th>
-              <th className="text-end">{t('projectActions.contractValue')}</th>
               <th>{t('common.startDate')}</th>
               <th>{t('common.endDate')}</th>
               <th>{t('common.duration')}</th>
+              <th>{t('projectActions.remarks')}</th>
               <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {goods.length === 0 ? (
-              <tr><td colSpan="8" className="text-center text-muted">{t('table.noData')}</td></tr>
+              <tr><td colSpan="17" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               goods.map((item) => (
                 <tr key={item.id}>
+                  <td>{item.project?.project || '-'}</td>
+                  <td>{item.component?.projectComponents || '-'}</td>
+                  <td>{item.subcomponent?.subcomponent || '-'}</td>
+                  <td>{item.activity?.activity || '-'}</td>
+                  <td>{item.projectCategory?.category || '-'}</td>
+                  <td>{item.fundingSource?.name || '-'}</td>
+                  <td>{item.currency?.currency || '-'}</td>
+                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
+                  <td>{item.amendments ? t('common.yes') : t('common.no')}</td>
                   <td><strong>{item.contractRefNo || '-'}</strong></td>
                   <td>{item.nameOfSupplier || '-'}</td>
                   <td>{item.nameOfConsultant || '-'}</td>
-                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
                   <td>{formatDate(item.contractStartDate)}</td>
                   <td>{formatDate(item.contractEndDate)}</td>
                   <td>{item.duration || '-'}</td>
-                  <td>
-                    <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-                    <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
+                  <td>{item.remarks || '-'}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteGoods(item.id)}><FiTrash2 /></button>
                   </td>
                 </tr>
               ))
@@ -755,41 +830,130 @@ function ProjectActions() {
       {showModal && activeTab === 'monitoring' && renderMonitoringModal()}
 
       {showModal && activeTab === 'goods' && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{t('projectActions.addGoodsContract')}</h5>
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">
+                  {editingItem ? t('projectActions.editGoodsContract') : t('projectActions.addGoodsContract')}
+                </h5>
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">{t('projectActions.contractNumber')}</label>
-                  <input type="text" className="form-control" />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">{t('projectActions.supplier')}</label>
-                  <input type="text" className="form-control" />
-                </div>
-                <div className="row">
-                  <div className="col-md-6">
-                    <label className="form-label">{t('projectActions.contractValue')}</label>
-                    <input type="number" className="form-control" />
+              <form onSubmit={handleGoodsSave}>
+                <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                  <h6 className="text-muted border-bottom pb-2 mb-3">{t('financial.project')} & {t('financial.components')}</h6>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('financial.project')}</label>
+                      <select className="form-select" value={worksFormProject} onChange={e => { setWorksFormProject(e.target.value); setWorksFormComp(''); setWorksFormSubcomp(''); }}>
+                        <option value="">----------</option>
+                        {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('financial.components')}</label>
+                      <select name="componentId" value={worksFormComp} onChange={e => { setWorksFormComp(e.target.value); setWorksFormSubcomp(''); }} className="form-select">
+                        <option value="">----------</option>
+                        {filteredComponents.map(c => (
+                          <option key={c.id} value={c.id}>{c.projectComponents}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('financial.subcomponents')}</label>
+                      <select name="subcomponentId" value={worksFormSubcomp} onChange={e => setWorksFormSubcomp(e.target.value)} className="form-select" disabled={!worksFormComp}>
+                        <option value="">----------</option>
+                        {filteredSubcomponents.map(s => (
+                          <option key={s.subcompId} value={s.subcompId}>{s.subcomponent}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('financial.activities')}</label>
+                      <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.activityId || ''} disabled={!worksFormSubcomp}>
+                        <option value="">----------</option>
+                        {filteredActivities.map(a => (
+                          <option key={a.activityId} value={a.activityId}>{a.activity}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.projectCategory')}</label>
+                      <select name="projectCategoryId" defaultValue={editingItem?.projectCategory?.categoryId || ''} className="form-select">
+                        <option value="">----------</option>
+                        {categories.map(c => (
+                          <option key={c.categoryId} value={c.categoryId}>{c.category}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.fundingSource')}</label>
+                      <select name="fundingSourceId" defaultValue={editingItem?.fundingSource?.donorId || ''} className="form-select">
+                        <option value="">----------</option>
+                        {donors.map(d => (
+                          <option key={d.donorId} value={d.donorId}>{d.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('financial.currency')}</label>
+                      <select name="currencyId" defaultValue={editingItem?.currency?.id || ''} className="form-select">
+                        <option value="">----------</option>
+                        {currencies.map(c => (
+                          <option key={c.id} value={c.id}>{c.currency}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div className="col-md-6">
-                    <label className="form-label">{t('common.duration')}</label>
-                    <input type="text" className="form-control" />
+
+                  <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.contractValue')} & {t('common.details')}</h6>
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.contractValue')}</label>
+                      <input type="number" step="0.01" name="contractValue" defaultValue={editingItem?.contractValue} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.amendments')}</label>
+                      <select name="amendments" defaultValue={editingItem?.amendments?.toString() || 'false'} className="form-select">
+                        <option value="false">{t('common.no')}</option>
+                        <option value="true">{t('common.yes')}</option>
+                      </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.contractNumber')}</label>
+                      <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.supplier')}</label>
+                      <input name="nameOfSupplier" defaultValue={editingItem?.nameOfSupplier} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('projectActions.nameOfConsultant')}</label>
+                      <input name="nameOfConsultant" defaultValue={editingItem?.nameOfConsultant} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('common.duration')}</label>
+                      <input name="duration" defaultValue={editingItem?.duration} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('common.startDate')}</label>
+                      <input type="date" name="contractStartDate" defaultValue={editingItem?.contractStartDate} className="form-control" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-medium">{t('common.endDate')}</label>
+                      <input type="date" name="contractEndDate" defaultValue={editingItem?.contractEndDate} className="form-control" />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
+                      <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3"></textarea>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
-                  {t('common.cancel')}
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleCloseModal}>
-                  {t('common.save')}
-                </button>
-              </div>
+                <div className="modal-footer border-0 pt-0">
+                  <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>{t('common.cancel')}</button>
+                  <button type="submit" className="btn btn-primary">{t('common.save')}</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
