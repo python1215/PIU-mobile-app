@@ -473,8 +473,12 @@ function SystemSetup() {
       },
       relatedDataKeys: ['pdos'] },
     results: { endpoint: '/api/setup/results', idField: 'id', label: 'Project Results',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'projectResult', label: 'Project Result' }],
-      fields: [{ name: 'projectResult', label: 'Project Result' }] },
+      columns: [{ key: 'id', label: 'ID' }, { key: 'projectOutcome.projectOutcome', label: 'Related Outcome' }, { key: 'projectResult', label: 'Project Result' }],
+      fields: [
+        { name: 'outcomeId', label: 'Related Project Outcome', type: 'select', dataKey: 'outcomes', valueField: 'id', displayField: 'projectOutcome', relationField: 'projectOutcome', placeholder: 'Select a Project Outcome...', helpText: 'Select the project outcome that this result supports' },
+        { name: 'projectResult', label: 'Project Result', type: 'textarea', placeholder: 'Enter detailed project result description...', helpText: 'Describe the specific, measurable result achieved' }
+      ],
+      relatedDataKeys: ['outcomes'] },
   }), []);
 
   const menuGroups = useMemo(() => [
@@ -501,7 +505,7 @@ function SystemSetup() {
   }, [tabConfig]);
 
   const loadRelatedData = useCallback(async () => {
-    const relatedTabs = ['regions', 'lgas', 'districts', 'wards', 'monitoringTypes', 'pdos'];
+    const relatedTabs = ['regions', 'lgas', 'districts', 'wards', 'monitoringTypes', 'pdos', 'outcomes'];
     const promises = relatedTabs.map(async (tabKey) => {
       if (loadedTabs[tabKey]) return;
       const config = tabConfig[tabKey];

@@ -581,7 +581,7 @@ public class SetupController {
 
     @PutMapping("/results/{id}")
     public ResponseEntity<ProjectResult> updateResult(@PathVariable Long id, @RequestBody ProjectResult details) {
-        return projectResultRepository.findById(id).map(r -> { r.setProjectResult(details.getProjectResult()); return ResponseEntity.ok(projectResultRepository.save(r)); }).orElse(ResponseEntity.notFound().build());
+        return projectResultRepository.findById(id).map(r -> { r.setProjectResult(details.getProjectResult()); r.setProjectOutcome(details.getProjectOutcome()); return ResponseEntity.ok(projectResultRepository.save(r)); }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/results/{id}")
