@@ -493,10 +493,9 @@ function FinancialManagement() {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     
-    const selectedComponent = components.find(c => c.id === parseInt(data.componentId));
-    const projectId = selectedComponent?.project?.projectId || selectedProject;
-    if (!projectId || projectId === 'all') {
-      toast.error('Please select a valid component');
+    const projectId = data.projectId;
+    if (!projectId) {
+      toast.error('Please select a project');
       return;
     }
     const payload = {
@@ -857,35 +856,47 @@ function FinancialManagement() {
               <form onSubmit={handleSubcomponentSave}>
                 <div className="modal-body">
                   <div className="row g-3">
-                    <div className="col-12">
-                      <label className="form-label fw-medium">Component</label>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium"><FiFolder className="me-1" /> Project *</label>
+                      <select name="projectId" defaultValue={selectedProject === 'all' ? '' : selectedProject} className="form-select" required>
+                        <option value="">Select Project...</option>
+                        {projects.map(p => (
+                          <option key={p.projectId} value={p.projectId}>{p.project}</option>
+                        ))}
+                      </select>
+                      <div className="form-text">Select the project for this subcomponent</div>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium"><FiLayers className="me-1" /> Component *</label>
                       <select name="componentId" className="form-select" required>
-                        <option value="">Select Component</option>
+                        <option value="">Select Component...</option>
                         {components.map(c => (
                           <option key={c.id} value={c.id}>{c.projectComponents}</option>
                         ))}
                       </select>
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label fw-medium">Subcomponent Name</label>
-                      <input name="subcomponent" defaultValue={editingItem?.subcomponent} className="form-control" placeholder="Enter subcomponent name" required />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label fw-medium">Description</label>
-                      <textarea name="subcomponentDescription" defaultValue={editingItem?.subcomponentDescription} className="form-control" rows="3" placeholder="Enter description"></textarea>
+                      <div className="form-text">Select the component for this subcomponent</div>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label fw-medium">Currency</label>
-                      <select name="currencyId" defaultValue={editingItem?.currency?.id} className="form-select">
-                        <option value="">Select Currency</option>
+                      <label className="form-label fw-medium">Subcomponent Name *</label>
+                      <input name="subcomponent" defaultValue={editingItem?.subcomponent} className="form-control" placeholder="Enter the subcomponent identifier" required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium"><FiDollarSign className="me-1" /> Currency *</label>
+                      <select name="currencyId" defaultValue={editingItem?.currency?.id} className="form-select" required>
+                        <option value="">Select Currency...</option>
                         {currencies.map(c => (
                           <option key={c.id} value={c.id}>{c.currency}</option>
                         ))}
                       </select>
+                      <div className="form-text">Select the currency for allocation</div>
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Description</label>
+                      <textarea name="subcomponentDescription" defaultValue={editingItem?.subcomponentDescription} className="form-control" rows="3" placeholder="Provide a detailed description of the subcomponent"></textarea>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label fw-medium">Allocation</label>
-                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="0.00" required />
+                      <label className="form-label fw-medium"><FiDollarSign className="me-1" /> Allocation Amount *</label>
+                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="Enter the allocated budget amount" required />
                     </div>
                   </div>
                 </div>
