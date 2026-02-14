@@ -416,7 +416,13 @@ function SystemSetup() {
       columns: [{ key: 'id', label: 'ID' }, { key: 'vulnerability', label: 'Vulnerability' }],
       fields: [{ name: 'vulnerability', label: 'Vulnerability Category' }] },
     kpiContracts: { endpoint: '/api/setup/kpi-contracts', idField: 'id', label: 'KPI Contracts',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'kpiCode', label: 'KPI Code' }, { key: 'project', label: 'Project', nested: 'project' }, { key: 'typeOfInvestment', label: 'Investment Type' }],
+      columns: [
+        { key: 'id', label: 'ID' }, 
+        { key: 'kpiCode', label: 'KPI Code' }, 
+        { key: 'project', label: 'Project', nested: 'project' }, 
+        { key: 'monitoringType', label: 'Monitoring Type', nested: 'monitoringType' },
+        { key: 'kpiDescription', label: 'Description' }
+      ],
       fields: [
         { name: 'kpiCode', label: 'KPI Code', halfWidth: true },
         { name: 'project', label: 'Project', type: 'select', dataKey: 'projects', valueField: 'projectId', displayField: 'project', relationField: 'project', halfWidth: true },
