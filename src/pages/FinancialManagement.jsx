@@ -198,6 +198,12 @@ const ProjectRow = memo(function ProjectRow({ project, onEdit, onDelete }) {
       <td className="px-4 py-3 fw-medium">{project.projectId}</td>
       <td className="px-4 py-3">{project.project}</td>
       <td className="px-4 py-3">
+        {project.donors?.map(d => d.name).join(', ') || '-'}
+      </td>
+      <td className="px-4 py-3">
+        {project.contributors?.map(c => c.name).join(', ') || '-'}
+      </td>
+      <td className="px-4 py-3">
         {project.currency?.currency} {project.funding?.toLocaleString()}
       </td>
       <td className="px-4 py-3">{project.effectivenessDate || '-'}</td>
@@ -496,6 +502,8 @@ function FinancialManagement() {
               <tr>
                 <th className="border-0 px-4 py-3">{t('projects.projectId')}</th>
                 <th className="border-0 px-4 py-3">{t('common.name')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.donors')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.contributors')}</th>
                 <th className="border-0 px-4 py-3">{t('projects.funding')}</th>
                 <th className="border-0 px-4 py-3">{t('projects.effectivenessDate')}</th>
                 <th className="border-0 px-4 py-3">{t('projects.closureDate')}</th>
