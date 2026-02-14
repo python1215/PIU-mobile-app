@@ -708,6 +708,7 @@ function FinancialManagement() {
           onSave={handleProjectSave}
           donors={donors}
           contributors={contributors}
+          currencies={currencies}
         />
       )}
 
