@@ -302,7 +302,9 @@ function FinancialManagement() {
   const [selectedProject, setSelectedProject] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showComponentModal, setShowComponentModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [projectSearch, setProjectSearch] = useState('');
 
   const loadDonorsAndContributors = useCallback(async () => {
@@ -423,30 +425,44 @@ function FinancialManagement() {
     }
   }, [editingProject, handleUpdateProject, handleCreateProject]);
 
+  const handleComponentSave = useCallback(async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    data.project = { projectId: selectedProject };
+    
+    try {
+      if (editingItem) {
+        await axios.put(`/api/financial/components/${editingItem.compId}`, data);
+        toast.success('Component updated successfully');
+      } else {
+        await axios.post('/api/financial/components', data);
+        toast.success('Component created successfully');
+      }
+      setShowComponentModal(false);
+      setEditingItem(null);
+      loadFinancialData();
+    } catch (error) {
+      toast.error('Error saving component');
+    }
+  }, [selectedProject, editingItem, loadFinancialData]);
+
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
+    setShowComponentModal(false);
     setEditingProject(null);
-  }, []);
-
-  const handleEditProject = useCallback((project) => {
-    setEditingProject(project);
-  }, []);
-
-  const handleTabChange = useCallback((tabId) => {
-    setActiveTab(tabId);
-  }, []);
-
-  const handleSearchChange = useCallback((e) => {
-    setProjectSearch(e.target.value);
-  }, []);
-
-  const handleProjectSelect = useCallback((e) => {
-    setSelectedProject(e.target.value);
+    setEditingItem(null);
   }, []);
 
   const handleShowModal = useCallback(() => {
-    setShowModal(true);
-  }, []);
+    if (activeTab === 'projects') {
+      setShowModal(true);
+    } else if (activeTab === 'components') {
+      setShowComponentModal(true);
+    } else {
+      toast.error(`Add New for ${activeTab} is coming soon`);
+    }
+  }, [activeTab]);
 
   const filteredProjects = useMemo(() => {
     const searchLower = projectSearch.toLowerCase();
@@ -638,6 +654,43 @@ function FinancialManagement() {
           donors={donors}
           contributors={contributors}
         />
+      )}
+
+      {showComponentModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">{editingItem ? 'Edit Component' : 'Add Component'}</h5>
+                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+              </div>
+              <form onSubmit={handleComponentSave}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">Component ID</label>
+                    <input name="compId" defaultValue={editingItem?.compId} className="form-control" required />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">Component Name</label>
+                    <input name="projectComponents" defaultValue={editingItem?.projectComponents} className="form-control" required />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">Description</label>
+                    <textarea name="componentDescription" defaultValue={editingItem?.componentDescription} className="form-control" rows="3"></textarea>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">Allocation</label>
+                    <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" required />
+                  </div>
+                </div>
+                <div className="modal-footer border-0 pt-0">
+                  <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">{editingItem ? 'Update' : 'Create'}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
