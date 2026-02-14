@@ -616,9 +616,9 @@ function FinancialManagement() {
 
       {activeTab !== 'projects' && (
         <div className="row mb-4">
-          <StatCard title={t('financial.totalComponents')} value={components.length} bgClass="bg-primary" />
-          <StatCard title={t('financial.totalAllocation')} value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
-          <StatCard title={t('financial.totalActivities')} value={activities.length} bgClass="bg-info" />
+          <StatCard title="Total Components" value={components.length} bgClass="bg-primary" />
+          <StatCard title="Total Allocation" value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
+          <StatCard title="Total Activities" value={activities.length} bgClass="bg-info" />
         </div>
       )}
 
