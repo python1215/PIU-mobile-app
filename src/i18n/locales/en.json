@@ -229,8 +229,10 @@
   },
   "financial": {
     "title": "Financial Management",
-    "donors": "Donor",
-    "contributors": "Contributors",
+    "projects": "Projects",
+    "components": "Components",
+    "subcomponents": "Subcomponents",
+    "activities": "Activities",
     "pdoStatements": "PDO Statements",
     "outcomes": "Outcomes",
     "results": "Results",
