@@ -856,7 +856,7 @@ function FinancialManagement() {
                       <select name="componentId" className="form-select" required>
                         <option value="">Select Component</option>
                         {components.map(c => (
-                          <option key={c.id} value={c.id}>{c.projectComponents} ({c.compId})</option>
+                          <option key={c.id} value={c.id}>{c.projectComponents}</option>
                         ))}
                       </select>
                     </div>
