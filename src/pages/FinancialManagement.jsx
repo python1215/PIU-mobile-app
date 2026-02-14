@@ -449,7 +449,7 @@ function FinancialManagement() {
     
     try {
       if (editingItem) {
-        await axios.put(`/api/financial/components/${editingItem.compId}`, payload);
+        await axios.put(`/api/financial/components/${editingItem.id}`, payload);
         toast.success('Component updated successfully');
       } else {
         await axios.post('/api/financial/components', payload);

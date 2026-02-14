@@ -56,6 +56,7 @@ public class FinancialController {
     public ResponseEntity<Component> updateComponent(@PathVariable Long id, @RequestBody Component componentDetails) {
         return componentRepository.findById(id)
             .map(component -> {
+                component.setCompId(componentDetails.getCompId());
                 component.setProjectComponents(componentDetails.getProjectComponents());
                 component.setComponentDescription(componentDetails.getComponentDescription());
                 component.setAllocation(componentDetails.getAllocation());

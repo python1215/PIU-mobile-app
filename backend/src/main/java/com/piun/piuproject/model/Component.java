@@ -16,8 +16,11 @@ import java.time.LocalDateTime;
 public class Component {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comp_id")
-    private Long compId;
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "comp_id", length = 50)
+    private String compId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
