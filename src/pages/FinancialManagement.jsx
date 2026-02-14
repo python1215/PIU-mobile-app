@@ -327,6 +327,8 @@ function FinancialManagement() {
   const [years, setYears] = useState([]);
   const [activityProjectId, setActivityProjectId] = useState('');
   const [activityComponentId, setActivityComponentId] = useState('');
+  const [activitySubcompId, setActivitySubcompId] = useState('');
+  const [allActivities, setAllActivities] = useState([]);
   const [componentProjectId, setComponentProjectId] = useState('');
   const [allComponents, setAllComponents] = useState([]);
   const [subcompProjectId, setSubcompProjectId] = useState('');
@@ -408,6 +410,20 @@ function FinancialManagement() {
       });
     }
   }, [showSubcomponentModal]);
+
+  useEffect(() => {
+    if (showActivityModal) {
+      Promise.all([
+        api.get('/financial/components').catch(() => ({ data: [] })),
+        api.get('/financial/subcomponents').catch(() => ({ data: [] })),
+        api.get('/financial/activities').catch(() => ({ data: [] }))
+      ]).then(([compRes, subRes, actRes]) => {
+        setAllComponents(compRes.data);
+        setAllSubcomponents(subRes.data);
+        setAllActivities(actRes.data);
+      });
+    }
+  }, [showActivityModal]);
 
   const tabs = useMemo(() => [
     { id: 'projects', label: 'Projects', icon: FiFolder },
@@ -595,6 +611,21 @@ function FinancialManagement() {
     return subcomponents.filter(s => s.component?.id?.toString() === activityComponentId);
   }, [subcomponents, activityComponentId]);
 
+  const activityBudgetInfo = useMemo(() => {
+    if (!activitySubcompId) return null;
+    const selectedSubcomp = allSubcomponents.find(s => s.subcompId?.toString() === activitySubcompId);
+    if (!selectedSubcomp) return null;
+    const subcompAllocation = parseFloat(selectedSubcomp.allocation) || 0;
+    const allocatedAmount = allActivities
+      .filter(a => a.subcomponent?.subcompId?.toString() === activitySubcompId && (!editingItem || a.activityId !== editingItem.activityId))
+      .reduce((sum, a) => sum + (parseFloat(a.allocation) || 0), 0);
+    return {
+      subcompAllocation,
+      allocatedAmount,
+      remainingBalance: subcompAllocation - allocatedAmount
+    };
+  }, [activitySubcompId, allSubcomponents, allActivities, editingItem]);
+
   const handleActivitySave = useCallback(async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -604,12 +635,17 @@ function FinancialManagement() {
       toast.error('Please select a project');
       return;
     }
+    const allocationAmount = parseFloat(data.allocation) || 0;
+    if (activityBudgetInfo && allocationAmount > activityBudgetInfo.remainingBalance) {
+      toast.error(`Allocation exceeds remaining subcomponent balance of ${activityBudgetInfo.remainingBalance.toLocaleString()}`);
+      return;
+    }
     const payload = {
       activity: data.activity,
-      allocation: parseFloat(data.allocation),
+      allocation: allocationAmount,
       project: { projectId: data.projectId },
-      component: data.componentId ? { id: parseInt(data.componentId) } : null,
-      subcomponent: data.subcomponentId ? { subcompId: parseInt(data.subcomponentId) } : null,
+      component: activityComponentId ? { id: parseInt(activityComponentId) } : null,
+      subcomponent: activitySubcompId ? { subcompId: parseInt(activitySubcompId) } : null,
       currency: data.currencyId ? { id: parseInt(data.currencyId) } : null,
       year: data.yearId ? { id: parseInt(data.yearId) } : null
     };
@@ -626,12 +662,13 @@ function FinancialManagement() {
       setEditingItem(null);
       setActivityProjectId('');
       setActivityComponentId('');
+      setActivitySubcompId('');
       loadFinancialData();
     } catch (error) {
       console.error('Error saving activity:', error);
       toast.error('Error saving activity');
     }
-  }, [editingItem, loadFinancialData]);
+  }, [editingItem, loadFinancialData, activityComponentId, activitySubcompId, activityBudgetInfo]);
 
   const handleDeleteItem = useCallback(async (item) => {
     if (!confirm(t('messages.confirmDelete'))) return;
@@ -713,8 +750,9 @@ function FinancialManagement() {
       setSubcompComponentId('');
       setShowSubcomponentModal(true);
     } else if (activeTab === 'activities') {
-      setActivityProjectId('');
+      setActivityProjectId(selectedProject === 'all' ? '' : selectedProject);
       setActivityComponentId('');
+      setActivitySubcompId('');
       setShowActivityModal(true);
     } else {
       toast.error(`Add New for ${activeTab} is coming soon`);
@@ -1098,7 +1136,7 @@ function FinancialManagement() {
                       <div className="row g-3">
                         <div className="col-md-6">
                           <label className="form-label fw-medium">Project</label>
-                          <select name="projectId" value={activityProjectId} onChange={(e) => { setActivityProjectId(e.target.value); setActivityComponentId(''); }} className="form-select" required>
+                          <select name="projectId" value={activityProjectId} onChange={(e) => { setActivityProjectId(e.target.value); setActivityComponentId(''); setActivitySubcompId(''); }} className="form-select" required>
                             <option value="">Select Project...</option>
                             {projects.map(p => (
                               <option key={p.projectId} value={p.projectId}>{p.project}</option>
@@ -1108,7 +1146,7 @@ function FinancialManagement() {
                         </div>
                         <div className="col-md-6">
                           <label className="form-label fw-medium">Component</label>
-                          <select name="componentId" value={activityComponentId} onChange={(e) => setActivityComponentId(e.target.value)} className="form-select">
+                          <select name="componentId" value={activityComponentId} onChange={(e) => { setActivityComponentId(e.target.value); setActivitySubcompId(''); }} className="form-select">
                             <option value="">{activityProjectId ? 'Select Component...' : 'First select a project...'}</option>
                             {activityFilteredComponents.map(c => (
                               <option key={c.id} value={c.id}>{c.projectComponents}</option>
@@ -1117,13 +1155,35 @@ function FinancialManagement() {
                         </div>
                         <div className="col-md-6">
                           <label className="form-label fw-medium">Subcomponent</label>
-                          <select name="subcomponentId" defaultValue={editingItem?.subcomponent?.subcompId || ''} className="form-select">
+                          <select value={activitySubcompId} onChange={(e) => setActivitySubcompId(e.target.value)} className="form-select">
                             <option value="">{activityComponentId ? 'Select Subcomponent...' : 'First select a component...'}</option>
                             {activityFilteredSubcomponents.map(s => (
                               <option key={s.subcompId} value={s.subcompId}>{s.subcomponent}</option>
                             ))}
                           </select>
                         </div>
+                        {activityBudgetInfo && (
+                          <div className="col-12">
+                            <div className="card border-0" style={{ backgroundColor: '#e8f4fd' }}>
+                              <div className="card-body py-2 px-3">
+                                <div className="row text-center">
+                                  <div className="col-md-4">
+                                    <small className="text-muted d-block">Subcomponent Allocation</small>
+                                    <span className="fw-bold text-primary">{formatCurrency(activityBudgetInfo.subcompAllocation)}</span>
+                                  </div>
+                                  <div className="col-md-4">
+                                    <small className="text-muted d-block">Already Allocated</small>
+                                    <span className="fw-bold text-warning">{formatCurrency(activityBudgetInfo.allocatedAmount)}</span>
+                                  </div>
+                                  <div className="col-md-4">
+                                    <small className="text-muted d-block">Remaining Balance</small>
+                                    <span className={`fw-bold ${activityBudgetInfo.remainingBalance >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(activityBudgetInfo.remainingBalance)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <div className="col-md-6">
                           <label className="form-label fw-medium">Activity Name</label>
                           <input name="activity" defaultValue={editingItem?.activity} className="form-control" required />
@@ -1139,7 +1199,10 @@ function FinancialManagement() {
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">Allocation</label>
-                          <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" />
+                          <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" max={activityBudgetInfo ? activityBudgetInfo.remainingBalance : undefined} />
+                          {activityBudgetInfo && activityBudgetInfo.remainingBalance >= 0 && (
+                            <div className="form-text">Maximum allowed: {formatCurrency(activityBudgetInfo.remainingBalance)}</div>
+                          )}
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">Year</label>
