@@ -329,6 +329,9 @@ function FinancialManagement() {
   const [activityComponentId, setActivityComponentId] = useState('');
   const [componentProjectId, setComponentProjectId] = useState('');
   const [allComponents, setAllComponents] = useState([]);
+  const [subcompProjectId, setSubcompProjectId] = useState('');
+  const [subcompComponentId, setSubcompComponentId] = useState('');
+  const [allSubcomponents, setAllSubcomponents] = useState([]);
 
   const loadDonorsAndContributors = useCallback(async () => {
     try {
@@ -393,6 +396,18 @@ function FinancialManagement() {
       api.get('/financial/components').then(res => setAllComponents(res.data)).catch(() => setAllComponents([]));
     }
   }, [showComponentModal]);
+
+  useEffect(() => {
+    if (showSubcomponentModal) {
+      Promise.all([
+        api.get('/financial/components').catch(() => ({ data: [] })),
+        api.get('/financial/subcomponents').catch(() => ({ data: [] }))
+      ]).then(([compRes, subRes]) => {
+        setAllComponents(compRes.data);
+        setAllSubcomponents(subRes.data);
+      });
+    }
+  }, [showSubcomponentModal]);
 
   const tabs = useMemo(() => [
     { id: 'projects', label: 'Projects', icon: FiFolder },
@@ -504,22 +519,50 @@ function FinancialManagement() {
     }
   }, [editingItem, loadFinancialData, componentProjectId, componentBudgetInfo]);
 
+  const subcompFilteredComponents = useMemo(() => {
+    if (!subcompProjectId) return [];
+    return allComponents.filter(c => c.project?.projectId === subcompProjectId);
+  }, [allComponents, subcompProjectId]);
+
+  const subcompBudgetInfo = useMemo(() => {
+    if (!subcompComponentId) return null;
+    const component = allComponents.find(c => c.id?.toString() === subcompComponentId);
+    if (!component) return null;
+    const componentAllocation = parseFloat(component.allocation) || 0;
+    const allocatedAmount = allSubcomponents
+      .filter(s => s.component?.id?.toString() === subcompComponentId && (!editingItem || s.subcompId !== editingItem.subcompId))
+      .reduce((sum, s) => sum + (parseFloat(s.allocation) || 0), 0);
+    const remainingBalance = componentAllocation - allocatedAmount;
+    return { componentAllocation, allocatedAmount, remainingBalance };
+  }, [subcompComponentId, allComponents, allSubcomponents, editingItem]);
+
   const handleSubcomponentSave = useCallback(async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     
-    const projectId = data.projectId;
-    if (!projectId) {
+    if (!subcompProjectId) {
       toast.error('Please select a project');
       return;
     }
+
+    const allocation = parseFloat(data.allocation);
+    if (isNaN(allocation)) {
+      toast.error('Invalid allocation amount');
+      return;
+    }
+
+    if (subcompBudgetInfo && allocation > subcompBudgetInfo.remainingBalance) {
+      toast.error(`Allocation exceeds remaining balance of ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(subcompBudgetInfo.remainingBalance)}`);
+      return;
+    }
+
     const payload = {
       subcomponent: data.subcomponent,
       subcomponentDescription: data.subcomponentDescription,
-      allocation: parseFloat(data.allocation),
-      component: { id: parseInt(data.componentId) },
-      project: { projectId: projectId },
+      allocation: allocation,
+      component: { id: parseInt(subcompComponentId) },
+      project: { projectId: subcompProjectId },
       currency: data.currencyId ? { id: parseInt(data.currencyId) } : null
     };
 
@@ -533,12 +576,14 @@ function FinancialManagement() {
       }
       setShowSubcomponentModal(false);
       setEditingItem(null);
+      setSubcompProjectId('');
+      setSubcompComponentId('');
       loadFinancialData();
     } catch (error) {
       console.error('Error saving subcomponent:', error);
       toast.error('Error saving subcomponent');
     }
-  }, [editingItem, selectedProject, loadFinancialData]);
+  }, [editingItem, loadFinancialData, subcompProjectId, subcompComponentId, subcompBudgetInfo]);
 
   const activityFilteredComponents = useMemo(() => {
     if (!activityProjectId) return [];
@@ -616,6 +661,8 @@ function FinancialManagement() {
       setComponentProjectId(item.project?.projectId || '');
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
+      setSubcompProjectId(item.project?.projectId || '');
+      setSubcompComponentId(item.component?.id?.toString() || '');
       setShowSubcomponentModal(true);
     } else if (activeTab === 'activities') {
       setActivityProjectId(item.project?.projectId || '');
@@ -634,6 +681,8 @@ function FinancialManagement() {
     setActivityProjectId('');
     setActivityComponentId('');
     setComponentProjectId('');
+    setSubcompProjectId('');
+    setSubcompComponentId('');
   }, []);
 
   const handleEditProject = useCallback((project) => {
@@ -660,6 +709,8 @@ function FinancialManagement() {
       setComponentProjectId(selectedProject === 'all' ? '' : selectedProject);
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
+      setSubcompProjectId(selectedProject === 'all' ? '' : selectedProject);
+      setSubcompComponentId('');
       setShowSubcomponentModal(true);
     } else if (activeTab === 'activities') {
       setActivityProjectId('');
@@ -955,7 +1006,7 @@ function FinancialManagement() {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label fw-medium"><FiFolder className="me-1" /> Project *</label>
-                      <select name="projectId" defaultValue={selectedProject === 'all' ? '' : selectedProject} className="form-select" required>
+                      <select value={subcompProjectId} onChange={(e) => { setSubcompProjectId(e.target.value); setSubcompComponentId(''); }} className="form-select" required>
                         <option value="">Select Project...</option>
                         {projects.map(p => (
                           <option key={p.projectId} value={p.projectId}>{p.project}</option>
@@ -965,14 +1016,36 @@ function FinancialManagement() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-medium"><FiLayers className="me-1" /> Component *</label>
-                      <select name="componentId" className="form-select" required>
-                        <option value="">Select Component...</option>
-                        {components.map(c => (
+                      <select value={subcompComponentId} onChange={(e) => setSubcompComponentId(e.target.value)} className="form-select" required>
+                        <option value="">{subcompProjectId ? 'Select Component...' : 'First select a project...'}</option>
+                        {subcompFilteredComponents.map(c => (
                           <option key={c.id} value={c.id}>{c.projectComponents}</option>
                         ))}
                       </select>
                       <div className="form-text">Select the component for this subcomponent</div>
                     </div>
+                    {subcompBudgetInfo && (
+                      <div className="col-12">
+                        <div className="card border-0" style={{ backgroundColor: '#e8f4fd' }}>
+                          <div className="card-body py-2 px-3">
+                            <div className="row text-center">
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Component Allocation</small>
+                                <span className="fw-bold text-primary">{formatCurrency(subcompBudgetInfo.componentAllocation)}</span>
+                              </div>
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Already Allocated</small>
+                                <span className="fw-bold text-warning">{formatCurrency(subcompBudgetInfo.allocatedAmount)}</span>
+                              </div>
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Remaining Balance</small>
+                                <span className={`fw-bold ${subcompBudgetInfo.remainingBalance >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(subcompBudgetInfo.remainingBalance)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div className="col-md-6">
                       <label className="form-label fw-medium">Subcomponent Name *</label>
                       <input name="subcomponent" defaultValue={editingItem?.subcomponent} className="form-control" placeholder="Enter the subcomponent identifier" required />
@@ -993,7 +1066,10 @@ function FinancialManagement() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-medium"><FiDollarSign className="me-1" /> Allocation Amount *</label>
-                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="Enter the allocated budget amount" required />
+                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="Enter the allocated budget amount" required max={subcompBudgetInfo ? subcompBudgetInfo.remainingBalance : undefined} />
+                      {subcompBudgetInfo && subcompBudgetInfo.remainingBalance >= 0 && (
+                        <div className="form-text">Maximum allowed: {formatCurrency(subcompBudgetInfo.remainingBalance)}</div>
+                      )}
                     </div>
                   </div>
                 </div>
