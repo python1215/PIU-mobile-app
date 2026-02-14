@@ -322,7 +322,7 @@ function FinancialManagement() {
   const [donors, setDonors] = useState([]);
   const [contributors, setContributors] = useState([]);
   const [currencies, setCurrencies] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProject, setSelectedProject] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showComponentModal, setShowComponentModal] = useState(false);
@@ -351,9 +351,7 @@ function FinancialManagement() {
     try {
       const res = await api.get('/projects');
       setProjects(res.data);
-      if (res.data.length > 0) {
-        setSelectedProject(res.data[0].projectId);
-      }
+      setSelectedProject('all');
     } catch (error) {
       console.error('Error loading projects:', error);
     } finally {
@@ -364,13 +362,14 @@ function FinancialManagement() {
   const loadFinancialData = useCallback(async () => {
     if (!selectedProject) return;
     setLoading(true);
+    const isAll = selectedProject === 'all';
     try {
       const [compRes, subRes, actRes, pdoRes, outRes] = await Promise.all([
-        api.get(`/financial/components/project/${selectedProject}`).catch(err => { console.error('Components load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(`/financial/subcomponents`).catch(err => { console.error('Subcomponents load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(`/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(`/financial/pdos/project/${selectedProject}`).catch(err => { console.error('PDOs load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(`/financial/outcomes`).catch(err => { console.error('Outcomes load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
+        api.get(isAll ? '/financial/components' : `/financial/components/project/${selectedProject}`).catch(err => { console.error('Components load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get('/financial/subcomponents').catch(err => { console.error('Subcomponents load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(isAll ? '/financial/activities' : `/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(isAll ? '/financial/pdos' : `/financial/pdos/project/${selectedProject}`).catch(err => { console.error('PDOs load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get('/financial/outcomes').catch(err => { console.error('Outcomes load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
       ]);
       setComponents(compRes.data);
       setSubcomponents(subRes.data);
@@ -390,9 +389,7 @@ function FinancialManagement() {
   }, [loadProjects, loadDonorsAndContributors]);
 
   useEffect(() => {
-    if (selectedProject) {
-      loadFinancialData();
-    }
+    loadFinancialData();
   }, [selectedProject, loadFinancialData]);
 
   const tabs = useMemo(() => [
@@ -745,7 +742,10 @@ function FinancialManagement() {
   ), [tabs, activeTab, handleTabChange]);
 
   const projectOptions = useMemo(() => (
-    projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)
+    <>
+      <option value="all">All</option>
+      {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+    </>
   ), [projects]);
 
   return (
