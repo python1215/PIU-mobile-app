@@ -255,7 +255,7 @@ const ProjectRow = memo(function ProjectRow({ project, onEdit, onDelete }) {
   );
 });
 
-const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onEdit, onDelete }) {
+const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onView, onEdit, onDelete }) {
   return (
     <tr>
       {activeTab === 'components' && (
@@ -274,8 +274,9 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onEdit,
         <><td>{item.id}</td><td>{item.projectOutcome}</td></>
       )}
       <td>
-        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEdit && onEdit(item)}><FiEdit2 /></button>
-        <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete && onDelete(item)}><FiTrash2 /></button>
+        <button className="btn btn-sm btn-outline-info me-1" onClick={() => onView && onView(item)} title="View"><FiEye /></button>
+        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEdit && onEdit(item)} title="Edit"><FiEdit2 /></button>
+        <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete && onDelete(item)} title="Delete"><FiTrash2 /></button>
       </td>
     </tr>
   );
@@ -328,6 +329,7 @@ function FinancialManagement() {
   const [showSubcomponentModal, setShowSubcomponentModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [viewingItem, setViewingItem] = useState(null);
   const [projectSearch, setProjectSearch] = useState('');
 
   const loadDonorsAndContributors = useCallback(async () => {
@@ -542,6 +544,10 @@ function FinancialManagement() {
     }
   }, [activeTab, loadFinancialData, t]);
 
+  const handleViewItem = useCallback((item) => {
+    setViewingItem(item);
+  }, []);
+
   const handleEditItem = useCallback((item) => {
     setEditingItem(item);
     if (activeTab === 'components') {
@@ -704,6 +710,7 @@ function FinancialManagement() {
                   item={item}
                   activeTab={activeTab}
                   formatCurrency={formatCurrency}
+                  onView={handleViewItem}
                   onEdit={handleEditItem}
                   onDelete={handleDeleteItem}
                 />
@@ -722,7 +729,7 @@ function FinancialManagement() {
         </table>
       </div>
     );
-  }, [loading, activeTab, currentTabData, formatCurrency, dataTotal, handleEditItem, handleDeleteItem, t]);
+  }, [loading, activeTab, currentTabData, formatCurrency, dataTotal, handleViewItem, handleEditItem, handleDeleteItem, t]);
 
   const tabButtons = useMemo(() => (
     <ul className="nav nav-tabs mb-4">
@@ -881,6 +888,73 @@ function FinancialManagement() {
                   <button type="submit" className="btn btn-primary">{editingItem ? 'Update' : 'Create'}</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {viewingItem && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">
+                  {activeTab === 'components' && 'Component Details'}
+                  {activeTab === 'subcomponents' && 'Subcomponent Details'}
+                  {activeTab === 'activities' && 'Activity Details'}
+                  {activeTab === 'pdos' && 'PDO Statement Details'}
+                  {activeTab === 'outcomes' && 'Outcome Details'}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setViewingItem(null)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="row g-3">
+                  {activeTab === 'components' && (
+                    <>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('common.project')}</label><p className="fw-medium">{viewingItem.project?.project || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.compId}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.componentName')}</label><p className="fw-medium">{viewingItem.projectComponents}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('common.description')}</label><p className="fw-medium">{viewingItem.componentDescription || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
+                    </>
+                  )}
+                  {activeTab === 'subcomponents' && (
+                    <>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.components')}</label><p className="fw-medium">{viewingItem.component?.projectComponents || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.subcompId}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.subcomponent')}</label><p className="fw-medium">{viewingItem.subcomponent}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('common.description')}</label><p className="fw-medium">{viewingItem.subcomponentDescription || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
+                    </>
+                  )}
+                  {activeTab === 'activities' && (
+                    <>
+                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.activityId}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.activity')}</label><p className="fw-medium">{viewingItem.activity}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
+                    </>
+                  )}
+                  {activeTab === 'pdos' && (
+                    <>
+                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.id}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.pdoStatement')}</label><p className="fw-medium">{viewingItem.pdoStatement}</p></div>
+                    </>
+                  )}
+                  {activeTab === 'outcomes' && (
+                    <>
+                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.id}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.projectOutcome')}</label><p className="fw-medium">{viewingItem.projectOutcome}</p></div>
+                    </>
+                  )}
+                  {viewingItem.dateCreated && (
+                    <div className="col-12"><label className="form-label text-muted small">{t('common.dateCreated')}</label><p className="fw-medium">{new Date(viewingItem.dateCreated).toLocaleDateString()}</p></div>
+                  )}
+                </div>
+              </div>
+              <div className="modal-footer border-0 pt-0">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setViewingItem(null)}>Close</button>
+              </div>
             </div>
           </div>
         </div>
