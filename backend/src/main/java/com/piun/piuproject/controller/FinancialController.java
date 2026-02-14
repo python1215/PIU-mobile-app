@@ -112,7 +112,24 @@ public class FinancialController {
 
     @PostMapping("/subcomponents")
     public Subcomponent createSubcomponent(@RequestBody Subcomponent subcomponent) {
-        return subcomponentRepository.save(subcomponent);
+        try {
+            if (subcomponent.getLoginUser() == null) {
+                User user = userRepository.findAll().stream().findFirst().orElse(null);
+                subcomponent.setLoginUser(user);
+            }
+            if (subcomponent.getProject() != null && subcomponent.getProject().getProjectId() != null) {
+                Project project = projectRepository.findById(subcomponent.getProject().getProjectId()).orElse(null);
+                subcomponent.setProject(project);
+            }
+            if (subcomponent.getComponent() != null && subcomponent.getComponent().getId() != null) {
+                Component comp = componentRepository.findById(subcomponent.getComponent().getId()).orElse(null);
+                subcomponent.setComponent(comp);
+            }
+            return subcomponentRepository.save(subcomponent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PutMapping("/subcomponents/{id}")

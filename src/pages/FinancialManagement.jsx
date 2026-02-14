@@ -322,6 +322,7 @@ function FinancialManagement() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showComponentModal, setShowComponentModal] = useState(false);
+  const [showSubcomponentModal, setShowSubcomponentModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [projectSearch, setProjectSearch] = useState('');
@@ -485,9 +486,41 @@ function FinancialManagement() {
     }
   }, [editingItem, loadFinancialData]);
 
+  const handleSubcomponentSave = useCallback(async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    const payload = {
+      subcomponent: data.subcomponent,
+      subcomponentDescription: data.subcomponentDescription,
+      allocation: parseFloat(data.allocation),
+      component: { id: parseInt(data.componentId) },
+      project: { projectId: selectedProject },
+      currency: data.currencyId ? { id: parseInt(data.currencyId) } : null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/financial/subcomponents/${editingItem.subcompId}`, payload);
+        toast.success('Subcomponent updated successfully');
+      } else {
+        await axios.post('/api/financial/subcomponents', payload);
+        toast.success('Subcomponent created successfully');
+      }
+      setShowSubcomponentModal(false);
+      setEditingItem(null);
+      loadFinancialData();
+    } catch (error) {
+      console.error('Error saving subcomponent:', error);
+      toast.error('Error saving subcomponent');
+    }
+  }, [editingItem, selectedProject, loadFinancialData]);
+
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setShowComponentModal(false);
+    setShowSubcomponentModal(false);
     setEditingProject(null);
     setEditingItem(null);
   }, []);
@@ -514,6 +547,8 @@ function FinancialManagement() {
       setShowModal(true);
     } else if (activeTab === 'components') {
       setShowComponentModal(true);
+    } else if (activeTab === 'subcomponents') {
+      setShowSubcomponentModal(true);
     } else {
       toast.error(`Add New for ${activeTab} is coming soon`);
     }
@@ -736,6 +771,58 @@ function FinancialManagement() {
                     <div className="col-12">
                       <label className="form-label fw-medium">Description</label>
                       <textarea name="componentDescription" defaultValue={editingItem?.componentDescription} className="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Currency</label>
+                      <select name="currencyId" defaultValue={editingItem?.currency?.id} className="form-select">
+                        <option value="">Select Currency</option>
+                        {currencies.map(c => (
+                          <option key={c.id} value={c.id}>{c.currency}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Allocation</label>
+                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="0.00" required />
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-0 pt-0">
+                  <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">{editingItem ? 'Update' : 'Create'}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSubcomponentModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">{editingItem ? 'Edit Subcomponent' : 'Add Subcomponent'}</h5>
+                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+              </div>
+              <form onSubmit={handleSubcomponentSave}>
+                <div className="modal-body">
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Component</label>
+                      <select name="componentId" className="form-select" required>
+                        <option value="">Select Component</option>
+                        {components.map(c => (
+                          <option key={c.id} value={c.id}>{c.projectComponents} ({c.compId})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Subcomponent Name</label>
+                      <input name="subcomponent" defaultValue={editingItem?.subcomponent} className="form-control" placeholder="Enter subcomponent name" required />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-medium">Description</label>
+                      <textarea name="subcomponentDescription" defaultValue={editingItem?.subcomponentDescription} className="form-control" rows="3" placeholder="Enter description"></textarea>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-medium">Currency</label>
