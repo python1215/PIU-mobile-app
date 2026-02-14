@@ -49,27 +49,32 @@ public class FinancialController {
 
     @PostMapping("/components")
     public Component createComponent(@RequestBody Component component) {
-        if (component.getLoginUser() == null) {
-            User user = userRepository.findById(1L).orElseGet(() -> {
-                User newUser = new User();
-                newUser.setId(1L);
-                return newUser;
-            });
-            component.setLoginUser(user);
-        }
-        
-        if (component.getProject() != null && component.getProject().getProjectId() != null) {
-            Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
-            component.setProject(project);
-        }
+        try {
+            if (component.getLoginUser() == null) {
+                User user = userRepository.findById(1L).orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setId(1L);
+                    return newUser;
+                });
+                component.setLoginUser(user);
+            }
+            
+            if (component.getProject() != null && component.getProject().getProjectId() != null) {
+                Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
+                component.setProject(project);
+            }
 
-        // Auto-generate compId if not provided
-        if (component.getCompId() == null || component.getCompId().isEmpty()) {
-            long count = componentRepository.count() + 1;
-            component.setCompId("COMP-" + String.format("%03d", count));
+            // Auto-generate compId if not provided
+            if (component.getCompId() == null || component.getCompId().isEmpty()) {
+                long count = componentRepository.count() + 1;
+                component.setCompId("COMP-" + String.format("%03d", count));
+            }
+            
+            return componentRepository.save(component);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        
-        return componentRepository.save(component);
     }
 
     @PutMapping("/components/{id}")
