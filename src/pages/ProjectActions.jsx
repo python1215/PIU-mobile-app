@@ -117,7 +117,7 @@ function ProjectActions() {
 
   const filteredActivities = useMemo(() => {
     if (!worksFormSubcomp) return [];
-    return activities.filter(a => a.subcomponent?.id === parseInt(worksFormSubcomp));
+    return activities.filter(a => a.subcomponent?.subcompId === parseInt(worksFormSubcomp));
   }, [activities, worksFormSubcomp]);
 
   const formatCurrency = (amount) => {
@@ -146,7 +146,7 @@ function ProjectActions() {
     if (activeTab === 'works' || activeTab === 'goods') {
       setWorksFormProject(item?.project?.projectId || selectedProject);
       setWorksFormComp(item?.component?.id?.toString() || '');
-      setWorksFormSubcomp(item?.subcomponent?.id?.toString() || '');
+      setWorksFormSubcomp(item?.subcomponent?.subcompId?.toString() || '');
     }
     setShowModal(true);
   };
@@ -167,10 +167,10 @@ function ProjectActions() {
     const payload = {
       project: { projectId: worksFormProject || selectedProject },
       component: data.componentId ? { id: parseInt(data.componentId) } : null,
-      subcomponent: data.subcomponentId ? { id: parseInt(data.subcomponentId) } : null,
-      activity: data.activityId ? { id: parseInt(data.activityId) } : null,
-      projectCategory: data.projectCategoryId ? { id: parseInt(data.projectCategoryId) } : null,
-      fundingSource: data.fundingSourceId ? { id: parseInt(data.fundingSourceId) } : null,
+      subcomponent: data.subcomponentId ? { subcompId: parseInt(data.subcomponentId) } : null,
+      activity: data.activityId ? { activityId: parseInt(data.activityId) } : null,
+      projectCategory: data.projectCategoryId ? { categoryId: parseInt(data.projectCategoryId) } : null,
+      fundingSource: data.fundingSourceId ? { donorId: parseInt(data.fundingSourceId) } : null,
       mainInterventionFocus: data.mainInterventionFocus || null,
       targetBeneficiarySettlements: data.targetBeneficiarySettlements ? parseInt(data.targetBeneficiarySettlements) : null,
       locationOfInvestment: data.locationOfInvestment || null,
@@ -290,7 +290,7 @@ function ProjectActions() {
                   <td><strong>{item.contractRefNo || '-'}</strong></td>
                   <td>{item.nameOfContractor || '-'}</td>
                   <td>{item.nameOfConsultant || '-'}</td>
-                  <td>{item.projectCategory?.categoryName || '-'}</td>
+                  <td>{item.projectCategory?.category || '-'}</td>
                   <td>{item.locationOfInvestment || '-'}</td>
                   <td className="text-end">{formatCurrency(item.contractValue)}</td>
                   <td>{formatDate(item.contractStartDate)}</td>
@@ -421,7 +421,7 @@ function ProjectActions() {
                   <select name="componentId" value={worksFormComp} onChange={e => { setWorksFormComp(e.target.value); setWorksFormSubcomp(''); }} className="form-select">
                     <option value="">----------</option>
                     {filteredComponents.map(c => (
-                      <option key={c.id} value={c.id}>{c.componentName}</option>
+                      <option key={c.id} value={c.id}>{c.projectComponents}</option>
                     ))}
                   </select>
                 </div>
@@ -430,34 +430,34 @@ function ProjectActions() {
                   <select name="subcomponentId" value={worksFormSubcomp} onChange={e => setWorksFormSubcomp(e.target.value)} className="form-select" disabled={!worksFormComp}>
                     <option value="">----------</option>
                     {filteredSubcomponents.map(s => (
-                      <option key={s.id} value={s.id}>{s.subcomponentName}</option>
+                      <option key={s.subcompId} value={s.subcompId}>{s.subcomponent}</option>
                     ))}
                   </select>
                 </div>
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('financial.activities')}</label>
-                  <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.id || ''} disabled={!worksFormSubcomp}>
+                  <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.activityId || ''} disabled={!worksFormSubcomp}>
                     <option value="">----------</option>
                     {filteredActivities.map(a => (
-                      <option key={a.id} value={a.id}>{a.activityName}</option>
+                      <option key={a.activityId} value={a.activityId}>{a.activity}</option>
                     ))}
                   </select>
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.projectCategory')}</label>
-                  <select name="projectCategoryId" defaultValue={editingItem?.projectCategory?.id || ''} className="form-select">
+                  <select name="projectCategoryId" defaultValue={editingItem?.projectCategory?.categoryId || ''} className="form-select">
                     <option value="">----------</option>
                     {categories.map(c => (
-                      <option key={c.id} value={c.id}>{c.categoryName}</option>
+                      <option key={c.categoryId} value={c.categoryId}>{c.category}</option>
                     ))}
                   </select>
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.fundingSource')}</label>
-                  <select name="fundingSourceId" defaultValue={editingItem?.fundingSource?.id || ''} className="form-select">
+                  <select name="fundingSourceId" defaultValue={editingItem?.fundingSource?.donorId || ''} className="form-select">
                     <option value="">----------</option>
                     {donors.map(d => (
-                      <option key={d.id} value={d.id}>{d.donorName}</option>
+                      <option key={d.donorId} value={d.donorId}>{d.name}</option>
                     ))}
                   </select>
                 </div>
@@ -466,7 +466,7 @@ function ProjectActions() {
                   <select name="currencyId" defaultValue={editingItem?.currency?.id || ''} className="form-select">
                     <option value="">----------</option>
                     {currencies.map(c => (
-                      <option key={c.id} value={c.id}>{c.currencyCode} - {c.currencyName}</option>
+                      <option key={c.id} value={c.id}>{c.currency}</option>
                     ))}
                   </select>
                 </div>
