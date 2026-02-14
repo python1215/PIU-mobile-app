@@ -128,7 +128,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 <div className="col-md-4">
                   <label className="form-label fw-medium">Currency</label>
                   <select
-                    className="form-select"
+                    className="form-select shadow-sm border-secondary-subtle"
                     value={formData.currencyId || ''}
                     onChange={(e) => handleFieldChange('currencyId', e.target.value)}
                   >
