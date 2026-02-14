@@ -31,7 +31,7 @@ public class Project {
     @Column(unique = true, nullable = false, length = 200)
     private String project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currency_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Currency currency;
