@@ -271,37 +271,63 @@ function ProjectActions() {
   const renderWorksTable = () => {
     return (
       <div className="table-responsive">
-        <table className="table table-striped table-hover">
+        <table className="table table-striped table-hover" style={{ fontSize: '0.85rem' }}>
           <thead className="table-dark">
             <tr>
+              <th>{t('financial.project')}</th>
+              <th>{t('financial.components')}</th>
+              <th>{t('financial.subcomponents')}</th>
+              <th>{t('financial.activities')}</th>
+              <th>{t('projectActions.projectCategory')}</th>
+              <th>{t('projectActions.fundingSource')}</th>
+              <th>{t('projectActions.mainInterventionFocus')}</th>
+              <th>{t('projectActions.targetBeneficiarySettlements')}</th>
+              <th>{t('projectActions.locationOfInvestment')}</th>
+              <th>{t('projectActions.latitude')}</th>
+              <th>{t('projectActions.longitude')}</th>
+              <th>{t('projectActions.grossFloorArea')}</th>
+              <th>{t('financial.currency')}</th>
+              <th className="text-end">{t('projectActions.contractValue')}</th>
+              <th>{t('projectActions.amendments')}</th>
               <th>{t('projectActions.contractNumber')}</th>
               <th>{t('projectActions.contractor')}</th>
               <th>{t('projectActions.nameOfConsultant')}</th>
-              <th>{t('projectActions.projectCategory')}</th>
-              <th>{t('projectActions.locationOfInvestment')}</th>
-              <th className="text-end">{t('projectActions.contractValue')}</th>
               <th>{t('common.startDate')}</th>
               <th>{t('common.endDate')}</th>
               <th>{t('common.duration')}</th>
+              <th>{t('projectActions.remarks')}</th>
               <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {works.length === 0 ? (
-              <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
+              <tr><td colSpan="23" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               works.map((item) => (
                 <tr key={item.id}>
+                  <td>{item.project?.project || '-'}</td>
+                  <td>{item.component?.projectComponents || '-'}</td>
+                  <td>{item.subcomponent?.subcomponent || '-'}</td>
+                  <td>{item.activity?.activity || '-'}</td>
+                  <td>{item.projectCategory?.category || '-'}</td>
+                  <td>{item.fundingSource?.name || '-'}</td>
+                  <td>{item.mainInterventionFocus || '-'}</td>
+                  <td>{item.targetBeneficiarySettlements || '-'}</td>
+                  <td>{item.locationOfInvestment || '-'}</td>
+                  <td>{item.latitude || '-'}</td>
+                  <td>{item.longitude || '-'}</td>
+                  <td>{item.grossFloorAreaM2 || '-'}</td>
+                  <td>{item.currency?.currency || '-'}</td>
+                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
+                  <td>{item.amendments ? t('common.yes') : t('common.no')}</td>
                   <td><strong>{item.contractRefNo || '-'}</strong></td>
                   <td>{item.nameOfContractor || '-'}</td>
                   <td>{item.nameOfConsultant || '-'}</td>
-                  <td>{item.projectCategory?.category || '-'}</td>
-                  <td>{item.locationOfInvestment || '-'}</td>
-                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
                   <td>{formatDate(item.contractStartDate)}</td>
                   <td>{formatDate(item.contractEndDate)}</td>
                   <td>{item.duration || '-'}</td>
-                  <td>
+                  <td>{item.remarks || '-'}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
                     <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteWorks(item.id)}><FiTrash2 /></button>
                   </td>
