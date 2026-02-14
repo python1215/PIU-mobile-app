@@ -43,6 +43,12 @@ public class FinancialController {
 
     @PostMapping("/components")
     public Component createComponent(@RequestBody Component component) {
+        if (component.getLoginUser() == null) {
+            // In a real app we'd get this from SecurityContext
+            User user = new User();
+            user.setId(1L); 
+            component.setLoginUser(user);
+        }
         return componentRepository.save(component);
     }
 
