@@ -1,5 +1,6 @@
 com/piun/piuproject/repository/ContractProfilingWorksRepository.class
 com/piun/piuproject/repository/DecisionOutcomeRepository.class
+com/piun/piuproject/repository/SpecificContractMonitoringRepository.class
 com/piun/piuproject/model/NatureOfSettlement.class
 com/piun/piuproject/model/IssueAction.class
 com/piun/piuproject/model/ESIA.class

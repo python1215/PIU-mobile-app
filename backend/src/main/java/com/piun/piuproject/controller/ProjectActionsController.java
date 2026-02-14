@@ -19,6 +19,9 @@ public class ProjectActionsController {
     @Autowired
     private ContractProfilingGoodsRepository goodsRepository;
 
+    @Autowired
+    private SpecificContractMonitoringRepository monitoringRepository;
+
     @GetMapping("/works")
     public List<ContractProfilingWorks> getAllWorks() {
         return worksRepository.findAll();
@@ -100,6 +103,55 @@ public class ProjectActionsController {
         return goodsRepository.findById(id)
             .map(goods -> {
                 goodsRepository.delete(goods);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/monitoring")
+    public List<SpecificContractMonitoring> getAllMonitoring() {
+        return monitoringRepository.findAll();
+    }
+
+    @GetMapping("/monitoring/project/{projectId}")
+    public List<SpecificContractMonitoring> getMonitoringByProject(@PathVariable String projectId) {
+        return monitoringRepository.findByProject_ProjectId(projectId);
+    }
+
+    @PostMapping("/monitoring")
+    public SpecificContractMonitoring createMonitoring(@RequestBody SpecificContractMonitoring monitoring) {
+        return monitoringRepository.save(monitoring);
+    }
+
+    @PutMapping("/monitoring/{id}")
+    public ResponseEntity<SpecificContractMonitoring> updateMonitoring(
+            @PathVariable Long id,
+            @RequestBody SpecificContractMonitoring details) {
+        return monitoringRepository.findById(id)
+            .map(monitoring -> {
+                monitoring.setContractRefNo(details.getContractRefNo());
+                monitoring.setMonitoringDate(details.getMonitoringDate());
+                monitoring.setQuarter(details.getQuarter());
+                monitoring.setMonitoringType(details.getMonitoringType());
+                monitoring.setInvestmentType(details.getInvestmentType());
+                monitoring.setKpiDescription(details.getKpiDescription());
+                monitoring.setMilestoneStartDate(details.getMilestoneStartDate());
+                monitoring.setMilestoneEndDate(details.getMilestoneEndDate());
+                monitoring.setTarget(details.getTarget());
+                monitoring.setAchievedStatus(details.getAchievedStatus());
+                monitoring.setImplementationStatus(details.getImplementationStatus());
+                monitoring.setPictureOfStatus(details.getPictureOfStatus());
+                monitoring.setRemarks(details.getRemarks());
+                return ResponseEntity.ok(monitoringRepository.save(monitoring));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/monitoring/{id}")
+    public ResponseEntity<Void> deleteMonitoring(@PathVariable Long id) {
+        return monitoringRepository.findById(id)
+            .map(monitoring -> {
+                monitoringRepository.delete(monitoring);
                 return ResponseEntity.ok().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());
