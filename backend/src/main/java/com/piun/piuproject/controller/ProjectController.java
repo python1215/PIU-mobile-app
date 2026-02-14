@@ -56,6 +56,13 @@ public class ProjectController {
             project.setClosureDate(java.time.LocalDate.parse(payload.get("closureDate").toString()));
         }
         
+        // Handle currency
+        if (payload.get("currencyId") != null && !payload.get("currencyId").toString().isEmpty()) {
+            com.piun.piuproject.model.Currency currency = new com.piun.piuproject.model.Currency();
+            currency.setId(Long.valueOf(payload.get("currencyId").toString()));
+            project.setCurrency(currency);
+        }
+        
         // Handle donors - multi-select
         if (payload.get("donorIds") != null) {
             @SuppressWarnings("unchecked")
@@ -109,6 +116,15 @@ public class ProjectController {
                 }
                 if (payload.get("closureDate") != null && !payload.get("closureDate").toString().isEmpty()) {
                     project.setClosureDate(java.time.LocalDate.parse(payload.get("closureDate").toString()));
+                }
+                
+                // Handle currency
+                if (payload.get("currencyId") != null && !payload.get("currencyId").toString().isEmpty()) {
+                    com.piun.piuproject.model.Currency currency = new com.piun.piuproject.model.Currency();
+                    currency.setId(Long.valueOf(payload.get("currencyId").toString()));
+                    project.setCurrency(currency);
+                } else if (payload.containsKey("currencyId")) {
+                    project.setCurrency(null);
                 }
                 
                 // Handle donors - multi-select

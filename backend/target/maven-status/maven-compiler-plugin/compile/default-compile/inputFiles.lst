@@ -87,8 +87,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/PDORepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/VulnerabilityCategoryRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IndicatorTypeRepository.java
-/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/FinancialController.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IssueActionSource.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/MonitoringTypeRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Component.java

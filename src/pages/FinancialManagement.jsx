@@ -5,13 +5,14 @@ import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiS
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors }) {
+const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors, currencies }) {
   const [formData, setFormData] = useState(() => {
     if (project) {
       return {
         ...project,
         donorIds: project.donors?.map(d => d.donorId) || [],
         contributorIds: project.contributors?.map(c => c.id) || [],
+        currencyId: project.currency?.id || '',
       };
     }
     return {
@@ -22,6 +23,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
       closureDate: '',
       donorIds: [],
       contributorIds: [],
+      currencyId: '',
     };
   });
 
@@ -121,6 +123,22 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                     placeholder="Enter project name"
                     required
                   />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">Currency</label>
+                  <select
+                    className="form-select"
+                    value={formData.currencyId || ''}
+                    onChange={(e) => handleFieldChange('currencyId', e.target.value)}
+                  >
+                    <option value="">Select Currency</option>
+                    {currencies.map(curr => (
+                      <option key={curr.id} value={curr.id}>
+                        {curr.currency} ({curr.code})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="col-md-4">
