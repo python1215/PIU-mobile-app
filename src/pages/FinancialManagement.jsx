@@ -493,12 +493,18 @@ function FinancialManagement() {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     
+    const selectedComponent = components.find(c => c.id === parseInt(data.componentId));
+    const projectId = selectedComponent?.project?.projectId || selectedProject;
+    if (!projectId || projectId === 'all') {
+      toast.error('Please select a valid component');
+      return;
+    }
     const payload = {
       subcomponent: data.subcomponent,
       subcomponentDescription: data.subcomponentDescription,
       allocation: parseFloat(data.allocation),
       component: { id: parseInt(data.componentId) },
-      project: { projectId: selectedProject },
+      project: { projectId: projectId },
       currency: data.currencyId ? { id: parseInt(data.currencyId) } : null
     };
 
