@@ -280,12 +280,13 @@ function MonitoringEvaluation() {
                     <th className="text-center">Achieved</th>
                     <th className="text-center">Target</th>
                     <th className="text-center">Progress</th>
+                    <th>Remarks</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monitoring.length === 0 ? (
-                    <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
+                    <tr><td colSpan="11" className="text-center text-muted">{t('table.noData')}</td></tr>
                   ) : (
                     monitoring.map((item) => {
                       const progress = calculateProgress(item.baselineValue, item.achievedValue, item.endTargetValue);
@@ -306,6 +307,7 @@ function MonitoringEvaluation() {
                               </div>
                             </div>
                           </td>
+                          <td>{item.remarks ? (item.remarks.length > 30 ? item.remarks.substring(0, 30) + '...' : item.remarks) : '-'}</td>
                           <td>
                             <button className="btn btn-sm btn-outline-info me-1" onClick={() => setViewingItem(item)} title="View"><FiEye /></button>
                             <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenEdit(item)} title="Edit"><FiEdit2 /></button>
