@@ -25,6 +25,6 @@ public class Year {
     private LocalDateTime dateCreated = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "login_user_id", nullable = false)
+    @JoinColumn(name = "login_user_id")
     private User loginUser;
 }
