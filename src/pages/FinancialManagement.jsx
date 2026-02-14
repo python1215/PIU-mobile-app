@@ -410,6 +410,12 @@ function FinancialManagement() {
   }, [loadProjects, t]);
 
   const handleProjectSave = useCallback((data) => {
+    // Ensure essential fields are present, others like contributors are optional
+    if (!data.project || !data.projectId) {
+      toast.error('Project Name and ID are required');
+      return;
+    }
+
     if (editingProject) {
       handleUpdateProject(data);
     } else {
