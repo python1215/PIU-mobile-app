@@ -168,6 +168,11 @@ public class FinancialController {
             .map(activity -> {
                 activity.setActivity(details.getActivity());
                 activity.setAllocation(details.getAllocation());
+                activity.setProject(details.getProject());
+                activity.setComponent(details.getComponent());
+                activity.setSubcomponent(details.getSubcomponent());
+                activity.setCurrency(details.getCurrency());
+                activity.setYear(details.getYear());
                 return ResponseEntity.ok(activityRepository.save(activity));
             })
             .orElse(ResponseEntity.notFound().build());

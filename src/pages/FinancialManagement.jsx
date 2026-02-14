@@ -265,7 +265,7 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onView,
         <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription || '-'}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'activities' && (
-        <><td>{item.activityId}</td><td>{item.activity}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcomponent?.subcomponent || '-'}</td><td>{item.activity}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td><td>{item.year?.profileYear || '-'}</td></>
       )}
       {activeTab === 'pdos' && (
         <><td>{item.id}</td><td>{item.pdoStatement}</td></>
@@ -327,21 +327,27 @@ function FinancialManagement() {
   const [showModal, setShowModal] = useState(false);
   const [showComponentModal, setShowComponentModal] = useState(false);
   const [showSubcomponentModal, setShowSubcomponentModal] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [viewingItem, setViewingItem] = useState(null);
   const [projectSearch, setProjectSearch] = useState('');
+  const [years, setYears] = useState([]);
+  const [activityProjectId, setActivityProjectId] = useState('');
+  const [activityComponentId, setActivityComponentId] = useState('');
 
   const loadDonorsAndContributors = useCallback(async () => {
     try {
-      const [donorRes, contributorRes, currencyRes] = await Promise.all([
+      const [donorRes, contributorRes, currencyRes, yearRes] = await Promise.all([
         api.get('/donors').catch(() => ({ data: [] })),
         api.get('/setup/contributors').catch(() => ({ data: [] })),
-        api.get('/setup/currencies').catch(() => ({ data: [] }))
+        api.get('/setup/currencies').catch(() => ({ data: [] })),
+        api.get('/setup/years').catch(() => ({ data: [] }))
       ]);
       setDonors(donorRes.data);
       setContributors(contributorRes.data);
       setCurrencies(currencyRes.data);
+      setYears(yearRes.data);
     } catch (error) {
       console.error('Error loading donors/contributors/currencies:', error);
     }
@@ -524,6 +530,54 @@ function FinancialManagement() {
     }
   }, [editingItem, selectedProject, loadFinancialData]);
 
+  const activityFilteredComponents = useMemo(() => {
+    if (!activityProjectId) return [];
+    return components.filter(c => c.project?.projectId === activityProjectId);
+  }, [components, activityProjectId]);
+
+  const activityFilteredSubcomponents = useMemo(() => {
+    if (!activityComponentId) return [];
+    return subcomponents.filter(s => s.component?.id?.toString() === activityComponentId);
+  }, [subcomponents, activityComponentId]);
+
+  const handleActivitySave = useCallback(async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    if (!data.projectId) {
+      toast.error('Please select a project');
+      return;
+    }
+    const payload = {
+      activity: data.activity,
+      allocation: parseFloat(data.allocation),
+      project: { projectId: data.projectId },
+      component: data.componentId ? { id: parseInt(data.componentId) } : null,
+      subcomponent: data.subcomponentId ? { subcompId: parseInt(data.subcomponentId) } : null,
+      currency: data.currencyId ? { id: parseInt(data.currencyId) } : null,
+      year: data.yearId ? { id: parseInt(data.yearId) } : null
+    };
+
+    try {
+      if (editingItem) {
+        await api.put(`/financial/activities/${editingItem.activityId}`, payload);
+        toast.success('Activity updated successfully');
+      } else {
+        await api.post('/financial/activities', payload);
+        toast.success('Activity created successfully');
+      }
+      setShowActivityModal(false);
+      setEditingItem(null);
+      setActivityProjectId('');
+      setActivityComponentId('');
+      loadFinancialData();
+    } catch (error) {
+      console.error('Error saving activity:', error);
+      toast.error('Error saving activity');
+    }
+  }, [editingItem, loadFinancialData]);
+
   const handleDeleteItem = useCallback(async (item) => {
     if (!confirm(t('messages.confirmDelete'))) return;
     try {
@@ -556,6 +610,10 @@ function FinancialManagement() {
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
       setShowSubcomponentModal(true);
+    } else if (activeTab === 'activities') {
+      setActivityProjectId(item.project?.projectId || '');
+      setActivityComponentId(item.component?.id?.toString() || '');
+      setShowActivityModal(true);
     }
   }, [activeTab]);
 
@@ -563,8 +621,11 @@ function FinancialManagement() {
     setShowModal(false);
     setShowComponentModal(false);
     setShowSubcomponentModal(false);
+    setShowActivityModal(false);
     setEditingProject(null);
     setEditingItem(null);
+    setActivityProjectId('');
+    setActivityComponentId('');
   }, []);
 
   const handleEditProject = useCallback((project) => {
@@ -591,6 +652,10 @@ function FinancialManagement() {
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
       setShowSubcomponentModal(true);
+    } else if (activeTab === 'activities') {
+      setActivityProjectId('');
+      setActivityComponentId('');
+      setShowActivityModal(true);
     } else {
       toast.error(`Add New for ${activeTab} is coming soon`);
     }
@@ -696,7 +761,7 @@ function FinancialManagement() {
             <tr>
               {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'subcomponents' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
-              {activeTab === 'activities' && <><th>ID</th><th>{t('financial.activity')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'activities' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>{t('financial.subcomponents')}</th><th>{t('financial.activityName')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th><th>{t('common.year')}</th></>}
               {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
               {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
               <th>{t('common.actions')}</th>
@@ -722,8 +787,9 @@ function FinancialManagement() {
           {['components', 'subcomponents', 'activities'].includes(activeTab) && currentTabData.length > 0 && (
             <tfoot className="table-secondary">
               <tr>
-                <td colSpan={activeTab === 'components' ? 5 : activeTab === 'subcomponents' ? 6 : 2} className="fw-bold">{t('common.total')}</td>
+                <td colSpan={activeTab === 'components' ? 5 : activeTab === 'subcomponents' ? 6 : activeTab === 'activities' ? 5 : 2} className="fw-bold">{t('common.total')}</td>
                 <td className="text-end fw-bold">{formatCurrency(dataTotal)}</td>
+                {activeTab === 'activities' && <td></td>}
                 <td></td>
               </tr>
             </tfoot>
@@ -909,6 +975,87 @@ function FinancialManagement() {
           </div>
         </div>
       )}
+      {showActivityModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">{editingItem ? 'Edit Activity' : 'Add Activity'}</h5>
+                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+              </div>
+              <form onSubmit={handleActivitySave}>
+                <div className="modal-body">
+                  <div className="card border-0 bg-light mb-3">
+                    <div className="card-header bg-dark text-white py-2 fw-bold" style={{ fontSize: '0.9rem' }}>Activity Information</div>
+                    <div className="card-body">
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label fw-medium">Project</label>
+                          <select name="projectId" value={activityProjectId} onChange={(e) => { setActivityProjectId(e.target.value); setActivityComponentId(''); }} className="form-select" required>
+                            <option value="">Select Project...</option>
+                            {projects.map(p => (
+                              <option key={p.projectId} value={p.projectId}>{p.project}</option>
+                            ))}
+                          </select>
+                          <div className="form-text">Select a project to load its components</div>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label fw-medium">Component</label>
+                          <select name="componentId" value={activityComponentId} onChange={(e) => setActivityComponentId(e.target.value)} className="form-select">
+                            <option value="">{activityProjectId ? 'Select Component...' : 'First select a project...'}</option>
+                            {activityFilteredComponents.map(c => (
+                              <option key={c.id} value={c.id}>{c.projectComponents}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label fw-medium">Subcomponent</label>
+                          <select name="subcomponentId" defaultValue={editingItem?.subcomponent?.subcompId || ''} className="form-select">
+                            <option value="">{activityComponentId ? 'Select Subcomponent...' : 'First select a component...'}</option>
+                            {activityFilteredSubcomponents.map(s => (
+                              <option key={s.subcompId} value={s.subcompId}>{s.subcomponent}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label fw-medium">Activity Name</label>
+                          <input name="activity" defaultValue={editingItem?.activity} className="form-control" required />
+                        </div>
+                        <div className="col-md-4">
+                          <label className="form-label fw-medium">Currency</label>
+                          <select name="currencyId" defaultValue={editingItem?.currency?.id} className="form-select">
+                            <option value="">----------</option>
+                            {currencies.map(c => (
+                              <option key={c.id} value={c.id}>{c.currency}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-4">
+                          <label className="form-label fw-medium">Allocation</label>
+                          <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" />
+                        </div>
+                        <div className="col-md-4">
+                          <label className="form-label fw-medium">Year</label>
+                          <select name="yearId" defaultValue={editingItem?.year?.id} className="form-select">
+                            <option value="">----------</option>
+                            {years.map(y => (
+                              <option key={y.id} value={y.id}>{y.profileYear}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-0 pt-0">
+                  <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">{editingItem ? 'Update' : 'Create'}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
       {viewingItem && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -947,9 +1094,13 @@ function FinancialManagement() {
                   )}
                   {activeTab === 'activities' && (
                     <>
-                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.activityId}</p></div>
-                      <div className="col-12"><label className="form-label text-muted small">{t('financial.activity')}</label><p className="fw-medium">{viewingItem.activity}</p></div>
-                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('common.project')}</label><p className="fw-medium">{viewingItem.project?.project || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.components')}</label><p className="fw-medium">{viewingItem.component?.projectComponents || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.subcomponents')}</label><p className="fw-medium">{viewingItem.subcomponent?.subcomponent || '-'}</p></div>
+                      <div className="col-md-6"><label className="form-label text-muted small">{t('financial.activityName')}</label><p className="fw-medium">{viewingItem.activity}</p></div>
+                      <div className="col-md-4"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
+                      <div className="col-md-4"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
+                      <div className="col-md-4"><label className="form-label text-muted small">{t('common.year')}</label><p className="fw-medium">{viewingItem.year?.profileYear || '-'}</p></div>
                     </>
                   )}
                   {activeTab === 'pdos' && (
