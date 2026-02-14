@@ -403,10 +403,16 @@ function ProjectActions() {
           </div>
           <form onSubmit={handleWorksSave}>
             <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              <h6 className="text-muted border-bottom pb-2 mb-3">{t('common.project')} & {t('financial.component')}</h6>
+              <h6 className="text-muted border-bottom pb-2 mb-3">{t('financial.project')} & {t('financial.components')}</h6>
               <div className="row g-3">
-                <div className="col-md-4">
-                  <label className="form-label fw-medium">{t('financial.component')}</label>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('financial.project')}</label>
+                  <select className="form-select" value={selectedProject} disabled>
+                    {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('financial.components')}</label>
                   <select name="componentId" value={worksFormComp} onChange={e => { setWorksFormComp(e.target.value); setWorksFormSubcomp(''); }} className="form-select">
                     <option value="">----------</option>
                     {filteredComponents.map(c => (
@@ -414,8 +420,8 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-medium">{t('financial.subcomponent')}</label>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('financial.subcomponents')}</label>
                   <select name="subcomponentId" value={worksFormSubcomp} onChange={e => setWorksFormSubcomp(e.target.value)} className="form-select" disabled={!worksFormComp}>
                     <option value="">----------</option>
                     {filteredSubcomponents.map(s => (
@@ -423,8 +429,8 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-medium">{t('financial.activity')}</label>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('financial.activities')}</label>
                   <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.id || ''} disabled={!worksFormSubcomp}>
                     <option value="">----------</option>
                     {filteredActivities.map(a => (
@@ -451,7 +457,7 @@ function ProjectActions() {
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-medium">{t('common.currency')}</label>
+                  <label className="form-label fw-medium">{t('financial.currency')}</label>
                   <select name="currencyId" defaultValue={editingItem?.currency?.id || ''} className="form-select">
                     <option value="">----------</option>
                     {currencies.map(c => (
