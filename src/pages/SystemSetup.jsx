@@ -421,6 +421,7 @@ function SystemSetup() {
         { key: 'kpiCode', label: 'KPI Code' }, 
         { key: 'project', label: 'Project', nested: 'project' }, 
         { key: 'monitoringType', label: 'Monitoring Type', nested: 'monitoringType' },
+        { key: 'typeOfInvestment', label: 'Investment Type' },
         { key: 'kpiDescription', label: 'Description' }
       ],
       fields: [
