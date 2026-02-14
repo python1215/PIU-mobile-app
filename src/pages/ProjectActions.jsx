@@ -25,6 +25,7 @@ function ProjectActions() {
   const [donors, setDonors] = useState([]);
   const [currencies, setCurrencies] = useState([]);
 
+  const [worksFormProject, setWorksFormProject] = useState('');
   const [worksFormComp, setWorksFormComp] = useState('');
   const [worksFormSubcomp, setWorksFormSubcomp] = useState('');
 
@@ -105,8 +106,9 @@ function ProjectActions() {
   };
 
   const filteredComponents = useMemo(() => {
-    return components.filter(c => c.project?.projectId === selectedProject);
-  }, [components, selectedProject]);
+    const projId = worksFormProject || selectedProject;
+    return components.filter(c => c.project?.projectId === projId);
+  }, [components, selectedProject, worksFormProject]);
 
   const filteredSubcomponents = useMemo(() => {
     if (!worksFormComp) return [];
@@ -142,6 +144,7 @@ function ProjectActions() {
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
     if (activeTab === 'works' || activeTab === 'goods') {
+      setWorksFormProject(item?.project?.projectId || selectedProject);
       setWorksFormComp(item?.component?.id?.toString() || '');
       setWorksFormSubcomp(item?.subcomponent?.id?.toString() || '');
     }
@@ -151,6 +154,7 @@ function ProjectActions() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingItem(null);
+    setWorksFormProject('');
     setWorksFormComp('');
     setWorksFormSubcomp('');
   };
@@ -161,7 +165,7 @@ function ProjectActions() {
     const data = Object.fromEntries(formData.entries());
 
     const payload = {
-      project: { projectId: selectedProject },
+      project: { projectId: worksFormProject || selectedProject },
       component: data.componentId ? { id: parseInt(data.componentId) } : null,
       subcomponent: data.subcomponentId ? { id: parseInt(data.subcomponentId) } : null,
       activity: data.activityId ? { id: parseInt(data.activityId) } : null,
@@ -407,7 +411,8 @@ function ProjectActions() {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('financial.project')}</label>
-                  <select className="form-select" value={selectedProject} disabled>
+                  <select className="form-select" value={worksFormProject} onChange={e => { setWorksFormProject(e.target.value); setWorksFormComp(''); setWorksFormSubcomp(''); }}>
+                    <option value="">----------</option>
                     {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
                   </select>
                 </div>
