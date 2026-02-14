@@ -1,1 +1,0 @@
-default_app_config = 'Issues_Actions_monitoring.apps.IssuesActionsMonitoringConfig'

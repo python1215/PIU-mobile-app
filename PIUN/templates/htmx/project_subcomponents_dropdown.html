@@ -1,5 +1,0 @@
-{% for subcomponent in subcomponents %}
-<option value="{{ subcomponent.id }}">{{ subcomponent.subcomponent }} - {{ subcomponent.subcomponent_Description|truncatechars:50 }}</option>
-{% empty %}
-<option value="">No subcomponents available for this component</option>
-{% endfor %}

@@ -1,4 +1,0 @@
-<option value="">All PDOs</option>
-{% for pdo in pdos %}
-    <option value="{{ pdo.pk }}">{{ pdo.pdo_statement|truncatechars:40 }}</option>
-{% endfor %}
