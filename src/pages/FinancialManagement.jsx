@@ -262,7 +262,7 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onView,
         <><td>{item.project?.project || '-'}</td><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'subcomponents' && (
-        <><td>{item.component?.projectComponents || '-'}</td><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription || '-'}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'activities' && (
         <><td>{item.activityId}</td><td>{item.activity}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
@@ -695,7 +695,7 @@ function FinancialManagement() {
           <thead className="table-dark">
             <tr>
               {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
-              {activeTab === 'subcomponents' && <><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'subcomponents' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'activities' && <><th>ID</th><th>{t('financial.activity')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
               {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
@@ -722,7 +722,7 @@ function FinancialManagement() {
           {['components', 'subcomponents', 'activities'].includes(activeTab) && currentTabData.length > 0 && (
             <tfoot className="table-secondary">
               <tr>
-                <td colSpan={activeTab === 'components' ? 5 : activeTab === 'subcomponents' ? 4 : 2} className="fw-bold">{t('common.total')}</td>
+                <td colSpan={activeTab === 'components' ? 5 : activeTab === 'subcomponents' ? 6 : 2} className="fw-bold">{t('common.total')}</td>
                 <td className="text-end fw-bold">{formatCurrency(dataTotal)}</td>
                 <td></td>
               </tr>
