@@ -4,7 +4,7 @@ import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData, t }) {
+const GenericModal = memo(function GenericModal({ title, fields, item, onClose, onSave, relatedData, t, infoBox }) {
   const [formData, setFormData] = useState(() => {
     if (item) {
       const initial = { ...item };
@@ -125,7 +125,7 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                         disabled={(field.disableOnEdit && !!item) || saving}
                         style={{ borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.9rem' }}
                       >
-                        <option value="">Select {field.label}...</option>
+                        <option value="">{field.placeholder || `Select ${field.label}...`}</option>
                         {(field.type === 'cascadeParent' 
                           ? (relatedData[field.dataKey] || [])
                           : getFilteredOptions(field)
@@ -164,6 +164,19 @@ const GenericModal = memo(function GenericModal({ title, fields, item, onClose, 
                   </div>
                 ))}
               </div>
+              {infoBox && (
+                <div className="mt-3 p-3 rounded-3" style={{ background: '#e0f2fe', border: '1px solid #bae6fd' }}>
+                  <div className="d-flex align-items-center mb-2">
+                    <span className="me-2" style={{ color: '#0284c7' }}>&#9432;</span>
+                    <strong style={{ color: '#0c4a6e', fontSize: '0.9rem' }}>{infoBox.title}</strong>
+                  </div>
+                  <ul className="mb-0 ps-3" style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                    {infoBox.items.map((item, i) => (
+                      <li key={i} className="mb-1">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <div className="modal-footer border-top py-2 px-3 px-md-4 bg-white">
               <div className="d-flex gap-2 w-100 justify-content-end">
@@ -207,6 +220,14 @@ const DataTable = memo(function DataTable({ columns, data, onEdit, onDelete, idF
   const getCellValue = (item, col) => {
     if (col.nested) {
       return item[col.key]?.[col.nested] || '-';
+    }
+    if (col.key.includes('.')) {
+      const parts = col.key.split('.');
+      let val = item;
+      for (const p of parts) {
+        val = val?.[p];
+      }
+      return val || '-';
     }
     return item[col.key] || '-';
   };
@@ -436,8 +457,21 @@ function SystemSetup() {
       columns: [{ key: 'id', label: 'ID' }, { key: 'pdoStatement', label: 'PDO Statement' }],
       fields: [{ name: 'pdoStatement', label: 'PDO Statement' }] },
     outcomes: { endpoint: '/api/setup/outcomes', idField: 'id', label: 'Project Outcomes',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'projectOutcome', label: 'Project Outcome' }],
-      fields: [{ name: 'projectOutcome', label: 'Project Outcome' }] },
+      columns: [{ key: 'id', label: 'ID' }, { key: 'pdo.pdoStatement', label: 'Related PDO' }, { key: 'projectOutcome', label: 'Project Outcome' }],
+      fields: [
+        { name: 'pdoId', label: 'Related PDO', type: 'select', dataKey: 'pdos', valueField: 'id', displayField: 'pdoStatement', relationField: 'pdo', placeholder: '----------' },
+        { name: 'projectOutcome', label: 'Project Outcome', placeholder: 'Enter project outcome description', helpText: 'Enter a clear and measurable project outcome' }
+      ],
+      infoBox: {
+        title: 'Project Outcome Guidelines',
+        items: [
+          'Select the PDO that this outcome supports',
+          'Describe a specific, measurable outcome',
+          'Outcomes should be achievable and time-bound',
+          'Use clear, actionable language'
+        ]
+      },
+      relatedDataKeys: ['pdos'] },
     results: { endpoint: '/api/setup/results', idField: 'id', label: 'Project Results',
       columns: [{ key: 'id', label: 'ID' }, { key: 'projectResult', label: 'Project Result' }],
       fields: [{ name: 'projectResult', label: 'Project Result' }] },
@@ -746,6 +780,7 @@ function SystemSetup() {
           onSave={handleSave}
           relatedData={stableRelatedData}
           t={t}
+          infoBox={currentConfig.infoBox}
         />
       )}
     </div>
