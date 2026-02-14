@@ -43,12 +43,27 @@ public class ProjectActionsController {
             @RequestBody ContractProfilingWorks worksDetails) {
         return worksRepository.findById(id)
             .map(works -> {
-                works.setContractRefNo(worksDetails.getContractRefNo());
+                works.setProject(worksDetails.getProject());
+                works.setComponent(worksDetails.getComponent());
+                works.setSubcomponent(worksDetails.getSubcomponent());
+                works.setActivity(worksDetails.getActivity());
+                works.setProjectCategory(worksDetails.getProjectCategory());
+                works.setFundingSource(worksDetails.getFundingSource());
+                works.setMainInterventionFocus(worksDetails.getMainInterventionFocus());
+                works.setTargetBeneficiarySettlements(worksDetails.getTargetBeneficiarySettlements());
+                works.setLocationOfInvestment(worksDetails.getLocationOfInvestment());
+                works.setLatitude(worksDetails.getLatitude());
+                works.setLongitude(worksDetails.getLongitude());
+                works.setGrossFloorAreaM2(worksDetails.getGrossFloorAreaM2());
+                works.setCurrency(worksDetails.getCurrency());
                 works.setContractValue(worksDetails.getContractValue());
+                works.setAmendments(worksDetails.getAmendments());
+                works.setContractRefNo(worksDetails.getContractRefNo());
                 works.setNameOfContractor(worksDetails.getNameOfContractor());
                 works.setNameOfConsultant(worksDetails.getNameOfConsultant());
                 works.setContractStartDate(worksDetails.getContractStartDate());
                 works.setContractEndDate(worksDetails.getContractEndDate());
+                works.setDuration(worksDetails.getDuration());
                 works.setRemarks(worksDetails.getRemarks());
                 return ResponseEntity.ok(worksRepository.save(works));
             })

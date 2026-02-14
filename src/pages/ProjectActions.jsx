@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function ProjectActions() {
@@ -18,6 +18,16 @@ function ProjectActions() {
   const [quarters, setQuarters] = useState([]);
   const [monitoringTypes, setMonitoringTypes] = useState([]);
 
+  const [components, setComponents] = useState([]);
+  const [subcomponents, setSubcomponents] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [donors, setDonors] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
+
+  const [worksFormComp, setWorksFormComp] = useState('');
+  const [worksFormSubcomp, setWorksFormSubcomp] = useState('');
+
   useEffect(() => {
     loadProjects();
     loadReferenceData();
@@ -26,6 +36,7 @@ function ProjectActions() {
   useEffect(() => {
     if (selectedProject) {
       loadContracts();
+      loadFinancialData();
     }
   }, [selectedProject]);
 
@@ -43,14 +54,35 @@ function ProjectActions() {
 
   const loadReferenceData = async () => {
     try {
-      const [qRes, mtRes] = await Promise.all([
+      const [qRes, mtRes, catRes, donorRes, curRes] = await Promise.all([
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
-        axios.get('/api/setup/monitoring-types').catch(() => ({ data: [] }))
+        axios.get('/api/setup/monitoring-types').catch(() => ({ data: [] })),
+        axios.get('/api/setup/categories').catch(() => ({ data: [] })),
+        axios.get('/api/donors').catch(() => ({ data: [] })),
+        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setMonitoringTypes(mtRes.data);
+      setCategories(catRes.data);
+      setDonors(donorRes.data);
+      setCurrencies(curRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
+    }
+  };
+
+  const loadFinancialData = async () => {
+    try {
+      const [compRes, subRes, actRes] = await Promise.all([
+        axios.get('/api/financial/components').catch(() => ({ data: [] })),
+        axios.get('/api/financial/subcomponents').catch(() => ({ data: [] })),
+        axios.get('/api/financial/activities').catch(() => ({ data: [] }))
+      ]);
+      setComponents(compRes.data);
+      setSubcomponents(subRes.data);
+      setActivities(actRes.data);
+    } catch (error) {
+      console.error('Error loading financial data:', error);
     }
   };
 
@@ -71,6 +103,20 @@ function ProjectActions() {
       setLoading(false);
     }
   };
+
+  const filteredComponents = useMemo(() => {
+    return components.filter(c => c.project?.projectId === selectedProject);
+  }, [components, selectedProject]);
+
+  const filteredSubcomponents = useMemo(() => {
+    if (!worksFormComp) return [];
+    return subcomponents.filter(s => s.component?.id === parseInt(worksFormComp));
+  }, [subcomponents, worksFormComp]);
+
+  const filteredActivities = useMemo(() => {
+    if (!worksFormSubcomp) return [];
+    return activities.filter(a => a.subcomponent?.id === parseInt(worksFormSubcomp));
+  }, [activities, worksFormSubcomp]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(amount || 0);
@@ -95,12 +141,76 @@ function ProjectActions() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
+    if (activeTab === 'works' || activeTab === 'goods') {
+      setWorksFormComp(item?.component?.id?.toString() || '');
+      setWorksFormSubcomp(item?.subcomponent?.id?.toString() || '');
+    }
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingItem(null);
+    setWorksFormComp('');
+    setWorksFormSubcomp('');
+  };
+
+  const handleWorksSave = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    const payload = {
+      project: { projectId: selectedProject },
+      component: data.componentId ? { id: parseInt(data.componentId) } : null,
+      subcomponent: data.subcomponentId ? { id: parseInt(data.subcomponentId) } : null,
+      activity: data.activityId ? { id: parseInt(data.activityId) } : null,
+      projectCategory: data.projectCategoryId ? { id: parseInt(data.projectCategoryId) } : null,
+      fundingSource: data.fundingSourceId ? { id: parseInt(data.fundingSourceId) } : null,
+      mainInterventionFocus: data.mainInterventionFocus || null,
+      targetBeneficiarySettlements: data.targetBeneficiarySettlements ? parseInt(data.targetBeneficiarySettlements) : null,
+      locationOfInvestment: data.locationOfInvestment || null,
+      latitude: data.latitude ? parseFloat(data.latitude) : null,
+      longitude: data.longitude ? parseFloat(data.longitude) : null,
+      grossFloorAreaM2: data.grossFloorAreaM2 ? parseInt(data.grossFloorAreaM2) : null,
+      currency: data.currencyId ? { id: parseInt(data.currencyId) } : null,
+      contractValue: data.contractValue ? parseFloat(data.contractValue) : null,
+      amendments: data.amendments === 'true',
+      contractRefNo: data.contractRefNo || null,
+      nameOfContractor: data.nameOfContractor || null,
+      nameOfConsultant: data.nameOfConsultant || null,
+      contractStartDate: data.contractStartDate || null,
+      contractEndDate: data.contractEndDate || null,
+      duration: data.duration || null,
+      remarks: data.remarks || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/project-actions/works/${editingItem.id}`, payload);
+        toast.success(t('common.updateSuccess') || 'Updated successfully');
+      } else {
+        await axios.post('/api/project-actions/works', payload);
+        toast.success(t('common.createSuccess') || 'Created successfully');
+      }
+      handleCloseModal();
+      loadContracts();
+    } catch (error) {
+      console.error('Error saving works contract:', error);
+      toast.error('Error saving works contract');
+    }
+  };
+
+  const handleDeleteWorks = async (id) => {
+    if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
+    try {
+      await axios.delete(`/api/project-actions/works/${id}`);
+      toast.success(t('common.deleteSuccess') || 'Deleted successfully');
+      loadContracts();
+    } catch (error) {
+      console.error('Error deleting works:', error);
+      toast.error('Error deleting record');
+    }
   };
 
   const handleMonitoringSave = async (e) => {
@@ -138,7 +248,7 @@ function ProjectActions() {
   };
 
   const handleDeleteMonitoring = async (id) => {
-    if (!confirm('Are you sure you want to delete this record?')) return;
+    if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
     try {
       await axios.delete(`/api/project-actions/monitoring/${id}`);
       toast.success('Record deleted successfully');
@@ -149,16 +259,17 @@ function ProjectActions() {
     }
   };
 
-  const renderWorksGoodsTable = () => {
-    const data = activeTab === 'works' ? works : goods;
+  const renderWorksTable = () => {
     return (
       <div className="table-responsive">
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
               <th>{t('projectActions.contractNumber')}</th>
-              <th>{activeTab === 'works' ? t('projectActions.contractor') : t('projectActions.supplier')}</th>
-              <th>{t('common.consultant')}</th>
+              <th>{t('projectActions.contractor')}</th>
+              <th>{t('projectActions.nameOfConsultant')}</th>
+              <th>{t('projectActions.projectCategory')}</th>
+              <th>{t('projectActions.locationOfInvestment')}</th>
               <th className="text-end">{t('projectActions.contractValue')}</th>
               <th>{t('common.startDate')}</th>
               <th>{t('common.endDate')}</th>
@@ -167,18 +278,62 @@ function ProjectActions() {
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
-              <tr><td colSpan="8" className="text-center text-muted">{t('table.noData')}</td></tr>
+            {works.length === 0 ? (
+              <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
-              data.map((item, index) => (
-                <tr key={index}>
-                  <td><strong>{item.contractRefNo}</strong></td>
-                  <td>{activeTab === 'works' ? item.nameOfContractor : item.nameOfSupplier}</td>
-                  <td>{item.nameOfConsultant}</td>
-                  <td className="text-end">${formatCurrency(item.contractValue)}</td>
+              works.map((item) => (
+                <tr key={item.id}>
+                  <td><strong>{item.contractRefNo || '-'}</strong></td>
+                  <td>{item.nameOfContractor || '-'}</td>
+                  <td>{item.nameOfConsultant || '-'}</td>
+                  <td>{item.projectCategory?.categoryName || '-'}</td>
+                  <td>{item.locationOfInvestment || '-'}</td>
+                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
                   <td>{formatDate(item.contractStartDate)}</td>
                   <td>{formatDate(item.contractEndDate)}</td>
-                  <td>{item.duration}</td>
+                  <td>{item.duration || '-'}</td>
+                  <td>
+                    <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteWorks(item.id)}><FiTrash2 /></button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderGoodsTable = () => {
+    return (
+      <div className="table-responsive">
+        <table className="table table-striped table-hover">
+          <thead className="table-dark">
+            <tr>
+              <th>{t('projectActions.contractNumber')}</th>
+              <th>{t('projectActions.supplier')}</th>
+              <th>{t('projectActions.nameOfConsultant')}</th>
+              <th className="text-end">{t('projectActions.contractValue')}</th>
+              <th>{t('common.startDate')}</th>
+              <th>{t('common.endDate')}</th>
+              <th>{t('common.duration')}</th>
+              <th>{t('common.actions')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {goods.length === 0 ? (
+              <tr><td colSpan="8" className="text-center text-muted">{t('table.noData')}</td></tr>
+            ) : (
+              goods.map((item) => (
+                <tr key={item.id}>
+                  <td><strong>{item.contractRefNo || '-'}</strong></td>
+                  <td>{item.nameOfSupplier || '-'}</td>
+                  <td>{item.nameOfConsultant || '-'}</td>
+                  <td className="text-end">{formatCurrency(item.contractValue)}</td>
+                  <td>{formatDate(item.contractStartDate)}</td>
+                  <td>{formatDate(item.contractEndDate)}</td>
+                  <td>{item.duration || '-'}</td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
                     <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
@@ -235,6 +390,230 @@ function ProjectActions() {
       </div>
     );
   };
+
+  const renderWorksModal = () => (
+    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+      <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div className="modal-content border-0 shadow">
+          <div className="modal-header border-0 pb-0">
+            <h5 className="modal-title fw-bold">
+              {editingItem ? t('projectActions.editWorksContract') : t('projectActions.addWorksContract')}
+            </h5>
+            <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+          </div>
+          <form onSubmit={handleWorksSave}>
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              <h6 className="text-muted border-bottom pb-2 mb-3">{t('common.project')} & {t('financial.component')}</h6>
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('financial.component')}</label>
+                  <select name="componentId" value={worksFormComp} onChange={e => { setWorksFormComp(e.target.value); setWorksFormSubcomp(''); }} className="form-select">
+                    <option value="">----------</option>
+                    {filteredComponents.map(c => (
+                      <option key={c.id} value={c.id}>{c.componentName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('financial.subcomponent')}</label>
+                  <select name="subcomponentId" value={worksFormSubcomp} onChange={e => setWorksFormSubcomp(e.target.value)} className="form-select" disabled={!worksFormComp}>
+                    <option value="">----------</option>
+                    {filteredSubcomponents.map(s => (
+                      <option key={s.id} value={s.id}>{s.subcomponentName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('financial.activity')}</label>
+                  <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.id || ''} disabled={!worksFormSubcomp}>
+                    <option value="">----------</option>
+                    {filteredActivities.map(a => (
+                      <option key={a.id} value={a.id}>{a.activityName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.projectCategory')}</label>
+                  <select name="projectCategoryId" defaultValue={editingItem?.projectCategory?.id || ''} className="form-select">
+                    <option value="">----------</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.categoryName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.fundingSource')}</label>
+                  <select name="fundingSourceId" defaultValue={editingItem?.fundingSource?.id || ''} className="form-select">
+                    <option value="">----------</option>
+                    {donors.map(d => (
+                      <option key={d.id} value={d.id}>{d.donorName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('common.currency')}</label>
+                  <select name="currencyId" defaultValue={editingItem?.currency?.id || ''} className="form-select">
+                    <option value="">----------</option>
+                    {currencies.map(c => (
+                      <option key={c.id} value={c.id}>{c.currencyCode} - {c.currencyName}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.mainInterventionFocus')}</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.mainInterventionFocus')}</label>
+                  <input name="mainInterventionFocus" defaultValue={editingItem?.mainInterventionFocus} className="form-control" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-medium">{t('projectActions.targetBeneficiarySettlements')}</label>
+                  <input type="number" name="targetBeneficiarySettlements" defaultValue={editingItem?.targetBeneficiarySettlements} className="form-control" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-medium">{t('projectActions.grossFloorArea')}</label>
+                  <input type="number" name="grossFloorAreaM2" defaultValue={editingItem?.grossFloorAreaM2} className="form-control" />
+                </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.locationOfInvestment')}</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.locationOfInvestment')}</label>
+                  <input name="locationOfInvestment" defaultValue={editingItem?.locationOfInvestment} className="form-control" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-medium">{t('projectActions.latitude')}</label>
+                  <input type="number" step="any" name="latitude" defaultValue={editingItem?.latitude} className="form-control" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-medium">{t('projectActions.longitude')}</label>
+                  <input type="number" step="any" name="longitude" defaultValue={editingItem?.longitude} className="form-control" />
+                </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.contractValue')} & {t('common.details')}</h6>
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.contractValue')}</label>
+                  <input type="number" step="0.01" name="contractValue" defaultValue={editingItem?.contractValue} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.amendments')}</label>
+                  <select name="amendments" defaultValue={editingItem?.amendments?.toString() || 'false'} className="form-select">
+                    <option value="false">{t('common.no')}</option>
+                    <option value="true">{t('common.yes')}</option>
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.contractNumber')}</label>
+                  <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.contractor')}</label>
+                  <input name="nameOfContractor" defaultValue={editingItem?.nameOfContractor} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.nameOfConsultant')}</label>
+                  <input name="nameOfConsultant" defaultValue={editingItem?.nameOfConsultant} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('common.duration')}</label>
+                  <input name="duration" defaultValue={editingItem?.duration} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('common.startDate')}</label>
+                  <input type="date" name="contractStartDate" defaultValue={editingItem?.contractStartDate} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('common.endDate')}</label>
+                  <input type="date" name="contractEndDate" defaultValue={editingItem?.contractEndDate} className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
+                  <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderMonitoringModal = () => (
+    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+      <div className="modal-dialog modal-lg modal-dialog-centered">
+        <div className="modal-content border-0 shadow">
+          <div className="modal-header border-0 pb-0">
+            <h5 className="modal-title fw-bold">{t('projectActions.addContractMonitoring')}</h5>
+            <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+          </div>
+          <form onSubmit={handleMonitoringSave}>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.contractNumber')} *</label>
+                  <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" required />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.monitoringDate')}</label>
+                  <input type="date" name="monitoringDate" defaultValue={editingItem?.monitoringDate} className="form-control" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('common.quarter')}</label>
+                  <select name="quarterId" defaultValue={editingItem?.quarter?.id} className="form-select">
+                    <option value="">----------</option>
+                    {quarters.map(q => (
+                      <option key={q.id} value={q.id}>{q.quarter}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.monitoringType')}</label>
+                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id} className="form-select">
+                    <option value="">----------</option>
+                    {monitoringTypes.map(mt => (
+                      <option key={mt.id} value={mt.id}>{mt.monitoringType}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.milestoneStartDate')}</label>
+                  <input type="date" name="milestoneStartDate" defaultValue={editingItem?.milestoneStartDate} className="form-control" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.milestoneEndDate')}</label>
+                  <input type="date" name="milestoneEndDate" defaultValue={editingItem?.milestoneEndDate} className="form-control" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.target')}</label>
+                  <input name="target" defaultValue={editingItem?.target} className="form-control" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.achievedStatus')}</label>
+                  <input name="achievedStatus" defaultValue={editingItem?.achievedStatus} className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
+                  <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{editingItem ? t('common.update') : t('common.create')}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="container-fluid">
@@ -323,86 +702,22 @@ function ProjectActions() {
           {loading ? (
             <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
           ) : (
-            activeTab === 'monitoring' ? renderMonitoringTable() : renderWorksGoodsTable()
+            activeTab === 'works' ? renderWorksTable() :
+            activeTab === 'goods' ? renderGoodsTable() :
+            renderMonitoringTable()
           )}
         </div>
       </div>
 
-      {showModal && activeTab === 'monitoring' && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header border-0 pb-0">
-                <h5 className="modal-title fw-bold">{editingItem ? t('projectActions.addContractMonitoring') : t('projectActions.addContractMonitoring')}</h5>
-                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-              </div>
-              <form onSubmit={handleMonitoringSave}>
-                <div className="modal-body">
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.contractNumber')} *</label>
-                      <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" required />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.monitoringDate')}</label>
-                      <input type="date" name="monitoringDate" defaultValue={editingItem?.monitoringDate} className="form-control" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('common.quarter')}</label>
-                      <select name="quarterId" defaultValue={editingItem?.quarter?.id} className="form-select">
-                        <option value="">----------</option>
-                        {quarters.map(q => (
-                          <option key={q.id} value={q.id}>{q.quarter}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.monitoringType')}</label>
-                      <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id} className="form-select">
-                        <option value="">----------</option>
-                        {monitoringTypes.map(mt => (
-                          <option key={mt.id} value={mt.id}>{mt.monitoringType}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.milestoneStartDate')}</label>
-                      <input type="date" name="milestoneStartDate" defaultValue={editingItem?.milestoneStartDate} className="form-control" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.milestoneEndDate')}</label>
-                      <input type="date" name="milestoneEndDate" defaultValue={editingItem?.milestoneEndDate} className="form-control" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.target')}</label>
-                      <input name="target" defaultValue={editingItem?.target} className="form-control" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('projectActions.achievedStatus')}</label>
-                      <input name="achievedStatus" defaultValue={editingItem?.achievedStatus} className="form-control" />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
-                      <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3"></textarea>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer border-0 pt-0">
-                  <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>{t('common.cancel')}</button>
-                  <button type="submit" className="btn btn-primary">{editingItem ? t('common.update') : t('common.create')}</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      {showModal && activeTab === 'works' && renderWorksModal()}
+      {showModal && activeTab === 'monitoring' && renderMonitoringModal()}
 
-      {showModal && activeTab !== 'monitoring' && (
+      {showModal && activeTab === 'goods' && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{activeTab === 'works' ? t('projectActions.addWorksContract') : t('projectActions.addGoodsContract')}</h5>
+                <h5 className="modal-title">{t('projectActions.addGoodsContract')}</h5>
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
@@ -411,7 +726,7 @@ function ProjectActions() {
                   <input type="text" className="form-control" />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">{activeTab === 'works' ? t('projectActions.contractor') : t('projectActions.supplier')}</label>
+                  <label className="form-label">{t('projectActions.supplier')}</label>
                   <input type="text" className="form-control" />
                 </div>
                 <div className="row">
