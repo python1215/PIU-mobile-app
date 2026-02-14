@@ -19,11 +19,11 @@ public class Subcomponent {
     @Column(name = "subcomp_id")
     private Long subcompId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "comp_id", nullable = false)
     private Component component;
 
@@ -34,7 +34,7 @@ public class Subcomponent {
     @Column(name = "subcomponent_description", length = 500)
     private String subcomponentDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currency_id")
     private Currency currency;
 
@@ -44,7 +44,7 @@ public class Subcomponent {
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "login_user_id", nullable = false)
     private User loginUser;
 }

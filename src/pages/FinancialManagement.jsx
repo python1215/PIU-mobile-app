@@ -695,7 +695,7 @@ function FinancialManagement() {
           <thead className="table-dark">
             <tr>
               {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
-              {activeTab === 'subcomponents' && <><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponent')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'subcomponents' && <><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'activities' && <><th>ID</th><th>{t('financial.activity')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
               {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
@@ -939,7 +939,7 @@ function FinancialManagement() {
                     <>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.components')}</label><p className="fw-medium">{viewingItem.component?.projectComponents || '-'}</p></div>
                       <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.subcompId}</p></div>
-                      <div className="col-12"><label className="form-label text-muted small">{t('financial.subcomponent')}</label><p className="fw-medium">{viewingItem.subcomponent}</p></div>
+                      <div className="col-12"><label className="form-label text-muted small">{t('financial.subcomponentName')}</label><p className="fw-medium">{viewingItem.subcomponent}</p></div>
                       <div className="col-12"><label className="form-label text-muted small">{t('common.description')}</label><p className="fw-medium">{viewingItem.subcomponentDescription || '-'}</p></div>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
