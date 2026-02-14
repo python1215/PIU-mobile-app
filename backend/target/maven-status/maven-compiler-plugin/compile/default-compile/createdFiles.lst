@@ -39,6 +39,7 @@ com/piun/piuproject/repository/PDORepository.class
 com/piun/piuproject/controller/AuthController.class
 com/piun/piuproject/repository/DocumentVersionRepository.class
 com/piun/piuproject/controller/SpaController.class
+com/piun/piuproject/config/GlobalExceptionHandler.class
 com/piun/piuproject/model/SettlementWithCoordinates.class
 com/piun/piuproject/controller/DonorController.class
 com/piun/piuproject/model/ProjectCategory.class
