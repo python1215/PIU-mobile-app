@@ -197,8 +197,13 @@ function ProjectActions() {
         await axios.post('/api/project-actions/works', payload);
         toast.success(t('common.createSuccess') || 'Created successfully');
       }
+      const savedProject = worksFormProject || selectedProject;
       handleCloseModal();
-      loadContracts();
+      if (savedProject !== selectedProject) {
+        setSelectedProject(savedProject);
+      } else {
+        loadContracts();
+      }
     } catch (error) {
       console.error('Error saving works contract:', error);
       toast.error('Error saving works contract');
