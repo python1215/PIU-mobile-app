@@ -1,9 +1,0 @@
-{
-    "remote.SSH.remotePlatform": {
-        "88ef5e6b-ff4f-47ab-b937-c85b713020fa-00-cu5w6mikd1gh.worf.replit.dev": "windows"
-    },
-    "remote.SSH.showLoginTerminal": true,
-    "remote.SSH.configFile": "%USERPROFILE%\\.ssh\\config",
-    "remote.SSH.connectTimeout": 60,
-    "remote.SSH.remoteServerListenOnSocket": false
-}
