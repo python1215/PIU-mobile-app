@@ -29,7 +29,7 @@ public class KPIContractSetup {
     private String kpiDescription;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "monitoring_type_id")
+    @JoinColumn(name = "monitoring_type_id", referencedColumnName = "monitoring_type_code")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MonitoringType monitoringType;
 
