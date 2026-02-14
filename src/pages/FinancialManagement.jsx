@@ -502,11 +502,11 @@ function FinancialManagement() {
               <tr>
                 <th className="border-0 px-4 py-3">{t('projects.projectId')}</th>
                 <th className="border-0 px-4 py-3">{t('common.name')}</th>
-                <th className="border-0 px-4 py-3">{t('financial.donors')}</th>
-                <th className="border-0 px-4 py-3">{t('financial.contributors')}</th>
-                <th className="border-0 px-4 py-3">{t('projects.funding')}</th>
-                <th className="border-0 px-4 py-3">{t('projects.effectivenessDate')}</th>
-                <th className="border-0 px-4 py-3">{t('projects.closureDate')}</th>
+                <th className="border-0 px-4 py-3">Donor</th>
+                <th className="border-0 px-4 py-3">Contributors</th>
+                <th className="border-0 px-4 py-3">Funding Amount</th>
+                <th className="border-0 px-4 py-3">Effectiveness Date</th>
+                <th className="border-0 px-4 py-3">Closure Date</th>
                 <th className="border-0 px-4 py-3 text-end">{t('common.actions')}</th>
               </tr>
             </thead>
