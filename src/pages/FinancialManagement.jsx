@@ -327,6 +327,8 @@ function FinancialManagement() {
   const [years, setYears] = useState([]);
   const [activityProjectId, setActivityProjectId] = useState('');
   const [activityComponentId, setActivityComponentId] = useState('');
+  const [componentProjectId, setComponentProjectId] = useState('');
+  const [allComponents, setAllComponents] = useState([]);
 
   const loadDonorsAndContributors = useCallback(async () => {
     try {
@@ -445,13 +447,16 @@ function FinancialManagement() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const projectId = data.projectId;
-    delete data.projectId;
+    const projectId = componentProjectId;
     
-    // Convert allocation to number
     const allocation = parseFloat(data.allocation);
     if (isNaN(allocation)) {
       toast.error('Invalid allocation amount');
+      return;
+    }
+
+    if (componentBudgetInfo && allocation > componentBudgetInfo.remainingBalance) {
+      toast.error(`Allocation exceeds remaining balance of ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(componentBudgetInfo.remainingBalance)}`);
       return;
     }
 
@@ -473,12 +478,13 @@ function FinancialManagement() {
       }
       setShowComponentModal(false);
       setEditingItem(null);
+      setComponentProjectId('');
       loadFinancialData();
     } catch (error) {
       console.error('Error saving component:', error.response?.data || error.message);
       toast.error(error.response?.data?.message || 'Error saving component');
     }
-  }, [editingItem, loadFinancialData]);
+  }, [editingItem, loadFinancialData, componentProjectId, componentBudgetInfo]);
 
   const handleSubcomponentSave = useCallback(async (e) => {
     e.preventDefault();
@@ -515,6 +521,18 @@ function FinancialManagement() {
       toast.error('Error saving subcomponent');
     }
   }, [editingItem, selectedProject, loadFinancialData]);
+
+  const componentBudgetInfo = useMemo(() => {
+    if (!componentProjectId || componentProjectId === 'all') return null;
+    const project = projects.find(p => p.projectId === componentProjectId);
+    if (!project) return null;
+    const totalFunding = parseFloat(project.funding) || 0;
+    const allocatedAmount = allComponents
+      .filter(c => c.project?.projectId === componentProjectId && (!editingItem || c.id !== editingItem.id))
+      .reduce((sum, c) => sum + (parseFloat(c.allocation) || 0), 0);
+    const remainingBalance = totalFunding - allocatedAmount;
+    return { totalFunding, allocatedAmount, remainingBalance };
+  }, [componentProjectId, projects, allComponents, editingItem]);
 
   const activityFilteredComponents = useMemo(() => {
     if (!activityProjectId) return [];
@@ -589,6 +607,8 @@ function FinancialManagement() {
   const handleEditItem = useCallback((item) => {
     setEditingItem(item);
     if (activeTab === 'components') {
+      setComponentProjectId(item.project?.projectId || '');
+      loadAllComponents();
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
       setShowSubcomponentModal(true);
@@ -608,6 +628,7 @@ function FinancialManagement() {
     setEditingItem(null);
     setActivityProjectId('');
     setActivityComponentId('');
+    setComponentProjectId('');
   }, []);
 
   const handleEditProject = useCallback((project) => {
@@ -627,10 +648,21 @@ function FinancialManagement() {
     setSelectedProject(e.target.value);
   }, []);
 
+  const loadAllComponents = useCallback(async () => {
+    try {
+      const res = await api.get('/financial/components');
+      setAllComponents(res.data);
+    } catch (error) {
+      setAllComponents([]);
+    }
+  }, []);
+
   const handleShowModal = useCallback(() => {
     if (activeTab === 'projects') {
       setShowModal(true);
     } else if (activeTab === 'components') {
+      setComponentProjectId(selectedProject === 'all' ? '' : selectedProject);
+      loadAllComponents();
       setShowComponentModal(true);
     } else if (activeTab === 'subcomponents') {
       setShowSubcomponentModal(true);
@@ -853,10 +885,33 @@ function FinancialManagement() {
                   <div className="row g-3">
                     <div className="col-12">
                       <label className="form-label fw-medium">Project</label>
-                      <select name="projectId" defaultValue={selectedProject} className="form-select" required>
-                        {projectOptions}
+                      <select value={componentProjectId} onChange={(e) => setComponentProjectId(e.target.value)} className="form-select" required>
+                        <option value="">Select Project...</option>
+                        {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
                       </select>
                     </div>
+                    {componentBudgetInfo && (
+                      <div className="col-12">
+                        <div className="card border-0" style={{ backgroundColor: '#e8f4fd' }}>
+                          <div className="card-body py-2 px-3">
+                            <div className="row text-center">
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Total Project Funding</small>
+                                <span className="fw-bold text-primary">{formatCurrency(componentBudgetInfo.totalFunding)}</span>
+                              </div>
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Already Allocated</small>
+                                <span className="fw-bold text-warning">{formatCurrency(componentBudgetInfo.allocatedAmount)}</span>
+                              </div>
+                              <div className="col-md-4">
+                                <small className="text-muted d-block">Remaining Balance</small>
+                                <span className={`fw-bold ${componentBudgetInfo.remainingBalance >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(componentBudgetInfo.remainingBalance)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div className="col-12">
                       <label className="form-label fw-medium">Component Name</label>
                       <input name="projectComponents" defaultValue={editingItem?.projectComponents} className="form-control" placeholder="Enter component name" required />
@@ -876,7 +931,10 @@ function FinancialManagement() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-medium">Allocation</label>
-                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="0.00" required />
+                      <input type="number" step="0.01" name="allocation" defaultValue={editingItem?.allocation} className="form-control" placeholder="0.00" required max={componentBudgetInfo ? componentBudgetInfo.remainingBalance : undefined} />
+                      {componentBudgetInfo && componentBudgetInfo.remainingBalance >= 0 && (
+                        <div className="form-text">Maximum allowed: {formatCurrency(componentBudgetInfo.remainingBalance)}</div>
+                      )}
                     </div>
                   </div>
                 </div>
