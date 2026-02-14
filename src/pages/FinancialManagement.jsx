@@ -367,10 +367,10 @@ function FinancialManagement() {
   }, [selectedProject, loadFinancialData]);
 
   const tabs = useMemo(() => [
-    { id: 'projects', label: t('financial.projects'), icon: FiFolder },
-    { id: 'components', label: t('financial.components'), icon: FiLayers },
-    { id: 'subcomponents', label: t('financial.subcomponents'), icon: FiLayers },
-    { id: 'activities', label: t('financial.activities'), icon: FiDollarSign },
+    { id: 'projects', label: 'Projects', icon: FiFolder },
+    { id: 'components', label: 'Components', icon: FiLayers },
+    { id: 'subcomponents', label: 'Subcomponents', icon: FiLayers },
+    { id: 'activities', label: 'Activities', icon: FiDollarSign },
     { id: 'pdos', label: t('financial.pdoStatements'), icon: FiDollarSign },
     { id: 'outcomes', label: t('financial.outcomes'), icon: FiDollarSign }
   ], [t]);
