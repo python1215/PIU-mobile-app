@@ -26,6 +26,23 @@ function MonitoringEvaluation() {
   const [formPdoId, setFormPdoId] = useState('');
   const [formOutcomeId, setFormOutcomeId] = useState('');
   const [formResultId, setFormResultId] = useState('');
+  const [formBaseline, setFormBaseline] = useState('');
+  const [formAchieved, setFormAchieved] = useState('');
+  const [formEndTarget, setFormEndTarget] = useState('');
+
+  const pctVsBaseline = useMemo(() => {
+    const b = parseFloat(formBaseline);
+    const a = parseFloat(formAchieved);
+    if (!isNaN(b) && !isNaN(a) && b !== 0) return ((a / b) * 100).toFixed(2);
+    return '';
+  }, [formBaseline, formAchieved]);
+
+  const pctVsEndTarget = useMemo(() => {
+    const t = parseFloat(formEndTarget);
+    const a = parseFloat(formAchieved);
+    if (!isNaN(t) && !isNaN(a) && t !== 0) return ((a / t) * 100).toFixed(2);
+    return '';
+  }, [formEndTarget, formAchieved]);
 
   const loadReferenceData = useCallback(async () => {
     try {
@@ -99,6 +116,9 @@ function MonitoringEvaluation() {
     setFormPdoId('');
     setFormOutcomeId('');
     setFormResultId('');
+    setFormBaseline('');
+    setFormAchieved('');
+    setFormEndTarget('');
     setShowModal(true);
   }, []);
 
@@ -108,6 +128,9 @@ function MonitoringEvaluation() {
     setFormPdoId(item.pdo?.id?.toString() || '');
     setFormOutcomeId(item.projectOutcome?.id?.toString() || '');
     setFormResultId(item.projectResult?.id?.toString() || '');
+    setFormBaseline(item.baselineValue != null ? String(item.baselineValue) : '');
+    setFormAchieved(item.achievedValue != null ? String(item.achievedValue) : '');
+    setFormEndTarget(item.endTargetValue != null ? String(item.endTargetValue) : '');
     setShowModal(true);
   }, []);
 
@@ -118,6 +141,9 @@ function MonitoringEvaluation() {
     setFormPdoId('');
     setFormOutcomeId('');
     setFormResultId('');
+    setFormBaseline('');
+    setFormAchieved('');
+    setFormEndTarget('');
   }, []);
 
   const handleSave = useCallback(async (e) => {
@@ -379,25 +405,23 @@ function MonitoringEvaluation() {
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">Baseline Value</label>
-                          <input type="number" step="0.01" name="baselineValue" defaultValue={editingItem?.baselineValue || ''} className="form-control" />
+                          <input type="number" step="0.01" name="baselineValue" value={formBaseline} onChange={(e) => setFormBaseline(e.target.value)} className="form-control" />
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">Achieved Value</label>
-                          <input type="number" step="0.01" name="achievedValue" defaultValue={editingItem?.achievedValue || ''} className="form-control" />
+                          <input type="number" step="0.01" name="achievedValue" value={formAchieved} onChange={(e) => setFormAchieved(e.target.value)} className="form-control" />
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">End Target Value</label>
-                          <input type="number" step="0.01" name="endTargetValue" defaultValue={editingItem?.endTargetValue || ''} className="form-control" />
+                          <input type="number" step="0.01" name="endTargetValue" value={formEndTarget} onChange={(e) => setFormEndTarget(e.target.value)} className="form-control" />
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">% Achieved vs Baseline</label>
-                          <input type="text" className="form-control bg-light" readOnly value="Auto-calculated" />
-                          <div className="form-text">Calculated automatically on save</div>
+                          <input type="text" className="form-control bg-light" readOnly value={pctVsBaseline ? pctVsBaseline + '%' : '-'} />
                         </div>
                         <div className="col-md-4">
                           <label className="form-label fw-medium">% Achieved vs End Target</label>
-                          <input type="text" className="form-control bg-light" readOnly value="Auto-calculated" />
-                          <div className="form-text">Calculated automatically on save</div>
+                          <input type="text" className="form-control bg-light" readOnly value={pctVsEndTarget ? pctVsEndTarget + '%' : '-'} />
                         </div>
                         <div className="col-12">
                           <label className="form-label fw-medium">Remarks</label>
