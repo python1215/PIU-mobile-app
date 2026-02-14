@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import api from '../services/api';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiSearch, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -333,9 +333,9 @@ function FinancialManagement() {
   const loadDonorsAndContributors = useCallback(async () => {
     try {
       const [donorRes, contributorRes, currencyRes] = await Promise.all([
-        axios.get('/api/donors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/contributors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
+        api.get('/donors').catch(() => ({ data: [] })),
+        api.get('/setup/contributors').catch(() => ({ data: [] })),
+        api.get('/setup/currencies').catch(() => ({ data: [] }))
       ]);
       setDonors(donorRes.data);
       setContributors(contributorRes.data);
@@ -347,7 +347,7 @@ function FinancialManagement() {
 
   const loadProjects = useCallback(async () => {
     try {
-      const res = await axios.get('/api/projects');
+      const res = await api.get('/projects');
       setProjects(res.data);
       if (res.data.length > 0) {
         setSelectedProject(res.data[0].projectId);
@@ -364,11 +364,11 @@ function FinancialManagement() {
     setLoading(true);
     try {
       const [compRes, subRes, actRes, pdoRes, outRes] = await Promise.all([
-        axios.get(`/api/financial/components/project/${selectedProject}`).catch(() => ({ data: [] })),
-        axios.get(`/api/financial/subcomponents`).catch(() => ({ data: [] })),
-        axios.get(`/api/financial/activities/project/${selectedProject}`).catch(() => ({ data: [] })),
-        axios.get(`/api/financial/pdos/project/${selectedProject}`).catch(() => ({ data: [] })),
-        axios.get(`/api/financial/outcomes`).catch(() => ({ data: [] }))
+        api.get(`/financial/components/project/${selectedProject}`).catch(() => ({ data: [] })),
+        api.get(`/financial/subcomponents`).catch(() => ({ data: [] })),
+        api.get(`/financial/activities/project/${selectedProject}`).catch(() => ({ data: [] })),
+        api.get(`/financial/pdos/project/${selectedProject}`).catch(() => ({ data: [] })),
+        api.get(`/financial/outcomes`).catch(() => ({ data: [] }))
       ]);
       setComponents(compRes.data);
       setSubcomponents(subRes.data);
@@ -404,7 +404,7 @@ function FinancialManagement() {
 
   const handleCreateProject = useCallback(async (data) => {
     try {
-      await axios.post('/api/projects', data);
+      await api.post('/projects', data);
       toast.success(t('messages.createSuccess'));
       setShowModal(false);
       loadProjects();
@@ -415,7 +415,7 @@ function FinancialManagement() {
 
   const handleUpdateProject = useCallback(async (data) => {
     try {
-      await axios.put(`/api/projects/${editingProject.projectId}`, data);
+      await api.put(`/projects/${editingProject.projectId}`, data);
       toast.success(t('messages.updateSuccess'));
       setEditingProject(null);
       loadProjects();
@@ -427,7 +427,7 @@ function FinancialManagement() {
   const handleDeleteProject = useCallback(async (projectId) => {
     if (confirm(t('messages.confirmDelete'))) {
       try {
-        await axios.delete(`/api/projects/${projectId}`);
+        await api.delete(`/projects/${projectId}`);
         toast.success(t('messages.deleteSuccess'));
         loadProjects();
       } catch (error) {
@@ -474,10 +474,10 @@ function FinancialManagement() {
     
     try {
       if (editingItem) {
-        await axios.put(`/api/financial/components/${editingItem.id}`, payload);
+        await api.put(`/financial/components/${editingItem.id}`, payload);
         toast.success('Component updated successfully');
       } else {
-        await axios.post('/api/financial/components', payload);
+        await api.post('/financial/components', payload);
         toast.success('Component created successfully');
       }
       setShowComponentModal(false);
@@ -505,10 +505,10 @@ function FinancialManagement() {
 
     try {
       if (editingItem) {
-        await axios.put(`/api/financial/subcomponents/${editingItem.subcompId}`, payload);
+        await api.put(`/financial/subcomponents/${editingItem.subcompId}`, payload);
         toast.success('Subcomponent updated successfully');
       } else {
-        await axios.post('/api/financial/subcomponents', payload);
+        await api.post('/financial/subcomponents', payload);
         toast.success('Subcomponent created successfully');
       }
       setShowSubcomponentModal(false);
