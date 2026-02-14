@@ -62,6 +62,12 @@ public class FinancialController {
             Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
             component.setProject(project);
         }
+
+        // Auto-generate compId if not provided
+        if (component.getCompId() == null || component.getCompId().isEmpty()) {
+            long count = componentRepository.count() + 1;
+            component.setCompId("COMP-" + String.format("%03d", count));
+        }
         
         return componentRepository.save(component);
     }

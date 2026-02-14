@@ -440,7 +440,6 @@ function FinancialManagement() {
     }
 
     const payload = {
-      compId: data.compId,
       projectComponents: data.projectComponents,
       componentDescription: data.componentDescription,
       allocation: allocation,
@@ -701,15 +700,11 @@ function FinancialManagement() {
               <form onSubmit={handleComponentSave}>
                 <div className="modal-body">
                   <div className="row g-3">
-                    <div className="col-md-6">
+                    <div className="col-12">
                       <label className="form-label fw-medium">Project</label>
                       <select name="projectId" defaultValue={selectedProject} className="form-select" required>
                         {projectOptions}
                       </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">Component ID</label>
-                      <input name="compId" defaultValue={editingItem?.compId} className="form-control" placeholder="e.g., COMP-001" required />
                     </div>
                     <div className="col-12">
                       <label className="form-label fw-medium">Component Name</label>
