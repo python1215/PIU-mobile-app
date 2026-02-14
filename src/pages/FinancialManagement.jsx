@@ -431,21 +431,36 @@ function FinancialManagement() {
     const data = Object.fromEntries(formData.entries());
     const projectId = data.projectId;
     delete data.projectId;
-    data.project = { projectId };
+    
+    // Convert allocation to number
+    const allocation = parseFloat(data.allocation);
+    if (isNaN(allocation)) {
+      toast.error('Invalid allocation amount');
+      return;
+    }
+
+    const payload = {
+      compId: data.compId,
+      projectComponents: data.projectComponents,
+      componentDescription: data.componentDescription,
+      allocation: allocation,
+      project: { projectId: projectId }
+    };
     
     try {
       if (editingItem) {
-        await axios.put(`/api/financial/components/${editingItem.compId}`, data);
+        await axios.put(`/api/financial/components/${editingItem.compId}`, payload);
         toast.success('Component updated successfully');
       } else {
-        await axios.post('/api/financial/components', data);
+        await axios.post('/api/financial/components', payload);
         toast.success('Component created successfully');
       }
       setShowComponentModal(false);
       setEditingItem(null);
       loadFinancialData();
     } catch (error) {
-      toast.error('Error saving component');
+      console.error('Error saving component:', error.response?.data || error.message);
+      toast.error(error.response?.data?.message || 'Error saving component');
     }
   }, [editingItem, loadFinancialData]);
 
