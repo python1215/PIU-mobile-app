@@ -135,7 +135,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                     <option value="">Select Currency</option>
                     {currencies.map(curr => (
                       <option key={curr.id} value={curr.id}>
-                        {curr.currency} ({curr.code})
+                        {curr.currency}{curr.code ? ` (${curr.code})` : ''}
                       </option>
                     ))}
                   </select>
@@ -222,7 +222,7 @@ const ProjectRow = memo(function ProjectRow({ project, onEdit, onDelete }) {
         {project.contributors?.map(c => c.name).join(', ') || '-'}
       </td>
       <td className="px-4 py-3">
-        {project.currency?.code || project.currency?.currency || '-'}
+        {project.currency?.currency || '-'}
       </td>
       <td className="px-4 py-3">
         {project.funding?.toLocaleString() || '-'}
