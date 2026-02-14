@@ -379,6 +379,15 @@ function FinancialManagement() {
     }
   }, [selectedProject]);
 
+  const loadAllComponents = useCallback(async () => {
+    try {
+      const res = await api.get('/financial/components');
+      setAllComponents(res.data);
+    } catch (error) {
+      setAllComponents([]);
+    }
+  }, []);
+
   useEffect(() => {
     loadProjects();
     loadDonorsAndContributors();
@@ -617,7 +626,7 @@ function FinancialManagement() {
       setActivityComponentId(item.component?.id?.toString() || '');
       setShowActivityModal(true);
     }
-  }, [activeTab]);
+  }, [activeTab, loadAllComponents]);
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -648,15 +657,6 @@ function FinancialManagement() {
     setSelectedProject(e.target.value);
   }, []);
 
-  const loadAllComponents = useCallback(async () => {
-    try {
-      const res = await api.get('/financial/components');
-      setAllComponents(res.data);
-    } catch (error) {
-      setAllComponents([]);
-    }
-  }, []);
-
   const handleShowModal = useCallback(() => {
     if (activeTab === 'projects') {
       setShowModal(true);
@@ -673,7 +673,7 @@ function FinancialManagement() {
     } else {
       toast.error(`Add New for ${activeTab} is coming soon`);
     }
-  }, [activeTab]);
+  }, [activeTab, selectedProject, loadAllComponents]);
 
   const filteredProjects = useMemo(() => {
     const searchLower = projectSearch.toLowerCase();
