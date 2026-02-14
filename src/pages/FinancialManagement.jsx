@@ -259,10 +259,10 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onEdit,
   return (
     <tr>
       {activeTab === 'components' && (
-        <><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.project?.project || '-'}</td><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'subcomponents' && (
-        <><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.component?.projectComponents || '-'}</td><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'activities' && (
         <><td>{item.activityId}</td><td>{item.activity}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
@@ -274,8 +274,8 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onEdit,
         <><td>{item.id}</td><td>{item.projectOutcome}</td></>
       )}
       <td>
-        <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-        <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
+        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEdit && onEdit(item)}><FiEdit2 /></button>
+        <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete && onDelete(item)}><FiTrash2 /></button>
       </td>
     </tr>
   );
@@ -364,11 +364,11 @@ function FinancialManagement() {
     setLoading(true);
     try {
       const [compRes, subRes, actRes, pdoRes, outRes] = await Promise.all([
-        api.get(`/financial/components/project/${selectedProject}`).catch(() => ({ data: [] })),
-        api.get(`/financial/subcomponents`).catch(() => ({ data: [] })),
-        api.get(`/financial/activities/project/${selectedProject}`).catch(() => ({ data: [] })),
-        api.get(`/financial/pdos/project/${selectedProject}`).catch(() => ({ data: [] })),
-        api.get(`/financial/outcomes`).catch(() => ({ data: [] }))
+        api.get(`/financial/components/project/${selectedProject}`).catch(err => { console.error('Components load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(`/financial/subcomponents`).catch(err => { console.error('Subcomponents load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(`/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(`/financial/pdos/project/${selectedProject}`).catch(err => { console.error('PDOs load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
+        api.get(`/financial/outcomes`).catch(err => { console.error('Outcomes load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
       ]);
       setComponents(compRes.data);
       setSubcomponents(subRes.data);
@@ -520,6 +520,37 @@ function FinancialManagement() {
     }
   }, [editingItem, selectedProject, loadFinancialData]);
 
+  const handleDeleteItem = useCallback(async (item) => {
+    if (!confirm(t('messages.confirmDelete'))) return;
+    try {
+      if (activeTab === 'components') {
+        await api.delete(`/financial/components/${item.id}`);
+      } else if (activeTab === 'subcomponents') {
+        await api.delete(`/financial/subcomponents/${item.subcompId}`);
+      } else if (activeTab === 'activities') {
+        await api.delete(`/financial/activities/${item.activityId}`);
+      } else if (activeTab === 'pdos') {
+        await api.delete(`/financial/pdos/${item.id}`);
+      } else if (activeTab === 'outcomes') {
+        await api.delete(`/financial/outcomes/${item.id}`);
+      }
+      toast.success(t('messages.deleteSuccess'));
+      loadFinancialData();
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast.error(t('messages.deleteError'));
+    }
+  }, [activeTab, loadFinancialData, t]);
+
+  const handleEditItem = useCallback((item) => {
+    setEditingItem(item);
+    if (activeTab === 'components') {
+      setShowComponentModal(true);
+    } else if (activeTab === 'subcomponents') {
+      setShowSubcomponentModal(true);
+    }
+  }, [activeTab]);
+
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setShowComponentModal(false);
@@ -655,8 +686,8 @@ function FinancialManagement() {
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
-              {activeTab === 'components' && <><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
-              {activeTab === 'subcomponents' && <><th>ID</th><th>{t('financial.subcomponent')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'subcomponents' && <><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponent')}</th><th>{t('common.description')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'activities' && <><th>ID</th><th>{t('financial.activity')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
               {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
@@ -665,7 +696,7 @@ function FinancialManagement() {
           </thead>
           <tbody>
             {currentTabData.length === 0 ? (
-              <tr><td colSpan="5" className="text-center text-muted">{t('table.noData')}</td></tr>
+              <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               currentTabData.map((item, index) => (
                 <DataRow
@@ -673,6 +704,8 @@ function FinancialManagement() {
                   item={item}
                   activeTab={activeTab}
                   formatCurrency={formatCurrency}
+                  onEdit={handleEditItem}
+                  onDelete={handleDeleteItem}
                 />
               ))
             )}
@@ -680,7 +713,7 @@ function FinancialManagement() {
           {['components', 'subcomponents', 'activities'].includes(activeTab) && currentTabData.length > 0 && (
             <tfoot className="table-secondary">
               <tr>
-                <td colSpan={activeTab === 'activities' ? 2 : 3} className="fw-bold">{t('common.total')}</td>
+                <td colSpan={activeTab === 'components' ? 5 : activeTab === 'subcomponents' ? 4 : 2} className="fw-bold">{t('common.total')}</td>
                 <td className="text-end fw-bold">{formatCurrency(dataTotal)}</td>
                 <td></td>
               </tr>
@@ -689,7 +722,7 @@ function FinancialManagement() {
         </table>
       </div>
     );
-  }, [loading, activeTab, currentTabData, formatCurrency, dataTotal]);
+  }, [loading, activeTab, currentTabData, formatCurrency, dataTotal, handleEditItem, handleDeleteItem, t]);
 
   const tabButtons = useMemo(() => (
     <ul className="nav nav-tabs mb-4">
