@@ -242,7 +242,7 @@ function ProjectActions() {
       achievedStatus: data.achievedStatus,
       remarks: data.remarks,
       pictureOfStatus: data.pictureOfStatus || null,
-      project: { projectId: selectedProject },
+      project: { projectId: data.monitoringProjectId || selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
       monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null,
       investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
@@ -689,36 +689,56 @@ function ProjectActions() {
     <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
       <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content border-0 shadow">
-          <div className="modal-header border-0 pb-0">
+          <div className="modal-header text-white" style={{ background: 'linear-gradient(135deg, #4a4eb8, #6366f1)' }}>
             <h5 className="modal-title fw-bold">
-              {editingItem ? t('projectActions.editContractMonitoring') : t('projectActions.addContractMonitoring')}
+              <FiActivity className="me-2" />
+              {editingItem ? t('projectActions.editContractMonitoring') : t('projectActions.contractMonitoringInfo')}
             </h5>
-            <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+            <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal}></button>
           </div>
           <form onSubmit={handleMonitoringSave}>
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              <h6 className="text-muted border-bottom pb-2 mb-3">{t('financial.project')} & {t('projectActions.contractNumber')}</h6>
+            <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+
+              <div className="d-flex align-items-center mb-3 mt-1">
+                <span className="badge bg-primary rounded-circle me-2" style={{ width: 8, height: 8 }}></span>
+                <h6 className="fw-bold mb-0">{t('projectActions.projectContractInfo')}</h6>
+              </div>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.contractNumber')} *</label>
-                  <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" required />
+                  <label className="form-label fw-medium">{t('projectActions.selectProject')} *</label>
+                  <select name="monitoringProjectId" defaultValue={selectedProject} className="form-select" required>
+                    <option value="">----------</option>
+                    {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                  </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.monitoringDate')}</label>
-                  <input type="date" name="monitoringDate" defaultValue={editingItem?.monitoringDate} className="form-control" />
+                  <label className="form-label fw-medium">{t('projectActions.selectContractType')} *</label>
+                  <select name="contractType" defaultValue={editingItem ? 'works' : ''} className="form-select">
+                    <option value="">-- {t('projectActions.pleaseSelect')} --</option>
+                    <option value="works">{t('projectActions.worksContracts')}</option>
+                    <option value="goods">{t('projectActions.goodsContracts')}</option>
+                  </select>
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('common.quarter')}</label>
-                  <select name="quarterId" defaultValue={editingItem?.quarter?.id} className="form-select">
+                <div className="col-12">
+                  <label className="form-label fw-medium">{t('projectActions.contractReference')} *</label>
+                  <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" required placeholder={t('projectActions.contractRefPlaceholder')} />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.monitoringDate')} *</label>
+                  <input type="date" name="monitoringDate" defaultValue={editingItem?.monitoringDate || new Date().toISOString().split('T')[0]} className="form-control" required />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.reportFrequency')} *</label>
+                  <select name="quarterId" defaultValue={editingItem?.quarter?.id || ''} className="form-select" required>
                     <option value="">----------</option>
                     {quarters.map(q => (
                       <option key={q.id} value={q.id}>{q.quarter}</option>
                     ))}
                   </select>
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.monitoringType')}</label>
-                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id} className="form-select">
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('projectActions.monitoringType')} *</label>
+                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id || ''} className="form-select" required>
                     <option value="">----------</option>
                     {monitoringTypes.map(mt => (
                       <option key={mt.id} value={mt.id}>{mt.monitoringType}</option>
@@ -727,11 +747,15 @@ function ProjectActions() {
                 </div>
               </div>
 
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.typeOfInvestment')} & {t('projectActions.kpiDescription')}</h6>
+              <hr className="my-4" />
+              <div className="d-flex align-items-center mb-3">
+                <span className="badge bg-info rounded-circle me-2" style={{ width: 8, height: 8 }}></span>
+                <h6 className="fw-bold mb-0">{t('projectActions.investmentKpiDetails')}</h6>
+              </div>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')}</label>
-                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select">
+                  <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')} *</label>
+                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select" required>
                     <option value="">----------</option>
                     {kpiForContracts.map(k => (
                       <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.typeOfInvestment}</option>
@@ -739,8 +763,8 @@ function ProjectActions() {
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.kpiDescription')}</label>
-                  <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select">
+                  <label className="form-label fw-medium">{t('projectActions.kpiDescription')} *</label>
+                  <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select" required>
                     <option value="">----------</option>
                     {kpiForContracts.map(k => (
                       <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.kpiDescription}</option>
@@ -749,31 +773,39 @@ function ProjectActions() {
                 </div>
               </div>
 
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.milestoneStartDate')} & {t('projectActions.target')}</h6>
+              <hr className="my-4" />
+              <div className="d-flex align-items-center mb-3">
+                <span className="badge bg-warning rounded-circle me-2" style={{ width: 8, height: 8 }}></span>
+                <h6 className="fw-bold mb-0">{t('projectActions.milestoneInformation')}</h6>
+              </div>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.milestoneStartDate')}</label>
-                  <input type="date" name="milestoneStartDate" defaultValue={editingItem?.milestoneStartDate} className="form-control" />
+                  <label className="form-label fw-medium">{t('projectActions.milestoneStartDate')} *</label>
+                  <input type="date" name="milestoneStartDate" defaultValue={editingItem?.milestoneStartDate || new Date().toISOString().split('T')[0]} className="form-control" required />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.milestoneEndDate')}</label>
-                  <input type="date" name="milestoneEndDate" defaultValue={editingItem?.milestoneEndDate} className="form-control" />
+                  <label className="form-label fw-medium">{t('projectActions.milestoneEndDate')} *</label>
+                  <input type="date" name="milestoneEndDate" defaultValue={editingItem?.milestoneEndDate} className="form-control" required />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.target')}</label>
-                  <input name="target" defaultValue={editingItem?.target} className="form-control" />
+                  <label className="form-label fw-medium">{t('projectActions.target')} *</label>
+                  <textarea name="target" defaultValue={editingItem?.target} className="form-control" rows="3" required></textarea>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.achievedStatus')}</label>
-                  <input name="achievedStatus" defaultValue={editingItem?.achievedStatus} className="form-control" />
+                  <label className="form-label fw-medium">{t('projectActions.achievedStatus')} *</label>
+                  <textarea name="achievedStatus" defaultValue={editingItem?.achievedStatus} className="form-control" rows="3" required></textarea>
                 </div>
               </div>
 
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.implementationStatus')} & {t('projectActions.remarks')}</h6>
+              <hr className="my-4" />
+              <div className="d-flex align-items-center mb-3">
+                <span className="badge bg-secondary rounded-circle me-2" style={{ width: 8, height: 8 }}></span>
+                <h6 className="fw-bold mb-0">{t('projectActions.implementationStatusSection')}</h6>
+              </div>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.implementationStatus')}</label>
-                  <select name="implementationStatusId" defaultValue={editingItem?.implementationStatus?.id || ''} className="form-select">
+                  <label className="form-label fw-medium">{t('projectActions.implementationStatus')} *</label>
+                  <select name="implementationStatusId" defaultValue={editingItem?.implementationStatus?.id || ''} className="form-select" required>
                     <option value="">----------</option>
                     {implementationStatuses.map(s => (
                       <option key={s.id} value={s.id}>{s.progressScale}</option>
@@ -782,11 +814,17 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.pictureOfStatus')}</label>
-                  <input name="pictureOfStatus" defaultValue={editingItem?.pictureOfStatus} className="form-control" />
+                  <input type="file" name="pictureOfStatusFile" accept="image/*" className="form-control" />
+                  {editingItem?.pictureOfStatus ? (
+                    <small className="text-muted">{t('projectActions.currentFile')}: {editingItem.pictureOfStatus}</small>
+                  ) : (
+                    <small className="text-muted">{t('projectActions.noExistingPicture')}</small>
+                  )}
+                  <input type="hidden" name="pictureOfStatus" defaultValue={editingItem?.pictureOfStatus || ''} />
                 </div>
                 <div className="col-12">
-                  <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
-                  <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3"></textarea>
+                  <label className="form-label fw-medium">{t('projectActions.remarks')} *</label>
+                  <textarea name="remarks" defaultValue={editingItem?.remarks} className="form-control" rows="3" required></textarea>
                 </div>
               </div>
             </div>
