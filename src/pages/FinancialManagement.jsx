@@ -375,7 +375,8 @@ function FinancialManagement() {
         api.get(isAll ? '/financial/activities' : `/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
       ]);
       setComponents(compRes.data);
-      setSubcomponents(subRes.data);
+      const filteredSubs = isAll ? subRes.data : subRes.data.filter(s => s.component?.project?.projectId === selectedProject);
+      setSubcomponents(filteredSubs);
       setActivities(actRes.data);
     } catch (error) {
       console.error('Error loading financial data:', error);
