@@ -125,7 +125,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                   />
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-md-6">
                   <label className="form-label fw-medium">Currency</label>
                   <select
                     className="form-select shadow-sm border-secondary-subtle"
@@ -141,7 +141,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                   </select>
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-md-6">
                   <label className="form-label fw-medium">Funding Amount</label>
                   <input
                     type="number"
@@ -153,7 +153,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                   />
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-md-6">
                   <label className="form-label fw-medium">Effectiveness Date</label>
                   <input
                     type="date"
@@ -163,7 +163,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                   />
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-md-6">
                   <label className="form-label fw-medium">Closure Date</label>
                   <input
                     type="date"
