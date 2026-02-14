@@ -101,7 +101,7 @@ public class FinancialController {
     }
 
     @GetMapping("/subcomponents/component/{compId}")
-    public List<Subcomponent> getSubcomponentsByComponent(@PathVariable Long compId) {
+    public List<Subcomponent> getSubcomponentsByComponent(@PathVariable String compId) {
         return subcomponentRepository.findByComponent_CompId(compId);
     }
 

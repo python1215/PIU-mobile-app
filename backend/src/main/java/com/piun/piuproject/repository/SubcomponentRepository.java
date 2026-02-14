@@ -7,6 +7,6 @@ import java.util.List;
 
 @Repository
 public interface SubcomponentRepository extends JpaRepository<Subcomponent, Long> {
-    List<Subcomponent> findByComponent_CompId(Long compId);
+    List<Subcomponent> findByComponent_CompId(String compId);
     List<Subcomponent> findByProject_ProjectId(String projectId);
 }
