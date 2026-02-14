@@ -354,7 +354,19 @@
     "target": "Cible",
     "achievedStatus": "Statut Atteint",
     "implementationStatus": "Statut de Mise en Œuvre",
-    "remarks": "Remarques"
+    "remarks": "Remarques",
+    "mainInterventionFocus": "Objectif Principal d'Intervention / Résultat",
+    "targetBeneficiarySettlements": "Nombre Cible de Localités Bénéficiaires",
+    "locationOfInvestment": "Lieu d'Investissement",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "grossFloorArea": "Surface Brute (m²)",
+    "amendments": "Avenants",
+    "nameOfConsultant": "Nom du Consultant",
+    "fundingSource": "Source de Financement",
+    "projectCategory": "Catégorie de Projet",
+    "editWorksContract": "Modifier Contrat de Travaux",
+    "editGoodsContract": "Modifier Contrat de Biens"
   },
   "socialEnvironmental": {
     "title": "Social & Environnemental",

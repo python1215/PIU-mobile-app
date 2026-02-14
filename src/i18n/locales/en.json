@@ -355,7 +355,19 @@
     "target": "Target",
     "achievedStatus": "Achieved Status",
     "implementationStatus": "Implementation Status",
-    "remarks": "Remarks"
+    "remarks": "Remarks",
+    "mainInterventionFocus": "Main Intervention Focus / Result",
+    "targetBeneficiarySettlements": "Target No. of Beneficiary Settlements",
+    "locationOfInvestment": "Location of Investment",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "grossFloorArea": "Gross Floor Area (m²)",
+    "amendments": "Amendments",
+    "nameOfConsultant": "Name of Consultant",
+    "fundingSource": "Funding Source",
+    "projectCategory": "Project Category",
+    "editWorksContract": "Edit Works Contract",
+    "editGoodsContract": "Edit Goods Contract"
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",

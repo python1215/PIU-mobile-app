@@ -354,7 +354,19 @@
     "target": "Meta",
     "achievedStatus": "Status Alcançado",
     "implementationStatus": "Status de Implementação",
-    "remarks": "Observações"
+    "remarks": "Observações",
+    "mainInterventionFocus": "Foco Principal da Intervenção / Resultado",
+    "targetBeneficiarySettlements": "Nº Alvo de Assentamentos Beneficiários",
+    "locationOfInvestment": "Local do Investimento",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "grossFloorArea": "Área Bruta (m²)",
+    "amendments": "Emendas",
+    "nameOfConsultant": "Nome do Consultor",
+    "fundingSource": "Fonte de Financiamento",
+    "projectCategory": "Categoria do Projeto",
+    "editWorksContract": "Editar Contrato de Obras",
+    "editGoodsContract": "Editar Contrato de Bens"
   },
   "socialEnvironmental": {
     "title": "Social & Ambiental",
