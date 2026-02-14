@@ -299,6 +299,7 @@ function FinancialManagement() {
   const [outcomes, setOutcomes] = useState([]);
   const [donors, setDonors] = useState([]);
   const [contributors, setContributors] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -309,14 +310,16 @@ function FinancialManagement() {
 
   const loadDonorsAndContributors = useCallback(async () => {
     try {
-      const [donorRes, contributorRes] = await Promise.all([
+      const [donorRes, contributorRes, currencyRes] = await Promise.all([
         axios.get('/api/donors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/contributors').catch(() => ({ data: [] }))
+        axios.get('/api/setup/contributors').catch(() => ({ data: [] })),
+        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
       ]);
       setDonors(donorRes.data);
       setContributors(contributorRes.data);
+      setCurrencies(currencyRes.data);
     } catch (error) {
-      console.error('Error loading donors/contributors:', error);
+      console.error('Error loading donors/contributors/currencies:', error);
     }
   }, []);
 
@@ -443,7 +446,8 @@ function FinancialManagement() {
       projectComponents: data.projectComponents,
       componentDescription: data.componentDescription,
       allocation: allocation,
-      project: { projectId: projectId }
+      project: { projectId: projectId },
+      currency: data.currencyId ? { id: parseInt(data.currencyId) } : null
     };
     
     try {
@@ -713,6 +717,15 @@ function FinancialManagement() {
                     <div className="col-12">
                       <label className="form-label fw-medium">Description</label>
                       <textarea name="componentDescription" defaultValue={editingItem?.componentDescription} className="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Currency</label>
+                      <select name="currencyId" defaultValue={editingItem?.currency?.id} className="form-select">
+                        <option value="">Select Currency</option>
+                        {currencies.map(c => (
+                          <option key={c.id} value={c.id}>{c.currency}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-medium">Allocation</label>
