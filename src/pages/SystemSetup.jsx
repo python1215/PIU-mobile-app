@@ -459,7 +459,7 @@ function SystemSetup() {
     outcomes: { endpoint: '/api/setup/outcomes', idField: 'id', label: 'Project Outcomes',
       columns: [{ key: 'id', label: 'ID' }, { key: 'pdo.pdoStatement', label: 'Related PDO' }, { key: 'projectOutcome', label: 'Project Outcome' }],
       fields: [
-        { name: 'pdoId', label: 'Related PDO', type: 'select', dataKey: 'pdos', valueField: 'id', displayField: 'pdoStatement', relationField: 'pdo', placeholder: '----------' },
+        { name: 'pdoId', label: 'PDO', type: 'select', dataKey: 'pdos', valueField: 'id', displayField: 'pdoStatement', relationField: 'pdo', placeholder: '----------' },
         { name: 'projectOutcome', label: 'Project Outcome', placeholder: 'Enter project outcome description', helpText: 'Enter a clear and measurable project outcome' }
       ],
       infoBox: {
