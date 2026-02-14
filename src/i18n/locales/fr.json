@@ -575,6 +575,15 @@
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
     "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
     "serverError": "Erreur serveur. Veuillez réessayer plus tard.",
-    "accessDenied": "Accès refusé. Vous n'avez pas la permission d'effectuer cette action."
+    "accessDenied": "Accès refusé. Vous n'avez pas la permission d'effectuer cette action.",
+    "createSuccess": "Créé avec succès",
+    "createError": "Erreur lors de la création",
+    "updateSuccess": "Mis à jour avec succès",
+    "updateError": "Erreur lors de la mise à jour",
+    "deleteSuccess": "Supprimé avec succès",
+    "deleteError": "Erreur lors de la suppression",
+    "saveSuccess": "Enregistré avec succès",
+    "saveError": "Erreur lors de l'enregistrement",
+    "loadError": "Erreur lors du chargement des données"
   }
 }

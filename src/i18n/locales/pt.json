@@ -575,6 +575,15 @@
     "sessionExpired": "Sua sessão expirou. Por favor, faça login novamente.",
     "networkError": "Erro de rede. Por favor, verifique sua conexão.",
     "serverError": "Erro no servidor. Por favor, tente novamente mais tarde.",
-    "accessDenied": "Acesso negado. Você não tem permissão para realizar esta ação."
+    "accessDenied": "Acesso negado. Você não tem permissão para realizar esta ação.",
+    "createSuccess": "Criado com sucesso",
+    "createError": "Erro ao criar registro",
+    "updateSuccess": "Atualizado com sucesso",
+    "updateError": "Erro ao atualizar registro",
+    "deleteSuccess": "Excluído com sucesso",
+    "deleteError": "Erro ao excluir registro",
+    "saveSuccess": "Salvo com sucesso",
+    "saveError": "Erro ao salvar registro",
+    "loadError": "Erro ao carregar dados"
   }
 }
