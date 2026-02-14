@@ -4,6 +4,8 @@ import com.piun.piuproject.model.*;
 import com.piun.piuproject.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +39,16 @@ public class FinancialController {
     @Autowired
     private ProjectResultRepository resultRepository;
 
+    private User getAuthenticatedUser(UserDetails userDetails) {
+        if (userDetails != null) {
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElse(null);
+            if (user != null) return user;
+        }
+        return userRepository.findAll().stream().findFirst()
+            .orElseThrow(() -> new RuntimeException("No users found in the system"));
+    }
+
     @GetMapping("/components")
     public List<Component> getAllComponents() {
         return componentRepository.findAll();
@@ -48,33 +60,21 @@ public class FinancialController {
     }
 
     @PostMapping("/components")
-    public Component createComponent(@RequestBody Component component) {
-        try {
-            if (component.getLoginUser() == null) {
-                User user = userRepository.findById(1L).orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setId(1L);
-                    return newUser;
-                });
-                component.setLoginUser(user);
-            }
-            
-            if (component.getProject() != null && component.getProject().getProjectId() != null) {
-                Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
-                component.setProject(project);
-            }
-
-            // Auto-generate compId if not provided
-            if (component.getCompId() == null || component.getCompId().isEmpty()) {
-                long count = componentRepository.count() + 1;
-                component.setCompId("COMP-" + String.format("%03d", count));
-            }
-            
-            return componentRepository.save(component);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+    public Component createComponent(@RequestBody Component component,
+                                     @AuthenticationPrincipal UserDetails userDetails) {
+        component.setLoginUser(getAuthenticatedUser(userDetails));
+        
+        if (component.getProject() != null && component.getProject().getProjectId() != null) {
+            Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
+            component.setProject(project);
         }
+
+        if (component.getCompId() == null || component.getCompId().isEmpty()) {
+            long count = componentRepository.count() + 1;
+            component.setCompId("COMP-" + String.format("%03d", count));
+        }
+        
+        return componentRepository.save(component);
     }
 
     @PutMapping("/components/{id}")
@@ -111,25 +111,18 @@ public class FinancialController {
     }
 
     @PostMapping("/subcomponents")
-    public Subcomponent createSubcomponent(@RequestBody Subcomponent subcomponent) {
-        try {
-            if (subcomponent.getLoginUser() == null) {
-                User user = userRepository.findAll().stream().findFirst().orElse(null);
-                subcomponent.setLoginUser(user);
-            }
-            if (subcomponent.getProject() != null && subcomponent.getProject().getProjectId() != null) {
-                Project project = projectRepository.findById(subcomponent.getProject().getProjectId()).orElse(null);
-                subcomponent.setProject(project);
-            }
-            if (subcomponent.getComponent() != null && subcomponent.getComponent().getId() != null) {
-                Component comp = componentRepository.findById(subcomponent.getComponent().getId()).orElse(null);
-                subcomponent.setComponent(comp);
-            }
-            return subcomponentRepository.save(subcomponent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+    public Subcomponent createSubcomponent(@RequestBody Subcomponent subcomponent,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        subcomponent.setLoginUser(getAuthenticatedUser(userDetails));
+        if (subcomponent.getProject() != null && subcomponent.getProject().getProjectId() != null) {
+            Project project = projectRepository.findById(subcomponent.getProject().getProjectId()).orElse(null);
+            subcomponent.setProject(project);
         }
+        if (subcomponent.getComponent() != null && subcomponent.getComponent().getId() != null) {
+            Component comp = componentRepository.findById(subcomponent.getComponent().getId()).orElse(null);
+            subcomponent.setComponent(comp);
+        }
+        return subcomponentRepository.save(subcomponent);
     }
 
     @PutMapping("/subcomponents/{id}")

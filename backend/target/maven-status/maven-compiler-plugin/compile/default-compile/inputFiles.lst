@@ -45,8 +45,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/VulnerabilityCategory.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIContractSetup.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtAuthenticationEntryPoint.java
-/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/User.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/LGA.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/User.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/GlobalExceptionHandler.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/OHSMonitoring.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/WebConfig.java
