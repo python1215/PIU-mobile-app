@@ -22,7 +22,7 @@ public class Component {
     @Column(name = "comp_id", length = 50)
     private String compId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
@@ -33,7 +33,7 @@ public class Component {
     @Column(name = "component_description", length = 500)
     private String componentDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currency_id")
     private Currency currency;
 
@@ -43,7 +43,7 @@ public class Component {
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "login_user_id", nullable = false)
     private User loginUser;
 }

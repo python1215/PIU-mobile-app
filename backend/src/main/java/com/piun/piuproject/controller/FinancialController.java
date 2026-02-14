@@ -17,6 +17,12 @@ public class FinancialController {
     private ComponentRepository componentRepository;
     
     @Autowired
+    private ProjectRepository projectRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private SubcomponentRepository subcomponentRepository;
     
     @Autowired
@@ -44,11 +50,19 @@ public class FinancialController {
     @PostMapping("/components")
     public Component createComponent(@RequestBody Component component) {
         if (component.getLoginUser() == null) {
-            // In a real app we'd get this from SecurityContext
-            User user = new User();
-            user.setId(1L); 
+            User user = userRepository.findById(1L).orElseGet(() -> {
+                User newUser = new User();
+                newUser.setId(1L);
+                return newUser;
+            });
             component.setLoginUser(user);
         }
+        
+        if (component.getProject() != null && component.getProject().getProjectId() != null) {
+            Project project = projectRepository.findById(component.getProject().getProjectId()).orElse(null);
+            component.setProject(project);
+        }
+        
         return componentRepository.save(component);
     }
 
