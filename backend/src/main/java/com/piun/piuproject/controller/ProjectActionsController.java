@@ -22,6 +22,12 @@ public class ProjectActionsController {
     @Autowired
     private SpecificContractMonitoringRepository monitoringRepository;
 
+    @Autowired
+    private KPIForContractRepository kpiForContractRepository;
+
+    @Autowired
+    private PhysicalProgressRepository physicalProgressRepository;
+
     @GetMapping("/works")
     public List<ContractProfilingWorks> getAllWorks() {
         return worksRepository.findAll();
@@ -179,5 +185,20 @@ public class ProjectActionsController {
                 return ResponseEntity.ok().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/kpi-for-contracts")
+    public List<KPIForContract> getAllKPIForContracts() {
+        return kpiForContractRepository.findAll();
+    }
+
+    @GetMapping("/kpi-for-contracts/project/{projectId}")
+    public List<KPIForContract> getKPIForContractsByProject(@PathVariable String projectId) {
+        return kpiForContractRepository.findByProject_ProjectId(projectId);
+    }
+
+    @GetMapping("/implementation-status")
+    public List<PhysicalProgress> getAllImplementationStatus() {
+        return physicalProgressRepository.findAll();
     }
 }

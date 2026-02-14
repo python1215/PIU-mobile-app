@@ -17,6 +17,8 @@ function ProjectActions() {
   const [editingItem, setEditingItem] = useState(null);
   const [quarters, setQuarters] = useState([]);
   const [monitoringTypes, setMonitoringTypes] = useState([]);
+  const [kpiForContracts, setKpiForContracts] = useState([]);
+  const [implementationStatuses, setImplementationStatuses] = useState([]);
 
   const [components, setComponents] = useState([]);
   const [subcomponents, setSubcomponents] = useState([]);
@@ -55,18 +57,22 @@ function ProjectActions() {
 
   const loadReferenceData = async () => {
     try {
-      const [qRes, mtRes, catRes, donorRes, curRes] = await Promise.all([
+      const [qRes, mtRes, catRes, donorRes, curRes, kpiRes, implRes] = await Promise.all([
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
         axios.get('/api/setup/monitoring-types').catch(() => ({ data: [] })),
         axios.get('/api/setup/categories').catch(() => ({ data: [] })),
         axios.get('/api/donors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
+        axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
+        axios.get('/api/project-actions/kpi-for-contracts').catch(() => ({ data: [] })),
+        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setMonitoringTypes(mtRes.data);
       setCategories(catRes.data);
       setDonors(donorRes.data);
       setCurrencies(curRes.data);
+      setKpiForContracts(kpiRes.data);
+      setImplementationStatuses(implRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -235,9 +241,13 @@ function ProjectActions() {
       target: data.target,
       achievedStatus: data.achievedStatus,
       remarks: data.remarks,
+      pictureOfStatus: data.pictureOfStatus || null,
       project: { projectId: selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
-      monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null
+      monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null,
+      investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
+      kpiDescription: data.kpiDescriptionCode ? { monitoringTypeCode: data.kpiDescriptionCode } : null,
+      implementationStatus: data.implementationStatusId ? { id: parseInt(data.implementationStatusId) } : null
     };
 
     try {
@@ -460,35 +470,47 @@ function ProjectActions() {
   const renderMonitoringTable = () => {
     return (
       <div className="table-responsive">
-        <table className="table table-striped table-hover">
+        <table className="table table-striped table-hover" style={{ fontSize: '0.85rem' }}>
           <thead className="table-dark">
             <tr>
+              <th>{t('financial.project')}</th>
               <th>{t('projectActions.contractNumber')}</th>
               <th>{t('projectActions.monitoringDate')}</th>
+              <th>{t('common.quarter')}</th>
               <th>{t('projectActions.monitoringType')}</th>
+              <th>{t('projectActions.typeOfInvestment')}</th>
+              <th>{t('projectActions.kpiDescription')}</th>
               <th>{t('projectActions.milestoneStartDate')}</th>
               <th>{t('projectActions.milestoneEndDate')}</th>
               <th>{t('projectActions.target')}</th>
               <th>{t('projectActions.achievedStatus')}</th>
+              <th>{t('projectActions.implementationStatus')}</th>
+              <th>{t('projectActions.pictureOfStatus')}</th>
               <th>{t('projectActions.remarks')}</th>
               <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {monitoring.length === 0 ? (
-              <tr><td colSpan="9" className="text-center text-muted">{t('table.noData')}</td></tr>
+              <tr><td colSpan="15" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               monitoring.map((item) => (
                 <tr key={item.id}>
+                  <td>{item.project?.project || '-'}</td>
                   <td><strong>{item.contractRefNo || '-'}</strong></td>
                   <td>{formatDate(item.monitoringDate)}</td>
+                  <td>{item.quarter?.quarter || '-'}</td>
                   <td>{item.monitoringType?.monitoringType || '-'}</td>
+                  <td>{item.investmentType?.typeOfInvestment || '-'}</td>
+                  <td>{item.kpiDescription?.kpiDescription || '-'}</td>
                   <td>{formatDate(item.milestoneStartDate)}</td>
                   <td>{formatDate(item.milestoneEndDate)}</td>
                   <td>{item.target || '-'}</td>
                   <td>{item.achievedStatus || '-'}</td>
+                  <td>{item.implementationStatus?.progressScale || '-'}</td>
+                  <td>{item.pictureOfStatus || '-'}</td>
                   <td>{item.remarks || '-'}</td>
-                  <td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
                     <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteMonitoring(item.id)}><FiTrash2 /></button>
                   </td>
@@ -665,14 +687,17 @@ function ProjectActions() {
 
   const renderMonitoringModal = () => (
     <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-      <div className="modal-dialog modal-lg modal-dialog-centered">
+      <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content border-0 shadow">
           <div className="modal-header border-0 pb-0">
-            <h5 className="modal-title fw-bold">{t('projectActions.addContractMonitoring')}</h5>
+            <h5 className="modal-title fw-bold">
+              {editingItem ? t('projectActions.editContractMonitoring') : t('projectActions.addContractMonitoring')}
+            </h5>
             <button type="button" className="btn-close" onClick={handleCloseModal}></button>
           </div>
           <form onSubmit={handleMonitoringSave}>
-            <div className="modal-body">
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              <h6 className="text-muted border-bottom pb-2 mb-3">{t('financial.project')} & {t('projectActions.contractNumber')}</h6>
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.contractNumber')} *</label>
@@ -700,6 +725,32 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.typeOfInvestment')} & {t('projectActions.kpiDescription')}</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')}</label>
+                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select">
+                    <option value="">----------</option>
+                    {kpiForContracts.map(k => (
+                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.typeOfInvestment}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.kpiDescription')}</label>
+                  <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select">
+                    <option value="">----------</option>
+                    {kpiForContracts.map(k => (
+                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.kpiDescription}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.milestoneStartDate')} & {t('projectActions.target')}</h6>
+              <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.milestoneStartDate')}</label>
                   <input type="date" name="milestoneStartDate" defaultValue={editingItem?.milestoneStartDate} className="form-control" />
@@ -715,6 +766,23 @@ function ProjectActions() {
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.achievedStatus')}</label>
                   <input name="achievedStatus" defaultValue={editingItem?.achievedStatus} className="form-control" />
+                </div>
+              </div>
+
+              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.implementationStatus')} & {t('projectActions.remarks')}</h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.implementationStatus')}</label>
+                  <select name="implementationStatusId" defaultValue={editingItem?.implementationStatus?.id || ''} className="form-select">
+                    <option value="">----------</option>
+                    {implementationStatuses.map(s => (
+                      <option key={s.id} value={s.id}>{s.progressScale}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('projectActions.pictureOfStatus')}</label>
+                  <input name="pictureOfStatus" defaultValue={editingItem?.pictureOfStatus} className="form-control" />
                 </div>
                 <div className="col-12">
                   <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
