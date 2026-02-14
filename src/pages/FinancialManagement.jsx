@@ -267,12 +267,6 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onView,
       {activeTab === 'activities' && (
         <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcomponent?.subcomponent || '-'}</td><td>{item.activity}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td><td>{item.year?.profileYear || '-'}</td></>
       )}
-      {activeTab === 'pdos' && (
-        <><td>{item.id}</td><td>{item.pdoStatement}</td></>
-      )}
-      {activeTab === 'outcomes' && (
-        <><td>{item.id}</td><td>{item.projectOutcome}</td></>
-      )}
       <td>
         <button className="btn btn-sm btn-outline-info me-1" onClick={() => onView && onView(item)} title="View"><FiEye /></button>
         <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEdit && onEdit(item)} title="Edit"><FiEdit2 /></button>
@@ -317,8 +311,6 @@ function FinancialManagement() {
   const [components, setComponents] = useState([]);
   const [subcomponents, setSubcomponents] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [pdos, setPdos] = useState([]);
-  const [outcomes, setOutcomes] = useState([]);
   const [donors, setDonors] = useState([]);
   const [contributors, setContributors] = useState([]);
   const [currencies, setCurrencies] = useState([]);
@@ -370,18 +362,14 @@ function FinancialManagement() {
     setLoading(true);
     const isAll = selectedProject === 'all';
     try {
-      const [compRes, subRes, actRes, pdoRes, outRes] = await Promise.all([
+      const [compRes, subRes, actRes] = await Promise.all([
         api.get(isAll ? '/financial/components' : `/financial/components/project/${selectedProject}`).catch(err => { console.error('Components load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
         api.get('/financial/subcomponents').catch(err => { console.error('Subcomponents load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(isAll ? '/financial/activities' : `/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get(isAll ? '/financial/pdos' : `/financial/pdos/project/${selectedProject}`).catch(err => { console.error('PDOs load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; }),
-        api.get('/financial/outcomes').catch(err => { console.error('Outcomes load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
+        api.get(isAll ? '/financial/activities' : `/financial/activities/project/${selectedProject}`).catch(err => { console.error('Activities load error:', err.response?.status, err.response?.data || err.message); return { data: [] }; })
       ]);
       setComponents(compRes.data);
       setSubcomponents(subRes.data);
       setActivities(actRes.data);
-      setPdos(pdoRes.data);
-      setOutcomes(outRes.data);
     } catch (error) {
       console.error('Error loading financial data:', error);
     } finally {
@@ -402,9 +390,7 @@ function FinancialManagement() {
     { id: 'projects', label: 'Projects', icon: FiFolder },
     { id: 'components', label: 'Components', icon: FiLayers },
     { id: 'subcomponents', label: 'Subcomponents', icon: FiLayers },
-    { id: 'activities', label: 'Activities', icon: FiDollarSign },
-    { id: 'pdos', label: t('financial.pdoStatements'), icon: FiDollarSign },
-    { id: 'outcomes', label: t('financial.outcomes'), icon: FiDollarSign }
+    { id: 'activities', label: 'Activities', icon: FiDollarSign }
   ], [t]);
 
   const handleCreateProject = useCallback(async (data) => {
@@ -587,10 +573,6 @@ function FinancialManagement() {
         await api.delete(`/financial/subcomponents/${item.subcompId}`);
       } else if (activeTab === 'activities') {
         await api.delete(`/financial/activities/${item.activityId}`);
-      } else if (activeTab === 'pdos') {
-        await api.delete(`/financial/pdos/${item.id}`);
-      } else if (activeTab === 'outcomes') {
-        await api.delete(`/financial/outcomes/${item.id}`);
       }
       toast.success(t('messages.deleteSuccess'));
       loadFinancialData();
@@ -683,11 +665,9 @@ function FinancialManagement() {
       case 'components': return components;
       case 'subcomponents': return subcomponents;
       case 'activities': return activities;
-      case 'pdos': return pdos;
-      case 'outcomes': return outcomes;
       default: return [];
     }
-  }, [activeTab, components, subcomponents, activities, pdos, outcomes]);
+  }, [activeTab, components, subcomponents, activities]);
 
   const dataTotal = useMemo(() => {
     if (!['components', 'subcomponents', 'activities'].includes(activeTab)) return 0;
@@ -762,8 +742,6 @@ function FinancialManagement() {
               {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'subcomponents' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'activities' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>{t('financial.subcomponents')}</th><th>{t('financial.activityName')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th><th>{t('common.year')}</th></>}
-              {activeTab === 'pdos' && <><th>ID</th><th>{t('financial.pdoStatement')}</th></>}
-              {activeTab === 'outcomes' && <><th>ID</th><th>{t('financial.projectOutcome')}</th></>}
               <th>{t('common.actions')}</th>
             </tr>
           </thead>
@@ -1065,8 +1043,6 @@ function FinancialManagement() {
                   {activeTab === 'components' && 'Component Details'}
                   {activeTab === 'subcomponents' && 'Subcomponent Details'}
                   {activeTab === 'activities' && 'Activity Details'}
-                  {activeTab === 'pdos' && 'PDO Statement Details'}
-                  {activeTab === 'outcomes' && 'Outcome Details'}
                 </h5>
                 <button type="button" className="btn-close" onClick={() => setViewingItem(null)}></button>
               </div>
@@ -1101,18 +1077,6 @@ function FinancialManagement() {
                       <div className="col-md-4"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
                       <div className="col-md-4"><label className="form-label text-muted small">{t('financial.allocation')}</label><p className="fw-medium">{formatCurrency(viewingItem.allocation)}</p></div>
                       <div className="col-md-4"><label className="form-label text-muted small">{t('common.year')}</label><p className="fw-medium">{viewingItem.year?.profileYear || '-'}</p></div>
-                    </>
-                  )}
-                  {activeTab === 'pdos' && (
-                    <>
-                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.id}</p></div>
-                      <div className="col-12"><label className="form-label text-muted small">{t('financial.pdoStatement')}</label><p className="fw-medium">{viewingItem.pdoStatement}</p></div>
-                    </>
-                  )}
-                  {activeTab === 'outcomes' && (
-                    <>
-                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.id}</p></div>
-                      <div className="col-12"><label className="form-label text-muted small">{t('financial.projectOutcome')}</label><p className="fw-medium">{viewingItem.projectOutcome}</p></div>
                     </>
                   )}
                   {viewingItem.dateCreated && (
