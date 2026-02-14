@@ -291,9 +291,9 @@ const TabButton = memo(function TabButton({ tab, isActive, onClick }) {
   );
 });
 
-const StatCard = memo(function StatCard({ title, value, bgClass }) {
+const StatCard = memo(function StatCard({ title, value, bgClass, colClass = 'col-md-3' }) {
   return (
-    <div className="col-md-4">
+    <div className={colClass}>
       <div className={`card ${bgClass} text-white`}>
         <div className="card-body">
           <h6>{title}</h6>
@@ -932,6 +932,7 @@ function FinancialManagement() {
       {activeTab !== 'projects' && (
         <div className="row mb-4">
           <StatCard title="Total Components" value={components.length} bgClass="bg-primary" />
+          <StatCard title="Total Subcomponents" value={subcomponents.length} bgClass="bg-warning" />
           <StatCard title="Total Allocation" value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
           <StatCard title="Total Activities" value={activities.length} bgClass="bg-info" />
         </div>
