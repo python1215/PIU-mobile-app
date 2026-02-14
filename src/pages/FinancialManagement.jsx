@@ -449,6 +449,18 @@ function FinancialManagement() {
     }
   }, [editingProject, handleUpdateProject, handleCreateProject]);
 
+  const componentBudgetInfo = useMemo(() => {
+    if (!componentProjectId || componentProjectId === 'all') return null;
+    const project = projects.find(p => p.projectId === componentProjectId);
+    if (!project) return null;
+    const totalFunding = parseFloat(project.funding) || 0;
+    const allocatedAmount = allComponents
+      .filter(c => c.project?.projectId === componentProjectId && (!editingItem || c.id !== editingItem.id))
+      .reduce((sum, c) => sum + (parseFloat(c.allocation) || 0), 0);
+    const remainingBalance = totalFunding - allocatedAmount;
+    return { totalFunding, allocatedAmount, remainingBalance };
+  }, [componentProjectId, projects, allComponents, editingItem]);
+
   const handleComponentSave = useCallback(async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -527,18 +539,6 @@ function FinancialManagement() {
       toast.error('Error saving subcomponent');
     }
   }, [editingItem, selectedProject, loadFinancialData]);
-
-  const componentBudgetInfo = useMemo(() => {
-    if (!componentProjectId || componentProjectId === 'all') return null;
-    const project = projects.find(p => p.projectId === componentProjectId);
-    if (!project) return null;
-    const totalFunding = parseFloat(project.funding) || 0;
-    const allocatedAmount = allComponents
-      .filter(c => c.project?.projectId === componentProjectId && (!editingItem || c.id !== editingItem.id))
-      .reduce((sum, c) => sum + (parseFloat(c.allocation) || 0), 0);
-    const remainingBalance = totalFunding - allocatedAmount;
-    return { totalFunding, allocatedAmount, remainingBalance };
-  }, [componentProjectId, projects, allComponents, editingItem]);
 
   const activityFilteredComponents = useMemo(() => {
     if (!activityProjectId) return [];
