@@ -454,6 +454,14 @@ function FinancialManagement() {
     setEditingItem(null);
   }, []);
 
+  const handleSearchChange = useCallback((e) => {
+    setProjectSearch(e.target.value);
+  }, []);
+
+  const handleProjectSelect = useCallback((e) => {
+    setSelectedProject(e.target.value);
+  }, []);
+
   const handleShowModal = useCallback(() => {
     if (activeTab === 'projects') {
       setShowModal(true);
