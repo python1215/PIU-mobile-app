@@ -34,14 +34,25 @@ public class MonitoringController {
     @PutMapping("/{id}")
     public ResponseEntity<ResultsOrientedMonitoring> updateMonitoring(
             @PathVariable Long id, 
-            @RequestBody ResultsOrientedMonitoring monitoringDetails) {
+            @RequestBody ResultsOrientedMonitoring details) {
         return resultsMonitoringRepository.findById(id)
             .map(monitoring -> {
-                monitoring.setIndicatorDescription(monitoringDetails.getIndicatorDescription());
-                monitoring.setBaselineValue(monitoringDetails.getBaselineValue());
-                monitoring.setAchievedValue(monitoringDetails.getAchievedValue());
-                monitoring.setEndTargetValue(monitoringDetails.getEndTargetValue());
-                monitoring.setRemarks(monitoringDetails.getRemarks());
+                monitoring.setYear(details.getYear());
+                monitoring.setQuarter(details.getQuarter());
+                monitoring.setProject(details.getProject());
+                monitoring.setPdo(details.getPdo());
+                monitoring.setProjectOutcome(details.getProjectOutcome());
+                monitoring.setProjectResult(details.getProjectResult());
+                monitoring.setIndicatorType(details.getIndicatorType());
+                monitoring.setIndicatorDescription(details.getIndicatorDescription());
+                monitoring.setMeasurementUnit(details.getMeasurementUnit());
+                monitoring.setCollectionFrequency(details.getCollectionFrequency());
+                monitoring.setBaselineValue(details.getBaselineValue());
+                monitoring.setAchievedValue(details.getAchievedValue());
+                monitoring.setEndTargetValue(details.getEndTargetValue());
+                monitoring.setPercentageAchievedVsBaseline(details.getPercentageAchievedVsBaseline());
+                monitoring.setPercentageAchievedVsEndTarget(details.getPercentageAchievedVsEndTarget());
+                monitoring.setRemarks(details.getRemarks());
                 return ResponseEntity.ok(resultsMonitoringRepository.save(monitoring));
             })
             .orElse(ResponseEntity.notFound().build());

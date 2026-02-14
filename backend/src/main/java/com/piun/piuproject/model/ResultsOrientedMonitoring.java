@@ -10,42 +10,42 @@ public class ResultsOrientedMonitoring {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "year_id")
     private Year year;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quarter_id")
     private Quarter quarter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pdo_id")
     private PDO pdo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_outcome_id")
     private ProjectOutcome projectOutcome;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_result_id")
     private ProjectResult projectResult;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "indicator_type_id")
     private IndicatorType indicatorType;
 
     @Column(name = "indicator_description", columnDefinition = "TEXT")
     private String indicatorDescription;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "measurement_unit_id")
     private MeasurementUnit measurementUnit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "collection_frequency_id")
     private DataCollectionFrequency collectionFrequency;
 
@@ -70,7 +70,7 @@ public class ResultsOrientedMonitoring {
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 

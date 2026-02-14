@@ -24,7 +24,7 @@ public class Quarter {
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "login_user_id", nullable = false)
     private User loginUser;
 }
