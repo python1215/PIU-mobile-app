@@ -343,7 +343,19 @@
     "advancePayment": "Advance Payment",
     "retentionAmount": "Retention Amount",
     "variationOrders": "Variation Orders",
-    "claimsSubmitted": "Claims Submitted"
+    "claimsSubmitted": "Claims Submitted",
+    "contractMonitoring": "Contract Monitoring",
+    "addContractMonitoring": "Add Contract Monitoring",
+    "monitoringDate": "Monitoring Date",
+    "monitoringType": "Monitoring Type",
+    "investmentType": "Investment Type",
+    "kpiDescription": "KPI Description",
+    "milestoneStartDate": "Milestone Start",
+    "milestoneEndDate": "Milestone End",
+    "target": "Target",
+    "achievedStatus": "Achieved Status",
+    "implementationStatus": "Implementation Status",
+    "remarks": "Remarks"
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",

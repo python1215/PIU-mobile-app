@@ -342,7 +342,19 @@
     "advancePayment": "Paiement Anticipé",
     "retentionAmount": "Montant de Rétention",
     "variationOrders": "Ordres de Variation",
-    "claimsSubmitted": "Réclamations Soumises"
+    "claimsSubmitted": "Réclamations Soumises",
+    "contractMonitoring": "Suivi des Contrats",
+    "addContractMonitoring": "Ajouter Suivi de Contrat",
+    "monitoringDate": "Date de Suivi",
+    "monitoringType": "Type de Suivi",
+    "investmentType": "Type d'Investissement",
+    "kpiDescription": "Description KPI",
+    "milestoneStartDate": "Début Jalon",
+    "milestoneEndDate": "Fin Jalon",
+    "target": "Cible",
+    "achievedStatus": "Statut Atteint",
+    "implementationStatus": "Statut de Mise en Œuvre",
+    "remarks": "Remarques"
   },
   "socialEnvironmental": {
     "title": "Social & Environnemental",

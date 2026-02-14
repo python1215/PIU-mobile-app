@@ -342,7 +342,19 @@
     "advancePayment": "Pagamento Antecipado",
     "retentionAmount": "Valor de Retenção",
     "variationOrders": "Ordens de Variação",
-    "claimsSubmitted": "Reclamações Submetidas"
+    "claimsSubmitted": "Reclamações Submetidas",
+    "contractMonitoring": "Monitoramento de Contratos",
+    "addContractMonitoring": "Adicionar Monitoramento de Contrato",
+    "monitoringDate": "Data de Monitoramento",
+    "monitoringType": "Tipo de Monitoramento",
+    "investmentType": "Tipo de Investimento",
+    "kpiDescription": "Descrição KPI",
+    "milestoneStartDate": "Início Marco",
+    "milestoneEndDate": "Fim Marco",
+    "target": "Meta",
+    "achievedStatus": "Status Alcançado",
+    "implementationStatus": "Status de Implementação",
+    "remarks": "Observações"
   },
   "socialEnvironmental": {
     "title": "Social & Ambiental",
