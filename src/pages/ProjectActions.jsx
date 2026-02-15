@@ -18,6 +18,7 @@ function ProjectActions() {
   const [quarters, setQuarters] = useState([]);
   const [monitoringTypes, setMonitoringTypes] = useState([]);
   const [kpiForContracts, setKpiForContracts] = useState([]);
+  const [investmentTypes, setInvestmentTypes] = useState([]);
   const [implementationStatuses, setImplementationStatuses] = useState([]);
 
   const [components, setComponents] = useState([]);
@@ -65,14 +66,15 @@ function ProjectActions() {
 
   const loadReferenceData = async () => {
     try {
-      const [qRes, mtRes, catRes, donorRes, curRes, kpiRes, implRes] = await Promise.all([
+      const [qRes, mtRes, catRes, donorRes, curRes, kpiRes, implRes, invRes] = await Promise.all([
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
         axios.get('/api/setup/monitoring-types').catch(() => ({ data: [] })),
         axios.get('/api/setup/categories').catch(() => ({ data: [] })),
         axios.get('/api/donors').catch(() => ({ data: [] })),
         axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
         axios.get('/api/project-actions/kpi-for-contracts').catch(() => ({ data: [] })),
-        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] }))
+        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] })),
+        axios.get('/api/setup/investment-types').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setMonitoringTypes(mtRes.data);
@@ -81,6 +83,7 @@ function ProjectActions() {
       setCurrencies(curRes.data);
       setKpiForContracts(kpiRes.data);
       setImplementationStatuses(implRes.data);
+      setInvestmentTypes(invRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -255,7 +258,7 @@ function ProjectActions() {
       project: { projectId: data.monitoringProjectId || selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
       monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null,
-      investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
+      investmentType: data.investmentTypeId ? { id: parseInt(data.investmentTypeId) } : null,
       kpiDescription: data.kpiDescriptionCode ? { monitoringTypeCode: data.kpiDescriptionCode } : null,
       implementationStatus: data.implementationStatusId ? { id: parseInt(data.implementationStatusId) } : null
     };
@@ -541,7 +544,7 @@ function ProjectActions() {
                   <td>{formatDate(item.monitoringDate)}</td>
                   <td>{item.quarter?.quarter || '-'}</td>
                   <td>{item.monitoringType?.monitoringType || '-'}</td>
-                  <td>{item.investmentType?.typeOfInvestment || '-'}</td>
+                  <td>{item.investmentType?.nameOfInvestment || '-'}</td>
                   <td>{item.kpiDescription?.kpiDescription || '-'}</td>
                   <td>{formatDate(item.milestoneStartDate)}</td>
                   <td>{formatDate(item.milestoneEndDate)}</td>
@@ -806,10 +809,10 @@ function ProjectActions() {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')} *</label>
-                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select" required>
+                  <select name="investmentTypeId" defaultValue={editingItem?.investmentType?.id || ''} className="form-select" required>
                     <option value="">----------</option>
-                    {kpiForContracts.map(k => (
-                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.typeOfInvestment}</option>
+                    {investmentTypes.map(inv => (
+                      <option key={inv.id} value={inv.id}>{inv.nameOfInvestment}</option>
                     ))}
                   </select>
                 </div>
