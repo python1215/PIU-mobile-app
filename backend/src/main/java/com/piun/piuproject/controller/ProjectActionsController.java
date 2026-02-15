@@ -197,9 +197,9 @@ public class ProjectActionsController {
         return kpiForContractRepository.findByProject_ProjectId(projectId);
     }
 
-    @GetMapping("/kpi-for-contracts/monitoring-type/{monitoringTypeId}")
-    public List<KPIForContract> getKPIForContractsByMonitoringType(@PathVariable Long monitoringTypeId) {
-        return kpiForContractRepository.findByMonitoringType_Id(monitoringTypeId);
+    @GetMapping("/kpi-for-contracts/monitoring-type/{monitoringTypeCode}")
+    public List<KPIForContract> getKPIForContractsByMonitoringType(@PathVariable String monitoringTypeCode) {
+        return kpiForContractRepository.findByMonitoringType_MonitoringTypeCode(monitoringTypeCode);
     }
 
     @GetMapping("/implementation-status")

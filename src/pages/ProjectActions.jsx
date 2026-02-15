@@ -102,14 +102,15 @@ function ProjectActions() {
     }
   };
 
-  const handleMonitoringTypeChange = async (monitoringTypeId) => {
+  const handleMonitoringTypeChange = async (monitoringTypeCode) => {
     setFilteredKpiForContracts([]);
-    if (monitoringTypeId) {
+    if (monitoringTypeCode) {
       try {
-        const res = await axios.get(`/api/project-actions/kpi-for-contracts/monitoring-type/${monitoringTypeId}`);
-        setFilteredKpiForContracts(res.data);
+        const res = await axios.get(`/api/project-actions/kpi-for-contracts/monitoring-type/${monitoringTypeCode}`);
+        setFilteredKpiForContracts(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error('Error loading KPI for contracts by monitoring type:', error);
+        setFilteredKpiForContracts([]);
       }
     }
   };
@@ -175,8 +176,8 @@ function ProjectActions() {
       setWorksFormComp(item?.component?.id?.toString() || '');
       setWorksFormSubcomp(item?.subcomponent?.subcompId?.toString() || '');
     }
-    if (activeTab === 'monitoring' && item?.monitoringType?.id) {
-      handleMonitoringTypeChange(item.monitoringType.id);
+    if (activeTab === 'monitoring' && item?.monitoringType?.monitoringTypeCode) {
+      handleMonitoringTypeChange(item.monitoringType.monitoringTypeCode);
     } else {
       setFilteredKpiForContracts([]);
     }
@@ -272,7 +273,7 @@ function ProjectActions() {
       pictureOfStatus: data.pictureOfStatus || null,
       project: { projectId: data.monitoringProjectId || selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
-      monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null,
+      monitoringType: data.monitoringTypeCode ? { monitoringTypeCode: data.monitoringTypeCode } : null,
       investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
       kpiDescription: data.kpiDescriptionCode ? { monitoringTypeCode: data.kpiDescriptionCode } : null,
       implementationStatus: data.implementationStatusId ? { id: parseInt(data.implementationStatusId) } : null
@@ -807,10 +808,10 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.monitoringType')} *</label>
-                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id || ''} className="form-select" required onChange={(e) => handleMonitoringTypeChange(e.target.value)}>
+                  <select name="monitoringTypeCode" defaultValue={editingItem?.monitoringType?.monitoringTypeCode || ''} className="form-select" required onChange={(e) => handleMonitoringTypeChange(e.target.value)}>
                     <option value="">----------</option>
                     {monitoringTypes.map(mt => (
-                      <option key={mt.id} value={mt.id}>{mt.monitoringType}</option>
+                      <option key={mt.monitoringTypeCode} value={mt.monitoringTypeCode}>{mt.monitoringType}</option>
                     ))}
                   </select>
                 </div>

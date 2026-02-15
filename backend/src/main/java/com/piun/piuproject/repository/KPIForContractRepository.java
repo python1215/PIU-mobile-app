@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface KPIForContractRepository extends JpaRepository<KPIForContract, String> {
     List<KPIForContract> findByProject_ProjectId(String projectId);
-    List<KPIForContract> findByMonitoringType_Id(Long monitoringTypeId);
+    List<KPIForContract> findByMonitoringType_MonitoringTypeCode(String monitoringTypeCode);
 }
