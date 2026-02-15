@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function ProjectActions() {
@@ -30,6 +30,14 @@ function ProjectActions() {
   const [worksFormProject, setWorksFormProject] = useState('');
   const [worksFormComp, setWorksFormComp] = useState('');
   const [worksFormSubcomp, setWorksFormSubcomp] = useState('');
+
+  const [showContractSelector, setShowContractSelector] = useState(false);
+  const [contractSelectorList, setContractSelectorList] = useState([]);
+  const [contractSelectorType, setContractSelectorType] = useState('');
+  const [contractSelectorProject, setContractSelectorProject] = useState('');
+  const [contractSelectorLoading, setContractSelectorLoading] = useState(false);
+  const [selectedContractRef, setSelectedContractRef] = useState('');
+  const [contractDetailView, setContractDetailView] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -154,12 +162,14 @@ function ProjectActions() {
       setWorksFormComp(item?.component?.id?.toString() || '');
       setWorksFormSubcomp(item?.subcomponent?.subcompId?.toString() || '');
     }
+    setSelectedContractRef(item?.contractRefNo || '');
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingItem(null);
+    setSelectedContractRef('');
     setWorksFormProject('');
     setWorksFormComp('');
     setWorksFormSubcomp('');
@@ -321,6 +331,36 @@ function ProjectActions() {
       console.error('Error deleting goods:', error);
       toast.error('Error deleting record');
     }
+  };
+
+  const handleOpenContractSelector = async (projectId, contractType) => {
+    if (!projectId || !contractType) {
+      toast.error(t('projectActions.selectProjectAndType'));
+      return;
+    }
+    setContractSelectorProject(projectId);
+    setContractSelectorType(contractType);
+    setContractSelectorLoading(true);
+    setShowContractSelector(true);
+    setContractDetailView(null);
+    try {
+      const endpoint = contractType === 'works'
+        ? `/api/project-actions/works/project/${projectId}`
+        : `/api/project-actions/goods/project/${projectId}`;
+      const res = await axios.get(endpoint);
+      setContractSelectorList(res.data);
+    } catch (error) {
+      console.error('Error loading contracts for selector:', error);
+      setContractSelectorList([]);
+    } finally {
+      setContractSelectorLoading(false);
+    }
+  };
+
+  const handleSelectContract = (contractRefNo) => {
+    setSelectedContractRef(contractRefNo);
+    setShowContractSelector(false);
+    setContractDetailView(null);
   };
 
   const handleDeleteMonitoring = async (id) => {
@@ -721,7 +761,18 @@ function ProjectActions() {
                 </div>
                 <div className="col-12">
                   <label className="form-label fw-medium">{t('projectActions.contractReference')} *</label>
-                  <input name="contractRefNo" defaultValue={editingItem?.contractRefNo} className="form-control" required placeholder={t('projectActions.contractRefPlaceholder')} />
+                  <div className="d-flex gap-2">
+                    <input name="contractRefNo" value={selectedContractRef} onChange={e => setSelectedContractRef(e.target.value)} className="form-control" required placeholder={t('projectActions.contractRefPlaceholder')} />
+                    <button type="button" className="btn btn-outline-primary" style={{ whiteSpace: 'nowrap' }} onClick={() => {
+                      const form = document.querySelector('form');
+                      const projId = form?.querySelector('[name="monitoringProjectId"]')?.value;
+                      const cType = form?.querySelector('[name="contractType"]')?.value;
+                      handleOpenContractSelector(projId, cType);
+                    }}>
+                      <FiSearch className="me-1" /> {t('projectActions.selectContract')}
+                    </button>
+                  </div>
+                  <small className="text-muted">{t('projectActions.selectContractHint')}</small>
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.monitoringDate')} *</label>
@@ -1060,6 +1111,98 @@ function ProjectActions() {
                   <button type="submit" className="btn btn-primary">{t('common.save')}</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showContractSelector && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header">
+                <h5 className="modal-title fw-bold">{t('projectActions.selectContract')}</h5>
+                <button type="button" className="btn-close" onClick={() => { setShowContractSelector(false); setContractDetailView(null); }}></button>
+              </div>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                <p className="fw-bold mb-1">
+                  {contractSelectorType === 'works' ? t('projectActions.worksContracts') : t('projectActions.goodsContracts')}{' '}
+                  {t('projectActions.forProject')}: {projects.find(p => p.projectId === contractSelectorProject)?.project || contractSelectorProject}
+                </p>
+                <p className="text-muted small mb-3">
+                  {t('projectActions.foundContracts', { count: contractSelectorList.length })}
+                </p>
+
+                {contractSelectorLoading ? (
+                  <div className="text-center p-4"><div className="spinner-border" role="status"></div></div>
+                ) : contractSelectorList.length === 0 ? (
+                  <div className="text-center text-muted p-4">{t('table.noData')}</div>
+                ) : (
+                  contractSelectorList.map((contract) => (
+                    <div key={contract.id} className="card mb-3 border">
+                      <div className="card-body">
+                        <div className="d-flex justify-content-between align-items-start">
+                          <div className="flex-grow-1">
+                            <h6 className="fw-bold mb-1">{contract.contractRefNo || '-'}</h6>
+                            <p className="mb-1">
+                              <strong>{t('projectActions.contractValue')}:</strong>{' '}
+                              {contract.currency?.currency || ''} {formatCurrency(contract.contractValue)}
+                            </p>
+                            <p className="text-muted small mb-1">
+                              {contractSelectorType === 'works'
+                                ? `${t('projectActions.contractor')}: ${contract.nameOfContractor || '-'}`
+                                : `${t('projectActions.supplier')}: ${contract.nameOfSupplier || '-'}`}
+                              {' | '}{t('projectActions.nameOfConsultant')}: {contract.nameOfConsultant || '-'}
+                            </p>
+                            <p className="text-muted small mb-0">
+                              {t('common.duration')}: {formatDate(contract.contractStartDate)} {t('common.to')} {formatDate(contract.contractEndDate)}
+                            </p>
+                          </div>
+                          <div className="d-flex flex-column gap-1 ms-3">
+                            {contract.implementationStatus?.progressScale && (
+                              <span className="badge bg-secondary">{contract.implementationStatus.progressScale}</span>
+                            )}
+                            <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => handleSelectContract(contract.contractRefNo)}>
+                              <FiCheck className="me-1" /> {t('projectActions.select')}
+                            </button>
+                            <button type="button" className="btn btn-sm btn-outline-info" onClick={() => setContractDetailView(contractDetailView === contract.id ? null : contract.id)}>
+                              <FiEye className="me-1" /> {t('projectActions.viewDetails')}
+                            </button>
+                          </div>
+                        </div>
+
+                        {contractDetailView === contract.id && (
+                          <div className="mt-3 pt-3 border-top">
+                            <div className="row g-2" style={{ fontSize: '0.85rem' }}>
+                              <div className="col-md-6"><strong>{t('financial.project')}:</strong> {contract.project?.project || '-'}</div>
+                              <div className="col-md-6"><strong>{t('financial.components')}:</strong> {contract.component?.projectComponents || '-'}</div>
+                              <div className="col-md-6"><strong>{t('financial.subcomponents')}:</strong> {contract.subcomponent?.subcomponent || '-'}</div>
+                              <div className="col-md-6"><strong>{t('financial.activities')}:</strong> {contract.activity?.activity || '-'}</div>
+                              <div className="col-md-6"><strong>{t('projectActions.projectCategory')}:</strong> {contract.projectCategory?.category || '-'}</div>
+                              <div className="col-md-6"><strong>{t('projectActions.fundingSource')}:</strong> {contract.fundingSource?.name || '-'}</div>
+                              <div className="col-md-6"><strong>{t('financial.currency')}:</strong> {contract.currency?.currency || '-'}</div>
+                              <div className="col-md-6"><strong>{t('projectActions.amendments')}:</strong> {contract.amendments ? t('common.yes') : t('common.no')}</div>
+                              {contractSelectorType === 'works' && (
+                                <>
+                                  <div className="col-md-6"><strong>{t('projectActions.locationOfInvestment')}:</strong> {contract.locationOfInvestment || '-'}</div>
+                                  <div className="col-md-6"><strong>{t('projectActions.grossFloorArea')}:</strong> {contract.grossFloorAreaM2 || '-'}</div>
+                                  <div className="col-md-6"><strong>{t('projectActions.mainInterventionFocus')}:</strong> {contract.mainInterventionFocus || '-'}</div>
+                                </>
+                              )}
+                              <div className="col-12"><strong>{t('projectActions.remarks')}:</strong> {contract.remarks || '-'}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => { setShowContractSelector(false); setContractDetailView(null); }}>
+                  {t('common.cancel')}
+                </button>
+              </div>
             </div>
           </div>
         </div>
