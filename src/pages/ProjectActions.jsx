@@ -11,7 +11,7 @@ function ProjectActions() {
   const [works, setWorks] = useState([]);
   const [goods, setGoods] = useState([]);
   const [monitoring, setMonitoring] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProject, setSelectedProject] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -46,10 +46,8 @@ function ProjectActions() {
   }, []);
 
   useEffect(() => {
-    if (selectedProject) {
-      loadContracts();
-      loadFinancialData();
-    }
+    loadContracts();
+    loadFinancialData();
   }, [selectedProject]);
 
   const loadProjects = async () => {
@@ -57,7 +55,7 @@ function ProjectActions() {
       const res = await axios.get('/api/projects');
       setProjects(res.data);
       if (res.data.length > 0) {
-        setSelectedProject(res.data[0].projectId);
+        setSelectedProject('all');
       }
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -118,10 +116,11 @@ function ProjectActions() {
   const loadContracts = async () => {
     setLoading(true);
     try {
+      const isAll = selectedProject === 'all';
       const [worksRes, goodsRes, monRes] = await Promise.all([
-        axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
-        axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
-        axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
@@ -914,6 +913,7 @@ function ProjectActions() {
         <h2>{t('projectActions.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
+            <option value="all">{t('common.all')}</option>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
           <button className="btn btn-primary" style={{ whiteSpace: 'nowrap' }} onClick={() => handleOpenModal()}>
