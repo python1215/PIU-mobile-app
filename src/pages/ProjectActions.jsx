@@ -19,6 +19,7 @@ function ProjectActions() {
   const [monitoringTypes, setMonitoringTypes] = useState([]);
   const [kpiForContracts, setKpiForContracts] = useState([]);
   const [filteredKpiForContracts, setFilteredKpiForContracts] = useState([]);
+  const [selectedInvestmentType, setSelectedInvestmentType] = useState('');
   const [implementationStatuses, setImplementationStatuses] = useState([]);
 
   const [components, setComponents] = useState([]);
@@ -39,6 +40,16 @@ function ProjectActions() {
   const [contractSelectorLoading, setContractSelectorLoading] = useState(false);
   const [selectedContractRef, setSelectedContractRef] = useState('');
   const [contractDetailView, setContractDetailView] = useState(null);
+
+  const uniqueInvestmentTypes = useMemo(() => {
+    const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
+    return types;
+  }, [filteredKpiForContracts]);
+
+  const filteredKpiDescriptions = useMemo(() => {
+    if (!selectedInvestmentType) return [];
+    return filteredKpiForContracts.filter(k => k.typeOfInvestment === selectedInvestmentType);
+  }, [filteredKpiForContracts, selectedInvestmentType]);
 
   useEffect(() => {
     loadProjects();
@@ -102,6 +113,7 @@ function ProjectActions() {
 
   const handleMonitoringTypeChange = async (monitoringTypeCode) => {
     setFilteredKpiForContracts([]);
+    setSelectedInvestmentType('');
     if (monitoringTypeCode) {
       try {
         const res = await axios.get(`/api/project-actions/kpi-for-contracts/monitoring-type/${monitoringTypeCode}`);
@@ -177,8 +189,12 @@ function ProjectActions() {
     }
     if (activeTab === 'monitoring' && item?.monitoringType?.monitoringTypeCode) {
       handleMonitoringTypeChange(item.monitoringType.monitoringTypeCode);
+      if (item?.investmentType?.typeOfInvestment) {
+        setSelectedInvestmentType(item.investmentType.typeOfInvestment);
+      }
     } else {
       setFilteredKpiForContracts([]);
+      setSelectedInvestmentType('');
     }
     setSelectedContractRef(item?.contractRefNo || '');
     setShowModal(true);
@@ -824,18 +840,19 @@ function ProjectActions() {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')} *</label>
-                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select" required>
+                  <select value={selectedInvestmentType} onChange={(e) => setSelectedInvestmentType(e.target.value)} className="form-select" required>
                     <option value="">----------</option>
-                    {filteredKpiForContracts.map(k => (
-                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.typeOfInvestment}</option>
+                    {uniqueInvestmentTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
                     ))}
                   </select>
+                  <input type="hidden" name="investmentTypeCode" value={selectedInvestmentType ? (filteredKpiForContracts.find(k => k.typeOfInvestment === selectedInvestmentType)?.monitoringTypeCode || '') : ''} />
                 </div>
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.kpiDescription')} *</label>
                   <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select" required>
                     <option value="">----------</option>
-                    {filteredKpiForContracts.map(k => (
+                    {filteredKpiDescriptions.map(k => (
                       <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.kpiDescription}</option>
                     ))}
                   </select>
