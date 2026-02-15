@@ -30,8 +30,8 @@ public class SpecificContractMonitoring {
     private MonitoringType monitoringType;
 
     @ManyToOne
-    @JoinColumn(name = "investment_type_id")
-    private InvestmentType investmentType;
+    @JoinColumn(name = "investment_type_code")
+    private KPIForContract investmentType;
 
     @ManyToOne
     @JoinColumn(name = "kpi_description_code")
@@ -80,8 +80,8 @@ public class SpecificContractMonitoring {
     public void setQuarter(Quarter quarter) { this.quarter = quarter; }
     public MonitoringType getMonitoringType() { return monitoringType; }
     public void setMonitoringType(MonitoringType monitoringType) { this.monitoringType = monitoringType; }
-    public InvestmentType getInvestmentType() { return investmentType; }
-    public void setInvestmentType(InvestmentType investmentType) { this.investmentType = investmentType; }
+    public KPIForContract getInvestmentType() { return investmentType; }
+    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
     public KPIForContract getKpiDescription() { return kpiDescription; }
     public void setKpiDescription(KPIForContract kpiDescription) { this.kpiDescription = kpiDescription; }
     public LocalDate getMilestoneStartDate() { return milestoneStartDate; }

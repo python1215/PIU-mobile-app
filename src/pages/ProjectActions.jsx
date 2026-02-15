@@ -18,7 +18,7 @@ function ProjectActions() {
   const [quarters, setQuarters] = useState([]);
   const [monitoringTypes, setMonitoringTypes] = useState([]);
   const [kpiForContracts, setKpiForContracts] = useState([]);
-  const [investmentTypes, setInvestmentTypes] = useState([]);
+  const [filteredKpiForContracts, setFilteredKpiForContracts] = useState([]);
   const [implementationStatuses, setImplementationStatuses] = useState([]);
 
   const [components, setComponents] = useState([]);
@@ -66,15 +66,14 @@ function ProjectActions() {
 
   const loadReferenceData = async () => {
     try {
-      const [qRes, mtRes, catRes, donorRes, curRes, kpiRes, implRes, invRes] = await Promise.all([
+      const [qRes, mtRes, catRes, donorRes, curRes, kpiRes, implRes] = await Promise.all([
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
         axios.get('/api/setup/monitoring-types').catch(() => ({ data: [] })),
         axios.get('/api/setup/categories').catch(() => ({ data: [] })),
         axios.get('/api/donors').catch(() => ({ data: [] })),
         axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
         axios.get('/api/project-actions/kpi-for-contracts').catch(() => ({ data: [] })),
-        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] })),
-        axios.get('/api/setup/investment-types').catch(() => ({ data: [] }))
+        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setMonitoringTypes(mtRes.data);
@@ -83,7 +82,6 @@ function ProjectActions() {
       setCurrencies(curRes.data);
       setKpiForContracts(kpiRes.data);
       setImplementationStatuses(implRes.data);
-      setInvestmentTypes(invRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -101,6 +99,18 @@ function ProjectActions() {
       setActivities(actRes.data);
     } catch (error) {
       console.error('Error loading financial data:', error);
+    }
+  };
+
+  const handleMonitoringTypeChange = async (monitoringTypeId) => {
+    setFilteredKpiForContracts([]);
+    if (monitoringTypeId) {
+      try {
+        const res = await axios.get(`/api/project-actions/kpi-for-contracts/monitoring-type/${monitoringTypeId}`);
+        setFilteredKpiForContracts(res.data);
+      } catch (error) {
+        console.error('Error loading KPI for contracts by monitoring type:', error);
+      }
     }
   };
 
@@ -164,6 +174,11 @@ function ProjectActions() {
       setWorksFormProject(item?.project?.projectId || selectedProject);
       setWorksFormComp(item?.component?.id?.toString() || '');
       setWorksFormSubcomp(item?.subcomponent?.subcompId?.toString() || '');
+    }
+    if (activeTab === 'monitoring' && item?.monitoringType?.id) {
+      handleMonitoringTypeChange(item.monitoringType.id);
+    } else {
+      setFilteredKpiForContracts([]);
     }
     setSelectedContractRef(item?.contractRefNo || '');
     setShowModal(true);
@@ -258,7 +273,7 @@ function ProjectActions() {
       project: { projectId: data.monitoringProjectId || selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
       monitoringType: data.monitoringTypeId ? { id: parseInt(data.monitoringTypeId) } : null,
-      investmentType: data.investmentTypeId ? { id: parseInt(data.investmentTypeId) } : null,
+      investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
       kpiDescription: data.kpiDescriptionCode ? { monitoringTypeCode: data.kpiDescriptionCode } : null,
       implementationStatus: data.implementationStatusId ? { id: parseInt(data.implementationStatusId) } : null
     };
@@ -544,7 +559,7 @@ function ProjectActions() {
                   <td>{formatDate(item.monitoringDate)}</td>
                   <td>{item.quarter?.quarter || '-'}</td>
                   <td>{item.monitoringType?.monitoringType || '-'}</td>
-                  <td>{item.investmentType?.nameOfInvestment || '-'}</td>
+                  <td>{item.investmentType?.typeOfInvestment || '-'}</td>
                   <td>{item.kpiDescription?.kpiDescription || '-'}</td>
                   <td>{formatDate(item.milestoneStartDate)}</td>
                   <td>{formatDate(item.milestoneEndDate)}</td>
@@ -792,7 +807,7 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.monitoringType')} *</label>
-                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id || ''} className="form-select" required>
+                  <select name="monitoringTypeId" defaultValue={editingItem?.monitoringType?.id || ''} className="form-select" required onChange={(e) => handleMonitoringTypeChange(e.target.value)}>
                     <option value="">----------</option>
                     {monitoringTypes.map(mt => (
                       <option key={mt.id} value={mt.id}>{mt.monitoringType}</option>
@@ -809,10 +824,10 @@ function ProjectActions() {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.typeOfInvestment')} *</label>
-                  <select name="investmentTypeId" defaultValue={editingItem?.investmentType?.id || ''} className="form-select" required>
+                  <select name="investmentTypeCode" defaultValue={editingItem?.investmentType?.monitoringTypeCode || ''} className="form-select" required>
                     <option value="">----------</option>
-                    {investmentTypes.map(inv => (
-                      <option key={inv.id} value={inv.id}>{inv.nameOfInvestment}</option>
+                    {filteredKpiForContracts.map(k => (
+                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.typeOfInvestment}</option>
                     ))}
                   </select>
                 </div>
@@ -820,7 +835,7 @@ function ProjectActions() {
                   <label className="form-label fw-medium">{t('projectActions.kpiDescription')} *</label>
                   <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select" required>
                     <option value="">----------</option>
-                    {kpiForContracts.map(k => (
+                    {filteredKpiForContracts.map(k => (
                       <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.kpiDescription}</option>
                     ))}
                   </select>
