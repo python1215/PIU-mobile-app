@@ -30,12 +30,12 @@ public class SpecificContractMonitoring {
     private MonitoringType monitoringType;
 
     @ManyToOne
-    @JoinColumn(name = "investment_type_code")
-    private KPIForContract investmentType;
+    @JoinColumn(name = "investment_type_id")
+    private KPIContractSetup investmentType;
 
     @ManyToOne
-    @JoinColumn(name = "kpi_description_code")
-    private KPIForContract kpiDescription;
+    @JoinColumn(name = "kpi_description_id")
+    private KPIContractSetup kpiDescription;
 
     @Column(name = "milestone_start_date")
     private LocalDate milestoneStartDate;
@@ -80,10 +80,10 @@ public class SpecificContractMonitoring {
     public void setQuarter(Quarter quarter) { this.quarter = quarter; }
     public MonitoringType getMonitoringType() { return monitoringType; }
     public void setMonitoringType(MonitoringType monitoringType) { this.monitoringType = monitoringType; }
-    public KPIForContract getInvestmentType() { return investmentType; }
-    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
-    public KPIForContract getKpiDescription() { return kpiDescription; }
-    public void setKpiDescription(KPIForContract kpiDescription) { this.kpiDescription = kpiDescription; }
+    public KPIContractSetup getInvestmentType() { return investmentType; }
+    public void setInvestmentType(KPIContractSetup investmentType) { this.investmentType = investmentType; }
+    public KPIContractSetup getKpiDescription() { return kpiDescription; }
+    public void setKpiDescription(KPIContractSetup kpiDescription) { this.kpiDescription = kpiDescription; }
     public LocalDate getMilestoneStartDate() { return milestoneStartDate; }
     public void setMilestoneStartDate(LocalDate milestoneStartDate) { this.milestoneStartDate = milestoneStartDate; }
     public LocalDate getMilestoneEndDate() { return milestoneEndDate; }

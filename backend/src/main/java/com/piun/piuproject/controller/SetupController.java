@@ -538,6 +538,11 @@ public class SetupController {
         return kpiContractSetupRepository.findById(id).map(k -> { kpiContractSetupRepository.delete(k); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/kpi-contracts/monitoring-type/{monitoringTypeCode}")
+    public List<KPIContractSetup> getKPIContractsByMonitoringType(@PathVariable String monitoringTypeCode) {
+        return kpiContractSetupRepository.findByMonitoringType_MonitoringTypeCode(monitoringTypeCode);
+    }
+
     // PDO Statements
     @GetMapping("/pdos")
     public List<PDO> getAllPDOs() { return pdoRepository.findAll(); }

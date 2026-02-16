@@ -116,7 +116,7 @@ function ProjectActions() {
     setSelectedInvestmentType('');
     if (monitoringTypeCode) {
       try {
-        const res = await axios.get(`/api/project-actions/kpi-for-contracts/monitoring-type/${monitoringTypeCode}`);
+        const res = await axios.get(`/api/setup/kpi-contracts/monitoring-type/${monitoringTypeCode}`);
         setFilteredKpiForContracts(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error('Error loading KPI for contracts by monitoring type:', error);
@@ -289,8 +289,8 @@ function ProjectActions() {
       project: { projectId: data.monitoringProjectId || selectedProject },
       quarter: data.quarterId ? { id: parseInt(data.quarterId) } : null,
       monitoringType: data.monitoringTypeCode ? { monitoringTypeCode: data.monitoringTypeCode } : null,
-      investmentType: data.investmentTypeCode ? { monitoringTypeCode: data.investmentTypeCode } : null,
-      kpiDescription: data.kpiDescriptionCode ? { monitoringTypeCode: data.kpiDescriptionCode } : null,
+      investmentType: data.investmentTypeCode ? { id: parseInt(data.investmentTypeCode) } : null,
+      kpiDescription: data.kpiDescriptionCode ? { id: parseInt(data.kpiDescriptionCode) } : null,
       implementationStatus: data.implementationStatusId ? { id: parseInt(data.implementationStatusId) } : null
     };
 
@@ -846,14 +846,14 @@ function ProjectActions() {
                       <option key={type} value={type}>{type}</option>
                     ))}
                   </select>
-                  <input type="hidden" name="investmentTypeCode" value={selectedInvestmentType ? (filteredKpiForContracts.find(k => k.typeOfInvestment === selectedInvestmentType)?.monitoringTypeCode || '') : ''} />
+                  <input type="hidden" name="investmentTypeCode" value={selectedInvestmentType ? (filteredKpiForContracts.find(k => k.typeOfInvestment === selectedInvestmentType)?.id || '') : ''} />
                 </div>
                 <div className="col-md-6">
                   <label className="form-label fw-medium">{t('projectActions.kpiDescription')} *</label>
-                  <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.monitoringTypeCode || ''} className="form-select" required>
+                  <select name="kpiDescriptionCode" defaultValue={editingItem?.kpiDescription?.id || ''} className="form-select" required>
                     <option value="">----------</option>
                     {filteredKpiDescriptions.map(k => (
-                      <option key={k.monitoringTypeCode} value={k.monitoringTypeCode}>{k.kpiDescription}</option>
+                      <option key={k.id} value={k.id}>{k.kpiDescription}</option>
                     ))}
                   </select>
                 </div>
