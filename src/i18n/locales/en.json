@@ -570,7 +570,13 @@
     "returnOnAssets": "Return on Assets (ROA)",
     "netProfitMargin": "Net Profit Margin",
     "debtServiceCoverage": "Debt Service Coverage",
-    "mwhGenerated": "MWh Generated"
+    "mwhGenerated": "MWh Generated",
+    "addContractKPI": "Add Contract KPI",
+    "editContractKPI": "Edit Contract KPI",
+    "selectProject": "Select Project",
+    "selectMonitoringType": "Select Monitoring Type",
+    "noContractKPIs": "No Contract KPI records found",
+    "confirmDeleteKPI": "Are you sure you want to delete this Contract KPI?"
   },
   "map": {
     "title": "Project Map",

@@ -567,7 +567,13 @@
     "returnOnAssets": "Rendement des Actifs (ROA)",
     "netProfitMargin": "Marge Bénéficiaire Nette",
     "debtServiceCoverage": "Ratio de Couverture de la Dette",
-    "mwhGenerated": "MWh Générés"
+    "mwhGenerated": "MWh Générés",
+    "addContractKPI": "Ajouter KPI Contrat",
+    "editContractKPI": "Modifier KPI Contrat",
+    "selectProject": "Sélectionner un Projet",
+    "selectMonitoringType": "Sélectionner un Type de Suivi",
+    "noContractKPIs": "Aucun enregistrement KPI de contrat trouvé",
+    "confirmDeleteKPI": "Êtes-vous sûr de vouloir supprimer ce KPI de contrat ?"
   },
   "map": {
     "title": "Carte des Projets",

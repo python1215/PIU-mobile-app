@@ -567,7 +567,13 @@
     "returnOnAssets": "Retorno sobre Ativos (ROA)",
     "netProfitMargin": "Margem de Lucro Líquido",
     "debtServiceCoverage": "Índice de Cobertura da Dívida",
-    "mwhGenerated": "MWh Gerados"
+    "mwhGenerated": "MWh Gerados",
+    "addContractKPI": "Adicionar KPI Contrato",
+    "editContractKPI": "Editar KPI Contrato",
+    "selectProject": "Selecionar Projeto",
+    "selectMonitoringType": "Selecionar Tipo de Monitoramento",
+    "noContractKPIs": "Nenhum registro de KPI de contrato encontrado",
+    "confirmDeleteKPI": "Tem certeza que deseja excluir este KPI de contrato?"
   },
   "map": {
     "title": "Mapa do Projeto",

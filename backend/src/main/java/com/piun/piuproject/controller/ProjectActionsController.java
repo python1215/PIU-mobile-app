@@ -202,6 +202,36 @@ public class ProjectActionsController {
         return kpiForContractRepository.findByMonitoringType_MonitoringTypeCode(monitoringTypeCode);
     }
 
+    @PostMapping("/kpi-for-contracts")
+    public KPIForContract createKPIForContract(@RequestBody KPIForContract kpiForContract) {
+        return kpiForContractRepository.save(kpiForContract);
+    }
+
+    @PutMapping("/kpi-for-contracts/{monitoringTypeCode}")
+    public ResponseEntity<KPIForContract> updateKPIForContract(
+            @PathVariable String monitoringTypeCode,
+            @RequestBody KPIForContract details) {
+        return kpiForContractRepository.findById(monitoringTypeCode)
+            .map(kpi -> {
+                kpi.setProject(details.getProject());
+                kpi.setTypeOfInvestment(details.getTypeOfInvestment());
+                kpi.setKpiDescription(details.getKpiDescription());
+                kpi.setMonitoringType(details.getMonitoringType());
+                return ResponseEntity.ok(kpiForContractRepository.save(kpi));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/kpi-for-contracts/{monitoringTypeCode}")
+    public ResponseEntity<Void> deleteKPIForContract(@PathVariable String monitoringTypeCode) {
+        return kpiForContractRepository.findById(monitoringTypeCode)
+            .map(kpi -> {
+                kpiForContractRepository.delete(kpi);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/implementation-status")
     public List<PhysicalProgress> getAllImplementationStatus() {
         return physicalProgressRepository.findAll();
