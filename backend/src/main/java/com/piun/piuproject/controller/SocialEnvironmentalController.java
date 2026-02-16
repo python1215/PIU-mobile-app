@@ -47,6 +47,9 @@ public class SocialEnvironmentalController {
     public ResponseEntity<ESIA> updateESIA(@PathVariable Long id, @RequestBody ESIA esiaDetails) {
         return esiaRepository.findById(id)
             .map(esia -> {
+                esia.setEsiaId(esiaDetails.getEsiaId());
+                esia.setProject(esiaDetails.getProject());
+                esia.setTypeOfInvestment(esiaDetails.getTypeOfInvestment());
                 esia.setProjectDuration(esiaDetails.getProjectDuration());
                 esia.setProjectPhase(esiaDetails.getProjectPhase());
                 esia.setProjectLocations(esiaDetails.getProjectLocations());

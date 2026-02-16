@@ -15,8 +15,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/NatureOfSettlementRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IndicatorType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DecisionOutcome.java
-/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ESIA.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ProjectDocument.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ESIA.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/OHSMonitoringRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/SpecificContractMonitoringRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Project.java

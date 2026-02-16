@@ -10,13 +10,15 @@ public class ESIA {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @Column(name = "esia_id", length = 50)
+    private String esiaId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "investment_type_code")
-    private KPIForContract investmentType;
+    @Column(name = "type_of_investment", length = 255)
+    private String typeOfInvestment;
 
     @Column(name = "project_duration")
     private Integer projectDuration;
@@ -36,18 +38,16 @@ public class ESIA {
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
     public ESIA() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public String getEsiaId() { return esiaId; }
+    public void setEsiaId(String esiaId) { this.esiaId = esiaId; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
-    public KPIForContract getInvestmentType() { return investmentType; }
-    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
+    public String getTypeOfInvestment() { return typeOfInvestment; }
+    public void setTypeOfInvestment(String typeOfInvestment) { this.typeOfInvestment = typeOfInvestment; }
     public Integer getProjectDuration() { return projectDuration; }
     public void setProjectDuration(Integer projectDuration) { this.projectDuration = projectDuration; }
     public Integer getProjectPhase() { return projectPhase; }
@@ -60,6 +60,4 @@ public class ESIA {
     public void setEsiaFindings(String esiaFindings) { this.esiaFindings = esiaFindings; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
 }
