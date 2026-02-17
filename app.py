@@ -76,7 +76,7 @@ def proxy_api(path):
     global backend_ready
     
     if not backend_ready:
-        for _ in range(60):
+        for _ in range(20):
             if backend_ready:
                 break
             time.sleep(1)
