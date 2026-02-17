@@ -22,7 +22,6 @@ function SocialEnvironmental() {
 
   useEffect(() => {
     loadProjects();
-    loadInvestmentTypes();
   }, []);
 
   useEffect(() => {
@@ -74,8 +73,9 @@ function SocialEnvironmental() {
     if (item) {
       setEditingItem(item);
       if (activeTab === 'esia') {
+        const pid = item.project?.projectId || '';
         setFormData({
-          projectId: item.project?.projectId || '',
+          projectId: pid,
           typeOfInvestment: item.typeOfInvestment || '',
           projectDuration: item.projectDuration || '',
           projectPhase: item.projectPhase || '',
@@ -83,12 +83,15 @@ function SocialEnvironmental() {
           numberOfCommunities: item.numberOfCommunities || '',
           esiaFindings: item.esiaFindings || ''
         });
+        if (pid) loadInvestmentTypesByProject(pid);
+        else setInvestmentTypes([]);
       }
     } else {
       setEditingItem(null);
       if (activeTab === 'esia') {
+        const pid = selectedProject !== 'all' ? selectedProject : '';
         setFormData({
-          projectId: selectedProject !== 'all' ? selectedProject : '',
+          projectId: pid,
           typeOfInvestment: '',
           projectDuration: '',
           projectPhase: '',
@@ -96,6 +99,8 @@ function SocialEnvironmental() {
           numberOfCommunities: '',
           esiaFindings: ''
         });
+        if (pid) loadInvestmentTypesByProject(pid);
+        else setInvestmentTypes([]);
       }
     }
     setShowModal(true);
@@ -107,9 +112,9 @@ function SocialEnvironmental() {
     setFormData({});
   }, []);
 
-  const loadInvestmentTypes = async () => {
+  const loadInvestmentTypesByProject = async (projectId) => {
     try {
-      const res = await axios.get('/api/setup/investment-types');
+      const res = await axios.get(`/api/setup/kpi-contracts/project/${projectId}`);
       setInvestmentTypes(res.data);
     } catch { setInvestmentTypes([]); }
   };
@@ -117,6 +122,14 @@ function SocialEnvironmental() {
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'projectId') {
+      if (value) {
+        loadInvestmentTypesByProject(value);
+      } else {
+        setInvestmentTypes([]);
+      }
+      setFormData(prev => ({ ...prev, projectId: value, typeOfInvestment: '' }));
+    }
   }, []);
 
   const handleSubmitESIA = async (e) => {
@@ -263,7 +276,7 @@ function SocialEnvironmental() {
           <label className="form-label">{t('socialEnvironmental.typeOfInvestment')}</label>
           <select className="form-select" name="typeOfInvestment" value={formData.typeOfInvestment || ''} onChange={handleChange}>
             <option value="">{t('common.select')}</option>
-            {investmentTypes.map(it => <option key={it.id} value={it.nameOfInvestment}>{it.nameOfInvestment}</option>)}
+            {investmentTypes.map(it => <option key={it.id} value={it.typeOfInvestment}>{it.typeOfInvestment}</option>)}
           </select>
         </div>
         <div className="col-md-3">
