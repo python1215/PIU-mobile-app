@@ -543,6 +543,11 @@ public class SetupController {
         return kpiContractSetupRepository.findByMonitoringType_MonitoringTypeCode(monitoringTypeCode);
     }
 
+    @GetMapping("/kpi-contracts/project/{projectId}")
+    public List<KPIContractSetup> getKPIContractsByProject(@PathVariable String projectId) {
+        return kpiContractSetupRepository.findByProject_ProjectId(projectId);
+    }
+
     // PDO Statements
     @GetMapping("/pdos")
     public List<PDO> getAllPDOs() { return pdoRepository.findAll(); }

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface KPIContractSetupRepository extends JpaRepository<KPIContractSetup, Long> {
     List<KPIContractSetup> findByMonitoringType_MonitoringTypeCode(String monitoringTypeCode);
+    List<KPIContractSetup> findByProject_ProjectId(String projectId);
 }

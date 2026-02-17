@@ -18,6 +18,7 @@ function SocialEnvironmental() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [kpiContracts, setKpiContracts] = useState([]);
 
   useEffect(() => {
     loadProjects();
@@ -72,9 +73,9 @@ function SocialEnvironmental() {
     if (item) {
       setEditingItem(item);
       if (activeTab === 'esia') {
+        const pid = item.project?.projectId || '';
         setFormData({
-          esiaId: item.esiaId || '',
-          projectId: item.project?.projectId || '',
+          projectId: pid,
           typeOfInvestment: item.typeOfInvestment || '',
           projectDuration: item.projectDuration || '',
           projectPhase: item.projectPhase || '',
@@ -82,13 +83,14 @@ function SocialEnvironmental() {
           numberOfCommunities: item.numberOfCommunities || '',
           esiaFindings: item.esiaFindings || ''
         });
+        if (pid) loadKpiContracts(pid);
       }
     } else {
       setEditingItem(null);
       if (activeTab === 'esia') {
+        const pid = selectedProject !== 'all' ? selectedProject : '';
         setFormData({
-          esiaId: '',
-          projectId: selectedProject !== 'all' ? selectedProject : '',
+          projectId: pid,
           typeOfInvestment: '',
           projectDuration: '',
           projectPhase: '',
@@ -96,6 +98,8 @@ function SocialEnvironmental() {
           numberOfCommunities: '',
           esiaFindings: ''
         });
+        if (pid) loadKpiContracts(pid);
+        else setKpiContracts([]);
       }
     }
     setShowModal(true);
@@ -107,15 +111,27 @@ function SocialEnvironmental() {
     setFormData({});
   }, []);
 
+  const loadKpiContracts = async (projectId) => {
+    try {
+      const res = await axios.get(`/api/setup/kpi-contracts/project/${projectId}`);
+      setKpiContracts(res.data);
+    } catch { setKpiContracts([]); }
+  };
+
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'projectId' && value) {
+      loadKpiContracts(value);
+      setFormData(prev => ({ ...prev, projectId: value, typeOfInvestment: '' }));
+    } else if (name === 'projectId' && !value) {
+      setKpiContracts([]);
+    }
   }, []);
 
   const handleSubmitESIA = async (e) => {
     e.preventDefault();
     const payload = {
-      esiaId: formData.esiaId,
       project: formData.projectId ? { projectId: formData.projectId } : null,
       typeOfInvestment: formData.typeOfInvestment,
       projectDuration: formData.projectDuration ? parseInt(formData.projectDuration) : null,
@@ -246,10 +262,6 @@ function SocialEnvironmental() {
     <form onSubmit={handleSubmitESIA}>
       <div className="row g-3">
         <div className="col-md-6">
-          <label className="form-label">{t('socialEnvironmental.esiaId')}</label>
-          <input type="text" className="form-control" name="esiaId" value={formData.esiaId || ''} onChange={handleChange} />
-        </div>
-        <div className="col-md-6">
           <label className="form-label">{t('common.project')} *</label>
           <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
             <option value="">{t('common.select')}</option>
@@ -258,7 +270,10 @@ function SocialEnvironmental() {
         </div>
         <div className="col-md-6">
           <label className="form-label">{t('socialEnvironmental.typeOfInvestment')}</label>
-          <input type="text" className="form-control" name="typeOfInvestment" value={formData.typeOfInvestment || ''} onChange={handleChange} />
+          <select className="form-select" name="typeOfInvestment" value={formData.typeOfInvestment || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {kpiContracts.map(k => <option key={k.id} value={k.typeOfInvestment}>{k.typeOfInvestment}</option>)}
+          </select>
         </div>
         <div className="col-md-3">
           <label className="form-label">{t('socialEnvironmental.projectDuration')}</label>

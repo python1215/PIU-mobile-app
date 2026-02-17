@@ -40,7 +40,12 @@ public class SocialEnvironmentalController {
 
     @PostMapping("/esia")
     public ESIA createESIA(@RequestBody ESIA esia) {
-        return esiaRepository.save(esia);
+        ESIA saved = esiaRepository.save(esia);
+        if (saved.getEsiaId() == null || saved.getEsiaId().isEmpty()) {
+            saved.setEsiaId("ESIA-" + String.format("%04d", saved.getId()));
+            saved = esiaRepository.save(saved);
+        }
+        return saved;
     }
 
     @PutMapping("/esia/{id}")
