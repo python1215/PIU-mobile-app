@@ -201,7 +201,8 @@ function MonitoringEvaluation() {
       loadMonitoring();
     } catch (error) {
       console.error('Error deleting record:', error);
-      toast.error('Error deleting record');
+      const msg = error.response?.data?.message || 'Error deleting record';
+      toast.error(msg);
     }
   }, [loadMonitoring]);
 

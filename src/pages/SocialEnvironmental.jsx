@@ -165,7 +165,8 @@ function SocialEnvironmental() {
       loadData();
     } catch (error) {
       console.error('Error deleting ESIA:', error);
-      toast.error(t('common.error'));
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
     }
   };
 

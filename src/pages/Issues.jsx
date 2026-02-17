@@ -164,7 +164,10 @@ function Issues() {
       queryClient.invalidateQueries(['issues']);
       toast.success(t('messages.deleteSuccess'));
     },
-    onError: () => toast.error(t('messages.deleteError')),
+    onError: (error) => {
+      const msg = error.response?.data?.message || t('messages.deleteError');
+      toast.error(msg);
+    },
   });
 
   const filteredIssues = issues.filter((issue) => {

@@ -268,7 +268,8 @@ function ProjectActions() {
       loadContracts();
     } catch (error) {
       console.error('Error deleting works:', error);
-      toast.error('Error deleting record');
+      const msg = error.response?.data?.message || 'Error deleting record';
+      toast.error(msg);
     }
   };
 
@@ -363,7 +364,8 @@ function ProjectActions() {
       loadContracts();
     } catch (error) {
       console.error('Error deleting goods:', error);
-      toast.error('Error deleting record');
+      const msg = error.response?.data?.message || 'Error deleting record';
+      toast.error(msg);
     }
   };
 
@@ -405,7 +407,8 @@ function ProjectActions() {
       loadContracts();
     } catch (error) {
       console.error('Error deleting monitoring:', error);
-      toast.error('Error deleting record');
+      const msg = error.response?.data?.message || 'Error deleting record';
+      toast.error(msg);
     }
   };
 

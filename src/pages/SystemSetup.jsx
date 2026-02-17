@@ -594,9 +594,10 @@ function SystemSetup() {
     try {
       await axios.delete(`${currentConfig.endpoint}/${itemId}`);
       toast.success('Deleted successfully');
-    } catch {
+    } catch (error) {
       loadTabData(activeTab);
-      toast.error('Failed to delete');
+      const msg = error.response?.data?.message || 'Failed to delete';
+      toast.error(msg);
     }
   }, [currentConfig, activeTab, loadTabData]);
 

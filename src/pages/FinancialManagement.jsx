@@ -462,7 +462,8 @@ function FinancialManagement() {
         toast.success(t('messages.deleteSuccess'));
         loadProjects();
       } catch (error) {
-        toast.error(t('messages.deleteError'));
+        const msg = error.response?.data?.message || t('messages.deleteError');
+        toast.error(msg);
       }
     }
   }, [loadProjects, t]);
@@ -685,7 +686,8 @@ function FinancialManagement() {
       loadFinancialData();
     } catch (error) {
       console.error('Error deleting item:', error);
-      toast.error(t('messages.deleteError'));
+      const msg = error.response?.data?.message || t('messages.deleteError');
+      toast.error(msg);
     }
   }, [activeTab, loadFinancialData, t]);
 

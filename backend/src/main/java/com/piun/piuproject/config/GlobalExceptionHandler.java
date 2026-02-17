@@ -46,9 +46,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
-        logger.error("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("message", "Data integrity error: " + ex.getMostSpecificCause().getMessage(), "error", "Bad Request"));
+        String rootMsg = ex.getMostSpecificCause().getMessage();
+        logger.error("Data integrity violation: {}", rootMsg);
+        String userMessage;
+        if (rootMsg != null && rootMsg.contains("violates foreign key constraint")) {
+            userMessage = "Cannot delete this record because it is referenced by other records. Please remove the dependent records first.";
+        } else if (rootMsg != null && rootMsg.contains("duplicate key")) {
+            userMessage = "A record with this value already exists.";
+        } else {
+            userMessage = "Data integrity error. Please check your input.";
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(Map.of("message", userMessage, "error", "Conflict"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
