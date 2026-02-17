@@ -61,7 +61,11 @@ public class SecurityConfig {
         ));
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "https://*.replit.dev",
-            "https://*.replit.app"
+            "https://*.replit.app",
+            "https://*.romeot.net",
+            "https://romeot.net",
+            "http://*.romeot.net",
+            "http://romeot.net"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
