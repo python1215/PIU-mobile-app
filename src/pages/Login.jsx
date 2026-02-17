@@ -25,6 +25,11 @@ function Login() {
       toast.success(t('auth.loginSuccess'));
       navigate('/');
     } catch (error) {
+      if (error.response?.status === 503) {
+        toast.error(t('auth.serverStarting'));
+        setTimeout(() => handleSubmit(e), 3000);
+        return;
+      }
       toast.error(error.response?.data?.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);

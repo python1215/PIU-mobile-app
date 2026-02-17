@@ -29,6 +29,7 @@
     "signIn": "Se connecter",
     "loginSuccess": "Bienvenue !",
     "loginFailed": "Échec de la connexion",
+    "serverStarting": "Le serveur démarre, nouvelle tentative automatique...",
     "registerSuccess": "Compte créé avec succès !",
     "registerFailed": "Échec de l'inscription"
   },

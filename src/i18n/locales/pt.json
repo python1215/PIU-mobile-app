@@ -29,6 +29,7 @@
     "signIn": "Entrar",
     "loginSuccess": "Bem-vindo de volta!",
     "loginFailed": "Falha no login",
+    "serverStarting": "O servidor está iniciando, tentando novamente automaticamente...",
     "registerSuccess": "Conta criada com sucesso!",
     "registerFailed": "Falha no registro"
   },

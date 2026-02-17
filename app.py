@@ -76,12 +76,12 @@ def proxy_api(path):
     global backend_ready
     
     if not backend_ready:
-        for _ in range(30):
+        for _ in range(60):
             if backend_ready:
                 break
             time.sleep(1)
         if not backend_ready:
-            return {"error": "Backend starting", "message": "Please wait..."}, 503
+            return {"error": "Backend starting", "message": "Server is starting up, please try again in a moment."}, 503
     
     url = f"{BACKEND_URL}/api/{path}"
     if request.query_string:
