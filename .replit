@@ -7,6 +7,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+publicDir = "dist/public"
 
 [workflows]
 runButton = "Project"
