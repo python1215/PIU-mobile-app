@@ -446,91 +446,92 @@ function ProjectMap() {
 
   const center = [13.45, -15.4];
 
+  const selectedProjectName = useMemo(() => {
+    if (selectedProject === 'all') return t('common.allProjects');
+    const p = projects.find(pr => pr.projectId === selectedProject);
+    return p?.project || selectedProject;
+  }, [selectedProject, projects, t]);
+
   return (
-    <div className="container-fluid">
+    <div className="container-fluid" style={{ paddingBottom: '2rem' }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>{t('map.title')}</h2>
-        <div className="d-flex gap-3">
-          <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
+        <div>
+          <h2 className="fw-bold mb-1" style={{ letterSpacing: '-0.5px' }}>{t('map.title')}</h2>
+          {selectedProject !== 'all' && (
+            <small className="text-muted">{selectedProjectName}</small>
+          )}
+        </div>
+        <div className="d-flex gap-2 align-items-center">
+          <select
+            className="form-select form-select-sm shadow-sm"
+            value={selectedProject}
+            onChange={e => setSelectedProject(e.target.value)}
+            style={{ width: '240px', borderRadius: '8px' }}
+          >
             <option value="all">{t('common.allProjects')}</option>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            <FiPlus className="me-2" /> {t('map.addLocation')}
+          <button className="btn btn-primary btn-sm shadow-sm d-flex align-items-center gap-1" style={{ borderRadius: '8px', whiteSpace: 'nowrap' }} onClick={() => handleOpenModal()}>
+            <FiPlus size={16} /> {t('map.addLocation')}
           </button>
         </div>
       </div>
 
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <FiMapPin size={32} className="me-3" />
+      <div className="row g-3 mb-4">
+        {[
+          { label: t('map.mappedSites'), value: mappings.length, icon: <FiMapPin size={28} />, gradient: 'linear-gradient(135deg, #4A7BF7 0%, #6C63FF 100%)' },
+          { label: t('map.totalHouseholds'), value: stats.totalHouseholds.toLocaleString(), icon: <FiHome size={28} />, gradient: 'linear-gradient(135deg, #2ECC71 0%, #27AE60 100%)' },
+          { label: t('map.connected'), value: stats.connected.toLocaleString(), icon: <FiUsers size={28} />, gradient: 'linear-gradient(135deg, #00B4D8 0%, #0096C7 100%)' },
+          { label: t('map.regionsCovered'), value: stats.regions, icon: <FiMapPin size={28} />, gradient: 'linear-gradient(135deg, #F7B731 0%, #F5A623 100%)' }
+        ].map((card, idx) => (
+          <div className="col-6 col-lg-3" key={idx}>
+            <div
+              className="text-white p-3 h-100"
+              style={{
+                background: card.gradient,
+                borderRadius: '14px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                cursor: 'default'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)'; }}
+            >
+              <div className="d-flex align-items-center gap-3">
+                <div style={{ opacity: 0.85 }}>{card.icon}</div>
                 <div>
-                  <h6>{t('map.mappedSites')}</h6>
-                  <h3>{mappings.length}</h3>
+                  <div style={{ fontSize: '0.78rem', opacity: 0.9, fontWeight: 500 }}>{card.label}</div>
+                  <div className="fw-bold" style={{ fontSize: '1.6rem', lineHeight: 1.2 }}>{card.value}</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <FiHome size={32} className="me-3" />
-                <div>
-                  <h6>{t('map.totalHouseholds')}</h6>
-                  <h3>{stats.totalHouseholds.toLocaleString()}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <FiUsers size={32} className="me-3" />
-                <div>
-                  <h6>{t('map.connected')}</h6>
-                  <h3>{stats.connected.toLocaleString()}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <FiMapPin size={32} className="me-3" />
-                <div>
-                  <h6>{t('map.regionsCovered')}</h6>
-                  <h3>{stats.regions}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <ul className="nav nav-tabs mb-3">
+      <ul className="nav nav-tabs mb-3" style={{ borderBottom: '2px solid #e9ecef' }}>
         <li className="nav-item">
-          <button className={`nav-link${activeTab === 'map' ? ' active' : ''}`} onClick={() => setActiveTab('map')}>
-            <FiMap className="me-2" />{t('map.mapView')}
+          <button
+            className={`nav-link d-flex align-items-center gap-2${activeTab === 'map' ? ' active fw-semibold' : ''}`}
+            onClick={() => setActiveTab('map')}
+            style={activeTab === 'map' ? { borderColor: '#4A7BF7', borderBottomColor: '#fff', color: '#4A7BF7' } : {}}
+          >
+            <FiMap size={16} />{t('map.mapView')}
           </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link${activeTab === 'table' ? ' active' : ''}`} onClick={() => setActiveTab('table')}>
-            <FiList className="me-2" />{t('map.dataTable')}
+          <button
+            className={`nav-link d-flex align-items-center gap-2${activeTab === 'table' ? ' active fw-semibold' : ''}`}
+            onClick={() => setActiveTab('table')}
+            style={activeTab === 'table' ? { borderColor: '#4A7BF7', borderBottomColor: '#fff', color: '#4A7BF7' } : {}}
+          >
+            <FiList size={16} />{t('map.dataTable')}
           </button>
         </li>
       </ul>
 
       {activeTab === 'map' && (
-        <div className={`card mb-4${mapFullscreen ? ' position-fixed top-0 start-0 w-100 h-100 rounded-0 border-0' : ''}`} style={mapFullscreen ? { zIndex: 1050 } : {}}>
+        <div className={`card mb-4 border-0 shadow-sm${mapFullscreen ? ' position-fixed top-0 start-0 w-100 h-100 rounded-0' : ''}`} style={mapFullscreen ? { zIndex: 1050 } : { borderRadius: '14px', overflow: 'hidden' }}>
           <div className="card-body p-0 position-relative">
             <button
               type="button"
@@ -717,15 +718,15 @@ function ProjectMap() {
 
       {activeTab === 'table' && (
         <>
-          <div className="card mb-3">
-            <div className="card-header py-2">
+          <div className="card mb-3 border-0 shadow-sm" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="card-header py-2 bg-white border-bottom">
               <div className="d-flex align-items-center gap-2">
-                <FiFilter size={14} />
+                <FiFilter size={14} className="text-primary" />
                 <strong style={{ fontSize: '0.85rem' }}>{t('map.filterOptions')}</strong>
                 <small className="text-muted">({t('map.filterHint')})</small>
               </div>
             </div>
-            <div className="card-body py-2 px-3">
+            <div className="card-body py-3 px-3" style={{ backgroundColor: '#fafbfc' }}>
               <div className="row g-2 mb-2">
                 <div className="col-md-2">
                   <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('setup.region')}</label>
@@ -786,10 +787,10 @@ function ProjectMap() {
                   </div>
                 </div>
                 <div className="col-md-auto ms-auto d-flex gap-2">
-                  <button className="btn btn-primary btn-sm d-flex align-items-center gap-1" onClick={applyTableFilter}>
+                  <button className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" style={{ borderRadius: '8px', padding: '6px 16px' }} onClick={applyTableFilter}>
                     <FiSearch size={14} /> {t('map.applyFilters')}
                   </button>
-                  <button className="btn btn-secondary btn-sm d-flex align-items-center gap-1" onClick={clearTableFilter}>
+                  <button className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style={{ borderRadius: '8px', padding: '6px 16px' }} onClick={clearTableFilter}>
                     <FiXCircle size={14} /> {t('map.clear')}
                   </button>
                 </div>
@@ -797,53 +798,55 @@ function ProjectMap() {
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">{t('map.projectLocations')}</h5>
-              <small className="text-muted">{filteredTableMappings.length} / {mappings.length} {t('table.records')}</small>
+          <div className="card border-0 shadow-sm" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="card-header d-flex justify-content-between align-items-center bg-white border-bottom">
+              <h6 className="mb-0 fw-bold">{t('map.projectLocations')}</h6>
+              <span className="badge bg-light text-dark border" style={{ fontSize: '0.8rem' }}>{filteredTableMappings.length} / {mappings.length} {t('table.records')}</span>
             </div>
-            <div className="card-body">
+            <div className="card-body p-0">
               {loading ? (
                 <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
               ) : (
                 <div className="table-responsive">
-                  <table className="table table-striped table-hover">
-                    <thead className="table-dark">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead style={{ backgroundColor: '#f0f4ff' }}>
                       <tr>
-                        <th>ID</th>
-                        <th>{t('common.project')}</th>
-                        <th>{t('map.profileYear')}</th>
-                        <th>{t('setup.region')}</th>
-                        <th>{t('setup.district')}</th>
-                        <th>{t('setup.settlement')}</th>
-                        <th>{t('map.totalHouseholds')}</th>
-                        <th>{t('map.connected')}</th>
-                        <th>{t('map.latitude')}</th>
-                        <th>{t('map.longitude')}</th>
-                        <th>{t('map.accessType')}</th>
-                        <th>{t('common.actions')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>ID</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('common.project')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.profileYear')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('setup.region')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('setup.district')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('setup.settlement')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.totalHouseholds')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.connected')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.latitude')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.longitude')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('map.accessType')}</th>
+                        <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('common.actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredTableMappings.length === 0 ? (
-                        <tr><td colSpan="12" className="text-center text-muted">{t('table.noData')}</td></tr>
+                        <tr><td colSpan="12" className="text-center text-muted py-4">{t('table.noData')}</td></tr>
                       ) : (
                         filteredTableMappings.map((m) => (
                           <tr key={m.id}>
-                            <td><strong>{m.id}</strong></td>
-                            <td>{m.project?.project || '-'}</td>
-                            <td>{m.profileYear?.profileYear || '-'}</td>
-                            <td>{m.region?.regionName || '-'}</td>
-                            <td>{m.district?.districtName || '-'}</td>
-                            <td>{m.settlement?.settlementName || '-'}</td>
-                            <td>{m.totalHouseholds || 0}</td>
-                            <td>{m.connectedHouseholds || 0}</td>
-                            <td>{m.latitude?.toFixed(6) || '-'}</td>
-                            <td>{m.longitude?.toFixed(6) || '-'}</td>
-                            <td><span className="badge bg-secondary">{m.accessType?.accessType || '-'}</span></td>
+                            <td className="fw-semibold text-primary">{m.id}</td>
+                            <td style={{ fontSize: '0.85rem', maxWidth: '180px' }}>{m.project?.project || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.profileYear?.profileYear || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.region?.regionName || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.district?.districtName || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.settlement?.settlementName || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.totalHouseholds || 0}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.connectedHouseholds || 0}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.latitude?.toFixed(6) || '-'}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{m.longitude?.toFixed(6) || '-'}</td>
+                            <td><span className="badge" style={{ backgroundColor: '#E8F4FD', color: '#1976D2', fontWeight: 500 }}>{m.accessType?.accessType || '-'}</span></td>
                             <td>
-                              <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 /></button>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 /></button>
+                              <div className="d-flex gap-1">
+                                <button className="btn btn-sm btn-outline-primary" style={{ borderRadius: '6px', padding: '3px 8px' }} onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 size={14} /></button>
+                                <button className="btn btn-sm btn-outline-danger" style={{ borderRadius: '6px', padding: '3px 8px' }} onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 size={14} /></button>
+                              </div>
                             </td>
                           </tr>
                         ))
