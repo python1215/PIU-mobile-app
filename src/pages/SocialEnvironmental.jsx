@@ -21,7 +21,10 @@ function SocialEnvironmental() {
   const [investmentTypes, setInvestmentTypes] = useState([]);
   const [regions, setRegions] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [filteredDistricts, setFilteredDistricts] = useState([]);
+  const filteredDistricts = useMemo(() => {
+    if (!formData.regionCode) return [];
+    return districts.filter(d => d.lga?.region?.regionCode === formData.regionCode);
+  }, [formData.regionCode, districts]);
   const [settlements, setSettlements] = useState([]);
   const [papTypes, setPapTypes] = useState([]);
   const [papCategories, setPapCategories] = useState([]);
@@ -189,14 +192,6 @@ function SocialEnvironmental() {
     }
   }, []);
 
-  useEffect(() => {
-    if (formData.regionCode) {
-      const filtered = districts.filter(d => d.lga?.region?.regionCode === formData.regionCode);
-      setFilteredDistricts(filtered);
-    } else {
-      setFilteredDistricts([]);
-    }
-  }, [formData.regionCode, districts]);
 
   const filteredSettlements = useMemo(() => {
     if (!formData.districtCode) return [];
