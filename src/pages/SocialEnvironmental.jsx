@@ -191,7 +191,7 @@ function SocialEnvironmental() {
 
   useEffect(() => {
     if (formData.regionCode) {
-      const filtered = districts.filter(d => d.region?.regionCode === formData.regionCode);
+      const filtered = districts.filter(d => d.lga?.region?.regionCode === formData.regionCode);
       setFilteredDistricts(filtered);
     } else {
       setFilteredDistricts([]);
