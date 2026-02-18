@@ -279,7 +279,7 @@ function Documentation() {
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-scrollable">
+          <div className="modal-dialog modal-lg modal-fullscreen-md-down modal-dialog-scrollable">
             <div className="modal-content">
               <div className="modal-header py-2">
                 <h6 className="modal-title mb-0">{editingItem ? t('documentation.editDocument') : t('documentation.addDocument')}</h6>
@@ -287,72 +287,64 @@ function Documentation() {
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
-                  <div className="row g-2">
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">{t('common.description')} *</label>
+                    <textarea className="form-control" name="description" rows="4" value={formData.description || ''} onChange={handleChange} placeholder={t('documentation.descriptionPlaceholder')} required></textarea>
+                  </div>
+
+                  <div className="row mb-3">
                     <div className="col-md-6">
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
-                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('documentation.documentInfo')}</h6>
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')} *</label>
-                            <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
-                              <option value="">{t('common.select')}</option>
-                              {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
-                            </select>
-                          </div>
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('documentation.documentType')} *</label>
-                            <select className="form-select form-select-sm" name="documentTypeId" value={formData.documentTypeId || ''} onChange={handleChange} required>
-                              <option value="">{t('common.select')}</option>
-                              {documentTypes.map(dt => <option key={dt.id} value={dt.id}>{dt.documentType}</option>)}
-                            </select>
-                          </div>
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('documentation.documentDate')}</label>
-                            <input type="date" className="form-control form-control-sm" name="documentDate" value={formData.documentDate || ''} onChange={handleChange} />
-                          </div>
-                        </div>
-                      </div>
+                      <label className="form-label fw-semibold">{t('common.project')} *</label>
+                      <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+                        <option value="">---------</option>
+                        {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                      </select>
                     </div>
-
                     <div className="col-md-6">
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
-                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.description')}</h6>
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <textarea className="form-control form-control-sm" name="description" rows="5" value={formData.description || ''} onChange={handleChange} placeholder={t('documentation.descriptionPlaceholder')}></textarea>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f5f5f5'}}>
-                        <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('documentation.file')}</h6>
-                        <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="d-none" />
-                        <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
-                        {formData.attachment ? (
-                          <div className="d-flex align-items-center gap-2">
-                            <FiFile size={20} className="text-primary" />
-                            <a href={formData.attachment} target="_blank" rel="noopener noreferrer" className="text-truncate" style={{fontSize: '0.8rem', maxWidth: '200px'}}>{formData.attachment.split('/').pop()}</a>
-                            <span className="text-success" style={{fontSize: '0.8rem'}}><FiImage className="me-1" />{t('documentation.fileUploaded')}</span>
-                            <button type="button" className="btn btn-sm btn-outline-danger ms-auto p-1" onClick={handleRemoveAttachment}><FiX size={12} /></button>
-                          </div>
-                        ) : (
-                          <div className="d-flex gap-2">
-                            <button type="button" className="btn btn-sm btn-outline-primary flex-fill" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                              <FiUpload size={13} className="me-1" />{uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
-                            </button>
-                            <button type="button" className="btn btn-sm btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
-                              <FiCamera size={13} className="me-1" />{t('socialEnvironmental.takePhoto')}
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <label className="form-label fw-semibold">{t('documentation.documentType')} *</label>
+                      <select className="form-select" name="documentTypeId" value={formData.documentTypeId || ''} onChange={handleChange} required>
+                        <option value="">---------</option>
+                        {documentTypes.map(dt => <option key={dt.id} value={dt.id}>{dt.documentType}</option>)}
+                      </select>
                     </div>
                   </div>
-                  <div className="modal-footer mt-2 px-0 pt-2">
-                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">{t('documentation.documentDate')} *</label>
+                    <input type="date" className="form-control" name="documentDate" value={formData.documentDate || ''} onChange={handleChange} required />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">{t('documentation.file')}</label>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="d-none" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png" />
+                    <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
+                    {formData.attachment ? (
+                      <div className="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                        <FiFile size={18} className="text-primary" />
+                        <a href={formData.attachment} target="_blank" rel="noopener noreferrer" className="text-truncate" style={{maxWidth: '300px'}}>{formData.attachment.split('/').pop()}</a>
+                        <span className="text-success small"><FiImage className="me-1" />{t('documentation.fileUploaded')}</span>
+                        <button type="button" className="btn btn-sm btn-outline-danger ms-auto" onClick={handleRemoveAttachment}><FiX size={14} /></button>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="d-flex gap-2">
+                          <button type="button" className="btn btn-outline-secondary" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                            {uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
+                          </button>
+                          <button type="button" className="btn btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+                            <FiCamera size={15} className="me-1" />{t('socialEnvironmental.takePhoto')}
+                          </button>
+                        </div>
+                        <small className="text-muted mt-1 d-block">Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG</small>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
                       {t('common.cancel')}
                     </button>
-                    <button type="submit" className="btn btn-sm btn-primary">
+                    <button type="submit" className="btn btn-primary">
                       {editingItem ? t('common.update') : t('common.save')}
                     </button>
                   </div>
