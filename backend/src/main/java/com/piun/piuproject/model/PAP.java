@@ -18,11 +18,11 @@ public class PAP {
 
     @ManyToOne
     @JoinColumn(name = "investment_type_code")
-    private KPIForContract investmentType;
+    private KPIContractSetup investmentType;
 
     @ManyToOne
     @JoinColumn(name = "pap_type_id")
-    private PAPType papType;
+    private TypeOfPAP papType;
 
     @ManyToOne
     @JoinColumn(name = "region_code")
@@ -104,10 +104,10 @@ public class PAP {
     public void setPapIdentificationNumber(String papIdentificationNumber) { this.papIdentificationNumber = papIdentificationNumber; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
-    public KPIForContract getInvestmentType() { return investmentType; }
-    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
-    public PAPType getPapType() { return papType; }
-    public void setPapType(PAPType papType) { this.papType = papType; }
+    public KPIContractSetup getInvestmentType() { return investmentType; }
+    public void setInvestmentType(KPIContractSetup investmentType) { this.investmentType = investmentType; }
+    public TypeOfPAP getPapType() { return papType; }
+    public void setPapType(TypeOfPAP papType) { this.papType = papType; }
     public Region getRegion() { return region; }
     public void setRegion(Region region) { this.region = region; }
     public District getDistrict() { return district; }

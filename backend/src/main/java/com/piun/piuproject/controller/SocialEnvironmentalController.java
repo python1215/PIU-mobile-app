@@ -18,6 +18,36 @@ public class SocialEnvironmentalController {
     
     @Autowired
     private PAPRepository papRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private KPIContractSetupRepository kpiContractSetupRepository;
+
+    @Autowired
+    private RegionRepository regionRepository;
+
+    @Autowired
+    private DistrictRepository districtRepository;
+
+    @Autowired
+    private TypeOfPAPRepository papTypeRepository;
+
+    @Autowired
+    private PAPCategoryRepository papCategoryRepository;
+
+    @Autowired
+    private VulnerabilityCategoryRepository vulnerabilityCategoryRepository;
+
+    @Autowired
+    private SettlementRepository settlementRepository;
+
+    @Autowired
+    private TypeOfImpactRepository impactTypeRepository;
+
+    @Autowired
+    private NatureOfSettlementRepository natureOfSettlementRepository;
     
     @Autowired
     private GrievanceRepository grievanceRepository;
@@ -85,8 +115,36 @@ public class SocialEnvironmentalController {
         return papRepository.findByProject_ProjectId(projectId);
     }
 
+    private void resolvePAPReferences(PAP pap) {
+        if (pap.getProject() != null && pap.getProject().getProjectId() != null) {
+            projectRepository.findById(pap.getProject().getProjectId()).ifPresent(pap::setProject);
+        }
+        if (pap.getInvestmentType() != null && pap.getInvestmentType().getId() != null) {
+            kpiContractSetupRepository.findById(pap.getInvestmentType().getId()).ifPresent(pap::setInvestmentType);
+        }
+        if (pap.getRegion() != null && pap.getRegion().getRegionCode() != null) {
+            regionRepository.findById(pap.getRegion().getRegionCode()).ifPresent(pap::setRegion);
+        }
+        if (pap.getDistrict() != null && pap.getDistrict().getDistrictCode() != null) {
+            districtRepository.findById(pap.getDistrict().getDistrictCode()).ifPresent(pap::setDistrict);
+        }
+        if (pap.getPapType() != null && pap.getPapType().getId() != null) {
+            papTypeRepository.findById(pap.getPapType().getId()).ifPresent(pap::setPapType);
+        }
+        if (pap.getPapCategory() != null && pap.getPapCategory().getId() != null) {
+            papCategoryRepository.findById(pap.getPapCategory().getId()).ifPresent(pap::setPapCategory);
+        }
+        if (pap.getVulnerabilityCategory() != null && pap.getVulnerabilityCategory().getId() != null) {
+            vulnerabilityCategoryRepository.findById(pap.getVulnerabilityCategory().getId()).ifPresent(pap::setVulnerabilityCategory);
+        }
+        if (pap.getCurrentAddress() != null && pap.getCurrentAddress().getSettlementCode() != null) {
+            settlementRepository.findById(pap.getCurrentAddress().getSettlementCode()).ifPresent(pap::setCurrentAddress);
+        }
+    }
+
     @PostMapping("/pap")
     public PAP createPAP(@RequestBody PAP pap) {
+        resolvePAPReferences(pap);
         return papRepository.save(pap);
     }
 
@@ -94,6 +152,7 @@ public class SocialEnvironmentalController {
     public ResponseEntity<PAP> updatePAP(@PathVariable String id, @RequestBody PAP papDetails) {
         return papRepository.findById(id)
             .map(pap -> {
+                resolvePAPReferences(papDetails);
                 pap.setProject(papDetails.getProject());
                 pap.setInvestmentType(papDetails.getInvestmentType());
                 pap.setRegion(papDetails.getRegion());
