@@ -17,7 +17,7 @@ public class GrievanceMonitoringLog {
 
     @ManyToOne
     @JoinColumn(name = "investment_type_code")
-    private KPIForContract investmentType;
+    private KPIContractSetup investmentType;
 
     @Column(name = "sex", length = 1)
     private String sex;
@@ -50,6 +50,9 @@ public class GrievanceMonitoringLog {
     @JoinColumn(name = "decision_outcome_id")
     private DecisionOutcome decisionOutcome;
 
+    @Column(name = "resolution", length = 300)
+    private String resolution;
+
     @Column(name = "decision_communicated", length = 1)
     private String decisionCommunicated;
 
@@ -78,8 +81,8 @@ public class GrievanceMonitoringLog {
     public void setCaseNo(String caseNo) { this.caseNo = caseNo; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
-    public KPIForContract getInvestmentType() { return investmentType; }
-    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
+    public KPIContractSetup getInvestmentType() { return investmentType; }
+    public void setInvestmentType(KPIContractSetup investmentType) { this.investmentType = investmentType; }
     public String getSex() { return sex; }
     public void setSex(String sex) { this.sex = sex; }
     public LocalDate getDateClaimReceived() { return dateClaimReceived; }
@@ -100,6 +103,8 @@ public class GrievanceMonitoringLog {
     public void setExpectedDecisionDate(LocalDate expectedDecisionDate) { this.expectedDecisionDate = expectedDecisionDate; }
     public DecisionOutcome getDecisionOutcome() { return decisionOutcome; }
     public void setDecisionOutcome(DecisionOutcome decisionOutcome) { this.decisionOutcome = decisionOutcome; }
+    public String getResolution() { return resolution; }
+    public void setResolution(String resolution) { this.resolution = resolution; }
     public String getDecisionCommunicated() { return decisionCommunicated; }
     public void setDecisionCommunicated(String decisionCommunicated) { this.decisionCommunicated = decisionCommunicated; }
     public String getCommunicationMethod() { return communicationMethod; }

@@ -51,6 +51,9 @@ public class SocialEnvironmentalController {
     
     @Autowired
     private GrievanceRepository grievanceRepository;
+
+    @Autowired
+    private DecisionOutcomeRepository decisionOutcomeRepository;
     
     @Autowired
     private OHSMonitoringRepository ohsRepository;
@@ -196,6 +199,18 @@ public class SocialEnvironmentalController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    private void resolveGrievanceReferences(GrievanceMonitoringLog g) {
+        if (g.getProject() != null && g.getProject().getProjectId() != null) {
+            g.setProject(projectRepository.findById(g.getProject().getProjectId()).orElse(null));
+        }
+        if (g.getInvestmentType() != null && g.getInvestmentType().getId() != null) {
+            g.setInvestmentType(kpiContractSetupRepository.findById(g.getInvestmentType().getId()).orElse(null));
+        }
+        if (g.getDecisionOutcome() != null && g.getDecisionOutcome().getId() != null) {
+            g.setDecisionOutcome(decisionOutcomeRepository.findById(g.getDecisionOutcome().getId()).orElse(null));
+        }
+    }
+
     @GetMapping("/grievance")
     public List<GrievanceMonitoringLog> getAllGrievances() {
         return grievanceRepository.findAll();
@@ -208,6 +223,7 @@ public class SocialEnvironmentalController {
 
     @PostMapping("/grievance")
     public GrievanceMonitoringLog createGrievance(@RequestBody GrievanceMonitoringLog grievance) {
+        resolveGrievanceReferences(grievance);
         return grievanceRepository.save(grievance);
     }
 
@@ -215,9 +231,25 @@ public class SocialEnvironmentalController {
     public ResponseEntity<GrievanceMonitoringLog> updateGrievance(@PathVariable String id, @RequestBody GrievanceMonitoringLog grievanceDetails) {
         return grievanceRepository.findById(id)
             .map(grievance -> {
+                resolveGrievanceReferences(grievanceDetails);
+                grievance.setProject(grievanceDetails.getProject());
+                grievance.setInvestmentType(grievanceDetails.getInvestmentType());
+                grievance.setSex(grievanceDetails.getSex());
+                grievance.setDateClaimReceived(grievanceDetails.getDateClaimReceived());
+                grievance.setPersonReceivingComplaint(grievanceDetails.getPersonReceivingComplaint());
+                grievance.setHowComplaintReceived(grievanceDetails.getHowComplaintReceived());
+                grievance.setNameOfComplainant(grievanceDetails.getNameOfComplainant());
+                grievance.setPhoneNumber(grievanceDetails.getPhoneNumber());
                 grievance.setComplaintContent(grievanceDetails.getComplaintContent());
-                grievance.setFollowUpActions(grievanceDetails.getFollowUpActions());
+                grievance.setComplaintAcknowledged(grievanceDetails.getComplaintAcknowledged());
+                grievance.setExpectedDecisionDate(grievanceDetails.getExpectedDecisionDate());
+                grievance.setDecisionOutcome(grievanceDetails.getDecisionOutcome());
+                grievance.setResolution(grievanceDetails.getResolution());
+                grievance.setDecisionCommunicated(grievanceDetails.getDecisionCommunicated());
+                grievance.setCommunicationMethod(grievanceDetails.getCommunicationMethod());
                 grievance.setComplainantSatisfied(grievanceDetails.getComplainantSatisfied());
+                grievance.setBriefNoteNoAnswer(grievanceDetails.getBriefNoteNoAnswer());
+                grievance.setFollowUpActions(grievanceDetails.getFollowUpActions());
                 return ResponseEntity.ok(grievanceRepository.save(grievance));
             })
             .orElse(ResponseEntity.notFound().build());
