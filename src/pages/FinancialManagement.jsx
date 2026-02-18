@@ -259,10 +259,10 @@ const DataRow = memo(function DataRow({ item, activeTab, formatCurrency, onView,
   return (
     <tr>
       {activeTab === 'components' && (
-        <><td>{item.project?.project || '-'}</td><td>{item.compId}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.project?.project || '-'}</td><td>{item.projectComponents}</td><td>{item.componentDescription}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'subcomponents' && (
-        <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcompId}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription || '-'}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
+        <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcomponent}</td><td>{item.subcomponentDescription || '-'}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td></>
       )}
       {activeTab === 'activities' && (
         <><td>{item.project?.project || '-'}</td><td>{item.component?.projectComponents || '-'}</td><td>{item.subcomponent?.subcomponent || '-'}</td><td>{item.activity}</td><td>{item.currency?.currency || '-'}</td><td className="text-end">{formatCurrency(item.allocation)}</td><td>{item.year?.profileYear || '-'}</td></>
@@ -858,8 +858,8 @@ function FinancialManagement() {
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
-              {activeTab === 'components' && <><th>{t('common.project')}</th><th>ID</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
-              {activeTab === 'subcomponents' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>ID</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'components' && <><th>{t('common.project')}</th><th>{t('financial.componentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
+              {activeTab === 'subcomponents' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>{t('financial.subcomponentName')}</th><th>{t('common.description')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th></>}
               {activeTab === 'activities' && <><th>{t('common.project')}</th><th>{t('financial.components')}</th><th>{t('financial.subcomponents')}</th><th>{t('financial.activityName')}</th><th>{t('financial.currency')}</th><th className="text-end">{t('financial.allocation')}</th><th>{t('common.year')}</th></>}
               <th>{t('common.actions')}</th>
             </tr>
@@ -1247,7 +1247,6 @@ function FinancialManagement() {
                   {activeTab === 'components' && (
                     <>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('common.project')}</label><p className="fw-medium">{viewingItem.project?.project || '-'}</p></div>
-                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.compId}</p></div>
                       <div className="col-12"><label className="form-label text-muted small">{t('financial.componentName')}</label><p className="fw-medium">{viewingItem.projectComponents}</p></div>
                       <div className="col-12"><label className="form-label text-muted small">{t('common.description')}</label><p className="fw-medium">{viewingItem.componentDescription || '-'}</p></div>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
@@ -1257,7 +1256,6 @@ function FinancialManagement() {
                   {activeTab === 'subcomponents' && (
                     <>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.components')}</label><p className="fw-medium">{viewingItem.component?.projectComponents || '-'}</p></div>
-                      <div className="col-md-6"><label className="form-label text-muted small">ID</label><p className="fw-medium">{viewingItem.subcompId}</p></div>
                       <div className="col-12"><label className="form-label text-muted small">{t('financial.subcomponentName')}</label><p className="fw-medium">{viewingItem.subcomponent}</p></div>
                       <div className="col-12"><label className="form-label text-muted small">{t('common.description')}</label><p className="fw-medium">{viewingItem.subcomponentDescription || '-'}</p></div>
                       <div className="col-md-6"><label className="form-label text-muted small">{t('financial.currency')}</label><p className="fw-medium">{viewingItem.currency?.currency || '-'}</p></div>
