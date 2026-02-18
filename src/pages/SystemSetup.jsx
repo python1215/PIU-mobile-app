@@ -374,7 +374,7 @@ function SystemSetup() {
       fields: [
         { name: 'settlementCode', label: 'Settlement Code', disableOnEdit: true, halfWidth: true },
         { name: 'settlementName', label: 'Settlement Name', halfWidth: true },
-        { name: 'wardCode', label: 'Ward', type: 'select', dataKey: 'wards', valueField: 'wardCode', displayField: 'wardName', relationField: 'ward' }
+        { name: 'wardCode', label: 'Ward', type: 'select', dataKey: 'wards', valueField: 'wardCode', displayField: 'wardName', relationField: 'ward', required: false }
       ] },
     years: { endpoint: '/api/setup/years', idField: 'id', label: 'Years',
       columns: [{ key: 'id', label: 'ID' }, { key: 'profileYear', label: 'Profile Year' }],
