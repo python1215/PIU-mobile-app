@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiSearch, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiLayers, FiFolder, FiEye, FiSearch, FiX, FiDownload } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors, currencies }) {
   const [formData, setFormData] = useState(() => {
@@ -793,6 +796,92 @@ function FinancialManagement() {
     return currentTabData.reduce((sum, item) => sum + (parseFloat(item.allocation) || 0), 0);
   }, [activeTab, currentTabData]);
 
+  const getExportData = useCallback(() => {
+    if (activeTab === 'projects') {
+      return {
+        title: 'Projects',
+        headers: ['Project ID', 'Name', 'Donor', 'Contributors', 'Currency', 'Funding Amount', 'Effectiveness Date', 'Closure Date'],
+        rows: filteredProjects.map(p => [
+          p.projectId || '',
+          p.project || '',
+          p.donors?.map(d => d.donorName).join(', ') || '',
+          p.contributors?.map(c => c.contributorName).join(', ') || '',
+          p.currency?.currency || '',
+          p.funding || 0,
+          p.effectivenessDate || '',
+          p.closureDate || ''
+        ])
+      };
+    } else if (activeTab === 'components') {
+      return {
+        title: 'Components',
+        headers: ['Project', 'Component Name', 'Description', 'Currency', 'Allocation'],
+        rows: currentTabData.map(item => [
+          item.project?.project || '',
+          item.projectComponents || '',
+          item.componentDescription || '',
+          item.currency?.currency || '',
+          item.allocation || 0
+        ])
+      };
+    } else if (activeTab === 'subcomponents') {
+      return {
+        title: 'Subcomponents',
+        headers: ['Project', 'Component', 'Subcomponent Name', 'Description', 'Currency', 'Allocation'],
+        rows: currentTabData.map(item => [
+          item.project?.project || '',
+          item.component?.projectComponents || '',
+          item.subcomponent || '',
+          item.subcomponentDescription || '',
+          item.currency?.currency || '',
+          item.allocation || 0
+        ])
+      };
+    } else {
+      return {
+        title: 'Activities',
+        headers: ['Project', 'Component', 'Subcomponent', 'Activity Name', 'Currency', 'Allocation', 'Year'],
+        rows: currentTabData.map(item => [
+          item.project?.project || '',
+          item.component?.projectComponents || '',
+          item.subcomponent?.subcomponent || '',
+          item.activity || '',
+          item.currency?.currency || '',
+          item.allocation || 0,
+          item.year?.profileYear || ''
+        ])
+      };
+    }
+  }, [activeTab, filteredProjects, currentTabData]);
+
+  const exportToExcel = useCallback(() => {
+    const { title, headers, rows } = getExportData();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, title);
+    XLSX.writeFile(wb, `Financial_${title}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success('Exported to Excel');
+  }, [getExportData]);
+
+  const exportToPDF = useCallback(() => {
+    const { title, headers, rows } = getExportData();
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(16);
+    doc.text(`Financial Management - ${title}`, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 22);
+    doc.autoTable({
+      head: [headers],
+      body: rows,
+      startY: 28,
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+      alternateRowStyles: { fillColor: [245, 245, 245] }
+    });
+    doc.save(`Financial_${title}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('Exported to PDF');
+  }, [getExportData]);
+
   const projectsTable = useMemo(() => {
     if (loading) {
       return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
@@ -926,6 +1015,12 @@ function FinancialManagement() {
               {projectOptions}
             </select>
           )}
+          <button className="btn btn-success" onClick={exportToExcel} title="Export to Excel">
+            <FiDownload className="me-1" /> Excel
+          </button>
+          <button className="btn btn-danger" onClick={exportToPDF} title="Export to PDF">
+            <FiDownload className="me-1" /> PDF
+          </button>
           <button className="btn btn-primary" onClick={handleShowModal}>
             <FiPlus className="me-2" /> {t('common.addNew')}
           </button>
