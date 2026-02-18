@@ -3,7 +3,7 @@ package com.piun.piuproject.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "pap_types")
+@Table(name = "type_of_pap")
 public class PAPType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
