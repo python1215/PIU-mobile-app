@@ -703,7 +703,13 @@
     "mapView": "Map View",
     "dataTable": "Data Table",
     "projectLayers": "Project Layers",
-    "noProject": "No Project"
+    "noProject": "No Project",
+    "filterLocations": "Filter Locations",
+    "allRegions": "All Regions",
+    "allDistricts": "All Districts",
+    "allSettlements": "All Settlements",
+    "apply": "Apply",
+    "clear": "Clear"
   },
   "table": {
     "showing": "Showing",

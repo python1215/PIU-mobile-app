@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList, FiLayers, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList, FiLayers, FiChevronDown, FiChevronUp, FiFilter, FiMinus } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -54,49 +54,55 @@ function ProjectMap() {
   const [visibleProjects, setVisibleProjects] = useState({});
   const [layersPanelOpen, setLayersPanelOpen] = useState(true);
   const [panelPos, setPanelPos] = useState({ x: 10, y: 10 });
-  const dragRef = useRef(null);
-  const dragOffset = useRef({ x: 0, y: 0 });
-  const isDragging = useRef(false);
 
-  const dragStartPos = useRef({ x: 0, y: 0 });
-  const didDrag = useRef(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(true);
+  const [filterPos, setFilterPos] = useState({ x: 10, y: 60 });
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [mapFilter, setMapFilter] = useState({ projectId: '', regionCode: '', districtCode: '', settlementCode: '' });
+  const [appliedFilter, setAppliedFilter] = useState({ projectId: '', regionCode: '', districtCode: '', settlementCode: '' });
 
-  const handleDragStart = useCallback((e) => {
-    if (e.target.closest('input, label')) return;
-    isDragging.current = true;
-    didDrag.current = false;
-    dragStartPos.current = { x: e.clientX, y: e.clientY };
-    const rect = dragRef.current.getBoundingClientRect();
-    const parentRect = dragRef.current.parentElement.getBoundingClientRect();
-    dragOffset.current = {
-      x: e.clientX - (rect.left - parentRect.left),
-      y: e.clientY - (rect.top - parentRect.top)
+  const makeDraggable = useCallback((panelRef, setPos, setOpen, onClickToggle) => {
+    return (e) => {
+      if (e.target.closest('input, select, button, label')) return;
+      const ref = panelRef.current;
+      if (!ref) return;
+      let didMove = false;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const rect = ref.getBoundingClientRect();
+      const parentRect = ref.parentElement.getBoundingClientRect();
+      const offX = e.clientX - (rect.left - parentRect.left);
+      const offY = e.clientY - (rect.top - parentRect.top);
+      e.preventDefault();
+
+      const onMove = (ev) => {
+        if (Math.abs(ev.clientX - startX) > 3 || Math.abs(ev.clientY - startY) > 3) didMove = true;
+        const pRect = ref.parentElement.getBoundingClientRect();
+        setPos({
+          x: Math.max(0, Math.min(ev.clientX - offX, pRect.width - 50)),
+          y: Math.max(0, Math.min(ev.clientY - offY, pRect.height - 50))
+        });
+      };
+      const onUp = () => {
+        if (!didMove && onClickToggle) onClickToggle();
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
     };
-    e.preventDefault();
-
-    const handleDragMove = (ev) => {
-      if (!isDragging.current) return;
-      const dx = Math.abs(ev.clientX - dragStartPos.current.x);
-      const dy = Math.abs(ev.clientY - dragStartPos.current.y);
-      if (dx > 3 || dy > 3) didDrag.current = true;
-      const parentRect = dragRef.current.parentElement.getBoundingClientRect();
-      const newX = Math.max(0, Math.min(ev.clientX - dragOffset.current.x, parentRect.width - 50));
-      const newY = Math.max(0, Math.min(ev.clientY - dragOffset.current.y, parentRect.height - 50));
-      setPanelPos({ x: newX, y: newY });
-    };
-
-    const handleDragEnd = () => {
-      isDragging.current = false;
-      if (!didDrag.current) {
-        setLayersPanelOpen(prev => !prev);
-      }
-      document.removeEventListener('mousemove', handleDragMove);
-      document.removeEventListener('mouseup', handleDragEnd);
-    };
-
-    document.addEventListener('mousemove', handleDragMove);
-    document.addEventListener('mouseup', handleDragEnd);
   }, []);
+
+  const layersDragRef = useRef(null);
+  const filterDragRef = useRef(null);
+
+  const handleLayersDrag = useCallback((e) => {
+    makeDraggable(layersDragRef, setPanelPos, setLayersPanelOpen, () => setLayersPanelOpen(p => !p))(e);
+  }, [makeDraggable]);
+
+  const handleFilterDrag = useCallback((e) => {
+    makeDraggable(filterDragRef, setFilterPos, setFilterPanelOpen, () => setFilterPanelOpen(p => !p))(e);
+  }, [makeDraggable]);
 
   const [years, setYears] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -209,9 +215,14 @@ function ProjectMap() {
   const visibleMappings = useMemo(() => {
     return mappings.filter(m => {
       const pid = m.project?.projectId || '__no_project__';
-      return visibleProjects[pid] !== false;
+      if (visibleProjects[pid] === false) return false;
+      if (appliedFilter.projectId && (m.project?.projectId || '') !== appliedFilter.projectId) return false;
+      if (appliedFilter.regionCode && (m.region?.regionCode || '') !== appliedFilter.regionCode) return false;
+      if (appliedFilter.districtCode && (m.district?.districtCode || '') !== appliedFilter.districtCode) return false;
+      if (appliedFilter.settlementCode && (m.settlement?.settlementCode || '') !== appliedFilter.settlementCode) return false;
+      return true;
     });
-  }, [mappings, visibleProjects]);
+  }, [mappings, visibleProjects, appliedFilter]);
 
   const uniqueProjectsOnMap = useMemo(() => {
     const ids = new Set(mappings.map(m => m.project?.projectId || '__no_project__'));
@@ -221,6 +232,40 @@ function ProjectMap() {
     }
     return list;
   }, [mappings, projects, t]);
+
+  const filterDistricts = useMemo(() => {
+    if (!mapFilter.regionCode) return districts;
+    return districts.filter(d => d.lga?.region?.regionCode === mapFilter.regionCode);
+  }, [districts, mapFilter.regionCode]);
+
+  const filterSettlements = useMemo(() => {
+    if (!mapFilter.districtCode) return settlements;
+    return settlements.filter(s =>
+      s.district?.districtCode === mapFilter.districtCode ||
+      s.ward?.district?.districtCode === mapFilter.districtCode
+    );
+  }, [settlements, mapFilter.districtCode]);
+
+  const handleFilterChange = useCallback((e) => {
+    const { name, value } = e.target;
+    if (name === 'regionCode') {
+      setMapFilter(prev => ({ ...prev, regionCode: value, districtCode: '', settlementCode: '' }));
+    } else if (name === 'districtCode') {
+      setMapFilter(prev => ({ ...prev, districtCode: value, settlementCode: '' }));
+    } else {
+      setMapFilter(prev => ({ ...prev, [name]: value }));
+    }
+  }, []);
+
+  const applyFilter = useCallback(() => {
+    setAppliedFilter({ ...mapFilter });
+  }, [mapFilter]);
+
+  const clearFilter = useCallback(() => {
+    const empty = { projectId: '', regionCode: '', districtCode: '', settlementCode: '' };
+    setMapFilter(empty);
+    setAppliedFilter(empty);
+  }, []);
 
   const filteredDistricts = useMemo(() => {
     if (!formData.regionCode) return districts;
@@ -437,7 +482,7 @@ function ProjectMap() {
             </button>
 
             <div
-              ref={dragRef}
+              ref={layersDragRef}
               className="position-absolute bg-white rounded shadow"
               style={{
                 top: panelPos.y + 'px',
@@ -453,7 +498,7 @@ function ProjectMap() {
               <div
                 className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom"
                 style={{ cursor: 'grab', userSelect: 'none' }}
-                onMouseDown={handleDragStart}
+                onMouseDown={handleLayersDrag}
               >
                 <div className="d-flex align-items-center gap-2">
                   <FiLayers size={16} />
@@ -500,6 +545,80 @@ function ProjectMap() {
                 </div>
               )}
             </div>
+
+            <button
+              type="button"
+              className="btn btn-light btn-sm position-absolute shadow-sm"
+              style={{ top: '10px', right: '50px', zIndex: 1000 }}
+              onClick={() => setFilterVisible(prev => !prev)}
+              title={t('map.filterLocations')}
+            >
+              <FiFilter size={18} />
+            </button>
+
+            {filterVisible && (
+              <div
+                ref={filterDragRef}
+                className="position-absolute bg-white rounded shadow"
+                style={{
+                  top: filterPos.y + 'px',
+                  left: filterPos.x + 'px',
+                  zIndex: 1001,
+                  width: filterPanelOpen ? '260px' : 'auto',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <div
+                  className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom"
+                  style={{ cursor: 'grab', userSelect: 'none' }}
+                  onMouseDown={handleFilterDrag}
+                >
+                  <div className="d-flex align-items-center gap-2">
+                    <FiFilter size={14} />
+                    <strong style={{ fontSize: '0.85rem' }}>{t('map.filterLocations')}</strong>
+                  </div>
+                  <FiMinus size={14} style={{ cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setFilterPanelOpen(p => !p); }} />
+                </div>
+                {filterPanelOpen && (
+                  <div style={{ padding: '10px 14px' }}>
+                    <div className="mb-2">
+                      <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>{t('common.project')}:</label>
+                      <select className="form-select form-select-sm" name="projectId" value={mapFilter.projectId} onChange={handleFilterChange}>
+                        <option value="">{t('common.allProjects')}</option>
+                        {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                      </select>
+                    </div>
+                    <div className="mb-2">
+                      <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>{t('setup.region')}:</label>
+                      <select className="form-select form-select-sm" name="regionCode" value={mapFilter.regionCode} onChange={handleFilterChange}>
+                        <option value="">{t('map.allRegions')}</option>
+                        {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+                      </select>
+                    </div>
+                    <div className="mb-2">
+                      <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>{t('setup.district')}:</label>
+                      <select className="form-select form-select-sm" name="districtCode" value={mapFilter.districtCode} onChange={handleFilterChange}>
+                        <option value="">{t('map.allDistricts')}</option>
+                        {filterDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+                      </select>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>{t('setup.settlement')}:</label>
+                      <select className="form-select form-select-sm" name="settlementCode" value={mapFilter.settlementCode} onChange={handleFilterChange}>
+                        <option value="">{t('map.allSettlements')}</option>
+                        {filterSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+                      </select>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <button className="btn btn-primary btn-sm flex-fill" onClick={applyFilter}>{t('map.apply')}</button>
+                      <button className="btn btn-secondary btn-sm flex-fill" onClick={clearFilter}>{t('map.clear')}</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {loading ? (
               <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>

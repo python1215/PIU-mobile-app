@@ -702,7 +702,13 @@
     "mapView": "Vue Carte",
     "dataTable": "Tableau de Données",
     "projectLayers": "Couches de Projets",
-    "noProject": "Aucun Projet"
+    "noProject": "Aucun Projet",
+    "filterLocations": "Filtrer les Emplacements",
+    "allRegions": "Toutes les Régions",
+    "allDistricts": "Tous les Districts",
+    "allSettlements": "Toutes les Localités",
+    "apply": "Appliquer",
+    "clear": "Effacer"
   },
   "table": {
     "showing": "Affichage",
