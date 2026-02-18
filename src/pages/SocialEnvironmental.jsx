@@ -195,7 +195,7 @@ function SocialEnvironmental() {
 
   const filteredSettlements = useMemo(() => {
     if (!formData.districtCode) return [];
-    return settlements.filter(s => s.district?.districtCode === formData.districtCode);
+    return settlements.filter(s => s.ward?.district?.districtCode === formData.districtCode);
   }, [formData.districtCode, settlements]);
 
   const filteredInvestmentTypes = useMemo(() => {
