@@ -708,7 +708,15 @@
     "allDistricts": "Todos os Distritos",
     "allSettlements": "Todas as Localidades",
     "apply": "Aplicar",
-    "clear": "Limpar"
+    "clear": "Limpar",
+    "filterOptions": "Opções de Filtro",
+    "filterHint": "Combine vários filtros para resultados precisos",
+    "allDonors": "Todos os Doadores",
+    "allYears": "Todos os Anos",
+    "allAccessTypes": "Todos os Tipos de Acesso",
+    "searchSettlement": "Pesquisar Localidade",
+    "searchSettlementPlaceholder": "Digite o nome da localidade...",
+    "applyFilters": "Aplicar Filtros"
   },
   "table": {
     "showing": "Mostrando",
@@ -722,7 +730,8 @@
     "search": "Pesquisar...",
     "perPage": "Por página",
     "sortAsc": "Ordenar crescente",
-    "sortDesc": "Ordenar decrescente"
+    "sortDesc": "Ordenar decrescente",
+    "records": "registros"
   },
   "validation": {
     "required": "Este campo é obrigatório",

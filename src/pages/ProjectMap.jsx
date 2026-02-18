@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList, FiLayers, FiChevronDown, FiChevronUp, FiFilter, FiMinus } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList, FiLayers, FiChevronDown, FiChevronUp, FiFilter, FiMinus, FiSearch, FiXCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -60,6 +60,15 @@ function ProjectMap() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [mapFilter, setMapFilter] = useState({ projectId: '', regionCode: '', districtCode: '', settlementCode: '' });
   const [appliedFilter, setAppliedFilter] = useState({ projectId: '', regionCode: '', districtCode: '', settlementCode: '' });
+
+  const [tableFilter, setTableFilter] = useState({
+    regionCode: '', districtCode: '', settlementCode: '', projectId: '',
+    donorId: '', yearId: '', accessTypeId: '', searchSettlement: ''
+  });
+  const [appliedTableFilter, setAppliedTableFilter] = useState({
+    regionCode: '', districtCode: '', settlementCode: '', projectId: '',
+    donorId: '', yearId: '', accessTypeId: '', searchSettlement: ''
+  });
 
   const makeDraggable = useCallback((panelRef, setPos, setOpen, onClickToggle) => {
     return (e) => {
@@ -266,6 +275,58 @@ function ProjectMap() {
     setMapFilter(empty);
     setAppliedFilter(empty);
   }, []);
+
+  const tableFilterDistricts = useMemo(() => {
+    if (!tableFilter.regionCode) return districts;
+    return districts.filter(d => d.lga?.region?.regionCode === tableFilter.regionCode);
+  }, [districts, tableFilter.regionCode]);
+
+  const tableFilterSettlements = useMemo(() => {
+    if (!tableFilter.districtCode) return settlements;
+    return settlements.filter(s =>
+      s.district?.districtCode === tableFilter.districtCode ||
+      s.ward?.district?.districtCode === tableFilter.districtCode
+    );
+  }, [settlements, tableFilter.districtCode]);
+
+  const handleTableFilterChange = useCallback((e) => {
+    const { name, value } = e.target;
+    if (name === 'regionCode') {
+      setTableFilter(prev => ({ ...prev, regionCode: value, districtCode: '', settlementCode: '' }));
+    } else if (name === 'districtCode') {
+      setTableFilter(prev => ({ ...prev, districtCode: value, settlementCode: '' }));
+    } else {
+      setTableFilter(prev => ({ ...prev, [name]: value }));
+    }
+  }, []);
+
+  const applyTableFilter = useCallback(() => {
+    setAppliedTableFilter({ ...tableFilter });
+  }, [tableFilter]);
+
+  const clearTableFilter = useCallback(() => {
+    const empty = { regionCode: '', districtCode: '', settlementCode: '', projectId: '', donorId: '', yearId: '', accessTypeId: '', searchSettlement: '' };
+    setTableFilter(empty);
+    setAppliedTableFilter(empty);
+  }, []);
+
+  const filteredTableMappings = useMemo(() => {
+    return mappings.filter(m => {
+      const f = appliedTableFilter;
+      if (f.projectId && (m.project?.projectId || '') !== f.projectId) return false;
+      if (f.regionCode && (m.region?.regionCode || '') !== f.regionCode) return false;
+      if (f.districtCode && (m.district?.districtCode || '') !== f.districtCode) return false;
+      if (f.settlementCode && (m.settlement?.settlementCode || '') !== f.settlementCode) return false;
+      if (f.yearId && String(m.profileYear?.id || '') !== f.yearId) return false;
+      if (f.accessTypeId && String(m.accessType?.id || '') !== f.accessTypeId) return false;
+      if (f.donorId && !(m.donors || []).some(d => String(d.donorId) === f.donorId)) return false;
+      if (f.searchSettlement) {
+        const search = f.searchSettlement.toLowerCase();
+        if (!(m.settlement?.settlementName || '').toLowerCase().includes(search)) return false;
+      }
+      return true;
+    });
+  }, [mappings, appliedTableFilter]);
 
   const filteredDistricts = useMemo(() => {
     if (!formData.regionCode) return districts;
@@ -655,62 +716,145 @@ function ProjectMap() {
       )}
 
       {activeTab === 'table' && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">{t('map.projectLocations')}</h5>
-          </div>
-          <div className="card-body">
-            {loading ? (
-              <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-striped table-hover">
-                  <thead className="table-dark">
-                    <tr>
-                      <th>ID</th>
-                      <th>{t('common.project')}</th>
-                      <th>{t('map.profileYear')}</th>
-                      <th>{t('setup.region')}</th>
-                      <th>{t('setup.district')}</th>
-                      <th>{t('setup.settlement')}</th>
-                      <th>{t('map.totalHouseholds')}</th>
-                      <th>{t('map.connected')}</th>
-                      <th>{t('map.latitude')}</th>
-                      <th>{t('map.longitude')}</th>
-                      <th>{t('map.accessType')}</th>
-                      <th>{t('common.actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mappings.length === 0 ? (
-                      <tr><td colSpan="12" className="text-center text-muted">{t('table.noData')}</td></tr>
-                    ) : (
-                      mappings.map((m) => (
-                        <tr key={m.id}>
-                          <td><strong>{m.id}</strong></td>
-                          <td>{m.project?.project || '-'}</td>
-                          <td>{m.profileYear?.profileYear || '-'}</td>
-                          <td>{m.region?.regionName || '-'}</td>
-                          <td>{m.district?.districtName || '-'}</td>
-                          <td>{m.settlement?.settlementName || '-'}</td>
-                          <td>{m.totalHouseholds || 0}</td>
-                          <td>{m.connectedHouseholds || 0}</td>
-                          <td>{m.latitude?.toFixed(6) || '-'}</td>
-                          <td>{m.longitude?.toFixed(6) || '-'}</td>
-                          <td><span className="badge bg-secondary">{m.accessType?.accessType || '-'}</span></td>
-                          <td>
-                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 /></button>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 /></button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+        <>
+          <div className="card mb-3">
+            <div className="card-header py-2">
+              <div className="d-flex align-items-center gap-2">
+                <FiFilter size={14} />
+                <strong style={{ fontSize: '0.85rem' }}>{t('map.filterOptions')}</strong>
+                <small className="text-muted">({t('map.filterHint')})</small>
               </div>
-            )}
+            </div>
+            <div className="card-body py-2 px-3">
+              <div className="row g-2 mb-2">
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('setup.region')}</label>
+                  <select className="form-select form-select-sm" name="regionCode" value={tableFilter.regionCode} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allRegions')}</option>
+                    {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('setup.district')}</label>
+                  <select className="form-select form-select-sm" name="districtCode" value={tableFilter.districtCode} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allDistricts')}</option>
+                    {tableFilterDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('setup.settlement')}</label>
+                  <select className="form-select form-select-sm" name="settlementCode" value={tableFilter.settlementCode} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allSettlements')}</option>
+                    {tableFilterSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('common.project')}</label>
+                  <select className="form-select form-select-sm" name="projectId" value={tableFilter.projectId} onChange={handleTableFilterChange}>
+                    <option value="">{t('common.allProjects')}</option>
+                    {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('map.donors')}</label>
+                  <select className="form-select form-select-sm" name="donorId" value={tableFilter.donorId} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allDonors')}</option>
+                    {donors.map(d => <option key={d.donorId} value={d.donorId}>{d.name}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('map.profileYear')}</label>
+                  <select className="form-select form-select-sm" name="yearId" value={tableFilter.yearId} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allYears')}</option>
+                    {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="row g-2 align-items-end">
+                <div className="col-md-2">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('map.accessType')}</label>
+                  <select className="form-select form-select-sm" name="accessTypeId" value={tableFilter.accessTypeId} onChange={handleTableFilterChange}>
+                    <option value="">{t('map.allAccessTypes')}</option>
+                    {accessTypes.map(a => <option key={a.id} value={a.id}>{a.accessType}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label mb-1" style={{ fontSize: '0.78rem' }}>{t('map.searchSettlement')}</label>
+                  <div className="input-group input-group-sm">
+                    <span className="input-group-text"><FiSearch size={14} /></span>
+                    <input type="text" className="form-control" name="searchSettlement" placeholder={t('map.searchSettlementPlaceholder')} value={tableFilter.searchSettlement} onChange={handleTableFilterChange} />
+                  </div>
+                </div>
+                <div className="col-md-auto ms-auto d-flex gap-2">
+                  <button className="btn btn-primary btn-sm d-flex align-items-center gap-1" onClick={applyTableFilter}>
+                    <FiSearch size={14} /> {t('map.applyFilters')}
+                  </button>
+                  <button className="btn btn-secondary btn-sm d-flex align-items-center gap-1" onClick={clearTableFilter}>
+                    <FiXCircle size={14} /> {t('map.clear')}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+
+          <div className="card">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">{t('map.projectLocations')}</h5>
+              <small className="text-muted">{filteredTableMappings.length} / {mappings.length} {t('table.records')}</small>
+            </div>
+            <div className="card-body">
+              {loading ? (
+                <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-striped table-hover">
+                    <thead className="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>{t('common.project')}</th>
+                        <th>{t('map.profileYear')}</th>
+                        <th>{t('setup.region')}</th>
+                        <th>{t('setup.district')}</th>
+                        <th>{t('setup.settlement')}</th>
+                        <th>{t('map.totalHouseholds')}</th>
+                        <th>{t('map.connected')}</th>
+                        <th>{t('map.latitude')}</th>
+                        <th>{t('map.longitude')}</th>
+                        <th>{t('map.accessType')}</th>
+                        <th>{t('common.actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTableMappings.length === 0 ? (
+                        <tr><td colSpan="12" className="text-center text-muted">{t('table.noData')}</td></tr>
+                      ) : (
+                        filteredTableMappings.map((m) => (
+                          <tr key={m.id}>
+                            <td><strong>{m.id}</strong></td>
+                            <td>{m.project?.project || '-'}</td>
+                            <td>{m.profileYear?.profileYear || '-'}</td>
+                            <td>{m.region?.regionName || '-'}</td>
+                            <td>{m.district?.districtName || '-'}</td>
+                            <td>{m.settlement?.settlementName || '-'}</td>
+                            <td>{m.totalHouseholds || 0}</td>
+                            <td>{m.connectedHouseholds || 0}</td>
+                            <td>{m.latitude?.toFixed(6) || '-'}</td>
+                            <td>{m.longitude?.toFixed(6) || '-'}</td>
+                            <td><span className="badge bg-secondary">{m.accessType?.accessType || '-'}</span></td>
+                            <td>
+                              <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 /></button>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 /></button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {showModal && (

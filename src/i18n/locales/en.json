@@ -709,7 +709,15 @@
     "allDistricts": "All Districts",
     "allSettlements": "All Settlements",
     "apply": "Apply",
-    "clear": "Clear"
+    "clear": "Clear",
+    "filterOptions": "Filter Options",
+    "filterHint": "Combine multiple filters for precise results",
+    "allDonors": "All Donors",
+    "allYears": "All Years",
+    "allAccessTypes": "All Access Types",
+    "searchSettlement": "Search Settlement",
+    "searchSettlementPlaceholder": "Type settlement name...",
+    "applyFilters": "Apply Filters"
   },
   "table": {
     "showing": "Showing",
@@ -723,7 +731,8 @@
     "search": "Search...",
     "perPage": "Per page",
     "sortAsc": "Sort ascending",
-    "sortDesc": "Sort descending"
+    "sortDesc": "Sort descending",
+    "records": "records"
   },
   "validation": {
     "required": "This field is required",
