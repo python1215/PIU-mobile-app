@@ -579,7 +579,13 @@
     "versionNumber": "Número da Versão",
     "versionDate": "Data da Versão",
     "versionNotes": "Notas da Versão",
-    "uploadedBy": "Enviado por"
+    "uploadedBy": "Enviado por",
+    "documentInfo": "Informações do Documento",
+    "descriptionPlaceholder": "Digite a descrição do documento...",
+    "documentCreated": "Documento criado com sucesso",
+    "documentUpdated": "Documento atualizado com sucesso",
+    "documentDeleted": "Documento excluído com sucesso",
+    "fileUploaded": "Arquivo enviado"
   },
   "issues": {
     "title": "Problemas & Ações",

@@ -25,6 +25,21 @@ public class DocumentationController {
     @Autowired
     private DocumentTagRepository tagRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
+
+    private void resolveDocumentReferences(ProjectDocument document) {
+        if (document.getProject() != null && document.getProject().getProjectId() != null) {
+            document.setProject(projectRepository.findById(document.getProject().getProjectId()).orElse(null));
+        }
+        if (document.getDocumentType() != null && document.getDocumentType().getId() != null) {
+            document.setDocumentType(documentTypeRepository.findById(document.getDocumentType().getId()).orElse(null));
+        }
+    }
+
     @GetMapping
     public List<ProjectDocument> getAllDocuments() {
         return documentRepository.findAll();
@@ -37,6 +52,7 @@ public class DocumentationController {
 
     @PostMapping
     public ProjectDocument createDocument(@RequestBody ProjectDocument document) {
+        resolveDocumentReferences(document);
         return documentRepository.save(document);
     }
 
@@ -46,6 +62,9 @@ public class DocumentationController {
             @RequestBody ProjectDocument documentDetails) {
         return documentRepository.findById(id)
             .map(document -> {
+                resolveDocumentReferences(documentDetails);
+                document.setProject(documentDetails.getProject());
+                document.setDocumentType(documentDetails.getDocumentType());
                 document.setDescription(documentDetails.getDescription());
                 document.setDocumentDate(documentDetails.getDocumentDate());
                 document.setAttachment(documentDetails.getAttachment());

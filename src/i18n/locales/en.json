@@ -580,7 +580,13 @@
     "versionNumber": "Version Number",
     "versionDate": "Version Date",
     "versionNotes": "Version Notes",
-    "uploadedBy": "Uploaded By"
+    "uploadedBy": "Uploaded By",
+    "documentInfo": "Document Information",
+    "descriptionPlaceholder": "Enter document description...",
+    "documentCreated": "Document created successfully",
+    "documentUpdated": "Document updated successfully",
+    "documentDeleted": "Document deleted successfully",
+    "fileUploaded": "File uploaded"
   },
   "issues": {
     "title": "Issues & Actions",

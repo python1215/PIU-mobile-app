@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFile, FiDownload, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFile, FiUpload, FiCamera, FiX, FiImage } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function Documentation() {
@@ -9,10 +9,14 @@ function Documentation() {
   const [projects, setProjects] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProject, setSelectedProject] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   useEffect(() => {
     loadProjects();
@@ -20,18 +24,13 @@ function Documentation() {
   }, []);
 
   useEffect(() => {
-    if (selectedProject) {
-      loadDocuments();
-    }
+    loadDocuments();
   }, [selectedProject]);
 
   const loadProjects = async () => {
     try {
       const res = await axios.get('/api/projects');
       setProjects(res.data);
-      if (res.data.length > 0) {
-        setSelectedProject(res.data[0].projectId);
-      }
     } catch (error) {
       console.error('Error loading projects:', error);
     }
@@ -49,7 +48,10 @@ function Documentation() {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/documents/project/${selectedProject}`);
+      const isAll = selectedProject === 'all' || !selectedProject;
+      const res = isAll
+        ? await axios.get('/api/documents')
+        : await axios.get(`/api/documents/project/${selectedProject}`);
       setDocuments(res.data);
     } catch (error) {
       console.error('Error loading documents:', error);
@@ -64,13 +66,119 @@ function Documentation() {
     return new Date(date).toLocaleDateString();
   };
 
-  const getTypeStats = () => {
+  const getTypeStats = useMemo(() => {
     const stats = {};
     documents.forEach(doc => {
       const type = doc.documentType?.documentType || t('common.unknown');
       stats[type] = (stats[type] || 0) + 1;
     });
     return stats;
+  }, [documents, t]);
+
+  const handleFileUpload = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('socialEnvironmental.fileTooLarge'));
+      return;
+    }
+
+    setUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const res = await axios.post('/api/uploads', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({ ...prev, attachment: res.data.url }));
+      toast.success(t('documentation.fileUploaded'));
+    } catch (err) {
+      toast.error(err.response?.data?.error || t('socialEnvironmental.uploadFailed'));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }
+  }, [t]);
+
+  const handleRemoveAttachment = useCallback(() => {
+    setFormData(prev => ({ ...prev, attachment: null }));
+  }, []);
+
+  const handleOpenModal = useCallback((item = null) => {
+    if (item) {
+      setEditingItem(item);
+      setFormData({
+        projectId: item.project?.projectId || '',
+        documentTypeId: item.documentType?.id || '',
+        description: item.description || '',
+        documentDate: item.documentDate || '',
+        attachment: item.attachment || ''
+      });
+    } else {
+      setEditingItem(null);
+      setFormData({
+        projectId: selectedProject !== 'all' ? selectedProject : '',
+        documentTypeId: '',
+        description: '',
+        documentDate: '',
+        attachment: ''
+      });
+    }
+    setShowModal(true);
+  }, [selectedProject]);
+
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setEditingItem(null);
+    setFormData({});
+  }, []);
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      project: formData.projectId ? { projectId: formData.projectId } : null,
+      documentType: formData.documentTypeId ? { id: parseInt(formData.documentTypeId) } : null,
+      description: formData.description || null,
+      documentDate: formData.documentDate || null,
+      attachment: formData.attachment || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/documents/${editingItem.id}`, payload);
+        toast.success(t('documentation.documentUpdated'));
+      } else {
+        await axios.post('/api/documents', payload);
+        toast.success(t('documentation.documentCreated'));
+      }
+      handleCloseModal();
+      loadDocuments();
+    } catch (error) {
+      console.error('Error saving document:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/documents/${id}`);
+      toast.success(t('documentation.documentDeleted'));
+      loadDocuments();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
   };
 
   return (
@@ -79,10 +187,11 @@ function Documentation() {
         <h2>{t('documentation.title')}</h2>
         <div className="d-flex gap-3">
           <select className="form-select" value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ width: '250px' }}>
+            <option value="all">{t('common.allProjects')}</option>
             {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
           </select>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <FiPlus className="me-2" /> {t('documentation.upload')}
+          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+            <FiPlus className="me-2" /> {t('documentation.addDocument')}
           </button>
         </div>
       </div>
@@ -101,7 +210,7 @@ function Documentation() {
             </div>
           </div>
         </div>
-        {Object.entries(getTypeStats()).slice(0, 3).map(([type, count], index) => (
+        {Object.entries(getTypeStats).slice(0, 3).map(([type, count], index) => (
           <div className="col-md-3" key={type}>
             <div className={`card bg-${['success', 'info', 'warning'][index]} text-white`}>
               <div className="card-body">
@@ -115,13 +224,7 @@ function Documentation() {
 
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h5>{t('documentation.documentLibrary')}</h5>
-          <div className="btn-group">
-            <button className="btn btn-sm btn-outline-secondary active">{t('common.all')}</button>
-            {documentTypes.slice(0, 4).map(type => (
-              <button key={type.id} className="btn btn-sm btn-outline-secondary">{type.documentType}</button>
-            ))}
-          </div>
+          <h5 className="mb-0">{t('documentation.documentLibrary')}</h5>
         </div>
         <div className="card-body">
           {loading ? (
@@ -132,29 +235,37 @@ function Documentation() {
                 <thead className="table-dark">
                   <tr>
                     <th>ID</th>
+                    <th>{t('common.project')}</th>
                     <th>{t('documentation.documentType')}</th>
                     <th>{t('common.description')}</th>
                     <th>{t('documentation.documentDate')}</th>
+                    <th>{t('documentation.file')}</th>
                     <th>{t('common.dateCreated')}</th>
                     <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {documents.length === 0 ? (
-                    <tr><td colSpan="6" className="text-center text-muted">{t('table.noData')}</td></tr>
+                    <tr><td colSpan="8" className="text-center text-muted">{t('table.noData')}</td></tr>
                   ) : (
-                    documents.map((doc, index) => (
-                      <tr key={index}>
-                        <td>{doc.id}</td>
-                        <td><span className="badge bg-primary">{doc.documentType?.documentType || t('common.unknown')}</span></td>
-                        <td>{doc.description}</td>
+                    documents.map((doc) => (
+                      <tr key={doc.id}>
+                        <td><strong>{doc.id}</strong></td>
+                        <td>{doc.project?.project || '-'}</td>
+                        <td><span className="badge bg-primary">{doc.documentType?.documentType || '-'}</span></td>
+                        <td>{doc.description || '-'}</td>
                         <td>{formatDate(doc.documentDate)}</td>
+                        <td>
+                          {doc.attachment ? (
+                            <a href={doc.attachment} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-success p-1">
+                              <FiFile size={14} />
+                            </a>
+                          ) : '-'}
+                        </td>
                         <td>{formatDate(doc.dateCreated)}</td>
                         <td>
-                          <button className="btn btn-sm btn-outline-info me-1" title={t('common.view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-success me-1" title={t('common.download')}><FiDownload /></button>
-                          <button className="btn btn-sm btn-outline-primary me-1" title={t('common.edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger" title={t('common.delete')}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(doc)} title={t('common.edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(doc.id)} title={t('common.delete')}><FiTrash2 /></button>
                         </td>
                       </tr>
                     ))
@@ -168,38 +279,84 @@ function Documentation() {
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
+          <div className="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-scrollable">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{t('documentation.uploadNewDocument')}</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              <div className="modal-header py-2">
+                <h6 className="modal-title mb-0">{editingItem ? t('documentation.editDocument') : t('documentation.addDocument')}</h6>
+                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">{t('documentation.documentType')}</label>
-                  <select className="form-select">
-                    <option value="">{t('common.select')}</option>
-                    {documentTypes.map(type => (
-                      <option key={type.id} value={type.id}>{type.documentType}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">{t('common.description')}</label>
-                  <textarea className="form-control" rows={3}></textarea>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">{t('documentation.file')}</label>
-                  <input type="file" className="form-control" />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>
-                  {t('common.cancel')}
-                </button>
-                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
-                  {t('documentation.upload')}
-                </button>
+                <form onSubmit={handleSubmit}>
+                  <div className="row g-2">
+                    <div className="col-md-6">
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('documentation.documentInfo')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')} *</label>
+                            <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+                              <option value="">{t('common.select')}</option>
+                              {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('documentation.documentType')} *</label>
+                            <select className="form-select form-select-sm" name="documentTypeId" value={formData.documentTypeId || ''} onChange={handleChange} required>
+                              <option value="">{t('common.select')}</option>
+                              {documentTypes.map(dt => <option key={dt.id} value={dt.id}>{dt.documentType}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('documentation.documentDate')}</label>
+                            <input type="date" className="form-control form-control-sm" name="documentDate" value={formData.documentDate || ''} onChange={handleChange} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.description')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <textarea className="form-control form-control-sm" name="description" rows="5" value={formData.description || ''} onChange={handleChange} placeholder={t('documentation.descriptionPlaceholder')}></textarea>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f5f5f5'}}>
+                        <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('documentation.file')}</h6>
+                        <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="d-none" />
+                        <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
+                        {formData.attachment ? (
+                          <div className="d-flex align-items-center gap-2">
+                            <FiFile size={20} className="text-primary" />
+                            <a href={formData.attachment} target="_blank" rel="noopener noreferrer" className="text-truncate" style={{fontSize: '0.8rem', maxWidth: '200px'}}>{formData.attachment.split('/').pop()}</a>
+                            <span className="text-success" style={{fontSize: '0.8rem'}}><FiImage className="me-1" />{t('documentation.fileUploaded')}</span>
+                            <button type="button" className="btn btn-sm btn-outline-danger ms-auto p-1" onClick={handleRemoveAttachment}><FiX size={12} /></button>
+                          </div>
+                        ) : (
+                          <div className="d-flex gap-2">
+                            <button type="button" className="btn btn-sm btn-outline-primary flex-fill" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                              <FiUpload size={13} className="me-1" />{uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
+                            </button>
+                            <button type="button" className="btn btn-sm btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+                              <FiCamera size={13} className="me-1" />{t('socialEnvironmental.takePhoto')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="modal-footer mt-2 px-0 pt-2">
+                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
+                      {t('common.cancel')}
+                    </button>
+                    <button type="submit" className="btn btn-sm btn-primary">
+                      {editingItem ? t('common.update') : t('common.save')}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
