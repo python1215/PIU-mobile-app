@@ -102,7 +102,10 @@ function ProjectMap() {
 
   const filteredSettlements = useMemo(() => {
     if (!formData.districtCode) return settlements;
-    return settlements.filter(s => s.district?.districtCode === formData.districtCode);
+    return settlements.filter(s =>
+      s.district?.districtCode === formData.districtCode ||
+      s.ward?.district?.districtCode === formData.districtCode
+    );
   }, [settlements, formData.districtCode]);
 
   const handleOpenModal = useCallback((item = null) => {

@@ -157,6 +157,7 @@
     "budget": "Budget",
     "donor": "Donor",
     "region": "Region",
+    "district": "District",
     "description": "Description",
     "projectDetails": "Project Details",
     "projectList": "Project List",
