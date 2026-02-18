@@ -83,8 +83,7 @@ function SocialEnvironmental() {
           numberOfCommunities: item.numberOfCommunities || '',
           esiaFindings: item.esiaFindings || ''
         });
-        if (pid) loadInvestmentTypesByProject(pid);
-        else setInvestmentTypes([]);
+        loadInvestmentTypes();
       }
     } else {
       setEditingItem(null);
@@ -99,8 +98,7 @@ function SocialEnvironmental() {
           numberOfCommunities: '',
           esiaFindings: ''
         });
-        if (pid) loadInvestmentTypesByProject(pid);
-        else setInvestmentTypes([]);
+        loadInvestmentTypes();
       }
     }
     setShowModal(true);
@@ -112,9 +110,9 @@ function SocialEnvironmental() {
     setFormData({});
   }, []);
 
-  const loadInvestmentTypesByProject = async (projectId) => {
+  const loadInvestmentTypes = async () => {
     try {
-      const res = await axios.get(`/api/setup/kpi-contracts/project/${projectId}`);
+      const res = await axios.get('/api/setup/kpi-contracts');
       setInvestmentTypes(res.data);
     } catch { setInvestmentTypes([]); }
   };
@@ -123,11 +121,6 @@ function SocialEnvironmental() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (name === 'projectId') {
-      if (value) {
-        loadInvestmentTypesByProject(value);
-      } else {
-        setInvestmentTypes([]);
-      }
       setFormData(prev => ({ ...prev, projectId: value, typeOfInvestment: '' }));
     }
   }, []);
