@@ -684,7 +684,19 @@
     "totalHouseholds": "Total Households",
     "connected": "Connected",
     "regionsCovered": "Regions Covered",
-    "unknownLocation": "Unknown Location"
+    "unknownLocation": "Unknown Location",
+    "editLocation": "Edit Location",
+    "profileYear": "Profile Year",
+    "connectedHouseholds": "Connected Households",
+    "customerConnections": "Customer Connections",
+    "femaleHouseholds": "Female Households",
+    "maleHouseholds": "Male Households",
+    "accessType": "Access Type",
+    "donors": "Donors",
+    "donorsHelp": "Hold Ctrl/Cmd to select multiple donors",
+    "mappingCreated": "Mapping created successfully",
+    "mappingUpdated": "Mapping updated successfully",
+    "mappingDeleted": "Mapping deleted successfully"
   },
   "table": {
     "showing": "Showing",

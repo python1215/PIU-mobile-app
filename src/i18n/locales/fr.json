@@ -683,7 +683,19 @@
     "unknownLocation": "Emplacement Inconnu",
     "filterByRegion": "Filtrer par Région",
     "filterByStatus": "Filtrer par Statut",
-    "noLocationData": "Aucune donnée de localisation disponible"
+    "noLocationData": "Aucune donnée de localisation disponible",
+    "editLocation": "Modifier l'Emplacement",
+    "profileYear": "Année de Profil",
+    "connectedHouseholds": "Ménages Connectés",
+    "customerConnections": "Connexions Clients",
+    "femaleHouseholds": "Ménages Femmes",
+    "maleHouseholds": "Ménages Hommes",
+    "accessType": "Type d'Accès",
+    "donors": "Donateurs",
+    "donorsHelp": "Maintenez Ctrl/Cmd pour sélectionner plusieurs donateurs",
+    "mappingCreated": "Cartographie créée avec succès",
+    "mappingUpdated": "Cartographie mise à jour avec succès",
+    "mappingDeleted": "Cartographie supprimée avec succès"
   },
   "table": {
     "showing": "Affichage",

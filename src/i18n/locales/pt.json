@@ -683,7 +683,19 @@
     "unknownLocation": "Localização Desconhecida",
     "filterByRegion": "Filtrar por Região",
     "filterByStatus": "Filtrar por Status",
-    "noLocationData": "Nenhum dado de localização disponível"
+    "noLocationData": "Nenhum dado de localização disponível",
+    "editLocation": "Editar Localização",
+    "profileYear": "Ano de Perfil",
+    "connectedHouseholds": "Domicílios Conectados",
+    "customerConnections": "Conexões de Clientes",
+    "femaleHouseholds": "Domicílios Femininos",
+    "maleHouseholds": "Domicílios Masculinos",
+    "accessType": "Tipo de Acesso",
+    "donors": "Doadores",
+    "donorsHelp": "Segure Ctrl/Cmd para selecionar vários doadores",
+    "mappingCreated": "Mapeamento criado com sucesso",
+    "mappingUpdated": "Mapeamento atualizado com sucesso",
+    "mappingDeleted": "Mapeamento excluído com sucesso"
   },
   "table": {
     "showing": "Mostrando",

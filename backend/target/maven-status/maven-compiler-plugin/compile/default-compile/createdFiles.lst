@@ -20,6 +20,7 @@ com/piun/piuproject/model/PAP.class
 com/piun/piuproject/repository/DistrictRepository.class
 com/piun/piuproject/model/IndicatorDescription.class
 com/piun/piuproject/controller/MonitoringController.class
+com/piun/piuproject/repository/NawecInfrastructureRepository.class
 com/piun/piuproject/model/ResultsOrientedMonitoring.class
 com/piun/piuproject/model/Year.class
 com/piun/piuproject/model/MonitoringType.class
