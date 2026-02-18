@@ -55,11 +55,11 @@ public class PAP {
 
     @ManyToOne
     @JoinColumn(name = "impact_type_id")
-    private ImpactType impactType;
+    private TypeOfImpact impactType;
 
     @ManyToOne
     @JoinColumn(name = "nature_of_compensation_id")
-    private SettlementNature natureOfCompensation;
+    private NatureOfSettlement natureOfCompensation;
 
     @Column(name = "amount", precision = 12, scale = 2)
     private BigDecimal amount;
@@ -124,10 +124,10 @@ public class PAP {
     public void setVulnerabilityCategory(VulnerabilityCategory vulnerabilityCategory) { this.vulnerabilityCategory = vulnerabilityCategory; }
     public String getLocationOfImpact() { return locationOfImpact; }
     public void setLocationOfImpact(String locationOfImpact) { this.locationOfImpact = locationOfImpact; }
-    public ImpactType getImpactType() { return impactType; }
-    public void setImpactType(ImpactType impactType) { this.impactType = impactType; }
-    public SettlementNature getNatureOfCompensation() { return natureOfCompensation; }
-    public void setNatureOfCompensation(SettlementNature natureOfCompensation) { this.natureOfCompensation = natureOfCompensation; }
+    public TypeOfImpact getImpactType() { return impactType; }
+    public void setImpactType(TypeOfImpact impactType) { this.impactType = impactType; }
+    public NatureOfSettlement getNatureOfCompensation() { return natureOfCompensation; }
+    public void setNatureOfCompensation(NatureOfSettlement natureOfCompensation) { this.natureOfCompensation = natureOfCompensation; }
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public String getArea() { return area; }

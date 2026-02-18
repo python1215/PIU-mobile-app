@@ -140,6 +140,12 @@ public class SocialEnvironmentalController {
         if (pap.getCurrentAddress() != null && pap.getCurrentAddress().getSettlementCode() != null) {
             pap.setCurrentAddress(settlementRepository.findById(pap.getCurrentAddress().getSettlementCode()).orElse(null));
         }
+        if (pap.getImpactType() != null && pap.getImpactType().getId() != null) {
+            pap.setImpactType(impactTypeRepository.findById(pap.getImpactType().getId()).orElse(null));
+        }
+        if (pap.getNatureOfCompensation() != null && pap.getNatureOfCompensation().getId() != null) {
+            pap.setNatureOfCompensation(natureOfSettlementRepository.findById(pap.getNatureOfCompensation().getId()).orElse(null));
+        }
     }
 
     @PostMapping("/pap")

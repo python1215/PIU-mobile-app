@@ -54,9 +54,11 @@ def start_backend():
     try:
         lock_fd = open(LOCK_FILE, 'w')
         fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        lock_fd.write(str(os.getpid()))
+        lock_fd.flush()
     except (IOError, OSError):
         print("[SPRING BOOT] Another process is starting it, waiting...")
-        for i in range(120):
+        for i in range(180):
             if is_backend_running():
                 print("[SPRING BOOT] Ready (started by another process)!")
                 mark_ready()
@@ -65,47 +67,49 @@ def start_backend():
         print("[SPRING BOOT] Timed out waiting for other process")
         return
 
-    if is_backend_running():
-        print("[SPRING BOOT] Already running!")
-        mark_ready()
-        if lock_fd:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            lock_fd.close()
-        return
-
-    if not os.path.exists(JAR_PATH):
-        print(f"[ERROR] JAR not found: {JAR_PATH}")
-        if lock_fd:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            lock_fd.close()
-        return
-
-    print("[SPRING BOOT] Starting on port 8080...")
-    process = subprocess.Popen(
-        ["java", "-jar", JAR_PATH],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1
-    )
-
-    def stream():
-        for line in iter(process.stdout.readline, ''):
-            if line:
-                print(f"[SPRING] {line.rstrip()}")
-
-    threading.Thread(target=stream, daemon=True).start()
-
-    for i in range(120):
+    try:
         if is_backend_running():
-            print("[SPRING BOOT] Ready!")
+            print("[SPRING BOOT] Already running!")
             mark_ready()
             return
-        if i % 10 == 0:
-            print(f"[SPRING BOOT] Waiting... ({i}s)")
-        time.sleep(1)
 
-    print("[SPRING BOOT] Failed to start within 120s")
+        if not os.path.exists(JAR_PATH):
+            print(f"[ERROR] JAR not found: {JAR_PATH}")
+            return
+
+        print("[SPRING BOOT] Starting on port 8080...")
+        process = subprocess.Popen(
+            ["java", "-jar", JAR_PATH],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
+        def stream():
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    print(f"[SPRING] {line.rstrip()}")
+
+        threading.Thread(target=stream, daemon=True).start()
+
+        for i in range(180):
+            if is_backend_running():
+                print("[SPRING BOOT] Ready!")
+                mark_ready()
+                return
+            if i % 10 == 0:
+                print(f"[SPRING BOOT] Waiting... ({i}s)")
+            time.sleep(1)
+
+        print("[SPRING BOOT] Failed to start within 180s")
+    finally:
+        if lock_fd:
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+                lock_fd.close()
+            except:
+                pass
 
 try:
     os.remove(READY_FILE)
