@@ -1144,6 +1144,11 @@ function SocialEnvironmental() {
               </div>
             </div>
           </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f9f9f9'}}>
+            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.issuesRemarks')}</label>
+            <textarea className="form-control form-control-sm" name="remarks" rows="2" value={formData.remarks || ''} onChange={handleChange}></textarea>
+          </div>
         </div>
 
         <div className="col-md-6">
@@ -1211,11 +1216,6 @@ function SocialEnvironmental() {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="col-12">
-          <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.issuesRemarks')}</label>
-          <textarea className="form-control form-control-sm" name="remarks" rows="2" value={formData.remarks || ''} onChange={handleChange}></textarea>
         </div>
       </div>
       <div className="modal-footer mt-2 px-0 pt-2">
