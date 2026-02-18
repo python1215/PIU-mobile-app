@@ -698,7 +698,9 @@
     "mappingUpdated": "Cartographie mise à jour avec succès",
     "mappingDeleted": "Cartographie supprimée avec succès",
     "fullscreen": "Plein Écran",
-    "exitFullscreen": "Quitter le Plein Écran"
+    "exitFullscreen": "Quitter le Plein Écran",
+    "mapView": "Vue Carte",
+    "dataTable": "Tableau de Données"
   },
   "table": {
     "showing": "Affichage",

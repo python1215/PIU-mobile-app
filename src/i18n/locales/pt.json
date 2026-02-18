@@ -698,7 +698,9 @@
     "mappingUpdated": "Mapeamento atualizado com sucesso",
     "mappingDeleted": "Mapeamento excluído com sucesso",
     "fullscreen": "Tela Cheia",
-    "exitFullscreen": "Sair da Tela Cheia"
+    "exitFullscreen": "Sair da Tela Cheia",
+    "mapView": "Vista do Mapa",
+    "dataTable": "Tabela de Dados"
   },
   "table": {
     "showing": "Mostrando",

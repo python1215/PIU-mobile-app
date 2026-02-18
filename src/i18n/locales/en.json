@@ -699,7 +699,9 @@
     "mappingUpdated": "Mapping updated successfully",
     "mappingDeleted": "Mapping deleted successfully",
     "fullscreen": "View Fullscreen",
-    "exitFullscreen": "Exit Fullscreen"
+    "exitFullscreen": "Exit Fullscreen",
+    "mapView": "Map View",
+    "dataTable": "Data Table"
   },
   "table": {
     "showing": "Showing",

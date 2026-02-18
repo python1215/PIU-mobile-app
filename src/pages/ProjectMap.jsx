@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -25,6 +25,7 @@ function ProjectMap() {
   const [formData, setFormData] = useState({});
   const [stats, setStats] = useState({ totalHouseholds: 0, connected: 0, regions: 0 });
   const [mapFullscreen, setMapFullscreen] = useState(false);
+  const [activeTab, setActiveTab] = useState('map');
 
   const [years, setYears] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -284,99 +285,120 @@ function ProjectMap() {
         </div>
       </div>
 
-      <div className={`card mb-4${mapFullscreen ? ' position-fixed top-0 start-0 w-100 h-100 rounded-0 border-0' : ''}`} style={mapFullscreen ? { zIndex: 1050 } : {}}>
-        <div className="card-body p-0 position-relative">
-          <button
-            type="button"
-            className="btn btn-light btn-sm position-absolute shadow-sm"
-            style={{ top: '10px', right: '10px', zIndex: 1000 }}
-            onClick={() => setMapFullscreen(prev => !prev)}
-            title={mapFullscreen ? t('map.exitFullscreen') : t('map.fullscreen')}
-          >
-            {mapFullscreen ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+      <ul className="nav nav-tabs mb-3">
+        <li className="nav-item">
+          <button className={`nav-link${activeTab === 'map' ? ' active' : ''}`} onClick={() => setActiveTab('map')}>
+            <FiMap className="me-2" />{t('map.mapView')}
           </button>
-          {loading ? (
-            <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
-          ) : (
-            <div style={{ height: mapFullscreen ? '100vh' : '450px' }}>
-              <MapContainer center={center} zoom={8} style={{ height: '100%', width: '100%' }} maxBounds={[[12.5, -17.5], [14.5, -13.0]]} minZoom={7}>
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                />
-                {mappings.map((mapping) => {
-                  if (mapping.latitude && mapping.longitude) {
-                    return (
-                      <Marker key={mapping.id} position={[mapping.latitude, mapping.longitude]}>
-                        <Popup>
-                          <strong>{mapping.settlement?.settlementName || t('map.unknownLocation')}</strong><br />
-                          {t('setup.region')}: {mapping.region?.regionName || '-'}<br />
-                          {t('map.totalHouseholds')}: {mapping.totalHouseholds || 0}<br />
-                          {t('map.connected')}: {mapping.connectedHouseholds || 0}
-                        </Popup>
-                      </Marker>
-                    );
-                  }
-                  return null;
-                })}
-              </MapContainer>
-            </div>
-          )}
-        </div>
-      </div>
+        </li>
+        <li className="nav-item">
+          <button className={`nav-link${activeTab === 'table' ? ' active' : ''}`} onClick={() => setActiveTab('table')}>
+            <FiList className="me-2" />{t('map.dataTable')}
+          </button>
+        </li>
+      </ul>
 
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">{t('map.projectLocations')}</h5>
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>ID</th>
-                  <th>{t('common.project')}</th>
-                  <th>{t('map.profileYear')}</th>
-                  <th>{t('setup.region')}</th>
-                  <th>{t('setup.district')}</th>
-                  <th>{t('setup.settlement')}</th>
-                  <th>{t('map.totalHouseholds')}</th>
-                  <th>{t('map.connected')}</th>
-                  <th>{t('map.latitude')}</th>
-                  <th>{t('map.longitude')}</th>
-                  <th>{t('map.accessType')}</th>
-                  <th>{t('common.actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mappings.length === 0 ? (
-                  <tr><td colSpan="12" className="text-center text-muted">{t('table.noData')}</td></tr>
-                ) : (
-                  mappings.map((m) => (
-                    <tr key={m.id}>
-                      <td><strong>{m.id}</strong></td>
-                      <td>{m.project?.project || '-'}</td>
-                      <td>{m.profileYear?.profileYear || '-'}</td>
-                      <td>{m.region?.regionName || '-'}</td>
-                      <td>{m.district?.districtName || '-'}</td>
-                      <td>{m.settlement?.settlementName || '-'}</td>
-                      <td>{m.totalHouseholds || 0}</td>
-                      <td>{m.connectedHouseholds || 0}</td>
-                      <td>{m.latitude?.toFixed(6) || '-'}</td>
-                      <td>{m.longitude?.toFixed(6) || '-'}</td>
-                      <td><span className="badge bg-secondary">{m.accessType?.accessType || '-'}</span></td>
-                      <td>
-                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 /></button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 /></button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      {activeTab === 'map' && (
+        <div className={`card mb-4${mapFullscreen ? ' position-fixed top-0 start-0 w-100 h-100 rounded-0 border-0' : ''}`} style={mapFullscreen ? { zIndex: 1050 } : {}}>
+          <div className="card-body p-0 position-relative">
+            <button
+              type="button"
+              className="btn btn-light btn-sm position-absolute shadow-sm"
+              style={{ top: '10px', right: '10px', zIndex: 1000 }}
+              onClick={() => setMapFullscreen(prev => !prev)}
+              title={mapFullscreen ? t('map.exitFullscreen') : t('map.fullscreen')}
+            >
+              {mapFullscreen ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+            </button>
+            {loading ? (
+              <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
+            ) : (
+              <div style={{ height: mapFullscreen ? '100vh' : '500px' }}>
+                <MapContainer center={center} zoom={8} style={{ height: '100%', width: '100%' }} maxBounds={[[12.5, -17.5], [14.5, -13.0]]} minZoom={7}>
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  />
+                  {mappings.map((mapping) => {
+                    if (mapping.latitude && mapping.longitude) {
+                      return (
+                        <Marker key={mapping.id} position={[mapping.latitude, mapping.longitude]}>
+                          <Popup>
+                            <strong>{mapping.settlement?.settlementName || t('map.unknownLocation')}</strong><br />
+                            {t('setup.region')}: {mapping.region?.regionName || '-'}<br />
+                            {t('map.totalHouseholds')}: {mapping.totalHouseholds || 0}<br />
+                            {t('map.connected')}: {mapping.connectedHouseholds || 0}
+                          </Popup>
+                        </Marker>
+                      );
+                    }
+                    return null;
+                  })}
+                </MapContainer>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'table' && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">{t('map.projectLocations')}</h5>
+          </div>
+          <div className="card-body">
+            {loading ? (
+              <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-striped table-hover">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>{t('common.project')}</th>
+                      <th>{t('map.profileYear')}</th>
+                      <th>{t('setup.region')}</th>
+                      <th>{t('setup.district')}</th>
+                      <th>{t('setup.settlement')}</th>
+                      <th>{t('map.totalHouseholds')}</th>
+                      <th>{t('map.connected')}</th>
+                      <th>{t('map.latitude')}</th>
+                      <th>{t('map.longitude')}</th>
+                      <th>{t('map.accessType')}</th>
+                      <th>{t('common.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mappings.length === 0 ? (
+                      <tr><td colSpan="12" className="text-center text-muted">{t('table.noData')}</td></tr>
+                    ) : (
+                      mappings.map((m) => (
+                        <tr key={m.id}>
+                          <td><strong>{m.id}</strong></td>
+                          <td>{m.project?.project || '-'}</td>
+                          <td>{m.profileYear?.profileYear || '-'}</td>
+                          <td>{m.region?.regionName || '-'}</td>
+                          <td>{m.district?.districtName || '-'}</td>
+                          <td>{m.settlement?.settlementName || '-'}</td>
+                          <td>{m.totalHouseholds || 0}</td>
+                          <td>{m.connectedHouseholds || 0}</td>
+                          <td>{m.latitude?.toFixed(6) || '-'}</td>
+                          <td>{m.longitude?.toFixed(6) || '-'}</td>
+                          <td><span className="badge bg-secondary">{m.accessType?.accessType || '-'}</span></td>
+                          <td>
+                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(m)} title={t('common.edit')}><FiEdit2 /></button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m.id)} title={t('common.delete')}><FiTrash2 /></button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
