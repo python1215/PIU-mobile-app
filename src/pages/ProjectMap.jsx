@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2, FiMap, FiList, FiLayers, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -13,6 +13,31 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+const PROJECT_COLORS = [
+  '#4285F4', '#EA4335', '#34A853', '#FBBC05', '#9C27B0',
+  '#FF6D00', '#00BCD4', '#795548', '#E91E63', '#3F51B5',
+  '#009688', '#FF5722', '#607D8B', '#8BC34A', '#CDDC39'
+];
+
+const coloredMarkerCache = {};
+function getColoredMarkerIcon(color) {
+  if (coloredMarkerCache[color]) return coloredMarkerCache[color];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+    <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="12.5" cy="12.5" r="5" fill="#fff"/>
+  </svg>`;
+  const icon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(svg),
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    shadowSize: [41, 41]
+  });
+  coloredMarkerCache[color] = icon;
+  return icon;
+}
 
 function ProjectMap() {
   const { t } = useTranslation();
@@ -26,6 +51,8 @@ function ProjectMap() {
   const [stats, setStats] = useState({ totalHouseholds: 0, connected: 0, regions: 0 });
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
+  const [visibleProjects, setVisibleProjects] = useState({});
+  const [layersPanelOpen, setLayersPanelOpen] = useState(true);
 
   const [years, setYears] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -96,6 +123,60 @@ function ProjectMap() {
     const regionSet = new Set(data.map(m => m.region?.regionCode)).size;
     setStats({ totalHouseholds, connected, regions: regionSet });
   };
+
+  const projectColorMap = useMemo(() => {
+    const map = {};
+    projects.forEach((p, i) => {
+      map[p.projectId] = PROJECT_COLORS[i % PROJECT_COLORS.length];
+    });
+    map['__no_project__'] = '#9E9E9E';
+    return map;
+  }, [projects]);
+
+  useEffect(() => {
+    if (projects.length > 0 && Object.keys(visibleProjects).length === 0) {
+      const initial = { __all__: true };
+      projects.forEach(p => { initial[p.projectId] = true; });
+      initial['__no_project__'] = true;
+      setVisibleProjects(initial);
+    }
+  }, [projects]);
+
+  const toggleProjectLayer = useCallback((projectId) => {
+    setVisibleProjects(prev => {
+      const next = { ...prev, [projectId]: !prev[projectId] };
+      const allProjectKeys = projects.map(p => p.projectId).concat('__no_project__');
+      const allChecked = allProjectKeys.every(k => next[k]);
+      next.__all__ = allChecked;
+      return next;
+    });
+  }, [projects]);
+
+  const toggleAllProjects = useCallback(() => {
+    setVisibleProjects(prev => {
+      const newAll = !prev.__all__;
+      const next = { __all__: newAll };
+      projects.forEach(p => { next[p.projectId] = newAll; });
+      next['__no_project__'] = newAll;
+      return next;
+    });
+  }, [projects]);
+
+  const visibleMappings = useMemo(() => {
+    return mappings.filter(m => {
+      const pid = m.project?.projectId || '__no_project__';
+      return visibleProjects[pid] !== false;
+    });
+  }, [mappings, visibleProjects]);
+
+  const uniqueProjectsOnMap = useMemo(() => {
+    const ids = new Set(mappings.map(m => m.project?.projectId || '__no_project__'));
+    const list = projects.filter(p => ids.has(p.projectId));
+    if (ids.has('__no_project__')) {
+      list.push({ projectId: '__no_project__', project: t('map.noProject') });
+    }
+    return list;
+  }, [mappings, projects, t]);
 
   const filteredDistricts = useMemo(() => {
     if (!formData.regionCode) return districts;
@@ -310,6 +391,71 @@ function ProjectMap() {
             >
               {mapFullscreen ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
             </button>
+
+            <div
+              className="position-absolute bg-white rounded shadow"
+              style={{
+                top: '10px',
+                left: '10px',
+                zIndex: 1000,
+                width: layersPanelOpen ? '280px' : 'auto',
+                maxHeight: mapFullscreen ? 'calc(100vh - 30px)' : '460px',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <div
+                className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom"
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+                onClick={() => setLayersPanelOpen(prev => !prev)}
+              >
+                <div className="d-flex align-items-center gap-2">
+                  <FiLayers size={16} />
+                  <strong style={{ fontSize: '0.85rem' }}>{t('map.projectLayers')}</strong>
+                </div>
+                {layersPanelOpen ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+              </div>
+              {layersPanelOpen && (
+                <div style={{ overflowY: 'auto', padding: '8px 12px' }}>
+                  <div className="form-check mb-2 pb-2 border-bottom">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="layer-all"
+                      checked={visibleProjects.__all__ || false}
+                      onChange={toggleAllProjects}
+                    />
+                    <label className="form-check-label fw-bold" htmlFor="layer-all" style={{ fontSize: '0.95rem' }}>
+                      {t('common.allProjects')}
+                    </label>
+                  </div>
+                  {uniqueProjectsOnMap.map((p) => (
+                    <div className="form-check mb-1" key={p.projectId}>
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id={`layer-${p.projectId}`}
+                        checked={visibleProjects[p.projectId] !== false}
+                        onChange={() => toggleProjectLayer(p.projectId)}
+                      />
+                      <label className="form-check-label d-flex align-items-center gap-2" htmlFor={`layer-${p.projectId}`} style={{ fontSize: '0.82rem', lineHeight: '1.3' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          backgroundColor: projectColorMap[p.projectId] || '#9E9E9E',
+                          flexShrink: 0
+                        }}></span>
+                        {p.project}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {loading ? (
               <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
             ) : (
@@ -319,12 +465,15 @@ function ProjectMap() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   />
-                  {mappings.map((mapping) => {
+                  {visibleMappings.map((mapping) => {
                     if (mapping.latitude && mapping.longitude) {
+                      const pid = mapping.project?.projectId || '__no_project__';
+                      const color = projectColorMap[pid] || '#9E9E9E';
                       return (
-                        <Marker key={mapping.id} position={[mapping.latitude, mapping.longitude]}>
+                        <Marker key={mapping.id} position={[mapping.latitude, mapping.longitude]} icon={getColoredMarkerIcon(color)}>
                           <Popup>
                             <strong>{mapping.settlement?.settlementName || t('map.unknownLocation')}</strong><br />
+                            {t('common.project')}: {mapping.project?.project || t('map.noProject')}<br />
                             {t('setup.region')}: {mapping.region?.regionName || '-'}<br />
                             {t('map.totalHouseholds')}: {mapping.totalHouseholds || 0}<br />
                             {t('map.connected')}: {mapping.connectedHouseholds || 0}

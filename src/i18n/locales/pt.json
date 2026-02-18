@@ -700,7 +700,9 @@
     "fullscreen": "Tela Cheia",
     "exitFullscreen": "Sair da Tela Cheia",
     "mapView": "Vista do Mapa",
-    "dataTable": "Tabela de Dados"
+    "dataTable": "Tabela de Dados",
+    "projectLayers": "Camadas de Projetos",
+    "noProject": "Sem Projeto"
   },
   "table": {
     "showing": "Mostrando",

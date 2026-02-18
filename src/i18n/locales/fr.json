@@ -700,7 +700,9 @@
     "fullscreen": "Plein Écran",
     "exitFullscreen": "Quitter le Plein Écran",
     "mapView": "Vue Carte",
-    "dataTable": "Tableau de Données"
+    "dataTable": "Tableau de Données",
+    "projectLayers": "Couches de Projets",
+    "noProject": "Aucun Projet"
   },
   "table": {
     "showing": "Affichage",

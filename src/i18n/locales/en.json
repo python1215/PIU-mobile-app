@@ -701,7 +701,9 @@
     "fullscreen": "View Fullscreen",
     "exitFullscreen": "Exit Fullscreen",
     "mapView": "Map View",
-    "dataTable": "Data Table"
+    "dataTable": "Data Table",
+    "projectLayers": "Project Layers",
+    "noProject": "No Project"
   },
   "table": {
     "showing": "Showing",
