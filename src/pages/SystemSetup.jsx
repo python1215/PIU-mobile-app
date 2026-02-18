@@ -630,7 +630,8 @@ function SystemSetup() {
       setEditingItem(null);
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('Failed to save');
+      const msg = error.response?.data?.message || 'Failed to save';
+      toast.error(msg);
       throw error;
     }
   }, [currentConfig, editingItem, activeTab]);
