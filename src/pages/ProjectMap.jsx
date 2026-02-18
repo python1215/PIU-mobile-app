@@ -870,106 +870,125 @@ function ProjectMap() {
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
-                  <div className="row mb-3">
+                  <div className="row g-2">
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.profileYear')} *</label>
-                      <select className="form-select" name="yearId" value={formData.yearId || ''} onChange={handleChange} required>
-                        <option value="">---------</option>
-                        {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
-                      </select>
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('map.projectInfo')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')}</label>
+                            <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange}>
+                              <option value="">{t('common.select')}</option>
+                              {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.profileYear')} *</label>
+                            <select className="form-select form-select-sm" name="yearId" value={formData.yearId || ''} onChange={handleChange} required>
+                              <option value="">{t('common.select')}</option>
+                              {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+                        <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('map.locationDetails')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.region')} *</label>
+                            <select className="form-select form-select-sm" name="regionCode" value={formData.regionCode || ''} onChange={handleChange} required>
+                              <option value="">{t('common.select')}</option>
+                              {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-6 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.district')} *</label>
+                            <select className="form-select form-select-sm" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} required disabled={!formData.regionCode}>
+                              <option value="">{formData.regionCode ? t('common.select') : '--'}</option>
+                              {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-12 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.settlement')} *</label>
+                            <select className="form-select form-select-sm" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} required disabled={!formData.districtCode}>
+                              <option value="">{formData.districtCode ? t('common.select') : '--'}</option>
+                              {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('map.householdData')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.totalHouseholds')} *</label>
+                            <input type="number" className="form-control form-control-sm" name="totalHouseholds" value={formData.totalHouseholds || ''} onChange={handleChange} required min="0" />
+                          </div>
+                          <div className="col-6 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.connectedHouseholds')}</label>
+                            <input type="number" className="form-control form-control-sm" name="connectedHouseholds" value={formData.connectedHouseholds || ''} onChange={handleChange} min="0" />
+                          </div>
+                          <div className="col-12 col-lg-4">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.customerConnections')}</label>
+                            <input type="number" className="form-control form-control-sm" name="customerConnections" value={formData.customerConnections || ''} onChange={handleChange} min="0" />
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('common.project')}</label>
-                      <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange}>
-                        <option value="">---------</option>
-                        {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
-                      </select>
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
+                        <h6 className="mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6f42c1'}}>{t('map.genderBreakdown')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.femaleHouseholds')}</label>
+                            <input type="number" className="form-control form-control-sm" name="femaleHouseholds" value={formData.femaleHouseholds || ''} onChange={handleChange} min="0" />
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.maleHouseholds')}</label>
+                            <input type="number" className="form-control form-control-sm" name="maleHouseholds" value={formData.maleHouseholds || ''} onChange={handleChange} min="0" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('map.coordinatesAccess')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.latitude')} *</label>
+                            <input type="number" className="form-control form-control-sm" name="latitude" value={formData.latitude || ''} onChange={handleChange} step="0.000001" required />
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.longitude')} *</label>
+                            <input type="number" className="form-control form-control-sm" name="longitude" value={formData.longitude || ''} onChange={handleChange} step="0.000001" required />
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('map.accessType')} *</label>
+                            <select className="form-select form-select-sm" name="accessTypeId" value={formData.accessTypeId || ''} onChange={handleChange} required>
+                              <option value="">{t('common.select')}</option>
+                              {accessTypes.map(a => <option key={a.id} value={a.id}>{a.accessType}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f9f9f9'}}>
+                        <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('map.donorFunding')}</h6>
+                        <select className="form-select form-select-sm" multiple name="donorIds" value={formData.donorIds || []} onChange={handleDonorChange} style={{ minHeight: '80px' }}>
+                          {donors.map(d => <option key={d.donorId} value={d.donorId}>{d.name}</option>)}
+                        </select>
+                        <small className="text-muted" style={{fontSize: '0.72rem'}}>{t('map.donorsHelp')}</small>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="row mb-3">
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('setup.region')} *</label>
-                      <select className="form-select" name="regionCode" value={formData.regionCode || ''} onChange={handleChange} required>
-                        <option value="">---------</option>
-                        {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('setup.district')} *</label>
-                      <select className="form-select" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} required>
-                        <option value="">---------</option>
-                        {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('setup.settlement')} *</label>
-                      <select className="form-select" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} required>
-                        <option value="">---------</option>
-                        {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('map.totalHouseholds')} *</label>
-                      <input type="number" className="form-control" name="totalHouseholds" value={formData.totalHouseholds || ''} onChange={handleChange} required min="0" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('map.connectedHouseholds')}</label>
-                      <input type="number" className="form-control" name="connectedHouseholds" value={formData.connectedHouseholds || ''} onChange={handleChange} min="0" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label fw-semibold">{t('map.customerConnections')}</label>
-                      <input type="number" className="form-control" name="customerConnections" value={formData.customerConnections || ''} onChange={handleChange} min="0" />
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.femaleHouseholds')}</label>
-                      <input type="number" className="form-control" name="femaleHouseholds" value={formData.femaleHouseholds || ''} onChange={handleChange} min="0" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.maleHouseholds')}</label>
-                      <input type="number" className="form-control" name="maleHouseholds" value={formData.maleHouseholds || ''} onChange={handleChange} min="0" />
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.latitude')} *</label>
-                      <input type="number" className="form-control" name="latitude" value={formData.latitude || ''} onChange={handleChange} step="0.000001" required />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.longitude')} *</label>
-                      <input type="number" className="form-control" name="longitude" value={formData.longitude || ''} onChange={handleChange} step="0.000001" required />
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.accessType')} *</label>
-                      <select className="form-select" name="accessTypeId" value={formData.accessTypeId || ''} onChange={handleChange} required>
-                        <option value="">---------</option>
-                        {accessTypes.map(a => <option key={a.id} value={a.id}>{a.accessType}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">{t('map.donors')}</label>
-                      <select className="form-select" multiple name="donorIds" value={formData.donorIds || []} onChange={handleDonorChange} style={{ minHeight: '80px' }}>
-                        {donors.map(d => <option key={d.donorId} value={d.donorId}>{d.name}</option>)}
-                      </select>
-                      <small className="text-muted">{t('map.donorsHelp')}</small>
-                    </div>
-                  </div>
-
-                  <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                    <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+                  <div className="modal-footer mt-2 px-0 pt-2">
+                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
                       {t('common.cancel')}
                     </button>
-                    <button type="submit" className="btn btn-primary">
+                    <button type="submit" className="btn btn-sm btn-primary">
                       {editingItem ? t('common.update') : t('common.save')}
                     </button>
                   </div>

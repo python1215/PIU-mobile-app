@@ -717,7 +717,13 @@
     "allAccessTypes": "All Access Types",
     "searchSettlement": "Search Settlement",
     "searchSettlementPlaceholder": "Type settlement name...",
-    "applyFilters": "Apply Filters"
+    "applyFilters": "Apply Filters",
+    "projectInfo": "Project Information",
+    "locationDetails": "Location Details",
+    "householdData": "Household Data",
+    "genderBreakdown": "Gender Breakdown",
+    "coordinatesAccess": "Coordinates & Access",
+    "donorFunding": "Donor / Funding"
   },
   "table": {
     "showing": "Showing",

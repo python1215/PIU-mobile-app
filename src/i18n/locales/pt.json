@@ -716,7 +716,13 @@
     "allAccessTypes": "Todos os Tipos de Acesso",
     "searchSettlement": "Pesquisar Localidade",
     "searchSettlementPlaceholder": "Digite o nome da localidade...",
-    "applyFilters": "Aplicar Filtros"
+    "applyFilters": "Aplicar Filtros",
+    "projectInfo": "Informações do Projeto",
+    "locationDetails": "Detalhes da Localização",
+    "householdData": "Dados dos Agregados",
+    "genderBreakdown": "Distribuição por Género",
+    "coordinatesAccess": "Coordenadas & Acesso",
+    "donorFunding": "Doador / Financiamento"
   },
   "table": {
     "showing": "Mostrando",
