@@ -114,6 +114,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ActivityRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/StakeholderEngagementRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SpaController.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/FileUploadController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Activity.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/StakeholderEngagement.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/service/AuthService.java

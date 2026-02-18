@@ -527,7 +527,14 @@
     "ohsAssessment": "Détails de l'évaluation",
     "ohsWorkforce": "Données sur la main-d'œuvre",
     "issuesRemarks": "Problèmes ou remarques",
-    "picture": "Photo"
+    "picture": "Photo",
+    "browseFiles": "Parcourir les fichiers",
+    "takePhoto": "Prendre une photo",
+    "uploadingPhoto": "Téléchargement...",
+    "photoUploaded": "Photo téléchargée",
+    "uploadFailed": "Échec du téléchargement",
+    "onlyImages": "Seuls les fichiers image sont autorisés",
+    "fileTooLarge": "Le fichier doit faire moins de 10 Mo"
   },
   "documentation": {
     "title": "Documentation",

@@ -528,7 +528,14 @@
     "ohsAssessment": "Assessment Details",
     "ohsWorkforce": "Workforce Data",
     "issuesRemarks": "Issues or Remarks",
-    "picture": "Picture"
+    "picture": "Picture",
+    "browseFiles": "Browse Files",
+    "takePhoto": "Take Photo",
+    "uploadingPhoto": "Uploading...",
+    "photoUploaded": "Photo uploaded",
+    "uploadFailed": "Upload failed",
+    "onlyImages": "Only image files are allowed",
+    "fileTooLarge": "File must be under 10MB"
   },
   "documentation": {
     "title": "Documentation",

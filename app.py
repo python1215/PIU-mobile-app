@@ -15,6 +15,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dist')
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 BACKEND_URL = "http://localhost:8080"
 JAR_PATH = "/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
 LOCK_FILE = "/tmp/spring_boot.lock"
@@ -154,6 +155,10 @@ def proxy_api(path):
         return Response(resp.content, status=resp.status_code, headers=headers)
     except Exception as e:
         return {"error": "Backend unavailable", "message": str(e)}, 503
+
+@app.route('/uploads/<path:filename>')
+def serve_uploads(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
 @app.route('/health')
 def health():

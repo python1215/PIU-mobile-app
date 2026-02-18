@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function SocialEnvironmental() {
@@ -32,6 +32,46 @@ function SocialEnvironmental() {
   const [decisionOutcomes, setDecisionOutcomes] = useState([]);
   const [years, setYears] = useState([]);
   const [quarters, setQuarters] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+
+  const handleFileUpload = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(t('socialEnvironmental.onlyImages'));
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('socialEnvironmental.fileTooLarge'));
+      return;
+    }
+
+    setUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const res = await axios.post('/api/uploads', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({ ...prev, picture: res.data.url }));
+      toast.success(t('socialEnvironmental.photoUploaded'));
+    } catch (err) {
+      toast.error(err.response?.data?.error || t('socialEnvironmental.uploadFailed'));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }
+  }, [t]);
+
+  const handleRemovePicture = useCallback(() => {
+    setFormData(prev => ({ ...prev, picture: null }));
+  }, []);
 
   useEffect(() => {
     loadProjects();
@@ -1119,7 +1159,26 @@ function SocialEnvironmental() {
 
         <div className="col-md-6">
           <label className="form-label fw-semibold">{t('socialEnvironmental.picture')}</label>
-          <input type="text" className="form-control" name="picture" value={formData.picture || ''} onChange={handleChange} placeholder="URL or path to photo" />
+          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileUpload} className="d-none" />
+          <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
+          {formData.picture ? (
+            <div className="border rounded p-2">
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <span className="text-success fw-semibold" style={{fontSize: '0.85rem'}}><FiImage className="me-1" />{t('socialEnvironmental.photoUploaded')}</span>
+                <button type="button" className="btn btn-sm btn-outline-danger ms-auto" onClick={handleRemovePicture}><FiX size={14} /></button>
+              </div>
+              <img src={formData.picture} alt="OHS" className="img-fluid rounded" style={{maxHeight: '150px', objectFit: 'cover'}} />
+            </div>
+          ) : (
+            <div className="d-flex gap-2">
+              <button type="button" className="btn btn-outline-primary flex-fill" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                <FiUpload className="me-1" />{uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
+              </button>
+              <button type="button" className="btn btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+                <FiCamera className="me-1" />{t('socialEnvironmental.takePhoto')}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="col-12 mt-3">
