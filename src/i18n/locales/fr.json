@@ -696,7 +696,9 @@
     "donorsHelp": "Maintenez Ctrl/Cmd pour sélectionner plusieurs donateurs",
     "mappingCreated": "Cartographie créée avec succès",
     "mappingUpdated": "Cartographie mise à jour avec succès",
-    "mappingDeleted": "Cartographie supprimée avec succès"
+    "mappingDeleted": "Cartographie supprimée avec succès",
+    "fullscreen": "Plein Écran",
+    "exitFullscreen": "Quitter le Plein Écran"
   },
   "table": {
     "showing": "Affichage",

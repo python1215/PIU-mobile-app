@@ -696,7 +696,9 @@
     "donorsHelp": "Segure Ctrl/Cmd para selecionar vários doadores",
     "mappingCreated": "Mapeamento criado com sucesso",
     "mappingUpdated": "Mapeamento atualizado com sucesso",
-    "mappingDeleted": "Mapeamento excluído com sucesso"
+    "mappingDeleted": "Mapeamento excluído com sucesso",
+    "fullscreen": "Tela Cheia",
+    "exitFullscreen": "Sair da Tela Cheia"
   },
   "table": {
     "showing": "Mostrando",

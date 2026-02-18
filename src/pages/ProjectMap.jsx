@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiHome, FiUsers, FiEdit2, FiTrash2, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -24,6 +24,7 @@ function ProjectMap() {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [stats, setStats] = useState({ totalHouseholds: 0, connected: 0, regions: 0 });
+  const [mapFullscreen, setMapFullscreen] = useState(false);
 
   const [years, setYears] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -211,7 +212,7 @@ function ProjectMap() {
     }
   };
 
-  const center = [-13.4, 16.5];
+  const center = [13.45, -15.4];
 
   return (
     <div className="container-fluid">
@@ -283,13 +284,22 @@ function ProjectMap() {
         </div>
       </div>
 
-      <div className="card mb-4">
-        <div className="card-body p-0">
+      <div className={`card mb-4${mapFullscreen ? ' position-fixed top-0 start-0 w-100 h-100 rounded-0 border-0' : ''}`} style={mapFullscreen ? { zIndex: 1050 } : {}}>
+        <div className="card-body p-0 position-relative">
+          <button
+            type="button"
+            className="btn btn-light btn-sm position-absolute shadow-sm"
+            style={{ top: '10px', right: '10px', zIndex: 1000 }}
+            onClick={() => setMapFullscreen(prev => !prev)}
+            title={mapFullscreen ? t('map.exitFullscreen') : t('map.fullscreen')}
+          >
+            {mapFullscreen ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+          </button>
           {loading ? (
             <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
           ) : (
-            <div style={{ height: '400px' }}>
-              <MapContainer center={center} zoom={7} style={{ height: '100%', width: '100%' }}>
+            <div style={{ height: mapFullscreen ? '100vh' : '450px' }}>
+              <MapContainer center={center} zoom={8} style={{ height: '100%', width: '100%' }} maxBounds={[[12.5, -17.5], [14.5, -13.0]]} minZoom={7}>
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

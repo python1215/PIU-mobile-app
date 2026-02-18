@@ -697,7 +697,9 @@
     "donorsHelp": "Hold Ctrl/Cmd to select multiple donors",
     "mappingCreated": "Mapping created successfully",
     "mappingUpdated": "Mapping updated successfully",
-    "mappingDeleted": "Mapping deleted successfully"
+    "mappingDeleted": "Mapping deleted successfully",
+    "fullscreen": "View Fullscreen",
+    "exitFullscreen": "Exit Fullscreen"
   },
   "table": {
     "showing": "Showing",
