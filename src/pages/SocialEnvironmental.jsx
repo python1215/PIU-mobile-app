@@ -806,117 +806,129 @@ function SocialEnvironmental() {
 
   const renderPAPForm = () => (
     <form onSubmit={handleSubmitPAP}>
-      <div className="row g-3">
-        <div className="col-12">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('common.project')}</h6>
-        </div>
+      <div className="row g-2">
         <div className="col-md-6">
-          <label className="form-label fw-semibold">{t('common.project')} *</label>
-          <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
-            <option value="">{t('common.select')}</option>
-            {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
-          </select>
-        </div>
-        <div className="col-md-6">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.typeOfInvestment')}</label>
-          <select className="form-select" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
-            <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
-            {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
-          </select>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.project')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')} *</label>
+                <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+                  <option value="">{t('common.select')}</option>
+                  {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                </select>
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.typeOfInvestment')}</label>
+                <select className="form-select form-select-sm" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
+                  <option value="">{formData.projectId ? t('common.select') : '--'}</option>
+                  {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+            <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.location')}</h6>
+            <div className="row g-2">
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.regions')}</label>
+                <select className="form-select form-select-sm" name="regionCode" value={formData.regionCode || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.districts')}</label>
+                <select className="form-select form-select-sm" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} disabled={!formData.regionCode}>
+                  <option value="">{formData.regionCode ? t('common.select') : '--'}</option>
+                  {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.settlement')}</label>
+                <select className="form-select form-select-sm" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} disabled={!formData.districtCode}>
+                  <option value="">{formData.districtCode ? t('common.select') : '--'}</option>
+                  {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f9f9f9'}}>
+            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.remarks')}</label>
+            <textarea className="form-control form-control-sm" name="remarks" rows="2" value={formData.remarks || ''} onChange={handleChange} placeholder={t('socialEnvironmental.remarks')}></textarea>
+          </div>
         </div>
 
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.location')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('setup.regions')}</label>
-          <select className="form-select" name="regionCode" value={formData.regionCode || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('setup.districts')}</label>
-          <select className="form-select" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} disabled={!formData.regionCode}>
-            <option value="">{formData.regionCode ? t('common.select') : '-- Select region first --'}</option>
-            {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.settlement')}</label>
-          <select className="form-select" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} disabled={!formData.districtCode}>
-            <option value="">{formData.districtCode ? t('common.select') : '-- Select district first --'}</option>
-            {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
-          </select>
-        </div>
-
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.pap')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.papId')} *</label>
-          <input type="text" className="form-control" name="papIdentificationNumber" value={formData.papIdentificationNumber || ''} onChange={handleChange} required disabled={!!editingItem} placeholder="e.g. PAP-001" />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.sex')}</label>
-          <select className="form-select" name="sex" value={formData.sex || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="M">{t('socialEnvironmental.male')}</option>
-            <option value="F">{t('socialEnvironmental.female')}</option>
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.papType')}</label>
-          <select className="form-select" name="papTypeId" value={formData.papTypeId || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            {papTypes.map(pt => <option key={pt.id} value={pt.id}>{pt.typeOfPap}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.papCategory')}</label>
-          <select className="form-select" name="papCategoryId" value={formData.papCategoryId || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            {papCategories.map(pc => <option key={pc.id} value={pc.id}>{pc.papCategory}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.vulnerabilityStatus')}</label>
-          <select className="form-select" name="vulnerabilityCategoryId" value={formData.vulnerabilityCategoryId || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            {vulnerabilityCategories.map(vc => <option key={vc.id} value={vc.id}>{vc.vulnerability}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.compensated')}</label>
-          <select className="form-select" name="papCompensated" value={formData.papCompensated || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Y">{t('common.yes')}</option>
-            <option value="N">{t('common.no')}</option>
-          </select>
-        </div>
-
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.dateReceived')}</h6>
-        </div>
         <div className="col-md-6">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.dateReceivedFrom')}</label>
-          <input type="date" className="form-control" name="dateReceivedFrom" value={formData.dateReceivedFrom || ''} onChange={handleChange} />
-        </div>
-        <div className="col-md-6">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.dateReceivedTo')}</label>
-          <input type="date" className="form-control" name="dateReceivedTo" value={formData.dateReceivedTo || ''} onChange={handleChange} />
-        </div>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+            <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.pap')}</h6>
+            <div className="row g-2">
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.papId')} *</label>
+                <input type="text" className="form-control form-control-sm" name="papIdentificationNumber" value={formData.papIdentificationNumber || ''} onChange={handleChange} required disabled={!!editingItem} placeholder="e.g. PAP-001" />
+              </div>
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.sex')}</label>
+                <select className="form-select form-select-sm" name="sex" value={formData.sex || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="M">{t('socialEnvironmental.male')}</option>
+                  <option value="F">{t('socialEnvironmental.female')}</option>
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.papType')}</label>
+                <select className="form-select form-select-sm" name="papTypeId" value={formData.papTypeId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {papTypes.map(pt => <option key={pt.id} value={pt.id}>{pt.typeOfPap}</option>)}
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.papCategory')}</label>
+                <select className="form-select form-select-sm" name="papCategoryId" value={formData.papCategoryId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {papCategories.map(pc => <option key={pc.id} value={pc.id}>{pc.papCategory}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.vulnerabilityStatus')}</label>
+                <select className="form-select form-select-sm" name="vulnerabilityCategoryId" value={formData.vulnerabilityCategoryId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {vulnerabilityCategories.map(vc => <option key={vc.id} value={vc.id}>{vc.vulnerability}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensated')}</label>
+                <select className="form-select form-select-sm" name="papCompensated" value={formData.papCompensated || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Y">{t('common.yes')}</option>
+                  <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-        <div className="col-12 mt-2">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.remarks')}</label>
-          <textarea className="form-control" name="remarks" rows="3" value={formData.remarks || ''} onChange={handleChange} placeholder={t('socialEnvironmental.remarks')}></textarea>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+            <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.dateReceived')}</h6>
+            <div className="row g-2">
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceivedFrom')}</label>
+                <input type="date" className="form-control form-control-sm" name="dateReceivedFrom" value={formData.dateReceivedFrom || ''} onChange={handleChange} />
+              </div>
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceivedTo')}</label>
+                <input type="date" className="form-control form-control-sm" name="dateReceivedTo" value={formData.dateReceivedTo || ''} onChange={handleChange} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="modal-footer mt-3 px-0">
-        <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+      <div className="modal-footer mt-2 px-0 pt-2">
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
           {t('common.cancel')}
         </button>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-sm btn-primary">
           {editingItem ? t('common.update') : t('common.save')}
         </button>
       </div>
@@ -1336,7 +1348,7 @@ function SocialEnvironmental() {
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className={`modal-dialog modal-dialog-scrollable ${activeTab === 'ohs' || activeTab === 'grievance' ? 'modal-xl modal-fullscreen-md-down' : 'modal-lg modal-fullscreen-sm-down'}`}>
+          <div className={`modal-dialog modal-dialog-scrollable ${activeTab === 'ohs' || activeTab === 'grievance' || activeTab === 'pap' ? 'modal-xl modal-fullscreen-md-down' : 'modal-lg modal-fullscreen-sm-down'}`}>
             <div className="modal-content">
               <div className="modal-header py-2">
                 <h6 className="modal-title mb-0">{getModalTitle()}</h6>
