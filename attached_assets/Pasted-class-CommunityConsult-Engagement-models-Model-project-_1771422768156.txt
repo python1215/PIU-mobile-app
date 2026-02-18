@@ -1,0 +1,96 @@
+class CommunityConsult_Engagement(models.Model):
+    project_name = models.ForeignKey(
+        Project, 
+        on_delete=models.CASCADE, 
+        verbose_name='Name of Project',
+        db_index=True
+    )
+    reference_number = models.CharField(
+        primary_key=True, 
+        max_length=15,
+        unique=True,
+        help_text="Unique reference number for this engagement"
+    )
+    year = models.ForeignKey(
+        YEAR, 
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    place_of_event = models.CharField(
+        max_length=100,
+        help_text="Location where engagement took place"
+    )
+    date_of_consultation = models.DateField(db_index=True)
+    male = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Number of male participants"
+    )
+    female = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Number of female participants"
+    )
+    total_participants = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)]
+    )
+    stake_holder_engagement_Types = models.ForeignKey(
+        TypeOfStakeholderEngagement, 
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    key_issues_discussed = models.TextField()
+    any_follow_up_actions = models.TextField(blank=True)
+    picture = models.ImageField(
+        null=True, 
+        blank=True, 
+        upload_to='images/communityConsultation',
+        verbose_name='Picture',
+        help_text="Upload engagement photos"
+    )
+    date_created = models.DateTimeField(auto_now_add=True, db_index=True)
+    loginUser = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+
+    class Meta:
+        verbose_name = 'Community Engagement/Consultation'
+        verbose_name_plural = 'Community Engagement/Consultations'
+        ordering = ['-date_of_consultation', '-date_created']
+        indexes = [
+            models.Index(fields=['project_name', 'year']),
+            models.Index(fields=['stake_holder_engagement_Types']),
+            models.Index(fields=['date_of_consultation', 'place_of_event']),
+            models.Index(fields=['male', 'female', 'total_participants']),
+        ]
+
+    def __str__(self):
+        return f"{self.reference_number} - {self.place_of_event} ({self.date_of_consultation})"
+
+    def get_picture_url(self):
+        if self.picture:
+            return self.picture.url
+        return None
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.male + self.female != self.total_participants:
+            raise ValidationError(
+                "Total participants must equal the sum of male and female participants"
+            )
+
+    @property
+    def female_percentage(self):
+        if self.total_participants > 0:
+            return round((self.female / self.total_participants) * 100, 1)
+        return 0
+
+
+def get_kpi_description(id_kpi_description):
+    try:
+        kpis = KPI_For_Contract.objects.filter(
+            monitoring_type_code=id_kpi_description
+        ).values_list('kpi_description', flat=True)
+        return list(kpis)
+    except KPI_For_Contract.DoesNotExist:
+        return []

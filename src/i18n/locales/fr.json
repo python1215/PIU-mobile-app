@@ -534,7 +534,17 @@
     "photoUploaded": "Photo téléchargée",
     "uploadFailed": "Échec du téléchargement",
     "onlyImages": "Seuls les fichiers image sont autorisés",
-    "fileTooLarge": "Le fichier doit faire moins de 10 Mo"
+    "fileTooLarge": "Le fichier doit faire moins de 10 Mo",
+    "editEngagement": "Modifier l'engagement communautaire",
+    "engagementCreated": "Engagement créé avec succès",
+    "engagementUpdated": "Engagement mis à jour avec succès",
+    "engagementDeleted": "Engagement supprimé avec succès",
+    "engagementProjectInfo": "Projet & Type",
+    "engagementEventDetails": "Détails de l'événement",
+    "engagementParticipants": "Participants",
+    "engagementDiscussion": "Discussion & Suivi",
+    "dateOfConsultation": "Date de consultation",
+    "keyIssuesDiscussed": "Points clés discutés"
   },
   "documentation": {
     "title": "Documentation",

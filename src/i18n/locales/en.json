@@ -535,7 +535,17 @@
     "photoUploaded": "Photo uploaded",
     "uploadFailed": "Upload failed",
     "onlyImages": "Only image files are allowed",
-    "fileTooLarge": "File must be under 10MB"
+    "fileTooLarge": "File must be under 10MB",
+    "editEngagement": "Edit Community Engagement",
+    "engagementCreated": "Engagement record created successfully",
+    "engagementUpdated": "Engagement record updated successfully",
+    "engagementDeleted": "Engagement record deleted successfully",
+    "engagementProjectInfo": "Project & Type",
+    "engagementEventDetails": "Event Details",
+    "engagementParticipants": "Participants",
+    "engagementDiscussion": "Discussion & Follow-up",
+    "dateOfConsultation": "Date of Consultation",
+    "keyIssuesDiscussed": "Key Issues Discussed"
   },
   "documentation": {
     "title": "Documentation",

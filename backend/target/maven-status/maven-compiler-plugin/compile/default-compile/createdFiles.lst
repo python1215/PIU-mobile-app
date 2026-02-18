@@ -87,6 +87,7 @@ com/piun/piuproject/model/SettlementNature.class
 com/piun/piuproject/repository/PAPRepository.class
 com/piun/piuproject/service/AuthService.class
 com/piun/piuproject/model/ProjectDocument.class
+com/piun/piuproject/repository/StakeholderEngagementTypeRepository.class
 com/piun/piuproject/model/Settlement.class
 com/piun/piuproject/repository/InvestmentTypeRepository.class
 com/piun/piuproject/repository/PhysicalProgressRepository.class

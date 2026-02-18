@@ -62,6 +62,9 @@ public class SocialEnvironmentalController {
     private CommunityEngagementRepository engagementRepository;
 
     @Autowired
+    private StakeholderEngagementTypeRepository stakeholderEngagementTypeRepository;
+
+    @Autowired
     private YearRepository yearRepository;
 
     @Autowired
@@ -351,6 +354,11 @@ public class SocialEnvironmentalController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/engagement-types")
+    public List<StakeholderEngagementType> getAllEngagementTypes() {
+        return stakeholderEngagementTypeRepository.findAll();
+    }
+
     @GetMapping("/community-engagement")
     public List<CommunityEngagement> getAllEngagements() {
         return engagementRepository.findAll();
@@ -361,8 +369,21 @@ public class SocialEnvironmentalController {
         return engagementRepository.findByProject_ProjectId(projectId);
     }
 
+    private void resolveEngagementReferences(CommunityEngagement engagement) {
+        if (engagement.getProject() != null && engagement.getProject().getProjectId() != null) {
+            engagement.setProject(projectRepository.findById(engagement.getProject().getProjectId()).orElse(null));
+        }
+        if (engagement.getYear() != null && engagement.getYear().getId() != null) {
+            engagement.setYear(yearRepository.findById(engagement.getYear().getId()).orElse(null));
+        }
+        if (engagement.getEngagementType() != null && engagement.getEngagementType().getId() != null) {
+            engagement.setEngagementType(stakeholderEngagementTypeRepository.findById(engagement.getEngagementType().getId()).orElse(null));
+        }
+    }
+
     @PostMapping("/community-engagement")
     public CommunityEngagement createEngagement(@RequestBody CommunityEngagement engagement) {
+        resolveEngagementReferences(engagement);
         return engagementRepository.save(engagement);
     }
 
@@ -370,12 +391,18 @@ public class SocialEnvironmentalController {
     public ResponseEntity<CommunityEngagement> updateEngagement(@PathVariable String id, @RequestBody CommunityEngagement details) {
         return engagementRepository.findById(id)
             .map(engagement -> {
+                resolveEngagementReferences(details);
+                engagement.setProject(details.getProject());
+                engagement.setYear(details.getYear());
                 engagement.setPlaceOfEvent(details.getPlaceOfEvent());
-                engagement.setKeyIssuesDiscussed(details.getKeyIssuesDiscussed());
-                engagement.setFollowUpActions(details.getFollowUpActions());
+                engagement.setDateOfConsultation(details.getDateOfConsultation());
                 engagement.setMale(details.getMale());
                 engagement.setFemale(details.getFemale());
                 engagement.setTotalParticipants(details.getTotalParticipants());
+                engagement.setEngagementType(details.getEngagementType());
+                engagement.setKeyIssuesDiscussed(details.getKeyIssuesDiscussed());
+                engagement.setFollowUpActions(details.getFollowUpActions());
+                engagement.setPicture(details.getPicture());
                 return ResponseEntity.ok(engagementRepository.save(engagement));
             })
             .orElse(ResponseEntity.notFound().build());

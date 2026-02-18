@@ -32,6 +32,7 @@ function SocialEnvironmental() {
   const [decisionOutcomes, setDecisionOutcomes] = useState([]);
   const [years, setYears] = useState([]);
   const [quarters, setQuarters] = useState([]);
+  const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -116,7 +117,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -126,7 +127,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/kpi-contracts').catch(() => ({ data: [] })),
         axios.get('/api/setup/decision-outcomes').catch(() => ({ data: [] })),
         axios.get('/api/setup/years').catch(() => ({ data: [] })),
-        axios.get('/api/setup/quarters').catch(() => ({ data: [] }))
+        axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
+        axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -138,6 +140,7 @@ function SocialEnvironmental() {
       setDecisionOutcomes(doRes.data);
       setYears(yrRes.data);
       setQuarters(qrRes.data);
+      setEngagementTypes(etRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -152,7 +155,7 @@ function SocialEnvironmental() {
   ], [t, esia, pap, grievances, ohs, engagements]);
 
   const handleOpenModal = useCallback((item = null) => {
-    if (activeTab === 'esia' || activeTab === 'pap' || activeTab === 'grievance' || activeTab === 'ohs') {
+    if (activeTab === 'esia' || activeTab === 'pap' || activeTab === 'grievance' || activeTab === 'ohs' || activeTab === 'engagement') {
       loadReferenceData();
     }
     if (item) {
@@ -227,6 +230,21 @@ function SocialEnvironmental() {
           kpiDescriptionId: item.kpiDescription?.id || '',
           picture: item.picture || ''
         });
+      } else if (activeTab === 'engagement') {
+        setFormData({
+          referenceNumber: item.referenceNumber || '',
+          projectId: item.project?.projectId || '',
+          yearId: item.year?.id || '',
+          placeOfEvent: item.placeOfEvent || '',
+          dateOfConsultation: item.dateOfConsultation || '',
+          male: item.male ?? '',
+          female: item.female ?? '',
+          totalParticipants: item.totalParticipants ?? '',
+          engagementTypeId: item.engagementType?.id || '',
+          keyIssuesDiscussed: item.keyIssuesDiscussed || '',
+          followUpActions: item.followUpActions || '',
+          picture: item.picture || ''
+        });
       }
     } else {
       setEditingItem(null);
@@ -298,6 +316,21 @@ function SocialEnvironmental() {
           youthMale: '',
           youthFemale: '',
           kpiDescriptionId: '',
+          picture: ''
+        });
+      } else if (activeTab === 'engagement') {
+        setFormData({
+          referenceNumber: '',
+          projectId: pid,
+          yearId: '',
+          placeOfEvent: '',
+          dateOfConsultation: '',
+          male: '',
+          female: '',
+          totalParticipants: '',
+          engagementTypeId: '',
+          keyIssuesDiscussed: '',
+          followUpActions: '',
           picture: ''
         });
       }
@@ -533,6 +566,53 @@ function SocialEnvironmental() {
     }
   };
 
+  const handleSubmitEngagement = async (e) => {
+    e.preventDefault();
+    const payload = {
+      referenceNumber: formData.referenceNumber || null,
+      project: formData.projectId ? { projectId: formData.projectId } : null,
+      year: formData.yearId ? { id: parseInt(formData.yearId) } : null,
+      placeOfEvent: formData.placeOfEvent || null,
+      dateOfConsultation: formData.dateOfConsultation || null,
+      male: formData.male !== '' ? parseInt(formData.male) : null,
+      female: formData.female !== '' ? parseInt(formData.female) : null,
+      totalParticipants: formData.totalParticipants !== '' ? parseInt(formData.totalParticipants) : null,
+      engagementType: formData.engagementTypeId ? { id: parseInt(formData.engagementTypeId) } : null,
+      keyIssuesDiscussed: formData.keyIssuesDiscussed || null,
+      followUpActions: formData.followUpActions || null,
+      picture: formData.picture || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/social-environmental/community-engagement/${editingItem.referenceNumber}`, payload);
+        toast.success(t('socialEnvironmental.engagementUpdated'));
+      } else {
+        await axios.post('/api/social-environmental/community-engagement', payload);
+        toast.success(t('socialEnvironmental.engagementCreated'));
+      }
+      handleCloseModal();
+      loadData();
+    } catch (error) {
+      console.error('Error saving engagement:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
+  const handleDeleteEngagement = async (refNumber) => {
+    if (!window.confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/social-environmental/community-engagement/${refNumber}`);
+      toast.success(t('socialEnvironmental.engagementDeleted'));
+      loadData();
+    } catch (error) {
+      console.error('Error deleting engagement:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
   const renderESIATable = () => (
     <div className="table-responsive">
       <table className="table table-striped table-hover">
@@ -723,8 +803,10 @@ function SocialEnvironmental() {
         <thead className="table-dark">
           <tr>
             <th>{t('socialEnvironmental.reference')}</th>
+            <th>{t('common.project')}</th>
             <th>{t('socialEnvironmental.place')}</th>
             <th>{t('common.date')}</th>
+            <th>{t('socialEnvironmental.engagementType')}</th>
             <th>{t('socialEnvironmental.male')}</th>
             <th>{t('socialEnvironmental.female')}</th>
             <th>{t('common.total')}</th>
@@ -733,19 +815,21 @@ function SocialEnvironmental() {
         </thead>
         <tbody>
           {engagements.length === 0 ? (
-            <tr><td colSpan="7" className="text-center text-muted">{t('table.noData')}</td></tr>
+            <tr><td colSpan="9" className="text-center text-muted">{t('table.noData')}</td></tr>
           ) : (
-            engagements.map((item, index) => (
-              <tr key={index}>
-                <td>{item.referenceNumber}</td>
-                <td>{item.placeOfEvent}</td>
-                <td>{item.dateOfConsultation}</td>
-                <td>{item.male}</td>
-                <td>{item.female}</td>
-                <td>{item.totalParticipants}</td>
+            engagements.map((item) => (
+              <tr key={item.referenceNumber}>
+                <td><strong>{item.referenceNumber}</strong></td>
+                <td>{item.project?.project || '-'}</td>
+                <td>{item.placeOfEvent || '-'}</td>
+                <td>{item.dateOfConsultation || '-'}</td>
+                <td>{item.engagementType?.engagementType || '-'}</td>
+                <td>{item.male ?? '-'}</td>
+                <td>{item.female ?? '-'}</td>
+                <td>{item.totalParticipants ?? '-'}</td>
                 <td>
-                  <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-                  <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
+                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteEngagement(item.referenceNumber)}><FiTrash2 /></button>
                 </td>
               </tr>
             ))
@@ -1259,11 +1343,129 @@ function SocialEnvironmental() {
     </form>
   );
 
+  const renderEngagementForm = () => (
+    <form onSubmit={handleSubmitEngagement}>
+      <div className="row g-2">
+        <div className="col-md-6">
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.engagementProjectInfo')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.reference')} *</label>
+                <input type="text" className="form-control form-control-sm" name="referenceNumber" value={formData.referenceNumber || ''} onChange={handleChange} required maxLength={15} disabled={!!editingItem} />
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')} *</label>
+                <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+                  <option value="">{t('common.select')}</option>
+                  {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                </select>
+              </div>
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.yearOfReport')}</label>
+                <select className="form-select form-select-sm" name="yearId" value={formData.yearId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                </select>
+              </div>
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.engagementType')}</label>
+                <select className="form-select form-select-sm" name="engagementTypeId" value={formData.engagementTypeId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {engagementTypes.map(et => <option key={et.id} value={et.id}>{et.engagementType}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+            <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.engagementEventDetails')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.place')}</label>
+                <input type="text" className="form-control form-control-sm" name="placeOfEvent" value={formData.placeOfEvent || ''} onChange={handleChange} maxLength={100} />
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateOfConsultation')}</label>
+                <input type="date" className="form-control form-control-sm" name="dateOfConsultation" value={formData.dateOfConsultation || ''} onChange={handleChange} />
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
+            <h6 className="mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6f42c1'}}>{t('socialEnvironmental.engagementParticipants')}</h6>
+            <div className="row g-2">
+              <div className="col-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.male')}</label>
+                <input type="number" className="form-control form-control-sm" name="male" value={formData.male ?? ''} onChange={handleChange} min="0" />
+              </div>
+              <div className="col-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.female')}</label>
+                <input type="number" className="form-control form-control-sm" name="female" value={formData.female ?? ''} onChange={handleChange} min="0" />
+              </div>
+              <div className="col-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.total')}</label>
+                <input type="number" className="form-control form-control-sm" name="totalParticipants" value={formData.totalParticipants ?? ''} onChange={handleChange} min="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6">
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+            <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.engagementDiscussion')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.keyIssuesDiscussed')}</label>
+                <textarea className="form-control form-control-sm" name="keyIssuesDiscussed" rows="4" value={formData.keyIssuesDiscussed || ''} onChange={handleChange}></textarea>
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.followUpActions')}</label>
+                <textarea className="form-control form-control-sm" name="followUpActions" rows="4" value={formData.followUpActions || ''} onChange={handleChange}></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f5f5f5'}}>
+            <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.picture')}</h6>
+            <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileUpload} className="d-none" />
+            <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
+            {formData.picture ? (
+              <div className="d-flex align-items-center gap-2">
+                <img src={formData.picture} alt="Engagement" className="rounded" style={{height: '60px', width: '60px', objectFit: 'cover'}} />
+                <span className="text-success" style={{fontSize: '0.8rem'}}><FiImage className="me-1" />{t('socialEnvironmental.photoUploaded')}</span>
+                <button type="button" className="btn btn-sm btn-outline-danger ms-auto p-1" onClick={handleRemovePicture}><FiX size={12} /></button>
+              </div>
+            ) : (
+              <div className="d-flex gap-2">
+                <button type="button" className="btn btn-sm btn-outline-primary flex-fill" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                  <FiUpload size={13} className="me-1" />{uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
+                </button>
+                <button type="button" className="btn btn-sm btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+                  <FiCamera size={13} className="me-1" />{t('socialEnvironmental.takePhoto')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="modal-footer mt-2 px-0 pt-2">
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
+          {t('common.cancel')}
+        </button>
+        <button type="submit" className="btn btn-sm btn-primary">
+          {editingItem ? t('common.update') : t('common.save')}
+        </button>
+      </div>
+    </form>
+  );
+
   const getModalTitle = () => {
     if (activeTab === 'esia') return editingItem ? t('socialEnvironmental.editESIA') : t('socialEnvironmental.addESIA');
     if (activeTab === 'pap') return editingItem ? t('socialEnvironmental.editPAP') : t('socialEnvironmental.addPAP');
     if (activeTab === 'grievance') return editingItem ? t('socialEnvironmental.editGrievance') : t('socialEnvironmental.addGrievance');
     if (activeTab === 'ohs') return editingItem ? t('socialEnvironmental.editOHS') : t('socialEnvironmental.addOHS');
+    if (activeTab === 'engagement') return editingItem ? t('socialEnvironmental.editEngagement') : t('socialEnvironmental.addEngagement');
     return t('common.addNew');
   };
 
@@ -1282,19 +1484,8 @@ function SocialEnvironmental() {
     if (activeTab === 'pap') return renderPAPForm();
     if (activeTab === 'grievance') return renderGrievanceForm();
     if (activeTab === 'ohs') return renderOHSForm();
-    return (
-      <>
-        <p className="text-muted">{t('common.formPlaceholder')}</p>
-        <div className="modal-footer">
-          <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
-            {t('common.cancel')}
-          </button>
-          <button type="button" className="btn btn-primary" onClick={handleCloseModal}>
-            {t('common.save')}
-          </button>
-        </div>
-      </>
-    );
+    if (activeTab === 'engagement') return renderEngagementForm();
+    return null;
   };
 
   return (
@@ -1348,7 +1539,7 @@ function SocialEnvironmental() {
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className={`modal-dialog modal-dialog-scrollable ${activeTab === 'ohs' || activeTab === 'grievance' || activeTab === 'pap' ? 'modal-xl modal-fullscreen-md-down' : 'modal-lg modal-fullscreen-sm-down'}`}>
+          <div className={`modal-dialog modal-dialog-scrollable ${activeTab === 'ohs' || activeTab === 'grievance' || activeTab === 'pap' || activeTab === 'engagement' ? 'modal-xl modal-fullscreen-md-down' : 'modal-lg modal-fullscreen-sm-down'}`}>
             <div className="modal-content">
               <div className="modal-header py-2">
                 <h6 className="modal-title mb-0">{getModalTitle()}</h6>

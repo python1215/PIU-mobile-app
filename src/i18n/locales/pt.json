@@ -534,7 +534,17 @@
     "photoUploaded": "Foto enviada",
     "uploadFailed": "Falha no envio",
     "onlyImages": "Apenas arquivos de imagem são permitidos",
-    "fileTooLarge": "O arquivo deve ter menos de 10 MB"
+    "fileTooLarge": "O arquivo deve ter menos de 10 MB",
+    "editEngagement": "Editar Engajamento Comunitário",
+    "engagementCreated": "Registro de engajamento criado com sucesso",
+    "engagementUpdated": "Registro de engajamento atualizado com sucesso",
+    "engagementDeleted": "Registro de engajamento excluído com sucesso",
+    "engagementProjectInfo": "Projeto & Tipo",
+    "engagementEventDetails": "Detalhes do Evento",
+    "engagementParticipants": "Participantes",
+    "engagementDiscussion": "Discussão & Acompanhamento",
+    "dateOfConsultation": "Data da Consulta",
+    "keyIssuesDiscussed": "Principais Questões Discutidas"
   },
   "documentation": {
     "title": "Documentação",
