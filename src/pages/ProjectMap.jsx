@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -53,6 +53,50 @@ function ProjectMap() {
   const [activeTab, setActiveTab] = useState('map');
   const [visibleProjects, setVisibleProjects] = useState({});
   const [layersPanelOpen, setLayersPanelOpen] = useState(true);
+  const [panelPos, setPanelPos] = useState({ x: 10, y: 10 });
+  const dragRef = useRef(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const didDrag = useRef(false);
+
+  const handleDragStart = useCallback((e) => {
+    if (e.target.closest('input, label')) return;
+    isDragging.current = true;
+    didDrag.current = false;
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    const rect = dragRef.current.getBoundingClientRect();
+    const parentRect = dragRef.current.parentElement.getBoundingClientRect();
+    dragOffset.current = {
+      x: e.clientX - (rect.left - parentRect.left),
+      y: e.clientY - (rect.top - parentRect.top)
+    };
+    e.preventDefault();
+
+    const handleDragMove = (ev) => {
+      if (!isDragging.current) return;
+      const dx = Math.abs(ev.clientX - dragStartPos.current.x);
+      const dy = Math.abs(ev.clientY - dragStartPos.current.y);
+      if (dx > 3 || dy > 3) didDrag.current = true;
+      const parentRect = dragRef.current.parentElement.getBoundingClientRect();
+      const newX = Math.max(0, Math.min(ev.clientX - dragOffset.current.x, parentRect.width - 50));
+      const newY = Math.max(0, Math.min(ev.clientY - dragOffset.current.y, parentRect.height - 50));
+      setPanelPos({ x: newX, y: newY });
+    };
+
+    const handleDragEnd = () => {
+      isDragging.current = false;
+      if (!didDrag.current) {
+        setLayersPanelOpen(prev => !prev);
+      }
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+    };
+
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+  }, []);
 
   const [years, setYears] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -393,10 +437,11 @@ function ProjectMap() {
             </button>
 
             <div
+              ref={dragRef}
               className="position-absolute bg-white rounded shadow"
               style={{
-                top: '10px',
-                left: '10px',
+                top: panelPos.y + 'px',
+                left: panelPos.x + 'px',
                 zIndex: 1000,
                 width: layersPanelOpen ? '280px' : 'auto',
                 maxHeight: mapFullscreen ? 'calc(100vh - 30px)' : '460px',
@@ -407,8 +452,8 @@ function ProjectMap() {
             >
               <div
                 className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom"
-                style={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => setLayersPanelOpen(prev => !prev)}
+                style={{ cursor: 'grab', userSelect: 'none' }}
+                onMouseDown={handleDragStart}
               >
                 <div className="d-flex align-items-center gap-2">
                   <FiLayers size={16} />
