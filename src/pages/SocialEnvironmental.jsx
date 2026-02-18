@@ -925,145 +925,163 @@ function SocialEnvironmental() {
 
   const renderGrievanceForm = () => (
     <form onSubmit={handleSubmitGrievance}>
-      <div className="row g-3">
-        <div className="col-12">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('common.project')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.caseNo')} *</label>
-          <input type="text" className="form-control" name="caseNo" value={formData.caseNo || ''} onChange={handleChange} required disabled={!!editingItem} maxLength="15" placeholder="e.g. GRV-001" />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('common.project')} *</label>
-          <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
-            <option value="">{t('common.select')}</option>
-            {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.typeOfInvestment')}</label>
-          <select className="form-select" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
-            <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
-            {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
-          </select>
+      <div className="row g-2">
+        <div className="col-md-6">
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.project')}</h6>
+            <div className="row g-2">
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.caseNo')} *</label>
+                <input type="text" className="form-control form-control-sm" name="caseNo" value={formData.caseNo || ''} onChange={handleChange} required disabled={!!editingItem} maxLength="15" placeholder="e.g. GRV-001" />
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.project')} *</label>
+                <select className="form-select form-select-sm" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+                  <option value="">{t('common.select')}</option>
+                  {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.typeOfInvestment')}</label>
+                <select className="form-select form-select-sm" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
+                  <option value="">{formData.projectId ? t('common.select') : '--'}</option>
+                  {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+            <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.complaintDetails')}</h6>
+            <div className="row g-2">
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.complainant')} *</label>
+                <input type="text" className="form-control form-control-sm" name="nameOfComplainant" value={formData.nameOfComplainant || ''} onChange={handleChange} required maxLength="150" />
+              </div>
+              <div className="col-3">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.sex')}</label>
+                <select className="form-select form-select-sm" name="sex" value={formData.sex || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="M">{t('socialEnvironmental.male')}</option>
+                  <option value="F">{t('socialEnvironmental.female')}</option>
+                </select>
+              </div>
+              <div className="col-3">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.phoneNumber')}</label>
+                <input type="text" className="form-control form-control-sm" name="phoneNumber" value={formData.phoneNumber || ''} onChange={handleChange} maxLength="20" />
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceived')} *</label>
+                <input type="date" className="form-control form-control-sm" name="dateClaimReceived" value={formData.dateClaimReceived || ''} onChange={handleChange} required />
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.personReceivingComplaint')}</label>
+                <input type="text" className="form-control form-control-sm" name="personReceivingComplaint" value={formData.personReceivingComplaint || ''} onChange={handleChange} maxLength="150" />
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.howComplaintReceived')}</label>
+                <select className="form-select form-select-sm" name="howComplaintReceived" value={formData.howComplaintReceived || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Call">{t('socialEnvironmental.phoneCall')}</option>
+                  <option value="Email">{t('socialEnvironmental.email')}</option>
+                  <option value="Letter">{t('socialEnvironmental.letter')}</option>
+                  <option value="In Person">{t('socialEnvironmental.inPerson')}</option>
+                  <option value="SMS">{t('socialEnvironmental.sms')}</option>
+                  <option value="WhatsApp">{t('socialEnvironmental.whatsApp')}</option>
+                </select>
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.complaintContent')} *</label>
+                <textarea className="form-control form-control-sm" name="complaintContent" rows="2" value={formData.complaintContent || ''} onChange={handleChange} required></textarea>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.complaintAcknowledged')}</label>
+                <select className="form-select form-select-sm" name="complaintAcknowledged" value={formData.complaintAcknowledged || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Y">{t('common.yes')}</option>
+                  <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.complaintDetails')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.complainant')} *</label>
-          <input type="text" className="form-control" name="nameOfComplainant" value={formData.nameOfComplainant || ''} onChange={handleChange} required maxLength="150" />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.sex')}</label>
-          <select className="form-select" name="sex" value={formData.sex || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="M">{t('socialEnvironmental.male')}</option>
-            <option value="F">{t('socialEnvironmental.female')}</option>
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.phoneNumber')}</label>
-          <input type="text" className="form-control" name="phoneNumber" value={formData.phoneNumber || ''} onChange={handleChange} maxLength="20" />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.dateReceived')} *</label>
-          <input type="date" className="form-control" name="dateClaimReceived" value={formData.dateClaimReceived || ''} onChange={handleChange} required />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.personReceivingComplaint')}</label>
-          <input type="text" className="form-control" name="personReceivingComplaint" value={formData.personReceivingComplaint || ''} onChange={handleChange} maxLength="150" />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.howComplaintReceived')}</label>
-          <select className="form-select" name="howComplaintReceived" value={formData.howComplaintReceived || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Call">{t('socialEnvironmental.phoneCall')}</option>
-            <option value="Email">{t('socialEnvironmental.email')}</option>
-            <option value="Letter">{t('socialEnvironmental.letter')}</option>
-            <option value="In Person">{t('socialEnvironmental.inPerson')}</option>
-            <option value="SMS">{t('socialEnvironmental.sms')}</option>
-            <option value="WhatsApp">{t('socialEnvironmental.whatsApp')}</option>
-          </select>
-        </div>
-        <div className="col-12">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.complaintContent')} *</label>
-          <textarea className="form-control" name="complaintContent" rows="3" value={formData.complaintContent || ''} onChange={handleChange} required></textarea>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.complaintAcknowledged')}</label>
-          <select className="form-select" name="complaintAcknowledged" value={formData.complaintAcknowledged || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Y">{t('common.yes')}</option>
-            <option value="N">{t('common.no')}</option>
-          </select>
-        </div>
+        <div className="col-md-6">
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+            <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.decisionDetails')}</h6>
+            <div className="row g-2">
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.expectedDecisionDate')}</label>
+                <input type="date" className="form-control form-control-sm" name="expectedDecisionDate" value={formData.expectedDecisionDate || ''} onChange={handleChange} />
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.decisionOutcome')}</label>
+                <select className="form-select form-select-sm" name="decisionOutcomeId" value={formData.decisionOutcomeId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {decisionOutcomes.map(d => <option key={d.id} value={d.id}>{d.outcome}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.resolution')}</label>
+                <input type="text" className="form-control form-control-sm" name="resolution" value={formData.resolution || ''} onChange={handleChange} maxLength="300" />
+              </div>
+            </div>
+          </div>
 
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.decisionDetails')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.expectedDecisionDate')}</label>
-          <input type="date" className="form-control" name="expectedDecisionDate" value={formData.expectedDecisionDate || ''} onChange={handleChange} />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.decisionOutcome')}</label>
-          <select className="form-select" name="decisionOutcomeId" value={formData.decisionOutcomeId || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            {decisionOutcomes.map(d => <option key={d.id} value={d.id}>{d.outcome}</option>)}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.resolution')}</label>
-          <input type="text" className="form-control" name="resolution" value={formData.resolution || ''} onChange={handleChange} maxLength="300" />
-        </div>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+            <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.communicationDetails')}</h6>
+            <div className="row g-2">
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.decisionCommunicated')}</label>
+                <select className="form-select form-select-sm" name="decisionCommunicated" value={formData.decisionCommunicated || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Y">{t('common.yes')}</option>
+                  <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.communicationMethod')}</label>
+                <select className="form-select form-select-sm" name="communicationMethod" value={formData.communicationMethod || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Call">{t('socialEnvironmental.phoneCall')}</option>
+                  <option value="Email">{t('socialEnvironmental.email')}</option>
+                  <option value="Letter">{t('socialEnvironmental.letter')}</option>
+                  <option value="In Person">{t('socialEnvironmental.inPerson')}</option>
+                  <option value="SMS">{t('socialEnvironmental.sms')}</option>
+                  <option value="WhatsApp">{t('socialEnvironmental.whatsApp')}</option>
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.complainantSatisfied')}</label>
+                <select className="form-select form-select-sm" name="complainantSatisfied" value={formData.complainantSatisfied || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  <option value="Y">{t('common.yes')}</option>
+                  <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-        <div className="col-12 mt-3">
-          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.communicationDetails')}</h6>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.decisionCommunicated')}</label>
-          <select className="form-select" name="decisionCommunicated" value={formData.decisionCommunicated || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Y">{t('common.yes')}</option>
-            <option value="N">{t('common.no')}</option>
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.communicationMethod')}</label>
-          <select className="form-select" name="communicationMethod" value={formData.communicationMethod || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Call">{t('socialEnvironmental.phoneCall')}</option>
-            <option value="Email">{t('socialEnvironmental.email')}</option>
-            <option value="Letter">{t('socialEnvironmental.letter')}</option>
-            <option value="In Person">{t('socialEnvironmental.inPerson')}</option>
-            <option value="SMS">{t('socialEnvironmental.sms')}</option>
-            <option value="WhatsApp">{t('socialEnvironmental.whatsApp')}</option>
-          </select>
-        </div>
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.complainantSatisfied')}</label>
-          <select className="form-select" name="complainantSatisfied" value={formData.complainantSatisfied || ''} onChange={handleChange}>
-            <option value="">{t('common.select')}</option>
-            <option value="Y">{t('common.yes')}</option>
-            <option value="N">{t('common.no')}</option>
-          </select>
-        </div>
-        <div className="col-12">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.briefNoteNoAnswer')}</label>
-          <textarea className="form-control" name="briefNoteNoAnswer" rows="2" value={formData.briefNoteNoAnswer || ''} onChange={handleChange}></textarea>
-        </div>
-        <div className="col-12">
-          <label className="form-label fw-semibold">{t('socialEnvironmental.followUpActions')}</label>
-          <textarea className="form-control" name="followUpActions" rows="2" value={formData.followUpActions || ''} onChange={handleChange}></textarea>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
+            <h6 className="mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6f42c1'}}>{t('socialEnvironmental.followUpActions')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.briefNoteNoAnswer')}</label>
+                <textarea className="form-control form-control-sm" name="briefNoteNoAnswer" rows="2" value={formData.briefNoteNoAnswer || ''} onChange={handleChange}></textarea>
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.followUpActions')}</label>
+                <textarea className="form-control form-control-sm" name="followUpActions" rows="2" value={formData.followUpActions || ''} onChange={handleChange}></textarea>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="modal-footer mt-3 px-0">
-        <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+      <div className="modal-footer mt-2 px-0 pt-2">
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseModal}>
           {t('common.cancel')}
         </button>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-sm btn-primary">
           {editingItem ? t('common.update') : t('common.save')}
         </button>
       </div>
