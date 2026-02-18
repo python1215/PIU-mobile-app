@@ -15,8 +15,11 @@ function Documentation() {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     loadProjects();
@@ -99,13 +102,65 @@ function Documentation() {
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
   }, [t]);
 
   const handleRemoveAttachment = useCallback(() => {
     setFormData(prev => ({ ...prev, attachment: null }));
   }, []);
+
+  const openCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      streamRef.current = stream;
+      setShowCamera(true);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      }, 100);
+    } catch (err) {
+      console.error('Camera error:', err);
+      toast.error('Unable to access camera. Please check permissions.');
+    }
+  }, []);
+
+  const closeCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  }, []);
+
+  const capturePhoto = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      closeCamera();
+      setUploading(true);
+      const uploadData = new FormData();
+      uploadData.append('file', blob, `photo_${Date.now()}.jpg`);
+      try {
+        const res = await axios.post('/api/uploads', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setFormData(prev => ({ ...prev, attachment: res.data.url }));
+        toast.success(t('documentation.fileUploaded'));
+      } catch (err) {
+        toast.error(err.response?.data?.error || t('socialEnvironmental.uploadFailed'));
+      } finally {
+        setUploading(false);
+      }
+    }, 'image/jpeg', 0.9);
+  }, [closeCamera, t]);
 
   const handleOpenModal = useCallback((item = null) => {
     if (item) {
@@ -131,10 +186,11 @@ function Documentation() {
   }, [selectedProject]);
 
   const handleCloseModal = useCallback(() => {
+    closeCamera();
     setShowModal(false);
     setEditingItem(null);
     setFormData({});
-  }, []);
+  }, [closeCamera]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -317,8 +373,20 @@ function Documentation() {
                   <div className="mb-3">
                     <label className="form-label fw-semibold">{t('documentation.file')}</label>
                     <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="d-none" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png" />
-                    <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" onChange={handleFileUpload} className="d-none" />
-                    {formData.attachment ? (
+                    <canvas ref={canvasRef} className="d-none" />
+                    {showCamera ? (
+                      <div className="border rounded p-2 bg-dark text-center">
+                        <video ref={videoRef} autoPlay playsInline muted style={{width: '100%', maxHeight: '300px', borderRadius: '8px'}} />
+                        <div className="d-flex justify-content-center gap-2 mt-2">
+                          <button type="button" className="btn btn-success" onClick={capturePhoto}>
+                            <FiCamera size={16} className="me-1" /> Capture
+                          </button>
+                          <button type="button" className="btn btn-outline-light" onClick={closeCamera}>
+                            <FiX size={16} className="me-1" /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : formData.attachment ? (
                       <div className="d-flex align-items-center gap-2 p-2 border rounded bg-light">
                         <FiFile size={18} className="text-primary" />
                         <a href={formData.attachment} target="_blank" rel="noopener noreferrer" className="text-truncate" style={{maxWidth: '300px'}}>{formData.attachment.split('/').pop()}</a>
@@ -331,7 +399,7 @@ function Documentation() {
                           <button type="button" className="btn btn-outline-secondary" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                             {uploading ? t('socialEnvironmental.uploadingPhoto') : t('socialEnvironmental.browseFiles')}
                           </button>
-                          <button type="button" className="btn btn-outline-success" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+                          <button type="button" className="btn btn-outline-success" onClick={openCamera} disabled={uploading}>
                             <FiCamera size={15} className="me-1" />{t('socialEnvironmental.takePhoto')}
                           </button>
                         </div>
