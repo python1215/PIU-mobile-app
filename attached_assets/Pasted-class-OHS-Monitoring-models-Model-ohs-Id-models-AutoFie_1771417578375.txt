@@ -1,0 +1,113 @@
+class OHS_Monitoring(models.Model):
+    ohs_Id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(
+        Project, 
+        on_delete=models.CASCADE, 
+        verbose_name='Project',
+        db_index=True
+    )
+    Type_of_Investment = models.ForeignKey(
+        KPI_For_Contract, 
+        on_delete=models.CASCADE, 
+        related_name='ohs_investments',
+        db_index=True
+    )
+    year_of_report = models.ForeignKey(
+        YEAR, 
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    quarter = models.ForeignKey(
+        Quarter, 
+        on_delete=models.CASCADE, 
+        verbose_name="Report Frequency",
+        db_index=True
+    )
+    date = models.DateField(verbose_name="Monitoring Date", db_index=True)
+    region = models.ForeignKey(
+        Regions, 
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    district = models.ForeignKey(
+        Districts, 
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    settlement = models.ForeignKey(
+        Settlement,
+        to_field='settlement_code',
+        db_column='settlement_id',
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+    quality_at_entry_requirement = models.TextField(
+        help_text="Staffing, training, medicals, code of conduct, contracts"
+    )
+    working_environment = models.TextField()
+    remarks = models.TextField(
+        verbose_name='Issues or Remarks', 
+        blank=True,
+        default=''
+    )
+    male = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Number of male workers"
+    )
+    female = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Number of female workers"
+    )
+    youth_male = models.PositiveIntegerField(
+        verbose_name='Male Youths',
+        validators=[MinValueValidator(0)]
+    )
+    youth_female = models.PositiveIntegerField(
+        verbose_name='Female Youths',
+        validators=[MinValueValidator(0)]
+    )
+    Kpi_description = models.ForeignKey(
+        KPI_For_Contract, 
+        on_delete=models.CASCADE, 
+        related_name='ohs_kpi_descriptions'
+    )
+    picture = models.ImageField(
+        null=True, 
+        blank=True, 
+        upload_to=image_upload_path,
+        verbose_name='Picture',
+        help_text="Upload monitoring photos"
+    )
+    date_created = models.DateTimeField(auto_now_add=True, db_index=True)
+    loginUser = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        db_index=True
+    )
+
+    class Meta:
+        verbose_name = 'OHS Monitoring'
+        verbose_name_plural = 'OHS Monitoring'
+        ordering = ['-date', '-date_created']
+        indexes = [
+            models.Index(fields=['project', 'Type_of_Investment']),
+            models.Index(fields=['year_of_report', 'quarter']),
+            models.Index(fields=['region', 'district', 'settlement']),
+            models.Index(fields=['date', 'loginUser']),
+        ]
+
+    def __str__(self):
+        return f"OHS-{self.ohs_Id} - {self.project} ({self.date})"
+
+    def get_picture_url(self):
+        if self.picture:
+            return self.picture.url
+        return None
+
+    @property
+    def total_workers(self):
+        return self.male + self.female
+
+    @property
+    def total_youth(self):
+        return self.youth_male + self.youth_female

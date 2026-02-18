@@ -61,6 +61,12 @@ public class SocialEnvironmentalController {
     @Autowired
     private CommunityEngagementRepository engagementRepository;
 
+    @Autowired
+    private YearRepository yearRepository;
+
+    @Autowired
+    private QuarterRepository quarterRepository;
+
     @GetMapping("/esia")
     public List<ESIA> getAllESIA() {
         return esiaRepository.findAll();
@@ -265,6 +271,33 @@ public class SocialEnvironmentalController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    private void resolveOHSReferences(OHSMonitoring ohs) {
+        if (ohs.getProject() != null && ohs.getProject().getProjectId() != null) {
+            ohs.setProject(projectRepository.findById(ohs.getProject().getProjectId()).orElse(null));
+        }
+        if (ohs.getInvestmentType() != null && ohs.getInvestmentType().getId() != null) {
+            ohs.setInvestmentType(kpiContractSetupRepository.findById(ohs.getInvestmentType().getId()).orElse(null));
+        }
+        if (ohs.getKpiDescription() != null && ohs.getKpiDescription().getId() != null) {
+            ohs.setKpiDescription(kpiContractSetupRepository.findById(ohs.getKpiDescription().getId()).orElse(null));
+        }
+        if (ohs.getYear() != null && ohs.getYear().getId() != null) {
+            ohs.setYear(yearRepository.findById(ohs.getYear().getId()).orElse(null));
+        }
+        if (ohs.getQuarter() != null && ohs.getQuarter().getId() != null) {
+            ohs.setQuarter(quarterRepository.findById(ohs.getQuarter().getId()).orElse(null));
+        }
+        if (ohs.getRegion() != null && ohs.getRegion().getRegionCode() != null) {
+            ohs.setRegion(regionRepository.findById(ohs.getRegion().getRegionCode()).orElse(null));
+        }
+        if (ohs.getDistrict() != null && ohs.getDistrict().getDistrictCode() != null) {
+            ohs.setDistrict(districtRepository.findById(ohs.getDistrict().getDistrictCode()).orElse(null));
+        }
+        if (ohs.getSettlement() != null && ohs.getSettlement().getSettlementCode() != null) {
+            ohs.setSettlement(settlementRepository.findById(ohs.getSettlement().getSettlementCode()).orElse(null));
+        }
+    }
+
     @GetMapping("/ohs")
     public List<OHSMonitoring> getAllOHS() {
         return ohsRepository.findAll();
@@ -277,6 +310,7 @@ public class SocialEnvironmentalController {
 
     @PostMapping("/ohs")
     public OHSMonitoring createOHS(@RequestBody OHSMonitoring ohs) {
+        resolveOHSReferences(ohs);
         return ohsRepository.save(ohs);
     }
 
@@ -284,11 +318,24 @@ public class SocialEnvironmentalController {
     public ResponseEntity<OHSMonitoring> updateOHS(@PathVariable Long id, @RequestBody OHSMonitoring ohsDetails) {
         return ohsRepository.findById(id)
             .map(ohs -> {
+                resolveOHSReferences(ohsDetails);
+                ohs.setProject(ohsDetails.getProject());
+                ohs.setInvestmentType(ohsDetails.getInvestmentType());
+                ohs.setYear(ohsDetails.getYear());
+                ohs.setQuarter(ohsDetails.getQuarter());
+                ohs.setMonitoringDate(ohsDetails.getMonitoringDate());
+                ohs.setRegion(ohsDetails.getRegion());
+                ohs.setDistrict(ohsDetails.getDistrict());
+                ohs.setSettlement(ohsDetails.getSettlement());
                 ohs.setQualityAtEntryRequirement(ohsDetails.getQualityAtEntryRequirement());
                 ohs.setWorkingEnvironment(ohsDetails.getWorkingEnvironment());
                 ohs.setRemarks(ohsDetails.getRemarks());
                 ohs.setMale(ohsDetails.getMale());
                 ohs.setFemale(ohsDetails.getFemale());
+                ohs.setYouthMale(ohsDetails.getYouthMale());
+                ohs.setYouthFemale(ohsDetails.getYouthFemale());
+                ohs.setKpiDescription(ohsDetails.getKpiDescription());
+                ohs.setPicture(ohsDetails.getPicture());
                 return ResponseEntity.ok(ohsRepository.save(ohs));
             })
             .orElse(ResponseEntity.notFound().build());

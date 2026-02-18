@@ -30,6 +30,8 @@ function SocialEnvironmental() {
   const [papCategories, setPapCategories] = useState([]);
   const [vulnerabilityCategories, setVulnerabilityCategories] = useState([]);
   const [decisionOutcomes, setDecisionOutcomes] = useState([]);
+  const [years, setYears] = useState([]);
+  const [quarters, setQuarters] = useState([]);
 
   useEffect(() => {
     loadProjects();
@@ -74,7 +76,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -82,7 +84,9 @@ function SocialEnvironmental() {
         axios.get('/api/setup/pap-categories').catch(() => ({ data: [] })),
         axios.get('/api/setup/vulnerability-categories').catch(() => ({ data: [] })),
         axios.get('/api/setup/kpi-contracts').catch(() => ({ data: [] })),
-        axios.get('/api/setup/decision-outcomes').catch(() => ({ data: [] }))
+        axios.get('/api/setup/decision-outcomes').catch(() => ({ data: [] })),
+        axios.get('/api/setup/years').catch(() => ({ data: [] })),
+        axios.get('/api/setup/quarters').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -92,6 +96,8 @@ function SocialEnvironmental() {
       setVulnerabilityCategories(vcRes.data);
       setInvestmentTypes(itRes.data);
       setDecisionOutcomes(doRes.data);
+      setYears(yrRes.data);
+      setQuarters(qrRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -106,7 +112,7 @@ function SocialEnvironmental() {
   ], [t, esia, pap, grievances, ohs, engagements]);
 
   const handleOpenModal = useCallback((item = null) => {
-    if (activeTab === 'esia' || activeTab === 'pap' || activeTab === 'grievance') {
+    if (activeTab === 'esia' || activeTab === 'pap' || activeTab === 'grievance' || activeTab === 'ohs') {
       loadReferenceData();
     }
     if (item) {
@@ -161,6 +167,26 @@ function SocialEnvironmental() {
           briefNoteNoAnswer: item.briefNoteNoAnswer || '',
           followUpActions: item.followUpActions || ''
         });
+      } else if (activeTab === 'ohs') {
+        setFormData({
+          projectId: item.project?.projectId || '',
+          investmentTypeId: item.investmentType?.id || '',
+          yearId: item.year?.id || '',
+          quarterId: item.quarter?.id || '',
+          monitoringDate: item.monitoringDate || '',
+          regionCode: item.region?.regionCode || '',
+          districtCode: item.district?.districtCode || '',
+          settlementCode: item.settlement?.settlementCode || '',
+          qualityAtEntryRequirement: item.qualityAtEntryRequirement || '',
+          workingEnvironment: item.workingEnvironment || '',
+          remarks: item.remarks || '',
+          male: item.male ?? '',
+          female: item.female ?? '',
+          youthMale: item.youthMale ?? '',
+          youthFemale: item.youthFemale ?? '',
+          kpiDescriptionId: item.kpiDescription?.id || '',
+          picture: item.picture || ''
+        });
       }
     } else {
       setEditingItem(null);
@@ -213,6 +239,26 @@ function SocialEnvironmental() {
           complainantSatisfied: '',
           briefNoteNoAnswer: '',
           followUpActions: ''
+        });
+      } else if (activeTab === 'ohs') {
+        setFormData({
+          projectId: pid,
+          investmentTypeId: '',
+          yearId: '',
+          quarterId: '',
+          monitoringDate: '',
+          regionCode: '',
+          districtCode: '',
+          settlementCode: '',
+          qualityAtEntryRequirement: '',
+          workingEnvironment: '',
+          remarks: '',
+          male: '',
+          female: '',
+          youthMale: '',
+          youthFemale: '',
+          kpiDescriptionId: '',
+          picture: ''
         });
       }
     }
@@ -395,6 +441,58 @@ function SocialEnvironmental() {
     }
   };
 
+  const handleSubmitOHS = async (e) => {
+    e.preventDefault();
+    const payload = {
+      project: formData.projectId ? { projectId: formData.projectId } : null,
+      investmentType: formData.investmentTypeId ? { id: parseInt(formData.investmentTypeId) } : null,
+      year: formData.yearId ? { id: parseInt(formData.yearId) } : null,
+      quarter: formData.quarterId ? { id: parseInt(formData.quarterId) } : null,
+      monitoringDate: formData.monitoringDate || null,
+      region: formData.regionCode ? { regionCode: formData.regionCode } : null,
+      district: formData.districtCode ? { districtCode: formData.districtCode } : null,
+      settlement: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
+      qualityAtEntryRequirement: formData.qualityAtEntryRequirement || null,
+      workingEnvironment: formData.workingEnvironment || null,
+      remarks: formData.remarks || null,
+      male: formData.male !== '' ? parseInt(formData.male) : null,
+      female: formData.female !== '' ? parseInt(formData.female) : null,
+      youthMale: formData.youthMale !== '' ? parseInt(formData.youthMale) : null,
+      youthFemale: formData.youthFemale !== '' ? parseInt(formData.youthFemale) : null,
+      kpiDescription: formData.kpiDescriptionId ? { id: parseInt(formData.kpiDescriptionId) } : null,
+      picture: formData.picture || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/social-environmental/ohs/${editingItem.id}`, payload);
+        toast.success(t('socialEnvironmental.ohsUpdated'));
+      } else {
+        await axios.post('/api/social-environmental/ohs', payload);
+        toast.success(t('socialEnvironmental.ohsCreated'));
+      }
+      handleCloseModal();
+      loadData();
+    } catch (error) {
+      console.error('Error saving OHS:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
+  const handleDeleteOHS = async (id) => {
+    if (!window.confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/social-environmental/ohs/${id}`);
+      toast.success(t('socialEnvironmental.ohsDeleted'));
+      loadData();
+    } catch (error) {
+      console.error('Error deleting OHS:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
   const renderESIATable = () => (
     <div className="table-responsive">
       <table className="table table-striped table-hover">
@@ -533,44 +631,89 @@ function SocialEnvironmental() {
     </div>
   );
 
-  const renderOtherTable = () => {
-    const currentTab = tabs.find(tab => tab.id === activeTab);
-    const data = currentTab?.data || [];
+  const renderOHSTable = () => (
+    <div className="table-responsive">
+      <table className="table table-striped table-hover">
+        <thead className="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>{t('common.project')}</th>
+            <th>{t('socialEnvironmental.typeOfInvestment')}</th>
+            <th>{t('socialEnvironmental.monitoringDate')}</th>
+            <th>{t('setup.regions')}</th>
+            <th>{t('setup.districts')}</th>
+            <th>{t('socialEnvironmental.male')}</th>
+            <th>{t('socialEnvironmental.female')}</th>
+            <th>{t('socialEnvironmental.youthMale')}</th>
+            <th>{t('socialEnvironmental.youthFemale')}</th>
+            <th>{t('common.actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ohs.length === 0 ? (
+            <tr><td colSpan="11" className="text-center text-muted">{t('table.noData')}</td></tr>
+          ) : (
+            ohs.map((item) => (
+              <tr key={item.id}>
+                <td><strong>{item.id}</strong></td>
+                <td>{item.project?.project || '-'}</td>
+                <td>{item.investmentType?.typeOfInvestment || '-'}</td>
+                <td>{item.monitoringDate || '-'}</td>
+                <td>{item.region?.regionName || '-'}</td>
+                <td>{item.district?.districtName || '-'}</td>
+                <td>{item.male ?? '-'}</td>
+                <td>{item.female ?? '-'}</td>
+                <td>{item.youthMale ?? '-'}</td>
+                <td>{item.youthFemale ?? '-'}</td>
+                <td>
+                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteOHS(item.id)}><FiTrash2 /></button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 
-    return (
-      <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead className="table-dark">
-            <tr>
-              {activeTab === 'ohs' && <><th>ID</th><th>{t('common.date')}</th><th>{t('setup.regions')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('socialEnvironmental.youth')}</th></>}
-              {activeTab === 'engagement' && <><th>{t('socialEnvironmental.reference')}</th><th>{t('socialEnvironmental.place')}</th><th>{t('common.date')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('common.total')}</th></>}
-              <th>{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length === 0 ? (
-              <tr><td colSpan="7" className="text-center text-muted">{t('table.noData')}</td></tr>
-            ) : (
-              data.map((item, index) => (
-                <tr key={index}>
-                  {activeTab === 'ohs' && (
-                    <><td>{item.id}</td><td>{item.monitoringDate}</td><td>{item.region?.regionName}</td><td>{item.male}</td><td>{item.female}</td><td>{(item.youthMale || 0) + (item.youthFemale || 0)}</td></>
-                  )}
-                  {activeTab === 'engagement' && (
-                    <><td>{item.referenceNumber}</td><td>{item.placeOfEvent}</td><td>{item.dateOfConsultation}</td><td>{item.male}</td><td>{item.female}</td><td>{item.totalParticipants}</td></>
-                  )}
-                  <td>
-                    <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
-                    <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+  const renderEngagementTable = () => (
+    <div className="table-responsive">
+      <table className="table table-striped table-hover">
+        <thead className="table-dark">
+          <tr>
+            <th>{t('socialEnvironmental.reference')}</th>
+            <th>{t('socialEnvironmental.place')}</th>
+            <th>{t('common.date')}</th>
+            <th>{t('socialEnvironmental.male')}</th>
+            <th>{t('socialEnvironmental.female')}</th>
+            <th>{t('common.total')}</th>
+            <th>{t('common.actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {engagements.length === 0 ? (
+            <tr><td colSpan="7" className="text-center text-muted">{t('table.noData')}</td></tr>
+          ) : (
+            engagements.map((item, index) => (
+              <tr key={index}>
+                <td>{item.referenceNumber}</td>
+                <td>{item.placeOfEvent}</td>
+                <td>{item.dateOfConsultation}</td>
+                <td>{item.male}</td>
+                <td>{item.female}</td>
+                <td>{item.totalParticipants}</td>
+                <td>
+                  <button className="btn btn-sm btn-outline-primary me-1"><FiEdit2 /></button>
+                  <button className="btn btn-sm btn-outline-danger"><FiTrash2 /></button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 
   const renderESIAForm = () => (
     <form onSubmit={handleSubmitESIA}>
@@ -887,10 +1030,139 @@ function SocialEnvironmental() {
     </form>
   );
 
+  const renderOHSForm = () => (
+    <form onSubmit={handleSubmitOHS}>
+      <div className="row g-3">
+        <div className="col-12">
+          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.ohsProjectInfo')}</h6>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">{t('common.project')} *</label>
+          <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+            <option value="">{t('common.select')}</option>
+            {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+          </select>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.typeOfInvestment')}</label>
+          <select className="form-select" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
+            <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
+            {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+          </select>
+        </div>
+
+        <div className="col-12 mt-3">
+          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.ohsReportingPeriod')}</h6>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.yearOfReport')}</label>
+          <select className="form-select" name="yearId" value={formData.yearId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.reportFrequency')}</label>
+          <select className="form-select" name="quarterId" value={formData.quarterId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.monitoringDate')} *</label>
+          <input type="date" className="form-control" name="monitoringDate" value={formData.monitoringDate || ''} onChange={handleChange} required />
+        </div>
+
+        <div className="col-12 mt-3">
+          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.ohsLocationDetails')}</h6>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('setup.regions')}</label>
+          <select className="form-select" name="regionCode" value={formData.regionCode || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('setup.districts')}</label>
+          <select className="form-select" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} disabled={!formData.regionCode}>
+            <option value="">{formData.regionCode ? t('common.select') : '-- Select region first --'}</option>
+            {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.settlement')}</label>
+          <select className="form-select" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} disabled={!formData.districtCode}>
+            <option value="">{formData.districtCode ? t('common.select') : '-- Select district first --'}</option>
+            {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+          </select>
+        </div>
+
+        <div className="col-12 mt-3">
+          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.ohsAssessment')}</h6>
+        </div>
+        <div className="col-12">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.qualityAtEntry')}</label>
+          <textarea className="form-control" name="qualityAtEntryRequirement" rows="3" value={formData.qualityAtEntryRequirement || ''} onChange={handleChange} placeholder={t('socialEnvironmental.qualityAtEntryHelp')}></textarea>
+        </div>
+        <div className="col-12">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.workingEnvironment')}</label>
+          <textarea className="form-control" name="workingEnvironment" rows="3" value={formData.workingEnvironment || ''} onChange={handleChange}></textarea>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.kpiDescription')}</label>
+          <select className="form-select" name="kpiDescriptionId" value={formData.kpiDescriptionId || ''} onChange={handleChange} disabled={!formData.projectId}>
+            <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
+            {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.kpiDescription || it.typeOfInvestment}</option>)}
+          </select>
+        </div>
+
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.picture')}</label>
+          <input type="text" className="form-control" name="picture" value={formData.picture || ''} onChange={handleChange} placeholder="URL or path to photo" />
+        </div>
+
+        <div className="col-12 mt-3">
+          <h6 className="text-primary border-bottom pb-2 mb-0">{t('socialEnvironmental.ohsWorkforce')}</h6>
+        </div>
+        <div className="col-md-3">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.male')}</label>
+          <input type="number" className="form-control" name="male" value={formData.male ?? ''} onChange={handleChange} min="0" />
+        </div>
+        <div className="col-md-3">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.female')}</label>
+          <input type="number" className="form-control" name="female" value={formData.female ?? ''} onChange={handleChange} min="0" />
+        </div>
+        <div className="col-md-3">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.youthMale')}</label>
+          <input type="number" className="form-control" name="youthMale" value={formData.youthMale ?? ''} onChange={handleChange} min="0" />
+        </div>
+        <div className="col-md-3">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.youthFemale')}</label>
+          <input type="number" className="form-control" name="youthFemale" value={formData.youthFemale ?? ''} onChange={handleChange} min="0" />
+        </div>
+
+        <div className="col-12 mt-2">
+          <label className="form-label fw-semibold">{t('socialEnvironmental.issuesRemarks')}</label>
+          <textarea className="form-control" name="remarks" rows="3" value={formData.remarks || ''} onChange={handleChange}></textarea>
+        </div>
+      </div>
+      <div className="modal-footer mt-3 px-0">
+        <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+          {t('common.cancel')}
+        </button>
+        <button type="submit" className="btn btn-primary">
+          {editingItem ? t('common.update') : t('common.save')}
+        </button>
+      </div>
+    </form>
+  );
+
   const getModalTitle = () => {
     if (activeTab === 'esia') return editingItem ? t('socialEnvironmental.editESIA') : t('socialEnvironmental.addESIA');
     if (activeTab === 'pap') return editingItem ? t('socialEnvironmental.editPAP') : t('socialEnvironmental.addPAP');
     if (activeTab === 'grievance') return editingItem ? t('socialEnvironmental.editGrievance') : t('socialEnvironmental.addGrievance');
+    if (activeTab === 'ohs') return editingItem ? t('socialEnvironmental.editOHS') : t('socialEnvironmental.addOHS');
     return t('common.addNew');
   };
 
@@ -899,13 +1171,16 @@ function SocialEnvironmental() {
     if (activeTab === 'esia') return renderESIATable();
     if (activeTab === 'pap') return renderPAPTable();
     if (activeTab === 'grievance') return renderGrievanceTable();
-    return renderOtherTable();
+    if (activeTab === 'ohs') return renderOHSTable();
+    if (activeTab === 'engagement') return renderEngagementTable();
+    return null;
   };
 
   const renderActiveForm = () => {
     if (activeTab === 'esia') return renderESIAForm();
     if (activeTab === 'pap') return renderPAPForm();
     if (activeTab === 'grievance') return renderGrievanceForm();
+    if (activeTab === 'ohs') return renderOHSForm();
     return (
       <>
         <p className="text-muted">{t('common.formPlaceholder')}</p>

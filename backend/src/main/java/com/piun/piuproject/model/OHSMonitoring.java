@@ -1,5 +1,6 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,35 +12,42 @@ public class OHSMonitoring {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "investment_type_code")
-    private KPIForContract investmentType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "investment_type_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private KPIContractSetup investmentType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "year_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Year year;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quarter_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Quarter quarter;
 
     @Column(name = "monitoring_date")
     private LocalDate monitoringDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "region_code")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Region region;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "district_code")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private District district;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "settlement_code")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Settlement settlement;
 
     @Column(name = "quality_at_entry_requirement", columnDefinition = "TEXT")
@@ -63,9 +71,10 @@ public class OHSMonitoring {
     @Column(name = "youth_female")
     private Integer youthFemale;
 
-    @ManyToOne
-    @JoinColumn(name = "kpi_description_code")
-    private KPIForContract kpiDescription;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "kpi_description_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private KPIContractSetup kpiDescription;
 
     @Column(name = "picture", length = 255)
     private String picture;
@@ -83,8 +92,8 @@ public class OHSMonitoring {
     public void setId(Long id) { this.id = id; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
-    public KPIForContract getInvestmentType() { return investmentType; }
-    public void setInvestmentType(KPIForContract investmentType) { this.investmentType = investmentType; }
+    public KPIContractSetup getInvestmentType() { return investmentType; }
+    public void setInvestmentType(KPIContractSetup investmentType) { this.investmentType = investmentType; }
     public Year getYear() { return year; }
     public void setYear(Year year) { this.year = year; }
     public Quarter getQuarter() { return quarter; }
@@ -111,8 +120,8 @@ public class OHSMonitoring {
     public void setYouthMale(Integer youthMale) { this.youthMale = youthMale; }
     public Integer getYouthFemale() { return youthFemale; }
     public void setYouthFemale(Integer youthFemale) { this.youthFemale = youthFemale; }
-    public KPIForContract getKpiDescription() { return kpiDescription; }
-    public void setKpiDescription(KPIForContract kpiDescription) { this.kpiDescription = kpiDescription; }
+    public KPIContractSetup getKpiDescription() { return kpiDescription; }
+    public void setKpiDescription(KPIContractSetup kpiDescription) { this.kpiDescription = kpiDescription; }
     public String getPicture() { return picture; }
     public void setPicture(String picture) { this.picture = picture; }
     public LocalDateTime getDateCreated() { return dateCreated; }
