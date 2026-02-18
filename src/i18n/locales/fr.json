@@ -103,6 +103,7 @@
     "endDate": "Date de Fin",
     "duration": "Durée",
     "dateCreated": "Date de Création",
+    "project": "Projet",
     "formPlaceholder": "Les champs du formulaire seront affichés ici"
   },
   "nav": {

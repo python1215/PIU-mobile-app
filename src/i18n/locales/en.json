@@ -103,6 +103,7 @@
     "endDate": "End Date",
     "duration": "Duration",
     "dateCreated": "Date Created",
+    "project": "Project",
     "formPlaceholder": "Form fields will be displayed here"
   },
   "nav": {
