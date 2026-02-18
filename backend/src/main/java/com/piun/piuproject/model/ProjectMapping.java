@@ -1,6 +1,8 @@
 package com.piun.piuproject.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "project_mapping")
@@ -54,6 +56,14 @@ public class ProjectMapping {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "project_mapping_donors",
+        joinColumns = @JoinColumn(name = "project_mapping_id"),
+        inverseJoinColumns = @JoinColumn(name = "donor_id")
+    )
+    private Set<Donor> donors = new HashSet<>();
+
     public ProjectMapping() {}
 
     public Long getId() { return id; }
@@ -84,4 +94,6 @@ public class ProjectMapping {
     public void setAccessType(AccessType accessType) { this.accessType = accessType; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
+    public Set<Donor> getDonors() { return donors; }
+    public void setDonors(Set<Donor> donors) { this.donors = donors; }
 }
