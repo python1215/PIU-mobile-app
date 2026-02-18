@@ -82,6 +82,12 @@ public class PAP {
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
 
+    @Column(name = "date_received_from")
+    private LocalDate dateReceivedFrom;
+
+    @Column(name = "date_received_to")
+    private LocalDate dateReceivedTo;
+
     @Column(name = "document_upload", length = 255)
     private String documentUpload;
 
@@ -136,6 +142,10 @@ public class PAP {
     public void setPreProjectSituation(String preProjectSituation) { this.preProjectSituation = preProjectSituation; }
     public String getRemarks() { return remarks; }
     public void setRemarks(String remarks) { this.remarks = remarks; }
+    public LocalDate getDateReceivedFrom() { return dateReceivedFrom; }
+    public void setDateReceivedFrom(LocalDate dateReceivedFrom) { this.dateReceivedFrom = dateReceivedFrom; }
+    public LocalDate getDateReceivedTo() { return dateReceivedTo; }
+    public void setDateReceivedTo(LocalDate dateReceivedTo) { this.dateReceivedTo = dateReceivedTo; }
     public String getDocumentUpload() { return documentUpload; }
     public void setDocumentUpload(String documentUpload) { this.documentUpload = documentUpload; }
     public LocalDateTime getDateCreated() { return dateCreated; }

@@ -410,6 +410,13 @@
     "esiaUpdated": "Enregistrement EIES mis à jour avec succès",
     "esiaDeleted": "Enregistrement EIES supprimé avec succès",
     "addPAP": "Ajouter un Enregistrement PAP",
+    "editPAP": "Modifier un Enregistrement PAP",
+    "papCreated": "Enregistrement PAP créé avec succès",
+    "papUpdated": "Enregistrement PAP mis à jour avec succès",
+    "papDeleted": "Enregistrement PAP supprimé avec succès",
+    "dateReceivedFrom": "Date de Réception (Du)",
+    "dateReceivedTo": "Date de Réception (Au)",
+    "settlement": "Localité",
     "addGrievance": "Ajouter un Grief",
     "addOHS": "Ajouter un Enregistrement SST",
     "addEngagement": "Ajouter un Engagement",
@@ -471,7 +478,8 @@
     "female": "Femme",
     "youth": "Jeunesse",
     "reference": "Référence",
-    "place": "Lieu"
+    "place": "Lieu",
+    "remarks": "Remarques"
   },
   "documentation": {
     "title": "Documentation",

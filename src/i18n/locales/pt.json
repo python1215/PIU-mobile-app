@@ -410,6 +410,13 @@
     "esiaUpdated": "Registro AIAS atualizado com sucesso",
     "esiaDeleted": "Registro AIAS excluído com sucesso",
     "addPAP": "Adicionar Registro PAP",
+    "editPAP": "Editar Registro PAP",
+    "papCreated": "Registro PAP criado com sucesso",
+    "papUpdated": "Registro PAP atualizado com sucesso",
+    "papDeleted": "Registro PAP excluído com sucesso",
+    "dateReceivedFrom": "Data de Recebimento (De)",
+    "dateReceivedTo": "Data de Recebimento (Até)",
+    "settlement": "Assentamento",
     "addGrievance": "Adicionar Reclamação",
     "addOHS": "Adicionar Registro SST",
     "addEngagement": "Adicionar Engajamento",
@@ -471,7 +478,8 @@
     "female": "Feminino",
     "youth": "Juventude",
     "reference": "Referência",
-    "place": "Local"
+    "place": "Local",
+    "remarks": "Observações"
   },
   "documentation": {
     "title": "Documentação",

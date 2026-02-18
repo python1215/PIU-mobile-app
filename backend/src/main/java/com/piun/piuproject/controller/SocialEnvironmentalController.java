@@ -94,11 +94,28 @@ public class SocialEnvironmentalController {
     public ResponseEntity<PAP> updatePAP(@PathVariable String id, @RequestBody PAP papDetails) {
         return papRepository.findById(id)
             .map(pap -> {
+                pap.setProject(papDetails.getProject());
+                pap.setInvestmentType(papDetails.getInvestmentType());
+                pap.setRegion(papDetails.getRegion());
+                pap.setDistrict(papDetails.getDistrict());
                 pap.setPapName(papDetails.getPapName());
+                pap.setSex(papDetails.getSex());
+                pap.setPapType(papDetails.getPapType());
+                pap.setPapCategory(papDetails.getPapCategory());
+                pap.setVulnerabilityCategory(papDetails.getVulnerabilityCategory());
                 pap.setLocationOfImpact(papDetails.getLocationOfImpact());
+                pap.setImpactType(papDetails.getImpactType());
+                pap.setNatureOfCompensation(papDetails.getNatureOfCompensation());
                 pap.setAmount(papDetails.getAmount());
+                pap.setArea(papDetails.getArea());
                 pap.setPapCompensated(papDetails.getPapCompensated());
+                pap.setCompensationDate(papDetails.getCompensationDate());
+                pap.setCompensationRefNo(papDetails.getCompensationRefNo());
+                pap.setPreProjectSituation(papDetails.getPreProjectSituation());
+                pap.setCurrentAddress(papDetails.getCurrentAddress());
                 pap.setRemarks(papDetails.getRemarks());
+                pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());
+                pap.setDateReceivedTo(papDetails.getDateReceivedTo());
                 return ResponseEntity.ok(papRepository.save(pap));
             })
             .orElse(ResponseEntity.notFound().build());

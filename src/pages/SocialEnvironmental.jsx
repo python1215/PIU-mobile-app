@@ -19,6 +19,13 @@ function SocialEnvironmental() {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [investmentTypes, setInvestmentTypes] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [filteredDistricts, setFilteredDistricts] = useState([]);
+  const [settlements, setSettlements] = useState([]);
+  const [papTypes, setPapTypes] = useState([]);
+  const [papCategories, setPapCategories] = useState([]);
+  const [vulnerabilityCategories, setVulnerabilityCategories] = useState([]);
 
   useEffect(() => {
     loadProjects();
@@ -61,6 +68,29 @@ function SocialEnvironmental() {
     }
   };
 
+  const loadReferenceData = async () => {
+    try {
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes] = await Promise.all([
+        axios.get('/api/setup/regions').catch(() => ({ data: [] })),
+        axios.get('/api/setup/districts').catch(() => ({ data: [] })),
+        axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
+        axios.get('/api/setup/pap-types').catch(() => ({ data: [] })),
+        axios.get('/api/setup/pap-categories').catch(() => ({ data: [] })),
+        axios.get('/api/setup/vulnerability-categories').catch(() => ({ data: [] })),
+        axios.get('/api/setup/kpi-contracts').catch(() => ({ data: [] }))
+      ]);
+      setRegions(regRes.data);
+      setDistricts(distRes.data);
+      setSettlements(settRes.data);
+      setPapTypes(ptRes.data);
+      setPapCategories(pcRes.data);
+      setVulnerabilityCategories(vcRes.data);
+      setInvestmentTypes(itRes.data);
+    } catch (error) {
+      console.error('Error loading reference data:', error);
+    }
+  };
+
   const tabs = useMemo(() => [
     { id: 'esia', label: t('socialEnvironmental.esia'), icon: FiShield, data: esia },
     { id: 'pap', label: t('socialEnvironmental.pap'), icon: FiUsers, data: pap },
@@ -70,12 +100,14 @@ function SocialEnvironmental() {
   ], [t, esia, pap, grievances, ohs, engagements]);
 
   const handleOpenModal = useCallback((item = null) => {
+    if (activeTab === 'esia' || activeTab === 'pap') {
+      loadReferenceData();
+    }
     if (item) {
       setEditingItem(item);
       if (activeTab === 'esia') {
-        const pid = item.project?.projectId || '';
         setFormData({
-          projectId: pid,
+          projectId: item.project?.projectId || '',
           typeOfInvestment: item.typeOfInvestment || '',
           projectDuration: item.projectDuration || '',
           projectPhase: item.projectPhase || '',
@@ -83,12 +115,29 @@ function SocialEnvironmental() {
           numberOfCommunities: item.numberOfCommunities || '',
           esiaFindings: item.esiaFindings || ''
         });
-        loadInvestmentTypes();
+      } else if (activeTab === 'pap') {
+        const regionCode = item.region?.regionCode || '';
+        setFormData({
+          projectId: item.project?.projectId || '',
+          investmentTypeId: item.investmentType?.id || '',
+          regionCode: regionCode,
+          districtCode: item.district?.districtCode || '',
+          sex: item.sex || '',
+          papTypeId: item.papType?.id || '',
+          papCategoryId: item.papCategory?.id || '',
+          vulnerabilityCategoryId: item.vulnerabilityCategory?.id || '',
+          papCompensated: item.papCompensated || '',
+          papIdentificationNumber: item.papIdentificationNumber || '',
+          settlementCode: item.currentAddress?.settlementCode || '',
+          remarks: item.remarks || '',
+          dateReceivedFrom: item.dateReceivedFrom || '',
+          dateReceivedTo: item.dateReceivedTo || ''
+        });
       }
     } else {
       setEditingItem(null);
+      const pid = selectedProject !== 'all' ? selectedProject : '';
       if (activeTab === 'esia') {
-        const pid = selectedProject !== 'all' ? selectedProject : '';
         setFormData({
           projectId: pid,
           typeOfInvestment: '',
@@ -98,7 +147,23 @@ function SocialEnvironmental() {
           numberOfCommunities: '',
           esiaFindings: ''
         });
-        loadInvestmentTypes();
+      } else if (activeTab === 'pap') {
+        setFormData({
+          projectId: pid,
+          investmentTypeId: '',
+          regionCode: '',
+          districtCode: '',
+          sex: '',
+          papTypeId: '',
+          papCategoryId: '',
+          vulnerabilityCategoryId: '',
+          papCompensated: '',
+          papIdentificationNumber: '',
+          settlementCode: '',
+          remarks: '',
+          dateReceivedFrom: '',
+          dateReceivedTo: ''
+        });
       }
     }
     setShowModal(true);
@@ -110,20 +175,30 @@ function SocialEnvironmental() {
     setFormData({});
   }, []);
 
-  const loadInvestmentTypes = async () => {
-    try {
-      const res = await axios.get('/api/setup/kpi-contracts');
-      setInvestmentTypes(res.data);
-    } catch { setInvestmentTypes([]); }
-  };
-
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'projectId') {
-      setFormData(prev => ({ ...prev, projectId: value, typeOfInvestment: '' }));
+    if (name === 'regionCode') {
+      setFormData(prev => ({ ...prev, regionCode: value, districtCode: '', settlementCode: '' }));
+    }
+    if (name === 'districtCode') {
+      setFormData(prev => ({ ...prev, districtCode: value, settlementCode: '' }));
     }
   }, []);
+
+  useEffect(() => {
+    if (formData.regionCode) {
+      const filtered = districts.filter(d => d.region?.regionCode === formData.regionCode);
+      setFilteredDistricts(filtered);
+    } else {
+      setFilteredDistricts([]);
+    }
+  }, [formData.regionCode, districts]);
+
+  const filteredSettlements = useMemo(() => {
+    if (!formData.districtCode) return [];
+    return settlements.filter(s => s.district?.districtCode === formData.districtCode);
+  }, [formData.districtCode, settlements]);
 
   const handleSubmitESIA = async (e) => {
     e.preventDefault();
@@ -149,7 +224,44 @@ function SocialEnvironmental() {
       loadData();
     } catch (error) {
       console.error('Error saving ESIA:', error);
-      toast.error(t('common.error'));
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
+  const handleSubmitPAP = async (e) => {
+    e.preventDefault();
+    const payload = {
+      papIdentificationNumber: formData.papIdentificationNumber,
+      project: formData.projectId ? { projectId: formData.projectId } : null,
+      investmentType: formData.investmentTypeId ? { id: parseInt(formData.investmentTypeId) } : null,
+      region: formData.regionCode ? { regionCode: formData.regionCode } : null,
+      district: formData.districtCode ? { districtCode: formData.districtCode } : null,
+      sex: formData.sex || null,
+      papType: formData.papTypeId ? { id: parseInt(formData.papTypeId) } : null,
+      papCategory: formData.papCategoryId ? { id: parseInt(formData.papCategoryId) } : null,
+      vulnerabilityCategory: formData.vulnerabilityCategoryId ? { id: parseInt(formData.vulnerabilityCategoryId) } : null,
+      papCompensated: formData.papCompensated || null,
+      currentAddress: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
+      remarks: formData.remarks || null,
+      dateReceivedFrom: formData.dateReceivedFrom || null,
+      dateReceivedTo: formData.dateReceivedTo || null
+    };
+
+    try {
+      if (editingItem) {
+        await axios.put(`/api/social-environmental/pap/${editingItem.papIdentificationNumber}`, payload);
+        toast.success(t('socialEnvironmental.papUpdated'));
+      } else {
+        await axios.post('/api/social-environmental/pap', payload);
+        toast.success(t('socialEnvironmental.papCreated'));
+      }
+      handleCloseModal();
+      loadData();
+    } catch (error) {
+      console.error('Error saving PAP:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
     }
   };
 
@@ -161,6 +273,19 @@ function SocialEnvironmental() {
       loadData();
     } catch (error) {
       console.error('Error deleting ESIA:', error);
+      const msg = error.response?.data?.message || t('common.error');
+      toast.error(msg);
+    }
+  };
+
+  const handleDeletePAP = async (id) => {
+    if (!window.confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/social-environmental/pap/${id}`);
+      toast.success(t('socialEnvironmental.papDeleted'));
+      loadData();
+    } catch (error) {
+      console.error('Error deleting PAP:', error);
       const msg = error.response?.data?.message || t('common.error');
       toast.error(msg);
     }
@@ -208,6 +333,54 @@ function SocialEnvironmental() {
     </div>
   );
 
+  const renderPAPTable = () => (
+    <div className="table-responsive">
+      <table className="table table-striped table-hover">
+        <thead className="table-dark">
+          <tr>
+            <th>{t('socialEnvironmental.papId')}</th>
+            <th>{t('common.project')}</th>
+            <th>{t('socialEnvironmental.typeOfInvestment')}</th>
+            <th>{t('setup.region')}</th>
+            <th>{t('setup.district')}</th>
+            <th>{t('socialEnvironmental.sex')}</th>
+            <th>{t('socialEnvironmental.papType')}</th>
+            <th>{t('socialEnvironmental.papCategory')}</th>
+            <th>{t('socialEnvironmental.compensated')}</th>
+            <th>{t('common.actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pap.length === 0 ? (
+            <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
+          ) : (
+            pap.map((item) => (
+              <tr key={item.papIdentificationNumber}>
+                <td><strong>{item.papIdentificationNumber}</strong></td>
+                <td>{item.project?.project || '-'}</td>
+                <td>{item.investmentType?.typeOfInvestment || '-'}</td>
+                <td>{item.region?.regionName || '-'}</td>
+                <td>{item.district?.districtName || '-'}</td>
+                <td>{item.sex || '-'}</td>
+                <td>{item.papType?.typeOfPap || '-'}</td>
+                <td>{item.papCategory?.papCategory || '-'}</td>
+                <td>
+                  <span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`}>
+                    {item.papCompensated === 'Y' ? t('common.yes') : t('common.no')}
+                  </span>
+                </td>
+                <td>
+                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeletePAP(item.papIdentificationNumber)}><FiTrash2 /></button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const renderOtherTable = () => {
     const currentTab = tabs.find(tab => tab.id === activeTab);
     const data = currentTab?.data || [];
@@ -217,7 +390,6 @@ function SocialEnvironmental() {
         <table className="table table-striped table-hover">
           <thead className="table-dark">
             <tr>
-              {activeTab === 'pap' && <><th>{t('socialEnvironmental.papId')}</th><th>{t('common.name')}</th><th>{t('socialEnvironmental.sex')}</th><th>{t('socialEnvironmental.location')}</th><th>{t('socialEnvironmental.amount')}</th><th>{t('socialEnvironmental.compensated')}</th></>}
               {activeTab === 'grievance' && <><th>{t('socialEnvironmental.caseNo')}</th><th>{t('socialEnvironmental.complainant')}</th><th>{t('socialEnvironmental.dateReceived')}</th><th>{t('socialEnvironmental.outcome')}</th><th>{t('socialEnvironmental.satisfied')}</th></>}
               {activeTab === 'ohs' && <><th>ID</th><th>{t('common.date')}</th><th>{t('setup.region')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('socialEnvironmental.youth')}</th></>}
               {activeTab === 'engagement' && <><th>{t('socialEnvironmental.reference')}</th><th>{t('socialEnvironmental.place')}</th><th>{t('common.date')}</th><th>{t('socialEnvironmental.male')}</th><th>{t('socialEnvironmental.female')}</th><th>{t('common.total')}</th></>}
@@ -230,9 +402,6 @@ function SocialEnvironmental() {
             ) : (
               data.map((item, index) => (
                 <tr key={index}>
-                  {activeTab === 'pap' && (
-                    <><td>{item.papIdentificationNumber}</td><td>{item.papName}</td><td>{item.sex}</td><td>{item.locationOfImpact}</td><td>${item.amount}</td><td><span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`}>{item.papCompensated === 'Y' ? t('common.yes') : t('common.no')}</span></td></>
-                  )}
                   {activeTab === 'grievance' && (
                     <><td>{item.caseNo}</td><td>{item.nameOfComplainant}</td><td>{item.dateClaimReceived}</td><td>{item.decisionOutcome?.outcome}</td><td><span className={`badge bg-${item.complainantSatisfied === 'Y' ? 'success' : 'danger'}`}>{item.complainantSatisfied === 'Y' ? t('common.yes') : t('common.no')}</span></td></>
                   )}
@@ -304,6 +473,140 @@ function SocialEnvironmental() {
     </form>
   );
 
+  const renderPAPForm = () => (
+    <form onSubmit={handleSubmitPAP}>
+      <div className="row g-3">
+        <div className="col-md-6">
+          <label className="form-label">{t('common.project')} *</label>
+          <select className="form-select" name="projectId" value={formData.projectId || ''} onChange={handleChange} required>
+            <option value="">{t('common.select')}</option>
+            {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+          </select>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label">{t('socialEnvironmental.typeOfInvestment')}</label>
+          <select className="form-select" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {investmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('setup.region')}</label>
+          <select className="form-select" name="regionCode" value={formData.regionCode || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('setup.district')}</label>
+          <select className="form-select" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} disabled={!formData.regionCode}>
+            <option value="">{t('common.select')}</option>
+            {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.sex')}</label>
+          <select className="form-select" name="sex" value={formData.sex || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            <option value="M">{t('socialEnvironmental.male')}</option>
+            <option value="F">{t('socialEnvironmental.female')}</option>
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.papType')}</label>
+          <select className="form-select" name="papTypeId" value={formData.papTypeId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {papTypes.map(pt => <option key={pt.id} value={pt.id}>{pt.typeOfPap}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.papCategory')}</label>
+          <select className="form-select" name="papCategoryId" value={formData.papCategoryId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {papCategories.map(pc => <option key={pc.id} value={pc.id}>{pc.papCategory}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.vulnerabilityStatus')}</label>
+          <select className="form-select" name="vulnerabilityCategoryId" value={formData.vulnerabilityCategoryId || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            {vulnerabilityCategories.map(vc => <option key={vc.id} value={vc.id}>{vc.vulnerability}</option>)}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.compensated')}</label>
+          <select className="form-select" name="papCompensated" value={formData.papCompensated || ''} onChange={handleChange}>
+            <option value="">{t('common.select')}</option>
+            <option value="Y">{t('common.yes')}</option>
+            <option value="N">{t('common.no')}</option>
+          </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.papId')} *</label>
+          <input type="text" className="form-control" name="papIdentificationNumber" value={formData.papIdentificationNumber || ''} onChange={handleChange} required disabled={!!editingItem} />
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">{t('socialEnvironmental.settlement')}</label>
+          <select className="form-select" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} disabled={!formData.districtCode}>
+            <option value="">{t('common.select')}</option>
+            {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+          </select>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label">{t('socialEnvironmental.dateReceivedFrom')}</label>
+          <input type="date" className="form-control" name="dateReceivedFrom" value={formData.dateReceivedFrom || ''} onChange={handleChange} />
+        </div>
+        <div className="col-md-6">
+          <label className="form-label">{t('socialEnvironmental.dateReceivedTo')}</label>
+          <input type="date" className="form-control" name="dateReceivedTo" value={formData.dateReceivedTo || ''} onChange={handleChange} />
+        </div>
+        <div className="col-12">
+          <label className="form-label">{t('socialEnvironmental.remarks')}</label>
+          <textarea className="form-control" name="remarks" rows="3" value={formData.remarks || ''} onChange={handleChange}></textarea>
+        </div>
+      </div>
+      <div className="modal-footer mt-3 px-0">
+        <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+          {t('common.cancel')}
+        </button>
+        <button type="submit" className="btn btn-primary">
+          {editingItem ? t('common.update') : t('common.save')}
+        </button>
+      </div>
+    </form>
+  );
+
+  const getModalTitle = () => {
+    if (activeTab === 'esia') return editingItem ? t('socialEnvironmental.editESIA') : t('socialEnvironmental.addESIA');
+    if (activeTab === 'pap') return editingItem ? t('socialEnvironmental.editPAP') : t('socialEnvironmental.addPAP');
+    return t('common.addNew');
+  };
+
+  const renderActiveTable = () => {
+    if (loading) return <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>;
+    if (activeTab === 'esia') return renderESIATable();
+    if (activeTab === 'pap') return renderPAPTable();
+    return renderOtherTable();
+  };
+
+  const renderActiveForm = () => {
+    if (activeTab === 'esia') return renderESIAForm();
+    if (activeTab === 'pap') return renderPAPForm();
+    return (
+      <>
+        <p className="text-muted">{t('common.formPlaceholder')}</p>
+        <div className="modal-footer">
+          <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+            {t('common.cancel')}
+          </button>
+          <button type="button" className="btn btn-primary" onClick={handleCloseModal}>
+            {t('common.save')}
+          </button>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -349,9 +652,7 @@ function SocialEnvironmental() {
 
       <div className="card">
         <div className="card-body">
-          {loading ? (
-            <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
-          ) : activeTab === 'esia' ? renderESIATable() : renderOtherTable()}
+          {renderActiveTable()}
         </div>
       </div>
 
@@ -360,25 +661,11 @@ function SocialEnvironmental() {
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">
-                  {activeTab === 'esia' ? (editingItem ? t('socialEnvironmental.editESIA') : t('socialEnvironmental.addESIA')) : t('common.addNew')}
-                </h5>
+                <h5 className="modal-title">{getModalTitle()}</h5>
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
-                {activeTab === 'esia' ? renderESIAForm() : (
-                  <>
-                    <p className="text-muted">{t('common.formPlaceholder')}</p>
-                    <div className="modal-footer">
-                      <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
-                        {t('common.cancel')}
-                      </button>
-                      <button type="button" className="btn btn-primary" onClick={handleCloseModal}>
-                        {t('common.save')}
-                      </button>
-                    </div>
-                  </>
-                )}
+                {renderActiveForm()}
               </div>
             </div>
           </div>
