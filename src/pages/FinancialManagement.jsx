@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors, currencies }) {
   const [formData, setFormData] = useState(() => {
@@ -804,8 +804,8 @@ function FinancialManagement() {
         rows: filteredProjects.map(p => [
           p.projectId || '',
           p.project || '',
-          p.donors?.map(d => d.donorName).join(', ') || '',
-          p.contributors?.map(c => c.contributorName).join(', ') || '',
+          p.donors?.map(d => d.name).join(', ') || '',
+          p.contributors?.map(c => c.name).join(', ') || '',
           p.currency?.currency || '',
           p.funding || 0,
           p.effectivenessDate || '',
@@ -870,7 +870,7 @@ function FinancialManagement() {
     doc.text(`Financial Management - ${title}`, 14, 15);
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 22);
-    doc.autoTable({
+    autoTable(doc, {
       head: [headers],
       body: rows,
       startY: 28,
