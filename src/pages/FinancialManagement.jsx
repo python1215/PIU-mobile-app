@@ -865,18 +865,25 @@ function FinancialManagement() {
 
   const exportToPDF = useCallback(() => {
     const { title, headers, rows } = getExportData();
-    const doc = new jsPDF({ orientation: 'landscape' });
-    doc.setFontSize(16);
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.setFontSize(14);
     doc.text(`Financial Management - ${title}`, 14, 15);
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 22);
     autoTable(doc, {
       head: [headers],
       body: rows,
       startY: 28,
-      styles: { fontSize: 8, cellPadding: 3 },
-      headStyles: { fillColor: [67, 97, 238], textColor: 255 },
-      alternateRowStyles: { fillColor: [245, 245, 245] }
+      styles: { fontSize: 6, cellPadding: 2, overflow: 'linebreak' },
+      headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 7 },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { left: 10, right: 10 },
+      tableWidth: pageWidth - 20,
+      columnStyles: headers.reduce((acc, _, i) => {
+        acc[i] = { cellWidth: 'auto' };
+        return acc;
+      }, {})
     });
     doc.save(`Financial_${title}_${new Date().toISOString().slice(0, 10)}.pdf`);
     toast.success('Exported to PDF');
