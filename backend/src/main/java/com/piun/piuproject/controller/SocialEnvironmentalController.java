@@ -117,28 +117,28 @@ public class SocialEnvironmentalController {
 
     private void resolvePAPReferences(PAP pap) {
         if (pap.getProject() != null && pap.getProject().getProjectId() != null) {
-            projectRepository.findById(pap.getProject().getProjectId()).ifPresent(pap::setProject);
+            pap.setProject(projectRepository.findById(pap.getProject().getProjectId()).orElse(null));
         }
         if (pap.getInvestmentType() != null && pap.getInvestmentType().getId() != null) {
-            kpiContractSetupRepository.findById(pap.getInvestmentType().getId()).ifPresent(pap::setInvestmentType);
+            pap.setInvestmentType(kpiContractSetupRepository.findById(pap.getInvestmentType().getId()).orElse(null));
         }
         if (pap.getRegion() != null && pap.getRegion().getRegionCode() != null) {
-            regionRepository.findById(pap.getRegion().getRegionCode()).ifPresent(pap::setRegion);
+            pap.setRegion(regionRepository.findById(pap.getRegion().getRegionCode()).orElse(null));
         }
         if (pap.getDistrict() != null && pap.getDistrict().getDistrictCode() != null) {
-            districtRepository.findById(pap.getDistrict().getDistrictCode()).ifPresent(pap::setDistrict);
+            pap.setDistrict(districtRepository.findById(pap.getDistrict().getDistrictCode()).orElse(null));
         }
         if (pap.getPapType() != null && pap.getPapType().getId() != null) {
-            papTypeRepository.findById(pap.getPapType().getId()).ifPresent(pap::setPapType);
+            pap.setPapType(papTypeRepository.findById(pap.getPapType().getId()).orElse(null));
         }
         if (pap.getPapCategory() != null && pap.getPapCategory().getId() != null) {
-            papCategoryRepository.findById(pap.getPapCategory().getId()).ifPresent(pap::setPapCategory);
+            pap.setPapCategory(papCategoryRepository.findById(pap.getPapCategory().getId()).orElse(null));
         }
         if (pap.getVulnerabilityCategory() != null && pap.getVulnerabilityCategory().getId() != null) {
-            vulnerabilityCategoryRepository.findById(pap.getVulnerabilityCategory().getId()).ifPresent(pap::setVulnerabilityCategory);
+            pap.setVulnerabilityCategory(vulnerabilityCategoryRepository.findById(pap.getVulnerabilityCategory().getId()).orElse(null));
         }
         if (pap.getCurrentAddress() != null && pap.getCurrentAddress().getSettlementCode() != null) {
-            settlementRepository.findById(pap.getCurrentAddress().getSettlementCode()).ifPresent(pap::setCurrentAddress);
+            pap.setCurrentAddress(settlementRepository.findById(pap.getCurrentAddress().getSettlementCode()).orElse(null));
         }
     }
 

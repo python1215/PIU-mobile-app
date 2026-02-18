@@ -49,8 +49,12 @@ public class GlobalExceptionHandler {
         String rootMsg = ex.getMostSpecificCause().getMessage();
         logger.error("Data integrity violation: {}", rootMsg);
         String userMessage;
-        if (rootMsg != null && rootMsg.contains("violates foreign key constraint")) {
+        if (rootMsg != null && rootMsg.contains("violates foreign key constraint") && rootMsg.contains("is still referenced")) {
             userMessage = "Cannot delete this record because it is referenced by other records. Please remove the dependent records first.";
+        } else if (rootMsg != null && rootMsg.contains("violates foreign key constraint") && rootMsg.contains("is not present")) {
+            userMessage = "One of the selected references is invalid or does not exist. Please check your selections and try again.";
+        } else if (rootMsg != null && rootMsg.contains("violates foreign key constraint")) {
+            userMessage = "A data reference error occurred. Please check your input values.";
         } else if (rootMsg != null && rootMsg.contains("duplicate key")) {
             userMessage = "A record with this value already exists.";
         } else {
