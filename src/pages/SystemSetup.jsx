@@ -482,13 +482,13 @@ function SystemSetup() {
   }), []);
 
   const menuGroups = useMemo(() => [
-    { label: 'Stakeholders', items: [{ id: 'donors', label: 'Donors' }, { id: 'contributors', label: 'Contributors' }] },
-    { label: 'Geography', items: [{ id: 'regions', label: 'Regions' }, { id: 'lgas', label: 'LGAs' }, { id: 'districts', label: 'Districts' }, { id: 'wards', label: 'Wards' }, { id: 'settlements', label: 'Settlements' }] },
-    { label: 'Time & Finance', items: [{ id: 'years', label: 'Years' }, { id: 'quarters', label: 'Quarters' }, { id: 'currencies', label: 'Currencies' }, { id: 'investmentTypes', label: 'Investment Types' }] },
-    { label: 'Project Setup', items: [{ id: 'categories', label: 'Categories' }, { id: 'documentTypes', label: 'Document Types' }, { id: 'monitoringTypes', label: 'Monitoring Types' }, { id: 'indicatorTypes', label: 'Indicator Types' }, { id: 'measurementUnits', label: 'Measurement Units' }, { id: 'physicalProgress', label: 'Physical Progress' }, { id: 'dataFrequencies', label: 'Data Frequency' }] },
-    { label: 'Social & PAP', items: [{ id: 'papTypes', label: 'PAP Types' }, { id: 'papCategories', label: 'PAP Categories' }, { id: 'impactTypes', label: 'Impact Types' }, { id: 'settlementNatures', label: 'Settlement Nature' }, { id: 'vulnerabilityCategories', label: 'Vulnerability' }, { id: 'stakeholderEngagements', label: 'Stakeholder Eng.' }, { id: 'accessTypes', label: 'Access Types' }, { id: 'decisionOutcomes', label: 'Decision Outcomes' }] },
-    { label: 'Results Framework', items: [{ id: 'pdos', label: 'PDO Setup' }, { id: 'outcomes', label: 'Outcomes' }, { id: 'results', label: 'Results' }, { id: 'kpiContracts', label: 'KPI Contracts' }] },
-  ], []);
+    { label: t('setup.tabStakeholders'), items: [{ id: 'donors', label: t('setup.donors') }, { id: 'contributors', label: t('setup.contributors') }] },
+    { label: t('setup.tabGeography'), items: [{ id: 'regions', label: t('setup.regions') }, { id: 'lgas', label: t('setup.lgas') }, { id: 'districts', label: t('setup.districts') }, { id: 'wards', label: t('setup.wards') }, { id: 'settlements', label: t('setup.settlements') }] },
+    { label: t('setup.tabTimeFinance'), items: [{ id: 'years', label: t('setup.years') }, { id: 'quarters', label: t('setup.quarters') }, { id: 'currencies', label: t('setup.currencies') }, { id: 'investmentTypes', label: t('setup.investmentTypes') }] },
+    { label: t('setup.tabProjectSetup'), items: [{ id: 'categories', label: t('setup.categories') }, { id: 'documentTypes', label: t('setup.documentTypes') }, { id: 'monitoringTypes', label: t('setup.monitoringTypes') }, { id: 'indicatorTypes', label: t('setup.indicatorTypes') }, { id: 'measurementUnits', label: t('setup.measurementUnits') }, { id: 'physicalProgress', label: t('setup.physicalProgress') }, { id: 'dataFrequencies', label: t('setup.dataFrequency') }] },
+    { label: t('setup.tabSocialPAP'), items: [{ id: 'papTypes', label: t('setup.papTypes') }, { id: 'papCategories', label: t('setup.papCategories') }, { id: 'impactTypes', label: t('setup.impactTypes') }, { id: 'settlementNatures', label: t('setup.settlementNatures') }, { id: 'vulnerabilityCategories', label: t('setup.vulnerability') }, { id: 'stakeholderEngagements', label: t('setup.stakeholderEngagements') }, { id: 'accessTypes', label: t('setup.accessTypes') }, { id: 'decisionOutcomes', label: t('setup.decisionOutcomes') }] },
+    { label: t('setup.tabResultsFramework'), items: [{ id: 'pdos', label: t('setup.pdoSetup') }, { id: 'outcomes', label: t('setup.outcomes') }, { id: 'results', label: t('setup.results') }, { id: 'kpiContracts', label: t('setup.kpiContracts') }] },
+  ], [t]);
 
   const loadTabData = useCallback(async (tabKey) => {
     const config = tabConfig[tabKey];
