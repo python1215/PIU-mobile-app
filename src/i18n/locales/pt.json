@@ -617,7 +617,18 @@
     "closed": "Fechado",
     "inProgress": "Em Andamento",
     "resolved": "Resolvido",
-    "escalated": "Escalado"
+    "escalated": "Escalado",
+    "issuesTab": "Problemas",
+    "sourcesTab": "Fontes de Problemas/Ações",
+    "addSource": "Adicionar Fonte",
+    "editSource": "Editar Fonte",
+    "sourceDetails": "Detalhes da Fonte",
+    "issueActionSource": "Fonte de Problema/Ação",
+    "sourceCreatedBy": "Criado por",
+    "sourceDateCreated": "Data de Criação",
+    "sourceCreated": "Fonte criada com sucesso",
+    "sourceUpdated": "Fonte atualizada com sucesso",
+    "sourceDeleted": "Fonte excluída com sucesso"
   },
   "kpi": {
     "title": "Monitoramento KPI",

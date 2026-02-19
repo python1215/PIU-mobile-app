@@ -618,7 +618,18 @@
     "closed": "Closed",
     "inProgress": "In Progress",
     "resolved": "Resolved",
-    "escalated": "Escalated"
+    "escalated": "Escalated",
+    "issuesTab": "Issues",
+    "sourcesTab": "Issue/Action Sources",
+    "addSource": "Add Source",
+    "editSource": "Edit Source",
+    "sourceDetails": "Source Details",
+    "issueActionSource": "Issue/Action Source",
+    "sourceCreatedBy": "Created By",
+    "sourceDateCreated": "Date Created",
+    "sourceCreated": "Source created successfully",
+    "sourceUpdated": "Source updated successfully",
+    "sourceDeleted": "Source deleted successfully"
   },
   "kpi": {
     "title": "KPI Monitoring",

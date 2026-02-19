@@ -617,7 +617,18 @@
     "closed": "Fermé",
     "inProgress": "En Cours",
     "resolved": "Résolu",
-    "escalated": "Escaladé"
+    "escalated": "Escaladé",
+    "issuesTab": "Problèmes",
+    "sourcesTab": "Sources de Problèmes/Actions",
+    "addSource": "Ajouter une Source",
+    "editSource": "Modifier la Source",
+    "sourceDetails": "Détails de la Source",
+    "issueActionSource": "Source de Problème/Action",
+    "sourceCreatedBy": "Créé par",
+    "sourceDateCreated": "Date de Création",
+    "sourceCreated": "Source créée avec succès",
+    "sourceUpdated": "Source mise à jour avec succès",
+    "sourceDeleted": "Source supprimée avec succès"
   },
   "kpi": {
     "title": "Suivi des KPI",

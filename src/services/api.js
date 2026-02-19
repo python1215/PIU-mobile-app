@@ -62,4 +62,12 @@ export const issueAPI = {
   delete: (id) => api.delete(`/issues/${id}`),
 };
 
+export const issueActionSourceAPI = {
+  getAll: () => api.get('/issue-action-sources'),
+  getById: (id) => api.get(`/issue-action-sources/${id}`),
+  create: (data) => api.post('/issue-action-sources', data),
+  update: (id, data) => api.put(`/issue-action-sources/${id}`, data),
+  delete: (id) => api.delete(`/issue-action-sources/${id}`),
+};
+
 export default api;

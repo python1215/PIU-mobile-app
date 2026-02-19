@@ -25,6 +25,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/PhysicalProgressRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Quarter.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/InvestmentType.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/IssueActionSourceController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/AuthController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtTokenProvider.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PAPCategory.java
@@ -86,6 +87,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DonorRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/UserRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/NawecInfrastructureRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionSourceRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ProjectOutcome.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/PAPCategoryRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/PDORepository.java

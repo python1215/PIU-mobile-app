@@ -73,6 +73,7 @@ com/piun/piuproject/model/LGA.class
 com/piun/piuproject/repository/MeasurementUnitRepository.class
 com/piun/piuproject/controller/SocialEnvironmentalController.class
 com/piun/piuproject/dto/AuthRequest.class
+com/piun/piuproject/controller/IssueActionSourceController.class
 com/piun/piuproject/repository/MonitoringTypeRepository.class
 com/piun/piuproject/dto/RegisterRequest.class
 com/piun/piuproject/repository/ProjectCategoryRepository.class
@@ -120,6 +121,7 @@ com/piun/piuproject/repository/ContributorRepository.class
 com/piun/piuproject/model/Component.class
 com/piun/piuproject/security/JwtTokenProvider.class
 com/piun/piuproject/repository/VulnerabilityCategoryRepository.class
+com/piun/piuproject/repository/IssueActionSourceRepository.class
 com/piun/piuproject/model/Ward.class
 com/piun/piuproject/model/StakeholderEngagementType.class
 com/piun/piuproject/controller/FinancialController.class
