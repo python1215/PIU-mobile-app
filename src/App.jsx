@@ -23,6 +23,15 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
+function ModuleGuard({ moduleKey, children }) {
+  const permissions = useAuthStore((state) => state.permissions);
+  const user = useAuthStore((state) => state.user);
+
+  if (!permissions || user?.isSuperuser) return children;
+  if (permissions[moduleKey] === true) return children;
+  return <Navigate to="/" replace />;
+}
+
 function App() {
   return (
     <Routes>
@@ -40,16 +49,16 @@ function App() {
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="donors" element={<Donors />} />
-        <Route path="issues" element={<Issues />} />
-        <Route path="kpi" element={<KPIMonitoring />} />
-        <Route path="setup" element={<SystemSetup />} />
-        <Route path="financial" element={<FinancialManagement />} />
-        <Route path="monitoring" element={<MonitoringEvaluation />} />
-        <Route path="project-actions" element={<ProjectActions />} />
-        <Route path="social-environmental" element={<SocialEnvironmental />} />
-        <Route path="documentation" element={<Documentation />} />
-        <Route path="map" element={<ProjectMap />} />
-        <Route path="administration" element={<Administration />} />
+        <Route path="issues" element={<ModuleGuard moduleKey="issues"><Issues /></ModuleGuard>} />
+        <Route path="kpi" element={<ModuleGuard moduleKey="kpi"><KPIMonitoring /></ModuleGuard>} />
+        <Route path="setup" element={<ModuleGuard moduleKey="systemSetup"><SystemSetup /></ModuleGuard>} />
+        <Route path="financial" element={<ModuleGuard moduleKey="financialManagement"><FinancialManagement /></ModuleGuard>} />
+        <Route path="monitoring" element={<ModuleGuard moduleKey="monitoring"><MonitoringEvaluation /></ModuleGuard>} />
+        <Route path="project-actions" element={<ModuleGuard moduleKey="projectActions"><ProjectActions /></ModuleGuard>} />
+        <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
+        <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />
+        <Route path="map" element={<ModuleGuard moduleKey="projectMap"><ProjectMap /></ModuleGuard>} />
+        <Route path="administration" element={<ModuleGuard moduleKey="administration"><Administration /></ModuleGuard>} />
       </Route>
     </Routes>
   );
