@@ -45,17 +45,17 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const StatCard = memo(function StatCard({ icon: Icon, label, value, color, bgColor }) {
   return (
-    <div className="card border-0 shadow-sm h-100">
+    <div className="card border-0 shadow-sm" style={{ minWidth: '160px', maxWidth: '200px' }}>
       <div className="card-body d-flex align-items-center gap-2 py-2 px-3">
         <div 
           className={`rounded-2 d-flex align-items-center justify-content-center ${bgColor}`}
-          style={{ width: '40px', height: '40px', minWidth: '40px' }}
+          style={{ width: '36px', height: '36px', minWidth: '36px' }}
         >
-          <Icon size={18} className={color} />
+          <Icon size={16} className={color} />
         </div>
         <div>
-          <h4 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.25rem' }}>{value}</h4>
-          <p className="mb-0 text-muted" style={{ fontSize: '0.75rem' }}>{label}</p>
+          <h5 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.1rem', lineHeight: 1.2 }}>{value}</h5>
+          <p className="mb-0 text-muted" style={{ fontSize: '0.7rem', lineHeight: 1.2 }}>{label}</p>
         </div>
       </div>
     </div>
@@ -182,43 +182,35 @@ function Dashboard() {
         <p className="text-muted mb-0">{t('dashboard.welcomeMessage')}</p>
       </div>
 
-      <div className="row g-3 mb-3">
-        <div className="col-6 col-sm-6 col-xl-3">
-          <StatCard
-            icon={FiFolder}
-            label={t('dashboard.totalProjects')}
-            value={projects.length}
-            color="text-primary"
-            bgColor="bg-primary bg-opacity-10"
-          />
-        </div>
-        <div className="col-6 col-sm-6 col-xl-3">
-          <StatCard
-            icon={FiAlertCircle}
-            label={t('dashboard.openIssues')}
-            value={incompleteIssues}
-            color="text-warning"
-            bgColor="bg-warning bg-opacity-10"
-          />
-        </div>
-        <div className="col-6 col-sm-6 col-xl-3">
-          <StatCard
-            icon={FiCheckCircle}
-            label={t('dashboard.resolvedIssues')}
-            value={completeIssues}
-            color="text-success"
-            bgColor="bg-success bg-opacity-10"
-          />
-        </div>
-        <div className="col-6 col-sm-6 col-xl-3">
-          <StatCard
-            icon={FiClock}
-            label={t('dashboard.criticalIssues')}
-            value={criticalIssues}
-            color="text-danger"
-            bgColor="bg-danger bg-opacity-10"
-          />
-        </div>
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <StatCard
+          icon={FiFolder}
+          label={t('dashboard.totalProjects')}
+          value={projects.length}
+          color="text-primary"
+          bgColor="bg-primary bg-opacity-10"
+        />
+        <StatCard
+          icon={FiAlertCircle}
+          label={t('dashboard.openIssues')}
+          value={incompleteIssues}
+          color="text-warning"
+          bgColor="bg-warning bg-opacity-10"
+        />
+        <StatCard
+          icon={FiCheckCircle}
+          label={t('dashboard.resolvedIssues')}
+          value={completeIssues}
+          color="text-success"
+          bgColor="bg-success bg-opacity-10"
+        />
+        <StatCard
+          icon={FiClock}
+          label={t('dashboard.criticalIssues')}
+          value={criticalIssues}
+          color="text-danger"
+          bgColor="bg-danger bg-opacity-10"
+        />
       </div>
 
       <div className="row g-3 mb-3">
@@ -251,11 +243,11 @@ function Dashboard() {
             <div className="card-header bg-white border-0 py-2">
               <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('map.projectLocations')}</h6>
             </div>
-            <div className="card-body p-0" style={{ minHeight: '320px' }}>
+            <div className="card-body p-0" style={{ minHeight: '400px' }}>
               <MapContainer
                 center={[13.45, -15.4]}
                 zoom={8}
-                style={{ height: '100%', minHeight: '320px', borderRadius: '0 0 0.375rem 0.375rem' }}
+                style={{ height: '100%', minHeight: '400px', borderRadius: '0 0 0.375rem 0.375rem' }}
                 scrollWheelZoom={false}
               >
                 <TileLayer
