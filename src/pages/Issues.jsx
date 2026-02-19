@@ -1,9 +1,25 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { issueAPI, issueActionSourceAPI } from '../services/api';
+import { issueAPI, issueActionSourceAPI, projectAPI, setupAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFilter, FiAlertCircle, FiLayers } from 'react-icons/fi';
+
+const emptyIssueForm = {
+  project: null,
+  year: null,
+  quarter: null,
+  issueCode: '',
+  issueActionType: null,
+  descriptionOfIssueOrAction: '',
+  sourceOfIssueOrAction: null,
+  status: 'incomplete',
+  priority: 'medium',
+  assignedTo: '',
+  assignDate: '',
+  dueDate: '',
+  remarks: '',
+};
 
 function Issues() {
   const { t } = useTranslation();
@@ -15,22 +31,37 @@ function Issues() {
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const [editingSource, setEditingSource] = useState(null);
   const [sourceFormData, setSourceFormData] = useState({ issueActionSource: '' });
+  const [issueFormData, setIssueFormData] = useState({ ...emptyIssueForm });
   const queryClient = useQueryClient();
 
   const { data: issues = [], isLoading } = useQuery({
     queryKey: ['issues'],
-    queryFn: async () => {
-      const response = await issueAPI.getAll();
-      return response.data;
-    },
+    queryFn: async () => { const r = await issueAPI.getAll(); return r.data; },
   });
 
   const { data: sources = [], isLoading: sourcesLoading } = useQuery({
     queryKey: ['issueActionSources'],
-    queryFn: async () => {
-      const response = await issueActionSourceAPI.getAll();
-      return response.data;
-    },
+    queryFn: async () => { const r = await issueActionSourceAPI.getAll(); return r.data; },
+  });
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => { const r = await projectAPI.getAll(); return r.data; },
+  });
+
+  const { data: years = [] } = useQuery({
+    queryKey: ['years'],
+    queryFn: async () => { const r = await setupAPI.getYears(); return r.data; },
+  });
+
+  const { data: quarters = [] } = useQuery({
+    queryKey: ['quarters'],
+    queryFn: async () => { const r = await setupAPI.getQuarters(); return r.data; },
+  });
+
+  const { data: monitoringTypes = [] } = useQuery({
+    queryKey: ['monitoringTypes'],
+    queryFn: async () => { const r = await setupAPI.getMonitoringTypes(); return r.data; },
   });
 
   const createMutation = useMutation({
@@ -104,7 +135,8 @@ function Issues() {
   const filteredIssues = useMemo(() => issues.filter((issue) => {
     const matchesSearch =
       issue.issueCode?.toLowerCase().includes(search.toLowerCase()) ||
-      issue.descriptionOfIssueOrAction?.toLowerCase().includes(search.toLowerCase());
+      issue.descriptionOfIssueOrAction?.toLowerCase().includes(search.toLowerCase()) ||
+      issue.assignedTo?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'all' || issue.status === statusFilter;
     return matchesSearch && matchesStatus;
   }), [issues, search, statusFilter]);
@@ -114,22 +146,42 @@ function Issues() {
   ), [sources, search]);
 
   const getPriorityBadge = (priority) => {
-    const colors = { low: 'bg-success', medium: 'bg-warning', high: 'bg-orange text-dark', critical: 'bg-danger' };
-    const labels = { low: t('issues.low'), medium: t('issues.medium'), high: t('issues.high'), critical: t('issues.critical') };
+    const colors = { low: 'bg-success', medium: 'bg-warning text-dark', high: 'bg-orange text-dark', critical: 'bg-danger', done: 'bg-info' };
+    const labels = { low: t('issues.low'), medium: t('issues.medium'), high: t('issues.high'), critical: t('issues.critical'), done: t('issues.done') };
     return <span className={`badge ${colors[priority] || 'bg-secondary'}`}>{labels[priority] || priority}</span>;
   };
 
   const getStatusBadge = (status) => {
-    const colors = { incomplete: 'bg-warning text-dark', complete: 'bg-success' };
-    const labels = { incomplete: t('common.incomplete'), complete: t('common.complete') };
+    const colors = { incomplete: 'bg-warning text-dark', complete: 'bg-success', Cancel: 'bg-secondary' };
+    const labels = { incomplete: t('common.incomplete'), complete: t('common.complete'), Cancel: t('issues.cancel') };
     return <span className={`badge ${colors[status] || 'bg-secondary'}`}>{labels[status] || status}</span>;
   };
 
-  const handleSave = (data) => {
+  const buildPayload = (formData) => {
+    const payload = {
+      issueCode: formData.issueCode,
+      descriptionOfIssueOrAction: formData.descriptionOfIssueOrAction,
+      status: formData.status,
+      priority: formData.priority,
+      assignedTo: formData.assignedTo,
+      assignDate: formData.assignDate || null,
+      dueDate: formData.dueDate || null,
+      remarks: formData.remarks,
+    };
+    if (formData.project) payload.project = { projectId: formData.project };
+    if (formData.year) payload.year = { id: parseInt(formData.year) };
+    if (formData.quarter) payload.quarter = { id: parseInt(formData.quarter) };
+    if (formData.issueActionType) payload.issueActionType = { monitoringTypeCode: formData.issueActionType };
+    if (formData.sourceOfIssueOrAction) payload.sourceOfIssueOrAction = { id: parseInt(formData.sourceOfIssueOrAction) };
+    return payload;
+  };
+
+  const handleSave = (formData) => {
+    const payload = buildPayload(formData);
     if (editingIssue) {
-      updateMutation.mutate({ id: editingIssue.id, data });
+      updateMutation.mutate({ id: editingIssue.issueId, data: payload });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(payload);
     }
   };
 
@@ -137,6 +189,36 @@ function Issues() {
     if (window.confirm(t('messages.confirmDelete'))) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleOpenIssueModal = (issue = null) => {
+    if (issue) {
+      setEditingIssue(issue);
+      setIssueFormData({
+        project: issue.project?.projectId || '',
+        year: issue.year?.id?.toString() || '',
+        quarter: issue.quarter?.id?.toString() || '',
+        issueCode: issue.issueCode || '',
+        issueActionType: issue.issueActionType?.monitoringTypeCode || '',
+        descriptionOfIssueOrAction: issue.descriptionOfIssueOrAction || '',
+        sourceOfIssueOrAction: issue.sourceOfIssueOrAction?.id?.toString() || '',
+        status: issue.status || 'incomplete',
+        priority: issue.priority || 'medium',
+        assignedTo: issue.assignedTo || '',
+        assignDate: issue.assignDate || '',
+        dueDate: issue.dueDate || '',
+        remarks: issue.remarks || '',
+      });
+    } else {
+      setEditingIssue(null);
+      setIssueFormData({ ...emptyIssueForm });
+    }
+    setModalOpen(true);
+  };
+
+  const handleIssueSubmit = (e) => {
+    e.preventDefault();
+    handleSave(issueFormData);
   };
 
   const handleOpenSourceModal = (source = null) => {
@@ -163,37 +245,6 @@ function Issues() {
     if (window.confirm(t('messages.confirmDelete'))) {
       deleteSourceMutation.mutate(id);
     }
-  };
-
-  const [issueFormData, setIssueFormData] = useState({
-    issueCode: '', descriptionOfIssueOrAction: '', status: 'incomplete',
-    priority: 'medium', assignedTo: '', remarks: '',
-  });
-
-  const handleOpenIssueModal = (issue = null) => {
-    if (issue) {
-      setEditingIssue(issue);
-      setIssueFormData({
-        issueCode: issue.issueCode || '',
-        descriptionOfIssueOrAction: issue.descriptionOfIssueOrAction || '',
-        status: issue.status || 'incomplete',
-        priority: issue.priority || 'medium',
-        assignedTo: issue.assignedTo || '',
-        remarks: issue.remarks || '',
-      });
-    } else {
-      setEditingIssue(null);
-      setIssueFormData({
-        issueCode: '', descriptionOfIssueOrAction: '', status: 'incomplete',
-        priority: 'medium', assignedTo: '', remarks: '',
-      });
-    }
-    setModalOpen(true);
-  };
-
-  const handleIssueSubmit = (e) => {
-    e.preventDefault();
-    handleSave(issueFormData);
   };
 
   const tabs = [
@@ -253,13 +304,7 @@ function Issues() {
             <div className="col-md-6">
               <div className="input-group input-group-sm">
                 <span className="input-group-text bg-white"><FiSearch size={14} /></span>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="form-control"
-                  placeholder={t('common.search')}
-                />
+                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="form-control" placeholder={t('common.search')} />
               </div>
             </div>
             {activeTab === 'issues' && (
@@ -270,6 +315,7 @@ function Issues() {
                     <option value="all">{t('common.all')}</option>
                     <option value="incomplete">{t('common.incomplete')}</option>
                     <option value="complete">{t('common.complete')}</option>
+                    <option value="Cancel">{t('issues.cancel')}</option>
                   </select>
                 </div>
               </div>
@@ -293,27 +339,33 @@ function Issues() {
                   <thead style={{ backgroundColor: '#f0f4ff' }}>
                     <tr>
                       <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.issueNumber')}</th>
+                      <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.project')}</th>
+                      <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.issueActionType')}</th>
                       <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('common.description')}</th>
                       <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('common.status')}</th>
                       <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.priority')}</th>
                       <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.assignedTo')}</th>
+                      <th className="fw-semibold" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('issues.dueDate')}</th>
                       <th className="fw-semibold text-end" style={{ fontSize: '0.82rem', color: '#4A5568' }}>{t('common.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredIssues.map((issue) => (
-                      <tr key={issue.id}>
+                      <tr key={issue.issueId}>
                         <td className="fw-semibold text-primary" style={{ fontSize: '0.85rem' }}>{issue.issueCode}</td>
+                        <td style={{ fontSize: '0.85rem' }}>{issue.project?.project || issue.project?.projectId || '-'}</td>
+                        <td style={{ fontSize: '0.85rem' }}>{issue.issueActionType?.monitoringType || '-'}</td>
                         <td style={{ fontSize: '0.85rem' }}>
-                          <div className="text-truncate" style={{ maxWidth: '300px' }}>{issue.descriptionOfIssueOrAction}</div>
+                          <div className="text-truncate" style={{ maxWidth: '200px' }}>{issue.descriptionOfIssueOrAction}</div>
                         </td>
                         <td>{getStatusBadge(issue.status)}</td>
                         <td>{getPriorityBadge(issue.priority)}</td>
                         <td style={{ fontSize: '0.85rem' }}>{issue.assignedTo || '-'}</td>
+                        <td style={{ fontSize: '0.85rem' }}>{issue.dueDate || '-'}</td>
                         <td className="text-end">
                           <div className="d-flex gap-1 justify-content-end">
                             <button className="btn btn-sm btn-outline-primary" style={{ borderRadius: '6px', padding: '3px 8px' }} onClick={() => handleOpenIssueModal(issue)}><FiEdit2 size={14} /></button>
-                            <button className="btn btn-sm btn-outline-danger" style={{ borderRadius: '6px', padding: '3px 8px' }} onClick={() => handleDelete(issue.id)}><FiTrash2 size={14} /></button>
+                            <button className="btn btn-sm btn-outline-danger" style={{ borderRadius: '6px', padding: '3px 8px' }} onClick={() => handleDelete(issue.issueId)}><FiTrash2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
@@ -376,7 +428,7 @@ function Issues() {
         </div>
       )}
 
-      {(modalOpen || editingIssue) && (
+      {modalOpen && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-lg modal-fullscreen-md-down modal-dialog-scrollable">
             <div className="modal-content">
@@ -389,8 +441,29 @@ function Issues() {
                   <div className="row g-2">
                     <div className="col-md-6">
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
-                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.issueNumber')}</h6>
+                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.issueDetails')}</h6>
                         <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.project')} *</label>
+                            <select className="form-select form-select-sm" value={issueFormData.project || ''} onChange={(e) => setIssueFormData({ ...issueFormData, project: e.target.value })} required>
+                              <option value="">{t('issues.selectProject')}</option>
+                              {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.year')} *</label>
+                            <select className="form-select form-select-sm" value={issueFormData.year || ''} onChange={(e) => setIssueFormData({ ...issueFormData, year: e.target.value })} required>
+                              <option value="">{t('issues.selectYear')}</option>
+                              {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.quarter')} *</label>
+                            <select className="form-select form-select-sm" value={issueFormData.quarter || ''} onChange={(e) => setIssueFormData({ ...issueFormData, quarter: e.target.value })} required>
+                              <option value="">{t('issues.selectQuarter')}</option>
+                              {quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}
+                            </select>
+                          </div>
                           <div className="col-12">
                             <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.issueNumber')} *</label>
                             <input type="text" className="form-control form-control-sm" value={issueFormData.issueCode} onChange={(e) => setIssueFormData({ ...issueFormData, issueCode: e.target.value })} placeholder="ISS-001" required />
@@ -399,30 +472,45 @@ function Issues() {
                       </div>
 
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
-                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.description')}</h6>
+                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.descriptionOfIssueOrAction')}</h6>
                         <div className="row g-2">
                           <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.description')} *</label>
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.descriptionOfIssueOrAction')} *</label>
                             <textarea className="form-control form-control-sm" rows="3" value={issueFormData.descriptionOfIssueOrAction} onChange={(e) => setIssueFormData({ ...issueFormData, descriptionOfIssueOrAction: e.target.value })} required></textarea>
                           </div>
                         </div>
                       </div>
 
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f9f9f9'}}>
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.remarks')}</label>
+                        <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.remarks')}</h6>
                         <textarea className="form-control form-control-sm" rows="2" value={issueFormData.remarks} onChange={(e) => setIssueFormData({ ...issueFormData, remarks: e.target.value })}></textarea>
                       </div>
                     </div>
 
                     <div className="col-md-6">
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
-                        <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('common.status')} & {t('issues.priority')}</h6>
+                        <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.classification')}</h6>
                         <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.issueActionType')} *</label>
+                            <select className="form-select form-select-sm" value={issueFormData.issueActionType || ''} onChange={(e) => setIssueFormData({ ...issueFormData, issueActionType: e.target.value })} required>
+                              <option value="">{t('issues.selectType')}</option>
+                              {monitoringTypes.map(mt => <option key={mt.monitoringTypeCode} value={mt.monitoringTypeCode}>{mt.monitoringType}</option>)}
+                            </select>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.sourceOfIssueOrAction')} *</label>
+                            <select className="form-select form-select-sm" value={issueFormData.sourceOfIssueOrAction || ''} onChange={(e) => setIssueFormData({ ...issueFormData, sourceOfIssueOrAction: e.target.value })} required>
+                              <option value="">{t('issues.selectSource')}</option>
+                              {sources.map(s => <option key={s.id} value={s.id}>{s.issueActionSource}</option>)}
+                            </select>
+                          </div>
                           <div className="col-6">
                             <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('common.status')}</label>
                             <select className="form-select form-select-sm" value={issueFormData.status} onChange={(e) => setIssueFormData({ ...issueFormData, status: e.target.value })}>
                               <option value="incomplete">{t('common.incomplete')}</option>
                               <option value="complete">{t('common.complete')}</option>
+                              <option value="Cancel">{t('issues.cancel')}</option>
                             </select>
                           </div>
                           <div className="col-6">
@@ -438,11 +526,25 @@ function Issues() {
                       </div>
 
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
-                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.assignedTo')}</h6>
+                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.assignment')}</h6>
                         <div className="row g-2">
                           <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.assignedTo')}</label>
-                            <input type="text" className="form-control form-control-sm" value={issueFormData.assignedTo} onChange={(e) => setIssueFormData({ ...issueFormData, assignedTo: e.target.value })} />
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.assignedTo')} *</label>
+                            <input type="text" className="form-control form-control-sm" value={issueFormData.assignedTo} onChange={(e) => setIssueFormData({ ...issueFormData, assignedTo: e.target.value })} required />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0fff4'}}>
+                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.dates')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.assignDate')}</label>
+                            <input type="date" className="form-control form-control-sm" value={issueFormData.assignDate} onChange={(e) => setIssueFormData({ ...issueFormData, assignDate: e.target.value })} />
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.dueDate')}</label>
+                            <input type="date" className="form-control form-control-sm" value={issueFormData.dueDate} onChange={(e) => setIssueFormData({ ...issueFormData, dueDate: e.target.value })} />
                           </div>
                         </div>
                       </div>
@@ -481,39 +583,12 @@ function Issues() {
                         <div className="row g-2">
                           <div className="col-12">
                             <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.issueActionSource')} *</label>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={sourceFormData.issueActionSource}
-                              onChange={(e) => setSourceFormData({ ...sourceFormData, issueActionSource: e.target.value })}
-                              required
-                              maxLength={100}
-                              placeholder={t('issues.issueActionSource')}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-md-6">
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f9f9f9'}}>
-                        <h6 className="text-secondary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.sourceDateCreated')}</h6>
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.sourceDateCreated')}</label>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={editingSource?.dateCreated ? new Date(editingSource.dateCreated).toLocaleString() : new Date().toLocaleString()}
-                              disabled
-                            />
-                            <small className="text-muted" style={{fontSize: '0.72rem'}}>{editingSource ? t('issues.sourceCreatedBy') + ': ' + (editingSource.user?.username || '-') : ''}</small>
+                            <input type="text" className="form-control form-control-sm" value={sourceFormData.issueActionSource} onChange={(e) => setSourceFormData({ ...sourceFormData, issueActionSource: e.target.value })} required />
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-
                   <div className="modal-footer mt-2 px-0 pt-2">
                     <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => { setSourceModalOpen(false); setEditingSource(null); setSourceFormData({ issueActionSource: '' }); }}>
                       {t('common.cancel')}

@@ -52,6 +52,12 @@ export const donorAPI = {
   delete: (id) => api.delete(`/donors/${id}`),
 };
 
+export const setupAPI = {
+  getYears: () => api.get('/setup/years'),
+  getQuarters: () => api.get('/setup/quarters'),
+  getMonitoringTypes: () => api.get('/setup/monitoring-types'),
+};
+
 export const issueAPI = {
   getAll: () => api.get('/issues'),
   getById: (id) => api.get(`/issues/${id}`),

@@ -1,5 +1,6 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -13,36 +14,44 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class IssueAction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "issue_id")
     private Long issueId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "donors", "contributors", "loginUser"})
     private Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "year_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "loginUser"})
     private Year year;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quarter_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "loginUser"})
     private Quarter quarter;
 
     @NotBlank
     @Column(name = "issue_code", length = 100)
     private String issueCode;
 
-    @Column(name = "issue_action_type", length = 50)
-    private String issueActionType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "issue_action_type_code")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
+    private MonitoringType issueActionType;
 
     @Column(name = "description_of_issue_or_action", columnDefinition = "TEXT")
     private String descriptionOfIssueOrAction;
 
-    @Column(name = "source_of_issue_or_action", length = 100)
-    private String sourceOfIssueOrAction;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "source_of_issue_or_action_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
+    private IssueActionSource sourceOfIssueOrAction;
 
     @Column(length = 50)
     private String status = "incomplete";
@@ -68,8 +77,9 @@ public class IssueAction {
     @Column(columnDefinition = "TEXT")
     private String remarks;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "login_user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "passwordHash"})
     private User loginUser;
 
     @PreUpdate

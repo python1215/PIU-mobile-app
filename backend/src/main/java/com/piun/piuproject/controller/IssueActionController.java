@@ -1,9 +1,7 @@
 package com.piun.piuproject.controller;
 
-import com.piun.piuproject.model.IssueAction;
-import com.piun.piuproject.model.User;
-import com.piun.piuproject.repository.IssueActionRepository;
-import com.piun.piuproject.repository.UserRepository;
+import com.piun.piuproject.model.*;
+import com.piun.piuproject.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/issues")
@@ -77,6 +76,9 @@ public class IssueActionController {
                                                     @RequestBody IssueAction issueDetails) {
         return issueActionRepository.findById(id)
             .map(issue -> {
+                issue.setProject(issueDetails.getProject());
+                issue.setYear(issueDetails.getYear());
+                issue.setQuarter(issueDetails.getQuarter());
                 issue.setIssueCode(issueDetails.getIssueCode());
                 issue.setIssueActionType(issueDetails.getIssueActionType());
                 issue.setDescriptionOfIssueOrAction(issueDetails.getDescriptionOfIssueOrAction());
