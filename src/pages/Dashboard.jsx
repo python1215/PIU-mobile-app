@@ -222,40 +222,40 @@ function Dashboard() {
       </div>
 
       <div className="row g-3 mb-3">
-        <div className="col-12 col-lg-4">
+        <div className="col-12 col-lg-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-white border-0 py-2">
-              <h6 className="mb-0 fw-semibold">{t('dashboard.issuesSummary')}</h6>
+              <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('dashboard.issuesSummary')}</h6>
             </div>
-            <div className="card-body d-flex justify-content-center align-items-center py-2">
-              <div style={{ maxWidth: '220px', width: '100%' }}>
+            <div className="card-body d-flex justify-content-center align-items-center py-1">
+              <div style={{ maxWidth: '180px', width: '100%' }}>
                 <Doughnut data={issueStatusData} options={doughnutOptions} />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-lg-4">
+        <div className="col-12 col-lg-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-white border-0 py-2">
-              <h6 className="mb-0 fw-semibold">{t('issues.priority')}</h6>
+              <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('issues.priority')}</h6>
             </div>
-            <div className="card-body py-2">
+            <div className="card-body py-1">
               <Bar data={priorityData} options={barOptions} />
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-lg-4">
+        <div className="col-12 col-lg-6">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-white border-0 py-2">
-              <h6 className="mb-0 fw-semibold">{t('map.projectLocations')}</h6>
+              <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('map.projectLocations')}</h6>
             </div>
-            <div className="card-body p-0" style={{ minHeight: '280px' }}>
+            <div className="card-body p-0" style={{ minHeight: '320px' }}>
               <MapContainer
                 center={[13.45, -15.4]}
                 zoom={8}
-                style={{ height: '100%', minHeight: '280px', borderRadius: '0 0 0.375rem 0.375rem' }}
+                style={{ height: '100%', minHeight: '320px', borderRadius: '0 0 0.375rem 0.375rem' }}
                 scrollWheelZoom={false}
               >
                 <TileLayer
