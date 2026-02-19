@@ -27,8 +27,8 @@ function Register() {
 
     try {
       const response = await authAPI.register(formData);
-      const { token, username, email } = response.data;
-      login(token, { username, email });
+      const { token, username, email, roleId, roleName, superuser, permissions } = response.data;
+      login(token, { username, email, roleId, roleName, isSuperuser: superuser, permissions });
       toast.success(t('auth.registerSuccess'));
       navigate('/');
     } catch (error) {

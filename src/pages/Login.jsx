@@ -20,8 +20,8 @@ function Login() {
 
     try {
       const response = await authAPI.login(formData);
-      const { token, username, email } = response.data;
-      login(token, { username, email });
+      const { token, username, email, roleId, roleName, superuser, permissions } = response.data;
+      login(token, { username, email, roleId, roleName, isSuperuser: superuser, permissions });
       toast.success(t('auth.loginSuccess'));
       navigate('/');
     } catch (error) {
