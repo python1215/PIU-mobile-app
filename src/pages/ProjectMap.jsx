@@ -551,7 +551,7 @@ function ProjectMap() {
                 left: panelPos.x + 'px',
                 zIndex: 1000,
                 width: layersPanelOpen ? '280px' : 'auto',
-                maxHeight: mapFullscreen ? 'calc(100vh - 30px)' : '460px',
+                maxHeight: mapFullscreen ? 'calc(100vh - 30px)' : 'calc(100vh - 320px)',
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column'
@@ -685,8 +685,8 @@ function ProjectMap() {
             {loading ? (
               <div className="text-center p-5"><div className="spinner-border" role="status"></div></div>
             ) : (
-              <div style={{ height: mapFullscreen ? '100vh' : '500px' }}>
-                <MapContainer center={center} zoom={8} style={{ height: '100%', width: '100%' }} maxBounds={[[12.5, -17.5], [14.5, -13.0]]} minZoom={7}>
+              <div style={{ height: mapFullscreen ? '100vh' : 'calc(100vh - 280px)', minHeight: '500px' }}>
+                <MapContainer center={[13.45, -15.4]} zoom={9} style={{ height: '100%', width: '100%' }} maxBounds={[[12.5, -17.5], [14.5, -13.0]]} minZoom={7}>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
