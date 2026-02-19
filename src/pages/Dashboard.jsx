@@ -219,8 +219,8 @@ function Dashboard() {
             <div className="card-header bg-white border-0 py-2">
               <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('dashboard.issuesSummary')}</h6>
             </div>
-            <div className="card-body d-flex justify-content-center align-items-center py-1">
-              <div style={{ maxWidth: '180px', width: '100%' }}>
+            <div className="card-body d-flex justify-content-center align-items-center p-2">
+              <div style={{ width: '90%' }}>
                 <Doughnut data={issueStatusData} options={doughnutOptions} />
               </div>
             </div>
@@ -232,8 +232,10 @@ function Dashboard() {
             <div className="card-header bg-white border-0 py-2">
               <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('issues.priority')}</h6>
             </div>
-            <div className="card-body py-1">
-              <Bar data={priorityData} options={barOptions} />
+            <div className="card-body d-flex align-items-center p-2">
+              <div style={{ width: '90%', margin: '0 auto' }}>
+                <Bar data={priorityData} options={barOptions} />
+              </div>
             </div>
           </div>
         </div>
