@@ -574,17 +574,11 @@ function Issues() {
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSourceSubmit}>
-                  <div className="row g-2">
-                    <div className="col-md-6">
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
-                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.sourceDetails')}</h6>
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('issues.issueActionSource')} *</label>
-                            <input type="text" className="form-control form-control-sm" value={sourceFormData.issueActionSource} onChange={(e) => setSourceFormData({ ...sourceFormData, issueActionSource: e.target.value })} required />
-                          </div>
-                        </div>
-                      </div>
+                  <div className="border rounded p-3 mb-3" style={{backgroundColor: '#f8f9ff'}}>
+                    <h6 className="text-primary mb-3" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('issues.sourceDetails')}</h6>
+                    <div>
+                      <label className="form-label mb-1" style={{fontSize: '0.85rem'}}>{t('issues.issueActionSource')} *</label>
+                      <input type="text" className="form-control" value={sourceFormData.issueActionSource} onChange={(e) => setSourceFormData({ ...sourceFormData, issueActionSource: e.target.value })} required />
                     </div>
                   </div>
                   <div className="modal-footer mt-2 px-0 pt-2">
