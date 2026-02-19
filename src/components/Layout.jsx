@@ -18,32 +18,22 @@ import {
   FiShield,
   FiFile,
   FiMapPin,
+  FiLock,
 } from "react-icons/fi";
 import { useState, useCallback, useMemo, memo } from "react";
 
 const navItemsConfig = [
-  { path: "/", icon: FiHome, labelKey: "nav.dashboard" },
-  { path: "/setup", icon: FiSettings, labelKey: "nav.systemSetup" },
-  {
-    path: "/financial",
-    icon: FiDollarSign,
-    labelKey: "nav.financialManagement",
-  },
-  { path: "/monitoring", icon: FiTrendingUp, labelKey: "nav.monitoring" },
-  {
-    path: "/project-actions",
-    icon: FiFileText,
-    labelKey: "nav.projectActions",
-  },
-  {
-    path: "/social-environmental",
-    icon: FiShield,
-    labelKey: "nav.socialEnvironmental",
-  },
-  { path: "/documentation", icon: FiFile, labelKey: "nav.documentation" },
-  { path: "/map", icon: FiMapPin, labelKey: "nav.projectMap" },
-  { path: "/issues", icon: FiAlertCircle, labelKey: "nav.issues" },
-  { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi" },
+  { path: "/", icon: FiHome, labelKey: "nav.dashboard", moduleKey: "dashboard" },
+  { path: "/setup", icon: FiSettings, labelKey: "nav.systemSetup", moduleKey: "systemSetup" },
+  { path: "/financial", icon: FiDollarSign, labelKey: "nav.financialManagement", moduleKey: "financialManagement" },
+  { path: "/monitoring", icon: FiTrendingUp, labelKey: "nav.monitoring", moduleKey: "monitoring" },
+  { path: "/project-actions", icon: FiFileText, labelKey: "nav.projectActions", moduleKey: "projectActions" },
+  { path: "/social-environmental", icon: FiShield, labelKey: "nav.socialEnvironmental", moduleKey: "socialEnvironmental" },
+  { path: "/documentation", icon: FiFile, labelKey: "nav.documentation", moduleKey: "documentation" },
+  { path: "/map", icon: FiMapPin, labelKey: "nav.projectMap", moduleKey: "projectMap" },
+  { path: "/issues", icon: FiAlertCircle, labelKey: "nav.issues", moduleKey: "issues" },
+  { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi", moduleKey: "kpi" },
+  { path: "/administration", icon: FiLock, labelKey: "nav.administration", moduleKey: "administration" },
 ];
 
 const NavItem = memo(function NavItem({ item, isActive, sidebarOpen, t }) {
@@ -79,6 +69,7 @@ function Layout() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const permissions = useAuthStore((state) => state.permissions);
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -92,9 +83,17 @@ function Layout() {
     setSidebarOpen((prev) => !prev);
   }, []);
 
+  const filteredNavItems = useMemo(() => {
+    if (!permissions || user?.isSuperuser) return navItemsConfig;
+    return navItemsConfig.filter((item) => {
+      if (item.moduleKey === 'dashboard') return true;
+      return permissions[item.moduleKey] === true;
+    });
+  }, [permissions, user]);
+
   const navList = useMemo(
     () =>
-      navItemsConfig.map((item) => (
+      filteredNavItems.map((item) => (
         <NavItem
           key={item.path}
           item={item}
@@ -103,7 +102,7 @@ function Layout() {
           t={t}
         />
       )),
-    [location.pathname, sidebarOpen, t],
+    [filteredNavItems, location.pathname, sidebarOpen, t],
   );
 
   const sidebarStyle = useMemo(

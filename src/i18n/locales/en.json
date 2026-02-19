@@ -122,7 +122,8 @@
     "projectActions": "Project Actions",
     "socialEnvironmental": "Social & Environmental",
     "documentation": "Documentation",
-    "projectMap": "Project Map"
+    "projectMap": "Project Map",
+    "administration": "Administration"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -842,5 +843,30 @@
     "saveSuccess": "Saved successfully",
     "saveError": "Error saving record",
     "loadError": "Error loading data"
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Manage user roles and module access permissions",
+    "roles": "Roles",
+    "userAssignment": "User Assignment",
+    "addRole": "Add Role",
+    "editRole": "Edit Role",
+    "roleName": "Role Name",
+    "roleNameRequired": "Role name is required",
+    "noRoles": "No roles created yet",
+    "noRolesDesc": "Create a role to start managing access permissions",
+    "module": "Module / Form",
+    "modulePermissions": "Module Permissions",
+    "accessGranted": "Access Granted",
+    "accessDenied": "Access Denied",
+    "grantAll": "Grant All",
+    "revokeAll": "Revoke All",
+    "users": "users",
+    "fullName": "Full Name",
+    "department": "Department",
+    "superuser": "Superuser",
+    "assignedRole": "Assigned Role",
+    "noRole": "No Role (Full Access)",
+    "allAccess": "Full Access (Superuser)"
   }
 }

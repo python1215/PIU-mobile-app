@@ -50,6 +50,10 @@ public class User {
 
     private boolean isSuperuser = false;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
+
     @Column(name = "date_joined")
     private LocalDateTime dateJoined = LocalDateTime.now();
 

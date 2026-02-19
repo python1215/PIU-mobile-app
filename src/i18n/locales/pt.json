@@ -122,7 +122,8 @@
     "projectActions": "Ações do Projeto",
     "socialEnvironmental": "Social & Ambiental",
     "documentation": "Documentação",
-    "projectMap": "Mapa do Projeto"
+    "projectMap": "Mapa do Projeto",
+    "administration": "Administração"
   },
   "dashboard": {
     "title": "Painel",
@@ -842,5 +843,30 @@
     "saveSuccess": "Salvo com sucesso",
     "saveError": "Erro ao salvar registro",
     "loadError": "Erro ao carregar dados"
+  },
+  "admin": {
+    "title": "Administração",
+    "subtitle": "Gerenciar funções de usuários e permissões de acesso aos módulos",
+    "roles": "Funções",
+    "userAssignment": "Atribuição de Usuários",
+    "addRole": "Adicionar Função",
+    "editRole": "Editar Função",
+    "roleName": "Nome da Função",
+    "roleNameRequired": "O nome da função é obrigatório",
+    "noRoles": "Nenhuma função criada",
+    "noRolesDesc": "Crie uma função para começar a gerenciar as permissões de acesso",
+    "module": "Módulo / Formulário",
+    "modulePermissions": "Permissões dos Módulos",
+    "accessGranted": "Acesso Concedido",
+    "accessDenied": "Acesso Negado",
+    "grantAll": "Conceder Todos",
+    "revokeAll": "Revogar Todos",
+    "users": "usuários",
+    "fullName": "Nome Completo",
+    "department": "Departamento",
+    "superuser": "Superusuário",
+    "assignedRole": "Função Atribuída",
+    "noRole": "Sem Função (Acesso Total)",
+    "allAccess": "Acesso Total (Superusuário)"
   }
 }

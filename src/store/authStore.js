@@ -7,17 +7,30 @@ export const useAuthStore = create(
       token: null,
       user: null,
       isAuthenticated: false,
+      permissions: null,
 
       login: (token, user) => {
-        set({ token, user, isAuthenticated: true });
+        const permissions = user.permissions || null;
+        set({ token, user, isAuthenticated: true, permissions });
       },
 
       logout: () => {
-        set({ token: null, user: null, isAuthenticated: false });
+        set({ token: null, user: null, isAuthenticated: false, permissions: null });
       },
 
       updateUser: (user) => {
         set({ user });
+      },
+
+      updatePermissions: (permissions) => {
+        set({ permissions });
+      },
+
+      hasModuleAccess: (moduleKey) => {
+        const state = useAuthStore.getState();
+        if (!state.permissions) return true;
+        if (state.user?.isSuperuser) return true;
+        return state.permissions[moduleKey] === true;
       },
     }),
     {

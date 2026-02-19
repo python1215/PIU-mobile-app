@@ -122,7 +122,8 @@
     "projectActions": "Actions de Projet",
     "socialEnvironmental": "Social & Environnemental",
     "documentation": "Documentation",
-    "projectMap": "Carte des Projets"
+    "projectMap": "Carte des Projets",
+    "administration": "Administration"
   },
   "dashboard": {
     "title": "Tableau de Bord",
@@ -842,5 +843,30 @@
     "saveSuccess": "Enregistré avec succès",
     "saveError": "Erreur lors de l'enregistrement",
     "loadError": "Erreur lors du chargement des données"
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Gérer les rôles des utilisateurs et les permissions d'accès aux modules",
+    "roles": "Rôles",
+    "userAssignment": "Attribution des Utilisateurs",
+    "addRole": "Ajouter un Rôle",
+    "editRole": "Modifier le Rôle",
+    "roleName": "Nom du Rôle",
+    "roleNameRequired": "Le nom du rôle est requis",
+    "noRoles": "Aucun rôle créé",
+    "noRolesDesc": "Créez un rôle pour commencer à gérer les permissions d'accès",
+    "module": "Module / Formulaire",
+    "modulePermissions": "Permissions des Modules",
+    "accessGranted": "Accès Accordé",
+    "accessDenied": "Accès Refusé",
+    "grantAll": "Tout Accorder",
+    "revokeAll": "Tout Révoquer",
+    "users": "utilisateurs",
+    "fullName": "Nom Complet",
+    "department": "Département",
+    "superuser": "Super-utilisateur",
+    "assignedRole": "Rôle Attribué",
+    "noRole": "Aucun Rôle (Accès Complet)",
+    "allAccess": "Accès Complet (Super-utilisateur)"
   }
 }

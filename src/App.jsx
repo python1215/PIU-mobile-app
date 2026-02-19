@@ -16,6 +16,7 @@ import ProjectActions from './pages/ProjectActions';
 import SocialEnvironmental from './pages/SocialEnvironmental';
 import Documentation from './pages/Documentation';
 import ProjectMap from './pages/ProjectMap';
+import Administration from './pages/Administration';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -48,6 +49,7 @@ function App() {
         <Route path="social-environmental" element={<SocialEnvironmental />} />
         <Route path="documentation" element={<Documentation />} />
         <Route path="map" element={<ProjectMap />} />
+        <Route path="administration" element={<Administration />} />
       </Route>
     </Routes>
   );

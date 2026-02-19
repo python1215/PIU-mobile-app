@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
+
+    private static final List<String> ALL_MODULES = List.of(
+        "dashboard", "systemSetup", "financialManagement", "monitoring",
+        "projectActions", "socialEnvironmental", "documentation",
+        "projectMap", "issues", "kpi", "administration"
+    );
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -48,7 +57,7 @@ public class AuthService {
         userRepository.save(user);
 
         String token = tokenProvider.generateTokenFromUsername(user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getEmail());
+        return buildAuthResponse(token, user);
     }
 
     public AuthResponse login(AuthRequest request) {
@@ -66,6 +75,26 @@ public class AuthService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        return new AuthResponse(token, user.getUsername(), user.getEmail());
+        return buildAuthResponse(token, user);
+    }
+
+    private AuthResponse buildAuthResponse(String token, User user) {
+        Map<String, Boolean> permissions = buildPermissions(user);
+        Long roleId = user.getRole() != null ? user.getRole().getId() : null;
+        String roleName = user.getRole() != null ? user.getRole().getName() : null;
+        return new AuthResponse(token, user.getUsername(), user.getEmail(), roleId, roleName, user.isSuperuser(), permissions);
+    }
+
+    private Map<String, Boolean> buildPermissions(User user) {
+        Map<String, Boolean> perms = new LinkedHashMap<>();
+        if (user.isSuperuser()) {
+            ALL_MODULES.forEach(m -> perms.put(m, true));
+        } else if (user.getRole() != null && user.getRole().getPermissions() != null) {
+            ALL_MODULES.forEach(m -> perms.put(m, false));
+            user.getRole().getPermissions().forEach(p -> perms.put(p.getModuleKey(), p.isHasAccess()));
+        } else {
+            ALL_MODULES.forEach(m -> perms.put(m, true));
+        }
+        return perms;
     }
 }
