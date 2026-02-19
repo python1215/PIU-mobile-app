@@ -13,6 +13,7 @@ com/piun/piuproject/repository/ProjectMappingRepository.class
 com/piun/piuproject/repository/IssueActionRepository.class
 com/piun/piuproject/model/ProjectResult.class
 com/piun/piuproject/model/DecisionOutcome.class
+com/piun/piuproject/model/Role.class
 com/piun/piuproject/model/StakeholderEngagement.class
 com/piun/piuproject/model/Subcomponent.class
 com/piun/piuproject/security/JwtAuthenticationEntryPoint.class
@@ -91,6 +92,8 @@ com/piun/piuproject/service/AuthService.class
 com/piun/piuproject/model/ProjectDocument.class
 com/piun/piuproject/repository/StakeholderEngagementTypeRepository.class
 com/piun/piuproject/model/Settlement.class
+com/piun/piuproject/model/RoleModulePermission.class
+com/piun/piuproject/repository/RoleRepository.class
 com/piun/piuproject/repository/InvestmentTypeRepository.class
 com/piun/piuproject/repository/PhysicalProgressRepository.class
 com/piun/piuproject/model/Donor.class
@@ -140,4 +143,6 @@ com/piun/piuproject/repository/KPIContractSetupRepository.class
 com/piun/piuproject/model/ContractProfilingWorks.class
 com/piun/piuproject/service/CustomUserDetailsService.class
 com/piun/piuproject/model/TypeOfImpact.class
+com/piun/piuproject/controller/AdministrationController.class
 com/piun/piuproject/repository/GrievanceRepository.class
+com/piun/piuproject/repository/RoleModulePermissionRepository.class

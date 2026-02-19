@@ -39,6 +39,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/service/CustomUserDetailsService.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/MonitoringController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Settlement.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RoleModulePermissionRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Region.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/AccessType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DocumentComment.java
@@ -54,6 +55,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/OHSMonitoring.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/WebConfig.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ContractProfilingGoodsRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/AdministrationController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/SubcomponentRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SocialEnvironmentalController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/InvestmentTypeRepository.java
@@ -62,6 +64,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Year.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/AuthRequest.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/SettlementNature.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Role.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ContractProfilingWorksRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/PAPRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/SettlementWithCoordinates.java
@@ -81,6 +84,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DocumentTagRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/MeasurementUnit.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PDO.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RoleRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/DocumentationController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Subcomponent.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/TypeOfPAPRepository.java
@@ -131,6 +135,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/PAPType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/security/JwtAuthenticationFilter.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/RoleModulePermission.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIContractSetupRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/AuthResponse.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DocumentVersionRepository.java
