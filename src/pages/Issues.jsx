@@ -268,31 +268,29 @@ function Issues() {
         </button>
       </div>
 
-      <div className="row g-3 mb-4">
+      <div className="d-flex gap-2 mb-3">
         {tabs.map(tab => (
-          <div className="col-6" key={tab.id}>
-            <div
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                background: activeTab === tab.id ? 'linear-gradient(135deg, #4A7BF7 0%, #6C63FF 100%)' : '#fff',
-                color: activeTab === tab.id ? '#fff' : '#333',
-                borderRadius: '14px',
-                boxShadow: activeTab === tab.id ? '0 4px 15px rgba(74,123,247,0.3)' : '0 2px 8px rgba(0,0,0,0.06)',
-                border: activeTab === tab.id ? 'none' : '1px solid #e9ecef',
-                padding: '16px 20px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
-              onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
-            >
-              <div className="d-flex align-items-center gap-3">
-                <div style={{ opacity: 0.85 }}>{tab.icon}</div>
-                <div>
-                  <div style={{ fontSize: '0.78rem', opacity: 0.9, fontWeight: 500 }}>{tab.label}</div>
-                  <div className="fw-bold" style={{ fontSize: '1.6rem', lineHeight: 1.2 }}>{tab.count}</div>
-                </div>
-              </div>
+          <div
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              background: activeTab === tab.id ? 'linear-gradient(135deg, #4A7BF7 0%, #6C63FF 100%)' : '#fff',
+              color: activeTab === tab.id ? '#fff' : '#555',
+              borderRadius: '8px',
+              boxShadow: activeTab === tab.id ? '0 2px 8px rgba(74,123,247,0.3)' : '0 1px 4px rgba(0,0,0,0.06)',
+              border: activeTab === tab.id ? 'none' : '1px solid #e9ecef',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontSize: '0.82rem',
+            }}
+            onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; }}
+            onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}
+          >
+            <div className="d-flex align-items-center gap-2">
+              <span style={{ opacity: 0.85 }}>{tab.icon}</span>
+              <span style={{ fontWeight: 600 }}>{tab.label}</span>
+              <span className="badge" style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : '#e9ecef', color: activeTab === tab.id ? '#fff' : '#555', fontSize: '0.72rem' }}>{tab.count}</span>
             </div>
           </div>
         ))}
