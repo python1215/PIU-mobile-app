@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors, currencies }) {
+const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, donors, contributors, currencies, t }) {
   const [formData, setFormData] = useState(() => {
     if (project) {
       return {
@@ -95,7 +95,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
         <div className="modal-content border-0 shadow">
           <div className="modal-header border-0 pb-0">
             <h5 className="modal-title fw-bold">
-              {project ? 'Edit Project' : 'Add New Project'}
+              {project ? t('financial.editProject') : t('financial.addProject')}
             </h5>
             <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
@@ -104,7 +104,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Project ID</label>
+                  <label className="form-label fw-medium">{t('projects.projectId')}</label>
                   <input
                     type="text"
                     value={formData.projectId}
@@ -117,7 +117,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Project Name</label>
+                  <label className="form-label fw-medium">{t('financial.projectName')}</label>
                   <input
                     type="text"
                     value={formData.project}
@@ -129,13 +129,13 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Currency</label>
+                  <label className="form-label fw-medium">{t('financial.currency')}</label>
                   <select
                     className="form-select shadow-sm border-secondary-subtle"
                     value={formData.currencyId || ''}
                     onChange={(e) => handleFieldChange('currencyId', e.target.value)}
                   >
-                    <option value="">Select Currency</option>
+                    <option value="">{t('financial.selectCurrency')}</option>
                     {currencies.map(curr => (
                       <option key={curr.id} value={curr.id}>
                         {curr.currency}{curr.code ? ` (${curr.code})` : ''}
@@ -145,7 +145,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Funding Amount</label>
+                  <label className="form-label fw-medium">{t('financial.fundingAmount')}</label>
                   <input
                     type="number"
                     value={formData.funding}
@@ -157,7 +157,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Effectiveness Date</label>
+                  <label className="form-label fw-medium">{t('financial.effectivenessDate')}</label>
                   <input
                     type="date"
                     value={formData.effectivenessDate || ''}
@@ -167,7 +167,7 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Closure Date</label>
+                  <label className="form-label fw-medium">{t('financial.closureDate')}</label>
                   <input
                     type="date"
                     value={formData.closureDate || ''}
@@ -177,33 +177,33 @@ const ProjectModal = memo(function ProjectModal({ project, onClose, onSave, dono
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Donors (Multi-select)</label>
+                  <label className="form-label fw-medium">{t('financial.donorsMultiSelect')}</label>
                   <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                     {donors.length === 0 ? (
-                      <p className="text-muted small mb-0">No donors available. Add donors in System Setup.</p>
+                      <p className="text-muted small mb-0">{t('financial.noDonorsAvailable')}</p>
                     ) : donorList}
                   </div>
-                  <small className="text-muted">Selected: {(formData.donorIds || []).length}</small>
+                  <small className="text-muted">{t('common.selected')}: {(formData.donorIds || []).length}</small>
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label fw-medium">Contributors (Multi-select)</label>
+                  <label className="form-label fw-medium">{t('financial.contributorsMultiSelect')}</label>
                   <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                     {contributors.length === 0 ? (
-                      <p className="text-muted small mb-0">No contributors available. Add contributors in System Setup.</p>
+                      <p className="text-muted small mb-0">{t('financial.noContributorsAvailable')}</p>
                     ) : contributorList}
                   </div>
-                  <small className="text-muted">Selected: {(formData.contributorIds || []).length}</small>
+                  <small className="text-muted">{t('common.selected')}: {(formData.contributorIds || []).length}</small>
                 </div>
               </div>
             </div>
 
             <div className="modal-footer border-0 pt-0">
               <button type="button" onClick={onClose} className="btn btn-outline-secondary">
-                Cancel
+                {t('common.cancel')}
               </button>
               <button type="submit" className="btn btn-primary">
-                {project ? 'Update' : 'Create'}
+                {project ? t('common.update') : t('common.create')}
               </button>
             </div>
           </form>
@@ -430,10 +430,10 @@ function FinancialManagement() {
   }, [showActivityModal]);
 
   const tabs = useMemo(() => [
-    { id: 'projects', label: 'Projects', icon: FiFolder },
-    { id: 'components', label: 'Components', icon: FiLayers },
-    { id: 'subcomponents', label: 'Subcomponents', icon: FiLayers },
-    { id: 'activities', label: 'Activities', icon: FiDollarSign }
+    { id: 'projects', label: t('financial.projects'), icon: FiFolder },
+    { id: 'components', label: t('financial.components'), icon: FiLayers },
+    { id: 'subcomponents', label: t('financial.subcomponents'), icon: FiLayers },
+    { id: 'activities', label: t('financial.activities'), icon: FiDollarSign }
   ], [t]);
 
   const handleCreateProject = useCallback(async (data) => {
@@ -799,8 +799,8 @@ function FinancialManagement() {
   const getExportData = useCallback(() => {
     if (activeTab === 'projects') {
       return {
-        title: 'Projects',
-        headers: ['Project ID', 'Name', 'Donor', 'Contributors', 'Currency', 'Funding Amount', 'Effectiveness Date', 'Closure Date'],
+        title: t('financial.projects'),
+        headers: [t('projects.projectId'), t('common.name'), t('financial.donor'), t('financial.contributors'), t('financial.currency'), t('financial.fundingAmount'), t('financial.effectivenessDate'), t('financial.closureDate')],
         rows: filteredProjects.map(p => [
           p.projectId || '',
           p.project || '',
@@ -814,8 +814,8 @@ function FinancialManagement() {
       };
     } else if (activeTab === 'components') {
       return {
-        title: 'Components',
-        headers: ['Project', 'Component Name', 'Description', 'Currency', 'Allocation'],
+        title: t('financial.components'),
+        headers: [t('common.project'), t('financial.componentName'), t('common.description'), t('financial.currency'), t('financial.allocation')],
         rows: currentTabData.map(item => [
           item.project?.project || '',
           item.projectComponents || '',
@@ -826,8 +826,8 @@ function FinancialManagement() {
       };
     } else if (activeTab === 'subcomponents') {
       return {
-        title: 'Subcomponents',
-        headers: ['Project', 'Component', 'Subcomponent Name', 'Description', 'Currency', 'Allocation'],
+        title: t('financial.subcomponents'),
+        headers: [t('common.project'), t('financial.components'), t('financial.subcomponentName'), t('common.description'), t('financial.currency'), t('financial.allocation')],
         rows: currentTabData.map(item => [
           item.project?.project || '',
           item.component?.projectComponents || '',
@@ -839,8 +839,8 @@ function FinancialManagement() {
       };
     } else {
       return {
-        title: 'Activities',
-        headers: ['Project', 'Component', 'Subcomponent', 'Activity Name', 'Currency', 'Allocation', 'Year'],
+        title: t('financial.activities'),
+        headers: [t('common.project'), t('financial.components'), t('financial.subcomponents'), t('financial.activityName'), t('financial.currency'), t('financial.allocation'), t('common.year')],
         rows: currentTabData.map(item => [
           item.project?.project || '',
           item.component?.projectComponents || '',
@@ -860,7 +860,7 @@ function FinancialManagement() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, title);
     XLSX.writeFile(wb, `Financial_${title}_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success('Exported to Excel');
+    toast.success(t('common.exportedExcel'));
   }, [getExportData]);
 
   const exportToPDF = useCallback(() => {
@@ -868,7 +868,7 @@ function FinancialManagement() {
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFontSize(14);
-    doc.text(`Financial Management - ${title}`, 14, 15);
+    doc.text(`${t('financial.title')} - ${title}`, 14, 15);
     doc.setFontSize(9);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 22);
     autoTable(doc, {
@@ -886,7 +886,7 @@ function FinancialManagement() {
       }, {})
     });
     doc.save(`Financial_${title}_${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast.success('Exported to PDF');
+    toast.success(t('common.exportedPDF'));
   }, [getExportData]);
 
   const projectsTable = useMemo(() => {
@@ -916,12 +916,12 @@ function FinancialManagement() {
               <tr>
                 <th className="border-0 px-4 py-3">{t('projects.projectId')}</th>
                 <th className="border-0 px-4 py-3">{t('common.name')}</th>
-                <th className="border-0 px-4 py-3">Donor</th>
-                <th className="border-0 px-4 py-3">Contributors</th>
-                <th className="border-0 px-4 py-3">Currency</th>
-                <th className="border-0 px-4 py-3">Funding Amount</th>
-                <th className="border-0 px-4 py-3">Effectiveness Date</th>
-                <th className="border-0 px-4 py-3">Closure Date</th>
+                <th className="border-0 px-4 py-3">{t('financial.donor')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.contributors')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.currency')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.fundingAmount')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.effectivenessDate')}</th>
+                <th className="border-0 px-4 py-3">{t('financial.closureDate')}</th>
                 <th className="border-0 px-4 py-3 text-end">{t('common.actions')}</th>
               </tr>
             </thead>
@@ -1007,7 +1007,7 @@ function FinancialManagement() {
 
   const projectOptions = useMemo(() => (
     <>
-      <option value="all">All</option>
+      <option value="all">{t('common.all')}</option>
       {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
     </>
   ), [projects]);
@@ -1036,10 +1036,10 @@ function FinancialManagement() {
 
       {activeTab !== 'projects' && (
         <div className="row mb-4">
-          <StatCard title="Total Components" value={components.length} bgClass="bg-primary" />
-          <StatCard title="Total Subcomponents" value={subcomponents.length} bgClass="bg-warning" />
-          <StatCard title="Total Allocation" value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
-          <StatCard title="Total Activities" value={activities.length} bgClass="bg-info" />
+          <StatCard title={t('financial.totalComponents')} value={components.length} bgClass="bg-primary" />
+          <StatCard title={t('financial.totalSubcomponents')} value={subcomponents.length} bgClass="bg-warning" />
+          <StatCard title={t('financial.totalAllocation')} value={`$${formatCurrency(totalAllocation)}`} bgClass="bg-success" />
+          <StatCard title={t('financial.totalActivities')} value={activities.length} bgClass="bg-info" />
         </div>
       )}
 
@@ -1059,6 +1059,7 @@ function FinancialManagement() {
           donors={donors}
           contributors={contributors}
           currencies={currencies}
+          t={t}
         />
       )}
 

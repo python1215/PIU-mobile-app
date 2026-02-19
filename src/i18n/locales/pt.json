@@ -104,7 +104,11 @@
     "duration": "Duração",
     "dateCreated": "Data de Criação",
     "project": "Projeto",
-    "formPlaceholder": "Os campos do formulário serão exibidos aqui"
+    "formPlaceholder": "Os campos do formulário serão exibidos aqui",
+    "selected": "Selecionado",
+    "exportedExcel": "Exportado para Excel",
+    "exportedPDF": "Exportado para PDF",
+    "year": "Ano"
   },
   "nav": {
     "dashboard": "Painel",
@@ -301,7 +305,24 @@
     "budgetSummary": "Resumo do Orçamento",
     "totalAllocation": "Alocação Total",
     "totalDisbursed": "Total Desembolsado",
-    "remainingBalance": "Saldo Restante"
+    "remainingBalance": "Saldo Restante",
+    "projects": "Projetos",
+    "editProject": "Editar Projeto",
+    "addProject": "Adicionar Projeto",
+    "projectName": "Nome do Projeto",
+    "selectCurrency": "Selecionar Moeda",
+    "fundingAmount": "Montante de Financiamento",
+    "effectivenessDate": "Data de Efetividade",
+    "closureDate": "Data de Encerramento",
+    "donor": "Doador",
+    "contributors": "Contribuidores",
+    "donorsMultiSelect": "Doadores (Multi-seleção)",
+    "noDonorsAvailable": "Nenhum doador disponível. Adicione doadores na Configuração do Sistema.",
+    "contributorsMultiSelect": "Contribuidores (Multi-seleção)",
+    "noContributorsAvailable": "Nenhum contribuidor disponível. Adicione contribuidores na Configuração do Sistema.",
+    "totalComponents": "Total de Componentes",
+    "totalSubcomponents": "Total de Subcomponentes",
+    "totalActivities": "Total de Atividades"
   },
   "monitoring": {
     "title": "Monitoramento & Avaliação",

@@ -104,7 +104,11 @@
     "duration": "Duration",
     "dateCreated": "Date Created",
     "project": "Project",
-    "formPlaceholder": "Form fields will be displayed here"
+    "formPlaceholder": "Form fields will be displayed here",
+    "selected": "Selected",
+    "exportedExcel": "Exported to Excel",
+    "exportedPDF": "Exported to PDF",
+    "year": "Year"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -302,7 +306,23 @@
     "budgetSummary": "Budget Summary",
     "totalAllocation": "Total Allocation",
     "totalDisbursed": "Total Disbursed",
-    "remainingBalance": "Remaining Balance"
+    "remainingBalance": "Remaining Balance",
+    "editProject": "Edit Project",
+    "addProject": "Add New Project",
+    "projectName": "Project Name",
+    "selectCurrency": "Select Currency",
+    "fundingAmount": "Funding Amount",
+    "effectivenessDate": "Effectiveness Date",
+    "closureDate": "Closure Date",
+    "donor": "Donor",
+    "contributors": "Contributors",
+    "donorsMultiSelect": "Donors (Multi-select)",
+    "noDonorsAvailable": "No donors available. Add donors in System Setup.",
+    "contributorsMultiSelect": "Contributors (Multi-select)",
+    "noContributorsAvailable": "No contributors available. Add contributors in System Setup.",
+    "totalComponents": "Total Components",
+    "totalSubcomponents": "Total Subcomponents",
+    "totalActivities": "Total Activities"
   },
   "monitoring": {
     "title": "Monitoring & Evaluation",
