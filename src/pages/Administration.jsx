@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MODULE_KEYS = [
@@ -33,6 +33,7 @@ function Administration() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: {} });
+  const [expandedRoles, setExpandedRoles] = useState({});
 
   const loadRoles = useCallback(async () => {
     try {
@@ -123,6 +124,10 @@ function Administration() {
     }));
   }, []);
 
+  const toggleRoleExpand = useCallback((roleId) => {
+    setExpandedRoles(prev => ({ ...prev, [roleId]: !prev[roleId] }));
+  }, []);
+
   const selectAll = useCallback((value) => {
     setRoleForm(prev => {
       const perms = {};
@@ -178,12 +183,19 @@ function Administration() {
               {roles.map(role => (
                 <div key={role.id} className="col-12">
                   <div className="card border-0 shadow-sm">
-                    <div className="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                      <div>
-                        <h6 className="mb-0 fw-bold">{role.name}</h6>
-                        {role.description && <small className="text-muted">{role.description}</small>}
+                    <div
+                      className="card-header bg-white d-flex justify-content-between align-items-center py-3"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => toggleRoleExpand(role.id)}
+                    >
+                      <div className="d-flex align-items-center gap-2">
+                        {expandedRoles[role.id] ? <FiChevronDown size={18} /> : <FiChevronRight size={18} />}
+                        <div>
+                          <h6 className="mb-0 fw-bold">{role.name}</h6>
+                          {role.description && <small className="text-muted">{role.description}</small>}
+                        </div>
                       </div>
-                      <div className="d-flex gap-2 align-items-center">
+                      <div className="d-flex gap-2 align-items-center" onClick={(e) => e.stopPropagation()}>
                         <span className="badge bg-primary bg-opacity-10 text-primary">
                           <FiUsers className="me-1" />{role.userCount} {t('admin.users')}
                         </span>
@@ -195,36 +207,38 @@ function Administration() {
                         </button>
                       </div>
                     </div>
-                    <div className="card-body p-0">
-                      <div className="table-responsive">
-                        <table className="table table-sm mb-0">
-                          <thead className="table-light">
-                            <tr>
-                              <th className="px-3 py-2" style={{ width: '40%' }}>{t('admin.module')}</th>
-                              <th className="px-3 py-2 text-center" style={{ width: '30%' }}>{t('admin.accessGranted')}</th>
-                              <th className="px-3 py-2 text-center" style={{ width: '30%' }}>{t('admin.accessDenied')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {MODULE_KEYS.map(moduleKey => (
-                              <tr key={moduleKey}>
-                                <td className="px-3 py-2 fw-medium">{t(MODULE_LABEL_MAP[moduleKey])}</td>
-                                <td className="px-3 py-2 text-center">
-                                  {role.permissions[moduleKey] ? (
-                                    <span className="badge bg-success bg-opacity-10 text-success"><FiCheck size={14} /> {t('common.yes')}</span>
-                                  ) : null}
-                                </td>
-                                <td className="px-3 py-2 text-center">
-                                  {!role.permissions[moduleKey] ? (
-                                    <span className="badge bg-danger bg-opacity-10 text-danger"><FiX size={14} /> {t('common.no')}</span>
-                                  ) : null}
-                                </td>
+                    {expandedRoles[role.id] && (
+                      <div className="card-body p-0">
+                        <div className="table-responsive">
+                          <table className="table table-sm mb-0">
+                            <thead className="table-light">
+                              <tr>
+                                <th className="px-3 py-2" style={{ width: '40%' }}>{t('admin.module')}</th>
+                                <th className="px-3 py-2 text-center" style={{ width: '30%' }}>{t('admin.accessGranted')}</th>
+                                <th className="px-3 py-2 text-center" style={{ width: '30%' }}>{t('admin.accessDenied')}</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {MODULE_KEYS.map(moduleKey => (
+                                <tr key={moduleKey}>
+                                  <td className="px-3 py-2 fw-medium">{t(MODULE_LABEL_MAP[moduleKey])}</td>
+                                  <td className="px-3 py-2 text-center">
+                                    {role.permissions[moduleKey] ? (
+                                      <span className="badge bg-success bg-opacity-10 text-success"><FiCheck size={14} /> {t('common.yes')}</span>
+                                    ) : null}
+                                  </td>
+                                  <td className="px-3 py-2 text-center">
+                                    {!role.permissions[moduleKey] ? (
+                                      <span className="badge bg-danger bg-opacity-10 text-danger"><FiX size={14} /> {t('common.no')}</span>
+                                    ) : null}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))}
