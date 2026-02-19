@@ -139,7 +139,8 @@ function Dashboard() {
   const barOptions = useMemo(() => ({
     plugins: { legend: { display: false } },
     scales: { y: { beginAtZero: true } },
-    maintainAspectRatio: true
+    maintainAspectRatio: false,
+    responsive: true
   }), []);
 
   const recentProjects = useMemo(() => projects.slice(0, 5), [projects]);
@@ -232,10 +233,8 @@ function Dashboard() {
             <div className="card-header bg-white border-0 py-2">
               <h6 className="mb-0 fw-semibold" style={{ fontSize: '0.85rem' }}>{t('issues.priority')}</h6>
             </div>
-            <div className="card-body d-flex align-items-center p-2">
-              <div style={{ width: '90%', margin: '0 auto' }}>
-                <Bar data={priorityData} options={barOptions} />
-              </div>
+            <div className="card-body p-2" style={{ position: 'relative', height: '90%' }}>
+              <Bar data={priorityData} options={barOptions} />
             </div>
           </div>
         </div>
