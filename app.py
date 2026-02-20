@@ -112,13 +112,37 @@ def start_backend():
             except:
                 pass
 
+def warm_up_database():
+    """Wake up Neon database before Spring Boot starts."""
+    import psycopg2
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        print("[DB WARMUP] No DATABASE_URL found, skipping")
+        return
+    
+    print("[DB WARMUP] Waking up database...")
+    for i in range(30):
+        try:
+            conn = psycopg2.connect(db_url, connect_timeout=10)
+            cur = conn.cursor()
+            cur.execute('SELECT 1')
+            cur.close()
+            conn.close()
+            print(f"[DB WARMUP] Database is awake! (attempt {i+1})")
+            return
+        except Exception as e:
+            if i % 5 == 0:
+                print(f"[DB WARMUP] Waiting for database... (attempt {i+1}/30)")
+            time.sleep(3)
+    print("[DB WARMUP] Could not wake database after 30 attempts, continuing anyway...")
+
 try:
     os.remove(READY_FILE)
 except:
     pass
 
-thread = threading.Thread(target=start_backend, daemon=True)
-thread.start()
+warmup_thread = threading.Thread(target=lambda: (warm_up_database(), start_backend()), daemon=True)
+warmup_thread.start()
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
@@ -138,23 +162,42 @@ def proxy_api(path):
     if request.query_string:
         url += f"?{request.query_string.decode()}"
 
-    try:
-        resp = http_requests.request(
-            method=request.method,
-            url=url,
-            headers={k: v for k, v in request.headers if k.lower() != 'host'},
-            data=request.get_data(),
-            cookies=request.cookies,
-            allow_redirects=False,
-            timeout=30
-        )
+    req_headers = {k: v for k, v in request.headers if k.lower() != 'host'}
+    req_data = request.get_data()
+    req_cookies = request.cookies
 
-        excluded = {'content-encoding', 'transfer-encoding', 'connection'}
-        headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        try:
+            resp = http_requests.request(
+                method=request.method,
+                url=url,
+                headers=req_headers,
+                data=req_data,
+                cookies=req_cookies,
+                allow_redirects=False,
+                timeout=60
+            )
 
-        return Response(resp.content, status=resp.status_code, headers=headers)
-    except Exception as e:
-        return {"error": "Backend unavailable", "message": str(e)}, 503
+            if resp.status_code == 500 and attempt < max_retries:
+                try:
+                    body = resp.json()
+                    err_msg = str(body.get('message', '') or body.get('error', ''))
+                    if 'EntityManager' in err_msg or 'JDBC' in err_msg or 'Connection' in err_msg:
+                        time.sleep(2)
+                        continue
+                except:
+                    pass
+
+            excluded = {'content-encoding', 'transfer-encoding', 'connection'}
+            headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
+
+            return Response(resp.content, status=resp.status_code, headers=headers)
+        except Exception as e:
+            if attempt < max_retries:
+                time.sleep(2)
+                continue
+            return {"error": "Backend unavailable", "message": str(e)}, 503
 
 @app.route('/uploads/<path:filename>')
 def serve_uploads(filename):

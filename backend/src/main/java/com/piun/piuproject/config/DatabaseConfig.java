@@ -49,11 +49,16 @@ public class DatabaseConfig {
         }
         
         dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setMaximumPoolSize(10);
-        dataSource.setMinimumIdle(2);
-        dataSource.setConnectionTimeout(30000);
-        dataSource.setIdleTimeout(600000);
-        dataSource.setMaxLifetime(1800000);
+        dataSource.setMaximumPoolSize(5);
+        dataSource.setMinimumIdle(1);
+        dataSource.setConnectionTimeout(60000);
+        dataSource.setIdleTimeout(120000);
+        dataSource.setMaxLifetime(300000);
+        dataSource.setKeepaliveTime(60000);
+        dataSource.setConnectionTestQuery("SELECT 1");
+        dataSource.setValidationTimeout(10000);
+        dataSource.setInitializationFailTimeout(0);
+        dataSource.setLeakDetectionThreshold(60000);
         
         return dataSource;
     }
