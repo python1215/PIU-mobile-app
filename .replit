@@ -41,8 +41,8 @@ packages = [
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["bash", "start.sh", "main:app"]
-publicDir = "dist/public"
+run = ["bash", "start.sh"]
+
 
 [workflows]
 runButton = "Project"
@@ -76,12 +76,3 @@ JWT_SECRET = "piu-project-microservices-jwt-secret-key-must-be-at-least-32-bytes
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5433
-externalPort = 3001
-exposeLocalhost = true
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
