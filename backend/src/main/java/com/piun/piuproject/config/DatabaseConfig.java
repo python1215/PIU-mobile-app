@@ -22,11 +22,12 @@ public class DatabaseConfig {
         HikariDataSource dataSource = new HikariDataSource();
         
         if (databaseUrl != null && !databaseUrl.isEmpty()) {
-            // Parse the DATABASE_URL and convert to JDBC format
             URI dbUri = new URI(databaseUrl);
             
-            String username = dbUri.getUserInfo().split(":")[0];
-            String password = dbUri.getUserInfo().split(":")[1];
+            String[] userParts = dbUri.getUserInfo() != null
+                    ? dbUri.getUserInfo().split(":", 2) : new String[]{"postgres"};
+            String username = userParts[0];
+            String password = userParts.length > 1 ? userParts[1] : "";
             
             // Build JDBC URL
             String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + 
@@ -51,14 +52,14 @@ public class DatabaseConfig {
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setMaximumPoolSize(5);
         dataSource.setMinimumIdle(1);
-        dataSource.setConnectionTimeout(60000);
+        dataSource.setConnectionTimeout(5000);
         dataSource.setIdleTimeout(120000);
         dataSource.setMaxLifetime(300000);
         dataSource.setKeepaliveTime(60000);
         dataSource.setConnectionTestQuery("SELECT 1");
-        dataSource.setValidationTimeout(10000);
+        dataSource.setValidationTimeout(3000);
         dataSource.setInitializationFailTimeout(0);
-        dataSource.setLeakDetectionThreshold(60000);
+        dataSource.setLeakDetectionThreshold(30000);
         
         return dataSource;
     }
