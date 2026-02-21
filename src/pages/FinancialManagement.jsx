@@ -855,12 +855,17 @@ function FinancialManagement() {
     }
   }, [activeTab, filteredProjects, currentTabData]);
 
-  const exportToExcel = useCallback(() => {
+  const exportToExcel = useCallback(async () => {
     const { title, headers, rows } = getExportData();
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, title);
-    XLSX.writeFile(wb, `Financial_${title}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(title);
+    ws.addRow(headers);
+    rows.forEach(row => ws.addRow(row));
+    const headerRow = ws.getRow(1);
+    headerRow.font = { bold: true };
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Financial_${title}_${new Date().toISOString().slice(0, 10)}.xlsx`);
     toast.success(t('common.exportedExcel'));
   }, [getExportData]);
 
