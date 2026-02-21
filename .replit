@@ -41,7 +41,7 @@ packages = [
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["bash", "start.sh"]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 
 
 [workflows]
