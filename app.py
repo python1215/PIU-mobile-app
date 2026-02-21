@@ -114,14 +114,19 @@ def start_backend():
 
 def warm_up_database():
     """Wake up Neon database before Spring Boot starts."""
-    import psycopg2
+    try:
+        import psycopg2
+    except ImportError:
+        print("[DB WARMUP] psycopg2 not available, skipping")
+        return
+
     db_url = os.environ.get('DATABASE_URL')
     if not db_url:
         print("[DB WARMUP] No DATABASE_URL found, skipping")
         return
-    
+
     print("[DB WARMUP] Waking up database...")
-    for i in range(30):
+    for i in range(10):
         try:
             conn = psycopg2.connect(db_url, connect_timeout=10)
             cur = conn.cursor()
@@ -131,10 +136,15 @@ def warm_up_database():
             print(f"[DB WARMUP] Database is awake! (attempt {i+1})")
             return
         except Exception as e:
-            if i % 5 == 0:
-                print(f"[DB WARMUP] Waiting for database... (attempt {i+1}/30)")
-            time.sleep(3)
-    print("[DB WARMUP] Could not wake database after 30 attempts, continuing anyway...")
+            err_msg = str(e)
+            if 'disabled' in err_msg.lower() or 'endpoint' in err_msg.lower():
+                print(f"[DB WARMUP] Database endpoint not available: {err_msg.strip()}")
+                print("[DB WARMUP] Skipping warmup, Spring Boot will handle retries")
+                return
+            if i % 3 == 0:
+                print(f"[DB WARMUP] Waiting for database... (attempt {i+1}/10)")
+            time.sleep(2)
+    print("[DB WARMUP] Could not wake database after 10 attempts, continuing anyway...")
 
 try:
     os.remove(READY_FILE)
