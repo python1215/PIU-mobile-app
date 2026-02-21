@@ -20,4 +20,7 @@ dependencies = [
     "flask-dance>=7.1.0",
     "requests>=2.32.4",
     "urllib3>=2.6.3",
+    "gunicorn>=25.1.0",
+    "flask>=3.1.2",
+    "werkzeug>=3.1.3",
 ]
