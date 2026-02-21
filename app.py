@@ -20,7 +20,10 @@ BACKEND_URL = "http://localhost:8080"
 JAR_PATH = "/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
 LOCK_FILE = "/tmp/spring_boot.lock"
 READY_FILE = "/tmp/spring_boot_ready"
+LOCAL_PG_DIR = "/tmp/pgdata"
+LOCAL_PG_PORT = "5433"
 _backend_ready_cache = False
+_active_database_url = None
 
 def is_backend_running():
     try:
@@ -79,12 +82,19 @@ def start_backend():
             return
 
         print("[SPRING BOOT] Starting on port 8080...")
+        boot_env = os.environ.copy()
+        if _active_database_url:
+            boot_env['DATABASE_URL'] = _active_database_url
+            boot_env['SPRING_JPA_HIBERNATE_DDL_AUTO'] = 'update'
+            print(f"[SPRING BOOT] Using database: {_active_database_url.split('@')[0].split('//')[0]}//***@{_active_database_url.split('@')[-1] if '@' in _active_database_url else _active_database_url}")
+
         process = subprocess.Popen(
             ["java", "-jar", JAR_PATH],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1
+            bufsize=1,
+            env=boot_env
         )
 
         def stream():
@@ -112,46 +122,132 @@ def start_backend():
             except:
                 pass
 
-def warm_up_database():
-    """Wake up Neon database before Spring Boot starts."""
+def test_remote_database():
+    """Test if the remote DATABASE_URL is reachable."""
     try:
         import psycopg2
     except ImportError:
-        print("[DB WARMUP] psycopg2 not available, skipping")
-        return
+        return False
 
     db_url = os.environ.get('DATABASE_URL')
     if not db_url:
-        print("[DB WARMUP] No DATABASE_URL found, skipping")
-        return
+        return False
 
-    print("[DB WARMUP] Waking up database...")
-    for i in range(10):
+    try:
+        conn = psycopg2.connect(db_url, connect_timeout=10)
+        cur = conn.cursor()
+        cur.execute('SELECT 1')
+        cur.close()
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+def start_local_postgres():
+    """Start a local PostgreSQL instance as fallback."""
+    global _active_database_url
+    local_db_url = f"postgresql://runner:runner@localhost:{LOCAL_PG_PORT}/piuproject"
+
+    try:
+        import psycopg2
+        conn = psycopg2.connect(local_db_url, connect_timeout=5)
+        cur = conn.cursor()
+        cur.execute('SELECT 1')
+        cur.close()
+        conn.close()
+        print("[LOCAL DB] Local PostgreSQL already running")
+        _active_database_url = local_db_url
+        return True
+    except Exception:
+        pass
+
+    print("[LOCAL DB] Starting local PostgreSQL...")
+
+    clean_env = {k: v for k, v in os.environ.items()
+                 if k not in ('PGHOST', 'PGPORT', 'PGUSER', 'PGPASSWORD', 'PGDATABASE', 'DATABASE_URL')}
+
+    if not os.path.exists(os.path.join(LOCAL_PG_DIR, 'PG_VERSION')):
+        result = subprocess.run(
+            ['initdb', '-D', LOCAL_PG_DIR, '-U', 'runner', '--auth=trust'],
+            capture_output=True, text=True, env=clean_env
+        )
+        if result.returncode != 0:
+            print(f"[LOCAL DB] initdb failed: {result.stderr}")
+            return False
+
+        with open(os.path.join(LOCAL_PG_DIR, 'postgresql.conf'), 'a') as f:
+            f.write(f"\nport = {LOCAL_PG_PORT}\n")
+            f.write("listen_addresses = 'localhost'\n")
+            f.write("unix_socket_directories = '/tmp'\n")
+            f.write("shared_buffers = 16MB\n")
+            f.write("work_mem = 2MB\n")
+            f.write("max_connections = 10\n")
+
+    result = subprocess.run(
+        ['pg_ctl', '-D', LOCAL_PG_DIR, '-l', os.path.join(LOCAL_PG_DIR, 'logfile'), 'start'],
+        capture_output=True, text=True, env=clean_env
+    )
+    if result.returncode != 0:
+        print(f"[LOCAL DB] pg_ctl start failed: {result.stderr}")
+        return False
+
+    print("[LOCAL DB] PostgreSQL started, waiting for it to be ready...")
+    time.sleep(2)
+
+    import psycopg2
+    for attempt in range(5):
         try:
-            conn = psycopg2.connect(db_url, connect_timeout=10)
+            conn = psycopg2.connect(
+                f"postgresql://runner@localhost:{LOCAL_PG_PORT}/postgres",
+                connect_timeout=5
+            )
+            conn.autocommit = True
             cur = conn.cursor()
-            cur.execute('SELECT 1')
+            cur.execute("SELECT 1 FROM pg_database WHERE datname='piuproject'")
+            if not cur.fetchone():
+                cur.execute("CREATE DATABASE piuproject")
+                print("[LOCAL DB] Database 'piuproject' created")
+            else:
+                print("[LOCAL DB] Database 'piuproject' already exists")
             cur.close()
             conn.close()
-            print(f"[DB WARMUP] Database is awake! (attempt {i+1})")
-            return
+            _active_database_url = local_db_url
+            print(f"[LOCAL DB] Ready at {local_db_url}")
+            return True
         except Exception as e:
-            err_msg = str(e)
-            if 'disabled' in err_msg.lower() or 'endpoint' in err_msg.lower():
-                print(f"[DB WARMUP] Database endpoint not available: {err_msg.strip()}")
-                print("[DB WARMUP] Skipping warmup, Spring Boot will handle retries")
-                return
-            if i % 3 == 0:
-                print(f"[DB WARMUP] Waiting for database... (attempt {i+1}/10)")
+            print(f"[LOCAL DB] Waiting... attempt {attempt+1}/5: {e}")
             time.sleep(2)
-    print("[DB WARMUP] Could not wake database after 10 attempts, continuing anyway...")
+
+    print("[LOCAL DB] Failed to start local PostgreSQL")
+    return False
+
+def prepare_database():
+    """Try remote database first, fall back to local."""
+    global _active_database_url
+
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        print("[DB] Testing remote database...")
+        if test_remote_database():
+            print("[DB] Remote database is available!")
+            _active_database_url = db_url
+            return
+        else:
+            print("[DB] Remote database unavailable, starting local fallback...")
+    else:
+        print("[DB] No DATABASE_URL set, starting local database...")
+
+    if start_local_postgres():
+        print("[DB] Local database ready")
+    else:
+        print("[DB] WARNING: No database available, backend may have limited functionality")
 
 try:
     os.remove(READY_FILE)
 except:
     pass
 
-warmup_thread = threading.Thread(target=lambda: (warm_up_database(), start_backend()), daemon=True)
+warmup_thread = threading.Thread(target=lambda: (prepare_database(), start_backend()), daemon=True)
 warmup_thread.start()
 
 @app.route('/assets/<path:filename>')
