@@ -89,7 +89,7 @@ def start_backend():
             print(f"[SPRING BOOT] Using database: {_active_database_url.split('@')[0].split('//')[0]}//***@{_active_database_url.split('@')[-1] if '@' in _active_database_url else _active_database_url}")
 
         process = subprocess.Popen(
-            ["java", "-jar", JAR_PATH],
+            ["java", "-Xms128m", "-Xmx384m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m", "-jar", JAR_PATH],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
