@@ -41,7 +41,7 @@ packages = [
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["bash", "start.sh"]
+run = ["java", "-jar", "backend/target/piuproject-1.0.0.jar"]
 
 
 [workflows]
