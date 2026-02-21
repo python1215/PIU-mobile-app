@@ -267,6 +267,17 @@ This creates the JAR file in `backend/target/piuproject-1.0.0.jar`.
 
 ## Recent Changes
 
+### February 21, 2026 - Security Dependency Updates
+- Upgraded Spring Boot parent from 3.2.0 to 3.4.3 (addresses CVEs in tomcat, spring-security, spring-web, logback, postgresql)
+- Rebuilt backend JAR with updated dependencies:
+  - logback-classic/core: 1.4.11 -> 1.5.16
+  - tomcat-embed-core: 10.1.16 -> 10.1.36
+  - spring-web/webmvc: 6.1.1 -> 6.2.3
+  - spring-security-core/web/crypto: 6.2.0 -> 6.4.3
+  - postgresql driver: 42.6.0 -> 42.7.5
+- Updated Python dependencies: Django 5.2.1 -> 5.2.8, Pillow 11.3.0 -> 12.1.1, urllib3 added >=2.6.3
+- Updated Node.js dependency: jspdf 4.1.0 -> 4.2.0
+
 ### December 3, 2025 - Complete Module Implementation
 - Added 40+ JPA entities covering all 8 modules from Django
 - Created 29 Spring Data JPA repositories
