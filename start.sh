@@ -1,17 +1,9 @@
 #!/bin/bash
-set -e
 
 JAR_PATH="/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
 LOCAL_PG_DIR="/tmp/pgdata"
 LOCAL_PG_PORT="5433"
-
-test_remote_db() {
-    if [ -z "$DATABASE_URL" ]; then
-        return 1
-    fi
-    psql "$DATABASE_URL" -c "SELECT 1" >/dev/null 2>&1
-    return $?
-}
+DDL_AUTO="none"
 
 start_local_postgres() {
     echo "[LOCAL DB] Checking local PostgreSQL..."
@@ -19,6 +11,11 @@ start_local_postgres() {
     if pg_isready -h localhost -p $LOCAL_PG_PORT -q 2>/dev/null; then
         echo "[LOCAL DB] Already running"
         return 0
+    fi
+
+    if ! command -v pg_ctl &> /dev/null; then
+        echo "[LOCAL DB] pg_ctl not available (production mode), skipping local DB"
+        return 1
     fi
 
     if [ ! -f "$LOCAL_PG_DIR/PG_VERSION" ]; then
@@ -55,19 +52,34 @@ EOF
     return 0
 }
 
+test_remote_db() {
+    if [ -z "$DATABASE_URL" ]; then
+        return 1
+    fi
+    timeout 5 psql "$DATABASE_URL" -c "SELECT 1" >/dev/null 2>&1
+    return $?
+}
+
 echo "[DB] Testing remote database..."
 if test_remote_db; then
     echo "[DB] Remote database is available!"
-    export ACTIVE_DATABASE_URL="$DATABASE_URL"
+    DDL_AUTO="update"
 else
-    echo "[DB] Remote database unavailable, starting local fallback..."
-    start_local_postgres
-    export ACTIVE_DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
-    export DATABASE_URL="$ACTIVE_DATABASE_URL"
+    echo "[DB] Remote database unavailable, trying local fallback..."
+    if start_local_postgres; then
+        export DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
+        unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
+        DDL_AUTO="update"
+        echo "[DB] Using local database"
+    else
+        echo "[DB] No database available - app will start without DB (degraded mode)"
+        unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE DATABASE_URL
+    fi
 fi
 
 export PORT=5000
-echo "[SPRING BOOT] Starting on port $PORT..."
+echo "[SPRING BOOT] Starting on port $PORT with ddl-auto=$DDL_AUTO..."
 exec java -Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m \
     -Dserver.port=$PORT \
+    -Dspring.jpa.hibernate.ddl-auto=$DDL_AUTO \
     -jar "$JAR_PATH"
