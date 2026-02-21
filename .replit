@@ -76,3 +76,7 @@ JWT_SECRET = "piu-project-microservices-jwt-secret-key-must-be-at-least-32-bytes
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 8080
+externalPort = 8080

@@ -83,6 +83,7 @@ def start_backend():
 
         print("[SPRING BOOT] Starting on port 8080...")
         boot_env = os.environ.copy()
+        boot_env['PORT'] = '8080'
         if _active_database_url:
             boot_env['DATABASE_URL'] = _active_database_url
             boot_env['SPRING_JPA_HIBERNATE_DDL_AUTO'] = 'update'
