@@ -9,35 +9,7 @@ modules = [
 
 [nix]
 channel = "stable-24_05"
-packages = [
-  "cairo",
-  "ffmpeg-full",
-  "freetds",
-  "freetype",
-  "ghostscript",
-  "glibcLocales",
-  "gobject-introspection",
-  "gtk3",
-  "jdk21",
-  "lcms2",
-  "libimagequant",
-  "libjpeg",
-  "libtiff",
-  "libwebp",
-  "libxcrypt",
-  "maven",
-  "netcat-gnu",
-  "openjpeg",
-  "openssh",
-  "openssl",
-  "pkg-config",
-  "postgresql",
-  "qhull",
-  "tcl",
-  "tk",
-  "unixODBC",
-  "zlib",
-]
+packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -76,7 +48,3 @@ JWT_SECRET = "piu-project-microservices-jwt-secret-key-must-be-at-least-32-bytes
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
