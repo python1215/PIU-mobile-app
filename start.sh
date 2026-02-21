@@ -66,6 +66,8 @@ else
     export DATABASE_URL="$ACTIVE_DATABASE_URL"
 fi
 
-echo "[SPRING BOOT] Starting on port 5000..."
+export PORT=5000
+echo "[SPRING BOOT] Starting on port $PORT..."
 exec java -Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m \
+    -Dserver.port=$PORT \
     -jar "$JAR_PATH"
