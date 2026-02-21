@@ -9,11 +9,40 @@ modules = [
 
 [nix]
 channel = "stable-24_05"
-packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
+packages = [
+  "cairo",
+  "ffmpeg-full",
+  "freetds",
+  "freetype",
+  "ghostscript",
+  "glibcLocales",
+  "gobject-introspection",
+  "gtk3",
+  "jdk21",
+  "lcms2",
+  "libimagequant",
+  "libjpeg",
+  "libtiff",
+  "libwebp",
+  "libxcrypt",
+  "maven",
+  "netcat-gnu",
+  "openjpeg",
+  "openssh",
+  "openssl",
+  "pkg-config",
+  "postgresql",
+  "qhull",
+  "tcl",
+  "tk",
+  "unixODBC",
+  "zlib",
+]
 
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+build = ["pip", "install", "-r", "requirements.txt"]
 
 
 [workflows]
