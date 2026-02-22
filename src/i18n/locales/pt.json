@@ -897,6 +897,7 @@
     "registerFieldsRequired": "Nome de usuário, e-mail e senha são obrigatórios",
     "personalInfo": "Informações Pessoais",
     "accountDetails": "Detalhes da Conta",
-    "passwordHint": "Mínimo de 6 caracteres"
+    "passwordHint": "Mínimo de 6 caracteres",
+    "securityInfo": "Segurança"
   }
 }
