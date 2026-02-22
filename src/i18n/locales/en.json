@@ -894,6 +894,9 @@
     "registering": "Registering...",
     "registerUserSuccess": "User registered successfully",
     "registerUserFailed": "Failed to register user",
-    "registerFieldsRequired": "Username, email and password are required"
+    "registerFieldsRequired": "Username, email and password are required",
+    "personalInfo": "Personal Information",
+    "accountDetails": "Account Details",
+    "passwordHint": "Minimum 6 characters"
   }
 }

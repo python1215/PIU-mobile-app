@@ -894,6 +894,9 @@
     "registering": "Registrando...",
     "registerUserSuccess": "Usuário registrado com sucesso",
     "registerUserFailed": "Falha ao registrar usuário",
-    "registerFieldsRequired": "Nome de usuário, e-mail e senha são obrigatórios"
+    "registerFieldsRequired": "Nome de usuário, e-mail e senha são obrigatórios",
+    "personalInfo": "Informações Pessoais",
+    "accountDetails": "Detalhes da Conta",
+    "passwordHint": "Mínimo de 6 caracteres"
   }
 }

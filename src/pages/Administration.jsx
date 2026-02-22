@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiUserPlus, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiUserPlus, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw, FiUser, FiMail, FiLock, FiBriefcase } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -355,80 +355,122 @@ function Administration() {
       {activeSection === 'register' && (
         <div className="row justify-content-center">
           <div className="col-12 col-lg-8 col-xl-6">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body p-4">
+            <div className="card border-0 shadow rounded-4">
+              <div className="card-body p-4 p-md-5">
+                <div className="text-center mb-4">
+                  <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3" style={{ width: 64, height: 64 }}>
+                    <FiUserPlus size={28} className="text-primary" />
+                  </div>
+                  <h5 className="fw-bold mb-1">{t('admin.registerUser')}</h5>
+                  <p className="text-muted small mb-0">{t('admin.subtitle')}</p>
+                </div>
+                <hr className="mb-4" />
                 <form onSubmit={handleRegisterUser}>
-                  <div className="row g-3">
+                  <p className="text-uppercase text-muted small fw-bold mb-3 ls-1">{t('admin.personalInfo') || 'Personal Information'}</p>
+                  <div className="row g-3 mb-4">
                     <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.firstName')}</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.firstName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
-                        placeholder={t('admin.firstName')}
-                      />
+                      <label className="form-label small fw-semibold text-muted">{t('admin.firstName')}</label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiUser size={16} className="text-muted" /></span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.firstName}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                          placeholder={t('admin.firstName')}
+                        />
+                      </div>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.lastName')}</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.lastName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
-                        placeholder={t('admin.lastName')}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.username')} <span className="text-danger">*</span></label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.username}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder={t('admin.enterUsername')}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.email')} <span className="text-danger">*</span></label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={registerForm.email}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder={t('admin.enterEmail')}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.password')} <span className="text-danger">*</span></label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={registerForm.password}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
-                        placeholder={t('admin.enterPassword')}
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.department')}</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.department}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
-                        placeholder={t('admin.enterDepartment')}
-                      />
+                      <label className="form-label small fw-semibold text-muted">{t('admin.lastName')}</label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiUser size={16} className="text-muted" /></span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.lastName}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                          placeholder={t('admin.lastName')}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="d-flex gap-2 mt-4">
+
+                  <p className="text-uppercase text-muted small fw-bold mb-3 ls-1">{t('admin.accountDetails') || 'Account Details'}</p>
+                  <div className="row g-3 mb-4">
+                    <div className="col-md-6">
+                      <label className="form-label small fw-semibold text-muted">{t('admin.username')} <span className="text-danger">*</span></label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiUserCheck size={16} className="text-muted" /></span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.username}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
+                          placeholder={t('admin.enterUsername')}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label small fw-semibold text-muted">{t('admin.email')} <span className="text-danger">*</span></label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiMail size={16} className="text-muted" /></span>
+                        <input
+                          type="email"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.email}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder={t('admin.enterEmail')}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label small fw-semibold text-muted">{t('admin.password')} <span className="text-danger">*</span></label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiLock size={16} className="text-muted" /></span>
+                        <input
+                          type="password"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.password}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
+                          placeholder={t('admin.enterPassword')}
+                          required
+                          minLength={6}
+                        />
+                      </div>
+                      <div className="form-text">{t('admin.passwordHint') || 'Minimum 6 characters'}</div>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label small fw-semibold text-muted">{t('admin.department')}</label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light border-end-0"><FiBriefcase size={16} className="text-muted" /></span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0 ps-0"
+                          value={registerForm.department}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
+                          placeholder={t('admin.enterDepartment')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr className="mb-4" />
+                  <div className="d-flex justify-content-end gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-light px-4"
+                      onClick={() => setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' })}
+                    >
+                      <FiX size={16} className="me-1" />
+                      {t('common.clear')}
+                    </button>
                     <button
                       type="submit"
                       disabled={registerLoading}
-                      className="btn btn-primary d-flex align-items-center gap-2"
+                      className="btn btn-primary px-4 d-flex align-items-center gap-2"
                     >
                       {registerLoading ? (
                         <>
@@ -437,17 +479,10 @@ function Administration() {
                         </>
                       ) : (
                         <>
-                          <FiUserPlus size={18} />
+                          <FiUserPlus size={16} />
                           <span>{t('admin.registerUser')}</span>
                         </>
                       )}
-                    </button>
-                    <button
-                      type="reset"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' })}
-                    >
-                      {t('common.clear')}
                     </button>
                   </div>
                 </form>
