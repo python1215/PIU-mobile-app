@@ -359,8 +359,8 @@ function Administration() {
       )}
 
       {activeSection === 'register' && (
-        <div className="row">
-          <div className="col-12 col-md-6 col-lg-5 col-xl-4">
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-10 col-lg-7 col-xl-6">
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
                 <h6 className="mb-0 fw-bold d-flex align-items-center gap-1"><FiUserPlus size={16} className="text-primary" /> {t('admin.registerUser')}</h6>
