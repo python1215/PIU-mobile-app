@@ -56,7 +56,13 @@ function App() {
         <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
         <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />
         <Route path="map" element={<ModuleGuard moduleKey="projectMap"><ProjectMap /></ModuleGuard>} />
-        <Route path="administration" element={<ModuleGuard moduleKey="administration"><Administration /></ModuleGuard>} />
+        <Route path="administration" element={<ModuleGuard moduleKey="administration"><Administration /></ModuleGuard>}>
+          <Route index element={<Navigate to="/administration/roles" replace />} />
+          <Route path="roles" element={null} />
+          <Route path="users" element={null} />
+          <Route path="register" element={null} />
+          <Route path="connected" element={null} />
+        </Route>
       </Route>
     </Routes>
   );

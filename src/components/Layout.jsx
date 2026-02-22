@@ -19,6 +19,9 @@ import {
   FiFile,
   FiMapPin,
   FiLock,
+  FiChevronDown,
+  FiUserPlus,
+  FiActivity,
 } from "react-icons/fi";
 import { useState, useCallback, useMemo, memo } from "react";
 
@@ -33,7 +36,13 @@ const navItemsConfig = [
   { path: "/map", icon: FiMapPin, labelKey: "nav.projectMap", moduleKey: "projectMap" },
   { path: "/issues", icon: FiAlertCircle, labelKey: "nav.issues", moduleKey: "issues" },
   { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi", moduleKey: "kpi" },
-  { path: "/administration", icon: FiLock, labelKey: "nav.administration", moduleKey: "administration" },
+];
+
+const adminSubItems = [
+  { path: "/administration/roles", icon: FiShield, labelKey: "admin.roles" },
+  { path: "/administration/users", icon: FiUsers, labelKey: "admin.userAssignment" },
+  { path: "/administration/register", icon: FiUserPlus, labelKey: "admin.registerUser" },
+  { path: "/administration/connected", icon: FiActivity, labelKey: "admin.connectedUsers" },
 ];
 
 const NavItem = memo(function NavItem({ item, isActive, sidebarOpen, t }) {
@@ -73,6 +82,9 @@ function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [adminExpanded, setAdminExpanded] = useState(false);
+
+  const isAdminPath = location.pathname.startsWith("/administration");
 
   const handleLogout = useCallback(() => {
     logout();
@@ -83,12 +95,27 @@ function Layout() {
     setSidebarOpen((prev) => !prev);
   }, []);
 
+  const toggleAdmin = useCallback(() => {
+    if (!sidebarOpen) {
+      setSidebarOpen(true);
+      setAdminExpanded(true);
+      navigate("/administration/roles");
+    } else {
+      setAdminExpanded((prev) => !prev);
+    }
+  }, [sidebarOpen, navigate]);
+
   const filteredNavItems = useMemo(() => {
     if (!permissions || user?.isSuperuser) return navItemsConfig;
     return navItemsConfig.filter((item) => {
       if (item.moduleKey === 'dashboard') return true;
       return permissions[item.moduleKey] === true;
     });
+  }, [permissions, user]);
+
+  const showAdmin = useMemo(() => {
+    if (!permissions || user?.isSuperuser) return true;
+    return permissions.administration === true;
   }, [permissions, user]);
 
   const navList = useMemo(
@@ -114,6 +141,8 @@ function Layout() {
     [sidebarOpen],
   );
 
+  const adminIsExpanded = adminExpanded || isAdminPath;
+
   return (
     <div className="d-flex vh-100 bg-light">
       <aside
@@ -136,7 +165,60 @@ function Layout() {
         </div>
 
         <nav className="flex-grow-1 py-3 overflow-auto">
-          <ul className="nav flex-column gap-1 px-2">{navList}</ul>
+          <ul className="nav flex-column gap-1 px-2">
+            {navList}
+
+            {showAdmin && (
+              <>
+                <li className="nav-item">
+                  <button
+                    onClick={toggleAdmin}
+                    className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 w-100 border-0 bg-transparent ${
+                      isAdminPath ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                    }`}
+                    style={{ transition: "all 0.2s", whiteSpace: "nowrap", textAlign: "left" }}
+                  >
+                    <FiLock size={20} />
+                    {sidebarOpen && (
+                      <>
+                        <span className="fw-medium flex-grow-1">{t("nav.administration")}</span>
+                        <FiChevronDown
+                          size={16}
+                          style={{
+                            transition: "transform 0.3s",
+                            transform: adminIsExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                          }}
+                        />
+                      </>
+                    )}
+                  </button>
+                </li>
+
+                {sidebarOpen && adminIsExpanded && (
+                  <div style={{ paddingLeft: "20px" }}>
+                    {adminSubItems.map((sub) => {
+                      const SubIcon = sub.icon;
+                      const isSubActive = location.pathname === sub.path;
+                      return (
+                        <li key={sub.path} className="nav-item">
+                          <Link
+                            to={sub.path}
+                            className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
+                              isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                            }`}
+                            style={{ transition: "all 0.2s", whiteSpace: "nowrap", fontSize: "0.9rem" }}
+                          >
+                            <SubIcon size={16} />
+                            <span className="fw-medium">{t(sub.labelKey)}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </ul>
         </nav>
 
         <div className="p-3 border-top">
