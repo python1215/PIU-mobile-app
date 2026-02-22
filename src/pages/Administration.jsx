@@ -37,6 +37,7 @@ function Administration() {
   const [expandedRoles, setExpandedRoles] = useState({});
   const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState({ users: [], totalConnected: 0, activeCount: 0, idleCount: 0 });
   const [connectedLoading, setConnectedLoading] = useState(false);
   const refreshIntervalRef = useRef(null);
@@ -170,6 +171,7 @@ function Administration() {
       await authAPI.register(registerForm);
       toast.success(t('admin.registerUserSuccess'));
       setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
+      setShowRegisterForm(false);
       loadUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || t('admin.registerUserFailed'));
@@ -197,7 +199,127 @@ function Administration() {
           <h2 className="fw-bold mb-1"><FiShield className="me-2" />{t('admin.title')}</h2>
           <p className="text-muted mb-0">{t('admin.subtitle')}</p>
         </div>
+        <button
+          className={`btn ${showRegisterForm ? 'btn-outline-secondary' : 'btn-primary'} d-flex align-items-center gap-2`}
+          onClick={() => setShowRegisterForm(prev => !prev)}
+        >
+          {showRegisterForm ? <FiX size={18} /> : <FiUserPlus size={18} />}
+          {showRegisterForm ? t('common.close') : t('admin.registerUser')}
+        </button>
       </div>
+
+      {showRegisterForm && (
+        <div className="card border-0 shadow-sm mb-4" style={{ animation: 'slideDown 0.3s ease-out' }}>
+          <div className="card-header bg-primary bg-opacity-10 py-3 d-flex justify-content-between align-items-center">
+            <h5 className="mb-0 fw-bold d-flex align-items-center gap-2 text-primary">
+              <FiUserPlus />
+              {t('admin.registerUser')}
+            </h5>
+            <button className="btn btn-sm btn-outline-secondary" onClick={() => setShowRegisterForm(false)}>
+              <FiX size={16} />
+            </button>
+          </div>
+          <div className="card-body p-4">
+            <form onSubmit={handleRegisterUser}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.firstName')}</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={registerForm.firstName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder={t('admin.firstName')}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.lastName')}</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={registerForm.lastName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder={t('admin.lastName')}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.username')} <span className="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={registerForm.username}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder={t('admin.enterUsername')}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.email')} <span className="text-danger">*</span></label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={registerForm.email}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder={t('admin.enterEmail')}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.password')} <span className="text-danger">*</span></label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder={t('admin.enterPassword')}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium">{t('admin.department')}</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={registerForm.department}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
+                    placeholder={t('admin.enterDepartment')}
+                  />
+                </div>
+              </div>
+              <div className="d-flex gap-2 mt-4">
+                <button
+                  type="submit"
+                  disabled={registerLoading}
+                  className="btn btn-primary d-flex align-items-center gap-2"
+                >
+                  {registerLoading ? (
+                    <>
+                      <div className="spinner-border spinner-border-sm" role="status"></div>
+                      <span>{t('admin.registering')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiUserPlus size={18} />
+                      <span>{t('admin.registerUser')}</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => {
+                    setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
+                    setShowRegisterForm(false);
+                  }}
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
@@ -208,11 +330,6 @@ function Administration() {
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
             <FiUsers className="me-2" />{t('admin.userAssignment')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'register' ? 'active' : ''}`} onClick={() => setActiveTab('register')}>
-            <FiUserPlus className="me-2" />{t('admin.registerUser')}
           </button>
         </li>
         <li className="nav-item">
@@ -363,113 +480,6 @@ function Administration() {
               {users.length === 0 && (
                 <p className="text-center text-muted py-5">{t('table.noData')}</p>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'register' && (
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-8 col-xl-6">
-            <div className="card border-0 shadow-sm">
-              <div className="card-header bg-white py-3">
-                <h5 className="mb-0 fw-bold d-flex align-items-center gap-2">
-                  <FiUserPlus className="text-primary" />
-                  {t('admin.registerUser')}
-                </h5>
-              </div>
-              <div className="card-body p-4">
-                <form onSubmit={handleRegisterUser}>
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.firstName')}</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.firstName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
-                        placeholder={t('admin.firstName')}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-medium">{t('admin.lastName')}</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={registerForm.lastName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
-                        placeholder={t('admin.lastName')}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">{t('admin.username')} <span className="text-danger">*</span></label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={registerForm.username}
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
-                      placeholder={t('admin.enterUsername')}
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">{t('admin.email')} <span className="text-danger">*</span></label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      value={registerForm.email}
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder={t('admin.enterEmail')}
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">{t('admin.password')} <span className="text-danger">*</span></label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={registerForm.password}
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder={t('admin.enterPassword')}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="form-label fw-medium">{t('admin.department')}</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={registerForm.department}
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
-                      placeholder={t('admin.enterDepartment')}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={registerLoading}
-                    className="btn btn-primary d-flex align-items-center gap-2"
-                  >
-                    {registerLoading ? (
-                      <>
-                        <div className="spinner-border spinner-border-sm" role="status"></div>
-                        <span>{t('admin.registering')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <FiUserPlus size={18} />
-                        <span>{t('admin.registerUser')}</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
             </div>
           </div>
         </div>
