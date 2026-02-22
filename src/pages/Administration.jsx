@@ -37,7 +37,7 @@ function Administration() {
   const [editingRole, setEditingRole] = useState(null);
   const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: {} });
   const [expandedRoles, setExpandedRoles] = useState({});
-  const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '', firstName: '', lastName: '', department: '', roleId: '' });
+  const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '', confirmPassword: '', firstName: '', lastName: '', department: '', roleId: '' });
   const [registerLoading, setRegisterLoading] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState({ users: [], totalConnected: 0, activeCount: 0, idleCount: 0 });
   const [connectedLoading, setConnectedLoading] = useState(false);
@@ -167,11 +167,16 @@ function Administration() {
       toast.error(t('admin.registerFieldsRequired'));
       return;
     }
+    if (registerForm.password !== registerForm.confirmPassword) {
+      toast.error(t('admin.passwordMismatch'));
+      return;
+    }
     setRegisterLoading(true);
     try {
-      await authAPI.register(registerForm);
+      const { confirmPassword, ...payload } = registerForm;
+      await authAPI.register(payload);
       toast.success(t('admin.registerUserSuccess'));
-      setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
+      setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', firstName: '', lastName: '', department: '', roleId: '' });
       loadUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || t('admin.registerUserFailed'));
@@ -430,6 +435,21 @@ function Administration() {
                         />
                         <small className="text-muted" style={{fontSize: '0.72rem'}}>{t('admin.passwordHint')}</small>
                       </div>
+                      <div className="col-12">
+                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.confirmPassword')} *</label>
+                        <input
+                          type="password"
+                          className={`form-control form-control-sm ${registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword ? 'is-invalid' : ''} ${registerForm.confirmPassword && registerForm.password === registerForm.confirmPassword ? 'is-valid' : ''}`}
+                          value={registerForm.confirmPassword}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          placeholder={t('admin.enterConfirmPassword')}
+                          required
+                          minLength={6}
+                        />
+                        {registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword && (
+                          <div className="invalid-feedback" style={{fontSize: '0.72rem'}}>{t('admin.passwordMismatch')}</div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -468,7 +488,7 @@ function Administration() {
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-secondary"
-                  onClick={() => setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '', roleId: '' })}
+                  onClick={() => setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', firstName: '', lastName: '', department: '', roleId: '' })}
                 >
                   {t('common.clear')}
                 </button>

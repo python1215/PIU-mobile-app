@@ -898,6 +898,9 @@
     "personalInfo": "Informações Pessoais",
     "accountDetails": "Detalhes da Conta",
     "passwordHint": "Mínimo de 6 caracteres",
-    "securityInfo": "Segurança"
+    "securityInfo": "Segurança",
+    "confirmPassword": "Confirmar Senha",
+    "enterConfirmPassword": "Redigite a senha",
+    "passwordMismatch": "As senhas não coincidem"
   }
 }
