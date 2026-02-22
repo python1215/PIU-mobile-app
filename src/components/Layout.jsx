@@ -23,7 +23,7 @@ import {
   FiUserPlus,
   FiActivity,
 } from "react-icons/fi";
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState, useCallback, useMemo, useEffect, memo } from "react";
 
 const navItemsConfig = [
   { path: "/", icon: FiHome, labelKey: "nav.dashboard", moduleKey: "dashboard" },
@@ -141,7 +141,11 @@ function Layout() {
     [sidebarOpen],
   );
 
-  const adminIsExpanded = adminExpanded || isAdminPath;
+  useEffect(() => {
+    if (isAdminPath) setAdminExpanded(true);
+  }, [isAdminPath]);
+
+  const adminIsExpanded = adminExpanded;
 
   return (
     <div className="d-flex vh-100 bg-light">
