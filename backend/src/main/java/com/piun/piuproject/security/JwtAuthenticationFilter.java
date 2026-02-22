@@ -1,5 +1,7 @@
 package com.piun.piuproject.security;
 
+import com.piun.piuproject.model.User;
+import com.piun.piuproject.repository.UserRepository;
 import com.piun.piuproject.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,16 +17,22 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+    private final Map<String, LocalDateTime> lastUpdateMap = new ConcurrentHashMap<>();
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, @Lazy CustomUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, @Lazy CustomUserDetailsService userDetailsService, @Lazy UserRepository userRepository) {
         this.tokenProvider = tokenProvider;
         this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -44,12 +52,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                updateLastActivity(username);
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void updateLastActivity(String username) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime lastUpdate = lastUpdateMap.get(username);
+            if (lastUpdate == null || java.time.Duration.between(lastUpdate, now).toMinutes() >= 1) {
+                lastUpdateMap.put(username, now);
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    user.setLastActivity(now);
+                    userRepository.save(user);
+                });
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to update last activity: {}", e);
+        }
     }
 
     private String parseJwt(HttpServletRequest request) {

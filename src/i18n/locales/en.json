@@ -73,6 +73,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "pending": "Pending",
+    "refresh": "Refresh",
     "completed": "Completed",
     "inProgress": "In Progress",
     "all": "All",
@@ -867,6 +868,18 @@
     "superuser": "Superuser",
     "assignedRole": "Assigned Role",
     "noRole": "No Role (Full Access)",
-    "allAccess": "Full Access (Superuser)"
+    "allAccess": "Full Access (Superuser)",
+    "connectedUsers": "Connected Users",
+    "totalConnected": "Total Connected",
+    "activeNow": "Active Now",
+    "idleUsers": "Idle",
+    "statusLabel": "Status",
+    "active": "Active",
+    "idle": "Idle",
+    "lastActivityTime": "Last Activity",
+    "lastLoginTime": "Last Login",
+    "noConnectedUsers": "No connected users",
+    "noConnectedUsersDesc": "No users have been active in the last 15 minutes",
+    "autoRefreshNote": "Auto-refreshes every 30 seconds"
   }
 }

@@ -50,9 +50,9 @@ com/piun/piuproject/controller/ProjectMappingController.class
 com/piun/piuproject/repository/AccessTypeRepository.class
 com/piun/piuproject/repository/LGARepository.class
 com/piun/piuproject/model/DocumentTag.class
+com/piun/piuproject/PiuProjectApplication.class
 com/piun/piuproject/repository/ESIARepository.class
 com/piun/piuproject/controller/IssueActionController.class
-com/piun/piuproject/PiuProjectApplication.class
 com/piun/piuproject/repository/CommunityEngagementRepository.class
 com/piun/piuproject/model/Activity.class
 com/piun/piuproject/repository/DocumentCommentRepository.class

@@ -73,6 +73,7 @@
     "active": "Ativo",
     "inactive": "Inativo",
     "pending": "Pendente",
+    "refresh": "Atualizar",
     "completed": "Concluído",
     "inProgress": "Em Andamento",
     "all": "Todos",
@@ -867,6 +868,18 @@
     "superuser": "Superusuário",
     "assignedRole": "Função Atribuída",
     "noRole": "Sem Função (Acesso Total)",
-    "allAccess": "Acesso Total (Superusuário)"
+    "allAccess": "Acesso Total (Superusuário)",
+    "connectedUsers": "Usuários Conectados",
+    "totalConnected": "Total Conectados",
+    "activeNow": "Ativos Agora",
+    "idleUsers": "Inativos",
+    "statusLabel": "Status",
+    "active": "Ativo",
+    "idle": "Inativo",
+    "lastActivityTime": "Última Atividade",
+    "lastLoginTime": "Último Login",
+    "noConnectedUsers": "Nenhum usuário conectado",
+    "noConnectedUsersDesc": "Nenhum usuário esteve ativo nos últimos 15 minutos",
+    "autoRefreshNote": "Atualização automática a cada 30 segundos"
   }
 }

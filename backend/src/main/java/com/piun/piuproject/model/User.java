@@ -59,4 +59,7 @@ public class User {
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    @Column(name = "last_activity")
+    private LocalDateTime lastActivity;
 }

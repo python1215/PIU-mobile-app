@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MODULE_KEYS = [
@@ -34,6 +34,21 @@ function Administration() {
   const [editingRole, setEditingRole] = useState(null);
   const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: {} });
   const [expandedRoles, setExpandedRoles] = useState({});
+  const [connectedUsers, setConnectedUsers] = useState({ users: [], totalConnected: 0, activeCount: 0, idleCount: 0 });
+  const [connectedLoading, setConnectedLoading] = useState(false);
+  const refreshIntervalRef = useRef(null);
+
+  const loadConnectedUsers = useCallback(async () => {
+    try {
+      setConnectedLoading(true);
+      const res = await axios.get('/api/admin/connected-users');
+      setConnectedUsers(res.data);
+    } catch (err) {
+      console.error('Error loading connected users:', err);
+    } finally {
+      setConnectedLoading(false);
+    }
+  }, []);
 
   const loadRoles = useCallback(async () => {
     try {
@@ -56,6 +71,19 @@ function Administration() {
   useEffect(() => {
     Promise.all([loadRoles(), loadUsers()]).finally(() => setLoading(false));
   }, [loadRoles, loadUsers]);
+
+  useEffect(() => {
+    if (activeTab === 'connected') {
+      loadConnectedUsers();
+      refreshIntervalRef.current = setInterval(loadConnectedUsers, 30000);
+    }
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
+      }
+    };
+  }, [activeTab, loadConnectedUsers]);
 
   const openNewRole = useCallback(() => {
     const perms = {};
@@ -158,6 +186,14 @@ function Administration() {
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
             <FiUsers className="me-2" />{t('admin.userAssignment')}
+          </button>
+        </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'connected' ? 'active' : ''}`} onClick={() => setActiveTab('connected')}>
+            <FiActivity className="me-2" />{t('admin.connectedUsers')}
+            {connectedUsers.totalConnected > 0 && (
+              <span className="badge bg-success ms-2">{connectedUsers.totalConnected}</span>
+            )}
           </button>
         </li>
       </ul>
@@ -302,6 +338,107 @@ function Administration() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'connected' && (
+        <div>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex gap-3">
+              <div className="card border-0 shadow-sm px-3 py-2">
+                <div className="d-flex align-items-center gap-2">
+                  <FiUsers className="text-primary" />
+                  <div>
+                    <small className="text-muted d-block">{t('admin.totalConnected')}</small>
+                    <strong className="fs-5">{connectedUsers.totalConnected}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="card border-0 shadow-sm px-3 py-2">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="rounded-circle d-inline-block" style={{ width: 10, height: 10, backgroundColor: '#22c55e' }}></span>
+                  <div>
+                    <small className="text-muted d-block">{t('admin.activeNow')}</small>
+                    <strong className="fs-5 text-success">{connectedUsers.activeCount}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="card border-0 shadow-sm px-3 py-2">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="rounded-circle d-inline-block" style={{ width: 10, height: 10, backgroundColor: '#f59e0b' }}></span>
+                  <div>
+                    <small className="text-muted d-block">{t('admin.idleUsers')}</small>
+                    <strong className="fs-5 text-warning">{connectedUsers.idleCount}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button className="btn btn-outline-primary btn-sm" onClick={loadConnectedUsers} disabled={connectedLoading}>
+              <FiRefreshCw className={`me-1 ${connectedLoading ? 'spin-animation' : ''}`} size={14} />
+              {t('common.refresh')}
+            </button>
+          </div>
+
+          <div className="card border-0 shadow-sm">
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th className="px-4 py-3">{t('admin.statusLabel')}</th>
+                      <th className="px-4 py-3">{t('common.username')}</th>
+                      <th className="px-4 py-3">{t('admin.fullName')}</th>
+                      <th className="px-4 py-3">{t('common.email')}</th>
+                      <th className="px-4 py-3">{t('admin.department')}</th>
+                      <th className="px-4 py-3">{t('admin.assignedRole')}</th>
+                      <th className="px-4 py-3">{t('admin.lastActivityTime')}</th>
+                      <th className="px-4 py-3">{t('admin.lastLoginTime')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {connectedUsers.users.map(user => {
+                      const isActive = user.status === 'active';
+                      return (
+                        <tr key={user.id}>
+                          <td className="px-4 py-3">
+                            <span className={`badge ${isActive ? 'bg-success' : 'bg-warning'} bg-opacity-10 ${isActive ? 'text-success' : 'text-warning'}`}>
+                              <span className="rounded-circle d-inline-block me-1" style={{ width: 8, height: 8, backgroundColor: isActive ? '#22c55e' : '#f59e0b' }}></span>
+                              {isActive ? t('admin.active') : t('admin.idle')}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 fw-medium">{user.username}</td>
+                          <td className="px-4 py-3">{[user.firstName, user.lastName].filter(Boolean).join(' ') || '-'}</td>
+                          <td className="px-4 py-3">{user.email}</td>
+                          <td className="px-4 py-3">{user.department || '-'}</td>
+                          <td className="px-4 py-3">{user.roleName || '-'}</td>
+                          <td className="px-4 py-3">
+                            <span className="d-flex align-items-center gap-1">
+                              <FiClock size={14} className="text-muted" />
+                              {user.lastActivity ? new Date(user.lastActivity).toLocaleString() : '-'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {connectedUsers.users.length === 0 && (
+                  <div className="text-center py-5">
+                    <FiUsers size={48} className="text-muted mb-3" />
+                    <h5 className="text-muted">{t('admin.noConnectedUsers')}</h5>
+                    <p className="text-muted">{t('admin.noConnectedUsersDesc')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <small className="text-muted mt-2 d-block">
+            <FiRefreshCw size={12} className="me-1" />
+            {t('admin.autoRefreshNote')}
+          </small>
         </div>
       )}
 

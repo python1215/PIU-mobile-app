@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,6 +169,42 @@ public class AdministrationController {
             result.put("roleName", user.getRole() != null ? user.getRole().getName() : null);
             return ResponseEntity.ok(result);
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/connected-users")
+    public ResponseEntity<Map<String, Object>> getConnectedUsers() {
+        LocalDateTime fifteenMinutesAgo = LocalDateTime.now().minusMinutes(15);
+        List<User> recentUsers = userRepository.findByLastActivityAfterOrderByLastActivityDesc(fifteenMinutesAgo);
+
+        List<Map<String, Object>> connectedList = recentUsers.stream().map(user -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", user.getId());
+            map.put("username", user.getUsername());
+            map.put("firstName", user.getFirstName());
+            map.put("lastName", user.getLastName());
+            map.put("email", user.getEmail());
+            map.put("department", user.getDepartment());
+            map.put("roleName", user.getRole() != null ? user.getRole().getName() : null);
+            map.put("lastActivity", user.getLastActivity());
+            map.put("lastLogin", user.getLastLogin());
+
+            String status;
+            if (user.getLastActivity() != null) {
+                Duration since = Duration.between(user.getLastActivity(), LocalDateTime.now());
+                status = since.toMinutes() < 5 ? "active" : "idle";
+            } else {
+                status = "idle";
+            }
+            map.put("status", status);
+            return map;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("users", connectedList);
+        result.put("totalConnected", connectedList.size());
+        result.put("activeCount", connectedList.stream().filter(u -> "active".equals(u.get("status"))).count());
+        result.put("idleCount", connectedList.stream().filter(u -> "idle".equals(u.get("status"))).count());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/users/{userId}/permissions")

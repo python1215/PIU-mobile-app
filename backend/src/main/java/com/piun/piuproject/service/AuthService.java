@@ -72,7 +72,9 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setLastLogin(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        user.setLastLogin(now);
+        user.setLastActivity(now);
         userRepository.save(user);
 
         return buildAuthResponse(token, user);
