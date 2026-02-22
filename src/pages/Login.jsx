@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../services/api';
@@ -146,18 +146,6 @@ function Login() {
                   </button>
                 </form>
 
-                <div className="text-center mt-4">
-                  <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
-                    {t('auth.noAccount')}{' '}
-                    <Link 
-                      to="/register" 
-                      className="text-primary fw-semibold text-decoration-none"
-                      style={{ transition: 'color 0.2s' }}
-                    >
-                      {t('auth.signUp')}
-                    </Link>
-                  </p>
-                </div>
               </div>
             </div>
             

@@ -882,6 +882,18 @@
     "lastLoginTime": "Dernière Connexion",
     "noConnectedUsers": "Aucun utilisateur connecté",
     "noConnectedUsersDesc": "Aucun utilisateur n'a été actif au cours des 15 dernières minutes",
-    "autoRefreshNote": "Actualisation automatique toutes les 30 secondes"
+    "autoRefreshNote": "Actualisation automatique toutes les 30 secondes",
+    "registerUser": "Enregistrer un Utilisateur",
+    "firstName": "Prénom",
+    "lastName": "Nom de Famille",
+    "enterUsername": "Entrer le nom d'utilisateur",
+    "enterEmail": "Entrer l'adresse e-mail",
+    "password": "Mot de passe",
+    "enterPassword": "Entrer le mot de passe",
+    "enterDepartment": "Entrer le département",
+    "registering": "Enregistrement...",
+    "registerUserSuccess": "Utilisateur enregistré avec succès",
+    "registerUserFailed": "Échec de l'enregistrement de l'utilisateur",
+    "registerFieldsRequired": "Le nom d'utilisateur, l'e-mail et le mot de passe sont requis"
   }
 }

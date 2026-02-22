@@ -882,6 +882,18 @@
     "lastLoginTime": "Last Login",
     "noConnectedUsers": "No connected users",
     "noConnectedUsersDesc": "No users have been active in the last 15 minutes",
-    "autoRefreshNote": "Auto-refreshes every 30 seconds"
+    "autoRefreshNote": "Auto-refreshes every 30 seconds",
+    "registerUser": "Register User",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "enterUsername": "Enter username",
+    "enterEmail": "Enter email address",
+    "password": "Password",
+    "enterPassword": "Enter password",
+    "enterDepartment": "Enter department",
+    "registering": "Registering...",
+    "registerUserSuccess": "User registered successfully",
+    "registerUserFailed": "Failed to register user",
+    "registerFieldsRequired": "Username, email and password are required"
   }
 }

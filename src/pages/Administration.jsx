@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiUserPlus, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const MODULE_KEYS = [
@@ -34,6 +35,8 @@ function Administration() {
   const [editingRole, setEditingRole] = useState(null);
   const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: {} });
   const [expandedRoles, setExpandedRoles] = useState({});
+  const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
+  const [registerLoading, setRegisterLoading] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState({ users: [], totalConnected: 0, activeCount: 0, idleCount: 0 });
   const [connectedLoading, setConnectedLoading] = useState(false);
   const refreshIntervalRef = useRef(null);
@@ -156,6 +159,25 @@ function Administration() {
     setExpandedRoles(prev => ({ ...prev, [roleId]: !prev[roleId] }));
   }, []);
 
+  const handleRegisterUser = useCallback(async (e) => {
+    e.preventDefault();
+    if (!registerForm.username.trim() || !registerForm.email.trim() || !registerForm.password.trim()) {
+      toast.error(t('admin.registerFieldsRequired'));
+      return;
+    }
+    setRegisterLoading(true);
+    try {
+      await authAPI.register(registerForm);
+      toast.success(t('admin.registerUserSuccess'));
+      setRegisterForm({ username: '', email: '', password: '', firstName: '', lastName: '', department: '' });
+      loadUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.message || t('admin.registerUserFailed'));
+    } finally {
+      setRegisterLoading(false);
+    }
+  }, [registerForm, loadUsers, t]);
+
   const selectAll = useCallback((value) => {
     setRoleForm(prev => {
       const perms = {};
@@ -186,6 +208,11 @@ function Administration() {
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
             <FiUsers className="me-2" />{t('admin.userAssignment')}
+          </button>
+        </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'register' ? 'active' : ''}`} onClick={() => setActiveTab('register')}>
+            <FiUserPlus className="me-2" />{t('admin.registerUser')}
           </button>
         </li>
         <li className="nav-item">
@@ -336,6 +363,113 @@ function Administration() {
               {users.length === 0 && (
                 <p className="text-center text-muted py-5">{t('table.noData')}</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'register' && (
+        <div className="row justify-content-center">
+          <div className="col-12 col-lg-8 col-xl-6">
+            <div className="card border-0 shadow-sm">
+              <div className="card-header bg-white py-3">
+                <h5 className="mb-0 fw-bold d-flex align-items-center gap-2">
+                  <FiUserPlus className="text-primary" />
+                  {t('admin.registerUser')}
+                </h5>
+              </div>
+              <div className="card-body p-4">
+                <form onSubmit={handleRegisterUser}>
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('admin.firstName')}</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={registerForm.firstName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                        placeholder={t('admin.firstName')}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">{t('admin.lastName')}</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={registerForm.lastName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                        placeholder={t('admin.lastName')}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">{t('admin.username')} <span className="text-danger">*</span></label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={registerForm.username}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
+                      placeholder={t('admin.enterUsername')}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">{t('admin.email')} <span className="text-danger">*</span></label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={registerForm.email}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder={t('admin.enterEmail')}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">{t('admin.password')} <span className="text-danger">*</span></label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
+                      placeholder={t('admin.enterPassword')}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-medium">{t('admin.department')}</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={registerForm.department}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
+                      placeholder={t('admin.enterDepartment')}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={registerLoading}
+                    className="btn btn-primary d-flex align-items-center gap-2"
+                  >
+                    {registerLoading ? (
+                      <>
+                        <div className="spinner-border spinner-border-sm" role="status"></div>
+                        <span>{t('admin.registering')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiUserPlus size={18} />
+                        <span>{t('admin.registerUser')}</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
