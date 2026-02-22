@@ -360,7 +360,7 @@ function Administration() {
 
       {activeSection === 'register' && (
         <div className="row justify-content-center">
-          <div className="col-12 col-md-10 col-lg-7 col-xl-6">
+          <div className="col-12 col-lg-9">
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
                 <h6 className="mb-0 fw-bold d-flex align-items-center gap-1"><FiUserPlus size={16} className="text-primary" /> {t('admin.registerUser')}</h6>
@@ -370,66 +370,72 @@ function Administration() {
               </div>
               <div className="card-body p-3">
                 <form onSubmit={handleRegisterUser}>
-                  <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
-                    <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.personalInfo')}</h6>
-                    <div className="row g-2">
-                      <div className="col-6">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.firstName')}</label>
-                        <input type="text" className="form-control form-control-sm" value={registerForm.firstName} onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))} placeholder={t('admin.firstName')} />
+                  <div className="row g-2">
+                    <div className="col-md-6">
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+                        <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.personalInfo')}</h6>
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.firstName')}</label>
+                            <input type="text" className="form-control form-control-sm" value={registerForm.firstName} onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))} placeholder={t('admin.firstName')} />
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.lastName')}</label>
+                            <input type="text" className="form-control form-control-sm" value={registerForm.lastName} onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))} placeholder={t('admin.lastName')} />
+                          </div>
+                        </div>
                       </div>
-                      <div className="col-6">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.lastName')}</label>
-                        <input type="text" className="form-control form-control-sm" value={registerForm.lastName} onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))} placeholder={t('admin.lastName')} />
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+                        <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.accountDetails')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.username')} *</label>
+                            <input type="text" className="form-control form-control-sm" value={registerForm.username} onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))} placeholder={t('admin.enterUsername')} required />
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.email')} *</label>
+                            <input type="email" className="form-control form-control-sm" value={registerForm.email} onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))} placeholder={t('admin.enterEmail')} required />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.department')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.department')}</label>
+                            <input type="text" className="form-control form-control-sm" value={registerForm.department} onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))} placeholder={t('admin.enterDepartment')} />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
-                    <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.accountDetails')}</h6>
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.username')} *</label>
-                        <input type="text" className="form-control form-control-sm" value={registerForm.username} onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))} placeholder={t('admin.enterUsername')} required />
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.email')} *</label>
-                        <input type="email" className="form-control form-control-sm" value={registerForm.email} onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))} placeholder={t('admin.enterEmail')} required />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
-                    <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.securityInfo')}</h6>
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.password')} *</label>
-                        <input type="password" className="form-control form-control-sm" value={registerForm.password} onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))} placeholder={t('admin.enterPassword')} required minLength={6} />
-                        <small className="text-muted" style={{fontSize: '0.72rem'}}>{t('admin.passwordHint')}</small>
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.confirmPassword')} *</label>
-                        <input
-                          type="password"
-                          className={`form-control form-control-sm ${registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword ? 'is-invalid' : ''} ${registerForm.confirmPassword && registerForm.password === registerForm.confirmPassword ? 'is-valid' : ''}`}
-                          value={registerForm.confirmPassword}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          placeholder={t('admin.enterConfirmPassword')}
-                          required
-                          minLength={6}
-                        />
-                        {registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword && (
-                          <div className="invalid-feedback" style={{fontSize: '0.72rem'}}>{t('admin.passwordMismatch')}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
-                    <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.department')}</h6>
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.department')}</label>
-                        <input type="text" className="form-control form-control-sm" value={registerForm.department} onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))} placeholder={t('admin.enterDepartment')} />
+                    <div className="col-md-6">
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+                        <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.securityInfo')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.password')} *</label>
+                            <input type="password" className="form-control form-control-sm" value={registerForm.password} onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))} placeholder={t('admin.enterPassword')} required minLength={6} />
+                            <small className="text-muted" style={{fontSize: '0.72rem'}}>{t('admin.passwordHint')}</small>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.confirmPassword')} *</label>
+                            <input
+                              type="password"
+                              className={`form-control form-control-sm ${registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword ? 'is-invalid' : ''} ${registerForm.confirmPassword && registerForm.password === registerForm.confirmPassword ? 'is-valid' : ''}`}
+                              value={registerForm.confirmPassword}
+                              onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                              placeholder={t('admin.enterConfirmPassword')}
+                              required
+                              minLength={6}
+                            />
+                            {registerForm.confirmPassword && registerForm.password !== registerForm.confirmPassword && (
+                              <div className="invalid-feedback" style={{fontSize: '0.72rem'}}>{t('admin.passwordMismatch')}</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
