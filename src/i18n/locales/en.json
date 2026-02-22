@@ -868,6 +868,8 @@
     "superuser": "Superuser",
     "assignedRole": "Assigned Role",
     "noRole": "No Role (Full Access)",
+    "username": "Username",
+    "email": "Email",
     "allAccess": "Full Access (Superuser)",
     "connectedUsers": "Connected Users",
     "totalConnected": "Total Connected",

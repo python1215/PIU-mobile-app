@@ -868,6 +868,8 @@
     "superuser": "Superusuário",
     "assignedRole": "Função Atribuída",
     "noRole": "Sem Função (Acesso Total)",
+    "username": "Nome de Usuário",
+    "email": "E-mail",
     "allAccess": "Acesso Total (Superusuário)",
     "connectedUsers": "Usuários Conectados",
     "totalConnected": "Total Conectados",

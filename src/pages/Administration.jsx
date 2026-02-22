@@ -290,8 +290,8 @@ function Administration() {
               <table className="table table-hover mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="px-4 py-3">{t('common.username')}</th>
-                    <th className="px-4 py-3">{t('common.email')}</th>
+                    <th className="px-4 py-3">{t('admin.username')}</th>
+                    <th className="px-4 py-3">{t('admin.email')}</th>
                     <th className="px-4 py-3">{t('admin.fullName')}</th>
                     <th className="px-4 py-3">{t('admin.department')}</th>
                     <th className="px-4 py-3">{t('admin.superuser')}</th>
@@ -386,9 +386,9 @@ function Administration() {
                   <thead className="table-light">
                     <tr>
                       <th className="px-4 py-3">{t('admin.statusLabel')}</th>
-                      <th className="px-4 py-3">{t('common.username')}</th>
+                      <th className="px-4 py-3">{t('admin.username')}</th>
                       <th className="px-4 py-3">{t('admin.fullName')}</th>
-                      <th className="px-4 py-3">{t('common.email')}</th>
+                      <th className="px-4 py-3">{t('admin.email')}</th>
                       <th className="px-4 py-3">{t('admin.department')}</th>
                       <th className="px-4 py-3">{t('admin.assignedRole')}</th>
                       <th className="px-4 py-3">{t('admin.lastActivityTime')}</th>
