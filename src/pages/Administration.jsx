@@ -466,19 +466,6 @@ function Administration() {
                           placeholder={t('admin.enterDepartment')}
                         />
                       </div>
-                      <div className="col-12">
-                        <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.assignedRole')}</label>
-                        <select
-                          className="form-select form-select-sm"
-                          value={registerForm.roleId || ''}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, roleId: e.target.value }))}
-                        >
-                          <option value="">{t('admin.noRole')}</option>
-                          {roles.map(role => (
-                            <option key={role.id} value={role.id}>{role.name}</option>
-                          ))}
-                        </select>
-                      </div>
                     </div>
                   </div>
                 </div>
