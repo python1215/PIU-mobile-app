@@ -27,7 +27,7 @@ const MODULE_LABEL_MAP = {
 
 function Administration() {
   const { t } = useTranslation();
-  const [openAccordion, setOpenAccordion] = useState('roles');
+  const [openAccordion, setOpenAccordion] = useState(null);
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -201,21 +201,27 @@ function Administration() {
         <p className="text-muted mb-0">{t('admin.subtitle')}</p>
       </div>
 
-      <div className="accordion" id="adminAccordion">
+      <div>
 
-        <div className="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
-          <h2 className="accordion-header">
-            <button
-              className={`accordion-button ${openAccordion !== 'roles' ? 'collapsed' : ''} fw-bold`}
-              type="button"
-              onClick={() => toggleAccordion('roles')}
-            >
-              <FiShield className="me-2" />{t('admin.roles')}
-              <span className="badge bg-primary bg-opacity-10 text-primary ms-2">{roles.length}</span>
-            </button>
-          </h2>
-          <div className={`accordion-collapse collapse ${openAccordion === 'roles' ? 'show' : ''}`}>
-            <div className="accordion-body">
+        <div className="card border-0 shadow-sm mb-3 rounded-3">
+          <div
+            className="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 rounded-3"
+            style={{ cursor: 'pointer' }}
+            onClick={() => toggleAccordion('roles')}
+          >
+            <div className="d-flex align-items-center gap-2">
+              <FiShield size={18} className="text-muted" />
+              <span className="fw-bold">{t('admin.roles')}</span>
+              <span className="badge bg-primary bg-opacity-10 text-primary ms-1">{roles.length}</span>
+            </div>
+            <FiChevronDown
+              size={18}
+              className="text-muted"
+              style={{ transition: 'transform 0.3s', transform: openAccordion === 'roles' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </div>
+          {openAccordion === 'roles' && (
+            <div className="card-body border-top px-4 py-3">
               <div className="d-flex justify-content-end mb-3">
                 <button className="btn btn-primary" onClick={openNewRole}>
                   <FiPlus className="me-2" />{t('admin.addRole')}
@@ -295,22 +301,28 @@ function Administration() {
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
-          <h2 className="accordion-header">
-            <button
-              className={`accordion-button ${openAccordion !== 'users' ? 'collapsed' : ''} fw-bold`}
-              type="button"
-              onClick={() => toggleAccordion('users')}
-            >
-              <FiUsers className="me-2" />{t('admin.userAssignment')}
-              <span className="badge bg-primary bg-opacity-10 text-primary ms-2">{users.length}</span>
-            </button>
-          </h2>
-          <div className={`accordion-collapse collapse ${openAccordion === 'users' ? 'show' : ''}`}>
-            <div className="accordion-body p-0">
+        <div className="card border-0 shadow-sm mb-3 rounded-3">
+          <div
+            className="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 rounded-3"
+            style={{ cursor: 'pointer' }}
+            onClick={() => toggleAccordion('users')}
+          >
+            <div className="d-flex align-items-center gap-2">
+              <FiUsers size={18} className="text-muted" />
+              <span className="fw-bold">{t('admin.userAssignment')}</span>
+              <span className="badge bg-primary bg-opacity-10 text-primary ms-1">{users.length}</span>
+            </div>
+            <FiChevronDown
+              size={18}
+              className="text-muted"
+              style={{ transition: 'transform 0.3s', transform: openAccordion === 'users' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </div>
+          {openAccordion === 'users' && (
+            <div className="card-body border-top p-0">
               <div className="table-responsive">
                 <table className="table table-hover mb-0">
                   <thead className="table-light">
@@ -363,21 +375,27 @@ function Administration() {
                 )}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
-          <h2 className="accordion-header">
-            <button
-              className={`accordion-button ${openAccordion !== 'register' ? 'collapsed' : ''} fw-bold`}
-              type="button"
-              onClick={() => toggleAccordion('register')}
-            >
-              <FiUserPlus className="me-2" />{t('admin.registerUser')}
-            </button>
-          </h2>
-          <div className={`accordion-collapse collapse ${openAccordion === 'register' ? 'show' : ''}`}>
-            <div className="accordion-body">
+        <div className="card border-0 shadow-sm mb-3 rounded-3">
+          <div
+            className="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 rounded-3"
+            style={{ cursor: 'pointer' }}
+            onClick={() => toggleAccordion('register')}
+          >
+            <div className="d-flex align-items-center gap-2">
+              <FiUserPlus size={18} className="text-muted" />
+              <span className="fw-bold">{t('admin.registerUser')}</span>
+            </div>
+            <FiChevronDown
+              size={18}
+              className="text-muted"
+              style={{ transition: 'transform 0.3s', transform: openAccordion === 'register' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </div>
+          {openAccordion === 'register' && (
+            <div className="card-body border-top px-4 py-3">
               <form onSubmit={handleRegisterUser}>
                 <div className="row g-3">
                   <div className="col-md-6">
@@ -473,24 +491,30 @@ function Administration() {
                 </div>
               </form>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
-          <h2 className="accordion-header">
-            <button
-              className={`accordion-button ${openAccordion !== 'connected' ? 'collapsed' : ''} fw-bold`}
-              type="button"
-              onClick={() => toggleAccordion('connected')}
-            >
-              <FiActivity className="me-2" />{t('admin.connectedUsers')}
+        <div className="card border-0 shadow-sm mb-3 rounded-3">
+          <div
+            className="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 rounded-3"
+            style={{ cursor: 'pointer' }}
+            onClick={() => toggleAccordion('connected')}
+          >
+            <div className="d-flex align-items-center gap-2">
+              <FiActivity size={18} className="text-muted" />
+              <span className="fw-bold">{t('admin.connectedUsers')}</span>
               {connectedUsers.totalConnected > 0 && (
-                <span className="badge bg-success ms-2">{connectedUsers.totalConnected}</span>
+                <span className="badge bg-success ms-1">{connectedUsers.totalConnected}</span>
               )}
-            </button>
-          </h2>
-          <div className={`accordion-collapse collapse ${openAccordion === 'connected' ? 'show' : ''}`}>
-            <div className="accordion-body">
+            </div>
+            <FiChevronDown
+              size={18}
+              className="text-muted"
+              style={{ transition: 'transform 0.3s', transform: openAccordion === 'connected' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </div>
+          {openAccordion === 'connected' && (
+            <div className="card-body border-top px-4 py-3">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div className="d-flex gap-3 flex-wrap">
                   <div className="card border shadow-sm px-3 py-2">
@@ -584,7 +608,7 @@ function Administration() {
                 {t('admin.autoRefreshNote')}
               </small>
             </div>
-          </div>
+          )}
         </div>
 
       </div>
