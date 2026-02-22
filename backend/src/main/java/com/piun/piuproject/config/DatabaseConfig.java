@@ -34,11 +34,12 @@ public class DatabaseConfig {
         if (pgHost != null && !pgHost.isEmpty()) {
             String port = (pgPort != null && !pgPort.isEmpty()) ? pgPort : "5432";
             String db = (pgDatabase != null && !pgDatabase.isEmpty()) ? pgDatabase : "neondb";
+            String sslMode = pgHost.contains(".neon.tech") ? "require" : "prefer";
             jdbcUrl = "jdbc:postgresql://" + pgHost + ":" + port + "/" + db +
-                      "?sslmode=require&connectTimeout=5&socketTimeout=10&loginTimeout=5";
+                      "?sslmode=" + sslMode + "&connectTimeout=5&socketTimeout=10&loginTimeout=5";
             username = pgUser != null ? pgUser : "postgres";
             password = pgPassword != null ? pgPassword : "";
-            logger.info("Database: configured with PGHOST={}", pgHost);
+            logger.info("Database: configured with PGHOST={} sslmode={}", pgHost, sslMode);
         } else if (databaseUrl != null && !databaseUrl.isEmpty()) {
             try {
                 URI dbUri = new URI(databaseUrl);
