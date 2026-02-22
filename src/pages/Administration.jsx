@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiUserPlus, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw, FiUser, FiMail, FiLock, FiBriefcase } from 'react-icons/fi';
 import { authAPI } from '../services/api';
@@ -29,6 +29,7 @@ const MODULE_LABEL_MAP = {
 function Administration() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const activeSection = location.pathname.split('/').pop() || 'roles';
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
@@ -358,33 +359,27 @@ function Administration() {
       )}
 
       {activeSection === 'register' && (
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-3">
-            <form onSubmit={handleRegisterUser}>
-              <div className="row g-2">
-                <div className="col-md-6">
+        <div className="row">
+          <div className="col-12 col-md-6 col-lg-5 col-xl-4">
+            <div className="card border-0 shadow-sm">
+              <div className="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
+                <h6 className="mb-0 fw-bold d-flex align-items-center gap-1"><FiUserPlus size={16} className="text-primary" /> {t('admin.registerUser')}</h6>
+                <button type="button" className="btn btn-sm btn-light rounded-circle p-1" onClick={() => navigate('/administration/roles')} style={{lineHeight: 1}}>
+                  <FiX size={16} />
+                </button>
+              </div>
+              <div className="card-body p-3">
+                <form onSubmit={handleRegisterUser}>
                   <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
                     <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.personalInfo')}</h6>
                     <div className="row g-2">
                       <div className="col-6">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.firstName')}</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={registerForm.firstName}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
-                          placeholder={t('admin.firstName')}
-                        />
+                        <input type="text" className="form-control form-control-sm" value={registerForm.firstName} onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))} placeholder={t('admin.firstName')} />
                       </div>
                       <div className="col-6">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.lastName')}</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={registerForm.lastName}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
-                          placeholder={t('admin.lastName')}
-                        />
+                        <input type="text" className="form-control form-control-sm" value={registerForm.lastName} onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))} placeholder={t('admin.lastName')} />
                       </div>
                     </div>
                   </div>
@@ -394,45 +389,21 @@ function Administration() {
                     <div className="row g-2">
                       <div className="col-12">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.username')} *</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={registerForm.username}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
-                          placeholder={t('admin.enterUsername')}
-                          required
-                        />
+                        <input type="text" className="form-control form-control-sm" value={registerForm.username} onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))} placeholder={t('admin.enterUsername')} required />
                       </div>
                       <div className="col-12">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.email')} *</label>
-                        <input
-                          type="email"
-                          className="form-control form-control-sm"
-                          value={registerForm.email}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
-                          placeholder={t('admin.enterEmail')}
-                          required
-                        />
+                        <input type="email" className="form-control form-control-sm" value={registerForm.email} onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))} placeholder={t('admin.enterEmail')} required />
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="col-md-6">
                   <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
-                    <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.securityInfo') || 'Security'}</h6>
+                    <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.securityInfo')}</h6>
                     <div className="row g-2">
                       <div className="col-12">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.password')} *</label>
-                        <input
-                          type="password"
-                          className="form-control form-control-sm"
-                          value={registerForm.password}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
-                          placeholder={t('admin.enterPassword')}
-                          required
-                          minLength={6}
-                        />
+                        <input type="password" className="form-control form-control-sm" value={registerForm.password} onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))} placeholder={t('admin.enterPassword')} required minLength={6} />
                         <small className="text-muted" style={{fontSize: '0.72rem'}}>{t('admin.passwordHint')}</small>
                       </div>
                       <div className="col-12">
@@ -458,46 +429,26 @@ function Administration() {
                     <div className="row g-2">
                       <div className="col-12">
                         <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.department')}</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={registerForm.department}
-                          onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))}
-                          placeholder={t('admin.enterDepartment')}
-                        />
+                        <input type="text" className="form-control form-control-sm" value={registerForm.department} onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))} placeholder={t('admin.enterDepartment')} />
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-secondary"
-                  onClick={() => setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', firstName: '', lastName: '', department: '', roleId: '' })}
-                >
-                  {t('common.clear')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={registerLoading}
-                  className="btn btn-sm btn-primary d-flex align-items-center gap-1"
-                >
-                  {registerLoading ? (
-                    <>
-                      <div className="spinner-border spinner-border-sm" role="status"></div>
-                      <span>{t('admin.registering')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <FiUserPlus size={14} />
-                      <span>{t('admin.registerUser')}</span>
-                    </>
-                  )}
-                </button>
+                  <div className="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', firstName: '', lastName: '', department: '', roleId: '' })}>
+                      {t('common.clear')}
+                    </button>
+                    <button type="submit" disabled={registerLoading} className="btn btn-sm btn-primary d-flex align-items-center gap-1">
+                      {registerLoading ? (
+                        <><div className="spinner-border spinner-border-sm" role="status"></div><span>{t('admin.registering')}</span></>
+                      ) : (
+                        <><FiUserPlus size={14} /><span>{t('admin.registerUser')}</span></>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
