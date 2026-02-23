@@ -403,6 +403,16 @@ function Administration() {
                     </div>
 
                     <div className="col-md-6">
+                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.department')}</h6>
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.department')}</label>
+                            <input type="text" className="form-control form-control-sm" value={registerForm.department} onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))} placeholder={t('admin.enterDepartment')} />
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
                         <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.securityInfo')}</h6>
                         <div className="row g-2">
@@ -430,17 +440,6 @@ function Administration() {
                       </div>
                     </div>
 
-                    <div className="col-12">
-                      <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
-                        <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('admin.department')}</h6>
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('admin.department')}</label>
-                            <input type="text" className="form-control form-control-sm" value={registerForm.department} onChange={(e) => setRegisterForm(prev => ({ ...prev, department: e.target.value }))} placeholder={t('admin.enterDepartment')} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
