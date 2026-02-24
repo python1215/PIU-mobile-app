@@ -49,7 +49,8 @@
     "success": "Senha alterada com sucesso!",
     "error": "Falha ao alterar a senha",
     "changing": "Alterando...",
-    "submit": "Alterar Senha"
+    "submit": "Alterar Senha",
+    "sessionExpired": "Sessão expirada - por favor, faça login novamente"
   },
   "common": {
     "loading": "Carregando...",

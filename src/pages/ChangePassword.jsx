@@ -36,6 +36,12 @@ export default function ChangePassword() {
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       navigate('/');
     } catch (err) {
+      if (err.response?.status === 401) {
+        toast.error(t('changePassword.sessionExpired') || 'Session expired - please log in again');
+        useAuthStore.getState().logout();
+        navigate('/login');
+        return;
+      }
       const msg = err.response?.data?.error || t('changePassword.error');
       toast.error(msg);
     } finally {

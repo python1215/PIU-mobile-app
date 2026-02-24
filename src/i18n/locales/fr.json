@@ -49,7 +49,8 @@
     "success": "Mot de passe changé avec succès !",
     "error": "Échec du changement de mot de passe",
     "changing": "Changement...",
-    "submit": "Changer le mot de passe"
+    "submit": "Changer le mot de passe",
+    "sessionExpired": "Session expirée - veuillez vous reconnecter"
   },
   "common": {
     "loading": "Chargement...",
