@@ -83,6 +83,7 @@ function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [adminExpanded, setAdminExpanded] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const isAdminPath = location.pathname.startsWith("/administration");
 
@@ -233,38 +234,47 @@ function Layout() {
           )}
 
           <div
-            className={`d-flex align-items-center ${sidebarOpen ? "gap-3" : "justify-content-center"}`}
+            className={`d-flex align-items-center cursor-pointer ${sidebarOpen ? "gap-3" : "justify-content-center"}`}
+            onClick={() => setUserMenuOpen(prev => !prev)}
+            style={{ cursor: 'pointer' }}
           >
             <UserAvatar username={user?.username} />
             {sidebarOpen && (
-              <div className="flex-grow-1 overflow-hidden">
-                <p className="mb-0 fw-medium text-dark text-truncate">
-                  {user?.username}
-                </p>
-                <p className="mb-0 small text-muted text-truncate">
-                  {user?.email}
-                </p>
-              </div>
+              <>
+                <div className="flex-grow-1 overflow-hidden">
+                  <p className="mb-0 fw-medium text-dark text-truncate">
+                    {user?.username}
+                  </p>
+                  <p className="mb-0 small text-muted text-truncate">
+                    {user?.email}
+                  </p>
+                </div>
+                <FiChevronDown size={14} className="text-muted" style={{ transition: 'transform 0.2s', transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+              </>
             )}
           </div>
-          <Link
-            to="/change-password"
-            className={`btn btn-outline-secondary w-100 mt-3 d-flex align-items-center gap-2 ${
-              sidebarOpen ? "" : "justify-content-center"
-            }`}
-          >
-            <FiLock size={18} />
-            {sidebarOpen && <span>{t("changePassword.title")}</span>}
-          </Link>
-          <button
-            onClick={handleLogout}
-            className={`btn btn-outline-danger w-100 mt-2 d-flex align-items-center gap-2 ${
-              sidebarOpen ? "" : "justify-content-center"
-            }`}
-          >
-            <FiLogOut size={18} />
-            {sidebarOpen && <span>{t("auth.logout")}</span>}
-          </button>
+          {userMenuOpen && (
+            <>
+              <Link
+                to="/change-password"
+                className={`btn btn-outline-secondary w-100 mt-2 d-flex align-items-center gap-2 ${
+                  sidebarOpen ? "" : "justify-content-center"
+                }`}
+              >
+                <FiLock size={18} />
+                {sidebarOpen && <span>{t("changePassword.title")}</span>}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className={`btn btn-outline-danger w-100 mt-2 d-flex align-items-center gap-2 ${
+                  sidebarOpen ? "" : "justify-content-center"
+                }`}
+              >
+                <FiLogOut size={18} />
+                {sidebarOpen && <span>{t("auth.logout")}</span>}
+              </button>
+            </>
+          )}
         </div>
       </aside>
 
