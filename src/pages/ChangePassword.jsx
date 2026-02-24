@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FiLock, FiX, FiCheck } from 'react-icons/fi';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
+import axios from 'axios';
 
 export default function ChangePassword() {
   const { t } = useTranslation();
@@ -28,10 +28,10 @@ export default function ChangePassword() {
     }
     setLoading(true);
     try {
-      await axios.post('/api/auth/change-password', {
+      await axios.post('/api/user/change-password', {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      }, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } });
       toast.success(t('changePassword.success'));
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       navigate('/');

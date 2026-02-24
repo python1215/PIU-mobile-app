@@ -19,6 +19,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SetupController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SocialEnvironmentalController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SpaController.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/UserController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/AuthRequest.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/AuthResponse.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/ChangePasswordRequest.java
