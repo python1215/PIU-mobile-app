@@ -100,6 +100,7 @@ com/piun/piuproject/model/Donor.class
 com/piun/piuproject/model/IndicatorType.class
 com/piun/piuproject/model/KPIForContract.class
 com/piun/piuproject/dto/AuthResponse.class
+com/piun/piuproject/dto/ChangePasswordRequest.class
 com/piun/piuproject/repository/NatureOfSettlementRepository.class
 com/piun/piuproject/repository/CurrencyRepository.class
 com/piun/piuproject/controller/HealthController.class

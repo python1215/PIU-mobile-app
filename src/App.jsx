@@ -16,6 +16,7 @@ import SocialEnvironmental from './pages/SocialEnvironmental';
 import Documentation from './pages/Documentation';
 import ProjectMap from './pages/ProjectMap';
 import Administration from './pages/Administration';
+import ChangePassword from './pages/ChangePassword';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -56,6 +57,7 @@ function App() {
         <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
         <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />
         <Route path="map" element={<ModuleGuard moduleKey="projectMap"><ProjectMap /></ModuleGuard>} />
+        <Route path="change-password" element={<ChangePassword />} />
         <Route path="administration" element={<ModuleGuard moduleKey="administration"><Administration /></ModuleGuard>}>
           <Route index element={<Navigate to="/administration/roles" replace />} />
           <Route path="roles" element={null} />

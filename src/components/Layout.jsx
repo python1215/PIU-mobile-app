@@ -247,9 +247,18 @@ function Layout() {
               </div>
             )}
           </div>
+          <Link
+            to="/change-password"
+            className={`btn btn-outline-secondary w-100 mt-3 d-flex align-items-center gap-2 ${
+              sidebarOpen ? "" : "justify-content-center"
+            }`}
+          >
+            <FiLock size={18} />
+            {sidebarOpen && <span>{t("changePassword.title")}</span>}
+          </Link>
           <button
             onClick={handleLogout}
-            className={`btn btn-outline-danger w-100 mt-3 d-flex align-items-center gap-2 ${
+            className={`btn btn-outline-danger w-100 mt-2 d-flex align-items-center gap-2 ${
               sidebarOpen ? "" : "justify-content-center"
             }`}
           >

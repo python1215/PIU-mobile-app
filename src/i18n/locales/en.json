@@ -33,6 +33,24 @@
     "registerSuccess": "Account created successfully!",
     "registerFailed": "Registration failed"
   },
+  "changePassword": {
+    "title": "Change Password",
+    "currentSection": "Current Password",
+    "newSection": "New Password",
+    "currentPassword": "Current Password",
+    "enterCurrentPassword": "Enter your current password",
+    "newPassword": "New Password",
+    "enterNewPassword": "Enter your new password",
+    "confirmNewPassword": "Confirm New Password",
+    "enterConfirmNewPassword": "Confirm your new password",
+    "hint": "Password must be at least 6 characters",
+    "mismatch": "Passwords do not match",
+    "minLength": "Password must be at least 6 characters",
+    "success": "Password changed successfully!",
+    "error": "Failed to change password",
+    "changing": "Changing...",
+    "submit": "Change Password"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",

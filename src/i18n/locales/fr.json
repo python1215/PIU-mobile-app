@@ -33,6 +33,24 @@
     "registerSuccess": "Compte créé avec succès !",
     "registerFailed": "Échec de l'inscription"
   },
+  "changePassword": {
+    "title": "Changer le mot de passe",
+    "currentSection": "Mot de passe actuel",
+    "newSection": "Nouveau mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "enterCurrentPassword": "Entrez votre mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "enterNewPassword": "Entrez votre nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "enterConfirmNewPassword": "Confirmez votre nouveau mot de passe",
+    "hint": "Le mot de passe doit contenir au moins 6 caractères",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "minLength": "Le mot de passe doit contenir au moins 6 caractères",
+    "success": "Mot de passe changé avec succès !",
+    "error": "Échec du changement de mot de passe",
+    "changing": "Changement...",
+    "submit": "Changer le mot de passe"
+  },
   "common": {
     "loading": "Chargement...",
     "save": "Enregistrer",

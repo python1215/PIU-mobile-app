@@ -33,6 +33,24 @@
     "registerSuccess": "Conta criada com sucesso!",
     "registerFailed": "Falha no registro"
   },
+  "changePassword": {
+    "title": "Alterar Senha",
+    "currentSection": "Senha Atual",
+    "newSection": "Nova Senha",
+    "currentPassword": "Senha Atual",
+    "enterCurrentPassword": "Digite sua senha atual",
+    "newPassword": "Nova Senha",
+    "enterNewPassword": "Digite sua nova senha",
+    "confirmNewPassword": "Confirmar Nova Senha",
+    "enterConfirmNewPassword": "Confirme sua nova senha",
+    "hint": "A senha deve ter pelo menos 6 caracteres",
+    "mismatch": "As senhas não coincidem",
+    "minLength": "A senha deve ter pelo menos 6 caracteres",
+    "success": "Senha alterada com sucesso!",
+    "error": "Falha ao alterar a senha",
+    "changing": "Alterando...",
+    "submit": "Alterar Senha"
+  },
   "common": {
     "loading": "Carregando...",
     "save": "Salvar",

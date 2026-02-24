@@ -2,6 +2,7 @@ package com.piun.piuproject.service;
 
 import com.piun.piuproject.dto.AuthRequest;
 import com.piun.piuproject.dto.AuthResponse;
+import com.piun.piuproject.dto.ChangePasswordRequest;
 import com.piun.piuproject.dto.RegisterRequest;
 import com.piun.piuproject.model.User;
 import com.piun.piuproject.repository.UserRepository;
@@ -85,6 +86,19 @@ public class AuthService {
         Long roleId = user.getRole() != null ? user.getRole().getId() : null;
         String roleName = user.getRole() != null ? user.getRole().getName() : null;
         return new AuthResponse(token, user.getUsername(), user.getEmail(), roleId, roleName, user.isSuperuser(), permissions);
+    }
+
+    @Transactional
+    public void changePassword(String username, ChangePasswordRequest request) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     private Map<String, Boolean> buildPermissions(User user) {
