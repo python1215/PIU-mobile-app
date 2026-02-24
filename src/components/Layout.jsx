@@ -163,13 +163,15 @@ function Layout() {
       if (isMobile) {
         return {
           width: "280px",
-          minHeight: "100vh",
+          height: "100vh",
           position: "fixed",
           top: 0,
           left: 0,
           zIndex: 1040,
           transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.3s ease",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
         };
       }
       return {
