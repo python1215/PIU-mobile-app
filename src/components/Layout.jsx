@@ -45,12 +45,13 @@ const adminSubItems = [
   { path: "/administration/connected", icon: FiActivity, labelKey: "admin.connectedUsers" },
 ];
 
-const NavItem = memo(function NavItem({ item, isActive, sidebarOpen, t }) {
+const NavItem = memo(function NavItem({ item, isActive, sidebarOpen, t, onClick }) {
   const Icon = item.icon;
   return (
     <li className="nav-item">
       <Link
         to={item.path}
+        onClick={onClick}
         className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
           isActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
         }`}
@@ -74,6 +75,16 @@ const UserAvatar = memo(function UserAvatar({ username }) {
   );
 });
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile;
+}
+
 function Layout() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
@@ -81,11 +92,24 @@ function Layout() {
   const permissions = useAuthStore((state) => state.permissions);
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [adminExpanded, setAdminExpanded] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const isAdminPath = location.pathname.startsWith("/administration");
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isMobile]);
+
+  const closeSidebarOnMobile = useCallback(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [isMobile]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -126,20 +150,35 @@ function Layout() {
           key={item.path}
           item={item}
           isActive={location.pathname === item.path}
-          sidebarOpen={sidebarOpen}
+          sidebarOpen={sidebarOpen || isMobile}
           t={t}
+          onClick={closeSidebarOnMobile}
         />
       )),
-    [filteredNavItems, location.pathname, sidebarOpen, t],
+    [filteredNavItems, location.pathname, sidebarOpen, isMobile, t, closeSidebarOnMobile],
   );
 
   const sidebarStyle = useMemo(
-    () => ({
-      width: sidebarOpen ? "280px" : "80px",
-      transition: "width 0.3s ease",
-      minHeight: "100vh",
-    }),
-    [sidebarOpen],
+    () => {
+      if (isMobile) {
+        return {
+          width: "280px",
+          minHeight: "100vh",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 1040,
+          transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.3s ease",
+        };
+      }
+      return {
+        width: sidebarOpen ? "280px" : "80px",
+        transition: "width 0.3s ease",
+        minHeight: "100vh",
+      };
+    },
+    [sidebarOpen, isMobile],
   );
 
   useEffect(() => {
@@ -147,16 +186,38 @@ function Layout() {
   }, [isAdminPath]);
 
   const adminIsExpanded = adminExpanded;
+  const showLabels = sidebarOpen || isMobile;
 
   return (
     <div className="d-flex vh-100 bg-light">
+      {isMobile && sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {isMobile && (
+        <div className="mobile-header bg-white shadow-sm d-flex align-items-center justify-content-between px-3" style={{ height: "56px", position: "fixed", top: 0, left: 0, right: 0, zIndex: 1030 }}>
+          <button
+            onClick={toggleSidebar}
+            className="btn btn-light btn-sm rounded-circle"
+            style={{ width: "40px", height: "40px" }}
+          >
+            <FiMenu size={20} />
+          </button>
+          <h6 className="mb-0 text-primary fw-bold">PIU M&E</h6>
+          <UserAvatar username={user?.username} />
+        </div>
+      )}
+
       <aside
         className={`bg-white shadow-sm d-flex flex-column ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
         style={sidebarStyle}
       >
         <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
-          {sidebarOpen && (
-            <h4 className="mb-0 text-primary fw-bold">
+          {showLabels && (
+            <h4 className="mb-0 text-primary fw-bold" style={{ fontSize: isMobile ? "1rem" : undefined }}>
               PIU DIGITAL M&E SYSTEM{" "}
             </h4>
           )}
@@ -165,7 +226,7 @@ function Layout() {
             className="btn btn-light btn-sm rounded-circle"
             style={{ width: "40px", height: "40px" }}
           >
-            {sidebarOpen ? <FiX size={18} /> : <FiMenu size={18} />}
+            {sidebarOpen || isMobile ? <FiX size={18} /> : <FiMenu size={18} />}
           </button>
         </div>
 
@@ -184,7 +245,7 @@ function Layout() {
                     style={{ transition: "all 0.2s", whiteSpace: "nowrap", textAlign: "left" }}
                   >
                     <FiLock size={20} />
-                    {sidebarOpen && (
+                    {showLabels && (
                       <>
                         <span className="fw-medium flex-grow-1">{t("nav.administration")}</span>
                         <FiChevronDown
@@ -199,7 +260,7 @@ function Layout() {
                   </button>
                 </li>
 
-                {sidebarOpen && adminIsExpanded && (
+                {showLabels && adminIsExpanded && (
                   <div style={{ paddingLeft: "20px" }}>
                     {adminSubItems.map((sub) => {
                       const SubIcon = sub.icon;
@@ -208,6 +269,7 @@ function Layout() {
                         <li key={sub.path} className="nav-item">
                           <Link
                             to={sub.path}
+                            onClick={closeSidebarOnMobile}
                             className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
                               isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
                             }`}
@@ -227,19 +289,19 @@ function Layout() {
         </nav>
 
         <div className="p-3 border-top">
-          {sidebarOpen && (
+          {showLabels && (
             <div className="mb-3">
               <LanguageSelector />
             </div>
           )}
 
           <div
-            className={`d-flex align-items-center cursor-pointer ${sidebarOpen ? "gap-3" : "justify-content-center"}`}
+            className={`d-flex align-items-center cursor-pointer ${showLabels ? "gap-3" : "justify-content-center"}`}
             onClick={() => setUserMenuOpen(prev => !prev)}
             style={{ cursor: 'pointer' }}
           >
             <UserAvatar username={user?.username} />
-            {sidebarOpen && (
+            {showLabels && (
               <>
                 <div className="flex-grow-1 overflow-hidden">
                   <p className="mb-0 fw-medium text-dark text-truncate">
@@ -257,29 +319,30 @@ function Layout() {
             <>
               <Link
                 to="/change-password"
+                onClick={closeSidebarOnMobile}
                 className={`btn btn-outline-secondary w-100 mt-2 d-flex align-items-center gap-2 ${
-                  sidebarOpen ? "" : "justify-content-center"
+                  showLabels ? "" : "justify-content-center"
                 }`}
               >
                 <FiLock size={18} />
-                {sidebarOpen && <span>{t("changePassword.title")}</span>}
+                {showLabels && <span>{t("changePassword.title")}</span>}
               </Link>
               <button
                 onClick={handleLogout}
                 className={`btn btn-outline-danger w-100 mt-2 d-flex align-items-center gap-2 ${
-                  sidebarOpen ? "" : "justify-content-center"
+                  showLabels ? "" : "justify-content-center"
                 }`}
               >
                 <FiLogOut size={18} />
-                {sidebarOpen && <span>{t("auth.logout")}</span>}
+                {showLabels && <span>{t("auth.logout")}</span>}
               </button>
             </>
           )}
         </div>
       </aside>
 
-      <main className="flex-grow-1 overflow-auto">
-        <div className="container-fluid p-4">
+      <main className={`flex-grow-1 overflow-auto ${isMobile ? "mobile-main" : ""}`}>
+        <div className={`container-fluid ${isMobile ? "p-2 pt-3" : "p-4"}`}>
           <Outlet />
         </div>
       </main>

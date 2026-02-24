@@ -45,7 +45,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const StatCard = memo(function StatCard({ icon: Icon, label, value, color, bgColor }) {
   return (
-    <div className="card border-0 shadow-sm" style={{ minWidth: '160px', maxWidth: '200px' }}>
+    <div className="card border-0 shadow-sm stat-card" style={{ flex: '1 1 140px', minWidth: '140px' }}>
       <div className="card-body d-flex align-items-center gap-2 py-2 px-3">
         <div 
           className={`rounded-2 d-flex align-items-center justify-content-center ${bgColor}`}
