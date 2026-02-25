@@ -3,7 +3,10 @@ echo "Cleaning workspace for deployment..."
 rm -rf .git
 rm -rf node_modules
 rm -rf .pythonlibs
+rm -rf .cache
+rm -rf .config/.vscode-server
 rm -rf .local/state
+rm -rf .upm
 rm -rf __pycache__
 rm -rf backend/src
 rm -rf src
@@ -12,15 +15,17 @@ rm -rf frontend
 rm -rf attached_assets
 rm -rf uploads
 rm -rf static
-rm -rf vite.config.mjs
-rm -rf tailwind.config.js
-rm -rf postcss.config.js
-rm -rf index.html
-rm -rf pyproject.toml
-rm -rf uv.lock
-rm -rf package-lock.json
-rm -rf package.json
+rm -f vite.config.mjs
+rm -f tailwind.config.js
+rm -f postcss.config.js
+rm -f index.html
+rm -f pyproject.toml
+rm -f uv.lock
+rm -f package-lock.json
+rm -f package.json
 rm -f app.py
 rm -f models.py
 rm -f main.py
+rm -f gunicorn_config.py
+rm -f gunicorn.conf.py
 echo "Build cleanup complete"
