@@ -6,7 +6,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "-c", "rm -rf .git node_modules .local/state __pycache__ backend/src src frontend attached_assets uploads vite.config.mjs tailwind.config.js postcss.config.js sed* && echo 'Build cleaned'"]
+build = ["bash", "deploy_build.sh"]
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "--workers", "1", "--timeout", "120", "app:app"]
 publicDir = "dist"
 
