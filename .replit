@@ -7,7 +7,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 [deployment]
 deploymentTarget = "autoscale"
 build = ["bash", "-c", "echo 'Build ready'"]
-run = ["bash", "start.sh"]
+run = ["java", "-Xms128m", "-Xmx384m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m", "-Dserver.port=5000", "-Dspring.jpa.hibernate.ddl-auto=update", "-jar", "backend/target/piuproject-1.0.0.jar"]
 publicDir = "dist"
 
 

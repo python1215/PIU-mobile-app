@@ -1,28 +1,37 @@
 #!/bin/bash
 
-JAR_PATH="/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
-LOCAL_PG_DIR="/tmp/pgdata"
-LOCAL_PG_PORT="5433"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+JAR_PATH="$SCRIPT_DIR/backend/target/piuproject-1.0.0.jar"
 DDL_AUTO="update"
 
-start_local_postgres() {
-    echo "[LOCAL DB] Checking local PostgreSQL..."
-    
-    if pg_isready -h localhost -p $LOCAL_PG_PORT -q 2>/dev/null; then
-        echo "[LOCAL DB] Already running"
-        return 0
+if [ ! -f "$JAR_PATH" ]; then
+    echo "[ERROR] JAR not found at: $JAR_PATH"
+    echo "[ERROR] Trying alternative path..."
+    JAR_PATH="/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
+    if [ ! -f "$JAR_PATH" ]; then
+        echo "[ERROR] JAR not found. Cannot start."
+        exit 1
     fi
+fi
 
-    if ! command -v pg_ctl &> /dev/null; then
-        echo "[LOCAL DB] pg_ctl not available (production mode), skipping local DB"
-        return 1
-    fi
+if [ -n "$DATABASE_URL" ]; then
+    echo "[DB] DATABASE_URL is set, using remote database"
+    DDL_AUTO="update"
+elif [ -n "$PGHOST" ]; then
+    echo "[DB] PGHOST is set, database will be configured by Spring Boot"
+    DDL_AUTO="update"
+else
+    echo "[DB] No database configuration found"
+    if command -v pg_ctl &> /dev/null; then
+        echo "[DB] Trying local PostgreSQL fallback..."
+        LOCAL_PG_DIR="/tmp/pgdata"
+        LOCAL_PG_PORT="5433"
 
-    if [ ! -f "$LOCAL_PG_DIR/PG_VERSION" ]; then
-        echo "[LOCAL DB] Initializing..."
-        env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
-            initdb -D "$LOCAL_PG_DIR" -U runner --auth=trust >/dev/null 2>&1
-        cat >> "$LOCAL_PG_DIR/postgresql.conf" <<EOF
+        if ! pg_isready -h localhost -p $LOCAL_PG_PORT -q 2>/dev/null; then
+            if [ ! -f "$LOCAL_PG_DIR/PG_VERSION" ]; then
+                env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
+                    initdb -D "$LOCAL_PG_DIR" -U runner --auth=trust >/dev/null 2>&1
+                cat >> "$LOCAL_PG_DIR/postgresql.conf" <<EOF
 port = $LOCAL_PG_PORT
 listen_addresses = 'localhost'
 unix_socket_directories = '/tmp'
@@ -30,72 +39,28 @@ shared_buffers = 16MB
 work_mem = 2MB
 max_connections = 10
 EOF
-    fi
-
-    echo "[LOCAL DB] Starting..."
-    env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
-        pg_ctl -D "$LOCAL_PG_DIR" -l "$LOCAL_PG_DIR/logfile" start >/dev/null 2>&1
-
-    for i in $(seq 1 10); do
-        if pg_isready -h localhost -p $LOCAL_PG_PORT -q 2>/dev/null; then
-            break
+            fi
+            env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
+                pg_ctl -D "$LOCAL_PG_DIR" -l "$LOCAL_PG_DIR/logfile" start >/dev/null 2>&1
+            sleep 2
+            env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
+                psql -h localhost -p $LOCAL_PG_PORT -U runner -d postgres -c "SELECT 1 FROM pg_database WHERE datname='piuproject'" -t 2>/dev/null | grep -q 1 || \
+                env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
+                    psql -h localhost -p $LOCAL_PG_PORT -U runner -d postgres -c "CREATE DATABASE piuproject" >/dev/null 2>&1
         fi
-        sleep 1
-    done
-
-    env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
-        psql -h localhost -p $LOCAL_PG_PORT -U runner -d postgres -c "SELECT 1 FROM pg_database WHERE datname='piuproject'" -t 2>/dev/null | grep -q 1 || \
-        env -u PGHOST -u PGPORT -u PGUSER -u PGPASSWORD -u PGDATABASE -u DATABASE_URL \
-            psql -h localhost -p $LOCAL_PG_PORT -U runner -d postgres -c "CREATE DATABASE piuproject" >/dev/null 2>&1
-
-    echo "[LOCAL DB] Ready on port $LOCAL_PG_PORT"
-    return 0
-}
-
-test_remote_db() {
-    if [ -z "$DATABASE_URL" ]; then
-        return 1
-    fi
-    if command -v psql &> /dev/null; then
-        timeout 5 psql "$DATABASE_URL" -c "SELECT 1" >/dev/null 2>&1
-        return $?
-    else
-        echo "[DB] psql not available, trusting DATABASE_URL is valid"
-        return 0
-    fi
-}
-
-echo "[DB] Testing remote database..."
-if [ -n "$DATABASE_URL" ]; then
-    if test_remote_db; then
-        echo "[DB] Remote database is available!"
-        DDL_AUTO="update"
-    else
-        echo "[DB] Remote database test failed, trying local fallback..."
-        if start_local_postgres; then
-            export DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
-            unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
-            DDL_AUTO="update"
-            echo "[DB] Using local database"
-        else
-            echo "[DB] No database available - starting with DATABASE_URL anyway"
-            DDL_AUTO="update"
-        fi
-    fi
-else
-    echo "[DB] No DATABASE_URL set, trying local database..."
-    if start_local_postgres; then
         export DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
         unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
-        DDL_AUTO="update"
-        echo "[DB] Using local database"
+        echo "[DB] Using local database on port $LOCAL_PG_PORT"
     else
-        echo "[DB] WARNING: No database available"
+        echo "[DB] WARNING: No database tools available, Spring Boot will configure from env"
     fi
 fi
 
 export PORT=5000
 echo "[SPRING BOOT] Starting on port $PORT with ddl-auto=$DDL_AUTO..."
+echo "[SPRING BOOT] JAR: $JAR_PATH"
+echo "[SPRING BOOT] Working directory: $(pwd)"
+
 exec java -Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m \
     -Dserver.port=$PORT \
     -Dspring.jpa.hibernate.ddl-auto=$DDL_AUTO \
