@@ -7,7 +7,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 [deployment]
 deploymentTarget = "autoscale"
 build = ["bash", "-c", "echo 'Build ready'"]
-run = ["java", "-jar", "backend/target/piuproject-1.0.0.jar"]
+run = ["bash", "start.sh"]
 publicDir = "dist"
 
 
