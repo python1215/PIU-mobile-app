@@ -7,7 +7,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 [deployment]
 deploymentTarget = "autoscale"
 build = ["bash", "deploy_build.sh"]
-run = ["gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "--workers", "1", "--timeout", "120", "app:app"]
+run = ["python3", "-m", "gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "--workers", "1", "--timeout", "120", "app:app"]
 publicDir = "dist"
 
 
@@ -43,6 +43,10 @@ JWT_SECRET = "piu-project-microservices-jwt-secret-key-must-be-at-least-32-bytes
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
 
 [[ports]]
 localPort = 8080
