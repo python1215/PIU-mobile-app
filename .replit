@@ -5,9 +5,9 @@ channel = "stable-24_05"
 packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
 
 [deployment]
-deploymentTarget = "autoscale"
+deploymentTarget = "vm"
 build = ["bash", "deploy_build.sh"]
-run = ["python3", "-m", "gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "--workers", "1", "--timeout", "120", "app:app"]
+run = ["java", "-Xms128m", "-Xmx384m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m", "-Dserver.port=5000", "-Dspring.jpa.hibernate.ddl-auto=update", "-jar", "backend/target/piuproject-1.0.0.jar"]
 publicDir = "dist"
 
 
