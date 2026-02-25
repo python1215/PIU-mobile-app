@@ -6,7 +6,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 
 [deployment]
 deploymentTarget = "vm"
-build = ["bash", "-c", "echo 'Build ready'"]
+build = ["bash", "-c", "rm -rf node_modules .local/state __pycache__ backend/src dist src frontend attached_assets uploads static uv.lock package-lock.json *.py pyproject.toml vite.config.mjs tailwind.config.js postcss.config.js index.html sed* && echo 'Cleaned workspace for deployment'"]
 run = ["bash", "start.sh"]
 publicDir = "dist"
 
