@@ -3,7 +3,7 @@
 JAR_PATH="/home/runner/workspace/backend/target/piuproject-1.0.0.jar"
 LOCAL_PG_DIR="/tmp/pgdata"
 LOCAL_PG_PORT="5433"
-DDL_AUTO="none"
+DDL_AUTO="update"
 
 start_local_postgres() {
     echo "[LOCAL DB] Checking local PostgreSQL..."
@@ -56,24 +56,41 @@ test_remote_db() {
     if [ -z "$DATABASE_URL" ]; then
         return 1
     fi
-    timeout 5 psql "$DATABASE_URL" -c "SELECT 1" >/dev/null 2>&1
-    return $?
+    if command -v psql &> /dev/null; then
+        timeout 5 psql "$DATABASE_URL" -c "SELECT 1" >/dev/null 2>&1
+        return $?
+    else
+        echo "[DB] psql not available, trusting DATABASE_URL is valid"
+        return 0
+    fi
 }
 
 echo "[DB] Testing remote database..."
-if test_remote_db; then
-    echo "[DB] Remote database is available!"
-    DDL_AUTO="update"
+if [ -n "$DATABASE_URL" ]; then
+    if test_remote_db; then
+        echo "[DB] Remote database is available!"
+        DDL_AUTO="update"
+    else
+        echo "[DB] Remote database test failed, trying local fallback..."
+        if start_local_postgres; then
+            export DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
+            unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
+            DDL_AUTO="update"
+            echo "[DB] Using local database"
+        else
+            echo "[DB] No database available - starting with DATABASE_URL anyway"
+            DDL_AUTO="update"
+        fi
+    fi
 else
-    echo "[DB] Remote database unavailable, trying local fallback..."
+    echo "[DB] No DATABASE_URL set, trying local database..."
     if start_local_postgres; then
         export DATABASE_URL="postgresql://runner:runner@localhost:$LOCAL_PG_PORT/piuproject"
         unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
         DDL_AUTO="update"
         echo "[DB] Using local database"
     else
-        echo "[DB] No database available - app will start without DB (degraded mode)"
-        unset PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE DATABASE_URL
+        echo "[DB] WARNING: No database available"
     fi
 fi
 
