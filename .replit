@@ -5,9 +5,9 @@ channel = "stable-24_05"
 packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
 
 [deployment]
-deploymentTarget = "vm"
-build = ["bash", "-c", "rm -rf node_modules .local/state __pycache__ backend/src dist src frontend attached_assets uploads static uv.lock package-lock.json *.py pyproject.toml vite.config.mjs tailwind.config.js postcss.config.js index.html sed* && echo 'Cleaned workspace for deployment'"]
-run = ["bash", "start.sh"]
+deploymentTarget = "autoscale"
+build = ["bash", "-c", "rm -rf .git node_modules .local/state __pycache__ backend/src src frontend attached_assets uploads vite.config.mjs tailwind.config.js postcss.config.js sed* && echo 'Build cleaned'"]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "--workers", "1", "--timeout", "120", "app:app"]
 publicDir = "dist"
 
 
