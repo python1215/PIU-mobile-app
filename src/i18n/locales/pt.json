@@ -30,6 +30,8 @@
     "loginSuccess": "Bem-vindo de volta!",
     "loginFailed": "Falha no login",
     "serverStarting": "O servidor está iniciando, tentando novamente automaticamente...",
+    "systemInitializing": "O sistema está preparando seu espaço",
+    "systemInitializingDesc": "Isso geralmente leva de 15 a 30 segundos na primeira visita. Seu login continuará automaticamente.",
     "registerSuccess": "Conta criada com sucesso!",
     "registerFailed": "Falha no registro"
   },

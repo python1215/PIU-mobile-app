@@ -30,6 +30,8 @@
     "loginSuccess": "Bienvenue !",
     "loginFailed": "Échec de la connexion",
     "serverStarting": "Le serveur démarre, nouvelle tentative automatique...",
+    "systemInitializing": "Le système prépare votre espace",
+    "systemInitializingDesc": "Cela prend généralement 15 à 30 secondes lors de la première visite. Votre connexion se poursuivra automatiquement.",
     "registerSuccess": "Compte créé avec succès !",
     "registerFailed": "Échec de l'inscription"
   },

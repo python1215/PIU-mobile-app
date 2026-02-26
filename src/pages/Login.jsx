@@ -11,6 +11,7 @@ function Login() {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [serverStarting, setServerStarting] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
@@ -22,11 +23,13 @@ function Login() {
       const response = await authAPI.login(formData);
       const { token, username, email, roleId, roleName, superuser, permissions } = response.data;
       login(token, { username, email, roleId, roleName, isSuperuser: superuser, permissions });
+      setServerStarting(false);
       toast.success(t('auth.loginSuccess'));
       navigate('/');
     } catch (error) {
-      if (error.response?.status === 503) {
-        toast.error(t('auth.serverStarting'));
+      if (error.response?.status === 503 || error.code === 'ERR_NETWORK') {
+        setServerStarting(true);
+        setLoading(false);
         setTimeout(() => handleSubmit(e), 3000);
         return;
       }
@@ -145,6 +148,22 @@ function Login() {
                     )}
                   </button>
                 </form>
+
+                {serverStarting && (
+                  <div className="text-center mt-4 p-3" style={{ 
+                    background: 'linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%)',
+                    borderRadius: '12px',
+                    border: '1px solid #b6d4fe'
+                  }}>
+                    <div className="spinner-border spinner-border-sm text-primary mb-2" role="status" />
+                    <p className="mb-1 fw-semibold text-primary" style={{ fontSize: '0.9rem' }}>
+                      {t('auth.systemInitializing')}
+                    </p>
+                    <p className="mb-0 text-muted" style={{ fontSize: '0.8rem' }}>
+                      {t('auth.systemInitializingDesc')}
+                    </p>
+                  </div>
+                )}
 
               </div>
             </div>

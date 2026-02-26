@@ -30,6 +30,8 @@
     "loginSuccess": "Welcome back!",
     "loginFailed": "Login failed",
     "serverStarting": "Server is starting up, retrying automatically...",
+    "systemInitializing": "System is preparing your workspace",
+    "systemInitializingDesc": "This usually takes 15-30 seconds on first visit. Your login will proceed automatically.",
     "registerSuccess": "Account created successfully!",
     "registerFailed": "Registration failed"
   },
