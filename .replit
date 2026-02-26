@@ -5,9 +5,9 @@ channel = "stable-24_05"
 packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "jdk21", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "maven", "netcat-gnu", "openjpeg", "openssh", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "unixODBC", "zlib"]
 
 [deployment]
-deploymentTarget = "vm"
+deploymentTarget = "autoscale"
 build = ["bash", "deploy_build.sh"]
-run = ["java", "-Xms128m", "-Xmx384m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m", "-Dserver.port=5000", "-Dspring.jpa.hibernate.ddl-auto=update", "-jar", "backend/target/piuproject-1.0.0.jar"]
+run = ["node", "server.js"]
 publicDir = "dist"
 
 
@@ -27,13 +27,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash start.sh"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 integrations = ["python_log_in_with_replit:1.0.0", "python_database:1.0.0"]

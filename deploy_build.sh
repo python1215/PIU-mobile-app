@@ -10,7 +10,6 @@ rm -rf .upm
 rm -rf __pycache__
 rm -rf backend/src
 rm -rf src
-rm -rf dist
 rm -rf frontend
 rm -rf attached_assets
 rm -rf uploads
@@ -22,7 +21,6 @@ rm -f index.html
 rm -f pyproject.toml
 rm -f uv.lock
 rm -f package-lock.json
-rm -f package.json
 rm -f app.py
 rm -f models.py
 rm -f main.py
