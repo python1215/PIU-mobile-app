@@ -36,7 +36,7 @@ public class DatabaseConfig {
             String db = (pgDatabase != null && !pgDatabase.isEmpty()) ? pgDatabase : "neondb";
             String sslMode = pgHost.contains(".neon.tech") ? "require" : "prefer";
             jdbcUrl = "jdbc:postgresql://" + pgHost + ":" + port + "/" + db +
-                      "?sslmode=" + sslMode + "&connectTimeout=5&socketTimeout=10&loginTimeout=5";
+                      "?sslmode=" + sslMode + "&connectTimeout=30&socketTimeout=60&loginTimeout=30";
             username = pgUser != null ? pgUser : "postgres";
             password = pgPassword != null ? pgPassword : "";
             logger.info("Database: configured with PGHOST={} sslmode={}", pgHost, sslMode);
@@ -48,16 +48,19 @@ public class DatabaseConfig {
                 username = userParts[0];
                 password = userParts.length > 1 ? userParts[1] : "";
 
-                jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" +
+                String host = dbUri.getHost();
+                String sslParam = (host != null && host.contains(".neon.tech")) ? "&sslmode=require" : "";
+
+                jdbcUrl = "jdbc:postgresql://" + host + ":" +
                           (dbUri.getPort() > 0 ? dbUri.getPort() : 5432) +
                           dbUri.getPath() +
-                          "?connectTimeout=5&socketTimeout=10&loginTimeout=5";
+                          "?connectTimeout=30&socketTimeout=60&loginTimeout=30" + sslParam;
 
                 if (dbUri.getQuery() != null) {
                     jdbcUrl += "&" + dbUri.getQuery();
                 }
 
-                logger.info("Database: configured with DATABASE_URL host={}", dbUri.getHost());
+                logger.info("Database: configured with DATABASE_URL host={}", host);
             } catch (Exception e) {
                 logger.warn("Database: Failed to parse DATABASE_URL: {}", e.getMessage());
             }
@@ -76,12 +79,12 @@ public class DatabaseConfig {
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setMaximumPoolSize(5);
         dataSource.setMinimumIdle(0);
-        dataSource.setConnectionTimeout(5000);
+        dataSource.setConnectionTimeout(30000);
         dataSource.setIdleTimeout(120000);
         dataSource.setMaxLifetime(300000);
         dataSource.setKeepaliveTime(60000);
         dataSource.setConnectionTestQuery("SELECT 1");
-        dataSource.setValidationTimeout(3000);
+        dataSource.setValidationTimeout(10000);
         dataSource.setInitializationFailTimeout(-1);
         dataSource.setLeakDetectionThreshold(30000);
 
