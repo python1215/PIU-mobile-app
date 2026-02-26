@@ -7,7 +7,7 @@ packages = ["cairo", "ffmpeg-full", "freetds", "freetype", "ghostscript", "glibc
 [deployment]
 deploymentTarget = "autoscale"
 build = ["bash", "deploy_build.sh"]
-run = ["node", "server.js"]
+run = ["java", "HealthProxy"]
 publicDir = "dist"
 
 

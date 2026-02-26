@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "Compiling health proxy..."
+javac HealthProxy.java
 echo "Cleaning workspace for deployment..."
 rm -rf .git
 rm -rf node_modules
@@ -21,9 +23,11 @@ rm -f index.html
 rm -f pyproject.toml
 rm -f uv.lock
 rm -f package-lock.json
+rm -f package.json
 rm -f app.py
 rm -f models.py
 rm -f main.py
 rm -f gunicorn_config.py
 rm -f gunicorn.conf.py
+rm -f server.js
 echo "Build cleanup complete"
