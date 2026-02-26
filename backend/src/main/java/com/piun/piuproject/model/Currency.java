@@ -17,7 +17,7 @@ public class Currency {
     private Long id;
 
     @NotBlank
-    @Column(unique = true, nullable = false, length = 4)
+    @Column(unique = true, nullable = false, length = 10)
     private String currency;
 
     @ManyToOne(fetch = FetchType.LAZY)
