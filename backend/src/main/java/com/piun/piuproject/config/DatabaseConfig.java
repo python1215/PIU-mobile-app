@@ -34,12 +34,15 @@ public class DatabaseConfig {
         if (pgHost != null && !pgHost.isEmpty()) {
             String port = (pgPort != null && !pgPort.isEmpty()) ? pgPort : "5432";
             String db = (pgDatabase != null && !pgDatabase.isEmpty()) ? pgDatabase : "neondb";
-            String sslMode = pgHost.contains(".neon.tech") ? "require" : "prefer";
+            boolean isNeon = pgHost.contains(".neon.tech");
+            String sslMode = isNeon ? "require" : "prefer";
+            int connectTimeout = isNeon ? 120 : 30;
+            int socketTimeout = isNeon ? 120 : 60;
             jdbcUrl = "jdbc:postgresql://" + pgHost + ":" + port + "/" + db +
-                      "?sslmode=" + sslMode + "&connectTimeout=30&socketTimeout=60&loginTimeout=30";
+                      "?sslmode=" + sslMode + "&connectTimeout=" + connectTimeout + "&socketTimeout=" + socketTimeout + "&loginTimeout=" + connectTimeout;
             username = pgUser != null ? pgUser : "postgres";
             password = pgPassword != null ? pgPassword : "";
-            logger.info("Database: configured with PGHOST={} sslmode={}", pgHost, sslMode);
+            logger.info("Database: configured with PGHOST={} sslmode={} connectTimeout={}s", pgHost, sslMode, connectTimeout);
         } else if (databaseUrl != null && !databaseUrl.isEmpty()) {
             try {
                 URI dbUri = new URI(databaseUrl);
@@ -79,14 +82,14 @@ public class DatabaseConfig {
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setMaximumPoolSize(5);
         dataSource.setMinimumIdle(0);
-        dataSource.setConnectionTimeout(30000);
+        dataSource.setConnectionTimeout(120000);
         dataSource.setIdleTimeout(120000);
         dataSource.setMaxLifetime(300000);
         dataSource.setKeepaliveTime(60000);
         dataSource.setConnectionTestQuery("SELECT 1");
-        dataSource.setValidationTimeout(10000);
+        dataSource.setValidationTimeout(30000);
         dataSource.setInitializationFailTimeout(-1);
-        dataSource.setLeakDetectionThreshold(30000);
+        dataSource.setLeakDetectionThreshold(60000);
 
         return dataSource;
     }

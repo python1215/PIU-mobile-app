@@ -61,7 +61,6 @@ public class HealthProxy {
         ProcessBuilder pb = new ProcessBuilder(
             "java", "-Xms128m", "-Xmx512m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m",
             "-Dserver.port=" + BACKEND_PORT,
-            "-Dspring.jpa.hibernate.ddl-auto=update",
             "-jar", jarPath
         );
         pb.inheritIO();
