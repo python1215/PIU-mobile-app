@@ -84,7 +84,11 @@ public class HealthProxy {
             System.out.println("[PROXY] Spring Boot failed to start in 120s");
         }).start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> { proc.destroyForcibly(); server.stop(0); }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("[PROXY] Shutting down...");
+            proc.destroy();
+            server.stop(2);
+        }));
         proc.waitFor();
     }
 

@@ -8,23 +8,34 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Microservices Architecture
-The application follows a microservices pattern with three main components:
+### Architecture
+The application uses two different architectures for development and production:
 
-1. **Flask Gateway (Port 5000)**
-   - Serves the React SPA (Single Page Application)
-   - Proxies all `/api/*` requests to the Spring Boot backend
-   - Handles static file serving from the built React app
+#### Development (Workflow)
+- **Spring Boot (Port 5000)** - Runs directly on port 5000 via `start.sh`
+  - Uses `setsid` to isolate from Replit workflow SIGTERM signals
+  - Serves React SPA from `classpath:/static/` (built files in JAR)
+  - Provides all REST API endpoints with JWT authentication
+  - `start.sh` monitors and auto-restarts if Spring Boot exits
 
-2. **Spring Boot Backend (Port 8080)**
-   - RESTful API server with JWT authentication
-   - Handles all business logic and data operations
-   - Uses JPA/Hibernate for database operations
-   - 29 JPA repositories for all entities
+#### Production (Autoscale Deployment)
+- **HealthProxy.java (Port 5000)** - Lightweight Java HTTP proxy
+  - Instant startup for health checks
+  - Serves static files from `dist/` directory
+  - Proxies `/api/*` requests to Spring Boot on port 8080
+- **Spring Boot (Port 8080)** - Backend API server
+  - Started as child process by HealthProxy
 
-3. **PostgreSQL Database**
-   - Stores all application data
-   - Connected via Neon-backed Replit database
+#### Shared Components
+- **Spring Boot Backend**
+  - RESTful API server with JWT authentication
+  - Handles all business logic and data operations
+  - Uses JPA/Hibernate for database operations
+  - 56 JPA repository interfaces
+
+- **PostgreSQL Database**
+  - Stores all application data
+  - Connected via Neon-backed Replit database (PGHOST=helium)
 
 ### UI/UX Decisions
 - **Frontend Framework**: React 19 with Vite for build tooling

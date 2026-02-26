@@ -36,6 +36,11 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.disable())
+                .xssProtection(xss -> xss.disable())
+                .contentSecurityPolicy(csp -> csp.policyDirectives("frame-ancestors 'self' https://*.replit.dev https://*.replit.app"))
+            )
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session
