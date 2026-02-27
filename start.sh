@@ -11,8 +11,6 @@ fi
 pkill -9 -f "piuproject.*jar" 2>/dev/null
 sleep 1
 
-export SPRING_JPA_HIBERNATE_DDL_AUTO=update
-
 trap '' TERM
 
 setsid java -Xms128m -Xmx512m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m \
