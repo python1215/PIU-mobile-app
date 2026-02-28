@@ -170,7 +170,7 @@ function Login() {
             
             <div className="text-center mt-4">
               <p className="text-white text-opacity-75 mb-0" style={{ fontSize: '0.85rem' }}>
-                PIU Project Management System
+                ROMEOT Digital M&E System
               </p>
             </div>
           </div>

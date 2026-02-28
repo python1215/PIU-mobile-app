@@ -208,7 +208,7 @@ function Layout() {
           >
             <FiMenu size={20} />
           </button>
-          <h6 className="mb-0 text-primary fw-bold">PIU M&E</h6>
+          <h6 className="mb-0 text-primary fw-bold">ROMEOT M&E</h6>
           <UserAvatar username={user?.username} />
         </div>
       )}
@@ -220,7 +220,7 @@ function Layout() {
         <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
           {showLabels && (
             <h4 className="mb-0 text-primary fw-bold" style={{ fontSize: isMobile ? "1rem" : undefined }}>
-              PIU DIGITAL M&E SYSTEM{" "}
+              ROMEOT DIGITAL M&E SYSTEM{" "}
             </h4>
           )}
           <button
