@@ -27,30 +27,35 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         try {
-            if (!userRepository.existsByUsername("admin")) {
-                User admin = new User();
-                admin.setUsername("admin");
-                admin.setEmail("admin@romeot.net");
-                admin.setPasswordHash(passwordEncoder.encode("admin123"));
-                admin.setFirstName("Admin");
-                admin.setLastName("System");
-                admin.setActive(true);
-                admin.setSuperuser(true);
-                admin.setDateJoined(LocalDateTime.now());
-                userRepository.save(admin);
-                logger.info("Superuser 'admin' created successfully");
-            } else {
-                User admin = userRepository.findByUsername("admin").orElse(null);
-                if (admin != null && !admin.isSuperuser()) {
-                    admin.setSuperuser(true);
-                    userRepository.save(admin);
-                    logger.info("Existing 'admin' user promoted to superuser");
-                } else {
-                    logger.info("Superuser 'admin' already exists");
-                }
-            }
+            ensureSuperuser("admin", "admin@romeot.net", "admin123", "Admin", "System");
+            ensureSuperuser("superadmin", "superadmin@romeot.net", "Admin@2025", "Super", "Admin");
         } catch (Exception e) {
-            logger.warn("Could not initialize superuser (database may not be ready yet): {}", e.getMessage());
+            logger.warn("Could not initialize superusers (database may not be ready yet): {}", e.getMessage());
+        }
+    }
+
+    private void ensureSuperuser(String username, String email, String password, String firstName, String lastName) {
+        if (!userRepository.existsByUsername(username)) {
+            User user = new User();
+            user.setUsername(username);
+            user.setEmail(email);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setActive(true);
+            user.setSuperuser(true);
+            user.setDateJoined(LocalDateTime.now());
+            userRepository.save(user);
+            logger.info("Superuser '{}' created successfully", username);
+        } else {
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null && !user.isSuperuser()) {
+                user.setSuperuser(true);
+                userRepository.save(user);
+                logger.info("Existing '{}' user promoted to superuser", username);
+            } else {
+                logger.info("Superuser '{}' already exists", username);
+            }
         }
     }
 }
