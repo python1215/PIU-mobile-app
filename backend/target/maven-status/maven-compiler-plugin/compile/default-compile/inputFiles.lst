@@ -1,4 +1,5 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/PiuProjectApplication.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/DataInitializer.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/DatabaseConfig.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/GlobalExceptionHandler.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/config/SecurityConfig.java

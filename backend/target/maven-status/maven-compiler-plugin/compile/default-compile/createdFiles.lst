@@ -62,8 +62,8 @@ com/piun/piuproject/model/PAPType.class
 com/piun/piuproject/repository/ContractProfilingGoodsRepository.class
 com/piun/piuproject/repository/SubcomponentRepository.class
 com/piun/piuproject/repository/QuarterRepository.class
-com/piun/piuproject/security/JwtAuthenticationFilter.class
 com/piun/piuproject/model/ContractProfilingGoods.class
+com/piun/piuproject/security/JwtAuthenticationFilter.class
 com/piun/piuproject/controller/FileUploadController.class
 com/piun/piuproject/repository/DonorRepository.class
 com/piun/piuproject/model/ProjectMapping.class
@@ -137,6 +137,7 @@ com/piun/piuproject/repository/ActivityRepository.class
 com/piun/piuproject/repository/StakeholderEngagementRepository.class
 com/piun/piuproject/model/DataCollectionFrequency.class
 com/piun/piuproject/model/Region.class
+com/piun/piuproject/config/DataInitializer.class
 com/piun/piuproject/model/Currency.class
 com/piun/piuproject/repository/SettlementRepository.class
 com/piun/piuproject/repository/KPIContractSetupRepository.class
