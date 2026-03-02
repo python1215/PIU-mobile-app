@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function ProjectActions() {
@@ -40,6 +40,15 @@ function ProjectActions() {
   const [contractSelectorLoading, setContractSelectorLoading] = useState(false);
   const [selectedContractRef, setSelectedContractRef] = useState('');
   const [contractDetailView, setContractDetailView] = useState(null);
+
+  const [designWorkItems, setDesignWorkItems] = useState([]);
+  const [dwpDate, setDwpDate] = useState('');
+  const [dwpProject, setDwpProject] = useState('');
+  const [dwpContractType, setDwpContractType] = useState('');
+  const [dwpContractRefNo, setDwpContractRefNo] = useState('');
+  const [dwpContractOptions, setDwpContractOptions] = useState([]);
+  const [dwpRows, setDwpRows] = useState([]);
+  const [dwpSaving, setDwpSaving] = useState(false);
 
   const uniqueInvestmentTypes = useMemo(() => {
     const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
@@ -129,14 +138,16 @@ function ProjectActions() {
     setLoading(true);
     try {
       const isAll = selectedProject === 'all';
-      const [worksRes, goodsRes, monRes] = await Promise.all([
+      const [worksRes, goodsRes, monRes, dwpRes] = await Promise.all([
         isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
       setMonitoring(monRes.data);
+      setDesignWorkItems(dwpRes.data);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -927,6 +938,278 @@ function ProjectActions() {
     </div>
   );
 
+  const generateActivityId = (refNo) => {
+    const rand = Math.floor(100 + Math.random() * 900);
+    return `${refNo || 'ACT'}-${rand}`;
+  };
+
+  const handleDwpContractTypeChange = async (type) => {
+    setDwpContractType(type);
+    setDwpContractRefNo('');
+    setDwpContractOptions([]);
+    if (!type || !dwpProject) return;
+    try {
+      const endpoint = type === 'works'
+        ? `/api/project-actions/works/project/${dwpProject}`
+        : `/api/project-actions/goods/project/${dwpProject}`;
+      const res = await axios.get(endpoint);
+      setDwpContractOptions(res.data.filter(c => c.contractRefNo));
+    } catch (e) {
+      console.error('Error loading contracts:', e);
+    }
+  };
+
+  const handleDwpProjectChange = (projId) => {
+    setDwpProject(projId);
+    setDwpContractType('');
+    setDwpContractRefNo('');
+    setDwpContractOptions([]);
+  };
+
+  const addDwpRow = () => {
+    setDwpRows(prev => [...prev, {
+      tempId: Date.now(),
+      activityId: generateActivityId(dwpContractRefNo),
+      activity: '',
+      rate: '',
+      unit: '',
+      provisionalQuantities: '',
+      executedQuantities: '',
+      observations: ''
+    }]);
+  };
+
+  const updateDwpRow = (idx, field, value) => {
+    setDwpRows(prev => prev.map((row, i) => i === idx ? { ...row, [field]: value } : row));
+  };
+
+  const removeDwpRow = (idx) => {
+    setDwpRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const calcPercentage = (prov, exec) => {
+    const p = parseFloat(prov);
+    const e = parseFloat(exec);
+    if (!p || p === 0) return 0;
+    return Math.round((e / p) * 10000) / 100;
+  };
+
+  const calcGlobalProgressRate = (rate) => {
+    const r = parseFloat(rate);
+    if (isNaN(r)) return 0;
+    return Math.round((r / 100) * 10000) / 100;
+  };
+
+  const handleDwpSave = async () => {
+    if (!dwpDate || !dwpProject || !dwpContractType || !dwpContractRefNo) {
+      toast.error('Please fill in Date, Project, Contract Type, and Contract Reference');
+      return;
+    }
+    if (dwpRows.length === 0) {
+      toast.error('Please add at least one activity row');
+      return;
+    }
+    setDwpSaving(true);
+    try {
+      const items = dwpRows.map(row => ({
+        monitoringDate: dwpDate,
+        project: { projectId: dwpProject },
+        contractType: dwpContractType,
+        contractRefNo: dwpContractRefNo,
+        activityId: row.activityId,
+        activity: row.activity,
+        rate: parseFloat(row.rate) || 0,
+        unit: row.unit,
+        provisionalQuantities: parseFloat(row.provisionalQuantities) || 0,
+        executedQuantities: parseFloat(row.executedQuantities) || 0,
+        percentage: calcPercentage(row.provisionalQuantities, row.executedQuantities),
+        globalProgressRate: calcGlobalProgressRate(row.rate),
+        observations: row.observations
+      }));
+      await axios.post('/api/project-actions/design-work-progress/batch', items);
+      toast.success('Design work progress saved successfully');
+      setDwpRows([]);
+      setDwpDate('');
+      setDwpContractType('');
+      setDwpContractRefNo('');
+      setDwpContractOptions([]);
+      loadContracts();
+    } catch (e) {
+      toast.error('Error saving design work progress');
+      console.error(e);
+    } finally {
+      setDwpSaving(false);
+    }
+  };
+
+  const handleDeleteDwpItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axios.delete(`/api/project-actions/design-work-progress/${id}`);
+      toast.success('Item deleted');
+      loadContracts();
+    } catch (e) {
+      toast.error('Error deleting item');
+    }
+  };
+
+  const renderDesignWorkProgress = () => (
+    <div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white">
+          <h6 className="mb-0">Design Work Progress Monitoring & Reporting</h6>
+        </div>
+        <div className="card-body">
+          <div className="row g-3 mb-3">
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Date</label>
+              <input type="date" className="form-control" value={dwpDate} onChange={e => setDwpDate(e.target.value)} />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Project</label>
+              <select className="form-select" value={dwpProject} onChange={e => handleDwpProjectChange(e.target.value)}>
+                <option value="">Select Project</option>
+                {projects.map(p => (
+                  <option key={p.projectId} value={p.projectId}>{p.projectId} - {p.projectName || p.projectId}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Contract Type</label>
+              <select className="form-select" value={dwpContractType} onChange={e => handleDwpContractTypeChange(e.target.value)} disabled={!dwpProject}>
+                <option value="">Select Type</option>
+                <option value="works">Works Contracts</option>
+                <option value="goods">Goods and Services</option>
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <select className="form-select" value={dwpContractRefNo} onChange={e => {
+                setDwpContractRefNo(e.target.value);
+                setDwpRows(prev => prev.map(row => ({ ...row, activityId: generateActivityId(e.target.value) })));
+              }} disabled={!dwpContractType}>
+                <option value="">Select Reference</option>
+                {dwpContractOptions.map((c, i) => (
+                  <option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">Activity Rows</h6>
+            <button type="button" className="btn btn-sm btn-primary" onClick={addDwpRow} disabled={!dwpContractRefNo}>
+              <FiPlus className="me-1" /> Add Row
+            </button>
+          </div>
+
+          {dwpRows.length > 0 && (
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th style={{minWidth:'120px'}}>Activity ID</th>
+                    <th style={{minWidth:'150px'}}>Activity</th>
+                    <th style={{minWidth:'80px'}}>Rate (%)</th>
+                    <th style={{minWidth:'80px'}}>Unit</th>
+                    <th style={{minWidth:'120px'}}>Provisional Qty</th>
+                    <th style={{minWidth:'120px'}}>Executed Qty</th>
+                    <th style={{minWidth:'90px'}}>Percentage</th>
+                    <th style={{minWidth:'120px'}}>Global Progress Rate</th>
+                    <th style={{minWidth:'180px'}}>Observations</th>
+                    <th style={{width:'50px'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dwpRows.map((row, idx) => {
+                    const pct = calcPercentage(row.provisionalQuantities, row.executedQuantities);
+                    const gpr = calcGlobalProgressRate(row.rate);
+                    return (
+                      <tr key={row.tempId}>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.activityId} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateDwpRow(idx, 'activity', e.target.value)} placeholder="Activity name" /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateDwpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.provisionalQuantities} onChange={e => updateDwpRow(idx, 'provisionalQuantities', e.target.value)} step="0.01" /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateDwpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
+                        <td><textarea className="form-control form-control-sm" value={row.observations} onChange={e => updateDwpRow(idx, 'observations', e.target.value)} rows="1" /></td>
+                        <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeDwpRow(idx)}><FiTrash2 /></button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {dwpRows.length > 0 && (
+            <div className="text-end mt-2">
+              <button className="btn btn-success" onClick={handleDwpSave} disabled={dwpSaving}>
+                {dwpSaving ? 'Saving...' : 'Save All Rows'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h6 className="mb-0">Saved Records</h6>
+        </div>
+        <div className="card-body p-0">
+          {designWorkItems.length === 0 ? (
+            <div className="text-center text-muted p-4">No design work progress records yet</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped table-sm mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Project</th>
+                    <th>Type</th>
+                    <th>Contract Ref</th>
+                    <th>Activity ID</th>
+                    <th>Activity</th>
+                    <th>Rate (%)</th>
+                    <th>Unit</th>
+                    <th>Prov. Qty</th>
+                    <th>Exec. Qty</th>
+                    <th>%</th>
+                    <th>Global Rate</th>
+                    <th>Observations</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {designWorkItems.map(item => (
+                    <tr key={item.id}>
+                      <td>{item.monitoringDate}</td>
+                      <td>{item.project?.projectId || '-'}</td>
+                      <td><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></td>
+                      <td>{item.contractRefNo}</td>
+                      <td><code>{item.activityId}</code></td>
+                      <td>{item.activity}</td>
+                      <td>{item.rate}%</td>
+                      <td>{item.unit}</td>
+                      <td>{item.provisionalQuantities}</td>
+                      <td>{item.executedQuantities}</td>
+                      <td>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
+                      <td>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
+                      <td style={{maxWidth:'200px'}} className="text-truncate">{item.observations}</td>
+                      <td><button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -1008,6 +1291,11 @@ function ProjectActions() {
             <FiActivity className="me-2" /> {t('projectActions.contractMonitoring')}
           </button>
         </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'designWork' ? 'active' : ''}`} onClick={() => setActiveTab('designWork')}>
+            <FiClipboard className="me-2" /> Design Work Progress
+          </button>
+        </li>
       </ul>
 
       <div className="card">
@@ -1017,6 +1305,7 @@ function ProjectActions() {
           ) : (
             activeTab === 'works' ? renderWorksTable() :
             activeTab === 'goods' ? renderGoodsTable() :
+            activeTab === 'designWork' ? renderDesignWorkProgress() :
             renderMonitoringTable()
           )}
         </div>

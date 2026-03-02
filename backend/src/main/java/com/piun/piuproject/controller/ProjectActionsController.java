@@ -4,6 +4,8 @@ import com.piun.piuproject.model.*;
 import com.piun.piuproject.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +29,15 @@ public class ProjectActionsController {
 
     @Autowired
     private PhysicalProgressRepository physicalProgressRepository;
+
+    @Autowired
+    private DesignWorkProgressRepository designWorkProgressRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @GetMapping("/works")
     public List<ContractProfilingWorks> getAllWorks() {
@@ -235,5 +246,61 @@ public class ProjectActionsController {
     @GetMapping("/implementation-status")
     public List<PhysicalProgress> getAllImplementationStatus() {
         return physicalProgressRepository.findAll();
+    }
+
+    @GetMapping("/design-work-progress")
+    public List<DesignWorkProgress> getAllDesignWorkProgress() {
+        return designWorkProgressRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/design-work-progress/project/{projectId}")
+    public List<DesignWorkProgress> getDesignWorkProgressByProject(@PathVariable String projectId) {
+        return designWorkProgressRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @PostMapping("/design-work-progress")
+    public DesignWorkProgress createDesignWorkProgress(@RequestBody DesignWorkProgress item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return designWorkProgressRepository.save(item);
+    }
+
+    @PostMapping("/design-work-progress/batch")
+    public List<DesignWorkProgress> createDesignWorkProgressBatch(@RequestBody List<DesignWorkProgress> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return designWorkProgressRepository.saveAll(items);
+    }
+
+    @PutMapping("/design-work-progress/{id}")
+    public ResponseEntity<DesignWorkProgress> updateDesignWorkProgress(
+            @PathVariable Long id,
+            @RequestBody DesignWorkProgress details) {
+        return designWorkProgressRepository.findById(id)
+            .map(item -> {
+                item.setMonitoringDate(details.getMonitoringDate());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setActivityId(details.getActivityId());
+                item.setActivity(details.getActivity());
+                item.setRate(details.getRate());
+                item.setUnit(details.getUnit());
+                item.setProvisionalQuantities(details.getProvisionalQuantities());
+                item.setExecutedQuantities(details.getExecutedQuantities());
+                item.setPercentage(details.getPercentage());
+                item.setGlobalProgressRate(details.getGlobalProgressRate());
+                item.setObservations(details.getObservations());
+                return ResponseEntity.ok(designWorkProgressRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/design-work-progress/{id}")
+    public ResponseEntity<Void> deleteDesignWorkProgress(@PathVariable Long id) {
+        return designWorkProgressRepository.findById(id)
+            .map(item -> {
+                designWorkProgressRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
     }
 }
