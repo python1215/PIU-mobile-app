@@ -1138,7 +1138,7 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">Project</label>
-                  <p className="form-control-plaintext">{item.project?.projectId || '-'}</p>
+                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">Contract Type</label>
@@ -1263,7 +1263,7 @@ function ProjectActions() {
               <select className="form-select" value={dwpProject} onChange={e => handleDwpProjectChange(e.target.value)}>
                 <option value="">Select Project</option>
                 {projects.map(p => (
-                  <option key={p.projectId} value={p.projectId}>{p.projectName || p.projectId}</option>
+                  <option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>
                 ))}
               </select>
             </div>
@@ -1381,7 +1381,7 @@ function ProjectActions() {
                   {designWorkItems.map(item => (
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.monitoringDate}</td>
-                      <td style={{whiteSpace:'nowrap',maxWidth:'90px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.projectId || ''}>{item.project?.projectId || '-'}</td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || item.project?.projectId || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
                       <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.activityId}</code></td>
