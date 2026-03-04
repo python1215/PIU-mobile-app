@@ -49,6 +49,9 @@ function ProjectActions() {
   const [dwpContractOptions, setDwpContractOptions] = useState([]);
   const [dwpRows, setDwpRows] = useState([]);
   const [dwpSaving, setDwpSaving] = useState(false);
+  const [dwpModalItem, setDwpModalItem] = useState(null);
+  const [dwpModalMode, setDwpModalMode] = useState('view');
+  const [dwpEditForm, setDwpEditForm] = useState({});
 
   const uniqueInvestmentTypes = useMemo(() => {
     const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
@@ -1053,6 +1056,196 @@ function ProjectActions() {
     }
   };
 
+  const openDwpModal = (item, mode) => {
+    setDwpModalMode(mode);
+    setDwpModalItem(item);
+    if (mode === 'edit') {
+      setDwpEditForm({
+        monitoringDate: item.monitoringDate || '',
+        contractType: item.contractType || '',
+        contractRefNo: item.contractRefNo || '',
+        activityId: item.activityId || '',
+        activity: item.activity || '',
+        rate: item.rate ?? '',
+        unit: item.unit || '',
+        provisionalQuantities: item.provisionalQuantities ?? '',
+        executedQuantities: item.executedQuantities ?? '',
+        observations: item.observations || ''
+      });
+    }
+  };
+
+  const closeDwpModal = () => {
+    setDwpModalItem(null);
+    setDwpModalMode('view');
+    setDwpEditForm({});
+  };
+
+  const handleDwpEditSave = async () => {
+    if (!dwpModalItem) return;
+    try {
+      const pct = calcPercentage(dwpEditForm.provisionalQuantities, dwpEditForm.executedQuantities);
+      const gpr = calcGlobalProgressRate(dwpEditForm.rate);
+      await axios.put(`/api/project-actions/design-work-progress/${dwpModalItem.id}`, {
+        ...dwpModalItem,
+        monitoringDate: dwpEditForm.monitoringDate,
+        contractType: dwpEditForm.contractType,
+        contractRefNo: dwpEditForm.contractRefNo,
+        activityId: dwpEditForm.activityId,
+        activity: dwpEditForm.activity,
+        rate: parseFloat(dwpEditForm.rate) || 0,
+        unit: dwpEditForm.unit,
+        provisionalQuantities: parseFloat(dwpEditForm.provisionalQuantities) || 0,
+        executedQuantities: parseFloat(dwpEditForm.executedQuantities) || 0,
+        percentage: pct,
+        globalProgressRate: gpr,
+        observations: dwpEditForm.observations
+      });
+      toast.success('Record updated successfully');
+      closeDwpModal();
+      loadContracts();
+    } catch (e) {
+      toast.error('Error updating record');
+      console.error(e);
+    }
+  };
+
+  const renderDwpModal = () => {
+    if (!dwpModalItem) return null;
+    const isView = dwpModalMode === 'view';
+    const item = dwpModalItem;
+    const form = dwpEditForm;
+    const editPct = !isView ? calcPercentage(form.provisionalQuantities, form.executedQuantities) : null;
+    const editGpr = !isView ? calcGlobalProgressRate(form.rate) : null;
+
+    return (
+      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeDwpModal}>
+        <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <button type="button" className="btn-close" onClick={closeDwpModal}></button>
+            </div>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Date</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.monitoringDate || '-'}</p>
+                  ) : (
+                    <input type="date" className="form-control" value={form.monitoringDate} onChange={e => setDwpEditForm(f => ({...f, monitoringDate: e.target.value}))} />
+                  )}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Project</label>
+                  <p className="form-control-plaintext">{item.project?.projectId || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Type</label>
+                  {isView ? (
+                    <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p>
+                  ) : (
+                    <select className="form-select" value={form.contractType} onChange={e => setDwpEditForm(f => ({...f, contractType: e.target.value}))}>
+                      <option value="works">Works Contracts</option>
+                      <option value="goods">Goods and Services</option>
+                    </select>
+                  )}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.contractRefNo || '-'}</p>
+                  ) : (
+                    <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setDwpEditForm(f => ({...f, contractRefNo: e.target.value}))} />
+                  )}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Activity ID</label>
+                  {isView ? (
+                    <p className="form-control-plaintext"><code>{item.activityId}</code></p>
+                  ) : (
+                    <input type="text" className="form-control bg-light" value={form.activityId} readOnly />
+                  )}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Activity</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.activity || '-'}</p>
+                  ) : (
+                    <input type="text" className="form-control" value={form.activity} onChange={e => setDwpEditForm(f => ({...f, activity: e.target.value}))} />
+                  )}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Rate (%)</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.rate}%</p>
+                  ) : (
+                    <input type="number" className="form-control" value={form.rate} onChange={e => setDwpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />
+                  )}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Unit</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.unit || '-'}</p>
+                  ) : (
+                    <input type="text" className="form-control" value={form.unit} onChange={e => setDwpEditForm(f => ({...f, unit: e.target.value}))} />
+                  )}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Provisional Qty</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.provisionalQuantities}</p>
+                  ) : (
+                    <input type="number" className="form-control" value={form.provisionalQuantities} onChange={e => setDwpEditForm(f => ({...f, provisionalQuantities: e.target.value}))} step="0.01" />
+                  )}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Executed Qty</label>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.executedQuantities}</p>
+                  ) : (
+                    <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setDwpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />
+                  )}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Percentage</label>
+                  <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Global Progress Rate</label>
+                  <p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p>
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-semibold">Observations</label>
+                  {isView ? (
+                    <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observations || '-'}</p>
+                  ) : (
+                    <textarea className="form-control" rows="3" value={form.observations} onChange={e => setDwpEditForm(f => ({...f, observations: e.target.value}))} />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              {isView ? (
+                <>
+                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ monitoringDate: item.monitoringDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observations: item.observations || '' }); }}>
+                    <FiEdit2 className="me-1" /> Edit
+                  </button>
+                  <button className="btn btn-secondary" onClick={closeDwpModal}>Close</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-success" onClick={handleDwpEditSave}>Save Changes</button>
+                  <button className="btn btn-secondary" onClick={closeDwpModal}>Cancel</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderDesignWorkProgress = () => (
     <div>
       <div className="card mb-4">
@@ -1179,7 +1372,7 @@ function ProjectActions() {
                     <th>%</th>
                     <th>Global Rate</th>
                     <th>Observations</th>
-                    <th></th>
+                    <th style={{minWidth:'110px'}}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1198,7 +1391,13 @@ function ProjectActions() {
                       <td>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
                       <td>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
                       <td style={{maxWidth:'200px'}} className="text-truncate">{item.observations}</td>
-                      <td><button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button></td>
+                      <td>
+                        <div className="d-flex gap-1">
+                          <button className="btn btn-sm btn-outline-info" title="View" onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary" title="Edit" onClick={() => openDwpModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger" title="Delete" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1207,6 +1406,7 @@ function ProjectActions() {
           )}
         </div>
       </div>
+      {renderDwpModal()}
     </div>
   );
 
