@@ -1355,47 +1355,47 @@ function ProjectActions() {
           {designWorkItems.length === 0 ? (
             <div className="text-center text-muted p-4">No design work progress records yet</div>
           ) : (
-            <div className="table-responsive">
-              <table className="table table-striped table-sm mb-0">
+            <div style={{overflowX:'hidden', width:'100%'}}>
+              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)', width:'100%', tableLayout:'auto'}}>
                 <thead className="table-light">
                   <tr>
-                    <th>Date</th>
+                    <th style={{whiteSpace:'nowrap'}}>Date</th>
                     <th>Project</th>
                     <th>Type</th>
-                    <th>Contract Ref</th>
-                    <th>Activity ID</th>
+                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
+                    <th style={{whiteSpace:'nowrap'}}>Activity ID</th>
                     <th>Activity</th>
-                    <th>Rate (%)</th>
+                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
                     <th>Unit</th>
-                    <th>Prov. Qty</th>
-                    <th>Exec. Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Prov.Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Exec.Qty</th>
                     <th>%</th>
-                    <th>Global Rate</th>
+                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
                     <th>Observations</th>
-                    <th style={{minWidth:'110px'}}>Actions</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {designWorkItems.map(item => (
                     <tr key={item.id}>
-                      <td>{item.monitoringDate}</td>
-                      <td>{item.project?.projectId || '-'}</td>
-                      <td><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.monitoringDate}</td>
+                      <td style={{maxWidth:'80px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.project?.projectId || '-'}</td>
+                      <td><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
                       <td>{item.contractRefNo}</td>
-                      <td><code>{item.activityId}</code></td>
-                      <td>{item.activity}</td>
+                      <td><code style={{fontSize:'inherit'}}>{item.activityId}</code></td>
+                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.activity}</td>
                       <td>{item.rate}%</td>
                       <td>{item.unit}</td>
                       <td>{item.provisionalQuantities}</td>
                       <td>{item.executedQuantities}</td>
                       <td>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
                       <td>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
-                      <td style={{maxWidth:'200px'}} className="text-truncate">{item.observations}</td>
+                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.observations}</td>
                       <td>
                         <div className="d-flex gap-1">
-                          <button className="btn btn-sm btn-outline-info" title="View" onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary" title="Edit" onClick={() => openDwpModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger" title="Delete" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openDwpModal(item, 'view')} style={{fontSize:'inherit'}}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openDwpModal(item, 'edit')} style={{fontSize:'inherit'}}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteDwpItem(item.id)} style={{fontSize:'inherit'}}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
