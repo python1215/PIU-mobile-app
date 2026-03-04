@@ -1253,12 +1253,12 @@ function ProjectActions() {
           <h6 className="mb-0">Design Work Progress Monitoring & Reporting</h6>
         </div>
         <div className="card-body">
-          <div className="row g-3 mb-3">
-            <div className="col-md-3">
+          <div className="row g-3 mb-2">
+            <div className="col-md-6">
               <label className="form-label fw-semibold">Date</label>
               <input type="date" className="form-control" value={dwpDate} onChange={e => setDwpDate(e.target.value)} />
             </div>
-            <div className="col-md-3">
+            <div className="col-md-6">
               <label className="form-label fw-semibold">Project</label>
               <select className="form-select" value={dwpProject} onChange={e => handleDwpProjectChange(e.target.value)}>
                 <option value="">Select Project</option>
@@ -1267,7 +1267,9 @@ function ProjectActions() {
                 ))}
               </select>
             </div>
-            <div className="col-md-3">
+          </div>
+          <div className="row g-3 mb-3">
+            <div className="col-md-6">
               <label className="form-label fw-semibold">Contract Type</label>
               <select className="form-select" value={dwpContractType} onChange={e => handleDwpContractTypeChange(e.target.value)} disabled={!dwpProject}>
                 <option value="">Select Type</option>
@@ -1275,7 +1277,7 @@ function ProjectActions() {
                 <option value="goods">Goods and Services</option>
               </select>
             </div>
-            <div className="col-md-3">
+            <div className="col-md-6">
               <label className="form-label fw-semibold">Contract Reference No.</label>
               <select className="form-select" value={dwpContractRefNo} onChange={e => {
                 setDwpContractRefNo(e.target.value);
