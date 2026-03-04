@@ -1263,7 +1263,7 @@ function ProjectActions() {
               <select className="form-select" value={dwpProject} onChange={e => handleDwpProjectChange(e.target.value)}>
                 <option value="">Select Project</option>
                 {projects.map(p => (
-                  <option key={p.projectId} value={p.projectId}>{p.projectId} - {p.projectName || p.projectId}</option>
+                  <option key={p.projectId} value={p.projectId}>{p.projectName || p.projectId}</option>
                 ))}
               </select>
             </div>
