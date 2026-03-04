@@ -1355,47 +1355,47 @@ function ProjectActions() {
           {designWorkItems.length === 0 ? (
             <div className="text-center text-muted p-4">No design work progress records yet</div>
           ) : (
-            <div style={{overflowX:'hidden', width:'100%'}}>
-              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)', width:'100%', tableLayout:'auto'}}>
+            <div className="table-responsive">
+              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
                     <th style={{whiteSpace:'nowrap'}}>Date</th>
-                    <th>Project</th>
-                    <th>Type</th>
+                    <th style={{whiteSpace:'nowrap'}}>Project</th>
+                    <th style={{whiteSpace:'nowrap'}}>Type</th>
                     <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
                     <th style={{whiteSpace:'nowrap'}}>Activity ID</th>
-                    <th>Activity</th>
+                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
                     <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
-                    <th>Unit</th>
+                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
                     <th style={{whiteSpace:'nowrap'}}>Prov.Qty</th>
                     <th style={{whiteSpace:'nowrap'}}>Exec.Qty</th>
-                    <th>%</th>
+                    <th style={{whiteSpace:'nowrap'}}>%</th>
                     <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
-                    <th>Observations</th>
-                    <th>Actions</th>
+                    <th style={{whiteSpace:'nowrap'}}>Observations</th>
+                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {designWorkItems.map(item => (
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.monitoringDate}</td>
-                      <td style={{maxWidth:'80px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.project?.projectId || '-'}</td>
-                      <td><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
-                      <td>{item.contractRefNo}</td>
-                      <td><code style={{fontSize:'inherit'}}>{item.activityId}</code></td>
-                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.activity}</td>
-                      <td>{item.rate}%</td>
-                      <td>{item.unit}</td>
-                      <td>{item.provisionalQuantities}</td>
-                      <td>{item.executedQuantities}</td>
-                      <td>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
-                      <td>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
-                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.observations}</td>
-                      <td>
-                        <div className="d-flex gap-1">
-                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openDwpModal(item, 'view')} style={{fontSize:'inherit'}}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openDwpModal(item, 'edit')} style={{fontSize:'inherit'}}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteDwpItem(item.id)} style={{fontSize:'inherit'}}><FiTrash2 /></button>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'90px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.projectId || ''}>{item.project?.projectId || '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
+                      <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.activityId}</code></td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.provisionalQuantities}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.executedQuantities}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
+                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observations}>{item.observations}</td>
+                      <td style={{whiteSpace:'nowrap'}}>
+                        <div className="d-flex gap-1 flex-nowrap">
+                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openDwpModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
