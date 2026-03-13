@@ -1254,7 +1254,7 @@ function ProjectActions() {
       return;
     }
 
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -1309,22 +1309,22 @@ function ProjectActions() {
           item.observations || '-'
         ]),
         startY: startY + 8,
-        styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
-        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 7, fontStyle: 'bold' },
+        styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6.5, fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [245, 245, 245] },
-        margin: { left: 14, right: 14 },
-        tableWidth: pageWidth - 28,
+        margin: { left: 10, right: 10 },
+        tableWidth: pageWidth - 20,
         columnStyles: {
-          0: { cellWidth: 10 },
-          1: { cellWidth: 22 },
-          2: { cellWidth: 25 },
+          0: { cellWidth: 8 },
+          1: { cellWidth: 18 },
+          2: { cellWidth: 20 },
           3: { cellWidth: 'auto' },
-          4: { cellWidth: 18 },
-          5: { cellWidth: 15 },
-          6: { cellWidth: 22 },
-          7: { cellWidth: 22 },
-          8: { cellWidth: 18 },
-          9: { cellWidth: 25 },
+          4: { cellWidth: 14 },
+          5: { cellWidth: 12 },
+          6: { cellWidth: 16 },
+          7: { cellWidth: 16 },
+          8: { cellWidth: 14 },
+          9: { cellWidth: 18 },
           10: { cellWidth: 'auto' }
         }
       });
