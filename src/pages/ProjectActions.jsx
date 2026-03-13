@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function ProjectActions() {
   const { t } = useTranslation();
@@ -1246,11 +1248,104 @@ function ProjectActions() {
     );
   };
 
+  const exportDwpPdf = () => {
+    if (designWorkItems.length === 0) {
+      toast.error('No records to export');
+      return;
+    }
+
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(13);
+    doc.text('Design Work Progress Monitoring & Reporting', pageWidth / 2, 23, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
+
+    const grouped = {};
+    designWorkItems.forEach(item => {
+      const key = item.contractRefNo || 'Unknown';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(item);
+    });
+
+    let startY = 36;
+
+    Object.keys(grouped).forEach((contractRef, groupIdx) => {
+      const items = grouped[contractRef];
+      const projectName = items[0]?.project?.project || items[0]?.project?.projectId || '-';
+      const contractType = items[0]?.contractType === 'works' ? 'Works Contract' : 'Goods & Services';
+
+      if (startY > pageHeight - 40) {
+        doc.addPage();
+        startY = 15;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Contract Ref: ${contractRef}`, 14, startY);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+      doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
+
+      autoTable(doc, {
+        head: [['#', 'Date', 'Activity ID', 'Activity', 'Rate (%)', 'Unit', 'Prov. Qty', 'Exec. Qty', '%', 'Global Rate', 'Observations']],
+        body: items.map((item, idx) => [
+          idx + 1,
+          item.monitoringDate || '-',
+          item.activityId || '-',
+          item.activity || '-',
+          item.rate != null ? `${item.rate}%` : '-',
+          item.unit || '-',
+          item.provisionalQuantities != null ? item.provisionalQuantities : '-',
+          item.executedQuantities != null ? item.executedQuantities : '-',
+          item.percentage != null ? `${item.percentage}%` : '-',
+          item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-',
+          item.observations || '-'
+        ]),
+        startY: startY + 8,
+        styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 7, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: 14, right: 14 },
+        tableWidth: pageWidth - 28,
+        columnStyles: {
+          0: { cellWidth: 10 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 'auto' },
+          4: { cellWidth: 18 },
+          5: { cellWidth: 15 },
+          6: { cellWidth: 22 },
+          7: { cellWidth: 22 },
+          8: { cellWidth: 18 },
+          9: { cellWidth: 25 },
+          10: { cellWidth: 'auto' }
+        }
+      });
+
+      startY = doc.lastAutoTable.finalY + 12;
+    });
+
+    doc.save(`Design_Work_Progress_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF report downloaded');
+  };
+
   const renderDesignWorkProgress = () => (
     <div>
       <div className="card mb-4">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h6 className="mb-0">Design Work Progress Monitoring & Reporting</h6>
+          {designWorkItems.length > 0 && (
+            <button className="btn btn-sm btn-light" onClick={exportDwpPdf}>
+              <FiDownload className="me-1" /> Export PDF
+            </button>
+          )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-2">
