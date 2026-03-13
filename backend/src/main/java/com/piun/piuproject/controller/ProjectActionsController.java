@@ -355,4 +355,66 @@ public class ProjectActionsController {
             })
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/boq/contract/{contractRefNo}")
+    public List<Boq> getBoqByContractRef(@PathVariable String contractRefNo) {
+        return boqRepository.findByContractRefNoOrderByDateCreatedDesc(contractRefNo);
+    }
+
+    @Autowired
+    private SupplyProgressRepository supplyProgressRepository;
+
+    @GetMapping("/supply-progress")
+    public List<SupplyProgress> getAllSupplyProgress() {
+        return supplyProgressRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/supply-progress/project/{projectId}")
+    public List<SupplyProgress> getSupplyProgressByProject(@PathVariable String projectId) {
+        return supplyProgressRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @PostMapping("/supply-progress")
+    public SupplyProgress createSupplyProgress(@RequestBody SupplyProgress item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return supplyProgressRepository.save(item);
+    }
+
+    @PostMapping("/supply-progress/batch")
+    public List<SupplyProgress> createSupplyProgressBatch(@RequestBody List<SupplyProgress> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return supplyProgressRepository.saveAll(items);
+    }
+
+    @PutMapping("/supply-progress/{id}")
+    public ResponseEntity<SupplyProgress> updateSupplyProgress(@PathVariable Long id, @RequestBody SupplyProgress details) {
+        return supplyProgressRepository.findById(id)
+            .map(item -> {
+                item.setEntryDate(details.getEntryDate());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setItemId(details.getItemId());
+                item.setActivity(details.getActivity());
+                item.setRate(details.getRate());
+                item.setUnit(details.getUnit());
+                item.setBoqQuantities(details.getBoqQuantities());
+                item.setExecutedQuantities(details.getExecutedQuantities());
+                item.setPerformancePercentage(details.getPerformancePercentage());
+                item.setGlobalProgressRate(details.getGlobalProgressRate());
+                item.setObservation(details.getObservation());
+                return ResponseEntity.ok(supplyProgressRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/supply-progress/{id}")
+    public ResponseEntity<Void> deleteSupplyProgress(@PathVariable Long id) {
+        return supplyProgressRepository.findById(id)
+            .map(item -> {
+                supplyProgressRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
 }

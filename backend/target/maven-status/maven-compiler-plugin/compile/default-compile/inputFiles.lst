@@ -83,6 +83,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/StakeholderEngagement.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/StakeholderEngagementType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Subcomponent.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/SupplyProgress.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/TypeOfImpact.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/TypeOfPAP.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/User.java
@@ -141,6 +142,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/StakeholderEngagementRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/StakeholderEngagementTypeRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/SubcomponentRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/SupplyProgressRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/TypeOfImpactRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/TypeOfPAPRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/UserRepository.java

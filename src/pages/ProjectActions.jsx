@@ -67,6 +67,19 @@ function ProjectActions() {
   const [boqModalMode, setBoqModalMode] = useState('view');
   const [boqEditForm, setBoqEditForm] = useState({});
 
+  const [spItems, setSpItems] = useState([]);
+  const [spDate, setSpDate] = useState('');
+  const [spProject, setSpProject] = useState('');
+  const [spContractType, setSpContractType] = useState('');
+  const [spContractRefNo, setSpContractRefNo] = useState('');
+  const [spContractOptions, setSpContractOptions] = useState([]);
+  const [spBoqActivities, setSpBoqActivities] = useState([]);
+  const [spRows, setSpRows] = useState([]);
+  const [spSaving, setSpSaving] = useState(false);
+  const [spModalItem, setSpModalItem] = useState(null);
+  const [spModalMode, setSpModalMode] = useState('view');
+  const [spEditForm, setSpEditForm] = useState({});
+
   const uniqueInvestmentTypes = useMemo(() => {
     const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
     return types;
@@ -155,18 +168,20 @@ function ProjectActions() {
     setLoading(true);
     try {
       const isAll = selectedProject === 'all';
-      const [worksRes, goodsRes, monRes, dwpRes, boqRes] = await Promise.all([
+      const [worksRes, goodsRes, monRes, dwpRes, boqRes, spRes] = await Promise.all([
         isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/supply-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
       setMonitoring(monRes.data);
       setDesignWorkItems(dwpRes.data);
       setBoqItems(boqRes.data);
+      setSpItems(spRes.data);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -1468,6 +1483,440 @@ function ProjectActions() {
     );
   };
 
+  const handleSpContractTypeChange = async (type) => {
+    setSpContractType(type);
+    setSpContractRefNo('');
+    setSpContractOptions([]);
+    setSpBoqActivities([]);
+    if (!type || !spProject) return;
+    try {
+      const endpoint = type === 'works'
+        ? `/api/project-actions/works/project/${spProject}`
+        : `/api/project-actions/goods/project/${spProject}`;
+      const res = await axios.get(endpoint);
+      setSpContractOptions(res.data.filter(c => c.contractRefNo));
+    } catch (e) { console.error('Error loading contracts:', e); }
+  };
+
+  const handleSpProjectChange = (projId) => {
+    setSpProject(projId);
+    setSpContractType('');
+    setSpContractRefNo('');
+    setSpContractOptions([]);
+    setSpBoqActivities([]);
+  };
+
+  const handleSpContractRefChange = async (refNo) => {
+    setSpContractRefNo(refNo);
+    setSpBoqActivities([]);
+    setSpRows(prev => prev.map(row => ({ ...row, itemId: generateSpItemId(refNo) })));
+    if (!refNo) return;
+    try {
+      const res = await axios.get(`/api/project-actions/boq/contract/${refNo}`);
+      setSpBoqActivities(res.data);
+    } catch (e) { console.error('Error loading BOQ activities:', e); }
+  };
+
+  const generateSpItemId = (refNo) => {
+    const rand = Math.floor(100 + Math.random() * 900);
+    return `${refNo || 'SP'}-${rand}`;
+  };
+
+  const addSpRow = () => {
+    setSpRows(prev => [...prev, {
+      tempId: Date.now(),
+      itemId: generateSpItemId(spContractRefNo),
+      activity: '',
+      rate: '',
+      unit: '',
+      boqQuantities: '',
+      executedQuantities: '',
+      observation: ''
+    }]);
+  };
+
+  const updateSpRow = (idx, field, value) => {
+    setSpRows(prev => prev.map((row, i) => i === idx ? { ...row, [field]: value } : row));
+  };
+
+  const handleSpActivitySelect = (idx, activityName) => {
+    const boqMatch = spBoqActivities.find(b => b.activity === activityName);
+    setSpRows(prev => prev.map((row, i) => i === idx ? {
+      ...row,
+      activity: activityName,
+      unit: boqMatch?.unit || row.unit,
+      boqQuantities: boqMatch?.boqQuantity ?? ''
+    } : row));
+  };
+
+  const removeSpRow = (idx) => {
+    setSpRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const calcSpPerformance = (boqQty, execQty) => {
+    const b = parseFloat(boqQty);
+    const e = parseFloat(execQty);
+    if (!b || b === 0) return 0;
+    return Math.round((e / b) * 10000) / 100;
+  };
+
+  const calcSpGlobalRate = (rate) => {
+    const r = parseFloat(rate);
+    if (isNaN(r)) return 0;
+    return Math.round((r / 100) * 10000) / 100;
+  };
+
+  const handleSpSave = async () => {
+    if (!spDate || !spProject || !spContractType || !spContractRefNo) {
+      toast.error('Please fill in Date, Project, Contract Type, and Contract Reference');
+      return;
+    }
+    if (spRows.length === 0) {
+      toast.error('Please add at least one row');
+      return;
+    }
+    setSpSaving(true);
+    try {
+      const items = spRows.map(row => ({
+        entryDate: spDate,
+        project: { projectId: spProject },
+        contractType: spContractType,
+        contractRefNo: spContractRefNo,
+        itemId: row.itemId,
+        activity: row.activity,
+        rate: parseFloat(row.rate) || 0,
+        unit: row.unit,
+        boqQuantities: parseFloat(row.boqQuantities) || 0,
+        executedQuantities: parseFloat(row.executedQuantities) || 0,
+        performancePercentage: calcSpPerformance(row.boqQuantities, row.executedQuantities),
+        globalProgressRate: calcSpGlobalRate(row.rate),
+        observation: row.observation
+      }));
+      await axios.post('/api/project-actions/supply-progress/batch', items);
+      toast.success('Supply progress saved successfully');
+      setSpRows([]);
+      setSpDate('');
+      setSpContractType('');
+      setSpContractRefNo('');
+      setSpContractOptions([]);
+      setSpBoqActivities([]);
+      loadContracts();
+    } catch (e) {
+      toast.error('Error saving supply progress');
+      console.error(e);
+    } finally {
+      setSpSaving(false);
+    }
+  };
+
+  const handleDeleteSpItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axios.delete(`/api/project-actions/supply-progress/${id}`);
+      toast.success('Item deleted');
+      loadContracts();
+    } catch (e) { toast.error('Error deleting item'); }
+  };
+
+  const openSpModal = (item, mode) => {
+    setSpModalMode(mode);
+    setSpModalItem(item);
+    if (mode === 'edit') {
+      setSpEditForm({
+        entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '',
+        itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '',
+        unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '',
+        observation: item.observation || ''
+      });
+    }
+  };
+
+  const closeSpModal = () => { setSpModalItem(null); setSpModalMode('view'); setSpEditForm({}); };
+
+  const handleSpEditSave = async () => {
+    if (!spModalItem) return;
+    try {
+      const pct = calcSpPerformance(spEditForm.boqQuantities, spEditForm.executedQuantities);
+      const gpr = calcSpGlobalRate(spEditForm.rate);
+      await axios.put(`/api/project-actions/supply-progress/${spModalItem.id}`, {
+        ...spModalItem,
+        entryDate: spEditForm.entryDate, contractType: spEditForm.contractType, contractRefNo: spEditForm.contractRefNo,
+        itemId: spEditForm.itemId, activity: spEditForm.activity, rate: parseFloat(spEditForm.rate) || 0,
+        unit: spEditForm.unit, boqQuantities: parseFloat(spEditForm.boqQuantities) || 0,
+        executedQuantities: parseFloat(spEditForm.executedQuantities) || 0,
+        performancePercentage: pct, globalProgressRate: gpr, observation: spEditForm.observation
+      });
+      toast.success('Record updated successfully');
+      closeSpModal();
+      loadContracts();
+    } catch (e) { toast.error('Error updating record'); console.error(e); }
+  };
+
+  const renderSpModal = () => {
+    if (!spModalItem) return null;
+    const isView = spModalMode === 'view';
+    const item = spModalItem;
+    const form = spEditForm;
+    const editPct = !isView ? calcSpPerformance(form.boqQuantities, form.executedQuantities) : null;
+    const editGpr = !isView ? calcSpGlobalRate(form.rate) : null;
+    return (
+      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeSpModal}>
+        <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <button type="button" className="btn-close" onClick={closeSpModal}></button>
+            </div>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Date</label>
+                  {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setSpEditForm(f => ({...f, entryDate: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Project</label>
+                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Type</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setSpEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works</option><option value="goods">Goods & Services</option></select>}
+                </div>
+                <div className="col-md-4"><label className="form-label fw-semibold">Contract Ref</label>{isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setSpEditForm(f => ({...f, contractRefNo: e.target.value}))} />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">Item ID</label>{isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">Activity</label>{isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setSpEditForm(f => ({...f, activity: e.target.value}))} />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">Rate (%)</label>{isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">Unit</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))} />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">BOQ Qty</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">Exec. Qty</label>{isView ? <p className="form-control-plaintext">{item.executedQuantities}</p> : <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setSpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">Performance %</label><p className="form-control-plaintext">{isView ? (item.performancePercentage != null ? `${item.performancePercentage}%` : '-') : `${editPct}%`}</p></div>
+                <div className="col-md-4"><label className="form-label fw-semibold">Global Progress Rate</label><p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p></div>
+                <div className="col-12"><label className="form-label fw-semibold">Observation</label>{isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setSpEditForm(f => ({...f, observation: e.target.value}))} />}</div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              {isView ? (
+                <>
+                  <button className="btn btn-primary" onClick={() => { setSpModalMode('edit'); setSpEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observation: item.observation || '' }); }}><FiEdit2 className="me-1" /> Edit</button>
+                  <button className="btn btn-secondary" onClick={closeSpModal}>Close</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-success" onClick={handleSpEditSave}>Save Changes</button>
+                  <button className="btn btn-secondary" onClick={closeSpModal}>Cancel</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const exportSpPdf = () => {
+    if (spItems.length === 0) { toast.error('No records to export'); return; }
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(13);
+    doc.text('Supply Progress Monitoring & Reporting', pageWidth / 2, 23, { align: 'center' });
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
+    const grouped = {};
+    spItems.forEach(item => { const key = item.contractRefNo || 'Unknown'; if (!grouped[key]) grouped[key] = []; grouped[key].push(item); });
+    let startY = 36;
+    Object.keys(grouped).forEach(contractRef => {
+      const items = grouped[contractRef];
+      const projectName = items[0]?.project?.project || items[0]?.project?.projectId || '-';
+      const contractType = items[0]?.contractType === 'works' ? 'Works Contract' : 'Goods & Services';
+      if (startY > pageHeight - 40) { doc.addPage(); startY = 15; }
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.text(`Contract Ref: ${contractRef}`, 14, startY);
+      doc.setFont(undefined, 'normal'); doc.setFontSize(8);
+      doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
+      autoTable(doc, {
+        head: [['#', 'Date', 'Item ID', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Exec Qty', 'Perf.%', 'Global Rate', 'Observation']],
+        body: items.map((item, idx) => [idx + 1, item.entryDate || '-', item.itemId || '-', item.activity || '-', item.rate != null ? `${item.rate}%` : '-', item.unit || '-', item.boqQuantities ?? '-', item.executedQuantities ?? '-', item.performancePercentage != null ? `${item.performancePercentage}%` : '-', item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-', item.observation || '-']),
+        startY: startY + 8,
+        styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6.5, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: 10, right: 10 }, tableWidth: pageWidth - 20
+      });
+      startY = doc.lastAutoTable.finalY + 12;
+    });
+    doc.save(`Supply_Progress_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF report downloaded');
+  };
+
+  const renderSupplyProgress = () => (
+    <div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">Supply Progress Monitoring & Reporting</h6>
+          {spItems.length > 0 && (
+            <button className="btn btn-sm btn-light" onClick={exportSpPdf}>
+              <FiDownload className="me-1" /> Export PDF
+            </button>
+          )}
+        </div>
+        <div className="card-body">
+          <div className="row g-3 mb-2">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Date</label>
+              <input type="date" className="form-control" value={spDate} onChange={e => setSpDate(e.target.value)} />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Project</label>
+              <select className="form-select" value={spProject} onChange={e => handleSpProjectChange(e.target.value)}>
+                <option value="">Select Project</option>
+                {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>))}
+              </select>
+            </div>
+          </div>
+          <div className="row g-3 mb-3">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Type</label>
+              <select className="form-select" value={spContractType} onChange={e => handleSpContractTypeChange(e.target.value)} disabled={!spProject}>
+                <option value="">Select Type</option>
+                <option value="works">Works Contracts</option>
+                <option value="goods">Goods and Services</option>
+              </select>
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <select className="form-select" value={spContractRefNo} onChange={e => handleSpContractRefChange(e.target.value)} disabled={!spContractType}>
+                <option value="">Select Reference</option>
+                {spContractOptions.map((c, i) => (<option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>))}
+              </select>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">Activity Rows</h6>
+            <button type="button" className="btn btn-sm btn-primary" onClick={addSpRow} disabled={!spContractRefNo}>
+              <FiPlus className="me-1" /> Add Row
+            </button>
+          </div>
+
+          {spRows.length > 0 && (
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th style={{minWidth:'120px'}}>Item ID</th>
+                    <th style={{minWidth:'180px'}}>Activity</th>
+                    <th style={{minWidth:'80px'}}>Rate (%)</th>
+                    <th style={{minWidth:'80px'}}>Unit</th>
+                    <th style={{minWidth:'110px'}}>BOQ Qty</th>
+                    <th style={{minWidth:'110px'}}>Exec. Qty</th>
+                    <th style={{minWidth:'90px'}}>Perf. %</th>
+                    <th style={{minWidth:'100px'}}>Global Rate</th>
+                    <th style={{minWidth:'150px'}}>Observation</th>
+                    <th style={{width:'50px'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {spRows.map((row, idx) => {
+                    const pct = calcSpPerformance(row.boqQuantities, row.executedQuantities);
+                    const gpr = calcSpGlobalRate(row.rate);
+                    return (
+                      <tr key={row.tempId}>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
+                        <td>
+                          <select className="form-select form-select-sm" value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)}>
+                            <option value="">Select Activity</option>
+                            {spBoqActivities.map((b, bi) => (<option key={bi} value={b.activity}>{b.activity}</option>))}
+                          </select>
+                        </td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateSpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.unit} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.boqQuantities} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateSpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
+                        <td><textarea className="form-control form-control-sm" value={row.observation} onChange={e => updateSpRow(idx, 'observation', e.target.value)} rows="1" /></td>
+                        <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeSpRow(idx)}><FiTrash2 /></button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {spRows.length > 0 && (
+            <div className="text-end mt-2">
+              <button className="btn btn-success" onClick={handleSpSave} disabled={spSaving}>
+                {spSaving ? 'Saving...' : 'Save All Rows'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header"><h6 className="mb-0">Saved Records</h6></div>
+        <div className="card-body p-0">
+          {spItems.length === 0 ? (
+            <div className="text-center text-muted p-4">No supply progress records yet</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
+                <thead className="table-light">
+                  <tr>
+                    <th style={{whiteSpace:'nowrap'}}>Date</th>
+                    <th style={{whiteSpace:'nowrap'}}>Project</th>
+                    <th style={{whiteSpace:'nowrap'}}>Type</th>
+                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
+                    <th style={{whiteSpace:'nowrap'}}>Item ID</th>
+                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
+                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
+                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
+                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Exec Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Perf.%</th>
+                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
+                    <th style={{whiteSpace:'nowrap'}}>Observation</th>
+                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {spItems.map(item => (
+                    <tr key={item.id}>
+                      <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
+                      <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId}</code></td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.boqQuantities}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.executedQuantities}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.performancePercentage != null ? `${item.performancePercentage}%` : '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
+                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observation}>{item.observation}</td>
+                      <td style={{whiteSpace:'nowrap'}}>
+                        <div className="d-flex gap-1 flex-nowrap">
+                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openSpModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openSpModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteSpItem(item.id)}><FiTrash2 /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      {renderSpModal()}
+    </div>
+  );
+
   const exportBoqPdf = () => {
     if (boqItems.length === 0) { toast.error('No records to export'); return; }
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
@@ -2004,6 +2453,11 @@ function ProjectActions() {
             <FiFileText className="me-2" /> BOQ
           </button>
         </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'supplyProgress' ? 'active' : ''}`} onClick={() => setActiveTab('supplyProgress')}>
+            <FiPackage className="me-2" /> Supply Progress
+          </button>
+        </li>
       </ul>
 
       <div className="card">
@@ -2015,6 +2469,7 @@ function ProjectActions() {
             activeTab === 'goods' ? renderGoodsTable() :
             activeTab === 'designWork' ? renderDesignWorkProgress() :
             activeTab === 'boq' ? renderBoq() :
+            activeTab === 'supplyProgress' ? renderSupplyProgress() :
             renderMonitoringTable()
           )}
         </div>

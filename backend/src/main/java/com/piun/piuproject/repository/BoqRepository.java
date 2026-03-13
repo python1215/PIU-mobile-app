@@ -10,4 +10,5 @@ import java.util.List;
 public interface BoqRepository extends JpaRepository<Boq, Long> {
     List<Boq> findByProject_ProjectIdOrderByDateCreatedDesc(String projectId);
     List<Boq> findAllByOrderByDateCreatedDesc();
+    List<Boq> findByContractRefNoOrderByDateCreatedDesc(String contractRefNo);
 }

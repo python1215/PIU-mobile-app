@@ -6,6 +6,7 @@ com/piun/piuproject/model/NatureOfSettlement.class
 com/piun/piuproject/model/IssueAction.class
 com/piun/piuproject/model/ESIA.class
 com/piun/piuproject/model/InvestmentType.class
+com/piun/piuproject/model/SupplyProgress.class
 com/piun/piuproject/model/AccessType.class
 com/piun/piuproject/model/User.class
 com/piun/piuproject/repository/RegionRepository.class
@@ -43,6 +44,7 @@ com/piun/piuproject/model/Quarter.class
 com/piun/piuproject/repository/PDORepository.class
 com/piun/piuproject/controller/AuthController.class
 com/piun/piuproject/repository/DocumentVersionRepository.class
+com/piun/piuproject/repository/SupplyProgressRepository.class
 com/piun/piuproject/controller/SpaController.class
 com/piun/piuproject/config/GlobalExceptionHandler.class
 com/piun/piuproject/model/SettlementWithCoordinates.class
