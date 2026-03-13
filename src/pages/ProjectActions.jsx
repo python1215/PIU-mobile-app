@@ -1825,14 +1825,14 @@ function ProjectActions() {
                       <tr key={row.tempId}>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
-                          <select className="form-select form-select-sm" value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)}>
-                            <option value="">Select Activity</option>
-                            {spBoqActivities.map((b, bi) => (<option key={bi} value={b.activity}>{b.activity}</option>))}
-                          </select>
+                          <input type="text" className="form-control form-control-sm" list={`sp-activities-${row.tempId}`} value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)} placeholder="Select or type activity" />
+                          <datalist id={`sp-activities-${row.tempId}`}>
+                            {spBoqActivities.map((b, bi) => (<option key={bi} value={b.activity} />))}
+                          </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateSpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.unit} readOnly /></td>
-                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.boqQuantities} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateSpRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.boqQuantities} onChange={e => updateSpRow(idx, 'boqQuantities', e.target.value)} step="0.01" /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateSpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
