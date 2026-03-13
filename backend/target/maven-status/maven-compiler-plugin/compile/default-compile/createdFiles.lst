@@ -22,6 +22,7 @@ com/piun/piuproject/model/PAP.class
 com/piun/piuproject/repository/DistrictRepository.class
 com/piun/piuproject/model/IndicatorDescription.class
 com/piun/piuproject/controller/MonitoringController.class
+com/piun/piuproject/model/Boq.class
 com/piun/piuproject/repository/NawecInfrastructureRepository.class
 com/piun/piuproject/model/ResultsOrientedMonitoring.class
 com/piun/piuproject/model/Year.class
@@ -129,6 +130,7 @@ com/piun/piuproject/model/Component.class
 com/piun/piuproject/security/JwtTokenProvider.class
 com/piun/piuproject/repository/VulnerabilityCategoryRepository.class
 com/piun/piuproject/repository/IssueActionSourceRepository.class
+com/piun/piuproject/repository/BoqRepository.class
 com/piun/piuproject/model/Ward.class
 com/piun/piuproject/model/StakeholderEngagementType.class
 com/piun/piuproject/controller/FinancialController.class

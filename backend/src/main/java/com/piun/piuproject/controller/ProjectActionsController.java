@@ -39,6 +39,9 @@ public class ProjectActionsController {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private BoqRepository boqRepository;
+
     @GetMapping("/works")
     public List<ContractProfilingWorks> getAllWorks() {
         return worksRepository.findAll();
@@ -299,6 +302,55 @@ public class ProjectActionsController {
         return designWorkProgressRepository.findById(id)
             .map(item -> {
                 designWorkProgressRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/boq")
+    public List<Boq> getAllBoq() {
+        return boqRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/boq/project/{projectId}")
+    public List<Boq> getBoqByProject(@PathVariable String projectId) {
+        return boqRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @PostMapping("/boq")
+    public Boq createBoq(@RequestBody Boq item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return boqRepository.save(item);
+    }
+
+    @PostMapping("/boq/batch")
+    public List<Boq> createBoqBatch(@RequestBody List<Boq> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return boqRepository.saveAll(items);
+    }
+
+    @PutMapping("/boq/{id}")
+    public ResponseEntity<Boq> updateBoq(@PathVariable Long id, @RequestBody Boq details) {
+        return boqRepository.findById(id)
+            .map(item -> {
+                item.setEntryDate(details.getEntryDate());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setItemId(details.getItemId());
+                item.setActivity(details.getActivity());
+                item.setUnit(details.getUnit());
+                item.setBoqQuantity(details.getBoqQuantity());
+                return ResponseEntity.ok(boqRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/boq/{id}")
+    public ResponseEntity<Void> deleteBoq(@PathVariable Long id) {
+        return boqRepository.findById(id)
+            .map(item -> {
+                boqRepository.delete(item);
                 return ResponseEntity.ok().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());

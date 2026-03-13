@@ -55,6 +55,18 @@ function ProjectActions() {
   const [dwpModalMode, setDwpModalMode] = useState('view');
   const [dwpEditForm, setDwpEditForm] = useState({});
 
+  const [boqItems, setBoqItems] = useState([]);
+  const [boqDate, setBoqDate] = useState('');
+  const [boqProject, setBoqProject] = useState('');
+  const [boqContractType, setBoqContractType] = useState('');
+  const [boqContractRefNo, setBoqContractRefNo] = useState('');
+  const [boqContractOptions, setBoqContractOptions] = useState([]);
+  const [boqRows, setBoqRows] = useState([]);
+  const [boqSaving, setBoqSaving] = useState(false);
+  const [boqModalItem, setBoqModalItem] = useState(null);
+  const [boqModalMode, setBoqModalMode] = useState('view');
+  const [boqEditForm, setBoqEditForm] = useState({});
+
   const uniqueInvestmentTypes = useMemo(() => {
     const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
     return types;
@@ -143,16 +155,18 @@ function ProjectActions() {
     setLoading(true);
     try {
       const isAll = selectedProject === 'all';
-      const [worksRes, goodsRes, monRes, dwpRes] = await Promise.all([
+      const [worksRes, goodsRes, monRes, dwpRes, boqRes] = await Promise.all([
         isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
       setMonitoring(monRes.data);
       setDesignWorkItems(dwpRes.data);
+      setBoqItems(boqRes.data);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -1248,6 +1262,398 @@ function ProjectActions() {
     );
   };
 
+  const handleBoqContractTypeChange = async (type) => {
+    setBoqContractType(type);
+    setBoqContractRefNo('');
+    setBoqContractOptions([]);
+    if (!type || !boqProject) return;
+    try {
+      const endpoint = type === 'works'
+        ? `/api/project-actions/works/project/${boqProject}`
+        : `/api/project-actions/goods/project/${boqProject}`;
+      const res = await axios.get(endpoint);
+      setBoqContractOptions(res.data.filter(c => c.contractRefNo));
+    } catch (e) {
+      console.error('Error loading contracts:', e);
+    }
+  };
+
+  const handleBoqProjectChange = (projId) => {
+    setBoqProject(projId);
+    setBoqContractType('');
+    setBoqContractRefNo('');
+    setBoqContractOptions([]);
+  };
+
+  const generateBoqItemId = (refNo) => {
+    const rand = Math.floor(100 + Math.random() * 900);
+    return `${refNo || 'ITM'}-${rand}`;
+  };
+
+  const addBoqRow = () => {
+    setBoqRows(prev => [...prev, {
+      tempId: Date.now(),
+      itemId: generateBoqItemId(boqContractRefNo),
+      activity: '',
+      unit: '',
+      boqQuantity: ''
+    }]);
+  };
+
+  const updateBoqRow = (idx, field, value) => {
+    setBoqRows(prev => prev.map((row, i) => i === idx ? { ...row, [field]: value } : row));
+  };
+
+  const removeBoqRow = (idx) => {
+    setBoqRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleBoqSave = async () => {
+    if (!boqDate || !boqProject || !boqContractType || !boqContractRefNo) {
+      toast.error('Please fill in Date, Project, Contract Type, and Contract Reference');
+      return;
+    }
+    if (boqRows.length === 0) {
+      toast.error('Please add at least one item row');
+      return;
+    }
+    setBoqSaving(true);
+    try {
+      const items = boqRows.map(row => ({
+        entryDate: boqDate,
+        project: { projectId: boqProject },
+        contractType: boqContractType,
+        contractRefNo: boqContractRefNo,
+        itemId: row.itemId,
+        activity: row.activity,
+        unit: row.unit,
+        boqQuantity: parseFloat(row.boqQuantity) || 0
+      }));
+      await axios.post('/api/project-actions/boq/batch', items);
+      toast.success('BOQ items saved successfully');
+      setBoqRows([]);
+      setBoqDate('');
+      setBoqContractType('');
+      setBoqContractRefNo('');
+      setBoqContractOptions([]);
+      loadContracts();
+    } catch (e) {
+      toast.error('Error saving BOQ items');
+      console.error(e);
+    } finally {
+      setBoqSaving(false);
+    }
+  };
+
+  const handleDeleteBoqItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axios.delete(`/api/project-actions/boq/${id}`);
+      toast.success('Item deleted');
+      loadContracts();
+    } catch (e) {
+      toast.error('Error deleting item');
+    }
+  };
+
+  const openBoqModal = (item, mode) => {
+    setBoqModalMode(mode);
+    setBoqModalItem(item);
+    if (mode === 'edit') {
+      setBoqEditForm({
+        entryDate: item.entryDate || '',
+        contractType: item.contractType || '',
+        contractRefNo: item.contractRefNo || '',
+        itemId: item.itemId || '',
+        activity: item.activity || '',
+        unit: item.unit || '',
+        boqQuantity: item.boqQuantity ?? ''
+      });
+    }
+  };
+
+  const closeBoqModal = () => {
+    setBoqModalItem(null);
+    setBoqModalMode('view');
+    setBoqEditForm({});
+  };
+
+  const handleBoqEditSave = async () => {
+    if (!boqModalItem) return;
+    try {
+      await axios.put(`/api/project-actions/boq/${boqModalItem.id}`, {
+        ...boqModalItem,
+        entryDate: boqEditForm.entryDate,
+        contractType: boqEditForm.contractType,
+        contractRefNo: boqEditForm.contractRefNo,
+        itemId: boqEditForm.itemId,
+        activity: boqEditForm.activity,
+        unit: boqEditForm.unit,
+        boqQuantity: parseFloat(boqEditForm.boqQuantity) || 0
+      });
+      toast.success('Record updated successfully');
+      closeBoqModal();
+      loadContracts();
+    } catch (e) {
+      toast.error('Error updating record');
+      console.error(e);
+    }
+  };
+
+  const renderBoqModal = () => {
+    if (!boqModalItem) return null;
+    const isView = boqModalMode === 'view';
+    const item = boqModalItem;
+    const form = boqEditForm;
+    return (
+      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeBoqModal}>
+        <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{isView ? 'View BOQ Record' : 'Edit BOQ Record'}</h5>
+              <button type="button" className="btn-close" onClick={closeBoqModal}></button>
+            </div>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Date</label>
+                  {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setBoqEditForm(f => ({...f, entryDate: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Project</label>
+                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Type</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setBoqEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works Contracts</option><option value="goods">Goods and Services</option></select>}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  {isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setBoqEditForm(f => ({...f, contractRefNo: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Item ID</label>
+                  {isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Activity</label>
+                  {isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setBoqEditForm(f => ({...f, activity: e.target.value}))} />}
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Unit</label>
+                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setBoqEditForm(f => ({...f, unit: e.target.value}))} />}
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">BOQ Quantity</label>
+                  {isView ? <p className="form-control-plaintext">{item.boqQuantity}</p> : <input type="number" className="form-control" value={form.boqQuantity} onChange={e => setBoqEditForm(f => ({...f, boqQuantity: e.target.value}))} step="0.01" />}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              {isView ? (
+                <>
+                  <button className="btn btn-primary" onClick={() => { setBoqModalMode('edit'); setBoqEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', unit: item.unit || '', boqQuantity: item.boqQuantity ?? '' }); }}><FiEdit2 className="me-1" /> Edit</button>
+                  <button className="btn btn-secondary" onClick={closeBoqModal}>Close</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-success" onClick={handleBoqEditSave}>Save Changes</button>
+                  <button className="btn btn-secondary" onClick={closeBoqModal}>Cancel</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const exportBoqPdf = () => {
+    if (boqItems.length === 0) { toast.error('No records to export'); return; }
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(13);
+    doc.text('Bill of Quantities (BOQ)', pageWidth / 2, 23, { align: 'center' });
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
+    const grouped = {};
+    boqItems.forEach(item => { const key = item.contractRefNo || 'Unknown'; if (!grouped[key]) grouped[key] = []; grouped[key].push(item); });
+    let startY = 36;
+    Object.keys(grouped).forEach(contractRef => {
+      const items = grouped[contractRef];
+      const projectName = items[0]?.project?.project || items[0]?.project?.projectId || '-';
+      const contractType = items[0]?.contractType === 'works' ? 'Works Contract' : 'Goods & Services';
+      if (startY > pageHeight - 40) { doc.addPage(); startY = 15; }
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.text(`Contract Ref: ${contractRef}`, 14, startY);
+      doc.setFont(undefined, 'normal'); doc.setFontSize(8);
+      doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
+      autoTable(doc, {
+        head: [['#', 'Date', 'Item ID', 'Activity', 'Unit', 'BOQ Quantity']],
+        body: items.map((item, idx) => [idx + 1, item.entryDate || '-', item.itemId || '-', item.activity || '-', item.unit || '-', item.boqQuantity != null ? item.boqQuantity : '-']),
+        startY: startY + 8,
+        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: 14, right: 14 },
+        tableWidth: pageWidth - 28
+      });
+      startY = doc.lastAutoTable.finalY + 12;
+    });
+    doc.save(`BOQ_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF report downloaded');
+  };
+
+  const renderBoq = () => (
+    <div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">Bill of Quantities (BOQ)</h6>
+          {boqItems.length > 0 && (
+            <button className="btn btn-sm btn-light" onClick={exportBoqPdf}>
+              <FiDownload className="me-1" /> Export PDF
+            </button>
+          )}
+        </div>
+        <div className="card-body">
+          <div className="row g-3 mb-2">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Date</label>
+              <input type="date" className="form-control" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Project</label>
+              <select className="form-select" value={boqProject} onChange={e => handleBoqProjectChange(e.target.value)}>
+                <option value="">Select Project</option>
+                {projects.map(p => (
+                  <option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="row g-3 mb-3">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Type</label>
+              <select className="form-select" value={boqContractType} onChange={e => handleBoqContractTypeChange(e.target.value)} disabled={!boqProject}>
+                <option value="">Select Type</option>
+                <option value="works">Works Contracts</option>
+                <option value="goods">Goods and Services</option>
+              </select>
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <select className="form-select" value={boqContractRefNo} onChange={e => {
+                setBoqContractRefNo(e.target.value);
+                setBoqRows(prev => prev.map(row => ({ ...row, itemId: generateBoqItemId(e.target.value) })));
+              }} disabled={!boqContractType}>
+                <option value="">Select Reference</option>
+                {boqContractOptions.map((c, i) => (
+                  <option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">Item Rows</h6>
+            <button type="button" className="btn btn-sm btn-primary" onClick={addBoqRow} disabled={!boqContractRefNo}>
+              <FiPlus className="me-1" /> Add Row
+            </button>
+          </div>
+
+          {boqRows.length > 0 && (
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th style={{minWidth:'120px'}}>Item ID</th>
+                    <th style={{minWidth:'180px'}}>Activity</th>
+                    <th style={{minWidth:'80px'}}>Unit</th>
+                    <th style={{minWidth:'120px'}}>BOQ Quantity</th>
+                    <th style={{width:'50px'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boqRows.map((row, idx) => (
+                    <tr key={row.tempId}>
+                      <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
+                      <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateBoqRow(idx, 'activity', e.target.value)} placeholder="Activity name" /></td>
+                      <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateBoqRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                      <td><input type="number" className="form-control form-control-sm" value={row.boqQuantity} onChange={e => updateBoqRow(idx, 'boqQuantity', e.target.value)} step="0.01" /></td>
+                      <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeBoqRow(idx)}><FiTrash2 /></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {boqRows.length > 0 && (
+            <div className="text-end mt-2">
+              <button className="btn btn-success" onClick={handleBoqSave} disabled={boqSaving}>
+                {boqSaving ? 'Saving...' : 'Save All Rows'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h6 className="mb-0">Saved Records</h6>
+        </div>
+        <div className="card-body p-0">
+          {boqItems.length === 0 ? (
+            <div className="text-center text-muted p-4">No BOQ records yet</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
+                <thead className="table-light">
+                  <tr>
+                    <th style={{whiteSpace:'nowrap'}}>Date</th>
+                    <th style={{whiteSpace:'nowrap'}}>Project</th>
+                    <th style={{whiteSpace:'nowrap'}}>Type</th>
+                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
+                    <th style={{whiteSpace:'nowrap'}}>Item ID</th>
+                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
+                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
+                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boqItems.map(item => (
+                    <tr key={item.id}>
+                      <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || item.project?.projectId || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
+                      <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId}</code></td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'150px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.boqQuantity}</td>
+                      <td style={{whiteSpace:'nowrap'}}>
+                        <div className="d-flex gap-1 flex-nowrap">
+                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openBoqModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openBoqModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteBoqItem(item.id)}><FiTrash2 /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      {renderBoqModal()}
+    </div>
+  );
+
   const exportDwpPdf = () => {
     if (designWorkItems.length === 0) {
       toast.error('No records to export');
@@ -1593,6 +1999,11 @@ function ProjectActions() {
             <FiClipboard className="me-2" /> Design Work Progress
           </button>
         </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'boq' ? 'active' : ''}`} onClick={() => setActiveTab('boq')}>
+            <FiFileText className="me-2" /> BOQ
+          </button>
+        </li>
       </ul>
 
       <div className="card">
@@ -1603,6 +2014,7 @@ function ProjectActions() {
             activeTab === 'works' ? renderWorksTable() :
             activeTab === 'goods' ? renderGoodsTable() :
             activeTab === 'designWork' ? renderDesignWorkProgress() :
+            activeTab === 'boq' ? renderBoq() :
             renderMonitoringTable()
           )}
         </div>

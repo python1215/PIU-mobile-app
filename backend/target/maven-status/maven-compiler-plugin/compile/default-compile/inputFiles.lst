@@ -27,6 +27,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/dto/RegisterRequest.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/AccessType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Activity.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Boq.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/CommunityEngagement.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Component.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ContractProfilingGoods.java
@@ -90,6 +91,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Year.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/AccessTypeRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ActivityRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/BoqRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/CommunityEngagementRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ComponentRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ContractProfilingGoodsRepository.java
