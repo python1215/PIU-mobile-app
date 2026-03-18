@@ -42,11 +42,20 @@ function ProjectActions() {
     const s = new Date(start);
     const e = new Date(end);
     if (isNaN(s) || isNaN(e) || e <= s) return '';
-    const diffMs = e - s;
-    const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    if (days < 30) return `${days} day${days !== 1 ? 's' : ''}`;
-    const months = Math.round(days / 30.44);
-    return `${months} month${months !== 1 ? 's' : ''}`;
+    let years = e.getFullYear() - s.getFullYear();
+    let months = e.getMonth() - s.getMonth();
+    let days = e.getDate() - s.getDate();
+    if (days < 0) {
+      months--;
+      const prev = new Date(e.getFullYear(), e.getMonth(), 0).getDate();
+      days += prev;
+    }
+    if (months < 0) { years--; months += 12; }
+    const parts = [];
+    if (years > 0) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
+    if (months > 0) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
+    if (days > 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+    return parts.join(', ') || '0 days';
   };
 
   const [showContractSelector, setShowContractSelector] = useState(false);
