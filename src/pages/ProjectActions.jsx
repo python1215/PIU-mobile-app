@@ -283,9 +283,6 @@ function ProjectActions() {
       fundingSource: data.fundingSourceId ? { donorId: parseInt(data.fundingSourceId) } : null,
       mainInterventionFocus: data.mainInterventionFocus || null,
       targetBeneficiarySettlements: data.targetBeneficiarySettlements ? parseInt(data.targetBeneficiarySettlements) : null,
-      locationOfInvestment: data.locationOfInvestment || null,
-      latitude: data.latitude ? parseFloat(data.latitude) : null,
-      longitude: data.longitude ? parseFloat(data.longitude) : null,
       grossFloorAreaM2: data.grossFloorAreaM2 ? parseInt(data.grossFloorAreaM2) : null,
       currency: data.currencyId ? { id: parseInt(data.currencyId) } : null,
       contractValue: data.contractValue ? parseFloat(data.contractValue) : null,
@@ -486,9 +483,6 @@ function ProjectActions() {
               <th>{t('projectActions.fundingSource')}</th>
               <th>{t('projectActions.mainInterventionFocus')}</th>
               <th>{t('projectActions.targetBeneficiarySettlements')}</th>
-              <th>{t('projectActions.locationOfInvestment')}</th>
-              <th>{t('projectActions.latitude')}</th>
-              <th>{t('projectActions.longitude')}</th>
               <th>{t('projectActions.grossFloorArea')}</th>
               <th>{t('financial.currency')}</th>
               <th className="text-end">{t('projectActions.contractValue')}</th>
@@ -505,7 +499,7 @@ function ProjectActions() {
           </thead>
           <tbody>
             {works.length === 0 ? (
-              <tr><td colSpan="23" className="text-center text-muted">{t('table.noData')}</td></tr>
+              <tr><td colSpan="20" className="text-center text-muted">{t('table.noData')}</td></tr>
             ) : (
               works.map((item) => (
                 <tr key={item.id}>
@@ -517,9 +511,6 @@ function ProjectActions() {
                   <td>{item.fundingSource?.name || '-'}</td>
                   <td>{item.mainInterventionFocus || '-'}</td>
                   <td>{item.targetBeneficiarySettlements || '-'}</td>
-                  <td>{item.locationOfInvestment || '-'}</td>
-                  <td>{item.latitude || '-'}</td>
-                  <td>{item.longitude || '-'}</td>
                   <td>{item.grossFloorAreaM2 || '-'}</td>
                   <td>{item.currency?.currency || '-'}</td>
                   <td className="text-end">{formatCurrency(item.contractValue)}</td>
@@ -750,22 +741,6 @@ function ProjectActions() {
                 <div className="col-md-3">
                   <label className="form-label fw-medium">{t('projectActions.grossFloorArea')}</label>
                   <input type="number" name="grossFloorAreaM2" defaultValue={editingItem?.grossFloorAreaM2} className="form-control" />
-                </div>
-              </div>
-
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.locationOfInvestment')}</h6>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label fw-medium">{t('projectActions.locationOfInvestment')}</label>
-                  <input name="locationOfInvestment" defaultValue={editingItem?.locationOfInvestment} className="form-control" />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-medium">{t('projectActions.latitude')}</label>
-                  <input type="number" step="any" name="latitude" defaultValue={editingItem?.latitude} className="form-control" />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-medium">{t('projectActions.longitude')}</label>
-                  <input type="number" step="any" name="longitude" defaultValue={editingItem?.longitude} className="form-control" />
                 </div>
               </div>
 
@@ -3161,7 +3136,6 @@ function ProjectActions() {
                               <div className="col-md-6"><strong>{t('projectActions.amendments')}:</strong> {contract.amendments ? t('common.yes') : t('common.no')}</div>
                               {contractSelectorType === 'works' && (
                                 <>
-                                  <div className="col-md-6"><strong>{t('projectActions.locationOfInvestment')}:</strong> {contract.locationOfInvestment || '-'}</div>
                                   <div className="col-md-6"><strong>{t('projectActions.grossFloorArea')}:</strong> {contract.grossFloorAreaM2 || '-'}</div>
                                   <div className="col-md-6"><strong>{t('projectActions.mainInterventionFocus')}:</strong> {contract.mainInterventionFocus || '-'}</div>
                                 </>
