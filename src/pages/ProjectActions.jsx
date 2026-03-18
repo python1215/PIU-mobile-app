@@ -1055,9 +1055,6 @@ function ProjectActions() {
         rate: parseFloat(row.rate) || 0,
         unit: row.unit,
         provisionalQuantities: parseFloat(row.provisionalQuantities) || 0,
-        executedQuantities: parseFloat(row.executedQuantities) || 0,
-        percentage: calcPercentage(row.provisionalQuantities, row.executedQuantities),
-        globalProgressRate: calcGlobalProgressRate(row.rate),
         observations: row.observations
       }));
       await axios.post('/api/project-actions/design-work-progress/batch', items);
@@ -1100,7 +1097,6 @@ function ProjectActions() {
         rate: item.rate ?? '',
         unit: item.unit || '',
         provisionalQuantities: item.provisionalQuantities ?? '',
-        executedQuantities: item.executedQuantities ?? '',
         observations: item.observations || ''
       });
     }
@@ -1115,8 +1111,6 @@ function ProjectActions() {
   const handleDwpEditSave = async () => {
     if (!dwpModalItem) return;
     try {
-      const pct = calcPercentage(dwpEditForm.provisionalQuantities, dwpEditForm.executedQuantities);
-      const gpr = calcGlobalProgressRate(dwpEditForm.rate);
       await axios.put(`/api/project-actions/design-work-progress/${dwpModalItem.id}`, {
         ...dwpModalItem,
         monitoringDate: dwpEditForm.monitoringDate,
@@ -1127,9 +1121,6 @@ function ProjectActions() {
         rate: parseFloat(dwpEditForm.rate) || 0,
         unit: dwpEditForm.unit,
         provisionalQuantities: parseFloat(dwpEditForm.provisionalQuantities) || 0,
-        executedQuantities: parseFloat(dwpEditForm.executedQuantities) || 0,
-        percentage: pct,
-        globalProgressRate: gpr,
         observations: dwpEditForm.observations
       });
       toast.success('Record updated successfully');
@@ -1146,9 +1137,6 @@ function ProjectActions() {
     const isView = dwpModalMode === 'view';
     const item = dwpModalItem;
     const form = dwpEditForm;
-    const editPct = !isView ? calcPercentage(form.provisionalQuantities, form.executedQuantities) : null;
-    const editGpr = !isView ? calcGlobalProgressRate(form.rate) : null;
-
     return (
       <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeDwpModal}>
         <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
@@ -1230,22 +1218,6 @@ function ProjectActions() {
                     <input type="number" className="form-control" value={form.provisionalQuantities} onChange={e => setDwpEditForm(f => ({...f, provisionalQuantities: e.target.value}))} step="0.01" />
                   )}
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-semibold">Executed Qty</label>
-                  {isView ? (
-                    <p className="form-control-plaintext">{item.executedQuantities}</p>
-                  ) : (
-                    <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setDwpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />
-                  )}
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">Percentage</label>
-                  <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">Global Progress Rate</label>
-                  <p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p>
-                </div>
                 <div className="col-12">
                   <label className="form-label fw-semibold">Observations</label>
                   {isView ? (
@@ -1259,7 +1231,7 @@ function ProjectActions() {
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ monitoringDate: item.monitoringDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observations: item.observations || '' }); }}>
+                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ monitoringDate: item.monitoringDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', observations: item.observations || '' }); }}>
                     <FiEdit2 className="me-1" /> Edit
                   </button>
                   <button className="btn btn-secondary" onClick={closeDwpModal}>Close</button>
@@ -2149,7 +2121,7 @@ function ProjectActions() {
       doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
 
       autoTable(doc, {
-        head: [['#', 'Date', 'Activity ID', 'Activity', 'Rate (%)', 'Unit', 'Prov. Qty', 'Exec. Qty', '%', 'Global Rate', 'Observations']],
+        head: [['#', 'Date', 'Activity ID', 'Activity', 'Rate (%)', 'Unit', 'Prov. Qty', 'Observations']],
         body: items.map((item, idx) => [
           idx + 1,
           item.monitoringDate || '-',
@@ -2158,9 +2130,6 @@ function ProjectActions() {
           item.rate != null ? `${item.rate}%` : '-',
           item.unit || '-',
           item.provisionalQuantities != null ? item.provisionalQuantities : '-',
-          item.executedQuantities != null ? item.executedQuantities : '-',
-          item.percentage != null ? `${item.percentage}%` : '-',
-          item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-',
           item.observations || '-'
         ]),
         startY: startY + 8,
@@ -2171,16 +2140,13 @@ function ProjectActions() {
         tableWidth: pageWidth - 20,
         columnStyles: {
           0: { cellWidth: 8 },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 20 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 22 },
           3: { cellWidth: 'auto' },
-          4: { cellWidth: 14 },
-          5: { cellWidth: 12 },
-          6: { cellWidth: 16 },
-          7: { cellWidth: 16 },
-          8: { cellWidth: 14 },
-          9: { cellWidth: 18 },
-          10: { cellWidth: 'auto' }
+          4: { cellWidth: 16 },
+          5: { cellWidth: 14 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 'auto' }
         }
       });
 
@@ -2258,17 +2224,12 @@ function ProjectActions() {
                     <th style={{minWidth:'80px'}}>Rate (%)</th>
                     <th style={{minWidth:'80px'}}>Unit</th>
                     <th style={{minWidth:'120px'}}>Provisional Qty</th>
-                    <th style={{minWidth:'120px'}}>Executed Qty</th>
-                    <th style={{minWidth:'90px'}}>Percentage</th>
-                    <th style={{minWidth:'120px'}}>Global Progress Rate</th>
                     <th style={{minWidth:'180px'}}>Observations</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {dwpRows.map((row, idx) => {
-                    const pct = calcPercentage(row.provisionalQuantities, row.executedQuantities);
-                    const gpr = calcGlobalProgressRate(row.rate);
                     return (
                       <tr key={row.tempId}>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.activityId} readOnly /></td>
@@ -2276,9 +2237,6 @@ function ProjectActions() {
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateDwpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
                         <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.provisionalQuantities} onChange={e => updateDwpRow(idx, 'provisionalQuantities', e.target.value)} step="0.01" /></td>
-                        <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateDwpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
                         <td><textarea className="form-control form-control-sm" value={row.observations} onChange={e => updateDwpRow(idx, 'observations', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeDwpRow(idx)}><FiTrash2 /></button></td>
                       </tr>
@@ -2320,9 +2278,6 @@ function ProjectActions() {
                     <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
                     <th style={{whiteSpace:'nowrap'}}>Unit</th>
                     <th style={{whiteSpace:'nowrap'}}>Prov.Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Exec.Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>%</th>
-                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
                     <th style={{whiteSpace:'nowrap'}}>Observations</th>
                     <th style={{whiteSpace:'nowrap'}}>Actions</th>
                   </tr>
@@ -2339,9 +2294,6 @@ function ProjectActions() {
                       <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.provisionalQuantities}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.executedQuantities}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
                       <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observations}>{item.observations}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
