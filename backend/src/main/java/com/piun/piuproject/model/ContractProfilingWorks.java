@@ -79,7 +79,7 @@ public class ContractProfilingWorks {
     @Column(name = "contract_end_date")
     private LocalDate contractEndDate;
 
-    @Column(name = "duration", length = 20)
+    @Column(name = "duration", length = 100)
     private String duration;
 
     @Column(name = "remarks", columnDefinition = "TEXT")
