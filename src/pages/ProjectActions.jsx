@@ -663,16 +663,15 @@ function ProjectActions() {
           </div>
           <form onSubmit={handleWorksSave}>
             <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              <h6 className="text-muted border-bottom pb-2 mb-3">{t('financial.project')} & {t('financial.components')}</h6>
               <div className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('financial.project')}</label>
                   <select className="form-select" value={worksFormProject} onChange={e => { setWorksFormProject(e.target.value); setWorksFormComp(''); setWorksFormSubcomp(''); }}>
                     <option value="">----------</option>
                     {projects.map(p => <option key={p.projectId} value={p.projectId}>{p.project}</option>)}
                   </select>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('financial.components')}</label>
                   <select name="componentId" value={worksFormComp} onChange={e => { setWorksFormComp(e.target.value); setWorksFormSubcomp(''); }} className="form-select">
                     <option value="">----------</option>
@@ -681,7 +680,7 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('financial.subcomponents')}</label>
                   <select name="subcomponentId" value={worksFormSubcomp} onChange={e => setWorksFormSubcomp(e.target.value)} className="form-select" disabled={!worksFormComp}>
                     <option value="">----------</option>
@@ -690,7 +689,7 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('financial.activities')}</label>
                   <select name="activityId" className="form-select" defaultValue={editingItem?.activity?.activityId || ''} disabled={!worksFormSubcomp}>
                     <option value="">----------</option>
@@ -726,26 +725,18 @@ function ProjectActions() {
                     ))}
                   </select>
                 </div>
-              </div>
-
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.mainInterventionFocus')}</h6>
-              <div className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.mainInterventionFocus')}</label>
                   <input name="mainInterventionFocus" defaultValue={editingItem?.mainInterventionFocus} className="form-control" />
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.targetBeneficiarySettlements')}</label>
                   <input type="number" name="targetBeneficiarySettlements" defaultValue={editingItem?.targetBeneficiarySettlements} className="form-control" />
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.grossFloorArea')}</label>
                   <input type="number" name="grossFloorAreaM2" defaultValue={editingItem?.grossFloorAreaM2} className="form-control" />
                 </div>
-              </div>
-
-              <h6 className="text-muted border-bottom pb-2 mb-3 mt-4">{t('projectActions.contractValue')} & {t('common.details')}</h6>
-              <div className="row g-3">
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('projectActions.contractValue')}</label>
                   <input type="number" step="0.01" name="contractValue" defaultValue={editingItem?.contractValue} className="form-control" />
@@ -770,16 +761,16 @@ function ProjectActions() {
                   <input name="nameOfConsultant" defaultValue={editingItem?.nameOfConsultant} className="form-control" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-medium">{t('common.duration')}</label>
-                  <input name="duration" defaultValue={editingItem?.duration} className="form-control" />
-                </div>
-                <div className="col-md-4">
                   <label className="form-label fw-medium">{t('common.startDate')}</label>
                   <input type="date" name="contractStartDate" defaultValue={editingItem?.contractStartDate} className="form-control" />
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('common.endDate')}</label>
                   <input type="date" name="contractEndDate" defaultValue={editingItem?.contractEndDate} className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium">{t('common.duration')}</label>
+                  <input name="duration" defaultValue={editingItem?.duration} className="form-control" />
                 </div>
                 <div className="col-12">
                   <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
