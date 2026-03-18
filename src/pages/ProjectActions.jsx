@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -2145,12 +2145,30 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">Prov. Staking Qty</label>
-                  {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className="form-control" value={form.provisionalStakingQty} onChange={e => setInstEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
+                  {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className={`form-control ${!isView && (parseFloat(form.provisionalStakingQty) || 0) > (parseFloat(form.suppliedQty) || 0) && (parseFloat(form.suppliedQty) || 0) > 0 ? 'border-danger' : ''}`} value={form.provisionalStakingQty} onChange={e => setInstEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">Executed Qty</label>
                   {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => setInstEditForm(f => ({...f, executedQty: e.target.value}))} step="0.01" />}
                 </div>
+                {!isView && (() => {
+                  const mSupplied = parseFloat(form.suppliedQty) || 0;
+                  const mBoq = parseFloat(form.boqQty) || 0;
+                  const mProv = parseFloat(form.provisionalStakingQty) || 0;
+                  const mSupErr = mSupplied > mBoq && mBoq > 0;
+                  const mStaErr = mProv > mSupplied && mSupplied > 0;
+                  return (mSupErr || mStaErr) ? (
+                    <div className="col-12">
+                      <div className="alert alert-warning py-2 px-3 small d-flex align-items-center">
+                        <FiAlertTriangle className="me-2 flex-shrink-0" />
+                        <div>
+                          {mSupErr && <div>Supplied Qty ({mSupplied}) cannot be greater than BOQ Qty ({mBoq}). Please correct.</div>}
+                          {mStaErr && <div>Prov. Staking Qty ({mProv}) cannot be greater than Supplied Qty ({mSupplied}). Please correct.</div>}
+                        </div>
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">Percentage</label>
                   <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
@@ -2310,7 +2328,8 @@ function ProjectActions() {
                     const suppliedError = supplied > boq && boq > 0;
                     const stakingError = provStaking > supplied && supplied > 0;
                     return (
-                      <tr key={row.tempId}>
+                      <React.Fragment key={row.tempId}>
+                      <tr>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
                           <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder="Select or type activity" />
@@ -2321,14 +2340,26 @@ function ProjectActions() {
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateInstRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
                         <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light`} value={row.boqQty} readOnly /></td>
-                        <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly title={suppliedError ? 'Supplied Qty > BOQ Qty' : ''} /></td>
-                        <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" title={stakingError ? 'Cannot exceed Supplied Qty' : ''} /></td>
+                        <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly /></td>
+                        <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.executedQty} onChange={e => updateInstRow(idx, 'executedQty', e.target.value)} step="0.01" /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
                         <td><textarea className="form-control form-control-sm" value={row.observation} onChange={e => updateInstRow(idx, 'observation', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeInstRow(idx)}><FiTrash2 /></button></td>
                       </tr>
+                      {(suppliedError || stakingError) && (
+                        <tr>
+                          <td colSpan="12" className="p-0 border-0">
+                            <div className="alert alert-warning py-1 px-2 mb-0 small d-flex align-items-center" style={{borderRadius: 0}}>
+                              <FiAlertTriangle className="me-1 flex-shrink-0" />
+                              {suppliedError && <span className="me-3"><strong>Row {idx + 1}:</strong> Supplied Qty ({supplied}) cannot be greater than BOQ Qty ({boq}). Please correct.</span>}
+                              {stakingError && <span><strong>Row {idx + 1}:</strong> Prov. Staking Qty ({provStaking}) cannot be greater than Supplied Qty ({supplied}). Please correct.</span>}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
