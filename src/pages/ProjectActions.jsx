@@ -1148,13 +1148,13 @@ function ProjectActions() {
         <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <h5 className="modal-title">{isView ? t('projectActions.viewRecord') : t('projectActions.editRecord')}</h5>
               <button type="button" className="btn-close" onClick={closeDwpModal}></button>
             </div>
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Date</label>
+                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.monitoringDate || '-'}</p>
                   ) : (
@@ -1162,22 +1162,22 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Project</label>
+                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
                   <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Type</label>
+                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
                   {isView ? (
-                    <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p>
+                    <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goodsContracts')}</span></p>
                   ) : (
                     <select className="form-select" value={form.contractType} onChange={e => setDwpEditForm(f => ({...f, contractType: e.target.value}))}>
-                      <option value="works">Works Contracts</option>
-                      <option value="goods">Goods and Services</option>
+                      <option value="works">{t('projectActions.worksContracts')}</option>
+                      <option value="goods">{t('projectActions.goodsAndServices')}</option>
                     </select>
                   )}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  <label className="form-label fw-semibold">{t('projectActions.contractRefNo')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.contractRefNo || '-'}</p>
                   ) : (
@@ -1185,7 +1185,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Activity ID</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activityId')}</label>
                   {isView ? (
                     <p className="form-control-plaintext"><code>{item.activityId}</code></p>
                   ) : (
@@ -1193,7 +1193,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Activity</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activity')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.activity || '-'}</p>
                   ) : (
@@ -1201,7 +1201,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Rate (%)</label>
+                  <label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.rate}%</p>
                   ) : (
@@ -1209,7 +1209,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Unit</label>
+                  <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.unit || '-'}</p>
                   ) : (
@@ -1217,7 +1217,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Provisional Qty</label>
+                  <label className="form-label fw-semibold">{t('projectActions.provisionalQty')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.provisionalQuantities}</p>
                   ) : (
@@ -1225,7 +1225,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-12">
-                  <label className="form-label fw-semibold">Observations</label>
+                  <label className="form-label fw-semibold">{t('projectActions.observations')}</label>
                   {isView ? (
                     <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observations || '-'}</p>
                   ) : (
@@ -1238,14 +1238,14 @@ function ProjectActions() {
               {isView ? (
                 <>
                   <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ monitoringDate: item.monitoringDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', observations: item.observations || '' }); }}>
-                    <FiEdit2 className="me-1" /> Edit
+                    <FiEdit2 className="me-1" /> {t('common.edit')}
                   </button>
-                  <button className="btn btn-secondary" onClick={closeDwpModal}>Close</button>
+                  <button className="btn btn-secondary" onClick={closeDwpModal}>{t('common.close')}</button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-success" onClick={handleDwpEditSave}>Save Changes</button>
-                  <button className="btn btn-secondary" onClick={closeDwpModal}>Cancel</button>
+                  <button className="btn btn-success" onClick={handleDwpEditSave}>{t('projectActions.saveChanges')}</button>
+                  <button className="btn btn-secondary" onClick={closeDwpModal}>{t('common.cancel')}</button>
                 </>
               )}
             </div>
@@ -1403,41 +1403,41 @@ function ProjectActions() {
         <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{isView ? 'View BOQ Record' : 'Edit BOQ Record'}</h5>
+              <h5 className="modal-title">{isView ? t('projectActions.viewBoqRecord') : t('projectActions.editBoqRecord')}</h5>
               <button type="button" className="btn-close" onClick={closeBoqModal}></button>
             </div>
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Date</label>
+                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
                   {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setBoqEditForm(f => ({...f, entryDate: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Project</label>
+                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
                   <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Type</label>
-                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setBoqEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works Contracts</option><option value="goods">Goods and Services</option></select>}
+                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goodsContracts')}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setBoqEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">{t('projectActions.worksContracts')}</option><option value="goods">{t('projectActions.goodsAndServices')}</option></select>}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  <label className="form-label fw-semibold">{t('projectActions.contractRefNo')}</label>
                   {isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setBoqEditForm(f => ({...f, contractRefNo: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Item ID</label>
+                  <label className="form-label fw-semibold">{t('projectActions.itemId')}</label>
                   {isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Activity</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activity')}</label>
                   {isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setBoqEditForm(f => ({...f, activity: e.target.value}))} />}
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-semibold">Unit</label>
+                  <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
                   {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setBoqEditForm(f => ({...f, unit: e.target.value}))} />}
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-semibold">BOQ Quantity</label>
+                  <label className="form-label fw-semibold">{t('projectActions.boqQuantity')}</label>
                   {isView ? <p className="form-control-plaintext">{item.boqQuantity}</p> : <input type="number" className="form-control" value={form.boqQuantity} onChange={e => setBoqEditForm(f => ({...f, boqQuantity: e.target.value}))} step="0.01" />}
                 </div>
               </div>
@@ -1445,13 +1445,13 @@ function ProjectActions() {
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setBoqModalMode('edit'); setBoqEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', unit: item.unit || '', boqQuantity: item.boqQuantity ?? '' }); }}><FiEdit2 className="me-1" /> Edit</button>
-                  <button className="btn btn-secondary" onClick={closeBoqModal}>Close</button>
+                  <button className="btn btn-primary" onClick={() => { setBoqModalMode('edit'); setBoqEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', unit: item.unit || '', boqQuantity: item.boqQuantity ?? '' }); }}><FiEdit2 className="me-1" /> {t('common.edit')}</button>
+                  <button className="btn btn-secondary" onClick={closeBoqModal}>{t('common.close')}</button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-success" onClick={handleBoqEditSave}>Save Changes</button>
-                  <button className="btn btn-secondary" onClick={closeBoqModal}>Cancel</button>
+                  <button className="btn btn-success" onClick={handleBoqEditSave}>{t('projectActions.saveChanges')}</button>
+                  <button className="btn btn-secondary" onClick={closeBoqModal}>{t('common.cancel')}</button>
                 </>
               )}
             </div>
@@ -1642,45 +1642,45 @@ function ProjectActions() {
         <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <h5 className="modal-title">{isView ? t('projectActions.viewRecord') : t('projectActions.editRecord')}</h5>
               <button type="button" className="btn-close" onClick={closeSpModal}></button>
             </div>
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Date</label>
+                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
                   {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setSpEditForm(f => ({...f, entryDate: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Project</label>
+                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
                   <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Type</label>
-                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setSpEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works</option><option value="goods">Goods & Services</option></select>}
+                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goodsContracts')}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setSpEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">{t('projectActions.works')}</option><option value="goods">{t('projectActions.goodsContracts')}</option></select>}
                 </div>
-                <div className="col-md-4"><label className="form-label fw-semibold">Contract Ref</label>{isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setSpEditForm(f => ({...f, contractRefNo: e.target.value}))} />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">Item ID</label>{isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">Activity</label>{isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setSpEditForm(f => ({...f, activity: e.target.value}))} />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">Rate (%)</label>{isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">Unit</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))} />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">BOQ Qty</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">Exec. Qty</label>{isView ? <p className="form-control-plaintext">{item.executedQuantities}</p> : <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setSpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">Performance %</label><p className="form-control-plaintext">{isView ? (item.performancePercentage != null ? `${item.performancePercentage}%` : '-') : `${editPct}%`}</p></div>
-                <div className="col-md-4"><label className="form-label fw-semibold">Global Progress Rate</label><p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p></div>
-                <div className="col-12"><label className="form-label fw-semibold">Observation</label>{isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setSpEditForm(f => ({...f, observation: e.target.value}))} />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.contractRef')}</label>{isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setSpEditForm(f => ({...f, contractRefNo: e.target.value}))} />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.itemId')}</label>{isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.activity')}</label>{isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setSpEditForm(f => ({...f, activity: e.target.value}))} />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>{isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.unit')}</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))} />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
+                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.execQty')}</label>{isView ? <p className="form-control-plaintext">{item.executedQuantities}</p> : <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setSpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />}</div>
+                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.performancePercent')}</label><p className="form-control-plaintext">{isView ? (item.performancePercentage != null ? `${item.performancePercentage}%` : '-') : `${editPct}%`}</p></div>
+                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.globalProgressRate')}</label><p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p></div>
+                <div className="col-12"><label className="form-label fw-semibold">{t('projectActions.observation')}</label>{isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setSpEditForm(f => ({...f, observation: e.target.value}))} />}</div>
               </div>
             </div>
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setSpModalMode('edit'); setSpEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observation: item.observation || '' }); }}><FiEdit2 className="me-1" /> Edit</button>
-                  <button className="btn btn-secondary" onClick={closeSpModal}>Close</button>
+                  <button className="btn btn-primary" onClick={() => { setSpModalMode('edit'); setSpEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observation: item.observation || '' }); }}><FiEdit2 className="me-1" /> {t('common.edit')}</button>
+                  <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.close')}</button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-success" onClick={handleSpEditSave}>Save Changes</button>
-                  <button className="btn btn-secondary" onClick={closeSpModal}>Cancel</button>
+                  <button className="btn btn-success" onClick={handleSpEditSave}>{t('projectActions.saveChanges')}</button>
+                  <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.cancel')}</button>
                 </>
               )}
             </div>
@@ -1732,49 +1732,49 @@ function ProjectActions() {
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">Supply Progress Monitoring</h6>
+          <h6 className="mb-0">{t('projectActions.supplyProgressMonitoring')}</h6>
           {spItems.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportSpPdf}>
-              <FiDownload className="me-1" /> Export PDF
+              <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
             </button>
           )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Date</label>
+              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
               <input type="date" className="form-control" value={spDate} onChange={e => setSpDate(e.target.value)} />
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Project</label>
+              <label className="form-label fw-semibold">{t('projectActions.project')}</label>
               <select className="form-select" value={spProject} onChange={e => handleSpProjectChange(e.target.value)}>
-                <option value="">Select Project</option>
+                <option value="">{t('projectActions.selectProject')}</option>
                 {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>))}
               </select>
             </div>
           </div>
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Type</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
               <select className="form-select" value={spContractType} onChange={e => handleSpContractTypeChange(e.target.value)} disabled={!spProject}>
-                <option value="">Select Type</option>
-                <option value="works">Works Contracts</option>
-                <option value="goods">Goods and Services</option>
+                <option value="">{t('projectActions.selectType')}</option>
+                <option value="works">{t('projectActions.worksContracts')}</option>
+                <option value="goods">{t('projectActions.goodsAndServices')}</option>
               </select>
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
               <select className="form-select" value={spContractRefNo} onChange={e => handleSpContractRefChange(e.target.value)} disabled={!spContractType}>
-                <option value="">Select Reference</option>
+                <option value="">{t('projectActions.selectReference')}</option>
                 {spContractOptions.map((c, i) => (<option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>))}
               </select>
             </div>
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <h6 className="mb-0">Activity Rows</h6>
+            <h6 className="mb-0">{t('projectActions.activityRows')}</h6>
             <button type="button" className="btn btn-sm btn-primary" onClick={addSpRow} disabled={!spContractRefNo}>
-              <FiPlus className="me-1" /> Add Row
+              <FiPlus className="me-1" /> {t('projectActions.addRow')}
             </button>
           </div>
 
@@ -1783,15 +1783,15 @@ function ProjectActions() {
               <table className="table table-bordered table-sm align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{minWidth:'120px'}}>Item ID</th>
-                    <th style={{minWidth:'180px'}}>Activity</th>
-                    <th style={{minWidth:'80px'}}>Rate (%)</th>
-                    <th style={{minWidth:'80px'}}>Unit</th>
-                    <th style={{minWidth:'110px'}}>BOQ Qty</th>
-                    <th style={{minWidth:'110px'}}>Exec. Qty</th>
-                    <th style={{minWidth:'90px'}}>Perf. %</th>
-                    <th style={{minWidth:'100px'}}>Global Rate</th>
-                    <th style={{minWidth:'150px'}}>Observation</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.itemId')}</th>
+                    <th style={{minWidth:'180px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
+                    <th style={{minWidth:'110px'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{minWidth:'110px'}}>{t('projectActions.execQty')}</th>
+                    <th style={{minWidth:'90px'}}>{t('projectActions.perfPercent')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.globalRate')}</th>
+                    <th style={{minWidth:'150px'}}>{t('projectActions.observation')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
@@ -1803,13 +1803,13 @@ function ProjectActions() {
                       <tr key={row.tempId}>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
-                          <input type="text" className="form-control form-control-sm" list={`sp-activities-${row.tempId}`} value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)} placeholder="Select or type activity" />
+                          <input type="text" className="form-control form-control-sm" list={`sp-activities-${row.tempId}`} value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} />
                           <datalist id={`sp-activities-${row.tempId}`}>
                             {spBoqActivities.map((b, bi) => (<option key={bi} value={b.activity} />))}
                           </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateSpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateSpRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateSpRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.boqQuantities} onChange={e => updateSpRow(idx, 'boqQuantities', e.target.value)} step="0.01" /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateSpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
@@ -1827,7 +1827,7 @@ function ProjectActions() {
           {spRows.length > 0 && (
             <div className="text-end mt-2">
               <button className="btn btn-success" onClick={handleSpSave} disabled={spSaving}>
-                {spSaving ? 'Saving...' : 'Save All Rows'}
+                {spSaving ? t('projectActions.savingText') : t('projectActions.saveAllRows')}
               </button>
             </div>
           )}
@@ -1835,29 +1835,29 @@ function ProjectActions() {
       </div>
 
       <div className="card">
-        <div className="card-header"><h6 className="mb-0">Saved Records</h6></div>
+        <div className="card-header"><h6 className="mb-0">{t('projectActions.savedRecords')}</h6></div>
         <div className="card-body p-0">
           {spItems.length === 0 ? (
-            <div className="text-center text-muted p-4">No supply progress records yet</div>
+            <div className="text-center text-muted p-4">{t('projectActions.noSupplyProgressRecords')}</div>
           ) : (
             <div className="table-responsive">
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>Date</th>
-                    <th style={{whiteSpace:'nowrap'}}>Project</th>
-                    <th style={{whiteSpace:'nowrap'}}>Type</th>
-                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
-                    <th style={{whiteSpace:'nowrap'}}>Item ID</th>
-                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
-                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
-                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
-                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Exec Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Perf.%</th>
-                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
-                    <th style={{whiteSpace:'nowrap'}}>Observation</th>
-                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.itemId')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.executedQty')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.perfPercent')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.globalRate')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.observation')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1865,7 +1865,7 @@ function ProjectActions() {
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
                       <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId}</code></td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
@@ -1878,9 +1878,9 @@ function ProjectActions() {
                       <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observation}>{item.observation}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openSpModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openSpModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteSpItem(item.id)}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openSpModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openSpModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteSpItem(item.id)}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
@@ -2102,53 +2102,53 @@ function ProjectActions() {
         <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <h5 className="modal-title">{isView ? t('projectActions.viewRecord') : t('projectActions.editRecord')}</h5>
               <button type="button" className="btn-close" onClick={closeInstModal}></button>
             </div>
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Date</label>
+                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
                   {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setInstEditForm(f => ({...f, entryDate: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Project</label>
+                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
                   <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Type</label>
-                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setInstEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works Contracts</option><option value="goods">Goods and Services</option></select>}
+                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goodsContracts')}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setInstEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">{t('projectActions.worksContracts')}</option><option value="goods">{t('projectActions.goodsAndServices')}</option></select>}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  <label className="form-label fw-semibold">{t('projectActions.contractRefNo')}</label>
                   {isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setInstEditForm(f => ({...f, contractRefNo: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Activity</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activity')}</label>
                   {isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setInstEditForm(f => ({...f, activity: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Rate (%)</label>
+                  <label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>
                   {isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setInstEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Unit</label>
+                  <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
                   {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))} />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">BOQ Qty</label>
+                  <label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>
                   {isView ? <p className="form-control-plaintext">{item.boqQty}</p> : <input type="number" className="form-control bg-light" value={form.boqQty} readOnly />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Supplied Qty</label>
+                  <label className="form-label fw-semibold">{t('projectActions.suppliedQty')}</label>
                   {isView ? <p className="form-control-plaintext">{item.suppliedQty}</p> : <input type="number" className="form-control bg-light" value={form.suppliedQty} readOnly />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Prov. Staking Qty</label>
+                  <label className="form-label fw-semibold">{t('projectActions.provStakingQty')}</label>
                   {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className={`form-control ${!isView && (parseFloat(form.provisionalStakingQty) || 0) > (parseFloat(form.suppliedQty) || 0) && (parseFloat(form.suppliedQty) || 0) > 0 ? 'border-danger' : ''}`} value={form.provisionalStakingQty} onChange={e => setInstEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Executed Qty</label>
+                  <label className="form-label fw-semibold">{t('projectActions.executedQty')}</label>
                   {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => setInstEditForm(f => ({...f, executedQty: e.target.value}))} step="0.01" />}
                 </div>
                 {!isView && (() => {
@@ -2162,23 +2162,23 @@ function ProjectActions() {
                       <div className="alert alert-warning py-2 px-3 small d-flex align-items-center">
                         <FiAlertTriangle className="me-2 flex-shrink-0" />
                         <div>
-                          {mSupErr && <div>Supplied Qty ({mSupplied}) cannot be greater than BOQ Qty ({mBoq}). Please correct.</div>}
-                          {mStaErr && <div>Prov. Staking Qty ({mProv}) cannot be greater than Supplied Qty ({mSupplied}). Please correct.</div>}
+                          {mSupErr && <div>{t('projectActions.suppliedQtyError', { supplied: mSupplied, boq: mBoq })}</div>}
+                          {mStaErr && <div>{t('projectActions.provStakingQtyError', { prov: mProv, supplied: mSupplied })}</div>}
                         </div>
                       </div>
                     </div>
                   ) : null;
                 })()}
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Percentage</label>
+                  <label className="form-label fw-semibold">{t('projectActions.percentage')}</label>
                   <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">Global Rate</label>
+                  <label className="form-label fw-semibold">{t('projectActions.globalRate')}</label>
                   <p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p>
                 </div>
                 <div className="col-12">
-                  <label className="form-label fw-semibold">Observation</label>
+                  <label className="form-label fw-semibold">{t('projectActions.observation')}</label>
                   {isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setInstEditForm(f => ({...f, observation: e.target.value}))} />}
                 </div>
               </div>
@@ -2187,14 +2187,14 @@ function ProjectActions() {
               {isView ? (
                 <>
                   <button className="btn btn-primary" onClick={() => { setInstModalMode('edit'); setInstEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '', provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || '' }); }}>
-                    <FiEdit2 className="me-1" /> Edit
+                    <FiEdit2 className="me-1" /> {t('common.edit')}
                   </button>
-                  <button className="btn btn-secondary" onClick={closeInstModal}>Close</button>
+                  <button className="btn btn-secondary" onClick={closeInstModal}>{t('common.close')}</button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-success" onClick={handleInstEditSave}>Save Changes</button>
-                  <button className="btn btn-secondary" onClick={closeInstModal}>Cancel</button>
+                  <button className="btn btn-success" onClick={handleInstEditSave}>{t('projectActions.saveChanges')}</button>
+                  <button className="btn btn-secondary" onClick={closeInstModal}>{t('common.cancel')}</button>
                 </>
               )}
             </div>
@@ -2253,49 +2253,49 @@ function ProjectActions() {
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">Installation</h6>
+          <h6 className="mb-0">{t('projectActions.installationTab')}</h6>
           {instItems.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportInstPdf}>
-              <FiDownload className="me-1" /> Export PDF
+              <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
             </button>
           )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Date</label>
+              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
               <input type="date" className="form-control" value={instDate} onChange={e => setInstDate(e.target.value)} />
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Project</label>
+              <label className="form-label fw-semibold">{t('projectActions.project')}</label>
               <select className="form-select" value={instProject} onChange={e => handleInstProjectChange(e.target.value)}>
-                <option value="">Select Project</option>
+                <option value="">{t('projectActions.selectProject')}</option>
                 {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>))}
               </select>
             </div>
           </div>
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Type</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
               <select className="form-select" value={instContractType} onChange={e => handleInstContractTypeChange(e.target.value)} disabled={!instProject}>
-                <option value="">Select Type</option>
-                <option value="works">Works Contracts</option>
-                <option value="goods">Goods and Services</option>
+                <option value="">{t('projectActions.selectType')}</option>
+                <option value="works">{t('projectActions.worksContracts')}</option>
+                <option value="goods">{t('projectActions.goodsAndServices')}</option>
               </select>
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
               <select className="form-select" value={instContractRefNo} onChange={e => handleInstContractRefChange(e.target.value)} disabled={!instContractType}>
-                <option value="">Select Reference</option>
+                <option value="">{t('projectActions.selectReference')}</option>
                 {instContractOptions.map((c, i) => (<option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>))}
               </select>
             </div>
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <h6 className="mb-0">Activity Rows</h6>
+            <h6 className="mb-0">{t('projectActions.activityRows')}</h6>
             <button type="button" className="btn btn-sm btn-primary" onClick={addInstRow} disabled={!instContractRefNo}>
-              <FiPlus className="me-1" /> Add Row
+              <FiPlus className="me-1" /> {t('projectActions.addRow')}
             </button>
           </div>
 
@@ -2304,17 +2304,17 @@ function ProjectActions() {
               <table className="table table-bordered table-sm align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{minWidth:'120px'}}>Item ID</th>
-                    <th style={{minWidth:'180px'}}>Activity</th>
-                    <th style={{minWidth:'80px'}}>Rate (%)</th>
-                    <th style={{minWidth:'80px'}}>Unit</th>
-                    <th style={{minWidth:'100px'}}>BOQ Qty</th>
-                    <th style={{minWidth:'100px'}}>Supplied Qty</th>
-                    <th style={{minWidth:'120px'}}>Prov. Staking Qty</th>
-                    <th style={{minWidth:'100px'}}>Exec. Qty</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.itemId')}</th>
+                    <th style={{minWidth:'180px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.suppliedQty')}</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.provStakingQty')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.execQty')}</th>
                     <th style={{minWidth:'80px'}}>%</th>
-                    <th style={{minWidth:'90px'}}>Global Rate</th>
-                    <th style={{minWidth:'150px'}}>Observation</th>
+                    <th style={{minWidth:'90px'}}>{t('projectActions.globalRate')}</th>
+                    <th style={{minWidth:'150px'}}>{t('projectActions.observation')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
@@ -2332,13 +2332,13 @@ function ProjectActions() {
                       <tr>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
-                          <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder="Select or type activity" />
+                          <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} />
                           <datalist id={`inst-activities-${row.tempId}`}>
                             {instSpActivities.map((a, ai) => (<option key={ai} value={a.activity} />))}
                           </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateInstRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light`} value={row.boqQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" /></td>
@@ -2353,8 +2353,8 @@ function ProjectActions() {
                           <td colSpan="12" className="p-0 border-0">
                             <div className="alert alert-warning py-1 px-2 mb-0 small d-flex align-items-center" style={{borderRadius: 0}}>
                               <FiAlertTriangle className="me-1 flex-shrink-0" />
-                              {suppliedError && <span className="me-3"><strong>Row {idx + 1}:</strong> Supplied Qty ({supplied}) cannot be greater than BOQ Qty ({boq}). Please correct.</span>}
-                              {stakingError && <span><strong>Row {idx + 1}:</strong> Prov. Staking Qty ({provStaking}) cannot be greater than Supplied Qty ({supplied}). Please correct.</span>}
+                              {suppliedError && <span className="me-3"><strong>{t('projectActions.row')} {idx + 1}:</strong> {t('projectActions.suppliedQtyError', { supplied, boq })}</span>}
+                              {stakingError && <span><strong>{t('projectActions.row')} {idx + 1}:</strong> {t('projectActions.provStakingQtyError', { prov: provStaking, supplied })}</span>}
                             </div>
                           </td>
                         </tr>
@@ -2370,7 +2370,7 @@ function ProjectActions() {
           {instRows.length > 0 && (
             <div className="text-end mt-2">
               <button className="btn btn-success" onClick={handleInstSave} disabled={instSaving}>
-                {instSaving ? 'Saving...' : 'Save All Rows'}
+                {instSaving ? t('projectActions.savingText') : t('projectActions.saveAllRows')}
               </button>
             </div>
           )}
@@ -2378,29 +2378,29 @@ function ProjectActions() {
       </div>
 
       <div className="card">
-        <div className="card-header"><h6 className="mb-0">Saved Records</h6></div>
+        <div className="card-header"><h6 className="mb-0">{t('projectActions.savedRecords')}</h6></div>
         <div className="card-body p-0">
           {instItems.length === 0 ? (
-            <div className="text-center text-muted p-4">No installation records yet</div>
+            <div className="text-center text-muted p-4">{t('projectActions.noInstallationRecords')}</div>
           ) : (
             <div className="table-responsive">
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>Date</th>
-                    <th style={{whiteSpace:'nowrap'}}>Project</th>
-                    <th style={{whiteSpace:'nowrap'}}>Type</th>
-                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
-                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
-                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
-                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
-                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Supplied</th>
-                    <th style={{whiteSpace:'nowrap'}}>Prov.Staking</th>
-                    <th style={{whiteSpace:'nowrap'}}>Exec Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.supplied')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.provStaking')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.executedQty')}</th>
                     <th style={{whiteSpace:'nowrap'}}>%</th>
-                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
-                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.globalRate')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2408,7 +2408,7 @@ function ProjectActions() {
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
@@ -2421,9 +2421,9 @@ function ProjectActions() {
                       <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openInstModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openInstModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteInstItem(item.id)}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openInstModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openInstModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteInstItem(item.id)}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
@@ -2481,23 +2481,23 @@ function ProjectActions() {
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">Bill of Quantities (BOQ)</h6>
+          <h6 className="mb-0">{t('projectActions.billOfQuantities')}</h6>
           {boqItems.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportBoqPdf}>
-              <FiDownload className="me-1" /> Export PDF
+              <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
             </button>
           )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Date</label>
+              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
               <input type="date" className="form-control" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Project</label>
+              <label className="form-label fw-semibold">{t('projectActions.project')}</label>
               <select className="form-select" value={boqProject} onChange={e => handleBoqProjectChange(e.target.value)}>
-                <option value="">Select Project</option>
+                <option value="">{t('projectActions.selectProject')}</option>
                 {projects.map(p => (
                   <option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>
                 ))}
@@ -2506,20 +2506,20 @@ function ProjectActions() {
           </div>
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Type</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
               <select className="form-select" value={boqContractType} onChange={e => handleBoqContractTypeChange(e.target.value)} disabled={!boqProject}>
-                <option value="">Select Type</option>
-                <option value="works">Works Contracts</option>
-                <option value="goods">Goods and Services</option>
+                <option value="">{t('projectActions.selectType')}</option>
+                <option value="works">{t('projectActions.worksContracts')}</option>
+                <option value="goods">{t('projectActions.goodsAndServices')}</option>
               </select>
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
               <select className="form-select" value={boqContractRefNo} onChange={e => {
                 setBoqContractRefNo(e.target.value);
                 setBoqRows(prev => prev.map(row => ({ ...row, itemId: generateBoqItemId(e.target.value) })));
               }} disabled={!boqContractType}>
-                <option value="">Select Reference</option>
+                <option value="">{t('projectActions.selectReference')}</option>
                 {boqContractOptions.map((c, i) => (
                   <option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>
                 ))}
@@ -2528,9 +2528,9 @@ function ProjectActions() {
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <h6 className="mb-0">Item Rows</h6>
+            <h6 className="mb-0">{t('projectActions.itemRows')}</h6>
             <button type="button" className="btn btn-sm btn-primary" onClick={addBoqRow} disabled={!boqContractRefNo}>
-              <FiPlus className="me-1" /> Add Row
+              <FiPlus className="me-1" /> {t('projectActions.addRow')}
             </button>
           </div>
 
@@ -2539,10 +2539,10 @@ function ProjectActions() {
               <table className="table table-bordered table-sm align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{minWidth:'120px'}}>Item ID</th>
-                    <th style={{minWidth:'180px'}}>Activity</th>
-                    <th style={{minWidth:'80px'}}>Unit</th>
-                    <th style={{minWidth:'120px'}}>BOQ Quantity</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.itemId')}</th>
+                    <th style={{minWidth:'180px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.boqQuantity')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
@@ -2550,8 +2550,8 @@ function ProjectActions() {
                   {boqRows.map((row, idx) => (
                     <tr key={row.tempId}>
                       <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
-                      <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateBoqRow(idx, 'activity', e.target.value)} placeholder="Activity name" /></td>
-                      <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateBoqRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                      <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateBoqRow(idx, 'activity', e.target.value)} placeholder={t('projectActions.placeholderActivityName')} /></td>
+                      <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateBoqRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
                       <td><input type="number" className="form-control form-control-sm" value={row.boqQuantity} onChange={e => updateBoqRow(idx, 'boqQuantity', e.target.value)} step="0.01" /></td>
                       <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeBoqRow(idx)}><FiTrash2 /></button></td>
                     </tr>
@@ -2564,7 +2564,7 @@ function ProjectActions() {
           {boqRows.length > 0 && (
             <div className="text-end mt-2">
               <button className="btn btn-success" onClick={handleBoqSave} disabled={boqSaving}>
-                {boqSaving ? 'Saving...' : 'Save All Rows'}
+                {boqSaving ? t('projectActions.savingText') : t('projectActions.saveAllRows')}
               </button>
             </div>
           )}
@@ -2573,25 +2573,25 @@ function ProjectActions() {
 
       <div className="card">
         <div className="card-header">
-          <h6 className="mb-0">Saved Records</h6>
+          <h6 className="mb-0">{t('projectActions.savedRecords')}</h6>
         </div>
         <div className="card-body p-0">
           {boqItems.length === 0 ? (
-            <div className="text-center text-muted p-4">No BOQ records yet</div>
+            <div className="text-center text-muted p-4">{t('projectActions.noBoqRecords')}</div>
           ) : (
             <div className="table-responsive">
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>Date</th>
-                    <th style={{whiteSpace:'nowrap'}}>Project</th>
-                    <th style={{whiteSpace:'nowrap'}}>Type</th>
-                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
-                    <th style={{whiteSpace:'nowrap'}}>Item ID</th>
-                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
-                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
-                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.itemId')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2599,7 +2599,7 @@ function ProjectActions() {
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || item.project?.projectId || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
                       <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId}</code></td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'150px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
@@ -2607,9 +2607,9 @@ function ProjectActions() {
                       <td style={{whiteSpace:'nowrap'}}>{item.boqQuantity}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openBoqModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openBoqModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteBoqItem(item.id)}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openBoqModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openBoqModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteBoqItem(item.id)}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
@@ -2710,23 +2710,23 @@ function ProjectActions() {
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">Design Work Plan</h6>
+          <h6 className="mb-0">{t('projectActions.designWorkPlan')}</h6>
           {designWorkItems.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportDwpPdf}>
-              <FiDownload className="me-1" /> Export PDF
+              <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
             </button>
           )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Date</label>
+              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
               <input type="date" className="form-control" value={dwpDate} onChange={e => setDwpDate(e.target.value)} />
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Project</label>
+              <label className="form-label fw-semibold">{t('projectActions.project')}</label>
               <select className="form-select" value={dwpProject} onChange={e => handleDwpProjectChange(e.target.value)}>
-                <option value="">Select Project</option>
+                <option value="">{t('projectActions.selectProject')}</option>
                 {projects.map(p => (
                   <option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>
                 ))}
@@ -2735,20 +2735,20 @@ function ProjectActions() {
           </div>
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Type</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
               <select className="form-select" value={dwpContractType} onChange={e => handleDwpContractTypeChange(e.target.value)} disabled={!dwpProject}>
-                <option value="">Select Type</option>
-                <option value="works">Works Contracts</option>
-                <option value="goods">Goods and Services</option>
+                <option value="">{t('projectActions.selectType')}</option>
+                <option value="works">{t('projectActions.worksContracts')}</option>
+                <option value="goods">{t('projectActions.goodsAndServices')}</option>
               </select>
             </div>
             <div className="col-md-6">
-              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
               <select className="form-select" value={dwpContractRefNo} onChange={e => {
                 setDwpContractRefNo(e.target.value);
                 setDwpRows(prev => prev.map(row => ({ ...row, activityId: generateActivityId(e.target.value) })));
               }} disabled={!dwpContractType}>
-                <option value="">Select Reference</option>
+                <option value="">{t('projectActions.selectReference')}</option>
                 {dwpContractOptions.map((c, i) => (
                   <option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>
                 ))}
@@ -2757,9 +2757,9 @@ function ProjectActions() {
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <h6 className="mb-0">Activity Rows</h6>
+            <h6 className="mb-0">{t('projectActions.activityRows')}</h6>
             <button type="button" className="btn btn-sm btn-primary" onClick={addDwpRow} disabled={!dwpContractRefNo}>
-              <FiPlus className="me-1" /> Add Row
+              <FiPlus className="me-1" /> {t('projectActions.addRow')}
             </button>
           </div>
 
@@ -2768,12 +2768,12 @@ function ProjectActions() {
               <table className="table table-bordered table-sm align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{minWidth:'120px'}}>Activity ID</th>
-                    <th style={{minWidth:'150px'}}>Activity</th>
-                    <th style={{minWidth:'80px'}}>Rate (%)</th>
-                    <th style={{minWidth:'80px'}}>Unit</th>
-                    <th style={{minWidth:'120px'}}>Provisional Qty</th>
-                    <th style={{minWidth:'180px'}}>Observations</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.activityId')}</th>
+                    <th style={{minWidth:'150px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
+                    <th style={{minWidth:'120px'}}>{t('projectActions.provisionalQty')}</th>
+                    <th style={{minWidth:'180px'}}>{t('projectActions.observations')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
@@ -2782,9 +2782,9 @@ function ProjectActions() {
                     return (
                       <tr key={row.tempId}>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.activityId} readOnly /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateDwpRow(idx, 'activity', e.target.value)} placeholder="Activity name" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateDwpRow(idx, 'activity', e.target.value)} placeholder={t('projectActions.placeholderActivityName')} /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateDwpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.provisionalQuantities} onChange={e => updateDwpRow(idx, 'provisionalQuantities', e.target.value)} step="0.01" /></td>
                         <td><textarea className="form-control form-control-sm" value={row.observations} onChange={e => updateDwpRow(idx, 'observations', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeDwpRow(idx)}><FiTrash2 /></button></td>
@@ -2799,7 +2799,7 @@ function ProjectActions() {
           {dwpRows.length > 0 && (
             <div className="text-end mt-2">
               <button className="btn btn-success" onClick={handleDwpSave} disabled={dwpSaving}>
-                {dwpSaving ? 'Saving...' : 'Save All Rows'}
+                {dwpSaving ? t('projectActions.savingText') : t('projectActions.saveAllRows')}
               </button>
             </div>
           )}
@@ -2808,27 +2808,27 @@ function ProjectActions() {
 
       <div className="card">
         <div className="card-header">
-          <h6 className="mb-0">Saved Records</h6>
+          <h6 className="mb-0">{t('projectActions.savedRecords')}</h6>
         </div>
         <div className="card-body p-0">
           {designWorkItems.length === 0 ? (
-            <div className="text-center text-muted p-4">No design work progress records yet</div>
+            <div className="text-center text-muted p-4">{t('projectActions.noDesignWorkRecords')}</div>
           ) : (
             <div className="table-responsive">
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>Date</th>
-                    <th style={{whiteSpace:'nowrap'}}>Project</th>
-                    <th style={{whiteSpace:'nowrap'}}>Type</th>
-                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
-                    <th style={{whiteSpace:'nowrap'}}>Activity ID</th>
-                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
-                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
-                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
-                    <th style={{whiteSpace:'nowrap'}}>Prov.Qty</th>
-                    <th style={{whiteSpace:'nowrap'}}>Observations</th>
-                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activityId')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.provisionalQty')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.observations')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2836,7 +2836,7 @@ function ProjectActions() {
                     <tr key={item.id}>
                       <td style={{whiteSpace:'nowrap'}}>{item.monitoringDate}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || item.project?.projectId || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
                       <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.activityId}</code></td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
@@ -2846,9 +2846,9 @@ function ProjectActions() {
                       <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observations}>{item.observations}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openDwpModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openDwpModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteDwpItem(item.id)}><FiTrash2 /></button>
                         </div>
                       </td>
                     </tr>
@@ -2946,22 +2946,22 @@ function ProjectActions() {
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'designWork' ? 'active' : ''}`} onClick={() => setActiveTab('designWork')}>
-            <FiClipboard className="me-2" /> Design Work Plan
+            <FiClipboard className="me-2" /> {t('projectActions.designWorkPlan')}
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'boq' ? 'active' : ''}`} onClick={() => setActiveTab('boq')}>
-            <FiFileText className="me-2" /> BOQ
+            <FiFileText className="me-2" /> {t('projectActions.boqTab')}
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'supplyProgress' ? 'active' : ''}`} onClick={() => setActiveTab('supplyProgress')}>
-            <FiPackage className="me-2" /> Supply Progress
+            <FiPackage className="me-2" /> {t('projectActions.supplyProgressTab')}
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'installation' ? 'active' : ''}`} onClick={() => setActiveTab('installation')}>
-            <FiSettings className="me-2" /> Installation
+            <FiSettings className="me-2" /> {t('projectActions.installationTab')}
           </button>
         </li>
       </ul>
