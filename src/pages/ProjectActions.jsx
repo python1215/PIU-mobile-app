@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle } from 'react-icons/fi';
@@ -2328,7 +2328,7 @@ function ProjectActions() {
                     const suppliedError = supplied > boq && boq > 0;
                     const stakingError = provStaking > supplied && supplied > 0;
                     return (
-                      <React.Fragment key={row.tempId}>
+                      <Fragment key={row.tempId}>
                       <tr>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
@@ -2359,7 +2359,7 @@ function ProjectActions() {
                           </td>
                         </tr>
                       )}
-                      </React.Fragment>
+                      </Fragment>
                     );
                   })}
                 </tbody>
