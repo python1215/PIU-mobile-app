@@ -2117,7 +2117,7 @@ function ProjectActions() {
     doc.setFont(undefined, 'bold');
     doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
     doc.setFontSize(13);
-    doc.text('Design Work Progress Monitoring & Reporting', pageWidth / 2, 23, { align: 'center' });
+    doc.text('Design Work Plan', pageWidth / 2, 23, { align: 'center' });
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
@@ -2195,7 +2195,7 @@ function ProjectActions() {
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">Design Work Progress Monitoring & Reporting</h6>
+          <h6 className="mb-0">Design Work Plan</h6>
           {designWorkItems.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportDwpPdf}>
               <FiDownload className="me-1" /> Export PDF
@@ -2445,7 +2445,7 @@ function ProjectActions() {
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === 'designWork' ? 'active' : ''}`} onClick={() => setActiveTab('designWork')}>
-            <FiClipboard className="me-2" /> Design Work Progress
+            <FiClipboard className="me-2" /> Design Work Plan
           </button>
         </li>
         <li className="nav-item">
