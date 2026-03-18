@@ -34,6 +34,20 @@ function ProjectActions() {
   const [worksFormProject, setWorksFormProject] = useState('');
   const [worksFormComp, setWorksFormComp] = useState('');
   const [worksFormSubcomp, setWorksFormSubcomp] = useState('');
+  const [worksStartDate, setWorksStartDate] = useState('');
+  const [worksEndDate, setWorksEndDate] = useState('');
+
+  const calcDuration = (start, end) => {
+    if (!start || !end) return '';
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s) || isNaN(e) || e <= s) return '';
+    const diffMs = e - s;
+    const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    if (days < 30) return `${days} day${days !== 1 ? 's' : ''}`;
+    const months = Math.round(days / 30.44);
+    return `${months} month${months !== 1 ? 's' : ''}`;
+  };
 
   const [showContractSelector, setShowContractSelector] = useState(false);
   const [contractSelectorList, setContractSelectorList] = useState([]);
@@ -246,6 +260,8 @@ function ProjectActions() {
       setWorksFormProject(item?.project?.projectId || selectedProject);
       setWorksFormComp(item?.component?.id?.toString() || '');
       setWorksFormSubcomp(item?.subcomponent?.subcompId?.toString() || '');
+      setWorksStartDate(item?.contractStartDate || '');
+      setWorksEndDate(item?.contractEndDate || '');
     }
     if (activeTab === 'monitoring' && item?.monitoringType?.monitoringTypeCode) {
       handleMonitoringTypeChange(item.monitoringType.monitoringTypeCode);
@@ -290,9 +306,9 @@ function ProjectActions() {
       contractRefNo: data.contractRefNo || null,
       nameOfContractor: data.nameOfContractor || null,
       nameOfConsultant: data.nameOfConsultant || null,
-      contractStartDate: data.contractStartDate || null,
-      contractEndDate: data.contractEndDate || null,
-      duration: data.duration || null,
+      contractStartDate: worksStartDate || null,
+      contractEndDate: worksEndDate || null,
+      duration: calcDuration(worksStartDate, worksEndDate) || null,
       remarks: data.remarks || null
     };
 
@@ -762,15 +778,15 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('common.startDate')}</label>
-                  <input type="date" name="contractStartDate" defaultValue={editingItem?.contractStartDate} className="form-control" />
+                  <input type="date" className="form-control" value={worksStartDate} onChange={e => setWorksStartDate(e.target.value)} />
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('common.endDate')}</label>
-                  <input type="date" name="contractEndDate" defaultValue={editingItem?.contractEndDate} className="form-control" />
+                  <input type="date" className="form-control" value={worksEndDate} onChange={e => setWorksEndDate(e.target.value)} />
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-medium">{t('common.duration')}</label>
-                  <input name="duration" defaultValue={editingItem?.duration} className="form-control" />
+                  <input className="form-control bg-light" value={calcDuration(worksStartDate, worksEndDate)} readOnly />
                 </div>
                 <div className="col-12">
                   <label className="form-label fw-medium">{t('projectActions.remarks')}</label>
