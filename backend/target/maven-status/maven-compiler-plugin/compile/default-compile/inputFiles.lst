@@ -48,6 +48,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ImpactType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IndicatorDescription.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IndicatorType.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Installation.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/InvestmentType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IssueAction.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IssueActionSource.java
@@ -111,6 +112,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ESIARepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/GrievanceRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IndicatorTypeRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/InstallationRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/InvestmentTypeRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionSourceRepository.java

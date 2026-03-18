@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload, FiSettings } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -79,6 +79,19 @@ function ProjectActions() {
   const [spModalItem, setSpModalItem] = useState(null);
   const [spModalMode, setSpModalMode] = useState('view');
   const [spEditForm, setSpEditForm] = useState({});
+
+  const [instItems, setInstItems] = useState([]);
+  const [instDate, setInstDate] = useState('');
+  const [instProject, setInstProject] = useState('');
+  const [instContractType, setInstContractType] = useState('');
+  const [instContractRefNo, setInstContractRefNo] = useState('');
+  const [instContractOptions, setInstContractOptions] = useState([]);
+  const [instSpActivities, setInstSpActivities] = useState([]);
+  const [instRows, setInstRows] = useState([]);
+  const [instSaving, setInstSaving] = useState(false);
+  const [instModalItem, setInstModalItem] = useState(null);
+  const [instModalMode, setInstModalMode] = useState('view');
+  const [instEditForm, setInstEditForm] = useState({});
 
   const uniqueInvestmentTypes = useMemo(() => {
     const types = [...new Set(filteredKpiForContracts.map(k => k.typeOfInvestment).filter(Boolean))];
@@ -168,13 +181,14 @@ function ProjectActions() {
     setLoading(true);
     try {
       const isAll = selectedProject === 'all';
-      const [worksRes, goodsRes, monRes, dwpRes, boqRes, spRes] = await Promise.all([
+      const [worksRes, goodsRes, monRes, dwpRes, boqRes, spRes, instRes] = await Promise.all([
         isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/monitoring').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/monitoring/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/supply-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/supply-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/installation').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/installation/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
@@ -182,6 +196,7 @@ function ProjectActions() {
       setDesignWorkItems(dwpRes.data);
       setBoqItems(boqRes.data);
       setSpItems(spRes.data);
+      setInstItems(instRes.data);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -1889,6 +1904,518 @@ function ProjectActions() {
     </div>
   );
 
+  // --- Installation ---
+  const handleInstProjectChange = async (projectId) => {
+    setInstProject(projectId);
+    setInstContractType('');
+    setInstContractRefNo('');
+    setInstContractOptions([]);
+    setInstSpActivities([]);
+    setInstRows([]);
+  };
+
+  const handleInstContractTypeChange = async (type) => {
+    setInstContractType(type);
+    setInstContractRefNo('');
+    setInstContractOptions([]);
+    setInstSpActivities([]);
+    setInstRows([]);
+    if (!type || !instProject) return;
+    try {
+      const url = type === 'works'
+        ? `/api/project-actions/works/project/${instProject}`
+        : `/api/project-actions/goods/project/${instProject}`;
+      const res = await axios.get(url);
+      const opts = res.data.map(c => ({ contractRefNo: c.contractRefNo })).filter(c => c.contractRefNo);
+      const unique = [...new Map(opts.map(o => [o.contractRefNo, o])).values()];
+      setInstContractOptions(unique);
+    } catch { setInstContractOptions([]); }
+  };
+
+  const handleInstContractRefChange = async (ref) => {
+    setInstContractRefNo(ref);
+    setInstSpActivities([]);
+    setInstRows([]);
+    if (!ref) return;
+    try {
+      const [spRes, boqRes] = await Promise.all([
+        axios.get(`/api/project-actions/supply-progress/contract/${ref}`).catch(() => ({ data: [] })),
+        axios.get(`/api/project-actions/boq/contract/${ref}`).catch(() => ({ data: [] }))
+      ]);
+      const spData = spRes.data.map(sp => {
+        const boqMatch = boqRes.data.find(b => b.activity === sp.activity);
+        return {
+          activity: sp.activity,
+          unit: sp.unit || boqMatch?.unit || '',
+          suppliedQty: sp.executedQuantities || 0,
+          boqQty: boqMatch?.boqQuantity || sp.boqQuantities || 0
+        };
+      });
+      setInstSpActivities(spData);
+    } catch { setInstSpActivities([]); }
+  };
+
+  const generateInstItemId = (ref) => {
+    const count = instRows.length + 1;
+    return `${ref || 'INST'}-${String(count).padStart(3, '0')}`;
+  };
+
+  const addInstRow = () => {
+    setInstRows(prev => [...prev, {
+      tempId: Date.now(), itemId: generateInstItemId(instContractRefNo),
+      activity: '', rate: '', unit: '', boqQty: '', suppliedQty: '', provisionalStakingQty: '', executedQty: '', observation: ''
+    }]);
+  };
+
+  const updateInstRow = (idx, field, value) => {
+    setInstRows(prev => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r));
+  };
+
+  const removeInstRow = (idx) => {
+    setInstRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleInstActivitySelect = (idx, activityName) => {
+    const match = instSpActivities.find(a => a.activity === activityName);
+    if (match) {
+      setInstRows(prev => prev.map((r, i) => i === idx ? {
+        ...r, activity: activityName, unit: match.unit, suppliedQty: match.suppliedQty, boqQty: match.boqQty
+      } : r));
+    } else {
+      updateInstRow(idx, 'activity', activityName);
+    }
+  };
+
+  const calcInstPercentage = (boqQty, executedQty) => {
+    const b = parseFloat(boqQty); const e = parseFloat(executedQty);
+    if (!b || b === 0) return 0;
+    return Math.round((e / b) * 10000) / 100;
+  };
+
+  const calcInstGlobalRate = (rate) => {
+    const r = parseFloat(rate);
+    if (isNaN(r)) return 0;
+    return Math.round(r * 100) / 100;
+  };
+
+  const validateInstRow = (row) => {
+    const supplied = parseFloat(row.suppliedQty) || 0;
+    const boq = parseFloat(row.boqQty) || 0;
+    const provStaking = parseFloat(row.provisionalStakingQty) || 0;
+    if (supplied > boq) return 'Supplied Qty cannot be greater than BOQ Qty';
+    if (provStaking > supplied) return 'Provisional Staking Qty cannot be greater than Supplied Qty';
+    return null;
+  };
+
+  const handleInstSave = async () => {
+    if (!instDate || !instProject || !instContractType || !instContractRefNo) {
+      toast.error('Please fill all header fields');
+      return;
+    }
+    if (instRows.length === 0) { toast.error('Please add at least one activity row'); return; }
+    for (let i = 0; i < instRows.length; i++) {
+      const err = validateInstRow(instRows[i]);
+      if (err) { toast.error(`Row ${i + 1}: ${err}`); return; }
+    }
+    setInstSaving(true);
+    try {
+      const items = instRows.map(row => ({
+        entryDate: instDate,
+        project: { projectId: instProject },
+        contractType: instContractType,
+        contractRefNo: instContractRefNo,
+        itemId: row.itemId,
+        activity: row.activity,
+        rate: parseFloat(row.rate) || 0,
+        unit: row.unit,
+        boqQty: parseFloat(row.boqQty) || 0,
+        suppliedQty: parseFloat(row.suppliedQty) || 0,
+        provisionalStakingQty: parseFloat(row.provisionalStakingQty) || 0,
+        executedQty: parseFloat(row.executedQty) || 0,
+        percentage: calcInstPercentage(row.boqQty, row.executedQty),
+        globalProgressRate: calcInstGlobalRate(row.rate),
+        observation: row.observation
+      }));
+      await axios.post('/api/project-actions/installation/batch', items);
+      toast.success('Installation records saved successfully');
+      setInstRows([]);
+      setInstDate('');
+      setInstContractType('');
+      setInstContractRefNo('');
+      setInstContractOptions([]);
+      setInstSpActivities([]);
+      loadContracts();
+    } catch (e) { toast.error('Error saving installation records'); console.error(e); }
+    finally { setInstSaving(false); }
+  };
+
+  const handleDeleteInstItem = async (id) => {
+    if (!window.confirm('Delete this record?')) return;
+    try {
+      await axios.delete(`/api/project-actions/installation/${id}`);
+      toast.success('Record deleted');
+      loadContracts();
+    } catch { toast.error('Error deleting record'); }
+  };
+
+  const openInstModal = (item, mode) => {
+    setInstModalItem(item);
+    setInstModalMode(mode);
+    if (mode === 'edit') {
+      setInstEditForm({
+        entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '',
+        itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '',
+        unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '',
+        provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || ''
+      });
+    }
+  };
+
+  const closeInstModal = () => { setInstModalItem(null); setInstModalMode('view'); setInstEditForm({}); };
+
+  const handleInstEditSave = async () => {
+    if (!instModalItem) return;
+    const supplied = parseFloat(instEditForm.suppliedQty) || 0;
+    const boq = parseFloat(instEditForm.boqQty) || 0;
+    const provStaking = parseFloat(instEditForm.provisionalStakingQty) || 0;
+    if (supplied > boq) { toast.error('Supplied Qty cannot be greater than BOQ Qty'); return; }
+    if (provStaking > supplied) { toast.error('Provisional Staking Qty cannot be greater than Supplied Qty'); return; }
+    try {
+      const pct = calcInstPercentage(instEditForm.boqQty, instEditForm.executedQty);
+      const gpr = calcInstGlobalRate(instEditForm.rate);
+      await axios.put(`/api/project-actions/installation/${instModalItem.id}`, {
+        ...instModalItem,
+        entryDate: instEditForm.entryDate, contractType: instEditForm.contractType, contractRefNo: instEditForm.contractRefNo,
+        itemId: instEditForm.itemId, activity: instEditForm.activity, rate: parseFloat(instEditForm.rate) || 0,
+        unit: instEditForm.unit, boqQty: parseFloat(instEditForm.boqQty) || 0,
+        suppliedQty: parseFloat(instEditForm.suppliedQty) || 0,
+        provisionalStakingQty: parseFloat(instEditForm.provisionalStakingQty) || 0,
+        executedQty: parseFloat(instEditForm.executedQty) || 0,
+        percentage: pct, globalProgressRate: gpr, observation: instEditForm.observation
+      });
+      toast.success('Record updated successfully');
+      closeInstModal();
+      loadContracts();
+    } catch (e) { toast.error('Error updating record'); console.error(e); }
+  };
+
+  const renderInstModal = () => {
+    if (!instModalItem) return null;
+    const isView = instModalMode === 'view';
+    const item = instModalItem;
+    const form = instEditForm;
+    const editPct = !isView ? calcInstPercentage(form.boqQty, form.executedQty) : null;
+    const editGpr = !isView ? calcInstGlobalRate(form.rate) : null;
+    return (
+      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeInstModal}>
+        <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{isView ? 'View Record' : 'Edit Record'}</h5>
+              <button type="button" className="btn-close" onClick={closeInstModal}></button>
+            </div>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Date</label>
+                  {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setInstEditForm(f => ({...f, entryDate: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Project</label>
+                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Type</label>
+                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? 'Works' : 'Goods & Services'}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setInstEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">Works Contracts</option><option value="goods">Goods and Services</option></select>}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Contract Ref No.</label>
+                  {isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setInstEditForm(f => ({...f, contractRefNo: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Activity</label>
+                  {isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setInstEditForm(f => ({...f, activity: e.target.value}))} />}
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Rate (%)</label>
+                  {isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setInstEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Unit</label>
+                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))} />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">BOQ Qty</label>
+                  {isView ? <p className="form-control-plaintext">{item.boqQty}</p> : <input type="number" className="form-control bg-light" value={form.boqQty} readOnly />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Supplied Qty</label>
+                  {isView ? <p className="form-control-plaintext">{item.suppliedQty}</p> : <input type="number" className="form-control bg-light" value={form.suppliedQty} readOnly />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Prov. Staking Qty</label>
+                  {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className="form-control" value={form.provisionalStakingQty} onChange={e => setInstEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Executed Qty</label>
+                  {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => setInstEditForm(f => ({...f, executedQty: e.target.value}))} step="0.01" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Percentage</label>
+                  <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">Global Rate</label>
+                  <p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p>
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-semibold">Observation</label>
+                  {isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setInstEditForm(f => ({...f, observation: e.target.value}))} />}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              {isView ? (
+                <>
+                  <button className="btn btn-primary" onClick={() => { setInstModalMode('edit'); setInstEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '', provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || '' }); }}>
+                    <FiEdit2 className="me-1" /> Edit
+                  </button>
+                  <button className="btn btn-secondary" onClick={closeInstModal}>Close</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-success" onClick={handleInstEditSave}>Save Changes</button>
+                  <button className="btn btn-secondary" onClick={closeInstModal}>Cancel</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const exportInstPdf = () => {
+    if (instItems.length === 0) { toast.error('No records to export'); return; }
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(13);
+    doc.text('Installation', pageWidth / 2, 23, { align: 'center' });
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
+    const grouped = {};
+    instItems.forEach(item => { const key = item.contractRefNo || 'Unknown'; if (!grouped[key]) grouped[key] = []; grouped[key].push(item); });
+    let startY = 36;
+    Object.keys(grouped).forEach(contractRef => {
+      const items = grouped[contractRef];
+      const projectName = items[0]?.project?.project || items[0]?.project?.projectId || '-';
+      const contractType = items[0]?.contractType === 'works' ? 'Works Contract' : 'Goods & Services';
+      if (startY > pageHeight - 40) { doc.addPage(); startY = 15; }
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.text(`Contract Ref: ${contractRef}`, 14, startY);
+      doc.setFont(undefined, 'normal'); doc.setFontSize(8);
+      doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
+      autoTable(doc, {
+        head: [['#', 'Date', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Supplied Qty', 'Prov.Staking', 'Exec Qty', '%', 'Global Rate']],
+        body: items.map((item, idx) => [
+          idx + 1, item.entryDate || '-', item.activity || '-',
+          item.rate != null ? `${item.rate}%` : '-', item.unit || '-',
+          item.boqQty ?? '-', item.suppliedQty ?? '-', item.provisionalStakingQty ?? '-',
+          item.executedQty ?? '-',
+          item.percentage != null ? `${item.percentage}%` : '-',
+          item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'
+        ]),
+        startY: startY + 8,
+        styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6.5, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: 10, right: 10 },
+        tableWidth: pageWidth - 20
+      });
+      startY = doc.lastAutoTable.finalY + 12;
+    });
+    doc.save('installation.pdf');
+  };
+
+  const renderInstallation = () => (
+    <div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">Installation</h6>
+          {instItems.length > 0 && (
+            <button className="btn btn-sm btn-light" onClick={exportInstPdf}>
+              <FiDownload className="me-1" /> Export PDF
+            </button>
+          )}
+        </div>
+        <div className="card-body">
+          <div className="row g-3 mb-2">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Date</label>
+              <input type="date" className="form-control" value={instDate} onChange={e => setInstDate(e.target.value)} />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Project</label>
+              <select className="form-select" value={instProject} onChange={e => handleInstProjectChange(e.target.value)}>
+                <option value="">Select Project</option>
+                {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>))}
+              </select>
+            </div>
+          </div>
+          <div className="row g-3 mb-3">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Type</label>
+              <select className="form-select" value={instContractType} onChange={e => handleInstContractTypeChange(e.target.value)} disabled={!instProject}>
+                <option value="">Select Type</option>
+                <option value="works">Works Contracts</option>
+                <option value="goods">Goods and Services</option>
+              </select>
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Contract Reference No.</label>
+              <select className="form-select" value={instContractRefNo} onChange={e => handleInstContractRefChange(e.target.value)} disabled={!instContractType}>
+                <option value="">Select Reference</option>
+                {instContractOptions.map((c, i) => (<option key={i} value={c.contractRefNo}>{c.contractRefNo}</option>))}
+              </select>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">Activity Rows</h6>
+            <button type="button" className="btn btn-sm btn-primary" onClick={addInstRow} disabled={!instContractRefNo}>
+              <FiPlus className="me-1" /> Add Row
+            </button>
+          </div>
+
+          {instRows.length > 0 && (
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th style={{minWidth:'120px'}}>Item ID</th>
+                    <th style={{minWidth:'180px'}}>Activity</th>
+                    <th style={{minWidth:'80px'}}>Rate (%)</th>
+                    <th style={{minWidth:'80px'}}>Unit</th>
+                    <th style={{minWidth:'100px'}}>BOQ Qty</th>
+                    <th style={{minWidth:'100px'}}>Supplied Qty</th>
+                    <th style={{minWidth:'120px'}}>Prov. Staking Qty</th>
+                    <th style={{minWidth:'100px'}}>Exec. Qty</th>
+                    <th style={{minWidth:'80px'}}>%</th>
+                    <th style={{minWidth:'90px'}}>Global Rate</th>
+                    <th style={{minWidth:'150px'}}>Observation</th>
+                    <th style={{width:'50px'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {instRows.map((row, idx) => {
+                    const pct = calcInstPercentage(row.boqQty, row.executedQty);
+                    const gpr = calcInstGlobalRate(row.rate);
+                    const supplied = parseFloat(row.suppliedQty) || 0;
+                    const boq = parseFloat(row.boqQty) || 0;
+                    const provStaking = parseFloat(row.provisionalStakingQty) || 0;
+                    const suppliedError = supplied > boq && boq > 0;
+                    const stakingError = provStaking > supplied && supplied > 0;
+                    return (
+                      <tr key={row.tempId}>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
+                        <td>
+                          <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder="Select or type activity" />
+                          <datalist id={`inst-activities-${row.tempId}`}>
+                            {instSpActivities.map((a, ai) => (<option key={ai} value={a.activity} />))}
+                          </datalist>
+                        </td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateInstRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
+                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)} placeholder="e.g. m2" /></td>
+                        <td><input type="number" className={`form-control form-control-sm bg-light`} value={row.boqQty} readOnly /></td>
+                        <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly title={suppliedError ? 'Supplied Qty > BOQ Qty' : ''} /></td>
+                        <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" title={stakingError ? 'Cannot exceed Supplied Qty' : ''} /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.executedQty} onChange={e => updateInstRow(idx, 'executedQty', e.target.value)} step="0.01" /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
+                        <td><textarea className="form-control form-control-sm" value={row.observation} onChange={e => updateInstRow(idx, 'observation', e.target.value)} rows="1" /></td>
+                        <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeInstRow(idx)}><FiTrash2 /></button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {instRows.length > 0 && (
+            <div className="text-end mt-2">
+              <button className="btn btn-success" onClick={handleInstSave} disabled={instSaving}>
+                {instSaving ? 'Saving...' : 'Save All Rows'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header"><h6 className="mb-0">Saved Records</h6></div>
+        <div className="card-body p-0">
+          {instItems.length === 0 ? (
+            <div className="text-center text-muted p-4">No installation records yet</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
+                <thead className="table-light">
+                  <tr>
+                    <th style={{whiteSpace:'nowrap'}}>Date</th>
+                    <th style={{whiteSpace:'nowrap'}}>Project</th>
+                    <th style={{whiteSpace:'nowrap'}}>Type</th>
+                    <th style={{whiteSpace:'nowrap'}}>Contract Ref</th>
+                    <th style={{whiteSpace:'nowrap'}}>Activity</th>
+                    <th style={{whiteSpace:'nowrap'}}>Rate(%)</th>
+                    <th style={{whiteSpace:'nowrap'}}>Unit</th>
+                    <th style={{whiteSpace:'nowrap'}}>BOQ Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>Supplied</th>
+                    <th style={{whiteSpace:'nowrap'}}>Prov.Staking</th>
+                    <th style={{whiteSpace:'nowrap'}}>Exec Qty</th>
+                    <th style={{whiteSpace:'nowrap'}}>%</th>
+                    <th style={{whiteSpace:'nowrap'}}>Global Rate</th>
+                    <th style={{whiteSpace:'nowrap'}}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {instItems.map(item => (
+                    <tr key={item.id}>
+                      <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? 'Works' : 'Goods'}</span></td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
+                      <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.boqQty}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.suppliedQty}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.provisionalStakingQty}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.executedQty}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}>
+                        <div className="d-flex gap-1 flex-nowrap">
+                          <button className="btn btn-sm btn-outline-info p-1" title="View" onClick={() => openInstModal(item, 'view')}><FiEye /></button>
+                          <button className="btn btn-sm btn-outline-primary p-1" title="Edit" onClick={() => openInstModal(item, 'edit')}><FiEdit2 /></button>
+                          <button className="btn btn-sm btn-outline-danger p-1" title="Delete" onClick={() => handleDeleteInstItem(item.id)}><FiTrash2 /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      {renderInstModal()}
+    </div>
+  );
+
   const exportBoqPdf = () => {
     if (boqItems.length === 0) { toast.error('No records to export'); return; }
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
@@ -2410,6 +2937,11 @@ function ProjectActions() {
             <FiPackage className="me-2" /> Supply Progress
           </button>
         </li>
+        <li className="nav-item">
+          <button className={`nav-link ${activeTab === 'installation' ? 'active' : ''}`} onClick={() => setActiveTab('installation')}>
+            <FiSettings className="me-2" /> Installation
+          </button>
+        </li>
       </ul>
 
       <div className="card">
@@ -2422,6 +2954,7 @@ function ProjectActions() {
             activeTab === 'designWork' ? renderDesignWorkProgress() :
             activeTab === 'boq' ? renderBoq() :
             activeTab === 'supplyProgress' ? renderSupplyProgress() :
+            activeTab === 'installation' ? renderInstallation() :
             renderMonitoringTable()
           )}
         </div>

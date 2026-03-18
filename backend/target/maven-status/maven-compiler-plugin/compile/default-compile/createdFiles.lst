@@ -52,6 +52,7 @@ com/piun/piuproject/controller/DonorController.class
 com/piun/piuproject/model/ProjectCategory.class
 com/piun/piuproject/controller/ProjectMappingController.class
 com/piun/piuproject/repository/AccessTypeRepository.class
+com/piun/piuproject/repository/InstallationRepository.class
 com/piun/piuproject/repository/LGARepository.class
 com/piun/piuproject/model/DocumentTag.class
 com/piun/piuproject/PiuProjectApplication.class
@@ -88,6 +89,7 @@ com/piun/piuproject/config/SecurityConfig.class
 com/piun/piuproject/model/VulnerabilityCategory.class
 com/piun/piuproject/repository/ProjectDocumentRepository.class
 com/piun/piuproject/model/PDO.class
+com/piun/piuproject/model/Installation.class
 com/piun/piuproject/controller/DocumentationController.class
 com/piun/piuproject/config/DatabaseConfig.class
 com/piun/piuproject/repository/PAPCategoryRepository.class

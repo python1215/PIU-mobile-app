@@ -417,4 +417,68 @@ public class ProjectActionsController {
             })
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/supply-progress/contract/{contractRefNo}")
+    public List<SupplyProgress> getSupplyProgressByContractRef(@PathVariable String contractRefNo) {
+        return supplyProgressRepository.findByContractRefNoOrderByDateCreatedDesc(contractRefNo);
+    }
+
+    @Autowired
+    private InstallationRepository installationRepository;
+
+    @GetMapping("/installation")
+    public List<Installation> getAllInstallation() {
+        return installationRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/installation/project/{projectId}")
+    public List<Installation> getInstallationByProject(@PathVariable String projectId) {
+        return installationRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @PostMapping("/installation")
+    public Installation createInstallation(@RequestBody Installation item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return installationRepository.save(item);
+    }
+
+    @PostMapping("/installation/batch")
+    public List<Installation> createInstallationBatch(@RequestBody List<Installation> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return installationRepository.saveAll(items);
+    }
+
+    @PutMapping("/installation/{id}")
+    public ResponseEntity<Installation> updateInstallation(@PathVariable Long id, @RequestBody Installation details) {
+        return installationRepository.findById(id)
+            .map(item -> {
+                item.setEntryDate(details.getEntryDate());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setItemId(details.getItemId());
+                item.setActivity(details.getActivity());
+                item.setRate(details.getRate());
+                item.setUnit(details.getUnit());
+                item.setBoqQty(details.getBoqQty());
+                item.setSuppliedQty(details.getSuppliedQty());
+                item.setProvisionalStakingQty(details.getProvisionalStakingQty());
+                item.setExecutedQty(details.getExecutedQty());
+                item.setPercentage(details.getPercentage());
+                item.setGlobalProgressRate(details.getGlobalProgressRate());
+                item.setObservation(details.getObservation());
+                return ResponseEntity.ok(installationRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/installation/{id}")
+    public ResponseEntity<Void> deleteInstallation(@PathVariable Long id) {
+        return installationRepository.findById(id)
+            .map(item -> {
+                installationRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -10,4 +10,5 @@ import java.util.List;
 public interface SupplyProgressRepository extends JpaRepository<SupplyProgress, Long> {
     List<SupplyProgress> findByProject_ProjectIdOrderByDateCreatedDesc(String projectId);
     List<SupplyProgress> findAllByOrderByDateCreatedDesc();
+    List<SupplyProgress> findByContractRefNoOrderByDateCreatedDesc(String contractRefNo);
 }
