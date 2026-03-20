@@ -1,14 +1,29 @@
 import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiActivity, FiSearch, FiCheck, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+const PATH_TO_TAB = {
+  'works': 'works',
+  'goods': 'goods',
+  'monitoring': 'monitoring',
+  'design-work': 'designWork',
+  'boq': 'boq',
+  'supply-progress': 'supplyProgress',
+  'installation': 'installation',
+};
+
 function ProjectActions() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('works');
+  const location = useLocation();
+  const activeTab = useMemo(() => {
+    const segment = location.pathname.split('/').pop() || 'works';
+    return PATH_TO_TAB[segment] || 'works';
+  }, [location.pathname]);
   const [projects, setProjects] = useState([]);
   const [works, setWorks] = useState([]);
   const [goods, setGoods] = useState([]);
@@ -2927,44 +2942,6 @@ function ProjectActions() {
           </div>
         </div>
       </div>
-
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'works' ? 'active' : ''}`} onClick={() => setActiveTab('works')}>
-            <FiFileText className="me-2" /> {t('projectActions.worksContracts')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'goods' ? 'active' : ''}`} onClick={() => setActiveTab('goods')}>
-            <FiPackage className="me-2" /> {t('projectActions.goodsContracts')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'monitoring' ? 'active' : ''}`} onClick={() => setActiveTab('monitoring')}>
-            <FiActivity className="me-2" /> {t('projectActions.contractMonitoring')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'designWork' ? 'active' : ''}`} onClick={() => setActiveTab('designWork')}>
-            <FiClipboard className="me-2" /> {t('projectActions.designWorkPlan')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'boq' ? 'active' : ''}`} onClick={() => setActiveTab('boq')}>
-            <FiFileText className="me-2" /> {t('projectActions.boqTab')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'supplyProgress' ? 'active' : ''}`} onClick={() => setActiveTab('supplyProgress')}>
-            <FiPackage className="me-2" /> {t('projectActions.supplyProgressTab')}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'installation' ? 'active' : ''}`} onClick={() => setActiveTab('installation')}>
-            <FiSettings className="me-2" /> {t('projectActions.installationTab')}
-          </button>
-        </li>
-      </ul>
 
       <div className="card">
         <div className="card-body">

@@ -22,6 +22,8 @@ import {
   FiChevronDown,
   FiUserPlus,
   FiActivity,
+  FiPackage,
+  FiClipboard,
 } from "react-icons/fi";
 import { useState, useCallback, useMemo, useEffect, memo } from "react";
 
@@ -30,12 +32,21 @@ const navItemsConfig = [
   { path: "/setup", icon: FiSettings, labelKey: "nav.systemSetup", moduleKey: "systemSetup" },
   { path: "/financial", icon: FiDollarSign, labelKey: "nav.financialManagement", moduleKey: "financialManagement" },
   { path: "/monitoring", icon: FiTrendingUp, labelKey: "nav.monitoring", moduleKey: "monitoring" },
-  { path: "/project-actions", icon: FiFileText, labelKey: "nav.projectActions", moduleKey: "projectActions" },
   { path: "/social-environmental", icon: FiShield, labelKey: "nav.socialEnvironmental", moduleKey: "socialEnvironmental" },
   { path: "/documentation", icon: FiFile, labelKey: "nav.documentation", moduleKey: "documentation" },
   { path: "/map", icon: FiMapPin, labelKey: "nav.projectMap", moduleKey: "projectMap" },
   { path: "/issues", icon: FiAlertCircle, labelKey: "nav.issues", moduleKey: "issues" },
   { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi", moduleKey: "kpi" },
+];
+
+const projectActionsSubItems = [
+  { path: "/project-actions/works", icon: FiFileText, labelKey: "projectActions.worksContracts" },
+  { path: "/project-actions/goods", icon: FiPackage, labelKey: "projectActions.goodsContracts" },
+  { path: "/project-actions/monitoring", icon: FiActivity, labelKey: "projectActions.contractMonitoring" },
+  { path: "/project-actions/design-work", icon: FiClipboard, labelKey: "projectActions.designWorkPlan" },
+  { path: "/project-actions/boq", icon: FiFileText, labelKey: "projectActions.boqTab" },
+  { path: "/project-actions/supply-progress", icon: FiPackage, labelKey: "projectActions.supplyProgressTab" },
+  { path: "/project-actions/installation", icon: FiSettings, labelKey: "projectActions.installationTab" },
 ];
 
 const adminSubItems = [
@@ -95,9 +106,11 @@ function Layout() {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [adminExpanded, setAdminExpanded] = useState(false);
+  const [projectActionsExpanded, setProjectActionsExpanded] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const isAdminPath = location.pathname.startsWith("/administration");
+  const isProjectActionsPath = location.pathname.startsWith("/project-actions");
 
   useEffect(() => {
     if (isMobile) {
@@ -120,6 +133,16 @@ function Layout() {
     setSidebarOpen((prev) => !prev);
   }, []);
 
+  const toggleProjectActions = useCallback(() => {
+    if (!sidebarOpen) {
+      setSidebarOpen(true);
+      setProjectActionsExpanded(true);
+      navigate("/project-actions/works");
+    } else {
+      setProjectActionsExpanded((prev) => !prev);
+    }
+  }, [sidebarOpen, navigate]);
+
   const toggleAdmin = useCallback(() => {
     if (!sidebarOpen) {
       setSidebarOpen(true);
@@ -136,6 +159,11 @@ function Layout() {
       if (item.moduleKey === 'dashboard') return true;
       return permissions[item.moduleKey] === true;
     });
+  }, [permissions, user]);
+
+  const showProjectActions = useMemo(() => {
+    if (!permissions || user?.isSuperuser) return true;
+    return permissions.projectActions === true;
   }, [permissions, user]);
 
   const showAdmin = useMemo(() => {
@@ -182,6 +210,10 @@ function Layout() {
     },
     [sidebarOpen, isMobile],
   );
+
+  useEffect(() => {
+    if (isProjectActionsPath) setProjectActionsExpanded(true);
+  }, [isProjectActionsPath]);
 
   useEffect(() => {
     if (isAdminPath) setAdminExpanded(true);
@@ -235,6 +267,58 @@ function Layout() {
         <nav className="flex-grow-1 py-3 overflow-auto">
           <ul className="nav flex-column gap-1 px-2">
             {navList}
+
+            {showProjectActions && (
+              <>
+                <li className="nav-item">
+                  <button
+                    onClick={toggleProjectActions}
+                    className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 w-100 border-0 bg-transparent ${
+                      isProjectActionsPath ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                    }`}
+                    style={{ transition: "all 0.2s", whiteSpace: "nowrap", textAlign: "left" }}
+                  >
+                    <FiFileText size={20} />
+                    {showLabels && (
+                      <>
+                        <span className="fw-medium flex-grow-1">{t("nav.projectActions")}</span>
+                        <FiChevronDown
+                          size={16}
+                          style={{
+                            transition: "transform 0.3s",
+                            transform: projectActionsExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                          }}
+                        />
+                      </>
+                    )}
+                  </button>
+                </li>
+
+                {showLabels && projectActionsExpanded && (
+                  <div style={{ paddingLeft: "20px" }}>
+                    {projectActionsSubItems.map((sub) => {
+                      const SubIcon = sub.icon;
+                      const isSubActive = location.pathname === sub.path;
+                      return (
+                        <li key={sub.path} className="nav-item">
+                          <Link
+                            to={sub.path}
+                            onClick={closeSidebarOnMobile}
+                            className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
+                              isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                            }`}
+                            style={{ transition: "all 0.2s", whiteSpace: "nowrap", fontSize: "0.9rem" }}
+                          >
+                            <SubIcon size={16} />
+                            <span className="fw-medium">{t(sub.labelKey)}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
 
             {showAdmin && (
               <>

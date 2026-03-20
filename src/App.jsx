@@ -53,7 +53,16 @@ function App() {
         <Route path="setup" element={<ModuleGuard moduleKey="systemSetup"><SystemSetup /></ModuleGuard>} />
         <Route path="financial" element={<ModuleGuard moduleKey="financialManagement"><FinancialManagement /></ModuleGuard>} />
         <Route path="monitoring" element={<ModuleGuard moduleKey="monitoring"><MonitoringEvaluation /></ModuleGuard>} />
-        <Route path="project-actions" element={<ModuleGuard moduleKey="projectActions"><ProjectActions /></ModuleGuard>} />
+        <Route path="project-actions" element={<ModuleGuard moduleKey="projectActions"><ProjectActions /></ModuleGuard>}>
+          <Route index element={<Navigate to="/project-actions/works" replace />} />
+          <Route path="works" element={null} />
+          <Route path="goods" element={null} />
+          <Route path="monitoring" element={null} />
+          <Route path="design-work" element={null} />
+          <Route path="boq" element={null} />
+          <Route path="supply-progress" element={null} />
+          <Route path="installation" element={null} />
+        </Route>
         <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
         <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />
         <Route path="map" element={<ModuleGuard moduleKey="projectMap"><ProjectMap /></ModuleGuard>} />
