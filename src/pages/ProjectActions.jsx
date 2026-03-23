@@ -2680,9 +2680,9 @@ function ProjectActions() {
               <span className="fw-bold text-primary"><code style={{ fontSize: 'inherit' }}>{item.activityId}</code></span>
               <span className="text-dark" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.activity}>{item.activity}</span>
             </div>
-            <button className="btn btn-sm p-1" onClick={() => toggleDmExpand(item.activityId)} title={dmExpandedRow === item.activityId ? 'Collapse' : 'Expand milestones'}>
-              {dmExpandedRow === item.activityId ? <FiChevronDown /> : <FiChevronRight />}
-            </button>
+            <span className="badge bg-secondary bg-opacity-25 text-dark" style={{ fontSize: '0.72rem' }}>
+              {(dmMilestones[item.activityId] || []).length} {t('projectActions.designMilestones').toLowerCase()}
+            </span>
           </div>
 
           <div className="card-body p-0">
@@ -2710,8 +2710,7 @@ function ProjectActions() {
             </div>
           </div>
 
-          {(dmExpandedRow === item.activityId || dmMilestoneForm?.activityId === item.activityId) && (
-            <div className="card-footer bg-white p-3">
+          <div className="card-footer bg-white p-3">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h6 className="mb-0 text-primary" style={{ fontSize: 'clamp(0.72rem, 1.1vw, 0.88rem)' }}>
                   <FiClipboard className="me-2" />
@@ -2833,8 +2832,7 @@ function ProjectActions() {
                   </table>
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       ))}
     </div>
