@@ -890,7 +890,7 @@ function ProjectActions() {
                   )}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.activity')}</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>
                   {isView ? (
                     <p className="form-control-plaintext">{item.activity || '-'}</p>
                   ) : (
@@ -910,7 +910,10 @@ function ProjectActions() {
                   {isView ? (
                     <p className="form-control-plaintext">{item.unit || '-'}</p>
                   ) : (
-                    <input type="text" className="form-control" value={form.unit} onChange={e => setDwpEditForm(f => ({...f, unit: e.target.value}))} />
+                    <select className="form-select" value={form.unit} onChange={e => setDwpEditForm(f => ({...f, unit: e.target.value}))}>
+                      <option value="">--</option>
+                      {dmUnits.map(u => <option key={u.id} value={u.unit}>{u.unit}</option>)}
+                    </select>
                   )}
                 </div>
                 <div className="col-md-3">
@@ -2882,7 +2885,7 @@ function ProjectActions() {
                 <thead className="table-light">
                   <tr>
                     <th style={{minWidth:'120px'}}>{t('projectActions.activityId')}</th>
-                    <th style={{minWidth:'150px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'150px'}}>{t('projectActions.activityDescription')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
                     <th style={{minWidth:'120px'}}>{t('projectActions.provisionalQty')}</th>
@@ -2897,7 +2900,7 @@ function ProjectActions() {
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.activityId} readOnly /></td>
                         <td><input type="text" className="form-control form-control-sm" value={row.activity} onChange={e => updateDwpRow(idx, 'activity', e.target.value)} placeholder={t('projectActions.placeholderActivityName')} /></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateDwpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
+                        <td><select className="form-select form-select-sm" value={row.unit} onChange={e => updateDwpRow(idx, 'unit', e.target.value)}><option value="">{t('projectActions.placeholderUnit')}</option>{dmUnits.map(u => <option key={u.id} value={u.unit}>{u.unit}</option>)}</select></td>
                         <td><input type="number" className="form-control form-control-sm" value={row.provisionalQuantities} onChange={e => updateDwpRow(idx, 'provisionalQuantities', e.target.value)} step="0.01" /></td>
                         <td><textarea className="form-control form-control-sm" value={row.observations} onChange={e => updateDwpRow(idx, 'observations', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeDwpRow(idx)}><FiTrash2 /></button></td>
@@ -2936,7 +2939,7 @@ function ProjectActions() {
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activityId')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activityDescription')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.provisionalQty')}</th>
