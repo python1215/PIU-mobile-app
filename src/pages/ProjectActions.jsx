@@ -2550,7 +2550,7 @@ function ProjectActions() {
   const handleDmAddMilestone = (activityId) => {
     const monitoringId = dmMonitoringMap[activityId];
     if (!monitoringId) { toast.error('No monitoring record linked'); return; }
-    setDmMilestoneForm({ monitoringId, activityId, logDate: '', quarterId: '', frequencyId: '', achievedValues: '', status: '', remarks: '' });
+    setDmMilestoneForm({ monitoringId, activityId, logDate: '', quarterId: '', frequencyId: '', overallPlannedQuantities: '', achievedValues: '', plannedVsAchievedPct: '', status: '', remarks: '' });
     setDmEditingMilestone(null);
   };
 
@@ -2563,7 +2563,9 @@ function ProjectActions() {
       logDate: milestone.logDate || '',
       quarterId: milestone.quarter?.id || '',
       frequencyId: milestone.frequency?.id || '',
-      achievedValues: milestone.achievedValues || '',
+      overallPlannedQuantities: milestone.overallPlannedQuantities ?? '',
+      achievedValues: milestone.achievedValues ?? '',
+      plannedVsAchievedPct: milestone.plannedVsAchievedPct ?? '',
       status: milestone.status || '',
       remarks: milestone.remarks || ''
     });
@@ -2575,7 +2577,9 @@ function ProjectActions() {
       logDate: dmMilestoneForm.logDate || null,
       quarter: dmMilestoneForm.quarterId ? { id: parseInt(dmMilestoneForm.quarterId) } : null,
       frequency: dmMilestoneForm.frequencyId ? { id: parseInt(dmMilestoneForm.frequencyId) } : null,
-      achievedValues: dmMilestoneForm.achievedValues ? parseFloat(dmMilestoneForm.achievedValues) : null,
+      overallPlannedQuantities: dmMilestoneForm.overallPlannedQuantities !== '' ? parseFloat(dmMilestoneForm.overallPlannedQuantities) : null,
+      achievedValues: dmMilestoneForm.achievedValues !== '' ? parseFloat(dmMilestoneForm.achievedValues) : null,
+      plannedVsAchievedPct: dmMilestoneForm.plannedVsAchievedPct !== '' ? parseFloat(dmMilestoneForm.plannedVsAchievedPct) : null,
       status: dmMilestoneForm.status || null,
       remarks: dmMilestoneForm.remarks || null
     };
@@ -2737,10 +2741,22 @@ function ProjectActions() {
                         </select>
                       </div>
                       <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.overallPlannedQty')}</label>
+                        <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.overallPlannedQuantities} onChange={e => setDmMilestoneForm(f => ({ ...f, overallPlannedQuantities: e.target.value }))} step="0.01" />
+                      </div>
+                      <div className="col-md-3">
                         <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
                         <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.achievedValues} onChange={e => setDmMilestoneForm(f => ({ ...f, achievedValues: e.target.value }))} step="0.01" />
                       </div>
-                      <div className="col-md-4">
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
+                        <input type="number" className="form-control form-control-sm bg-light" value={
+                          dmMilestoneForm.overallPlannedQuantities && dmMilestoneForm.achievedValues && parseFloat(dmMilestoneForm.overallPlannedQuantities) > 0
+                            ? (Math.round((parseFloat(dmMilestoneForm.achievedValues) / parseFloat(dmMilestoneForm.overallPlannedQuantities)) * 10000) / 100)
+                            : (dmMilestoneForm.plannedVsAchievedPct || '')
+                        } readOnly />
+                      </div>
+                      <div className="col-md-3">
                         <label className="form-label small fw-semibold">{t('common.status')}</label>
                         <select className="form-select form-select-sm" value={dmMilestoneForm.status} onChange={e => setDmMilestoneForm(f => ({ ...f, status: e.target.value }))}>
                           <option value="">--</option>
@@ -2773,9 +2789,9 @@ function ProjectActions() {
                         <th>{t('projectActions.logDate')}</th>
                         <th>{t('projectActions.quarter')}</th>
                         <th>{t('projectActions.frequency')}</th>
+                        <th>{t('projectActions.overallPlannedQty')}</th>
                         <th>{t('projectActions.achievedValues')}</th>
                         <th>{t('projectActions.plannedVsAchieved')}</th>
-                        <th>{t('projectActions.achievedVsGlobal')}</th>
                         <th>{t('common.status')}</th>
                         <th>{t('projectActions.remarks')}</th>
                         <th>{t('common.actions')}</th>
@@ -2787,9 +2803,9 @@ function ProjectActions() {
                           <td style={{ whiteSpace: 'nowrap' }}>{ms.logDate || '-'}</td>
                           <td>{ms.quarter?.quarter || '-'}</td>
                           <td>{ms.frequency?.frequency || '-'}</td>
+                          <td>{ms.overallPlannedQuantities ?? '-'}</td>
                           <td>{ms.achievedValues ?? '-'}</td>
                           <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
-                          <td>{ms.achievedVsGlobalPct != null ? `${ms.achievedVsGlobalPct}%` : '-'}</td>
                           <td>
                             {ms.status && (
                               <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>

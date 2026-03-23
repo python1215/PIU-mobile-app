@@ -31,6 +31,9 @@ public class DesignMonitoringMilestone {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DataCollectionFrequency frequency;
 
+    @Column(name = "overall_planned_quantities")
+    private Double overallPlannedQuantities;
+
     @Column(name = "achieved_values")
     private Double achievedValues;
 
@@ -61,6 +64,8 @@ public class DesignMonitoringMilestone {
     public void setQuarter(Quarter quarter) { this.quarter = quarter; }
     public DataCollectionFrequency getFrequency() { return frequency; }
     public void setFrequency(DataCollectionFrequency frequency) { this.frequency = frequency; }
+    public Double getOverallPlannedQuantities() { return overallPlannedQuantities; }
+    public void setOverallPlannedQuantities(Double overallPlannedQuantities) { this.overallPlannedQuantities = overallPlannedQuantities; }
     public Double getAchievedValues() { return achievedValues; }
     public void setAchievedValues(Double achievedValues) { this.achievedValues = achievedValues; }
     public Double getPlannedVsAchievedPct() { return plannedVsAchievedPct; }

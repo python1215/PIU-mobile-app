@@ -623,10 +623,10 @@ public class ProjectActionsController {
             .map(monitoring -> {
                 milestone.setDesignProgressMonitoring(monitoring);
                 milestone.setDateCreated(java.time.LocalDateTime.now());
-                if (milestone.getAchievedValues() != null && monitoring.getOverallPlannedQuantities() != null && monitoring.getOverallPlannedQuantities() > 0) {
-                    double pct = (milestone.getAchievedValues() / monitoring.getOverallPlannedQuantities()) * 100;
+                Double planned = milestone.getOverallPlannedQuantities();
+                if (milestone.getAchievedValues() != null && planned != null && planned > 0) {
+                    double pct = (milestone.getAchievedValues() / planned) * 100;
                     milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
-                    milestone.setAchievedVsGlobalPct(Math.round(pct * 100.0) / 100.0);
                 }
                 return ResponseEntity.ok(designMonitoringMilestoneRepository.save(milestone));
             })
@@ -642,14 +642,16 @@ public class ProjectActionsController {
                 m.setLogDate(details.getLogDate());
                 m.setQuarter(details.getQuarter());
                 m.setFrequency(details.getFrequency());
+                m.setOverallPlannedQuantities(details.getOverallPlannedQuantities());
                 m.setAchievedValues(details.getAchievedValues());
+                m.setPlannedVsAchievedPct(details.getPlannedVsAchievedPct());
+                m.setAchievedVsGlobalPct(details.getAchievedVsGlobalPct());
                 m.setStatus(details.getStatus());
                 m.setRemarks(details.getRemarks());
-                DesignProgressMonitoring parent = m.getDesignProgressMonitoring();
-                if (details.getAchievedValues() != null && parent != null && parent.getOverallPlannedQuantities() != null && parent.getOverallPlannedQuantities() > 0) {
-                    double pct = (details.getAchievedValues() / parent.getOverallPlannedQuantities()) * 100;
+                Double planned = details.getOverallPlannedQuantities();
+                if (details.getAchievedValues() != null && planned != null && planned > 0) {
+                    double pct = (details.getAchievedValues() / planned) * 100;
                     m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
-                    m.setAchievedVsGlobalPct(Math.round(pct * 100.0) / 100.0);
                 }
                 return ResponseEntity.ok(designMonitoringMilestoneRepository.save(m));
             })
