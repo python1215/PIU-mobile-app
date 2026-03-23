@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -2654,6 +2654,13 @@ function ProjectActions() {
               </select>
             </div>
           </div>
+          {(dmYear || dmProject || dmContractType || dmContractRefNo) && (
+            <div className="d-flex justify-content-end mt-2">
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => { setDmYear(''); setDmProject(''); setDmContractType(''); setDmContractRefNo(''); setDmContractOptions([]); setDmItems([]); setDmExpandedRow(null); setDmMilestones({}); setDmMonitoringMap({}); setDmMilestoneForm(null); setDmEditingMilestone(null); }}>
+                <FiRefreshCw className="me-1" /> {t('common.reset')}
+              </button>
+            </div>
+          )}
 
         </div>
       </div>
