@@ -142,6 +142,9 @@ function ProjectActions() {
   const [dmEditingActivity, setDmEditingActivity] = useState(null);
   const [dmEditForm, setDmEditForm] = useState({});
   const [dmMonitoringMap, setDmMonitoringMap] = useState({});
+  const [dmAllRecords, setDmAllRecords] = useState([]);
+  const [dmAllMilestones, setDmAllMilestones] = useState({});
+  const [dmAllLoading, setDmAllLoading] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -152,6 +155,12 @@ function ProjectActions() {
     loadContracts();
     loadFinancialData();
   }, [selectedProject]);
+
+  useEffect(() => {
+    if (activeTab === 'designMonitoring') {
+      loadAllDmRecords();
+    }
+  }, [activeTab]);
 
   const loadProjects = async () => {
     try {
@@ -2431,6 +2440,29 @@ function ProjectActions() {
     }
   };
 
+  const loadAllDmRecords = async () => {
+    setDmAllLoading(true);
+    try {
+      const res = await axios.get('/api/project-actions/design-monitoring');
+      setDmAllRecords(res.data);
+      if (res.data.length > 0) {
+        const milestonePromises = res.data.map(mi =>
+          axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
+            .then(r => ({ id: mi.id, milestones: r.data }))
+            .catch(() => ({ id: mi.id, milestones: [] }))
+        );
+        const results = await Promise.all(milestonePromises);
+        const allMs = {};
+        results.forEach(r => { allMs[r.id] = r.milestones; });
+        setDmAllMilestones(allMs);
+      }
+    } catch (e) {
+      console.error('Error loading all DM records:', e);
+    } finally {
+      setDmAllLoading(false);
+    }
+  };
+
   const handleDmContractRefChange = async (refNo) => {
     setDmContractRefNo(refNo);
     setDmItems([]);
@@ -2669,6 +2701,101 @@ function ProjectActions() {
         <div className="card">
           <div className="card-body text-center text-muted py-4">
             <p className="mb-0">{t('projectActions.noDesignMonitoringRecords')}</p>
+          </div>
+        </div>
+      )}
+
+      {!dmContractRefNo && (
+        <div className="card mb-4">
+          <div className="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 className="mb-0"><FiClipboard className="me-2" />{t('projectActions.savedRecords')}</h6>
+            <button className="btn btn-sm btn-outline-primary" onClick={loadAllDmRecords} disabled={dmAllLoading}>
+              <FiRefreshCw className={`me-1 ${dmAllLoading ? 'spin' : ''}`} /> {t('common.refresh') || 'Refresh'}
+            </button>
+          </div>
+          <div className="card-body p-0">
+            {dmAllLoading ? (
+              <div className="text-center py-4"><div className="spinner-border spinner-border-sm text-primary" /></div>
+            ) : dmAllRecords.length === 0 ? (
+              <div className="text-center text-muted py-4">{t('common.noData')}</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-bordered table-hover table-sm mb-0" style={{ fontSize: 'clamp(0.65rem, 1vw, 0.82rem)' }}>
+                  <thead className="table-light">
+                    <tr>
+                      <th>{t('projectActions.activityId')}</th>
+                      <th>{t('projectActions.activityDescription')}</th>
+                      <th>{t('projectActions.project')}</th>
+                      <th>{t('projectActions.contractReferenceNo')}</th>
+                      <th>{t('projectActions.contractType')}</th>
+                      <th>{t('projectActions.rate')}</th>
+                      <th>{t('projectActions.unit')}</th>
+                      <th>{t('projectActions.overallPlannedQty')}</th>
+                      <th>{t('projectActions.designMilestones')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dmAllRecords.map(rec => (
+                      <Fragment key={rec.id}>
+                        <tr>
+                          <td><code>{rec.activityId}</code></td>
+                          <td>{rec.activityDescription || '-'}</td>
+                          <td>{rec.project?.project || rec.project?.projectId || '-'}</td>
+                          <td>{rec.contractRefNo || '-'}</td>
+                          <td><span className="badge bg-info bg-opacity-25 text-dark">{rec.contractType || '-'}</span></td>
+                          <td className="text-center">{rec.rate != null ? `${rec.rate}%` : '-'}</td>
+                          <td className="text-center">{rec.unit || '-'}</td>
+                          <td className="text-center">{rec.overallPlannedQuantities ?? '-'}</td>
+                          <td className="text-center">
+                            <span className="badge bg-secondary bg-opacity-25 text-dark">
+                              {(dmAllMilestones[rec.id] || []).length}
+                            </span>
+                          </td>
+                        </tr>
+                        {(dmAllMilestones[rec.id] || []).length > 0 && (
+                          <tr>
+                            <td colSpan="9" className="p-0">
+                              <table className="table table-sm table-bordered mb-0 ms-4" style={{ fontSize: 'inherit', width: 'calc(100% - 2rem)' }}>
+                                <thead className="table-warning">
+                                  <tr>
+                                    <th>{t('projectActions.logDate')}</th>
+                                    <th>{t('projectActions.quarter')}</th>
+                                    <th>{t('projectActions.overallPlannedQty')}</th>
+                                    <th>{t('projectActions.achievedValues')}</th>
+                                    <th>{t('projectActions.plannedVsAchieved')}</th>
+                                    <th>{t('common.status')}</th>
+                                    <th>{t('projectActions.remarks')}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {(dmAllMilestones[rec.id] || []).map(ms => (
+                                    <tr key={ms.id}>
+                                      <td>{ms.logDate || '-'}</td>
+                                      <td>{ms.quarter?.quarter || '-'}</td>
+                                      <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                                      <td>{ms.achievedValues ?? '-'}</td>
+                                      <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                      <td>
+                                        {ms.status && (
+                                          <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
+                                            {t(`projectActions.status${ms.status}`) || ms.status}
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td>{ms.remarks || '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
