@@ -17,6 +17,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectActionsController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/ProjectMappingController.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/RiskAssessmentController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SetupController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SocialEnvironmentalController.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/controller/SpaController.java
@@ -75,6 +76,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Quarter.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Region.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ResultsOrientedMonitoring.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/RiskAssessment.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/RiskMitigation.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Role.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/RoleModulePermission.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Settlement.java
@@ -137,6 +140,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/QuarterRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RegionRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ResultsMonitoringRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RiskAssessmentRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RiskMitigationRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RoleModulePermissionRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/RoleRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/SettlementRepository.java

@@ -3,6 +3,7 @@ com/piun/piuproject/repository/DecisionOutcomeRepository.class
 com/piun/piuproject/controller/UserController.class
 com/piun/piuproject/repository/SpecificContractMonitoringRepository.class
 com/piun/piuproject/model/NatureOfSettlement.class
+com/piun/piuproject/repository/RiskAssessmentRepository.class
 com/piun/piuproject/model/IssueAction.class
 com/piun/piuproject/model/ESIA.class
 com/piun/piuproject/model/InvestmentType.class
@@ -38,6 +39,7 @@ com/piun/piuproject/model/TypeOfPAP.class
 com/piun/piuproject/repository/ProjectRepository.class
 com/piun/piuproject/model/NawecInfrastructure.class
 com/piun/piuproject/repository/TypeOfPAPRepository.class
+com/piun/piuproject/model/RiskMitigation.class
 com/piun/piuproject/model/ProjectOutcome.class
 com/piun/piuproject/repository/ProjectResultRepository.class
 com/piun/piuproject/model/Quarter.class
@@ -79,6 +81,7 @@ com/piun/piuproject/model/LGA.class
 com/piun/piuproject/repository/MeasurementUnitRepository.class
 com/piun/piuproject/controller/SocialEnvironmentalController.class
 com/piun/piuproject/dto/AuthRequest.class
+com/piun/piuproject/controller/RiskAssessmentController.class
 com/piun/piuproject/model/DesignWorkProgress.class
 com/piun/piuproject/controller/IssueActionSourceController.class
 com/piun/piuproject/repository/MonitoringTypeRepository.class
@@ -107,6 +110,7 @@ com/piun/piuproject/model/Donor.class
 com/piun/piuproject/model/IndicatorType.class
 com/piun/piuproject/model/KPIForContract.class
 com/piun/piuproject/dto/AuthResponse.class
+com/piun/piuproject/model/RiskAssessment.class
 com/piun/piuproject/dto/ChangePasswordRequest.class
 com/piun/piuproject/repository/NatureOfSettlementRepository.class
 com/piun/piuproject/repository/CurrencyRepository.class
@@ -154,6 +158,7 @@ com/piun/piuproject/model/PhysicalProgress.class
 com/piun/piuproject/model/ContractProfilingWorks.class
 com/piun/piuproject/service/CustomUserDetailsService.class
 com/piun/piuproject/model/TypeOfImpact.class
+com/piun/piuproject/repository/RiskMitigationRepository.class
 com/piun/piuproject/controller/AdministrationController.class
 com/piun/piuproject/repository/GrievanceRepository.class
 com/piun/piuproject/repository/RoleModulePermissionRepository.class

@@ -24,6 +24,7 @@ import {
   FiActivity,
   FiPackage,
   FiClipboard,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { useState, useCallback, useMemo, useEffect, memo } from "react";
 
@@ -35,6 +36,7 @@ const navItemsConfig = [
   { path: "/social-environmental", icon: FiShield, labelKey: "nav.socialEnvironmental", moduleKey: "socialEnvironmental" },
   { path: "/documentation", icon: FiFile, labelKey: "nav.documentation", moduleKey: "documentation" },
   { path: "/map", icon: FiMapPin, labelKey: "nav.projectMap", moduleKey: "projectMap" },
+  { path: "/risk-assessment", icon: FiAlertTriangle, labelKey: "nav.riskAssessment", moduleKey: "riskAssessment" },
   { path: "/issues", icon: FiAlertCircle, labelKey: "nav.issues", moduleKey: "issues" },
   { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi", moduleKey: "kpi" },
 ];

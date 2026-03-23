@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const MODULE_KEYS = [
   'dashboard', 'systemSetup', 'financialManagement', 'monitoring',
   'projectActions', 'socialEnvironmental', 'documentation',
-  'projectMap', 'issues', 'kpi', 'administration'
+  'projectMap', 'riskAssessment', 'issues', 'kpi', 'administration'
 ];
 
 const MODULE_LABEL_MAP = {
@@ -23,6 +23,7 @@ const MODULE_LABEL_MAP = {
   projectMap: 'nav.projectMap',
   issues: 'nav.issues',
   kpi: 'nav.kpi',
+  riskAssessment: 'nav.riskAssessment',
   administration: 'admin.title'
 };
 

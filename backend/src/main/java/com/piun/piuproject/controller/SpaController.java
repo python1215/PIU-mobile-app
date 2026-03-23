@@ -9,7 +9,7 @@ public class SpaController {
     @GetMapping(value = {"/", "/login", "/dashboard", "/projects", "/projects/**", "/donors", "/donors/**", 
                          "/issues", "/issues/**", "/kpi", "/kpi/**", "/users", "/users/**", "/settings", "/profile",
                          "/setup", "/financial", "/monitoring", "/project-actions", "/project-actions/**", "/social-environmental",
-                         "/documentation", "/map", "/administration", "/administration/**", "/change-password"})
+                         "/documentation", "/map", "/risk-assessment", "/administration", "/administration/**", "/change-password"})
     public String forward() {
         return "forward:/index.html";
     }

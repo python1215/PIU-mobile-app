@@ -16,6 +16,7 @@ import SocialEnvironmental from './pages/SocialEnvironmental';
 import Documentation from './pages/Documentation';
 import ProjectMap from './pages/ProjectMap';
 import Administration from './pages/Administration';
+import RiskAssessmentPage from './pages/RiskAssessment';
 import ChangePassword from './pages/ChangePassword';
 
 function ProtectedRoute({ children }) {
@@ -65,6 +66,7 @@ function App() {
         <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
         <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />
         <Route path="map" element={<ModuleGuard moduleKey="projectMap"><ProjectMap /></ModuleGuard>} />
+        <Route path="risk-assessment" element={<ModuleGuard moduleKey="riskAssessment"><RiskAssessmentPage /></ModuleGuard>} />
         <Route path="change-password" element={<ChangePassword />} />
         <Route path="administration" element={<ModuleGuard moduleKey="administration"><Administration /></ModuleGuard>}>
           <Route index element={<Navigate to="/administration/roles" replace />} />
