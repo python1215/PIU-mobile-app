@@ -287,7 +287,7 @@ public class ProjectActionsController {
             @RequestBody DesignWorkProgress details) {
         return designWorkProgressRepository.findById(id)
             .map(item -> {
-                item.setMonitoringDate(details.getMonitoringDate());
+                item.setYear(details.getYear());
                 item.setProject(details.getProject());
                 item.setContractType(details.getContractType());
                 item.setContractRefNo(details.getContractRefNo());

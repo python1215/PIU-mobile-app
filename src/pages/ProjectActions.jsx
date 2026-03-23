@@ -76,7 +76,7 @@ function ProjectActions() {
   };
 
   const [designWorkItems, setDesignWorkItems] = useState([]);
-  const [dwpDate, setDwpDate] = useState('');
+  const [dwpYear, setDwpYear] = useState('');
   const [dwpProject, setDwpProject] = useState('');
   const [dwpContractType, setDwpContractType] = useState('');
   const [dwpContractRefNo, setDwpContractRefNo] = useState('');
@@ -734,8 +734,8 @@ function ProjectActions() {
   };
 
   const handleDwpSave = async () => {
-    if (!dwpDate || !dwpProject || !dwpContractType || !dwpContractRefNo) {
-      toast.error('Please fill in Date, Project, Contract Type, and Contract Reference');
+    if (!dwpYear || !dwpProject || !dwpContractType || !dwpContractRefNo) {
+      toast.error('Please fill in Year, Project, Contract Type, and Contract Reference');
       return;
     }
     if (dwpRows.length === 0) {
@@ -745,7 +745,7 @@ function ProjectActions() {
     setDwpSaving(true);
     try {
       const items = dwpRows.map(row => ({
-        monitoringDate: dwpDate,
+        year: { id: parseInt(dwpYear) },
         project: { projectId: dwpProject },
         contractType: dwpContractType,
         contractRefNo: dwpContractRefNo,
@@ -759,7 +759,7 @@ function ProjectActions() {
       await axios.post('/api/project-actions/design-work-progress/batch', items);
       toast.success('Design work progress saved successfully');
       setDwpRows([]);
-      setDwpDate('');
+      setDwpYear('');
       setDwpContractType('');
       setDwpContractRefNo('');
       setDwpContractOptions([]);
@@ -788,7 +788,7 @@ function ProjectActions() {
     setDwpModalItem(item);
     if (mode === 'edit') {
       setDwpEditForm({
-        monitoringDate: item.monitoringDate || '',
+        yearId: item.year?.id || '',
         contractType: item.contractType || '',
         contractRefNo: item.contractRefNo || '',
         activityId: item.activityId || '',
@@ -812,7 +812,7 @@ function ProjectActions() {
     try {
       await axios.put(`/api/project-actions/design-work-progress/${dwpModalItem.id}`, {
         ...dwpModalItem,
-        monitoringDate: dwpEditForm.monitoringDate,
+        year: dwpEditForm.yearId ? { id: parseInt(dwpEditForm.yearId) } : null,
         contractType: dwpEditForm.contractType,
         contractRefNo: dwpEditForm.contractRefNo,
         activityId: dwpEditForm.activityId,
@@ -847,11 +847,14 @@ function ProjectActions() {
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
+                  <label className="form-label fw-semibold">{t('projectActions.year')}</label>
                   {isView ? (
-                    <p className="form-control-plaintext">{item.monitoringDate || '-'}</p>
+                    <p className="form-control-plaintext">{item.year?.profileYear || '-'}</p>
                   ) : (
-                    <input type="date" className="form-control" value={form.monitoringDate} onChange={e => setDwpEditForm(f => ({...f, monitoringDate: e.target.value}))} />
+                    <select className="form-select" value={form.yearId} onChange={e => setDwpEditForm(f => ({...f, yearId: e.target.value}))}>
+                      <option value="">{t('projectActions.selectYear')}</option>
+                      {dmYears.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                    </select>
                   )}
                 </div>
                 <div className="col-md-4">
@@ -930,7 +933,7 @@ function ProjectActions() {
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ monitoringDate: item.monitoringDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', observations: item.observations || '' }); }}>
+                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ yearId: item.year?.id || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', observations: item.observations || '' }); }}>
                     <FiEdit2 className="me-1" /> {t('common.edit')}
                   </button>
                   <button className="btn btn-secondary" onClick={closeDwpModal}>{t('common.close')}</button>
@@ -2363,10 +2366,10 @@ function ProjectActions() {
       doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
 
       autoTable(doc, {
-        head: [['#', 'Date', 'Activity ID', 'Activity', 'Rate (%)', 'Unit', 'Prov. Qty', 'Observations']],
+        head: [['#', 'Year', 'Activity ID', 'Activity', 'Rate (%)', 'Unit', 'Prov. Qty', 'Observations']],
         body: items.map((item, idx) => [
           idx + 1,
-          item.monitoringDate || '-',
+          item.year?.profileYear || '-',
           item.activityId || '-',
           item.activity || '-',
           item.rate != null ? `${item.rate}%` : '-',
@@ -2852,8 +2855,13 @@ function ProjectActions() {
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
-              <input type="date" className="form-control" value={dwpDate} onChange={e => setDwpDate(e.target.value)} />
+              <label className="form-label fw-semibold">{t('projectActions.year')}</label>
+              <select className="form-select" value={dwpYear} onChange={e => setDwpYear(e.target.value)}>
+                <option value="">{t('projectActions.selectYear')}</option>
+                {dmYears.map(y => (
+                  <option key={y.id} value={y.id}>{y.profileYear}</option>
+                ))}
+              </select>
             </div>
             <div className="col-md-6">
               <label className="form-label fw-semibold">{t('projectActions.project')}</label>
@@ -2950,7 +2958,7 @@ function ProjectActions() {
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.year')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
@@ -2966,7 +2974,7 @@ function ProjectActions() {
                 <tbody>
                   {designWorkItems.map(item => (
                     <tr key={item.id}>
-                      <td style={{whiteSpace:'nowrap'}}>{item.monitoringDate}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.year?.profileYear || '-'}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || item.project?.projectId || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>

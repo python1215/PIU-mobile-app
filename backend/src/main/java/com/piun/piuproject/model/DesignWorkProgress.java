@@ -13,8 +13,10 @@ public class DesignWorkProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "monitoring_date")
-    private LocalDate monitoringDate;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "year_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Year year;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
@@ -65,8 +67,8 @@ public class DesignWorkProgress {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public LocalDate getMonitoringDate() { return monitoringDate; }
-    public void setMonitoringDate(LocalDate monitoringDate) { this.monitoringDate = monitoringDate; }
+    public Year getYear() { return year; }
+    public void setYear(Year year) { this.year = year; }
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
     public String getContractType() { return contractType; }
