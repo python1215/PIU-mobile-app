@@ -37,6 +37,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Currency.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DataCollectionFrequency.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DecisionOutcome.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DesignMonitoringMilestone.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DesignProgressMonitoring.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DesignWorkProgress.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/District.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/DocumentComment.java
@@ -105,6 +107,8 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/CurrencyRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DataCollectionFrequencyRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DecisionOutcomeRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DesignMonitoringMilestoneRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DesignProgressMonitoringRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DesignWorkProgressRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DistrictRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DocumentCommentRepository.java

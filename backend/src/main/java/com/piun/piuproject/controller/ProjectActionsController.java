@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 @RestController
 @RequestMapping("/api/project-actions")
@@ -32,6 +34,12 @@ public class ProjectActionsController {
 
     @Autowired
     private DesignWorkProgressRepository designWorkProgressRepository;
+
+    @Autowired
+    private DesignProgressMonitoringRepository designProgressMonitoringRepository;
+
+    @Autowired
+    private DesignMonitoringMilestoneRepository designMonitoringMilestoneRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -477,6 +485,170 @@ public class ProjectActionsController {
         return installationRepository.findById(id)
             .map(item -> {
                 installationRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/design-monitoring")
+    public List<DesignProgressMonitoring> getAllDesignMonitoring() {
+        return designProgressMonitoringRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/design-monitoring/project/{projectId}")
+    public List<DesignProgressMonitoring> getDesignMonitoringByProject(@PathVariable String projectId) {
+        return designProgressMonitoringRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @GetMapping("/design-monitoring/filter")
+    public List<DesignProgressMonitoring> getDesignMonitoringFiltered(
+            @RequestParam String projectId,
+            @RequestParam String contractType,
+            @RequestParam String contractRefNo) {
+        return designProgressMonitoringRepository.findByProject_ProjectIdAndContractTypeAndContractRefNo(projectId, contractType, contractRefNo);
+    }
+
+    @PostMapping("/design-monitoring")
+    public DesignProgressMonitoring createDesignMonitoring(@RequestBody DesignProgressMonitoring item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return designProgressMonitoringRepository.save(item);
+    }
+
+    @PostMapping("/design-monitoring/batch")
+    public List<DesignProgressMonitoring> createDesignMonitoringBatch(@RequestBody List<DesignProgressMonitoring> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return designProgressMonitoringRepository.saveAll(items);
+    }
+
+    @PostMapping("/design-monitoring/import-from-design-work")
+    public Map<String, Object> importFromDesignWork(
+            @RequestParam String projectId,
+            @RequestParam String contractType,
+            @RequestParam String contractRefNo,
+            @RequestParam(required = false) Long yearId) {
+        List<DesignWorkProgress> dwpItems = designWorkProgressRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId)
+                .stream()
+                .filter(d -> contractType.equals(d.getContractType()) && contractRefNo.equals(d.getContractRefNo()))
+                .toList();
+
+        List<DesignProgressMonitoring> existing = designProgressMonitoringRepository
+                .findByProject_ProjectIdAndContractTypeAndContractRefNo(projectId, contractType, contractRefNo);
+
+        java.util.Set<String> existingActivityIds = existing.stream()
+                .map(DesignProgressMonitoring::getActivityId)
+                .filter(a -> a != null)
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<DesignProgressMonitoring> imported = new java.util.ArrayList<>();
+        for (DesignWorkProgress dwp : dwpItems) {
+            if (dwp.getActivityId() != null && existingActivityIds.contains(dwp.getActivityId())) {
+                continue;
+            }
+            DesignProgressMonitoring dpm = new DesignProgressMonitoring();
+            dpm.setProject(dwp.getProject());
+            dpm.setContractType(dwp.getContractType());
+            dpm.setContractRefNo(dwp.getContractRefNo());
+            dpm.setActivityId(dwp.getActivityId());
+            dpm.setActivityDescription(dwp.getActivity());
+            dpm.setRate(dwp.getRate());
+            dpm.setUnit(dwp.getUnit());
+            dpm.setOverallPlannedQuantities(dwp.getProvisionalQuantities());
+            dpm.setDateCreated(java.time.LocalDateTime.now());
+            if (yearId != null) {
+                Year y = new Year();
+                y.setId(yearId);
+                dpm.setYear(y);
+            }
+            imported.add(designProgressMonitoringRepository.save(dpm));
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("imported", imported.size());
+        result.put("items", imported);
+        return result;
+    }
+
+    @PutMapping("/design-monitoring/{id}")
+    public ResponseEntity<DesignProgressMonitoring> updateDesignMonitoring(
+            @PathVariable Long id,
+            @RequestBody DesignProgressMonitoring details) {
+        return designProgressMonitoringRepository.findById(id)
+            .map(item -> {
+                item.setYear(details.getYear());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setActivityId(details.getActivityId());
+                item.setActivityDescription(details.getActivityDescription());
+                item.setRate(details.getRate());
+                item.setUnit(details.getUnit());
+                item.setOverallPlannedQuantities(details.getOverallPlannedQuantities());
+                return ResponseEntity.ok(designProgressMonitoringRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/design-monitoring/{id}")
+    public ResponseEntity<Void> deleteDesignMonitoring(@PathVariable Long id) {
+        return designProgressMonitoringRepository.findById(id)
+            .map(item -> {
+                designProgressMonitoringRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/design-monitoring/{monitoringId}/milestones")
+    public List<DesignMonitoringMilestone> getMilestones(@PathVariable Long monitoringId) {
+        return designMonitoringMilestoneRepository.findByDesignProgressMonitoring_IdOrderByLogDateDesc(monitoringId);
+    }
+
+    @PostMapping("/design-monitoring/{monitoringId}/milestones")
+    public ResponseEntity<DesignMonitoringMilestone> createMilestone(
+            @PathVariable Long monitoringId,
+            @RequestBody DesignMonitoringMilestone milestone) {
+        return designProgressMonitoringRepository.findById(monitoringId)
+            .map(monitoring -> {
+                milestone.setDesignProgressMonitoring(monitoring);
+                milestone.setDateCreated(java.time.LocalDateTime.now());
+                if (milestone.getAchievedValues() != null && monitoring.getOverallPlannedQuantities() != null && monitoring.getOverallPlannedQuantities() > 0) {
+                    double pct = (milestone.getAchievedValues() / monitoring.getOverallPlannedQuantities()) * 100;
+                    milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                    milestone.setAchievedVsGlobalPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(designMonitoringMilestoneRepository.save(milestone));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/design-monitoring/milestones/{id}")
+    public ResponseEntity<DesignMonitoringMilestone> updateMilestone(
+            @PathVariable Long id,
+            @RequestBody DesignMonitoringMilestone details) {
+        return designMonitoringMilestoneRepository.findById(id)
+            .map(m -> {
+                m.setLogDate(details.getLogDate());
+                m.setQuarter(details.getQuarter());
+                m.setFrequency(details.getFrequency());
+                m.setAchievedValues(details.getAchievedValues());
+                m.setStatus(details.getStatus());
+                m.setRemarks(details.getRemarks());
+                DesignProgressMonitoring parent = m.getDesignProgressMonitoring();
+                if (details.getAchievedValues() != null && parent != null && parent.getOverallPlannedQuantities() != null && parent.getOverallPlannedQuantities() > 0) {
+                    double pct = (details.getAchievedValues() / parent.getOverallPlannedQuantities()) * 100;
+                    m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                    m.setAchievedVsGlobalPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(designMonitoringMilestoneRepository.save(m));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/design-monitoring/milestones/{id}")
+    public ResponseEntity<Void> deleteMilestone(@PathVariable Long id) {
+        return designMonitoringMilestoneRepository.findById(id)
+            .map(m -> {
+                designMonitoringMilestoneRepository.delete(m);
                 return ResponseEntity.ok().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());

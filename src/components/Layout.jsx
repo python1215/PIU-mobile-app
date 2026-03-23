@@ -48,6 +48,7 @@ const profilesSubItems = [
 
 const csmSubItems = [
   { path: "/project-actions/design-work", icon: FiClipboard, labelKey: "projectActions.designWorkPlan" },
+  { path: "/project-actions/design-monitoring", icon: FiTrendingUp, labelKey: "projectActions.designMonitoring" },
   { path: "/project-actions/boq", icon: FiFileText, labelKey: "projectActions.boqTab" },
   { path: "/project-actions/supply-progress", icon: FiPackage, labelKey: "projectActions.supplyProgressTab" },
   { path: "/project-actions/installation", icon: FiSettings, labelKey: "projectActions.installationTab" },

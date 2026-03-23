@@ -62,6 +62,7 @@ function App() {
           <Route path="boq" element={null} />
           <Route path="supply-progress" element={null} />
           <Route path="installation" element={null} />
+          <Route path="design-monitoring" element={null} />
         </Route>
         <Route path="social-environmental" element={<ModuleGuard moduleKey="socialEnvironmental"><SocialEnvironmental /></ModuleGuard>} />
         <Route path="documentation" element={<ModuleGuard moduleKey="documentation"><Documentation /></ModuleGuard>} />

@@ -46,7 +46,7 @@ The system employs a microservices architecture, leveraging Spring Boot for the 
 - **Database**: Spring Data JPA with Hibernate 6.
 - **Validation**: Jakarta Validation (Bean Validation).
 - **Build System**: Maven, producing a JAR package.
-- **Core Modules**: Comprises 8 REST controllers, 40+ JPA entities, and 29 Spring Data repositories to manage various aspects of the PIU system.
+- **Core Modules**: Comprises 8 REST controllers, 40+ JPA entities (including DesignProgressMonitoring, DesignMonitoringMilestone, RiskAssessment, RiskMitigation), and 64 Spring Data repositories to manage various aspects of the PIU system.
 
 ## External Dependencies
 - **PostgreSQL**: Primary database.
