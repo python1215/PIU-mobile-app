@@ -10,7 +10,6 @@ import autoTable from 'jspdf-autotable';
 const PATH_TO_TAB = {
   'works': 'works',
   'goods': 'goods',
-  'monitoring': 'monitoring',
   'design-work': 'designWork',
   'boq': 'boq',
   'supply-progress': 'supplyProgress',

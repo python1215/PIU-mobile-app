@@ -39,10 +39,12 @@ const navItemsConfig = [
   { path: "/kpi", icon: FiBarChart2, labelKey: "nav.kpi", moduleKey: "kpi" },
 ];
 
-const projectActionsSubItems = [
+const profilesSubItems = [
   { path: "/project-actions/works", icon: FiFileText, labelKey: "projectActions.worksContracts" },
   { path: "/project-actions/goods", icon: FiPackage, labelKey: "projectActions.goodsContracts" },
-  { path: "/project-actions/monitoring", icon: FiActivity, labelKey: "projectActions.contractMonitoring" },
+];
+
+const csmSubItems = [
   { path: "/project-actions/design-work", icon: FiClipboard, labelKey: "projectActions.designWorkPlan" },
   { path: "/project-actions/boq", icon: FiFileText, labelKey: "projectActions.boqTab" },
   { path: "/project-actions/supply-progress", icon: FiPackage, labelKey: "projectActions.supplyProgressTab" },
@@ -107,10 +109,14 @@ function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [adminExpanded, setAdminExpanded] = useState(false);
   const [projectActionsExpanded, setProjectActionsExpanded] = useState(false);
+  const [profilesExpanded, setProfilesExpanded] = useState(false);
+  const [csmExpanded, setCsmExpanded] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const isAdminPath = location.pathname.startsWith("/administration");
   const isProjectActionsPath = location.pathname.startsWith("/project-actions");
+  const isProfilesPath = ["/project-actions/works", "/project-actions/goods"].includes(location.pathname);
+  const isCsmPath = ["/project-actions/design-work", "/project-actions/boq", "/project-actions/supply-progress", "/project-actions/installation"].includes(location.pathname);
 
   useEffect(() => {
     if (isMobile) {
@@ -212,8 +218,12 @@ function Layout() {
   );
 
   useEffect(() => {
-    if (isProjectActionsPath) setProjectActionsExpanded(true);
-  }, [isProjectActionsPath]);
+    if (isProjectActionsPath) {
+      setProjectActionsExpanded(true);
+      if (isProfilesPath) setProfilesExpanded(true);
+      if (isCsmPath) setCsmExpanded(true);
+    }
+  }, [isProjectActionsPath, isProfilesPath, isCsmPath]);
 
   useEffect(() => {
     if (isAdminPath) setAdminExpanded(true);
@@ -295,26 +305,94 @@ function Layout() {
                 </li>
 
                 {showLabels && projectActionsExpanded && (
-                  <div style={{ paddingLeft: "20px" }}>
-                    {projectActionsSubItems.map((sub) => {
-                      const SubIcon = sub.icon;
-                      const isSubActive = location.pathname === sub.path;
-                      return (
-                        <li key={sub.path} className="nav-item">
-                          <Link
-                            to={sub.path}
-                            onClick={closeSidebarOnMobile}
-                            className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 ${
-                              isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
-                            }`}
-                            style={{ transition: "all 0.2s", whiteSpace: "nowrap", fontSize: "0.9rem" }}
-                          >
-                            <SubIcon size={16} />
-                            <span className="fw-medium">{t(sub.labelKey)}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                  <div style={{ paddingLeft: "16px" }}>
+                    <li className="nav-item">
+                      <button
+                        onClick={() => setProfilesExpanded((prev) => !prev)}
+                        className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 w-100 border-0 bg-transparent ${
+                          isProfilesPath ? "text-primary" : "text-secondary"
+                        }`}
+                        style={{ transition: "all 0.2s", whiteSpace: "nowrap", textAlign: "left", fontSize: "0.9rem" }}
+                      >
+                        <FiFolder size={16} />
+                        <span className="fw-medium flex-grow-1">{t("projectActions.profiles")}</span>
+                        <FiChevronDown
+                          size={14}
+                          style={{
+                            transition: "transform 0.3s",
+                            transform: profilesExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                          }}
+                        />
+                      </button>
+                    </li>
+
+                    {profilesExpanded && (
+                      <div style={{ paddingLeft: "16px" }}>
+                        {profilesSubItems.map((sub) => {
+                          const SubIcon = sub.icon;
+                          const isSubActive = location.pathname === sub.path;
+                          return (
+                            <li key={sub.path} className="nav-item">
+                              <Link
+                                to={sub.path}
+                                onClick={closeSidebarOnMobile}
+                                className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${
+                                  isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                                }`}
+                                style={{ transition: "all 0.2s", whiteSpace: "nowrap", fontSize: "0.85rem" }}
+                              >
+                                <SubIcon size={14} />
+                                <span className="fw-medium">{t(sub.labelKey)}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <li className="nav-item">
+                      <button
+                        onClick={() => setCsmExpanded((prev) => !prev)}
+                        className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 w-100 border-0 bg-transparent ${
+                          isCsmPath ? "text-primary" : "text-secondary"
+                        }`}
+                        style={{ transition: "all 0.2s", whiteSpace: "nowrap", textAlign: "left", fontSize: "0.9rem" }}
+                      >
+                        <FiActivity size={16} />
+                        <span className="fw-medium flex-grow-1">{t("projectActions.contractMonitoring")}</span>
+                        <FiChevronDown
+                          size={14}
+                          style={{
+                            transition: "transform 0.3s",
+                            transform: csmExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                          }}
+                        />
+                      </button>
+                    </li>
+
+                    {csmExpanded && (
+                      <div style={{ paddingLeft: "16px" }}>
+                        {csmSubItems.map((sub) => {
+                          const SubIcon = sub.icon;
+                          const isSubActive = location.pathname === sub.path;
+                          return (
+                            <li key={sub.path} className="nav-item">
+                              <Link
+                                to={sub.path}
+                                onClick={closeSidebarOnMobile}
+                                className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${
+                                  isSubActive ? "bg-primary bg-opacity-10 text-primary" : "text-secondary"
+                                }`}
+                                style={{ transition: "all 0.2s", whiteSpace: "nowrap", fontSize: "0.85rem" }}
+                              >
+                                <SubIcon size={14} />
+                                <span className="fw-medium">{t(sub.labelKey)}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </>

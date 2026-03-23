@@ -57,7 +57,6 @@ function App() {
           <Route index element={<Navigate to="/project-actions/works" replace />} />
           <Route path="works" element={null} />
           <Route path="goods" element={null} />
-          <Route path="monitoring" element={null} />
           <Route path="design-work" element={null} />
           <Route path="boq" element={null} />
           <Route path="supply-progress" element={null} />

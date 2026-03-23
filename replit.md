@@ -143,14 +143,15 @@ The application uses two different architectures for development and production:
    - Components, Subcomponents, Activities, PDO Statements, Outcomes
 4. **ProjectDetail** (`/projects/:id`) - Individual project details
 5. **MonitoringEvaluation** (`/monitoring`) - Results-oriented monitoring with progress tracking
-6. **ProjectActions** (`/project-actions/*`) - Expandable sidebar accordion with sub-routes:
-   - Works Contracts (`/project-actions/works`)
-   - Goods & Services (`/project-actions/goods`)
-   - Contract Monitoring (`/project-actions/monitoring`)
-   - Design Work Plan (`/project-actions/design-work`)
-   - BOQ (`/project-actions/boq`)
-   - Supply Progress (`/project-actions/supply-progress`)
-   - Installation (`/project-actions/installation`)
+6. **ProjectActions** (`/project-actions/*`) - Expandable sidebar accordion with nested sub-groups:
+   - **Profiles** (sub-accordion):
+     - Works Contracts (`/project-actions/works`)
+     - Goods & Services (`/project-actions/goods`)
+   - **Contract Specific Monitoring** (sub-accordion):
+     - Design Work Plan (`/project-actions/design-work`)
+     - BOQ (`/project-actions/boq`)
+     - Supply Progress (`/project-actions/supply-progress`)
+     - Installation (`/project-actions/installation`)
 7. **SocialEnvironmental** (`/social-environmental`) - ESIA, PAP, grievances, OHS, community engagement
 8. **Documentation** (`/documentation`) - Document management and tracking
 9. **ProjectMap** (`/map`) - Geographic visualization with Leaflet
