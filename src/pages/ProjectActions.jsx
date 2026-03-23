@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -141,6 +141,7 @@ function ProjectActions() {
   const [dmEditingMilestone, setDmEditingMilestone] = useState(null);
   const [dmEditingActivity, setDmEditingActivity] = useState(null);
   const [dmEditForm, setDmEditForm] = useState({});
+  const [dmMonitoringMap, setDmMonitoringMap] = useState({});
 
   useEffect(() => {
     loadProjects();
@@ -2434,22 +2435,29 @@ function ProjectActions() {
     if (!refNo || !dmProject || !dmContractType) return;
     try {
       const params = `projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${refNo}${dmYear ? `&yearId=${dmYear}` : ''}`;
-      await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${params}`);
-      const res = await axios.get(`/api/project-actions/design-monitoring/filter?projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${refNo}`);
+      const res = await axios.get(`/api/project-actions/design-work-progress/filter?${params}`);
       setDmItems(res.data);
       if (res.data.length > 0) {
-        const milestonePromises = res.data.map(item =>
-          axios.get(`/api/project-actions/design-monitoring/${item.id}/milestones`)
-            .then(r => ({ id: item.id, milestones: r.data }))
-            .catch(() => ({ id: item.id, milestones: [] }))
+        await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${params}`);
+        const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${refNo}`);
+        const monItems = monRes.data;
+        const milestonePromises = monItems.map(mi =>
+          axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
+            .then(r => ({ activityId: mi.activityId, monitoringId: mi.id, milestones: r.data }))
+            .catch(() => ({ activityId: mi.activityId, monitoringId: mi.id, milestones: [] }))
         );
         const results = await Promise.all(milestonePromises);
         const allMilestones = {};
-        results.forEach(r => { allMilestones[r.id] = r.milestones; });
+        const monMap = {};
+        results.forEach(r => {
+          allMilestones[r.activityId] = r.milestones;
+          monMap[r.activityId] = r.monitoringId;
+        });
         setDmMilestones(allMilestones);
+        setDmMonitoringMap(monMap);
       }
     } catch (e) {
-      console.error('Error loading design monitoring:', e);
+      console.error('Error loading design work plan data:', e);
     }
   };
 
@@ -2517,33 +2525,38 @@ function ProjectActions() {
     }
   };
 
-  const loadDmMilestones = async (monitoringId) => {
+  const loadDmMilestonesByActivity = async (activityId) => {
+    const monitoringId = dmMonitoringMap[activityId];
+    if (!monitoringId) return;
     try {
       const res = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
-      setDmMilestones(prev => ({ ...prev, [monitoringId]: res.data }));
+      setDmMilestones(prev => ({ ...prev, [activityId]: res.data }));
     } catch (e) {
       console.error('Error loading milestones:', e);
     }
   };
 
-  const toggleDmExpand = (id) => {
-    if (dmExpandedRow === id) {
+  const toggleDmExpand = (activityId) => {
+    if (dmExpandedRow === activityId) {
       setDmExpandedRow(null);
     } else {
-      setDmExpandedRow(id);
-      loadDmMilestones(id);
+      setDmExpandedRow(activityId);
     }
   };
 
-  const handleDmAddMilestone = (monitoringId) => {
-    setDmMilestoneForm({ monitoringId, logDate: '', quarterId: '', frequencyId: '', achievedValues: '', status: '', remarks: '' });
+  const handleDmAddMilestone = (activityId) => {
+    const monitoringId = dmMonitoringMap[activityId];
+    if (!monitoringId) { toast.error('No monitoring record linked'); return; }
+    setDmMilestoneForm({ monitoringId, activityId, logDate: '', quarterId: '', frequencyId: '', achievedValues: '', status: '', remarks: '' });
     setDmEditingMilestone(null);
   };
 
-  const handleDmEditMilestone = (milestone) => {
+  const handleDmEditMilestone = (milestone, activityId) => {
     setDmEditingMilestone(milestone);
+    const monitoringId = dmMonitoringMap[activityId];
     setDmMilestoneForm({
-      monitoringId: milestone.designProgressMonitoring?.id,
+      monitoringId: monitoringId || milestone.designProgressMonitoring?.id,
+      activityId,
       logDate: milestone.logDate || '',
       quarterId: milestone.quarter?.id || '',
       frequencyId: milestone.frequency?.id || '',
@@ -2571,7 +2584,7 @@ function ProjectActions() {
         await axios.post(`/api/project-actions/design-monitoring/${dmMilestoneForm.monitoringId}/milestones`, payload);
         toast.success(t('common.saved'));
       }
-      loadDmMilestones(dmMilestoneForm.monitoringId);
+      loadDmMilestonesByActivity(dmMilestoneForm.activityId);
       setDmMilestoneForm(null);
       setDmEditingMilestone(null);
     } catch (e) {
@@ -2579,11 +2592,11 @@ function ProjectActions() {
     }
   };
 
-  const handleDmDeleteMilestone = async (milestoneId, monitoringId) => {
+  const handleDmDeleteMilestone = async (milestoneId, activityId) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
       await axios.delete(`/api/project-actions/design-monitoring/milestones/${milestoneId}`);
-      loadDmMilestones(monitoringId);
+      loadDmMilestonesByActivity(activityId);
       toast.success(t('common.deleted'));
     } catch (e) {
       toast.error(t('common.deleteError'));
@@ -2651,50 +2664,12 @@ function ProjectActions() {
           <div className="card-header bg-white d-flex justify-content-between align-items-center py-2" style={{ borderLeft: '4px solid #4361ee' }}>
             <div className="d-flex align-items-center gap-3 flex-wrap" style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.88rem)' }}>
               <span className="fw-bold text-primary"><code style={{ fontSize: 'inherit' }}>{item.activityId}</code></span>
-              <span className="text-dark" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.activityDescription}>{item.activityDescription}</span>
+              <span className="text-dark" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.activity}>{item.activity}</span>
             </div>
-            <div className="d-flex gap-1">
-              <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => handleDmEditActivity(item)}><FiEdit2 /></button>
-              <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDmDeleteActivity(item.id)}><FiTrash2 /></button>
-            </div>
+            <button className="btn btn-sm p-1" onClick={() => toggleDmExpand(item.activityId)} title={dmExpandedRow === item.activityId ? 'Collapse' : 'Expand milestones'}>
+              {dmExpandedRow === item.activityId ? <FiChevronDown /> : <FiChevronRight />}
+            </button>
           </div>
-
-          {dmEditingActivity?.id === item.id && (
-            <div className="card-body border-bottom bg-light py-2">
-              <div className="row g-2 align-items-end">
-                <div className="col-md-3">
-                  <label className="form-label small fw-semibold mb-1">{t('projectActions.activityDescription')}</label>
-                  <input type="text" className="form-control form-control-sm" value={dmEditForm.activityDescription} onChange={e => setDmEditForm(f => ({ ...f, activityDescription: e.target.value }))} />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-semibold mb-1">{t('projectActions.ratePercent')}</label>
-                  <input type="number" className="form-control form-control-sm" value={dmEditForm.rate} onChange={e => setDmEditForm(f => ({ ...f, rate: e.target.value }))} step="0.01" />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-semibold mb-1">{t('projectActions.unit')}</label>
-                  <select className="form-select form-select-sm" value={dmEditForm.unit} onChange={e => setDmEditForm(f => ({ ...f, unit: e.target.value }))}>
-                    <option value="">--</option>
-                    {dmUnits.map(u => <option key={u.id} value={u.unit}>{u.unit}</option>)}
-                  </select>
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-semibold mb-1">{t('projectActions.overallPlannedQty')}</label>
-                  <input type="number" className="form-control form-control-sm" value={dmEditForm.overallPlannedQuantities} onChange={e => setDmEditForm(f => ({ ...f, overallPlannedQuantities: e.target.value }))} step="0.01" />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-semibold mb-1">{t('projectActions.year')}</label>
-                  <select className="form-select form-select-sm" value={dmEditForm.yearId} onChange={e => setDmEditForm(f => ({ ...f, yearId: e.target.value }))}>
-                    <option value="">--</option>
-                    {dmYears.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
-                  </select>
-                </div>
-                <div className="col-md-1 d-flex gap-1">
-                  <button className="btn btn-sm btn-success p-1" onClick={handleDmSaveActivity}><FiCheck /></button>
-                  <button className="btn btn-sm btn-outline-secondary p-1" onClick={() => setDmEditingActivity(null)}><FiX /></button>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="card-body p-0">
             <div className="table-responsive">
@@ -2703,133 +2678,137 @@ function ProjectActions() {
                   <tr>
                     <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.ratePercent')}</th>
                     <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.unit')}</th>
-                    <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.overallPlannedQty')}</th>
+                    <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.provisionalQty')}</th>
                     <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.year')}</th>
+                    <th className="text-center" style={{ whiteSpace: 'nowrap' }}>{t('projectActions.observations')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="text-center">{item.rate != null ? `${item.rate}%` : '-'}</td>
                     <td className="text-center">{item.unit || '-'}</td>
-                    <td className="text-center">{item.overallPlannedQuantities ?? '-'}</td>
+                    <td className="text-center">{item.provisionalQuantities ?? '-'}</td>
                     <td className="text-center">{item.year?.profileYear || '-'}</td>
+                    <td className="text-center" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.observations}>{item.observations || '-'}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="card-footer bg-white p-3">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h6 className="mb-0 text-primary" style={{ fontSize: 'clamp(0.72rem, 1.1vw, 0.88rem)' }}>
-                <FiClipboard className="me-2" />
-                {t('projectActions.designMilestones')}
-              </h6>
-              <button className="btn btn-sm btn-primary" onClick={() => handleDmAddMilestone(item.id)}>
-                <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
-              </button>
-            </div>
-
-            {dmMilestoneForm && dmMilestoneForm.monitoringId === item.id && (
-              <div className="card mb-3 border-primary">
-                <div className="card-header bg-primary bg-opacity-10 py-2">
-                  <strong>{dmEditingMilestone ? t('projectActions.editMilestone') : t('projectActions.addMilestone')}</strong>
-                </div>
-                <div className="card-body">
-                  <div className="row g-2">
-                    <div className="col-md-3">
-                      <label className="form-label small fw-semibold">{t('projectActions.logDate')}</label>
-                      <input type="date" className="form-control form-control-sm" value={dmMilestoneForm.logDate} onChange={e => setDmMilestoneForm(f => ({ ...f, logDate: e.target.value }))} />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label small fw-semibold">{t('projectActions.quarter')}</label>
-                      <select className="form-select form-select-sm" value={dmMilestoneForm.quarterId} onChange={e => setDmMilestoneForm(f => ({ ...f, quarterId: e.target.value }))}>
-                        <option value="">--</option>
-                        {quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label small fw-semibold">{t('projectActions.frequency')}</label>
-                      <select className="form-select form-select-sm" value={dmMilestoneForm.frequencyId} onChange={e => setDmMilestoneForm(f => ({ ...f, frequencyId: e.target.value }))}>
-                        <option value="">--</option>
-                        {dmFrequencies.map(f => <option key={f.id} value={f.id}>{f.frequency}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
-                      <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.achievedValues} onChange={e => setDmMilestoneForm(f => ({ ...f, achievedValues: e.target.value }))} step="0.01" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">{t('common.status')}</label>
-                      <select className="form-select form-select-sm" value={dmMilestoneForm.status} onChange={e => setDmMilestoneForm(f => ({ ...f, status: e.target.value }))}>
-                        <option value="">--</option>
-                        <option value="Complete">{t('projectActions.statusComplete')}</option>
-                        <option value="Incomplete">{t('projectActions.statusIncomplete')}</option>
-                        <option value="Stagnant">{t('projectActions.statusStagnant')}</option>
-                        <option value="Cancelled">{t('projectActions.statusCancelled')}</option>
-                      </select>
-                    </div>
-                    <div className="col-md-8">
-                      <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
-                      <textarea className="form-control form-control-sm" value={dmMilestoneForm.remarks} onChange={e => setDmMilestoneForm(f => ({ ...f, remarks: e.target.value }))} rows="1" />
-                    </div>
-                  </div>
-                  <div className="text-end mt-2">
-                    <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => { setDmMilestoneForm(null); setDmEditingMilestone(null); }}>{t('common.cancel')}</button>
-                    <button className="btn btn-sm btn-success" onClick={handleDmSaveMilestone}>{t('common.save')}</button>
-                  </div>
-                </div>
+          {(dmExpandedRow === item.activityId || dmMilestoneForm?.activityId === item.activityId) && (
+            <div className="card-footer bg-white p-3">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h6 className="mb-0 text-primary" style={{ fontSize: 'clamp(0.72rem, 1.1vw, 0.88rem)' }}>
+                  <FiClipboard className="me-2" />
+                  {t('projectActions.designMilestones')}
+                </h6>
+                <button className="btn btn-sm btn-primary" onClick={() => handleDmAddMilestone(item.activityId)}>
+                  <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
+                </button>
               </div>
-            )}
 
-            {(dmMilestones[item.id] || []).length === 0 ? (
-              <div className="text-center text-muted py-2" style={{ fontSize: '0.82rem' }}>{t('projectActions.noMilestones')}</div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-bordered table-sm mb-0" style={{ fontSize: 'clamp(0.6rem, 1vw, 0.8rem)' }}>
-                  <thead className="table-light">
-                    <tr>
-                      <th>{t('projectActions.logDate')}</th>
-                      <th>{t('projectActions.quarter')}</th>
-                      <th>{t('projectActions.frequency')}</th>
-                      <th>{t('projectActions.achievedValues')}</th>
-                      <th>{t('projectActions.plannedVsAchieved')}</th>
-                      <th>{t('projectActions.achievedVsGlobal')}</th>
-                      <th>{t('common.status')}</th>
-                      <th>{t('projectActions.remarks')}</th>
-                      <th>{t('common.actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(dmMilestones[item.id] || []).map(ms => (
-                      <tr key={ms.id}>
-                        <td style={{ whiteSpace: 'nowrap' }}>{ms.logDate || '-'}</td>
-                        <td>{ms.quarter?.quarter || '-'}</td>
-                        <td>{ms.frequency?.frequency || '-'}</td>
-                        <td>{ms.achievedValues ?? '-'}</td>
-                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
-                        <td>{ms.achievedVsGlobalPct != null ? `${ms.achievedVsGlobalPct}%` : '-'}</td>
-                        <td>
-                          {ms.status && (
-                            <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
-                              {t(`projectActions.status${ms.status}`) || ms.status}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={ms.remarks}>{ms.remarks || '-'}</td>
-                        <td style={{ whiteSpace: 'nowrap' }}>
-                          <div className="d-flex gap-1">
-                            <button className="btn btn-sm btn-outline-primary p-1" onClick={() => handleDmEditMilestone(ms)}><FiEdit2 /></button>
-                            <button className="btn btn-sm btn-outline-danger p-1" onClick={() => handleDmDeleteMilestone(ms.id, item.id)}><FiTrash2 /></button>
-                          </div>
-                        </td>
+              {dmMilestoneForm && dmMilestoneForm.activityId === item.activityId && (
+                <div className="card mb-3 border-primary">
+                  <div className="card-header bg-primary bg-opacity-10 py-2">
+                    <strong>{dmEditingMilestone ? t('projectActions.editMilestone') : t('projectActions.addMilestone')}</strong>
+                  </div>
+                  <div className="card-body">
+                    <div className="row g-2">
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.logDate')}</label>
+                        <input type="date" className="form-control form-control-sm" value={dmMilestoneForm.logDate} onChange={e => setDmMilestoneForm(f => ({ ...f, logDate: e.target.value }))} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.quarter')}</label>
+                        <select className="form-select form-select-sm" value={dmMilestoneForm.quarterId} onChange={e => setDmMilestoneForm(f => ({ ...f, quarterId: e.target.value }))}>
+                          <option value="">--</option>
+                          {quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}
+                        </select>
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.frequency')}</label>
+                        <select className="form-select form-select-sm" value={dmMilestoneForm.frequencyId} onChange={e => setDmMilestoneForm(f => ({ ...f, frequencyId: e.target.value }))}>
+                          <option value="">--</option>
+                          {dmFrequencies.map(f => <option key={f.id} value={f.id}>{f.frequency}</option>)}
+                        </select>
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
+                        <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.achievedValues} onChange={e => setDmMilestoneForm(f => ({ ...f, achievedValues: e.target.value }))} step="0.01" />
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                        <select className="form-select form-select-sm" value={dmMilestoneForm.status} onChange={e => setDmMilestoneForm(f => ({ ...f, status: e.target.value }))}>
+                          <option value="">--</option>
+                          <option value="Complete">{t('projectActions.statusComplete')}</option>
+                          <option value="Incomplete">{t('projectActions.statusIncomplete')}</option>
+                          <option value="Stagnant">{t('projectActions.statusStagnant')}</option>
+                          <option value="Cancelled">{t('projectActions.statusCancelled')}</option>
+                        </select>
+                      </div>
+                      <div className="col-md-8">
+                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                        <textarea className="form-control form-control-sm" value={dmMilestoneForm.remarks} onChange={e => setDmMilestoneForm(f => ({ ...f, remarks: e.target.value }))} rows="1" />
+                      </div>
+                    </div>
+                    <div className="text-end mt-2">
+                      <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => { setDmMilestoneForm(null); setDmEditingMilestone(null); }}>{t('common.cancel')}</button>
+                      <button className="btn btn-sm btn-success" onClick={handleDmSaveMilestone}>{t('common.save')}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(dmMilestones[item.activityId] || []).length === 0 ? (
+                <div className="text-center text-muted py-2" style={{ fontSize: '0.82rem' }}>{t('projectActions.noMilestones')}</div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-bordered table-sm mb-0" style={{ fontSize: 'clamp(0.6rem, 1vw, 0.8rem)' }}>
+                    <thead className="table-light">
+                      <tr>
+                        <th>{t('projectActions.logDate')}</th>
+                        <th>{t('projectActions.quarter')}</th>
+                        <th>{t('projectActions.frequency')}</th>
+                        <th>{t('projectActions.achievedValues')}</th>
+                        <th>{t('projectActions.plannedVsAchieved')}</th>
+                        <th>{t('projectActions.achievedVsGlobal')}</th>
+                        <th>{t('common.status')}</th>
+                        <th>{t('projectActions.remarks')}</th>
+                        <th>{t('common.actions')}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                    </thead>
+                    <tbody>
+                      {(dmMilestones[item.activityId] || []).map(ms => (
+                        <tr key={ms.id}>
+                          <td style={{ whiteSpace: 'nowrap' }}>{ms.logDate || '-'}</td>
+                          <td>{ms.quarter?.quarter || '-'}</td>
+                          <td>{ms.frequency?.frequency || '-'}</td>
+                          <td>{ms.achievedValues ?? '-'}</td>
+                          <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                          <td>{ms.achievedVsGlobalPct != null ? `${ms.achievedVsGlobalPct}%` : '-'}</td>
+                          <td>
+                            {ms.status && (
+                              <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
+                                {t(`projectActions.status${ms.status}`) || ms.status}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={ms.remarks}>{ms.remarks || '-'}</td>
+                          <td style={{ whiteSpace: 'nowrap' }}>
+                            <div className="d-flex gap-1">
+                              <button className="btn btn-sm btn-outline-primary p-1" onClick={() => handleDmEditMilestone(ms, item.activityId)}><FiEdit2 /></button>
+                              <button className="btn btn-sm btn-outline-danger p-1" onClick={() => handleDmDeleteMilestone(ms.id, item.activityId)}><FiTrash2 /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>

@@ -10,4 +10,6 @@ import java.util.List;
 public interface DesignWorkProgressRepository extends JpaRepository<DesignWorkProgress, Long> {
     List<DesignWorkProgress> findByProject_ProjectIdOrderByDateCreatedDesc(String projectId);
     List<DesignWorkProgress> findAllByOrderByDateCreatedDesc();
+    List<DesignWorkProgress> findByProject_ProjectIdAndContractTypeAndContractRefNoOrderByActivityIdAsc(String projectId, String contractType, String contractRefNo);
+    List<DesignWorkProgress> findByProject_ProjectIdAndContractTypeAndContractRefNoAndYear_IdOrderByActivityIdAsc(String projectId, String contractType, String contractRefNo, Long yearId);
 }

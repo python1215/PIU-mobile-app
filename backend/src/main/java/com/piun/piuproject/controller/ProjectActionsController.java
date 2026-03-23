@@ -269,6 +269,18 @@ public class ProjectActionsController {
         return designWorkProgressRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
     }
 
+    @GetMapping("/design-work-progress/filter")
+    public List<DesignWorkProgress> getDesignWorkProgressFiltered(
+            @RequestParam String projectId,
+            @RequestParam String contractType,
+            @RequestParam String contractRefNo,
+            @RequestParam(required = false) Long yearId) {
+        if (yearId != null) {
+            return designWorkProgressRepository.findByProject_ProjectIdAndContractTypeAndContractRefNoAndYear_IdOrderByActivityIdAsc(projectId, contractType, contractRefNo, yearId);
+        }
+        return designWorkProgressRepository.findByProject_ProjectIdAndContractTypeAndContractRefNoOrderByActivityIdAsc(projectId, contractType, contractRefNo);
+    }
+
     @PostMapping("/design-work-progress")
     public DesignWorkProgress createDesignWorkProgress(@RequestBody DesignWorkProgress item) {
         item.setDateCreated(java.time.LocalDateTime.now());
