@@ -547,6 +547,7 @@
     "designActivities": "Atividades de Projeto",
     "activityDescription": "Descricao da Atividade",
     "overallPlannedQty": "Quantidade Global Planejada",
+    "planQtyForPeriod": "Quantidade Planejada para o Período",
     "designMilestones": "Marcos de Monitoramento de Projeto",
     "addMilestone": "Adicionar Marco",
     "editMilestone": "Editar Marco",

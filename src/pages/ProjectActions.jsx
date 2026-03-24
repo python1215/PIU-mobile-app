@@ -3018,7 +3018,7 @@ function ProjectActions() {
                                   <tr>
                                     <th>{t('projectActions.logDate')}</th>
                                     <th>{t('projectActions.quarter')}</th>
-                                    <th>{t('projectActions.overallPlannedQty')}</th>
+                                    <th>{t('projectActions.planQtyForPeriod')}</th>
                                     <th>{t('projectActions.achievedValues')}</th>
                                     <th>{t('projectActions.plannedVsAchieved')}</th>
                                     <th>{t('common.status')}</th>
@@ -3129,7 +3129,7 @@ function ProjectActions() {
                         )}
                       </div>
                       <div className="col-md-3">
-                        <label className="form-label fw-semibold">{t('projectActions.overallPlannedQty')}</label>
+                        <label className="form-label fw-semibold">{t('projectActions.planQtyForPeriod')}</label>
                         {isView ? (
                           <p className="form-control-plaintext">{item.overallPlannedQuantities ?? '-'}</p>
                         ) : (
@@ -3145,7 +3145,7 @@ function ProjectActions() {
                                 <tr>
                                   <th>{t('projectActions.logDate')}</th>
                                   <th>{t('projectActions.quarter')}</th>
-                                  <th>{t('projectActions.overallPlannedQty')}</th>
+                                  <th>{t('projectActions.planQtyForPeriod')}</th>
                                   <th>{t('projectActions.achievedValues')}</th>
                                   <th>{t('projectActions.plannedVsAchieved')}</th>
                                   <th>{t('common.status')}</th>
@@ -3311,7 +3311,7 @@ function ProjectActions() {
                         </select>
                       </div>
                       <div className="col-md-3">
-                        <label className="form-label small fw-semibold">{t('projectActions.overallPlannedQty')}</label>
+                        <label className="form-label small fw-semibold">{t('projectActions.planQtyForPeriod')}</label>
                         <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.overallPlannedQuantities} onChange={e => setDmMilestoneForm(f => ({ ...f, overallPlannedQuantities: e.target.value }))} step="0.01" />
                       </div>
                       <div className="col-md-3">
@@ -3359,7 +3359,7 @@ function ProjectActions() {
                         <th>{t('projectActions.logDate')}</th>
                         <th>{t('projectActions.quarter')}</th>
                         <th>{t('projectActions.frequency')}</th>
-                        <th>{t('projectActions.overallPlannedQty')}</th>
+                        <th>{t('projectActions.planQtyForPeriod')}</th>
                         <th>{t('projectActions.achievedValues')}</th>
                         <th>{t('projectActions.plannedVsAchieved')}</th>
                         <th>{t('common.status')}</th>

@@ -547,6 +547,7 @@
     "designActivities": "Activites de Conception",
     "activityDescription": "Description de l Activite",
     "overallPlannedQty": "Quantite Globale Prevue",
+    "planQtyForPeriod": "Quantité Prévue pour la Période",
     "designMilestones": "Jalons de Suivi de Conception",
     "addMilestone": "Ajouter un Jalon",
     "editMilestone": "Modifier le Jalon",
