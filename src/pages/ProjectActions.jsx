@@ -1480,7 +1480,7 @@ function ProjectActions() {
     doc.setFontSize(16); doc.setFont(undefined, 'bold');
     doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
     doc.setFontSize(13);
-    doc.text('Supply Progress Monitoring', pageWidth / 2, 23, { align: 'center' });
+    doc.text('Supply', pageWidth / 2, 23, { align: 'center' });
     doc.setFontSize(9); doc.setFont(undefined, 'normal');
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
     const grouped = {};
