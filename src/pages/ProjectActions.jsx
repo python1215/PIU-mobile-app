@@ -2490,7 +2490,11 @@ function ProjectActions() {
   const loadAllDmRecords = async () => {
     setDmAllLoading(true);
     try {
-      const res = await axios.get('/api/project-actions/design-monitoring');
+      let url = '/api/project-actions/design-monitoring';
+      if (dmProject && dmContractType && dmContractRefNo) {
+        url = `/api/project-actions/design-monitoring/filter?projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${dmContractRefNo}`;
+      }
+      const res = await axios.get(url);
       setDmAllRecords(res.data);
       const allMs = {};
       res.data.forEach(rec => { allMs[rec.id] = rec.milestones || []; });
@@ -2529,6 +2533,16 @@ function ProjectActions() {
         });
         setDmMilestones(allMilestones);
         setDmMonitoringMap(monMap);
+        setDmAllRecords(monItems);
+        const savedMs = {};
+        monItems.forEach(mi => {
+          const found = results.find(r => r.monitoringId === mi.id);
+          savedMs[mi.id] = found ? found.milestones : [];
+        });
+        setDmAllMilestones(savedMs);
+      } else {
+        setDmAllRecords([]);
+        setDmAllMilestones({});
       }
     } catch (e) {
       console.error('Error loading design work plan data:', e);
