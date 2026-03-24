@@ -2840,7 +2840,7 @@ function ProjectActions() {
                       <th>{t('projectActions.project')}</th>
                       <th>{t('projectActions.contractReferenceNo')}</th>
                       <th>{t('projectActions.contractType')}</th>
-                      <th>{t('projectActions.rate')}</th>
+                      <th>{t('projectActions.ratePercent')}</th>
                       <th>{t('projectActions.unit')}</th>
                       <th>{t('projectActions.overallPlannedQty')}</th>
                       <th>{t('projectActions.designMilestones')}</th>
