@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight, FiRefreshCw, FiSave } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
