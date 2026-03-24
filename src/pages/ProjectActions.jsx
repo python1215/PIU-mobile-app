@@ -2611,8 +2611,9 @@ function ProjectActions() {
   const handleDmSavedEditSave = async () => {
     if (!dmSavedModalItem) return;
     try {
+      const { milestones, ...itemWithoutMilestones } = dmSavedModalItem;
       const payload = {
-        ...dmSavedModalItem,
+        ...itemWithoutMilestones,
         activityDescription: dmSavedEditForm.activityDescription,
         rate: dmSavedEditForm.rate !== '' ? parseFloat(dmSavedEditForm.rate) : null,
         unit: dmSavedEditForm.unit,
@@ -2654,8 +2655,9 @@ function ProjectActions() {
   const handleDmSaveActivity = async () => {
     if (!dmEditingActivity) return;
     try {
+      const { milestones, ...activityWithoutMilestones } = dmEditingActivity;
       const payload = {
-        ...dmEditingActivity,
+        ...activityWithoutMilestones,
         activityDescription: dmEditForm.activityDescription,
         rate: dmEditForm.rate ? parseFloat(dmEditForm.rate) : null,
         unit: dmEditForm.unit,
