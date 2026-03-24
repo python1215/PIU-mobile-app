@@ -414,12 +414,13 @@ public class ProjectActionsController {
     public ResponseEntity<SupplyProgress> updateSupplyProgress(@PathVariable Long id, @RequestBody SupplyProgress details) {
         return supplyProgressRepository.findById(id)
             .map(item -> {
+                item.setYear(details.getYear());
                 item.setEntryDate(details.getEntryDate());
                 item.setProject(details.getProject());
                 item.setContractType(details.getContractType());
                 item.setContractRefNo(details.getContractRefNo());
-                item.setItemId(details.getItemId());
-                item.setActivity(details.getActivity());
+                item.setActivityId(details.getActivityId());
+                item.setActivityDescription(details.getActivityDescription());
                 item.setRate(details.getRate());
                 item.setUnit(details.getUnit());
                 item.setBoqQuantities(details.getBoqQuantities());
@@ -427,6 +428,10 @@ public class ProjectActionsController {
                 item.setPerformancePercentage(details.getPerformancePercentage());
                 item.setGlobalProgressRate(details.getGlobalProgressRate());
                 item.setObservation(details.getObservation());
+                item.setStartDate(details.getStartDate());
+                item.setEndDate(details.getEndDate());
+                item.setDuration(details.getDuration());
+                item.setDurationUnit(details.getDurationUnit());
                 return ResponseEntity.ok(supplyProgressRepository.save(item));
             })
             .orElse(ResponseEntity.notFound().build());
@@ -445,6 +450,66 @@ public class ProjectActionsController {
     @GetMapping("/supply-progress/contract/{contractRefNo}")
     public List<SupplyProgress> getSupplyProgressByContractRef(@PathVariable String contractRefNo) {
         return supplyProgressRepository.findByContractRefNoOrderByDateCreatedDesc(contractRefNo);
+    }
+
+    @Autowired
+    private SupplyMonitoringMilestoneRepository supplyMilestoneRepository;
+
+    @GetMapping("/supply-progress/{supplyId}/milestones")
+    @Transactional(readOnly = true)
+    public List<SupplyMonitoringMilestone> getSupplyMilestones(@PathVariable Long supplyId) {
+        return supplyMilestoneRepository.findBySupplyProgress_IdOrderByLogDateDesc(supplyId);
+    }
+
+    @PostMapping("/supply-progress/{supplyId}/milestones")
+    public ResponseEntity<SupplyMonitoringMilestone> createSupplyMilestone(
+            @PathVariable Long supplyId,
+            @RequestBody SupplyMonitoringMilestone milestone) {
+        return supplyProgressRepository.findById(supplyId)
+            .map(sp -> {
+                milestone.setSupplyProgress(sp);
+                milestone.setDateCreated(java.time.LocalDateTime.now());
+                Double boq = sp.getBoqQuantities();
+                if (milestone.getAchievedValues() != null && boq != null && boq > 0) {
+                    double pct = (milestone.getAchievedValues() / boq) * 100;
+                    milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(supplyMilestoneRepository.save(milestone));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/supply-progress/milestones/{id}")
+    public ResponseEntity<SupplyMonitoringMilestone> updateSupplyMilestone(
+            @PathVariable Long id,
+            @RequestBody SupplyMonitoringMilestone details) {
+        return supplyMilestoneRepository.findById(id)
+            .map(m -> {
+                m.setLogDate(details.getLogDate());
+                m.setQuarter(details.getQuarter());
+                m.setAchievedValues(details.getAchievedValues());
+                m.setStatus(details.getStatus());
+                m.setAttachmentPath(details.getAttachmentPath());
+                m.setRemarks(details.getRemarks());
+                SupplyProgress sp = m.getSupplyProgress();
+                Double boq = sp != null ? sp.getBoqQuantities() : null;
+                if (details.getAchievedValues() != null && boq != null && boq > 0) {
+                    double pct = (details.getAchievedValues() / boq) * 100;
+                    m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(supplyMilestoneRepository.save(m));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/supply-progress/milestones/{id}")
+    public ResponseEntity<Void> deleteSupplyMilestone(@PathVariable Long id) {
+        return supplyMilestoneRepository.findById(id)
+            .map(m -> {
+                supplyMilestoneRepository.delete(m);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @Autowired

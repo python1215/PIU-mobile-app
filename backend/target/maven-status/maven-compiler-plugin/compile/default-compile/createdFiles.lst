@@ -19,6 +19,7 @@ com/piun/piuproject/model/DecisionOutcome.class
 com/piun/piuproject/model/Role.class
 com/piun/piuproject/model/StakeholderEngagement.class
 com/piun/piuproject/model/Subcomponent.class
+com/piun/piuproject/model/SupplyMonitoringMilestone.class
 com/piun/piuproject/security/JwtAuthenticationEntryPoint.class
 com/piun/piuproject/model/PAP.class
 com/piun/piuproject/repository/DistrictRepository.class
@@ -124,6 +125,7 @@ com/piun/piuproject/config/WebConfig$1.class
 com/piun/piuproject/repository/DocumentTagRepository.class
 com/piun/piuproject/repository/IndicatorTypeRepository.class
 com/piun/piuproject/model/CommunityEngagement.class
+com/piun/piuproject/repository/SupplyMonitoringMilestoneRepository.class
 com/piun/piuproject/repository/KPIForContractRepository.class
 com/piun/piuproject/model/Contributor.class
 com/piun/piuproject/repository/ComponentRepository.class

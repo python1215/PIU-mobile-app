@@ -100,7 +100,7 @@ function ProjectActions() {
   const [boqEditForm, setBoqEditForm] = useState({});
 
   const [spItems, setSpItems] = useState([]);
-  const [spDate, setSpDate] = useState('');
+  const [spYear, setSpYear] = useState('');
   const [spProject, setSpProject] = useState('');
   const [spContractType, setSpContractType] = useState('');
   const [spContractRefNo, setSpContractRefNo] = useState('');
@@ -111,6 +111,13 @@ function ProjectActions() {
   const [spModalItem, setSpModalItem] = useState(null);
   const [spModalMode, setSpModalMode] = useState('view');
   const [spEditForm, setSpEditForm] = useState({});
+  const [spAllRecords, setSpAllRecords] = useState([]);
+  const [spAllMilestones, setSpAllMilestones] = useState({});
+  const [spAllLoading, setSpAllLoading] = useState(false);
+  const [spExpandedRows, setSpExpandedRows] = useState({});
+  const [spMilestoneForm, setSpMilestoneForm] = useState({ supplyProgressId: null, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+  const [spShowMilestoneForm, setSpShowMilestoneForm] = useState(null);
+  const [spEditingMilestone, setSpEditingMilestone] = useState(null);
 
   const [instItems, setInstItems] = useState([]);
   const [instDate, setInstDate] = useState('');
@@ -166,6 +173,9 @@ function ProjectActions() {
   useEffect(() => {
     if (activeTab === 'designMonitoring') {
       loadAllDmRecords();
+    }
+    if (activeTab === 'supplyProgress') {
+      loadAllSpRecords();
     }
   }, [activeTab]);
 
@@ -1269,7 +1279,7 @@ function ProjectActions() {
   const handleSpContractRefChange = async (refNo) => {
     setSpContractRefNo(refNo);
     setSpBoqActivities([]);
-    setSpRows(prev => prev.map(row => ({ ...row, itemId: generateSpItemId(refNo) })));
+    setSpRows(prev => prev.map(row => ({ ...row, activityId: generateSpItemId(refNo) })));
     if (!refNo) return;
     try {
       const res = await axios.get(`/api/project-actions/boq/contract/${refNo}`);
@@ -1282,15 +1292,29 @@ function ProjectActions() {
     return `${refNo || 'SP'}-${rand}`;
   };
 
+  const calcSpDuration = (startDate, endDate, unit) => {
+    if (!startDate || !endDate) return '';
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    const diffMs = e - s;
+    if (diffMs < 0) return '';
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (unit === 'months') return Math.round((days / 30.44) * 100) / 100;
+    if (unit === 'years') return Math.round((days / 365.25) * 100) / 100;
+    return days;
+  };
+
   const addSpRow = () => {
     setSpRows(prev => [...prev, {
       tempId: Date.now(),
-      itemId: generateSpItemId(spContractRefNo),
-      activity: '',
+      activityId: generateSpItemId(spContractRefNo),
+      activityDescription: '',
       rate: '',
       unit: '',
       boqQuantities: '',
-      executedQuantities: '',
+      startDate: '',
+      endDate: '',
+      durationUnit: 'days',
       observation: ''
     }]);
   };
@@ -1303,7 +1327,7 @@ function ProjectActions() {
     const boqMatch = spBoqActivities.find(b => b.activity === activityName);
     setSpRows(prev => prev.map((row, i) => i === idx ? {
       ...row,
-      activity: activityName,
+      activityDescription: activityName,
       unit: boqMatch?.unit || row.unit,
       boqQuantities: boqMatch?.boqQuantity ?? ''
     } : row));
@@ -1327,55 +1351,74 @@ function ProjectActions() {
   };
 
   const handleSpSave = async () => {
-    if (!spDate || !spProject || !spContractType || !spContractRefNo) {
-      toast.error('Please fill in Date, Project, Contract Type, and Contract Reference');
+    if (!spYear || !spProject || !spContractType || !spContractRefNo) {
+      toast.error(t('projectActions.fillRequiredFields'));
       return;
     }
     if (spRows.length === 0) {
-      toast.error('Please add at least one row');
+      toast.error(t('projectActions.addAtLeastOneRow'));
       return;
     }
     setSpSaving(true);
     try {
       const items = spRows.map(row => ({
-        entryDate: spDate,
+        year: { id: parseInt(spYear) },
         project: { projectId: spProject },
         contractType: spContractType,
         contractRefNo: spContractRefNo,
-        itemId: row.itemId,
-        activity: row.activity,
+        activityId: row.activityId,
+        activityDescription: row.activityDescription,
         rate: parseFloat(row.rate) || 0,
         unit: row.unit,
         boqQuantities: parseFloat(row.boqQuantities) || 0,
-        executedQuantities: parseFloat(row.executedQuantities) || 0,
-        performancePercentage: calcSpPerformance(row.boqQuantities, row.executedQuantities),
-        globalProgressRate: calcSpGlobalRate(row.rate),
+        startDate: row.startDate || null,
+        endDate: row.endDate || null,
+        duration: calcSpDuration(row.startDate, row.endDate, row.durationUnit),
+        durationUnit: row.durationUnit,
         observation: row.observation
       }));
       await axios.post('/api/project-actions/supply-progress/batch', items);
-      toast.success('Supply progress saved successfully');
+      toast.success(t('projectActions.supplyProgressSaved'));
       setSpRows([]);
-      setSpDate('');
+      setSpYear('');
       setSpContractType('');
       setSpContractRefNo('');
       setSpContractOptions([]);
       setSpBoqActivities([]);
-      loadContracts();
+      loadAllSpRecords();
     } catch (e) {
-      toast.error('Error saving supply progress');
+      toast.error(t('projectActions.errorSaving'));
       console.error(e);
     } finally {
       setSpSaving(false);
     }
   };
 
+  const loadAllSpRecords = async () => {
+    setSpAllLoading(true);
+    try {
+      const res = await axios.get('/api/project-actions/supply-progress');
+      const records = res.data;
+      setSpAllRecords(records);
+      const msMap = {};
+      await Promise.all(records.map(async (rec) => {
+        try {
+          const msRes = await axios.get(`/api/project-actions/supply-progress/${rec.id}/milestones`);
+          msMap[rec.id] = msRes.data;
+        } catch { msMap[rec.id] = []; }
+      }));
+      setSpAllMilestones(msMap);
+    } catch (e) { console.error('Error loading supply records:', e); }
+    finally { setSpAllLoading(false); }
+  };
+
   const handleDeleteSpItem = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    if (!window.confirm(t('common.confirmDelete'))) return;
     try {
       await axios.delete(`/api/project-actions/supply-progress/${id}`);
-      toast.success('Item deleted');
-      loadContracts();
-    } catch (e) { toast.error('Error deleting item'); }
+      toast.success(t('common.deleted'));
+      loadAllSpRecords();
+    } catch (e) { toast.error(t('projectActions.errorDeleting')); }
   };
 
   const openSpModal = (item, mode) => {
@@ -1383,160 +1426,162 @@ function ProjectActions() {
     setSpModalItem(item);
     if (mode === 'edit') {
       setSpEditForm({
-        entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '',
-        itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '',
-        unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '',
-        observation: item.observation || ''
+        activityId: item.activityId || '', activityDescription: item.activityDescription || '',
+        rate: item.rate ?? '', unit: item.unit || '', boqQuantities: item.boqQuantities ?? '',
+        startDate: item.startDate || '', endDate: item.endDate || '',
+        durationUnit: item.durationUnit || 'days', observation: item.observation || ''
       });
     }
   };
 
-  const closeSpModal = () => { setSpModalItem(null); setSpModalMode('view'); setSpEditForm({}); };
+  const closeSpModal = () => { setSpModalItem(null); setSpModalMode('view'); setSpEditForm({}); setSpShowMilestoneForm(null); setSpEditingMilestone(null); };
 
   const handleSpEditSave = async () => {
     if (!spModalItem) return;
     try {
-      const pct = calcSpPerformance(spEditForm.boqQuantities, spEditForm.executedQuantities);
-      const gpr = calcSpGlobalRate(spEditForm.rate);
+      const dur = calcSpDuration(spEditForm.startDate, spEditForm.endDate, spEditForm.durationUnit);
       await axios.put(`/api/project-actions/supply-progress/${spModalItem.id}`, {
         ...spModalItem,
-        entryDate: spEditForm.entryDate, contractType: spEditForm.contractType, contractRefNo: spEditForm.contractRefNo,
-        itemId: spEditForm.itemId, activity: spEditForm.activity, rate: parseFloat(spEditForm.rate) || 0,
-        unit: spEditForm.unit, boqQuantities: parseFloat(spEditForm.boqQuantities) || 0,
-        executedQuantities: parseFloat(spEditForm.executedQuantities) || 0,
-        performancePercentage: pct, globalProgressRate: gpr, observation: spEditForm.observation
+        activityId: spEditForm.activityId,
+        activityDescription: spEditForm.activityDescription,
+        rate: parseFloat(spEditForm.rate) || 0,
+        unit: spEditForm.unit,
+        boqQuantities: parseFloat(spEditForm.boqQuantities) || 0,
+        startDate: spEditForm.startDate || null,
+        endDate: spEditForm.endDate || null,
+        duration: dur, durationUnit: spEditForm.durationUnit,
+        observation: spEditForm.observation
       });
-      toast.success('Record updated successfully');
+      toast.success(t('projectActions.recordUpdated'));
       closeSpModal();
-      loadContracts();
-    } catch (e) { toast.error('Error updating record'); console.error(e); }
+      loadAllSpRecords();
+    } catch (e) { toast.error(t('projectActions.errorUpdating')); console.error(e); }
   };
 
-  const renderSpModal = () => {
-    if (!spModalItem) return null;
-    const isView = spModalMode === 'view';
-    const item = spModalItem;
-    const form = spEditForm;
-    const editPct = !isView ? calcSpPerformance(form.boqQuantities, form.executedQuantities) : null;
-    const editGpr = !isView ? calcSpGlobalRate(form.rate) : null;
-    return (
-      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={closeSpModal}>
-        <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{isView ? t('projectActions.viewRecord') : t('projectActions.editRecord')}</h5>
-              <button type="button" className="btn-close" onClick={closeSpModal}></button>
-            </div>
-            <div className="modal-body">
-              <div className="row g-3">
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setSpEditForm(f => ({...f, entryDate: e.target.value}))} />}
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
-                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
-                  {isView ? <p className="form-control-plaintext"><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goodsContracts')}</span></p> : <select className="form-select" value={form.contractType} onChange={e => setSpEditForm(f => ({...f, contractType: e.target.value}))}><option value="works">{t('projectActions.works')}</option><option value="goods">{t('projectActions.goodsContracts')}</option></select>}
-                </div>
-                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.contractRef')}</label>{isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setSpEditForm(f => ({...f, contractRefNo: e.target.value}))} />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.itemId')}</label>{isView ? <p className="form-control-plaintext"><code>{item.itemId}</code></p> : <input type="text" className="form-control bg-light" value={form.itemId} readOnly />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.activity')}</label>{isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setSpEditForm(f => ({...f, activity: e.target.value}))} />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>{isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.unit')}</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))} />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
-                <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.execQty')}</label>{isView ? <p className="form-control-plaintext">{item.executedQuantities}</p> : <input type="number" className="form-control" value={form.executedQuantities} onChange={e => setSpEditForm(f => ({...f, executedQuantities: e.target.value}))} step="0.01" />}</div>
-                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.performancePercent')}</label><p className="form-control-plaintext">{isView ? (item.performancePercentage != null ? `${item.performancePercentage}%` : '-') : `${editPct}%`}</p></div>
-                <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.globalProgressRate')}</label><p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p></div>
-                <div className="col-12"><label className="form-label fw-semibold">{t('projectActions.observation')}</label>{isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setSpEditForm(f => ({...f, observation: e.target.value}))} />}</div>
-              </div>
-            </div>
-            <div className="modal-footer">
-              {isView ? (
-                <>
-                  <button className="btn btn-primary" onClick={() => { setSpModalMode('edit'); setSpEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQuantities: item.boqQuantities ?? '', executedQuantities: item.executedQuantities ?? '', observation: item.observation || '' }); }}><FiEdit2 className="me-1" /> {t('common.edit')}</button>
-                  <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.close')}</button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn-success" onClick={handleSpEditSave}>{t('projectActions.saveChanges')}</button>
-                  <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.cancel')}</button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  const handleSpSaveMilestone = async () => {
+    const form = spMilestoneForm;
+    if (!form.supplyProgressId || !form.logDate) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    try {
+      if (spEditingMilestone) {
+        await axios.put(`/api/project-actions/supply-progress/milestones/${spEditingMilestone.id}`, {
+          logDate: form.logDate,
+          quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+          achievedValues: parseFloat(form.achievedValues) || 0,
+          status: form.status, remarks: form.remarks
+        });
+        toast.success(t('projectActions.milestoneUpdated'));
+      } else {
+        await axios.post(`/api/project-actions/supply-progress/${form.supplyProgressId}/milestones`, {
+          logDate: form.logDate,
+          quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+          achievedValues: parseFloat(form.achievedValues) || 0,
+          status: form.status, remarks: form.remarks
+        });
+        toast.success(t('projectActions.milestoneSaved'));
+      }
+      setSpMilestoneForm({ supplyProgressId: null, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+      setSpShowMilestoneForm(null);
+      setSpEditingMilestone(null);
+      loadAllSpRecords();
+    } catch (e) { toast.error(t('projectActions.errorSaving')); console.error(e); }
+  };
+
+  const handleDeleteSpMilestone = async (msId) => {
+    if (!window.confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/supply-progress/milestones/${msId}`);
+      toast.success(t('common.deleted'));
+      loadAllSpRecords();
+    } catch (e) { toast.error(t('projectActions.errorDeleting')); }
   };
 
   const exportSpPdf = () => {
-    if (spItems.length === 0) { toast.error('No records to export'); return; }
+    const filtered = spAllRecords.filter(r => {
+      if (spYear && String(r.year?.id) !== String(spYear)) return false;
+      if (spProject) { const p = String(r.project?.projectId || ''); if (p !== String(spProject)) return false; }
+      if (spContractType && r.contractType !== spContractType) return false;
+      if (spContractRefNo && r.contractRefNo !== spContractRefNo) return false;
+      return true;
+    });
+    if (filtered.length === 0) { toast.error(t('common.noData')); return; }
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
     doc.setFontSize(16); doc.setFont(undefined, 'bold');
     doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
     doc.setFontSize(13);
-    doc.text('Supply Progress Monitoring', pageWidth / 2, 23, { align: 'center' });
+    doc.text(t('projectActions.supplyProgressMonitoring'), pageWidth / 2, 23, { align: 'center' });
     doc.setFontSize(9); doc.setFont(undefined, 'normal');
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30);
-    const grouped = {};
-    spItems.forEach(item => { const key = item.contractRefNo || 'Unknown'; if (!grouped[key]) grouped[key] = []; grouped[key].push(item); });
-    let startY = 36;
-    Object.keys(grouped).forEach(contractRef => {
-      const items = grouped[contractRef];
-      const projectName = items[0]?.project?.project || items[0]?.project?.projectId || '-';
-      const contractType = items[0]?.contractType === 'works' ? 'Works Contract' : 'Goods & Services';
-      if (startY > pageHeight - 40) { doc.addPage(); startY = 15; }
-      doc.setFontSize(10); doc.setFont(undefined, 'bold');
-      doc.text(`Contract Ref: ${contractRef}`, 14, startY);
-      doc.setFont(undefined, 'normal'); doc.setFontSize(8);
-      doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
-      autoTable(doc, {
-        head: [['#', 'Date', 'Item ID', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Exec Qty', 'Perf.%', 'Global Rate', 'Observation']],
-        body: items.map((item, idx) => [idx + 1, item.entryDate || '-', item.itemId || '-', item.activity || '-', item.rate != null ? `${item.rate}%` : '-', item.unit || '-', item.boqQuantities ?? '-', item.executedQuantities ?? '-', item.performancePercentage != null ? `${item.performancePercentage}%` : '-', item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-', item.observation || '-']),
-        startY: startY + 8,
-        styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
-        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6.5, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-        margin: { left: 10, right: 10 }, tableWidth: pageWidth - 20
-      });
-      startY = doc.lastAutoTable.finalY + 12;
+    const selYear = dmYears.find(y => String(y.id) === String(spYear));
+    const selProj = projects.find(p => String(p.projectId) === String(spProject));
+    const fInfo = [];
+    if (selYear) fInfo.push(`Year: ${selYear.profileYear}`);
+    if (selProj) fInfo.push(`Project: ${selProj.project || selProj.projectId}`);
+    if (spContractType) fInfo.push(`Type: ${spContractType === 'works' ? 'Works' : 'Goods & Services'}`);
+    if (spContractRefNo) fInfo.push(`Ref: ${spContractRefNo}`);
+    doc.text(fInfo.join('  |  ') || 'All Records', 14, 30);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 35);
+    let startY = 42;
+    filtered.forEach((rec, recIdx) => {
+      const pageH = doc.internal.pageSize.getHeight();
+      if (startY > pageH - 50) { doc.addPage(); startY = 15; }
+      doc.setFontSize(9); doc.setFont(undefined, 'bold');
+      doc.text(`${recIdx + 1}. ${rec.activityDescription || '-'}`, 14, startY);
+      doc.setFont(undefined, 'normal'); doc.setFontSize(7.5);
+      doc.text(`Activity ID: ${rec.activityId || '-'}  |  Contract: ${rec.contractRefNo || '-'}  |  Rate: ${rec.rate != null ? rec.rate + '%' : '-'}  |  Unit: ${rec.unit || '-'}  |  BOQ Qty: ${rec.boqQuantities ?? '-'}`, 14, startY + 5);
+      const milestones = spAllMilestones[rec.id] || [];
+      if (milestones.length > 0) {
+        autoTable(doc, {
+          head: [['Log Date', 'Quarter', 'Achieved', '% Planned vs Achieved', 'Status', 'Remarks']],
+          body: milestones.map(ms => [ms.logDate || '-', ms.quarter?.quarter || '-', ms.achievedValues ?? '-', ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-', ms.status || '-', ms.remarks || '-']),
+          startY: startY + 8,
+          styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+          headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { left: 10, right: 10 }, tableWidth: pageWidth - 20,
+        });
+        startY = doc.lastAutoTable.finalY + 10;
+      } else { doc.setFontSize(7); doc.text('No milestones recorded.', 18, startY + 10); startY += 16; }
     });
-    doc.save(`Supply_Progress_${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(`Supply_Progress_Monitoring_${new Date().toISOString().slice(0, 10)}.pdf`);
     toast.success('PDF report downloaded');
   };
 
-  const renderSupplyProgress = () => (
+  const renderSupplyProgress = () => {
+    const filteredSpRecords = spAllRecords.filter(r => {
+      if (spYear && String(r.year?.id) !== String(spYear)) return false;
+      if (spProject) { const p = String(r.project?.projectId || ''); if (p !== String(spProject)) return false; }
+      if (spContractType && r.contractType !== spContractType) return false;
+      if (spContractRefNo && r.contractRefNo !== spContractRefNo) return false;
+      return true;
+    });
+    return (
     <div>
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h6 className="mb-0">{t('projectActions.supplyProgressMonitoring')}</h6>
-          {spItems.length > 0 && (
+          {spAllRecords.length > 0 && (
             <button className="btn btn-sm btn-light" onClick={exportSpPdf}>
               <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
             </button>
           )}
         </div>
         <div className="card-body">
-          <div className="row g-3 mb-2">
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
-              <input type="date" className="form-control" value={spDate} onChange={e => setSpDate(e.target.value)} />
+          <div className="row g-3 mb-3">
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">{t('projectActions.year')}</label>
+              <select className="form-select" value={spYear} onChange={e => setSpYear(e.target.value)}>
+                <option value="">{t('projectActions.selectYear')}</option>
+                {dmYears.map(y => (<option key={y.id} value={y.id}>{y.profileYear}</option>))}
+              </select>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-3">
               <label className="form-label fw-semibold">{t('projectActions.project')}</label>
               <select className="form-select" value={spProject} onChange={e => handleSpProjectChange(e.target.value)}>
                 <option value="">{t('projectActions.selectProject')}</option>
                 {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project || p.projectId}</option>))}
               </select>
             </div>
-          </div>
-          <div className="row g-3 mb-3">
-            <div className="col-md-6">
+            <div className="col-md-3">
               <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
               <select className="form-select" value={spContractType} onChange={e => handleSpContractTypeChange(e.target.value)} disabled={!spProject}>
                 <option value="">{t('projectActions.selectType')}</option>
@@ -1544,7 +1589,7 @@ function ProjectActions() {
                 <option value="goods">{t('projectActions.goodsAndServices')}</option>
               </select>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-3">
               <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
               <select className="form-select" value={spContractRefNo} onChange={e => handleSpContractRefChange(e.target.value)} disabled={!spContractType}>
                 <option value="">{t('projectActions.selectReference')}</option>
@@ -1565,37 +1610,50 @@ function ProjectActions() {
               <table className="table table-bordered table-sm align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{minWidth:'120px'}}>{t('projectActions.itemId')}</th>
-                    <th style={{minWidth:'180px'}}>{t('projectActions.activity')}</th>
-                    <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
-                    <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
-                    <th style={{minWidth:'110px'}}>{t('projectActions.boqQty')}</th>
-                    <th style={{minWidth:'110px'}}>{t('projectActions.execQty')}</th>
-                    <th style={{minWidth:'90px'}}>{t('projectActions.perfPercent')}</th>
-                    <th style={{minWidth:'100px'}}>{t('projectActions.globalRate')}</th>
-                    <th style={{minWidth:'150px'}}>{t('projectActions.observation')}</th>
-                    <th style={{width:'50px'}}></th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.activityId')}</th>
+                    <th style={{minWidth:'160px'}}>{t('projectActions.activityDescription')}</th>
+                    <th style={{minWidth:'70px'}}>{t('projectActions.ratePercent')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.unit')}</th>
+                    <th style={{minWidth:'90px'}}>{t('projectActions.boqQty')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.startDate')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.endDate')}</th>
+                    <th style={{minWidth:'80px'}}>{t('projectActions.duration')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.observation')}</th>
+                    <th style={{width:'40px'}}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {spRows.map((row, idx) => {
-                    const pct = calcSpPerformance(row.boqQuantities, row.executedQuantities);
-                    const gpr = calcSpGlobalRate(row.rate);
+                    const dur = calcSpDuration(row.startDate, row.endDate, row.durationUnit);
                     return (
                       <tr key={row.tempId}>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.activityId} readOnly /></td>
                         <td>
-                          <input type="text" className="form-control form-control-sm" list={`sp-activities-${row.tempId}`} value={row.activity} onChange={e => handleSpActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} />
+                          <input type="text" className="form-control form-control-sm" list={`sp-activities-${row.tempId}`} value={row.activityDescription} onChange={e => handleSpActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} />
                           <datalist id={`sp-activities-${row.tempId}`}>
                             {spBoqActivities.map((b, bi) => (<option key={bi} value={b.activity} />))}
                           </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateSpRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateSpRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
+                        <td>
+                          <select className="form-select form-select-sm" value={row.unit} onChange={e => updateSpRow(idx, 'unit', e.target.value)}>
+                            <option value="">{t('projectActions.selectUnit')}</option>
+                            {(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}
+                          </select>
+                        </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.boqQuantities} onChange={e => updateSpRow(idx, 'boqQuantities', e.target.value)} step="0.01" /></td>
-                        <td><input type="number" className="form-control form-control-sm" value={row.executedQuantities} onChange={e => updateSpRow(idx, 'executedQuantities', e.target.value)} step="0.01" /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
+                        <td><input type="date" className="form-control form-control-sm" value={row.startDate} onChange={e => updateSpRow(idx, 'startDate', e.target.value)} /></td>
+                        <td><input type="date" className="form-control form-control-sm" value={row.endDate} onChange={e => updateSpRow(idx, 'endDate', e.target.value)} /></td>
+                        <td>
+                          <div className="d-flex align-items-center gap-1">
+                            <span className="form-control form-control-sm bg-light text-center" style={{width:'50px'}}>{dur || '-'}</span>
+                            <select className="form-select form-select-sm" style={{width:'70px'}} value={row.durationUnit} onChange={e => updateSpRow(idx, 'durationUnit', e.target.value)}>
+                              <option value="days">{t('projectActions.days')}</option>
+                              <option value="months">{t('projectActions.months')}</option>
+                              <option value="years">{t('projectActions.years')}</option>
+                            </select>
+                          </div>
+                        </td>
                         <td><textarea className="form-control form-control-sm" value={row.observation} onChange={e => updateSpRow(idx, 'observation', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeSpRow(idx)}><FiTrash2 /></button></td>
                       </tr>
@@ -1616,66 +1674,260 @@ function ProjectActions() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-header"><h6 className="mb-0">{t('projectActions.savedRecords')}</h6></div>
-        <div className="card-body p-0">
-          {spItems.length === 0 ? (
-            <div className="text-center text-muted p-4">{t('projectActions.noSupplyProgressRecords')}</div>
-          ) : (
+      {spAllLoading ? (
+        <div className="text-center p-4"><div className="spinner-border text-primary" /></div>
+      ) : filteredSpRecords.length === 0 ? (
+        <div className="text-center text-muted p-4">{t('projectActions.noSupplyProgressRecords')}</div>
+      ) : (
+        <div className="card">
+          <div className="card-header"><h6 className="mb-0">{t('projectActions.savedRecords')} ({filteredSpRecords.length})</h6></div>
+          <div className="card-body p-0">
             <div className="table-responsive">
-              <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
+              <table className="table table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.itemId')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.executedQty')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.perfPercent')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.globalRate')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.observation')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
+                    <th></th>
+                    <th>{t('projectActions.year')}</th>
+                    <th>{t('projectActions.contractRef')}</th>
+                    <th>{t('projectActions.activityId')}</th>
+                    <th>{t('projectActions.activityDescription')}</th>
+                    <th>{t('projectActions.ratePercent')}</th>
+                    <th>{t('projectActions.unit')}</th>
+                    <th>{t('projectActions.boqQty')}</th>
+                    <th>{t('projectActions.startDate')}</th>
+                    <th>{t('projectActions.endDate')}</th>
+                    <th>{t('projectActions.duration')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {spItems.map(item => (
-                    <tr key={item.id}>
-                      <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
-                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
-                      <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId}</code></td>
-                      <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.boqQuantities}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.executedQuantities}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.performancePercentage != null ? `${item.performancePercentage}%` : '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
-                      <td style={{maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={item.observation}>{item.observation}</td>
-                      <td style={{whiteSpace:'nowrap'}}>
-                        <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openSpModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openSpModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteSpItem(item.id)}><FiTrash2 /></button>
-                        </div>
-                      </td>
-                    </tr>
+                  {filteredSpRecords.map(rec => (
+                    <Fragment key={rec.id}>
+                      <tr>
+                        <td>
+                          <button className="btn btn-sm p-0" onClick={() => setSpExpandedRows(prev => ({ ...prev, [rec.id]: !prev[rec.id] }))}>
+                            {spExpandedRows[rec.id] ? <FiChevronDown /> : <FiChevronRight />}
+                          </button>
+                        </td>
+                        <td>{rec.year?.profileYear || '-'}</td>
+                        <td>{rec.contractRefNo || '-'}</td>
+                        <td><code style={{fontSize:'inherit'}}>{rec.activityId || '-'}</code></td>
+                        <td style={{maxWidth:'150px',overflow:'hidden',textOverflow:'ellipsis'}} title={rec.activityDescription}>{rec.activityDescription || '-'}</td>
+                        <td>{rec.rate != null ? `${rec.rate}%` : '-'}</td>
+                        <td>{rec.unit || '-'}</td>
+                        <td>{rec.boqQuantities ?? '-'}</td>
+                        <td>{rec.startDate || '-'}</td>
+                        <td>{rec.endDate || '-'}</td>
+                        <td>{rec.duration != null ? `${rec.duration} ${rec.durationUnit || 'days'}` : '-'}</td>
+                        <td>
+                          <div className="d-flex gap-1 flex-nowrap">
+                            <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openSpModal(rec, 'view')}><FiEye /></button>
+                            <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openSpModal(rec, 'edit')}><FiEdit2 /></button>
+                            <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteSpItem(rec.id)}><FiTrash2 /></button>
+                          </div>
+                        </td>
+                      </tr>
+                      {spExpandedRows[rec.id] && (
+                        <tr>
+                          <td colSpan="12" className="p-0">
+                            <div className="p-2 bg-light">
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h6 className="mb-0 text-warning">{t('projectActions.supplyMonitoringMilestones')}</h6>
+                                <button className="btn btn-sm btn-warning" onClick={() => {
+                                  setSpShowMilestoneForm(rec.id);
+                                  setSpEditingMilestone(null);
+                                  setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+                                }}>
+                                  <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
+                                </button>
+                              </div>
+
+                              {spShowMilestoneForm === rec.id && (
+                                <div className="card mb-2 border-warning">
+                                  <div className="card-body p-2">
+                                    <div className="row g-2">
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.logDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={spMilestoneForm.logDate} onChange={e => setSpMilestoneForm(f => ({...f, logDate: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.quarter')}</label>
+                                        <select className="form-select form-select-sm" value={spMilestoneForm.quarterId} onChange={e => setSpMilestoneForm(f => ({...f, quarterId: e.target.value}))}>
+                                          <option value="">{t('projectActions.selectQuarter')}</option>
+                                          {quarters.map(q => (<option key={q.id} value={q.id}>{q.quarter}</option>))}
+                                        </select>
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                                        <select className="form-select form-select-sm" value={spMilestoneForm.status} onChange={e => setSpMilestoneForm(f => ({...f, status: e.target.value}))}>
+                                          <option value="">{t('projectActions.selectStatus')}</option>
+                                          {Object.entries(DM_STATUS_COLORS).map(([s, c]) => (<option key={s} value={s} style={{color: c}}>{t(`projectActions.status${s}`) || s}</option>))}
+                                        </select>
+                                      </div>
+                                      <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={spMilestoneForm.remarks} onChange={e => setSpMilestoneForm(f => ({...f, remarks: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-1 d-flex align-items-end gap-1">
+                                        <button className="btn btn-sm btn-success" onClick={handleSpSaveMilestone}><FiCheck /></button>
+                                        <button className="btn btn-sm btn-secondary" onClick={() => { setSpShowMilestoneForm(null); setSpEditingMilestone(null); }}><FiX /></button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {(spAllMilestones[rec.id] || []).length > 0 ? (
+                                <table className="table table-bordered table-sm mb-0" style={{fontSize:'clamp(0.6rem, 1vw, 0.8rem)'}}>
+                                  <thead className="table-warning">
+                                    <tr>
+                                      <th>{t('projectActions.logDate')}</th>
+                                      <th>{t('projectActions.quarter')}</th>
+                                      <th>{t('projectActions.achievedValues')}</th>
+                                      <th>{t('projectActions.plannedVsAchieved')}</th>
+                                      <th>{t('common.status')}</th>
+                                      <th>{t('projectActions.remarks')}</th>
+                                      <th>{t('common.actions')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(spAllMilestones[rec.id] || []).map(ms => (
+                                      <tr key={ms.id}>
+                                        <td>{ms.logDate || '-'}</td>
+                                        <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.achievedValues ?? '-'}</td>
+                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                        <td>{ms.remarks || '-'}</td>
+                                        <td>
+                                          <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                              setSpShowMilestoneForm(rec.id);
+                                              setSpEditingMilestone(ms);
+                                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
+                                            }}><FiEdit2 /></button>
+                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <p className="text-muted small mb-0">{t('projectActions.noMilestones')}</p>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-      {renderSpModal()}
+      )}
+
+      {spModalItem && (
+        <div className="modal show d-block" style={{backgroundColor:'rgba(0,0,0,0.5)',zIndex:1055}} onClick={closeSpModal}>
+          <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{spModalMode === 'edit' ? t('common.edit') : t('common.view')} — {t('projectActions.supplyProgressMonitoring')}</h5>
+                <button className="btn-close" onClick={closeSpModal}></button>
+              </div>
+              <div className="modal-body">
+                {(() => {
+                  const isView = spModalMode === 'view';
+                  const item = spModalItem;
+                  const form = spEditForm;
+                  const dur = !isView ? calcSpDuration(form.startDate, form.endDate, form.durationUnit) : null;
+                  return (
+                    <div className="row g-3">
+                      <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.year')}</label><p className="form-control-plaintext">{item.year?.profileYear || '-'}</p></div>
+                      <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.project')}</label><p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p></div>
+                      <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.contractRef')}</label><p className="form-control-plaintext">{item.contractRefNo || '-'}</p></div>
+                      <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.activityId')}</label>{isView ? <p className="form-control-plaintext"><code>{item.activityId}</code></p> : <input type="text" className="form-control bg-light" value={form.activityId} readOnly />}</div>
+                      <div className="col-md-4"><label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>{isView ? <p className="form-control-plaintext">{item.activityDescription || '-'}</p> : <input type="text" className="form-control" value={form.activityDescription} onChange={e => setSpEditForm(f => ({...f, activityDescription: e.target.value}))} />}</div>
+                      <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>{isView ? <p className="form-control-plaintext">{item.rate != null ? `${item.rate}%` : '-'}</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
+                      <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.unit')}</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}</div>
+                      <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities ?? '-'}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
+                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.startDate')}</label>{isView ? <p className="form-control-plaintext">{item.startDate || '-'}</p> : <input type="date" className="form-control" value={form.startDate} onChange={e => setSpEditForm(f => ({...f, startDate: e.target.value}))} />}</div>
+                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.endDate')}</label>{isView ? <p className="form-control-plaintext">{item.endDate || '-'}</p> : <input type="date" className="form-control" value={form.endDate} onChange={e => setSpEditForm(f => ({...f, endDate: e.target.value}))} />}</div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.duration')}</label>
+                        {isView ? <p className="form-control-plaintext">{item.duration != null ? `${item.duration} ${item.durationUnit || 'days'}` : '-'}</p> : (
+                          <div className="d-flex gap-1">
+                            <span className="form-control bg-light">{dur || '-'}</span>
+                            <select className="form-select" style={{width:'100px'}} value={form.durationUnit} onChange={e => setSpEditForm(f => ({...f, durationUnit: e.target.value}))}>
+                              <option value="days">{t('projectActions.days')}</option>
+                              <option value="months">{t('projectActions.months')}</option>
+                              <option value="years">{t('projectActions.years')}</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.observation')}</label>{isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="2" value={form.observation} onChange={e => setSpEditForm(f => ({...f, observation: e.target.value}))} />}</div>
+
+                      <div className="col-12">
+                        <hr />
+                        <h6 className="text-warning">{t('projectActions.supplyMonitoringMilestones')}</h6>
+                        {(spAllMilestones[item.id] || []).length > 0 ? (
+                          <table className="table table-bordered table-sm" style={{fontSize:'0.8rem'}}>
+                            <thead className="table-warning">
+                              <tr>
+                                <th>{t('projectActions.logDate')}</th>
+                                <th>{t('projectActions.quarter')}</th>
+                                <th>{t('projectActions.achievedValues')}</th>
+                                <th>{t('projectActions.plannedVsAchieved')}</th>
+                                <th>{t('common.status')}</th>
+                                <th>{t('projectActions.remarks')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(spAllMilestones[item.id] || []).map(ms => (
+                                <tr key={ms.id}>
+                                  <td>{ms.logDate || '-'}</td>
+                                  <td>{ms.quarter?.quarter || '-'}</td>
+                                  <td>{ms.achievedValues ?? '-'}</td>
+                                  <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                  <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                  <td>{ms.remarks || '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : <p className="text-muted small">{t('projectActions.noMilestones')}</p>}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="modal-footer">
+                {spModalMode === 'view' ? (
+                  <>
+                    <button className="btn btn-primary" onClick={() => openSpModal(spModalItem, 'edit')}><FiEdit2 className="me-1" /> {t('common.edit')}</button>
+                    <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.close')}</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-success" onClick={handleSpEditSave}>{t('projectActions.saveChanges')}</button>
+                    <button className="btn btn-secondary" onClick={closeSpModal}>{t('common.cancel')}</button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+  };
 
   // --- Installation ---
   const handleInstProjectChange = async (projectId) => {
