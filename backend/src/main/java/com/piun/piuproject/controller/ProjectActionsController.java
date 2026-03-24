@@ -313,6 +313,9 @@ public class ProjectActionsController {
                 item.setPercentage(details.getPercentage());
                 item.setGlobalProgressRate(details.getGlobalProgressRate());
                 item.setObservations(details.getObservations());
+                item.setActivityStartDate(details.getActivityStartDate());
+                item.setActivityEndDate(details.getActivityEndDate());
+                item.setDuration(details.getDuration());
                 return ResponseEntity.ok(designWorkProgressRepository.save(item));
             })
             .orElse(ResponseEntity.notFound().build());

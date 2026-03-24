@@ -55,6 +55,15 @@ public class DesignWorkProgress {
     @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;
 
+    @Column(name = "activity_start_date")
+    private LocalDate activityStartDate;
+
+    @Column(name = "activity_end_date")
+    private LocalDate activityEndDate;
+
+    @Column(name = "duration")
+    private Long duration;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -93,6 +102,12 @@ public class DesignWorkProgress {
     public void setGlobalProgressRate(Double globalProgressRate) { this.globalProgressRate = globalProgressRate; }
     public String getObservations() { return observations; }
     public void setObservations(String observations) { this.observations = observations; }
+    public LocalDate getActivityStartDate() { return activityStartDate; }
+    public void setActivityStartDate(LocalDate activityStartDate) { this.activityStartDate = activityStartDate; }
+    public LocalDate getActivityEndDate() { return activityEndDate; }
+    public void setActivityEndDate(LocalDate activityEndDate) { this.activityEndDate = activityEndDate; }
+    public Long getDuration() { return duration; }
+    public void setDuration(Long duration) { this.duration = duration; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }
