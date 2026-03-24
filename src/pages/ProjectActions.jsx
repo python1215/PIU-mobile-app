@@ -2477,9 +2477,10 @@ function ProjectActions() {
     setDmItems([]);
     if (!type || !dmProject) return;
     try {
+      const encodedProject = encodeURIComponent(dmProject);
       const endpoint = type === 'works'
-        ? `/api/project-actions/works/project/${dmProject}`
-        : `/api/project-actions/goods/project/${dmProject}`;
+        ? `/api/project-actions/works/project/${encodedProject}`
+        : `/api/project-actions/goods/project/${encodedProject}`;
       const res = await axios.get(endpoint);
       setDmContractOptions(res.data.filter(c => c.contractRefNo));
     } catch (e) {
@@ -2492,7 +2493,8 @@ function ProjectActions() {
     try {
       let url = '/api/project-actions/design-monitoring';
       if (dmProject && dmContractType && dmContractRefNo) {
-        url = `/api/project-actions/design-monitoring/filter?projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${dmContractRefNo}`;
+        const savedParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: dmContractRefNo });
+        url = `/api/project-actions/design-monitoring/filter?${savedParams}`;
       }
       const res = await axios.get(url);
       setDmAllRecords(res.data);
@@ -2512,12 +2514,14 @@ function ProjectActions() {
     setDmExpandedRow(null);
     if (!refNo || !dmProject || !dmContractType) return;
     try {
-      const params = `projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${refNo}${dmYear ? `&yearId=${dmYear}` : ''}`;
-      const res = await axios.get(`/api/project-actions/design-work-progress/filter?${params}`);
+      const filterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
+      if (dmYear) filterParams.set('yearId', dmYear);
+      const res = await axios.get(`/api/project-actions/design-work-progress/filter?${filterParams}`);
       setDmItems(res.data);
       if (res.data.length > 0) {
-        await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${params}`);
-        const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${refNo}`);
+        await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${filterParams}`);
+        const monFilterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
+        const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?${monFilterParams}`);
         const monItems = monRes.data;
         const milestonePromises = monItems.map(mi =>
           axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
@@ -2556,8 +2560,9 @@ function ProjectActions() {
     }
     setDmImporting(true);
     try {
-      const params = `projectId=${dmProject}&contractType=${dmContractType}&contractRefNo=${dmContractRefNo}${dmYear ? `&yearId=${dmYear}` : ''}`;
-      const res = await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${params}`);
+      const importParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: dmContractRefNo });
+      if (dmYear) importParams.set('yearId', dmYear);
+      const res = await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${importParams}`);
       if (res.data.imported > 0) {
         toast.success(`${res.data.imported} ${t('projectActions.activitiesImported')}`);
         handleDmContractRefChange(dmContractRefNo);
