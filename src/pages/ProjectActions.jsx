@@ -131,6 +131,7 @@ function ProjectActions() {
   const [dmContractRefNo, setDmContractRefNo] = useState('');
   const [dmContractOptions, setDmContractOptions] = useState([]);
   const [dmActivityFilter, setDmActivityFilter] = useState('');
+  const [dmActivitySelected, setDmActivitySelected] = useState(false);
   const [dmActivitySuggestions, setDmActivitySuggestions] = useState([]);
   const [dmShowSuggestions, setDmShowSuggestions] = useState(false);
   const [dmYear, setDmYear] = useState('');
@@ -2887,6 +2888,7 @@ function ProjectActions() {
                   onChange={e => {
                     const val = e.target.value;
                     setDmActivityFilter(val);
+                    setDmActivitySelected(false);
                     if (val.length >= 3) {
                       const lower = val.toLowerCase();
                       const matches = dmAllRecords
@@ -2906,7 +2908,7 @@ function ProjectActions() {
                   <ul className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '200px', overflowY: 'auto' }}>
                     {dmActivitySuggestions.map((s, i) => (
                       <li key={i} className="list-group-item list-group-item-action py-1 px-2" style={{ cursor: 'pointer', fontSize: '0.85rem' }}
-                        onMouseDown={() => { setDmActivityFilter(s); setDmShowSuggestions(false); }}>
+                        onMouseDown={() => { setDmActivityFilter(s); setDmActivitySelected(true); setDmShowSuggestions(false); }}>
                         {s}
                       </li>
                     ))}
@@ -2917,7 +2919,7 @@ function ProjectActions() {
           </div>
           {(dmYear || dmProject || dmContractType || dmContractRefNo || dmActivityFilter) && (
             <div className="d-flex justify-content-end mt-2">
-              <button className="btn btn-outline-secondary btn-sm" onClick={() => { setDmYear(''); setDmProject(''); setDmContractType(''); setDmContractRefNo(''); setDmContractOptions([]); setDmItems([]); setDmExpandedRow(null); setDmMilestones({}); setDmMonitoringMap({}); setDmMilestoneForm(null); setDmEditingMilestone(null); setDmActivityFilter(''); setDmActivitySuggestions([]); }}>
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => { setDmYear(''); setDmProject(''); setDmContractType(''); setDmContractRefNo(''); setDmContractOptions([]); setDmItems([]); setDmExpandedRow(null); setDmMilestones({}); setDmMonitoringMap({}); setDmMilestoneForm(null); setDmEditingMilestone(null); setDmActivityFilter(''); setDmActivitySelected(false); setDmActivitySuggestions([]); }}>
                 <FiRefreshCw className="me-1" /> {t('common.reset')}
               </button>
             </div>
@@ -2955,7 +2957,13 @@ function ProjectActions() {
                 }
                 if (dmContractType && r.contractType !== dmContractType) return false;
                 if (dmContractRefNo && r.contractRefNo !== dmContractRefNo) return false;
-                if (dmActivityFilter && !(r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))) return false;
+                if (dmActivityFilter) {
+                  if (dmActivitySelected) {
+                    if (r.activityDescription !== dmActivityFilter) return false;
+                  } else {
+                    if (!(r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))) return false;
+                  }
+                }
                 return true;
               });
               return filteredDmRecords.length === 0 ? (
