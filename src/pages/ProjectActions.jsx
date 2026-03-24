@@ -3312,7 +3312,25 @@ function ProjectActions() {
                       </div>
                       <div className="col-md-3">
                         <label className="form-label small fw-semibold">{t('projectActions.planQtyForPeriod')}</label>
-                        <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.overallPlannedQuantities} onChange={e => setDmMilestoneForm(f => ({ ...f, overallPlannedQuantities: e.target.value }))} step="0.01" />
+                        <input type="number" className="form-control form-control-sm" value={dmMilestoneForm.overallPlannedQuantities} onChange={e => {
+                          const val = e.target.value;
+                          const provQty = parseFloat(item.provisionalQuantities) || 0;
+                          if (val !== '' && provQty > 0 && parseFloat(val) > provQty) {
+                            toast.error(t('projectActions.planQtyExceedsProvisional'));
+                            return;
+                          }
+                          setDmMilestoneForm(f => ({ ...f, overallPlannedQuantities: val }));
+                        }} step="0.01" max={item.provisionalQuantities || undefined} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.balanceToProvisionalQty')}</label>
+                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={
+                          (() => {
+                            const provQty = parseFloat(item.provisionalQuantities) || 0;
+                            const planQty = parseFloat(dmMilestoneForm.overallPlannedQuantities) || 0;
+                            return provQty > 0 ? Math.round((provQty - planQty) * 100) / 100 : '-';
+                          })()
+                        } />
                       </div>
                       <div className="col-md-3">
                         <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
@@ -3325,6 +3343,25 @@ function ProjectActions() {
                             ? (Math.round((parseFloat(dmMilestoneForm.achievedValues) / parseFloat(dmMilestoneForm.overallPlannedQuantities)) * 10000) / 100)
                             : (dmMilestoneForm.plannedVsAchievedPct || '')
                         } readOnly />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.overallProgressFromProvisionalQty')}</label>
+                        {(() => {
+                          const provQty = parseFloat(item.provisionalQuantities) || 0;
+                          const achieved = parseFloat(dmMilestoneForm.achievedValues) || 0;
+                          const pct = provQty > 0 ? Math.round((achieved / provQty) * 10000) / 100 : 0;
+                          const color = pct >= 75 ? '#28a745' : pct >= 50 ? '#ffc107' : pct >= 25 ? '#fd7e14' : '#dc3545';
+                          return (
+                            <div>
+                              <input type="text" className="form-control form-control-sm bg-light mb-1" readOnly value={provQty > 0 ? `${pct}%` : '-'} />
+                              {provQty > 0 && (
+                                <div className="progress" style={{ height: '8px' }}>
+                                  <div className="progress-bar" role="progressbar" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                       <div className="col-md-3">
                         <label className="form-label small fw-semibold">{t('common.status')}</label>
@@ -3360,22 +3397,42 @@ function ProjectActions() {
                         <th>{t('projectActions.quarter')}</th>
                         <th>{t('projectActions.frequency')}</th>
                         <th>{t('projectActions.planQtyForPeriod')}</th>
+                        <th>{t('projectActions.balanceToProvisionalQty')}</th>
                         <th>{t('projectActions.achievedValues')}</th>
                         <th>{t('projectActions.plannedVsAchieved')}</th>
+                        <th>{t('projectActions.overallProgressFromProvisionalQty')}</th>
                         <th>{t('common.status')}</th>
                         <th>{t('projectActions.remarks')}</th>
                         <th>{t('common.actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {(dmMilestones[item.activityId] || []).map(ms => (
+                      {(dmMilestones[item.activityId] || []).map(ms => {
+                        const msProvQty = parseFloat(item.provisionalQuantities) || 0;
+                        const msPlanQty = parseFloat(ms.overallPlannedQuantities) || 0;
+                        const msAchieved = parseFloat(ms.achievedValues) || 0;
+                        const msBalance = msProvQty > 0 ? Math.round((msProvQty - msPlanQty) * 100) / 100 : '-';
+                        const msProgressPct = msProvQty > 0 ? Math.round((msAchieved / msProvQty) * 10000) / 100 : 0;
+                        const msProgressColor = msProgressPct >= 75 ? '#28a745' : msProgressPct >= 50 ? '#ffc107' : msProgressPct >= 25 ? '#fd7e14' : '#dc3545';
+                        return (
                         <tr key={ms.id}>
                           <td style={{ whiteSpace: 'nowrap' }}>{ms.logDate || '-'}</td>
                           <td>{ms.quarter?.quarter || '-'}</td>
                           <td>{ms.frequency?.frequency || '-'}</td>
                           <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                          <td>{msBalance}</td>
                           <td>{ms.achievedValues ?? '-'}</td>
                           <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                          <td>
+                            {msProvQty > 0 ? (
+                              <div>
+                                <span>{msProgressPct}%</span>
+                                <div className="progress mt-1" style={{ height: '6px' }}>
+                                  <div className="progress-bar" style={{ width: `${Math.min(msProgressPct, 100)}%`, backgroundColor: msProgressColor }} />
+                                </div>
+                              </div>
+                            ) : '-'}
+                          </td>
                           <td>
                             {ms.status && (
                               <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
@@ -3391,7 +3448,8 @@ function ProjectActions() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
