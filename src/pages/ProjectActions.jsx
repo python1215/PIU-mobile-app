@@ -2541,10 +2541,12 @@ function ProjectActions() {
       const res = await axios.get(`/api/project-actions/design-work-progress/filter?${filterParams}`);
       setDmItems(res.data);
       if (res.data.length > 0) {
-        await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${filterParams}`);
-        const monFilterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
-        const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?${monFilterParams}`);
-        const monItems = monRes.data;
+        try { await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${filterParams}`); } catch (importErr) { console.warn('Import skipped:', importErr); }
+      }
+      const monFilterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
+      const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?${monFilterParams}`);
+      const monItems = monRes.data;
+      if (monItems.length > 0) {
         const milestonePromises = monItems.map(mi =>
           axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
             .then(r => ({ activityId: mi.activityId, monitoringId: mi.id, milestones: r.data }))
@@ -2569,6 +2571,8 @@ function ProjectActions() {
       } else {
         setDmAllRecords([]);
         setDmAllMilestones({});
+        setDmMilestones({});
+        setDmMonitoringMap({});
       }
     } catch (e) {
       console.error('Error loading design work plan data:', e);
