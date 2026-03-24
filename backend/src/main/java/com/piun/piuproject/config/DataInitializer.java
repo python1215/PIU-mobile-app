@@ -49,12 +49,13 @@ public class DataInitializer implements ApplicationRunner {
             logger.info("Superuser '{}' created successfully", username);
         } else {
             User user = userRepository.findByUsername(username).orElse(null);
-            if (user != null && !user.isSuperuser()) {
-                user.setSuperuser(true);
+            if (user != null) {
+                user.setPasswordHash(passwordEncoder.encode(password));
+                if (!user.isSuperuser()) {
+                    user.setSuperuser(true);
+                }
                 userRepository.save(user);
-                logger.info("Existing '{}' user promoted to superuser", username);
-            } else {
-                logger.info("Superuser '{}' already exists", username);
+                logger.info("Superuser '{}' password reset", username);
             }
         }
     }
