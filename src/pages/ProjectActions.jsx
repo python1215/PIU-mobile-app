@@ -2947,9 +2947,17 @@ function ProjectActions() {
             ) : dmAllRecords.length === 0 ? (
               <div className="text-center text-muted py-4">{t('common.noData')}</div>
             ) : (() => {
-              const filteredDmRecords = dmActivityFilter
-                ? dmAllRecords.filter(r => r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))
-                : dmAllRecords;
+              const filteredDmRecords = dmAllRecords.filter(r => {
+                if (dmYear && String(r.year?.id) !== String(dmYear)) return false;
+                if (dmProject) {
+                  const recProjId = r.project?.projectId || r.projectId || '';
+                  if (recProjId !== dmProject) return false;
+                }
+                if (dmContractType && r.contractType !== dmContractType) return false;
+                if (dmContractRefNo && r.contractRefNo !== dmContractRefNo) return false;
+                if (dmActivityFilter && !(r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))) return false;
+                return true;
+              });
               return filteredDmRecords.length === 0 ? (
                 <div className="text-center text-muted py-4">{t('common.noData')}</div>
               ) : (
