@@ -130,6 +130,9 @@ function ProjectActions() {
   const [dmContractType, setDmContractType] = useState('');
   const [dmContractRefNo, setDmContractRefNo] = useState('');
   const [dmContractOptions, setDmContractOptions] = useState([]);
+  const [dmActivityFilter, setDmActivityFilter] = useState('');
+  const [dmActivitySuggestions, setDmActivitySuggestions] = useState([]);
+  const [dmShowSuggestions, setDmShowSuggestions] = useState(false);
   const [dmYear, setDmYear] = useState('');
   const [dmYears, setDmYears] = useState([]);
   const [dmUnits, setDmUnits] = useState([]);
@@ -2872,9 +2875,49 @@ function ProjectActions() {
               </select>
             </div>
           </div>
-          {(dmYear || dmProject || dmContractType || dmContractRefNo) && (
+          <div className="row g-3 mt-1">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>
+              <div className="position-relative">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder={t('projectActions.typeToSearch')}
+                  value={dmActivityFilter}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setDmActivityFilter(val);
+                    if (val.length >= 3) {
+                      const lower = val.toLowerCase();
+                      const matches = dmAllRecords
+                        .map(r => r.activityDescription)
+                        .filter((desc, idx, arr) => desc && desc.toLowerCase().includes(lower) && arr.indexOf(desc) === idx);
+                      setDmActivitySuggestions(matches);
+                      setDmShowSuggestions(matches.length > 0);
+                    } else {
+                      setDmActivitySuggestions([]);
+                      setDmShowSuggestions(false);
+                    }
+                  }}
+                  onFocus={() => { if (dmActivityFilter.length >= 3 && dmActivitySuggestions.length > 0) setDmShowSuggestions(true); }}
+                  onBlur={() => setTimeout(() => setDmShowSuggestions(false), 200)}
+                />
+                {dmShowSuggestions && (
+                  <ul className="list-group position-absolute w-100 shadow-sm" style={{ zIndex: 1050, maxHeight: '200px', overflowY: 'auto' }}>
+                    {dmActivitySuggestions.map((s, i) => (
+                      <li key={i} className="list-group-item list-group-item-action py-1 px-2" style={{ cursor: 'pointer', fontSize: '0.85rem' }}
+                        onMouseDown={() => { setDmActivityFilter(s); setDmShowSuggestions(false); }}>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+          {(dmYear || dmProject || dmContractType || dmContractRefNo || dmActivityFilter) && (
             <div className="d-flex justify-content-end mt-2">
-              <button className="btn btn-outline-secondary btn-sm" onClick={() => { setDmYear(''); setDmProject(''); setDmContractType(''); setDmContractRefNo(''); setDmContractOptions([]); setDmItems([]); setDmExpandedRow(null); setDmMilestones({}); setDmMonitoringMap({}); setDmMilestoneForm(null); setDmEditingMilestone(null); }}>
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => { setDmYear(''); setDmProject(''); setDmContractType(''); setDmContractRefNo(''); setDmContractOptions([]); setDmItems([]); setDmExpandedRow(null); setDmMilestones({}); setDmMonitoringMap({}); setDmMilestoneForm(null); setDmEditingMilestone(null); setDmActivityFilter(''); setDmActivitySuggestions([]); }}>
                 <FiRefreshCw className="me-1" /> {t('common.reset')}
               </button>
             </div>
@@ -2903,7 +2946,13 @@ function ProjectActions() {
               <div className="text-center py-4"><div className="spinner-border spinner-border-sm text-primary" /></div>
             ) : dmAllRecords.length === 0 ? (
               <div className="text-center text-muted py-4">{t('common.noData')}</div>
-            ) : (
+            ) : (() => {
+              const filteredDmRecords = dmActivityFilter
+                ? dmAllRecords.filter(r => r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))
+                : dmAllRecords;
+              return filteredDmRecords.length === 0 ? (
+                <div className="text-center text-muted py-4">{t('common.noData')}</div>
+              ) : (
               <div className="table-responsive">
                 <table className="table table-bordered table-hover table-sm mb-0" style={{ fontSize: 'clamp(0.65rem, 1vw, 0.82rem)' }}>
                   <thead className="table-light">
@@ -2921,7 +2970,7 @@ function ProjectActions() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dmAllRecords.map(rec => (
+                    {filteredDmRecords.map(rec => (
                       <Fragment key={rec.id}>
                         <tr>
                           <td><code>{rec.activityId}</code></td>
@@ -2988,7 +3037,8 @@ function ProjectActions() {
                   </tbody>
                 </table>
               </div>
-            )}
+            );
+            })()}
           </div>
         </div>
 
