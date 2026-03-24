@@ -554,7 +554,11 @@
     "achievedVsGlobal": "% Alcancado vs Global",
     "noMilestones": "Nenhum marco registrado. Clique em Adicionar Marco para comecar o monitoramento.",
     "noDesignMonitoringRecords": "Nenhum registro de monitoramento de projeto. Importe atividades do Plano de Projeto.",
+    "statusNotStarted": "Não Iniciado",
+    "statusInProgress": "Em Progresso",
     "statusComplete": "Completo",
+    "statusDelayed": "Atrasado",
+    "statusOnHold": "Em Espera",
     "statusIncomplete": "Incompleto",
     "statusStagnant": "Estagnado",
     "statusCancelled": "Cancelado"

@@ -554,7 +554,11 @@
     "achievedVsGlobal": "% Realise vs Global",
     "noMilestones": "Aucun jalon enregistre. Cliquez sur Ajouter un Jalon pour commencer le suivi.",
     "noDesignMonitoringRecords": "Aucun enregistrement de suivi de conception. Importez les activites du Plan de Conception.",
-    "statusComplete": "Termine",
+    "statusNotStarted": "Non Démarré",
+    "statusInProgress": "En Cours",
+    "statusComplete": "Terminé",
+    "statusDelayed": "En Retard",
+    "statusOnHold": "En Attente",
     "statusIncomplete": "Incomplet",
     "statusStagnant": "Stagnant",
     "statusCancelled": "Annule"

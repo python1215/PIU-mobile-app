@@ -554,7 +554,11 @@
     "achievedVsGlobal": "% Achieved vs Global",
     "noMilestones": "No milestones recorded yet. Click Add Milestone to start tracking progress.",
     "noDesignMonitoringRecords": "No design monitoring records found. Import activities from the Design Work Plan.",
+    "statusNotStarted": "Not Started",
+    "statusInProgress": "In Progress",
     "statusComplete": "Complete",
+    "statusDelayed": "Delayed",
+    "statusOnHold": "On Hold",
     "statusIncomplete": "Incomplete",
     "statusStagnant": "Stagnant",
     "statusCancelled": "Cancelled"
