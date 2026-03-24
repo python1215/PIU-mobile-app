@@ -145,6 +145,9 @@ function ProjectActions() {
   const [dmAllRecords, setDmAllRecords] = useState([]);
   const [dmAllMilestones, setDmAllMilestones] = useState({});
   const [dmAllLoading, setDmAllLoading] = useState(false);
+  const [dmSavedModalItem, setDmSavedModalItem] = useState(null);
+  const [dmSavedModalMode, setDmSavedModalMode] = useState('view');
+  const [dmSavedEditForm, setDmSavedEditForm] = useState({});
 
   useEffect(() => {
     loadProjects();
@@ -2565,6 +2568,59 @@ function ProjectActions() {
     }
   };
 
+  const openDmSavedModal = (rec, mode) => {
+    setDmSavedModalMode(mode);
+    setDmSavedModalItem(rec);
+    if (mode === 'edit') {
+      setDmSavedEditForm({
+        activityDescription: rec.activityDescription || '',
+        rate: rec.rate ?? '',
+        unit: rec.unit || '',
+        overallPlannedQuantities: rec.overallPlannedQuantities ?? '',
+        contractType: rec.contractType || '',
+        contractRefNo: rec.contractRefNo || ''
+      });
+    }
+  };
+
+  const closeDmSavedModal = () => {
+    setDmSavedModalItem(null);
+    setDmSavedModalMode('view');
+    setDmSavedEditForm({});
+  };
+
+  const handleDmSavedEditSave = async () => {
+    if (!dmSavedModalItem) return;
+    try {
+      const payload = {
+        ...dmSavedModalItem,
+        activityDescription: dmSavedEditForm.activityDescription,
+        rate: dmSavedEditForm.rate !== '' ? parseFloat(dmSavedEditForm.rate) : null,
+        unit: dmSavedEditForm.unit,
+        overallPlannedQuantities: dmSavedEditForm.overallPlannedQuantities !== '' ? parseFloat(dmSavedEditForm.overallPlannedQuantities) : null,
+        contractType: dmSavedEditForm.contractType,
+        contractRefNo: dmSavedEditForm.contractRefNo
+      };
+      await axios.put(`/api/project-actions/design-monitoring/${dmSavedModalItem.id}`, payload);
+      toast.success(t('common.saved'));
+      closeDmSavedModal();
+      loadAllDmRecords();
+    } catch (e) {
+      toast.error(t('common.saveError'));
+    }
+  };
+
+  const handleDmSavedDelete = async (id) => {
+    if (!confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/design-monitoring/${id}`);
+      setDmAllRecords(prev => prev.filter(r => r.id !== id));
+      toast.success(t('common.deleted'));
+    } catch (e) {
+      toast.error(t('common.deleteError'));
+    }
+  };
+
   const handleDmEditActivity = (item) => {
     setDmEditingActivity(item);
     setDmEditForm({
@@ -2767,6 +2823,7 @@ function ProjectActions() {
                       <th>{t('projectActions.unit')}</th>
                       <th>{t('projectActions.overallPlannedQty')}</th>
                       <th>{t('projectActions.designMilestones')}</th>
+                      <th>{t('common.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2786,10 +2843,17 @@ function ProjectActions() {
                               {(dmAllMilestones[rec.id] || []).length}
                             </span>
                           </td>
+                          <td>
+                            <div className="d-flex gap-1 flex-nowrap">
+                              <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openDmSavedModal(rec, 'view')}><FiEye /></button>
+                              <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openDmSavedModal(rec, 'edit')}><FiEdit2 /></button>
+                              <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDmSavedDelete(rec.id)}><FiTrash2 /></button>
+                            </div>
+                          </td>
                         </tr>
                         {(dmAllMilestones[rec.id] || []).length > 0 && (
                           <tr>
-                            <td colSpan="9" className="p-0">
+                            <td colSpan="10" className="p-0">
                               <table className="table table-sm table-bordered mb-0 ms-4" style={{ fontSize: 'inherit', width: 'calc(100% - 2rem)' }}>
                                 <thead className="table-warning">
                                   <tr>
@@ -2833,6 +2897,147 @@ function ProjectActions() {
             )}
           </div>
         </div>
+
+      {dmSavedModalItem && (
+        <div className="modal show d-block" style={{backgroundColor:'rgba(0,0,0,0.5)',zIndex:1055}} onClick={closeDmSavedModal}>
+          <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{dmSavedModalMode === 'edit' ? t('common.edit') : t('common.view')} — {t('projectActions.designProgressMonitoring')}</h5>
+                <button className="btn-close" onClick={closeDmSavedModal}></button>
+              </div>
+              <div className="modal-body">
+                {(() => {
+                  const item = dmSavedModalItem;
+                  const isView = dmSavedModalMode === 'view';
+                  const form = dmSavedEditForm;
+                  return (
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label fw-semibold">{t('projectActions.activityId')}</label>
+                        <p className="form-control-plaintext"><code>{item.activityId}</code></p>
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-semibold">{t('projectActions.project')}</label>
+                        <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext">{item.activityDescription || '-'}</p>
+                        ) : (
+                          <input type="text" className="form-control" value={form.activityDescription} onChange={e => setDmSavedEditForm(f => ({...f, activityDescription: e.target.value}))} />
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext"><span className="badge bg-info bg-opacity-25 text-dark">{item.contractType || '-'}</span></p>
+                        ) : (
+                          <select className="form-select" value={form.contractType} onChange={e => setDmSavedEditForm(f => ({...f, contractType: e.target.value}))}>
+                            <option value="">{t('common.select')}</option>
+                            <option value="works">{t('projectActions.works')}</option>
+                            <option value="goods">{t('projectActions.goods')}</option>
+                          </select>
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.contractReferenceNo')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext">{item.contractRefNo || '-'}</p>
+                        ) : (
+                          <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setDmSavedEditForm(f => ({...f, contractRefNo: e.target.value}))} />
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.rate')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext">{item.rate != null ? `${item.rate}%` : '-'}</p>
+                        ) : (
+                          <input type="number" className="form-control" value={form.rate} onChange={e => setDmSavedEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext">{item.unit || '-'}</p>
+                        ) : (
+                          <select className="form-select" value={form.unit} onChange={e => setDmSavedEditForm(f => ({...f, unit: e.target.value}))}>
+                            <option value="">{t('projectActions.placeholderUnit')}</option>
+                            {dmUnits.map(u => <option key={u.id} value={u.unit}>{u.unit}</option>)}
+                          </select>
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold">{t('projectActions.overallPlannedQty')}</label>
+                        {isView ? (
+                          <p className="form-control-plaintext">{item.overallPlannedQuantities ?? '-'}</p>
+                        ) : (
+                          <input type="number" className="form-control" value={form.overallPlannedQuantities} onChange={e => setDmSavedEditForm(f => ({...f, overallPlannedQuantities: e.target.value}))} step="0.01" />
+                        )}
+                      </div>
+                      {(dmAllMilestones[item.id] || []).length > 0 && (
+                        <div className="col-12">
+                          <label className="form-label fw-semibold">{t('projectActions.designMilestones')} ({(dmAllMilestones[item.id] || []).length})</label>
+                          <div className="table-responsive">
+                            <table className="table table-sm table-bordered mb-0">
+                              <thead className="table-warning">
+                                <tr>
+                                  <th>{t('projectActions.logDate')}</th>
+                                  <th>{t('projectActions.quarter')}</th>
+                                  <th>{t('projectActions.overallPlannedQty')}</th>
+                                  <th>{t('projectActions.achievedValues')}</th>
+                                  <th>{t('projectActions.plannedVsAchieved')}</th>
+                                  <th>{t('common.status')}</th>
+                                  <th>{t('projectActions.remarks')}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(dmAllMilestones[item.id] || []).map(ms => (
+                                  <tr key={ms.id}>
+                                    <td>{ms.logDate || '-'}</td>
+                                    <td>{ms.quarter?.quarter || '-'}</td>
+                                    <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                                    <td>{ms.achievedValues ?? '-'}</td>
+                                    <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                    <td>
+                                      {ms.status && (
+                                        <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
+                                          {t(`projectActions.status${ms.status}`) || ms.status}
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td>{ms.remarks || '-'}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="modal-footer">
+                {dmSavedModalMode === 'view' ? (
+                  <>
+                    <button className="btn btn-primary" onClick={() => { setDmSavedModalMode('edit'); setDmSavedEditForm({ activityDescription: dmSavedModalItem.activityDescription || '', rate: dmSavedModalItem.rate ?? '', unit: dmSavedModalItem.unit || '', overallPlannedQuantities: dmSavedModalItem.overallPlannedQuantities ?? '', contractType: dmSavedModalItem.contractType || '', contractRefNo: dmSavedModalItem.contractRefNo || '' }); }}>
+                      <FiEdit2 className="me-1" /> {t('common.edit')}
+                    </button>
+                    <button className="btn btn-secondary" onClick={closeDmSavedModal}>{t('common.close')}</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-success" onClick={handleDmSavedEditSave}><FiSave className="me-1" /> {t('common.save')}</button>
+                    <button className="btn btn-secondary" onClick={closeDmSavedModal}>{t('common.cancel')}</button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {dmItems.map(item => (
         <div className="card mb-3" key={item.id}>
