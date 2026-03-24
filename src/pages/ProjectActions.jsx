@@ -3228,7 +3228,16 @@ function ProjectActions() {
         </div>
       )}
 
-      {dmItems.map(item => (
+      {dmItems.filter(item => {
+        if (dmActivityFilter) {
+          if (dmActivitySelected) {
+            if (item.activity !== dmActivityFilter) return false;
+          } else {
+            if (!(item.activity && item.activity.toLowerCase().includes(dmActivityFilter.toLowerCase()))) return false;
+          }
+        }
+        return true;
+      }).map(item => (
         <div className="card mb-3" key={item.id}>
           <div className="card-header bg-white d-flex justify-content-between align-items-center py-2" style={{ borderLeft: '4px solid #4361ee' }}>
             <div className="d-flex align-items-center gap-3 flex-wrap" style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.88rem)' }}>
