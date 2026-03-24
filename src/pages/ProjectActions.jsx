@@ -3019,20 +3019,40 @@ function ProjectActions() {
                                     <th>{t('projectActions.logDate')}</th>
                                     <th>{t('projectActions.quarter')}</th>
                                     <th>{t('projectActions.planQtyForPeriod')}</th>
+                                    <th>{t('projectActions.balanceToProvisionalQty')}</th>
                                     <th>{t('projectActions.achievedValues')}</th>
                                     <th>{t('projectActions.plannedVsAchieved')}</th>
+                                    <th>{t('projectActions.overallProgressFromProvisionalQty')}</th>
                                     <th>{t('common.status')}</th>
                                     <th>{t('projectActions.remarks')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {(dmAllMilestones[rec.id] || []).map(ms => (
+                                  {(dmAllMilestones[rec.id] || []).map(ms => {
+                                    const inlineProvQty = parseFloat(rec.overallPlannedQuantities) || 0;
+                                    const inlinePlanQty = parseFloat(ms.overallPlannedQuantities) || 0;
+                                    const inlineAchieved = parseFloat(ms.achievedValues) || 0;
+                                    const inlineBalance = inlineProvQty > 0 ? Math.round((inlineProvQty - inlinePlanQty) * 100) / 100 : '-';
+                                    const inlineProgressPct = inlineProvQty > 0 ? Math.round((inlineAchieved / inlineProvQty) * 10000) / 100 : 0;
+                                    const inlineProgressColor = inlineProgressPct >= 75 ? '#28a745' : inlineProgressPct >= 50 ? '#ffc107' : inlineProgressPct >= 25 ? '#fd7e14' : '#dc3545';
+                                    return (
                                     <tr key={ms.id}>
                                       <td>{ms.logDate || '-'}</td>
                                       <td>{ms.quarter?.quarter || '-'}</td>
                                       <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                                      <td>{inlineBalance}</td>
                                       <td>{ms.achievedValues ?? '-'}</td>
                                       <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                      <td>
+                                        {inlineProvQty > 0 ? (
+                                          <div>
+                                            <span>{inlineProgressPct}%</span>
+                                            <div className="progress mt-1" style={{ height: '6px' }}>
+                                              <div className="progress-bar" style={{ width: `${Math.min(inlineProgressPct, 100)}%`, backgroundColor: inlineProgressColor }} />
+                                            </div>
+                                          </div>
+                                        ) : '-'}
+                                      </td>
                                       <td>
                                         {ms.status && (
                                           <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
@@ -3042,7 +3062,8 @@ function ProjectActions() {
                                       </td>
                                       <td>{ms.remarks || '-'}</td>
                                     </tr>
-                                  ))}
+                                    );
+                                  })}
                                 </tbody>
                               </table>
                             </td>
@@ -3146,23 +3167,34 @@ function ProjectActions() {
                                   <th>{t('projectActions.logDate')}</th>
                                   <th>{t('projectActions.quarter')}</th>
                                   <th>{t('projectActions.planQtyForPeriod')}</th>
+                                  <th>{t('projectActions.balanceToProvisionalQty')}</th>
                                   <th>{t('projectActions.achievedValues')}</th>
                                   <th>{t('projectActions.plannedVsAchieved')}</th>
+                                  <th>{t('projectActions.overallProgressFromProvisionalQty')}</th>
                                   <th>{t('common.status')}</th>
                                   <th>{t('projectActions.remarks')}</th>
                                   {!isView && <th>{t('common.actions')}</th>}
                                 </tr>
                               </thead>
                               <tbody>
-                                {(dmAllMilestones[item.id] || []).map(ms => (
+                                {(dmAllMilestones[item.id] || []).map(ms => {
+                                  const modalProvQty = parseFloat(item.overallPlannedQuantities) || 0;
+                                  const modalMsPlanQty = parseFloat(ms.overallPlannedQuantities) || 0;
+                                  const modalMsAchieved = parseFloat(ms.achievedValues) || 0;
+                                  const modalMsBalance = modalProvQty > 0 ? Math.round((modalProvQty - modalMsPlanQty) * 100) / 100 : '-';
+                                  const modalMsProgressPct = modalProvQty > 0 ? Math.round((modalMsAchieved / modalProvQty) * 10000) / 100 : 0;
+                                  const modalMsProgressColor = modalMsProgressPct >= 75 ? '#28a745' : modalMsProgressPct >= 50 ? '#ffc107' : modalMsProgressPct >= 25 ? '#fd7e14' : '#dc3545';
+                                  return (
                                   <tr key={ms.id}>
                                     {!isView && dmSavedMsEditId === ms.id ? (
                                       <>
                                         <td><input type="date" className="form-control form-control-sm" value={dmSavedMsEditForm.logDate} onChange={e => setDmSavedMsEditForm(f => ({...f, logDate: e.target.value}))} /></td>
                                         <td><select className="form-select form-select-sm" value={dmSavedMsEditForm.quarterId} onChange={e => setDmSavedMsEditForm(f => ({...f, quarterId: e.target.value}))}><option value="">-</option>{quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}</select></td>
                                         <td><input type="number" className="form-control form-control-sm" value={dmSavedMsEditForm.overallPlannedQuantities} onChange={e => setDmSavedMsEditForm(f => ({...f, overallPlannedQuantities: e.target.value}))} step="0.01" /></td>
+                                        <td className="bg-light">{(() => { const editPlan = parseFloat(dmSavedMsEditForm.overallPlannedQuantities) || 0; return modalProvQty > 0 ? Math.round((modalProvQty - editPlan) * 100) / 100 : '-'; })()}</td>
                                         <td><input type="number" className="form-control form-control-sm" value={dmSavedMsEditForm.achievedValues} onChange={e => setDmSavedMsEditForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" /></td>
                                         <td>{dmSavedMsEditForm.overallPlannedQuantities && dmSavedMsEditForm.achievedValues ? `${Math.round((parseFloat(dmSavedMsEditForm.achievedValues) / parseFloat(dmSavedMsEditForm.overallPlannedQuantities)) * 10000) / 100}%` : '-'}</td>
+                                        <td>{(() => { const editAch = parseFloat(dmSavedMsEditForm.achievedValues) || 0; const editPct = modalProvQty > 0 ? Math.round((editAch / modalProvQty) * 10000) / 100 : 0; return modalProvQty > 0 ? `${editPct}%` : '-'; })()}</td>
                                         <td><select className="form-select form-select-sm" value={dmSavedMsEditForm.status} onChange={e => setDmSavedMsEditForm(f => ({...f, status: e.target.value}))}><option value="">-</option>{['NotStarted','InProgress','Complete','Delayed','OnHold'].map(s => <option key={s} value={s}>{t(`projectActions.status${s}`) || s}</option>)}</select></td>
                                         <td><input type="text" className="form-control form-control-sm" value={dmSavedMsEditForm.remarks} onChange={e => setDmSavedMsEditForm(f => ({...f, remarks: e.target.value}))} /></td>
                                         <td>
@@ -3177,8 +3209,19 @@ function ProjectActions() {
                                         <td>{ms.logDate || '-'}</td>
                                         <td>{ms.quarter?.quarter || '-'}</td>
                                         <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                                        <td>{modalMsBalance}</td>
                                         <td>{ms.achievedValues ?? '-'}</td>
                                         <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>
+                                          {modalProvQty > 0 ? (
+                                            <div>
+                                              <span>{modalMsProgressPct}%</span>
+                                              <div className="progress mt-1" style={{ height: '6px' }}>
+                                                <div className="progress-bar" style={{ width: `${Math.min(modalMsProgressPct, 100)}%`, backgroundColor: modalMsProgressColor }} />
+                                              </div>
+                                            </div>
+                                          ) : '-'}
+                                        </td>
                                         <td>
                                           {ms.status && (
                                             <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
@@ -3198,7 +3241,8 @@ function ProjectActions() {
                                       </>
                                     )}
                                   </tr>
-                                ))}
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>
