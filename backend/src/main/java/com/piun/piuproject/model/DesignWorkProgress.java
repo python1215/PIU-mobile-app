@@ -64,6 +64,9 @@ public class DesignWorkProgress {
     @Column(name = "duration")
     private Long duration;
 
+    @Column(name = "duration_unit", length = 10)
+    private String durationUnit;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -108,6 +111,8 @@ public class DesignWorkProgress {
     public void setActivityEndDate(LocalDate activityEndDate) { this.activityEndDate = activityEndDate; }
     public Long getDuration() { return duration; }
     public void setDuration(Long duration) { this.duration = duration; }
+    public String getDurationUnit() { return durationUnit; }
+    public void setDurationUnit(String durationUnit) { this.durationUnit = durationUnit; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }

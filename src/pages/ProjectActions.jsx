@@ -723,26 +723,31 @@ function ProjectActions() {
       executedQuantities: '',
       activityStartDate: '',
       activityEndDate: '',
-      duration: ''
+      duration: '',
+      durationUnit: 'Days'
     }]);
   };
 
-  const calcDwpDuration = (startDate, endDate) => {
+  const calcDwpDuration = (startDate, endDate, unit = 'Days') => {
     if (!startDate || !endDate) return '';
     const s = new Date(startDate);
     const e = new Date(endDate);
     if (isNaN(s) || isNaN(e) || e < s) return '';
-    return Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+    if (unit === 'Months') return Math.round((diffDays / 30.44) * 100) / 100;
+    if (unit === 'Years') return Math.round((diffDays / 365.25) * 100) / 100;
+    return diffDays;
   };
 
   const updateDwpRow = (idx, field, value) => {
     setDwpRows(prev => prev.map((row, i) => {
       if (i !== idx) return row;
       const updated = { ...row, [field]: value };
-      if (field === 'activityStartDate' || field === 'activityEndDate') {
+      if (field === 'activityStartDate' || field === 'activityEndDate' || field === 'durationUnit') {
         updated.duration = calcDwpDuration(
           field === 'activityStartDate' ? value : row.activityStartDate,
-          field === 'activityEndDate' ? value : row.activityEndDate
+          field === 'activityEndDate' ? value : row.activityEndDate,
+          field === 'durationUnit' ? value : (row.durationUnit || 'Days')
         );
       }
       return updated;
@@ -789,7 +794,8 @@ function ProjectActions() {
         provisionalQuantities: parseFloat(row.provisionalQuantities) || 0,
         activityStartDate: row.activityStartDate || null,
         activityEndDate: row.activityEndDate || null,
-        duration: row.duration !== '' ? parseInt(row.duration) : null
+        duration: row.duration !== '' ? parseFloat(row.duration) : null,
+        durationUnit: row.durationUnit || 'Days'
       }));
       await axios.post('/api/project-actions/design-work-progress/batch', items);
       toast.success('Design work progress saved successfully');
@@ -833,7 +839,8 @@ function ProjectActions() {
         provisionalQuantities: item.provisionalQuantities ?? '',
         activityStartDate: item.activityStartDate || '',
         activityEndDate: item.activityEndDate || '',
-        duration: item.duration ?? ''
+        duration: item.duration ?? '',
+        durationUnit: item.durationUnit || 'Days'
       });
     }
   };
@@ -859,7 +866,8 @@ function ProjectActions() {
         provisionalQuantities: parseFloat(dwpEditForm.provisionalQuantities) || 0,
         activityStartDate: dwpEditForm.activityStartDate || null,
         activityEndDate: dwpEditForm.activityEndDate || null,
-        duration: dwpEditForm.duration !== '' ? parseInt(dwpEditForm.duration) : null
+        duration: dwpEditForm.duration !== '' ? parseFloat(dwpEditForm.duration) : null,
+        durationUnit: dwpEditForm.durationUnit || 'Days'
       });
       toast.success('Record updated successfully');
       closeDwpModal();
@@ -969,7 +977,7 @@ function ProjectActions() {
                   ) : (
                     <input type="date" className="form-control" value={form.activityStartDate} onChange={e => {
                       const val = e.target.value;
-                      setDwpEditForm(f => ({...f, activityStartDate: val, duration: calcDwpDuration(val, f.activityEndDate)}));
+                      setDwpEditForm(f => ({...f, activityStartDate: val, duration: calcDwpDuration(val, f.activityEndDate, f.durationUnit || 'Days')}));
                     }} />
                   )}
                 </div>
@@ -980,20 +988,34 @@ function ProjectActions() {
                   ) : (
                     <input type="date" className="form-control" value={form.activityEndDate} onChange={e => {
                       const val = e.target.value;
-                      setDwpEditForm(f => ({...f, activityEndDate: val, duration: calcDwpDuration(f.activityStartDate, val)}));
+                      setDwpEditForm(f => ({...f, activityEndDate: val, duration: calcDwpDuration(f.activityStartDate, val, f.durationUnit || 'Days')}));
                     }} />
                   )}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">{t('projectActions.duration')}</label>
-                  <p className="form-control-plaintext">{(isView ? item.duration : form.duration) ?? '-'} {((isView ? item.duration : form.duration) != null && (isView ? item.duration : form.duration) !== '') ? t('projectActions.days') : ''}</p>
+                  {isView ? (
+                    <p className="form-control-plaintext">{item.duration ?? '-'} {item.duration != null ? t('projectActions.' + (item.durationUnit || 'Days').toLowerCase()) : ''}</p>
+                  ) : (
+                    <div className="d-flex gap-2">
+                      <input className="form-control bg-light" value={form.duration} readOnly style={{flex:'1'}} />
+                      <select className="form-select" value={form.durationUnit || 'Days'} onChange={e => {
+                        const unit = e.target.value;
+                        setDwpEditForm(f => ({...f, durationUnit: unit, duration: calcDwpDuration(f.activityStartDate, f.activityEndDate, unit)}));
+                      }} style={{flex:'1'}}>
+                        <option value="Days">{t('projectActions.days')}</option>
+                        <option value="Months">{t('projectActions.months')}</option>
+                        <option value="Years">{t('projectActions.years')}</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ yearId: item.year?.id || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', activityStartDate: item.activityStartDate || '', activityEndDate: item.activityEndDate || '', duration: item.duration ?? '' }); }}>
+                  <button className="btn btn-primary" onClick={() => { setDwpModalMode('edit'); setDwpEditForm({ yearId: item.year?.id || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', activityId: item.activityId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', provisionalQuantities: item.provisionalQuantities ?? '', activityStartDate: item.activityStartDate || '', activityEndDate: item.activityEndDate || '', duration: item.duration ?? '', durationUnit: item.durationUnit || 'Days' }); }}>
                     <FiEdit2 className="me-1" /> {t('common.edit')}
                   </button>
                   <button className="btn btn-secondary" onClick={closeDwpModal}>{t('common.close')}</button>
@@ -3376,6 +3398,7 @@ function ProjectActions() {
                     <th style={{minWidth:'130px'}}>{t('projectActions.activityStartDate')}</th>
                     <th style={{minWidth:'130px'}}>{t('projectActions.activityEndDate')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.duration')}</th>
+                    <th style={{minWidth:'90px'}}>{t('projectActions.durationUnit')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
                 </thead>
@@ -3391,6 +3414,7 @@ function ProjectActions() {
                         <td><input type="date" className="form-control form-control-sm" value={row.activityStartDate} onChange={e => updateDwpRow(idx, 'activityStartDate', e.target.value)} /></td>
                         <td><input type="date" className="form-control form-control-sm" value={row.activityEndDate} onChange={e => updateDwpRow(idx, 'activityEndDate', e.target.value)} /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light text-center" value={row.duration !== '' ? `${row.duration}` : ''} readOnly placeholder="-" /></td>
+                        <td><select className="form-select form-select-sm" value={row.durationUnit || 'Days'} onChange={e => updateDwpRow(idx, 'durationUnit', e.target.value)}><option value="Days">{t('projectActions.days')}</option><option value="Months">{t('projectActions.months')}</option><option value="Years">{t('projectActions.years')}</option></select></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeDwpRow(idx)}><FiTrash2 /></button></td>
                       </tr>
                     );
@@ -3451,7 +3475,7 @@ function ProjectActions() {
                       <td style={{whiteSpace:'nowrap'}}>{item.provisionalQuantities}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.activityStartDate || '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.activityEndDate || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.duration != null ? `${item.duration} ${t('projectActions.days')}` : '-'}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.duration != null ? `${item.duration} ${t('projectActions.' + (item.durationUnit || 'Days').toLowerCase())}` : '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
                           <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openDwpModal(item, 'view')}><FiEye /></button>
