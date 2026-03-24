@@ -2630,6 +2630,53 @@ function ProjectActions() {
     }
   };
 
+  const handleDmSavedMilestoneDelete = async (milestoneId, monitoringId) => {
+    if (!confirm(t('common.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/design-monitoring/milestones/${milestoneId}`);
+      const msRes = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
+      setDmAllMilestones(prev => ({ ...prev, [monitoringId]: msRes.data }));
+      toast.success(t('common.deleted'));
+    } catch (e) {
+      toast.error(t('common.deleteError'));
+    }
+  };
+
+  const [dmSavedMsEditId, setDmSavedMsEditId] = useState(null);
+  const [dmSavedMsEditForm, setDmSavedMsEditForm] = useState({});
+
+  const startDmSavedMsEdit = (ms) => {
+    setDmSavedMsEditId(ms.id);
+    setDmSavedMsEditForm({
+      logDate: ms.logDate || '',
+      quarterId: ms.quarter?.id || '',
+      overallPlannedQuantities: ms.overallPlannedQuantities ?? '',
+      achievedValues: ms.achievedValues ?? '',
+      status: ms.status || '',
+      remarks: ms.remarks || ''
+    });
+  };
+
+  const handleDmSavedMsSave = async (monitoringId) => {
+    try {
+      const payload = {
+        logDate: dmSavedMsEditForm.logDate || null,
+        quarter: dmSavedMsEditForm.quarterId ? { id: parseInt(dmSavedMsEditForm.quarterId) } : null,
+        overallPlannedQuantities: dmSavedMsEditForm.overallPlannedQuantities !== '' ? parseFloat(dmSavedMsEditForm.overallPlannedQuantities) : null,
+        achievedValues: dmSavedMsEditForm.achievedValues !== '' ? parseFloat(dmSavedMsEditForm.achievedValues) : null,
+        status: dmSavedMsEditForm.status || null,
+        remarks: dmSavedMsEditForm.remarks || null
+      };
+      await axios.put(`/api/project-actions/design-monitoring/milestones/${dmSavedMsEditId}`, payload);
+      const msRes = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
+      setDmAllMilestones(prev => ({ ...prev, [monitoringId]: msRes.data }));
+      setDmSavedMsEditId(null);
+      toast.success(t('common.saved'));
+    } catch (e) {
+      toast.error(t('common.saveError'));
+    }
+  };
+
   const handleDmSavedDelete = async (id) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
@@ -2924,7 +2971,7 @@ function ProjectActions() {
           <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{dmSavedModalMode === 'edit' ? t('common.edit') : t('common.view')} — {t('projectActions.designProgressMonitoring')}</h5>
+                <h5 className="modal-title">{dmSavedModalMode === 'edit' ? t('common.edit') : t('common.view')} — {t('projectActions.designMonitoring')}</h5>
                 <button className="btn-close" onClick={closeDmSavedModal}></button>
               </div>
               <div className="modal-body">
@@ -2971,7 +3018,7 @@ function ProjectActions() {
                         )}
                       </div>
                       <div className="col-md-3">
-                        <label className="form-label fw-semibold">{t('projectActions.rate')}</label>
+                        <label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>
                         {isView ? (
                           <p className="form-control-plaintext">{item.rate != null ? `${item.rate}%` : '-'}</p>
                         ) : (
@@ -3011,24 +3058,53 @@ function ProjectActions() {
                                   <th>{t('projectActions.plannedVsAchieved')}</th>
                                   <th>{t('common.status')}</th>
                                   <th>{t('projectActions.remarks')}</th>
+                                  {!isView && <th>{t('common.actions')}</th>}
                                 </tr>
                               </thead>
                               <tbody>
                                 {(dmAllMilestones[item.id] || []).map(ms => (
                                   <tr key={ms.id}>
-                                    <td>{ms.logDate || '-'}</td>
-                                    <td>{ms.quarter?.quarter || '-'}</td>
-                                    <td>{ms.overallPlannedQuantities ?? '-'}</td>
-                                    <td>{ms.achievedValues ?? '-'}</td>
-                                    <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
-                                    <td>
-                                      {ms.status && (
-                                        <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
-                                          {t(`projectActions.status${ms.status}`) || ms.status}
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td>{ms.remarks || '-'}</td>
+                                    {!isView && dmSavedMsEditId === ms.id ? (
+                                      <>
+                                        <td><input type="date" className="form-control form-control-sm" value={dmSavedMsEditForm.logDate} onChange={e => setDmSavedMsEditForm(f => ({...f, logDate: e.target.value}))} /></td>
+                                        <td><select className="form-select form-select-sm" value={dmSavedMsEditForm.quarterId} onChange={e => setDmSavedMsEditForm(f => ({...f, quarterId: e.target.value}))}><option value="">-</option>{quarters.map(q => <option key={q.id} value={q.id}>{q.quarter}</option>)}</select></td>
+                                        <td><input type="number" className="form-control form-control-sm" value={dmSavedMsEditForm.overallPlannedQuantities} onChange={e => setDmSavedMsEditForm(f => ({...f, overallPlannedQuantities: e.target.value}))} step="0.01" /></td>
+                                        <td><input type="number" className="form-control form-control-sm" value={dmSavedMsEditForm.achievedValues} onChange={e => setDmSavedMsEditForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" /></td>
+                                        <td>{dmSavedMsEditForm.overallPlannedQuantities && dmSavedMsEditForm.achievedValues ? `${Math.round((parseFloat(dmSavedMsEditForm.achievedValues) / parseFloat(dmSavedMsEditForm.overallPlannedQuantities)) * 10000) / 100}%` : '-'}</td>
+                                        <td><select className="form-select form-select-sm" value={dmSavedMsEditForm.status} onChange={e => setDmSavedMsEditForm(f => ({...f, status: e.target.value}))}><option value="">-</option>{['NotStarted','InProgress','Complete','Delayed','OnHold'].map(s => <option key={s} value={s}>{t(`projectActions.status${s}`) || s}</option>)}</select></td>
+                                        <td><input type="text" className="form-control form-control-sm" value={dmSavedMsEditForm.remarks} onChange={e => setDmSavedMsEditForm(f => ({...f, remarks: e.target.value}))} /></td>
+                                        <td>
+                                          <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-success p-1" onClick={() => handleDmSavedMsSave(item.id)}><FiCheck /></button>
+                                            <button className="btn btn-sm btn-secondary p-1" onClick={() => setDmSavedMsEditId(null)}><FiX /></button>
+                                          </div>
+                                        </td>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <td>{ms.logDate || '-'}</td>
+                                        <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.overallPlannedQuantities ?? '-'}</td>
+                                        <td>{ms.achievedValues ?? '-'}</td>
+                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>
+                                          {ms.status && (
+                                            <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>
+                                              {t(`projectActions.status${ms.status}`) || ms.status}
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td>{ms.remarks || '-'}</td>
+                                        {!isView && (
+                                          <td>
+                                            <div className="d-flex gap-1">
+                                              <button className="btn btn-sm btn-outline-primary p-1" onClick={() => startDmSavedMsEdit(ms)}><FiEdit2 /></button>
+                                              <button className="btn btn-sm btn-outline-danger p-1" onClick={() => handleDmSavedMilestoneDelete(ms.id, item.id)}><FiTrash2 /></button>
+                                            </div>
+                                          </td>
+                                        )}
+                                      </>
+                                    )}
                                   </tr>
                                 ))}
                               </tbody>
