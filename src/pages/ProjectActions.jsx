@@ -2867,7 +2867,7 @@ function ProjectActions() {
 
       <div className="card mb-4">
           <div className="card-header bg-white d-flex justify-content-between align-items-center">
-            <h6 className="mb-0"><FiClipboard className="me-2" />{t('projectActions.savedRecords')}</h6>
+            <h6 className="mb-0"><FiClipboard className="me-2" />{t('projectActions.designMonitoring')}</h6>
             <button className="btn btn-sm btn-outline-primary" onClick={loadAllDmRecords} disabled={dmAllLoading}>
               <FiRefreshCw className={`me-1 ${dmAllLoading ? 'spin' : ''}`} /> {t('common.refresh') || 'Refresh'}
             </button>
