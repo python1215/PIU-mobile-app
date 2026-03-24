@@ -2488,6 +2488,108 @@ function ProjectActions() {
     toast.success('PDF report downloaded');
   };
 
+  const exportDmPdf = () => {
+    const filtered = dmAllRecords.filter(r => {
+      if (dmYear && String(r.year?.id) !== String(dmYear)) return false;
+      if (dmProject) {
+        const recProjId = String(r.project?.projectId || r.projectId || '');
+        if (recProjId !== String(dmProject)) return false;
+      }
+      if (dmContractType && r.contractType !== dmContractType) return false;
+      if (dmContractRefNo && r.contractRefNo !== dmContractRefNo) return false;
+      if (dmActivityFilter) {
+        if (dmActivitySelected) {
+          if (r.activityDescription !== dmActivityFilter) return false;
+        } else {
+          if (!(r.activityDescription && r.activityDescription.toLowerCase().includes(dmActivityFilter.toLowerCase()))) return false;
+        }
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      toast.error(t('common.noData'));
+      return;
+    }
+
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('ROMEOT DIGITAL M&E SYSTEM', pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(13);
+    doc.text(t('projectActions.designMonitoring'), pageWidth / 2, 23, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+
+    const selYear = dmYears.find(y => String(y.id) === String(dmYear));
+    const selProj = projects.find(p => String(p.projectId) === String(dmProject));
+    const filterInfo = [];
+    if (selYear) filterInfo.push(`Year: ${selYear.profileYear}`);
+    if (selProj) filterInfo.push(`Project: ${selProj.project || selProj.projectId}`);
+    if (dmContractType) filterInfo.push(`Type: ${dmContractType === 'works' ? 'Works' : 'Goods & Services'}`);
+    if (dmContractRefNo) filterInfo.push(`Ref: ${dmContractRefNo}`);
+    doc.text(filterInfo.join('  |  ') || 'All Records', 14, 30);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 35);
+
+    let startY = 42;
+
+    filtered.forEach((rec, recIdx) => {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      if (startY > pageHeight - 50) {
+        doc.addPage();
+        startY = 15;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${recIdx + 1}. ${rec.activityDescription || '-'}`, 14, startY);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(7.5);
+      doc.text(`Activity ID: ${rec.activityId || '-'}  |  Contract: ${rec.contractRefNo || '-'}  |  Type: ${rec.contractType || '-'}  |  Rate: ${rec.rate != null ? rec.rate + '%' : '-'}  |  Unit: ${rec.unit || '-'}  |  Overall Planned Qty: ${rec.overallPlannedQuantities ?? '-'}`, 14, startY + 5);
+
+      const milestones = dmAllMilestones[rec.id] || [];
+      if (milestones.length > 0) {
+        const provQty = parseFloat(rec.overallPlannedQuantities) || 0;
+        autoTable(doc, {
+          head: [['Log Date', 'Quarter', t('projectActions.planQtyForPeriod'), t('projectActions.balanceToProvisionalQty'), 'Achieved', '% Plan vs Achieved', t('projectActions.overallProgressFromProvisionalQty'), 'Status', 'Remarks']],
+          body: milestones.map(ms => {
+            const msPlan = parseFloat(ms.overallPlannedQuantities) || 0;
+            const msAch = parseFloat(ms.achievedValues) || 0;
+            const balance = provQty > 0 ? Math.round((provQty - msPlan) * 100) / 100 : '-';
+            const progressPct = provQty > 0 ? Math.round((msAch / provQty) * 10000) / 100 : 0;
+            return [
+              ms.logDate || '-',
+              ms.quarter?.quarter || '-',
+              ms.overallPlannedQuantities ?? '-',
+              balance,
+              ms.achievedValues ?? '-',
+              ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-',
+              provQty > 0 ? `${progressPct}%` : '-',
+              ms.status || '-',
+              ms.remarks || '-'
+            ];
+          }),
+          startY: startY + 8,
+          styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+          headStyles: { fillColor: [67, 97, 238], textColor: 255, fontSize: 6, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          margin: { left: 10, right: 10 },
+          tableWidth: pageWidth - 20,
+        });
+        startY = doc.lastAutoTable.finalY + 10;
+      } else {
+        doc.setFontSize(7);
+        doc.text('No milestones recorded.', 18, startY + 10);
+        startY += 16;
+      }
+    });
+
+    doc.save(`Design_Progress_Monitoring_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF report downloaded');
+  };
+
   const handleDmProjectChange = (projId) => {
     setDmProject(projId);
     setDmContractType('');
@@ -2835,8 +2937,13 @@ function ProjectActions() {
   const renderDesignMonitoring = () => (
     <div>
       <div className="card mb-4">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h6 className="mb-0">{t('projectActions.designMonitoring')}</h6>
+          {dmAllRecords.length > 0 && (
+            <button className="btn btn-sm btn-light" onClick={exportDmPdf}>
+              <FiDownload className="me-1" /> {t('projectActions.exportPdf')}
+            </button>
+          )}
         </div>
         <div className="card-body">
           <div className="row g-3 mb-3">
