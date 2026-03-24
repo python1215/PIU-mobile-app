@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -503,6 +504,7 @@ public class ProjectActionsController {
     }
 
     @GetMapping("/design-monitoring")
+    @Transactional(readOnly = true)
     public List<DesignProgressMonitoring> getAllDesignMonitoring() {
         return designProgressMonitoringRepository.findAllByOrderByDateCreatedDesc();
     }
@@ -513,6 +515,7 @@ public class ProjectActionsController {
     }
 
     @GetMapping("/design-monitoring/filter")
+    @Transactional(readOnly = true)
     public List<DesignProgressMonitoring> getDesignMonitoringFiltered(
             @RequestParam String projectId,
             @RequestParam String contractType,
@@ -611,6 +614,7 @@ public class ProjectActionsController {
     }
 
     @GetMapping("/design-monitoring/{monitoringId}/milestones")
+    @Transactional(readOnly = true)
     public List<DesignMonitoringMilestone> getMilestones(@PathVariable Long monitoringId) {
         return designMonitoringMilestoneRepository.findByDesignProgressMonitoring_IdOrderByLogDateDesc(monitoringId);
     }

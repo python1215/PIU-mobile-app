@@ -1,5 +1,6 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ public class DesignMonitoringMilestone {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "design_progress_monitoring_id")
-    @JsonIgnoreProperties({"milestones", "hibernateLazyInitializer", "handler"})
+    @JsonIgnore
     private DesignProgressMonitoring designProgressMonitoring;
 
     @Column(name = "log_date")

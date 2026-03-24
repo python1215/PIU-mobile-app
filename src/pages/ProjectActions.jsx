@@ -2445,17 +2445,9 @@ function ProjectActions() {
     try {
       const res = await axios.get('/api/project-actions/design-monitoring');
       setDmAllRecords(res.data);
-      if (res.data.length > 0) {
-        const milestonePromises = res.data.map(mi =>
-          axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
-            .then(r => ({ id: mi.id, milestones: r.data }))
-            .catch(() => ({ id: mi.id, milestones: [] }))
-        );
-        const results = await Promise.all(milestonePromises);
-        const allMs = {};
-        results.forEach(r => { allMs[r.id] = r.milestones; });
-        setDmAllMilestones(allMs);
-      }
+      const allMs = {};
+      res.data.forEach(rec => { allMs[rec.id] = rec.milestones || []; });
+      setDmAllMilestones(allMs);
     } catch (e) {
       console.error('Error loading all DM records:', e);
     } finally {
