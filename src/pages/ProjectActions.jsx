@@ -1769,7 +1769,7 @@ function ProjectActions() {
                                 </button>
                               </div>
 
-                              {(spAllMilestones[rec.id] || []).length > 0 ? (
+                              {(spAllMilestones[rec.id] || []).length > 0 ? (<>
                                 <div className="table-responsive mb-2">
                                 <table className="table table-bordered table-sm mb-0" style={{fontSize:'clamp(0.6rem, 1vw, 0.8rem)'}}>
                                   <thead className="table-warning">
@@ -1874,7 +1874,7 @@ function ProjectActions() {
                                     </div>
                                   );
                                 })()}
-                              ) : (
+                              </>) : (
                                 <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>
                               )}
 
@@ -2007,7 +2007,7 @@ function ProjectActions() {
                           </button>
                         </div>
 
-                        {(spAllMilestones[item.id] || []).length > 0 ? (
+                        {(spAllMilestones[item.id] || []).length > 0 ? (<>
                           <div className="table-responsive mb-2">
                           <table className="table table-bordered table-sm mb-0" style={{fontSize:'0.8rem'}}>
                             <thead className="table-warning">
@@ -2113,7 +2113,7 @@ function ProjectActions() {
                               </div>
                             );
                           })()}
-                        ) : <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>}
+                        </>) : <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>}
 
                         {spShowMilestoneForm === item.id && (
                           <div className="card mb-2 border-warning">
