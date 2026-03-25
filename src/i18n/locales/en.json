@@ -585,6 +585,8 @@
     "selectQuarter": "Select Quarter",
     "selectStatus": "Select Status",
     "plannedValuesForPeriod": "Planned Values for the Period",
+    "prevPlannedValues": "Previously Planned Values",
+    "prevAchievedValues": "Previously Achieved Values",
     "balanceFromBoq": "Balance from BOQ",
     "achievedValueForPeriod": "Achieved Value for the Period",
     "achievedVsGlobalTargets": "% Achieved vs Global Targets"

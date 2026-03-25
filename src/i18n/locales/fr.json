@@ -585,6 +585,8 @@
     "selectQuarter": "Sélectionner Trimestre",
     "selectStatus": "Sélectionner Statut",
     "plannedValuesForPeriod": "Valeurs Prévues pour la Période",
+    "prevPlannedValues": "Valeurs Planifiées Précédentes",
+    "prevAchievedValues": "Valeurs Réalisées Précédentes",
     "balanceFromBoq": "Solde du BOQ",
     "achievedValueForPeriod": "Valeur Réalisée pour la Période",
     "achievedVsGlobalTargets": "% Réalisé vs Objectifs Globaux"

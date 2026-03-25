@@ -1770,12 +1770,20 @@ function ProjectActions() {
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevPlannedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (spAllMilestones[rec.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                      </div>
+                                      <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
                                         <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = rec.boqQuantities; const prevPlanned = (spAllMilestones[rec.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevAchievedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (spAllMilestones[rec.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
@@ -1943,12 +1951,20 @@ function ProjectActions() {
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
                                 </div>
                                 <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.prevPlannedValues')}</label>
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (spAllMilestones[item.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                </div>
+                                <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
                                   <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = item.boqQuantities; const prevPlanned = (spAllMilestones[item.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.prevAchievedValues')}</label>
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (spAllMilestones[item.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
