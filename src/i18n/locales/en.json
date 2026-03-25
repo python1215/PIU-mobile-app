@@ -581,7 +581,9 @@
     "statusOnHold": "On Hold",
     "statusIncomplete": "Incomplete",
     "statusStagnant": "Stagnant",
-    "statusCancelled": "Cancelled"
+    "statusCancelled": "Cancelled",
+    "selectQuarter": "Select Quarter",
+    "selectStatus": "Select Status"
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",
