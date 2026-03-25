@@ -1774,6 +1774,14 @@ function ProjectActions() {
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const a = parseFloat(spMilestoneForm.achievedValues); return (p > 0 && !isNaN(a)) ? `${Math.round((a / p) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = rec.boqQuantities; return (boq > 0 && !isNaN(a)) ? `${Math.round((a / boq) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('common.status')}</label>
                                         <select className="form-select form-select-sm" value={spMilestoneForm.status} onChange={e => setSpMilestoneForm(f => ({...f, status: e.target.value}))}>
                                           <option value="">{t('projectActions.selectStatus')}</option>
@@ -1928,6 +1936,14 @@ function ProjectActions() {
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const a = parseFloat(spMilestoneForm.achievedValues); return (p > 0 && !isNaN(a)) ? `${Math.round((a / p) * 10000) / 100}%` : '-'; })()} />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = item.boqQuantities; return (boq > 0 && !isNaN(a)) ? `${Math.round((a / boq) * 10000) / 100}%` : '-'; })()} />
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('common.status')}</label>
