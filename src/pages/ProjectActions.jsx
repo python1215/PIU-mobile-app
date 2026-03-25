@@ -1470,6 +1470,15 @@ function ProjectActions() {
         toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
         return;
       }
+      if (form.status === 'Complete') {
+        const prevAchieved = (spAllMilestones[form.supplyProgressId] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0);
+        const totalAchieved = prevAchieved + (parseFloat(form.achievedValues) || 0);
+        if (totalAchieved < boq) {
+          const balance = Math.round((boq - totalAchieved) * 100) / 100;
+          toast.error(t('projectActions.cannotCompleteAchievedLessThanBoq', { achieved: Math.round(totalAchieved * 100) / 100, boq, balance }));
+          return;
+        }
+      }
     }
     try {
       if (spEditingMilestone) {

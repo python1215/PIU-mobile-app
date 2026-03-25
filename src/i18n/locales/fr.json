@@ -590,7 +590,8 @@
     "balanceFromBoq": "Solde du BOQ",
     "achievedValueForPeriod": "Valeur Réalisée pour la Période",
     "achievedVsGlobalTargets": "% Réalisé vs Objectifs Globaux",
-    "plannedExceedsBoq": "Attention: Total des Valeurs Planifiées ({{total}}) dépasse la Quantité BOQ ({{boq}}). Veuillez ajuster."
+    "plannedExceedsBoq": "Attention: Total des Valeurs Planifiées ({{total}}) dépasse la Quantité BOQ ({{boq}}). Veuillez ajuster.",
+    "cannotCompleteAchievedLessThanBoq": "Impossible de définir le statut Complet. Total Réalisé ({{achieved}}) est inférieur à la Quantité BOQ ({{boq}}). Solde restant: {{balance}}."
   },
   "socialEnvironmental": {
     "title": "Social & Environnemental",
