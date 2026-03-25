@@ -1721,6 +1721,12 @@ function ProjectActions() {
                         <td>{rec.duration != null ? `${rec.duration} ${rec.durationUnit || 'days'}` : '-'}</td>
                         <td>
                           <div className="d-flex gap-1 flex-nowrap">
+                            <button className="btn btn-sm btn-outline-warning p-1" title={t('projectActions.addMilestone')} onClick={() => {
+                              setSpExpandedRows(prev => ({ ...prev, [rec.id]: true }));
+                              setSpShowMilestoneForm(rec.id);
+                              setSpEditingMilestone(null);
+                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+                            }}><FiPlus /></button>
                             <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openSpModal(rec, 'view')}><FiEye /></button>
                             <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openSpModal(rec, 'edit')}><FiEdit2 /></button>
                             <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteSpItem(rec.id)}><FiTrash2 /></button>
