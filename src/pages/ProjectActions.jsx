@@ -1771,7 +1771,7 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
-                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = rec.boqQuantities; return (boq != null && !isNaN(p)) ? Math.round((boq - p) * 100) / 100 : '-'; })()} />
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = rec.boqQuantities; const prevPlanned = (spAllMilestones[rec.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
@@ -1783,7 +1783,7 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
-                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = rec.boqQuantities; return (boq > 0 && !isNaN(a)) ? `${Math.round((a / boq) * 10000) / 100}%` : '-'; })()} />
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = rec.boqQuantities; const prevAchieved = (spAllMilestones[rec.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const totalAchieved = prevAchieved + (isNaN(a) ? 0 : a); return (boq > 0) ? `${Math.round((totalAchieved / boq) * 10000) / 100}%` : '-'; })()} />
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('common.status')}</label>
@@ -1822,10 +1822,12 @@ function ProjectActions() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {(spAllMilestones[rec.id] || []).map(ms => {
+                                    {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[rec.id] || []).map(ms => {
                                       const boqQty = rec.boqQuantities;
-                                      const balanceFromBoq = (ms.plannedValues != null && boqQty != null) ? Math.round((boqQty - ms.plannedValues) * 100) / 100 : null;
-                                      const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
+                                      cumPlanned += (ms.plannedValues || 0);
+                                      cumAchieved += (ms.achievedValues || 0);
+                                      const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                      const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
                                       return (
                                       <tr key={ms.id}>
                                         <td>{ms.logDate || '-'}</td>
@@ -1848,7 +1850,7 @@ function ProjectActions() {
                                           </div>
                                         </td>
                                       </tr>
-                                    );})}
+                                    );})})()}
                                   </tbody>
                                 </table>
                               ) : (
@@ -1942,7 +1944,7 @@ function ProjectActions() {
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
-                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = item.boqQuantities; return (boq != null && !isNaN(p)) ? Math.round((boq - p) * 100) / 100 : '-'; })()} />
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = item.boqQuantities; const prevPlanned = (spAllMilestones[item.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
@@ -1954,7 +1956,7 @@ function ProjectActions() {
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
-                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = item.boqQuantities; return (boq > 0 && !isNaN(a)) ? `${Math.round((a / boq) * 10000) / 100}%` : '-'; })()} />
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(spMilestoneForm.achievedValues); const boq = item.boqQuantities; const prevAchieved = (spAllMilestones[item.id] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const totalAchieved = prevAchieved + (isNaN(a) ? 0 : a); return (boq > 0) ? `${Math.round((totalAchieved / boq) * 10000) / 100}%` : '-'; })()} />
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('common.status')}</label>
@@ -1993,10 +1995,12 @@ function ProjectActions() {
                               </tr>
                             </thead>
                             <tbody>
-                              {(spAllMilestones[item.id] || []).map(ms => {
+                              {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[item.id] || []).map(ms => {
                                 const boqQty = item.boqQuantities;
-                                const balanceFromBoq = (ms.plannedValues != null && boqQty != null) ? Math.round((boqQty - ms.plannedValues) * 100) / 100 : null;
-                                const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
+                                cumPlanned += (ms.plannedValues || 0);
+                                cumAchieved += (ms.achievedValues || 0);
+                                const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
                                 return (
                                 <tr key={ms.id}>
                                   <td>{ms.logDate || '-'}</td>
@@ -2020,7 +2024,7 @@ function ProjectActions() {
                                   </td>
                                 </tr>
                               );
-                              })}
+                              })})()}
                             </tbody>
                           </table>
                         ) : <p className="text-muted small">{t('projectActions.noMilestones')}</p>}
