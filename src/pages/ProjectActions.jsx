@@ -1760,6 +1760,60 @@ function ProjectActions() {
                                 </button>
                               </div>
 
+                              {(spAllMilestones[rec.id] || []).length > 0 ? (
+                                <div className="table-responsive mb-2">
+                                <table className="table table-bordered table-sm mb-0" style={{fontSize:'clamp(0.6rem, 1vw, 0.8rem)'}}>
+                                  <thead className="table-warning">
+                                    <tr>
+                                      <th>{t('projectActions.logDate')}</th>
+                                      <th>{t('projectActions.quarter')}</th>
+                                      <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                      <th>{t('projectActions.balanceFromBoq')}</th>
+                                      <th>{t('projectActions.achievedValueForPeriod')}</th>
+                                      <th>{t('projectActions.plannedVsAchieved')}</th>
+                                      <th>{t('projectActions.achievedVsGlobalTargets')}</th>
+                                      <th>{t('common.status')}</th>
+                                      <th>{t('projectActions.remarks')}</th>
+                                      <th>{t('common.actions')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[rec.id] || []).map(ms => {
+                                      const boqQty = rec.boqQuantities;
+                                      cumPlanned += (ms.plannedValues || 0);
+                                      cumAchieved += (ms.achievedValues || 0);
+                                      const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                      const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
+                                      return (
+                                      <tr key={ms.id}>
+                                        <td>{ms.logDate || '-'}</td>
+                                        <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.plannedValues ?? '-'}</td>
+                                        <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
+                                        <td>{ms.achievedValues ?? '-'}</td>
+                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
+                                        <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                        <td>{ms.remarks || '-'}</td>
+                                        <td>
+                                          <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                              setSpShowMilestoneForm(rec.id);
+                                              setSpEditingMilestone(ms);
+                                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
+                                            }}><FiEdit2 /></button>
+                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );})})()}
+                                  </tbody>
+                                </table>
+                                </div>
+                              ) : (
+                                <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>
+                              )}
+
                               {spShowMilestoneForm === rec.id && (
                                 <div className="card mb-2 border-warning">
                                   <div className="card-body p-2">
@@ -1821,58 +1875,6 @@ function ProjectActions() {
                                     </div>
                                   </div>
                                 </div>
-                              )}
-
-                              {(spAllMilestones[rec.id] || []).length > 0 ? (
-                                <table className="table table-bordered table-sm mb-0" style={{fontSize:'clamp(0.6rem, 1vw, 0.8rem)'}}>
-                                  <thead className="table-warning">
-                                    <tr>
-                                      <th>{t('projectActions.logDate')}</th>
-                                      <th>{t('projectActions.quarter')}</th>
-                                      <th>{t('projectActions.plannedValuesForPeriod')}</th>
-                                      <th>{t('projectActions.balanceFromBoq')}</th>
-                                      <th>{t('projectActions.achievedValueForPeriod')}</th>
-                                      <th>{t('projectActions.plannedVsAchieved')}</th>
-                                      <th>{t('projectActions.achievedVsGlobalTargets')}</th>
-                                      <th>{t('common.status')}</th>
-                                      <th>{t('projectActions.remarks')}</th>
-                                      <th>{t('common.actions')}</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[rec.id] || []).map(ms => {
-                                      const boqQty = rec.boqQuantities;
-                                      cumPlanned += (ms.plannedValues || 0);
-                                      cumAchieved += (ms.achievedValues || 0);
-                                      const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
-                                      const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
-                                      return (
-                                      <tr key={ms.id}>
-                                        <td>{ms.logDate || '-'}</td>
-                                        <td>{ms.quarter?.quarter || '-'}</td>
-                                        <td>{ms.plannedValues ?? '-'}</td>
-                                        <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
-                                        <td>{ms.achievedValues ?? '-'}</td>
-                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
-                                        <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
-                                        <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
-                                        <td>{ms.remarks || '-'}</td>
-                                        <td>
-                                          <div className="d-flex gap-1">
-                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
-                                              setSpShowMilestoneForm(rec.id);
-                                              setSpEditingMilestone(ms);
-                                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
-                                            }}><FiEdit2 /></button>
-                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    );})})()}
-                                  </tbody>
-                                </table>
-                              ) : (
-                                <p className="text-muted small mb-0">{t('projectActions.noMilestones')}</p>
                               )}
                             </div>
                           </td>
@@ -1941,6 +1943,59 @@ function ProjectActions() {
                           </button>
                         </div>
 
+                        {(spAllMilestones[item.id] || []).length > 0 ? (
+                          <div className="table-responsive mb-2">
+                          <table className="table table-bordered table-sm mb-0" style={{fontSize:'0.8rem'}}>
+                            <thead className="table-warning">
+                              <tr>
+                                <th>{t('projectActions.logDate')}</th>
+                                <th>{t('projectActions.quarter')}</th>
+                                <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                <th>{t('projectActions.balanceFromBoq')}</th>
+                                <th>{t('projectActions.achievedValueForPeriod')}</th>
+                                <th>{t('projectActions.plannedVsAchieved')}</th>
+                                <th>{t('projectActions.achievedVsGlobalTargets')}</th>
+                                <th>{t('common.status')}</th>
+                                <th>{t('projectActions.remarks')}</th>
+                                <th>{t('common.actions')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[item.id] || []).map(ms => {
+                                const boqQty = item.boqQuantities;
+                                cumPlanned += (ms.plannedValues || 0);
+                                cumAchieved += (ms.achievedValues || 0);
+                                const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
+                                return (
+                                <tr key={ms.id}>
+                                  <td>{ms.logDate || '-'}</td>
+                                  <td>{ms.quarter?.quarter || '-'}</td>
+                                  <td>{ms.plannedValues ?? '-'}</td>
+                                  <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
+                                  <td>{ms.achievedValues ?? '-'}</td>
+                                  <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                  <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
+                                  <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                  <td>{ms.remarks || '-'}</td>
+                                  <td>
+                                    <div className="d-flex gap-1">
+                                      <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                        setSpShowMilestoneForm(item.id);
+                                        setSpEditingMilestone(ms);
+                                        setSpMilestoneForm({ supplyProgressId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
+                                      }}><FiEdit2 /></button>
+                                      <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                              })})()}
+                            </tbody>
+                          </table>
+                          </div>
+                        ) : <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>}
+
                         {spShowMilestoneForm === item.id && (
                           <div className="card mb-2 border-warning">
                             <div className="card-body p-2">
@@ -2003,57 +2058,6 @@ function ProjectActions() {
                             </div>
                           </div>
                         )}
-
-                        {(spAllMilestones[item.id] || []).length > 0 ? (
-                          <table className="table table-bordered table-sm" style={{fontSize:'0.8rem'}}>
-                            <thead className="table-warning">
-                              <tr>
-                                <th>{t('projectActions.logDate')}</th>
-                                <th>{t('projectActions.quarter')}</th>
-                                <th>{t('projectActions.plannedValuesForPeriod')}</th>
-                                <th>{t('projectActions.balanceFromBoq')}</th>
-                                <th>{t('projectActions.achievedValueForPeriod')}</th>
-                                <th>{t('projectActions.plannedVsAchieved')}</th>
-                                <th>{t('projectActions.achievedVsGlobalTargets')}</th>
-                                <th>{t('common.status')}</th>
-                                <th>{t('projectActions.remarks')}</th>
-                                <th>{t('common.actions')}</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(() => { let cumPlanned = 0; let cumAchieved = 0; return (spAllMilestones[item.id] || []).map(ms => {
-                                const boqQty = item.boqQuantities;
-                                cumPlanned += (ms.plannedValues || 0);
-                                cumAchieved += (ms.achievedValues || 0);
-                                const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
-                                const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
-                                return (
-                                <tr key={ms.id}>
-                                  <td>{ms.logDate || '-'}</td>
-                                  <td>{ms.quarter?.quarter || '-'}</td>
-                                  <td>{ms.plannedValues ?? '-'}</td>
-                                  <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
-                                  <td>{ms.achievedValues ?? '-'}</td>
-                                  <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
-                                  <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
-                                  <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
-                                  <td>{ms.remarks || '-'}</td>
-                                  <td>
-                                    <div className="d-flex gap-1">
-                                      <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
-                                        setSpShowMilestoneForm(item.id);
-                                        setSpEditingMilestone(ms);
-                                        setSpMilestoneForm({ supplyProgressId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
-                                      }}><FiEdit2 /></button>
-                                      <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                              })})()}
-                            </tbody>
-                          </table>
-                        ) : <p className="text-muted small">{t('projectActions.noMilestones')}</p>}
                       </div>
                     </div>
                   );
