@@ -1615,8 +1615,8 @@ function ProjectActions() {
                     <th style={{minWidth:'70px'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{minWidth:'100px'}}>{t('projectActions.unit')}</th>
                     <th style={{minWidth:'90px'}}>{t('projectActions.boqQty')}</th>
-                    <th style={{minWidth:'100px'}}>{t('projectActions.startDate')}</th>
-                    <th style={{minWidth:'100px'}}>{t('projectActions.endDate')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.activityStartDate')}</th>
+                    <th style={{minWidth:'100px'}}>{t('projectActions.activityEndDate')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.duration')}</th>
                     <th style={{minWidth:'100px'}}>{t('projectActions.observation')}</th>
                     <th style={{width:'40px'}}></th>
@@ -1694,8 +1694,8 @@ function ProjectActions() {
                     <th>{t('projectActions.ratePercent')}</th>
                     <th>{t('projectActions.unit')}</th>
                     <th>{t('projectActions.boqQty')}</th>
-                    <th>{t('projectActions.startDate')}</th>
-                    <th>{t('projectActions.endDate')}</th>
+                    <th>{t('projectActions.activityStartDate')}</th>
+                    <th>{t('projectActions.activityEndDate')}</th>
                     <th>{t('projectActions.duration')}</th>
                     <th>{t('common.actions')}</th>
                   </tr>
@@ -1857,8 +1857,8 @@ function ProjectActions() {
                       <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>{isView ? <p className="form-control-plaintext">{item.rate != null ? `${item.rate}%` : '-'}</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setSpEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}</div>
                       <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.unit')}</label>{isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setSpEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}</div>
                       <div className="col-md-2"><label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>{isView ? <p className="form-control-plaintext">{item.boqQuantities ?? '-'}</p> : <input type="number" className="form-control" value={form.boqQuantities} onChange={e => setSpEditForm(f => ({...f, boqQuantities: e.target.value}))} step="0.01" />}</div>
-                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.startDate')}</label>{isView ? <p className="form-control-plaintext">{item.startDate || '-'}</p> : <input type="date" className="form-control" value={form.startDate} onChange={e => setSpEditForm(f => ({...f, startDate: e.target.value}))} />}</div>
-                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.endDate')}</label>{isView ? <p className="form-control-plaintext">{item.endDate || '-'}</p> : <input type="date" className="form-control" value={form.endDate} onChange={e => setSpEditForm(f => ({...f, endDate: e.target.value}))} />}</div>
+                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.activityStartDate')}</label>{isView ? <p className="form-control-plaintext">{item.startDate || '-'}</p> : <input type="date" className="form-control" value={form.startDate} onChange={e => setSpEditForm(f => ({...f, startDate: e.target.value}))} />}</div>
+                      <div className="col-md-3"><label className="form-label fw-semibold">{t('projectActions.activityEndDate')}</label>{isView ? <p className="form-control-plaintext">{item.endDate || '-'}</p> : <input type="date" className="form-control" value={form.endDate} onChange={e => setSpEditForm(f => ({...f, endDate: e.target.value}))} />}</div>
                       <div className="col-md-3">
                         <label className="form-label fw-semibold">{t('projectActions.duration')}</label>
                         {isView ? <p className="form-control-plaintext">{item.duration != null ? `${item.duration} ${item.durationUnit || 'days'}` : '-'}</p> : (
