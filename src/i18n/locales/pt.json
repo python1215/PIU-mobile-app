@@ -590,7 +590,7 @@
     "balanceFromBoq": "Saldo do BOQ",
     "achievedValueForPeriod": "Valor Alcançado para o Período",
     "achievedVsGlobalTargets": "% Alcançado vs Metas Globais",
-    "plannedExceedsBoq": "Atenção: Total dos Valores Planejados ({total}) excede a Quantidade BOQ ({boq}). Por favor ajuste."
+    "plannedExceedsBoq": "Atenção: Total dos Valores Planejados ({{total}}) excede a Quantidade BOQ ({{boq}}). Por favor ajuste."
   },
   "socialEnvironmental": {
     "title": "Social & Ambiental",
