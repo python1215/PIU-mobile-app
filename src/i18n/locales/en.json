@@ -591,7 +591,13 @@
     "achievedValueForPeriod": "Achieved Value for the Period",
     "achievedVsGlobalTargets": "% Achieved vs Global Targets",
     "plannedExceedsBoq": "Warning: Total Planned Values ({{total}}) exceeds BOQ Qty ({{boq}}). Please adjust.",
-    "cannotCompleteAchievedLessThanBoq": "Cannot set status to Complete. Total Achieved ({{achieved}}) is less than BOQ Qty ({{boq}}). Remaining balance: {{balance}}."
+    "cannotCompleteAchievedLessThanBoq": "Cannot set status to Complete. Total Achieved ({{achieved}}) is less than BOQ Qty ({{boq}}). Remaining balance: {{balance}}.",
+    "progress": "Progress",
+    "timeElapsed": "Time Elapsed",
+    "daysRemaining": "Days Remaining",
+    "overdueDays": "Overdue Days",
+    "days": "days",
+    "completed": "Completed"
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",

@@ -1819,6 +1819,61 @@ function ProjectActions() {
                                   </tbody>
                                 </table>
                                 </div>
+                                {(() => {
+                                  const boqQty = rec.boqQuantities;
+                                  const totalAchieved = (spAllMilestones[rec.id] || []).reduce((s, m) => s + (m.achievedValues || 0), 0);
+                                  const progressPct = (boqQty != null && boqQty > 0) ? Math.min(Math.round((totalAchieved / boqQty) * 10000) / 100, 100) : 0;
+                                  const lastStatus = (spAllMilestones[rec.id] || []).slice(-1)[0]?.status;
+                                  const isComplete = lastStatus === 'Complete';
+                                  const endDate = rec.endDate;
+                                  const startDate = rec.startDate;
+                                  const today = new Date();
+                                  today.setHours(0,0,0,0);
+                                  const endD = endDate ? new Date(endDate) : null;
+                                  const startD = startDate ? new Date(startDate) : null;
+                                  if (endD) endD.setHours(0,0,0,0);
+                                  if (startD) startD.setHours(0,0,0,0);
+                                  const daysRemaining = endD ? Math.ceil((endD - today) / 86400000) : null;
+                                  const timeElapsed = (startD && endD) ? Math.max(0, Math.ceil((today - startD) / 86400000)) : null;
+                                  const overdueDays = (!isComplete && endD && today > endD) ? Math.ceil((today - endD) / 86400000) : null;
+                                  const barColor = progressPct >= 100 ? '#28a745' : progressPct >= 50 ? '#ffc107' : '#dc3545';
+                                  return (
+                                    <div className="d-flex flex-wrap align-items-center gap-3 mt-2 p-2 bg-white rounded border" style={{fontSize:'0.8rem'}}>
+                                      <div className="flex-grow-1" style={{minWidth:'200px'}}>
+                                        <div className="d-flex justify-content-between mb-1">
+                                          <strong>{t('projectActions.progress')}</strong>
+                                          <span className="fw-bold" style={{color: barColor}}>{progressPct}%</span>
+                                        </div>
+                                        <div className="progress" style={{height:'10px'}}>
+                                          <div className="progress-bar" role="progressbar" style={{width:`${progressPct}%`, backgroundColor: barColor}} aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                      </div>
+                                      {timeElapsed != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.timeElapsed')}</small>
+                                          <strong className="text-primary">{timeElapsed} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {daysRemaining != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.daysRemaining')}</small>
+                                          <strong className={daysRemaining >= 0 ? 'text-success' : 'text-danger'}>{daysRemaining >= 0 ? daysRemaining : 0} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {overdueDays != null && overdueDays > 0 && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.overdueDays')}</small>
+                                          <strong className="text-danger">{overdueDays} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {isComplete && (
+                                        <div className="text-center px-2">
+                                          <span className="badge bg-success">{t('projectActions.completed')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               ) : (
                                 <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>
                               )}
@@ -2003,6 +2058,61 @@ function ProjectActions() {
                             </tbody>
                           </table>
                           </div>
+                          {(() => {
+                            const boqQty = item.boqQuantities;
+                            const totalAchieved = (spAllMilestones[item.id] || []).reduce((s, m) => s + (m.achievedValues || 0), 0);
+                            const progressPct = (boqQty != null && boqQty > 0) ? Math.min(Math.round((totalAchieved / boqQty) * 10000) / 100, 100) : 0;
+                            const lastStatus = (spAllMilestones[item.id] || []).slice(-1)[0]?.status;
+                            const isComplete = lastStatus === 'Complete';
+                            const endDate = item.endDate;
+                            const startDate = item.startDate;
+                            const today = new Date();
+                            today.setHours(0,0,0,0);
+                            const endD = endDate ? new Date(endDate) : null;
+                            const startD = startDate ? new Date(startDate) : null;
+                            if (endD) endD.setHours(0,0,0,0);
+                            if (startD) startD.setHours(0,0,0,0);
+                            const daysRemaining = endD ? Math.ceil((endD - today) / 86400000) : null;
+                            const timeElapsed = (startD && endD) ? Math.max(0, Math.ceil((today - startD) / 86400000)) : null;
+                            const overdueDays = (!isComplete && endD && today > endD) ? Math.ceil((today - endD) / 86400000) : null;
+                            const barColor = progressPct >= 100 ? '#28a745' : progressPct >= 50 ? '#ffc107' : '#dc3545';
+                            return (
+                              <div className="d-flex flex-wrap align-items-center gap-3 mt-2 p-2 bg-white rounded border" style={{fontSize:'0.8rem'}}>
+                                <div className="flex-grow-1" style={{minWidth:'200px'}}>
+                                  <div className="d-flex justify-content-between mb-1">
+                                    <strong>{t('projectActions.progress')}</strong>
+                                    <span className="fw-bold" style={{color: barColor}}>{progressPct}%</span>
+                                  </div>
+                                  <div className="progress" style={{height:'10px'}}>
+                                    <div className="progress-bar" role="progressbar" style={{width:`${progressPct}%`, backgroundColor: barColor}} aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100"></div>
+                                  </div>
+                                </div>
+                                {timeElapsed != null && (
+                                  <div className="text-center px-2">
+                                    <small className="text-muted d-block">{t('projectActions.timeElapsed')}</small>
+                                    <strong className="text-primary">{timeElapsed} {t('projectActions.days')}</strong>
+                                  </div>
+                                )}
+                                {daysRemaining != null && (
+                                  <div className="text-center px-2">
+                                    <small className="text-muted d-block">{t('projectActions.daysRemaining')}</small>
+                                    <strong className={daysRemaining >= 0 ? 'text-success' : 'text-danger'}>{daysRemaining >= 0 ? daysRemaining : 0} {t('projectActions.days')}</strong>
+                                  </div>
+                                )}
+                                {overdueDays != null && overdueDays > 0 && (
+                                  <div className="text-center px-2">
+                                    <small className="text-muted d-block">{t('projectActions.overdueDays')}</small>
+                                    <strong className="text-danger">{overdueDays} {t('projectActions.days')}</strong>
+                                  </div>
+                                )}
+                                {isComplete && (
+                                  <div className="text-center px-2">
+                                    <span className="badge bg-success">{t('projectActions.completed')}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                         ) : <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>}
 
                         {spShowMilestoneForm === item.id && (
