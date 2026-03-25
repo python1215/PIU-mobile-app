@@ -1461,6 +1461,16 @@ function ProjectActions() {
   const handleSpSaveMilestone = async () => {
     const form = spMilestoneForm;
     if (!form.supplyProgressId || !form.logDate) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    const parentRec = spAllRecords.find(r => r.id === form.supplyProgressId);
+    const boq = parentRec?.boqQuantities;
+    if (boq != null && boq > 0) {
+      const prevPlanned = (spAllMilestones[form.supplyProgressId] || []).filter(m => !spEditingMilestone || m.id !== spEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0);
+      const totalPlanned = prevPlanned + (parseFloat(form.plannedValues) || 0);
+      if (totalPlanned > boq) {
+        toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
+        return;
+      }
+    }
     try {
       if (spEditingMilestone) {
         await axios.put(`/api/project-actions/supply-progress/milestones/${spEditingMilestone.id}`, {

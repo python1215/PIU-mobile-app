@@ -589,7 +589,8 @@
     "prevAchievedValues": "Previously Achieved Values",
     "balanceFromBoq": "Balance from BOQ",
     "achievedValueForPeriod": "Achieved Value for the Period",
-    "achievedVsGlobalTargets": "% Achieved vs Global Targets"
+    "achievedVsGlobalTargets": "% Achieved vs Global Targets",
+    "plannedExceedsBoq": "Warning: Total Planned Values ({total}) exceeds BOQ Qty ({boq}). Please adjust."
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",
