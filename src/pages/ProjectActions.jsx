@@ -1770,6 +1770,10 @@ function ProjectActions() {
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = rec.boqQuantities; return (boq != null && !isNaN(p)) ? Math.round((boq - p) * 100) / 100 : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
                                       </div>
@@ -1808,6 +1812,7 @@ function ProjectActions() {
                                       <th>{t('projectActions.logDate')}</th>
                                       <th>{t('projectActions.quarter')}</th>
                                       <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                      <th>{t('projectActions.balanceFromBoq')}</th>
                                       <th>{t('projectActions.achievedValueForPeriod')}</th>
                                       <th>{t('projectActions.plannedVsAchieved')}</th>
                                       <th>{t('projectActions.achievedVsGlobalTargets')}</th>
@@ -1819,12 +1824,14 @@ function ProjectActions() {
                                   <tbody>
                                     {(spAllMilestones[rec.id] || []).map(ms => {
                                       const boqQty = rec.boqQuantities;
+                                      const balanceFromBoq = (ms.plannedValues != null && boqQty != null) ? Math.round((boqQty - ms.plannedValues) * 100) / 100 : null;
                                       const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
                                       return (
                                       <tr key={ms.id}>
                                         <td>{ms.logDate || '-'}</td>
                                         <td>{ms.quarter?.quarter || '-'}</td>
                                         <td>{ms.plannedValues ?? '-'}</td>
+                                        <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
                                         <td>{ms.achievedValues ?? '-'}</td>
                                         <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
                                         <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
@@ -1934,6 +1941,10 @@ function ProjectActions() {
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
                                 </div>
                                 <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
+                                  <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(spMilestoneForm.plannedValues); const boq = item.boqQuantities; return (boq != null && !isNaN(p)) ? Math.round((boq - p) * 100) / 100 : '-'; })()} />
+                                </div>
+                                <div className="col-md-2">
                                   <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
                                 </div>
@@ -1972,6 +1983,7 @@ function ProjectActions() {
                                 <th>{t('projectActions.logDate')}</th>
                                 <th>{t('projectActions.quarter')}</th>
                                 <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                <th>{t('projectActions.balanceFromBoq')}</th>
                                 <th>{t('projectActions.achievedValueForPeriod')}</th>
                                 <th>{t('projectActions.plannedVsAchieved')}</th>
                                 <th>{t('projectActions.achievedVsGlobalTargets')}</th>
@@ -1983,12 +1995,14 @@ function ProjectActions() {
                             <tbody>
                               {(spAllMilestones[item.id] || []).map(ms => {
                                 const boqQty = item.boqQuantities;
+                                const balanceFromBoq = (ms.plannedValues != null && boqQty != null) ? Math.round((boqQty - ms.plannedValues) * 100) / 100 : null;
                                 const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
                                 return (
                                 <tr key={ms.id}>
                                   <td>{ms.logDate || '-'}</td>
                                   <td>{ms.quarter?.quarter || '-'}</td>
                                   <td>{ms.plannedValues ?? '-'}</td>
+                                  <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
                                   <td>{ms.achievedValues ?? '-'}</td>
                                   <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
                                   <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>

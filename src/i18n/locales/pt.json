@@ -585,6 +585,7 @@
     "selectQuarter": "Selecionar Trimestre",
     "selectStatus": "Selecionar Status",
     "plannedValuesForPeriod": "Valores Planejados para o Período",
+    "balanceFromBoq": "Saldo do BOQ",
     "achievedValueForPeriod": "Valor Alcançado para o Período",
     "achievedVsGlobalTargets": "% Alcançado vs Metas Globais"
   },
