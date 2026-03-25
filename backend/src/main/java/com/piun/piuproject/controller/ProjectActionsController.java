@@ -469,9 +469,8 @@ public class ProjectActionsController {
             .map(sp -> {
                 milestone.setSupplyProgress(sp);
                 milestone.setDateCreated(java.time.LocalDateTime.now());
-                Double boq = sp.getBoqQuantities();
-                if (milestone.getAchievedValues() != null && boq != null && boq > 0) {
-                    double pct = (milestone.getAchievedValues() / boq) * 100;
+                if (milestone.getAchievedValues() != null && milestone.getPlannedValues() != null && milestone.getPlannedValues() > 0) {
+                    double pct = (milestone.getAchievedValues() / milestone.getPlannedValues()) * 100;
                     milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
                 }
                 return ResponseEntity.ok(supplyMilestoneRepository.save(milestone));
@@ -487,14 +486,13 @@ public class ProjectActionsController {
             .map(m -> {
                 m.setLogDate(details.getLogDate());
                 m.setQuarter(details.getQuarter());
+                m.setPlannedValues(details.getPlannedValues());
                 m.setAchievedValues(details.getAchievedValues());
                 m.setStatus(details.getStatus());
                 m.setAttachmentPath(details.getAttachmentPath());
                 m.setRemarks(details.getRemarks());
-                SupplyProgress sp = m.getSupplyProgress();
-                Double boq = sp != null ? sp.getBoqQuantities() : null;
-                if (details.getAchievedValues() != null && boq != null && boq > 0) {
-                    double pct = (details.getAchievedValues() / boq) * 100;
+                if (details.getAchievedValues() != null && details.getPlannedValues() != null && details.getPlannedValues() > 0) {
+                    double pct = (details.getAchievedValues() / details.getPlannedValues()) * 100;
                     m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
                 }
                 return ResponseEntity.ok(supplyMilestoneRepository.save(m));

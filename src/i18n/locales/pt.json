@@ -583,7 +583,10 @@
     "statusStagnant": "Estagnado",
     "statusCancelled": "Cancelado",
     "selectQuarter": "Selecionar Trimestre",
-    "selectStatus": "Selecionar Status"
+    "selectStatus": "Selecionar Status",
+    "plannedValuesForPeriod": "Valores Planejados para o Período",
+    "achievedValueForPeriod": "Valor Alcançado para o Período",
+    "achievedVsGlobalTargets": "% Alcançado vs Metas Globais"
   },
   "socialEnvironmental": {
     "title": "Social & Ambiental",

@@ -583,7 +583,10 @@
     "statusStagnant": "Stagnant",
     "statusCancelled": "Cancelled",
     "selectQuarter": "Select Quarter",
-    "selectStatus": "Select Status"
+    "selectStatus": "Select Status",
+    "plannedValuesForPeriod": "Planned Values for the Period",
+    "achievedValueForPeriod": "Achieved Value for the Period",
+    "achievedVsGlobalTargets": "% Achieved vs Global Targets"
   },
   "socialEnvironmental": {
     "title": "Social & Environmental",

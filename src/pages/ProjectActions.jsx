@@ -115,7 +115,7 @@ function ProjectActions() {
   const [spAllMilestones, setSpAllMilestones] = useState({});
   const [spAllLoading, setSpAllLoading] = useState(false);
   const [spExpandedRows, setSpExpandedRows] = useState({});
-  const [spMilestoneForm, setSpMilestoneForm] = useState({ supplyProgressId: null, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+  const [spMilestoneForm, setSpMilestoneForm] = useState({ supplyProgressId: null, logDate: '', quarterId: '', plannedValues: '', achievedValues: '', status: '', remarks: '' });
   const [spShowMilestoneForm, setSpShowMilestoneForm] = useState(null);
   const [spEditingMilestone, setSpEditingMilestone] = useState(null);
 
@@ -1466,6 +1466,7 @@ function ProjectActions() {
         await axios.put(`/api/project-actions/supply-progress/milestones/${spEditingMilestone.id}`, {
           logDate: form.logDate,
           quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+          plannedValues: parseFloat(form.plannedValues) || 0,
           achievedValues: parseFloat(form.achievedValues) || 0,
           status: form.status, remarks: form.remarks
         });
@@ -1474,12 +1475,13 @@ function ProjectActions() {
         await axios.post(`/api/project-actions/supply-progress/${form.supplyProgressId}/milestones`, {
           logDate: form.logDate,
           quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+          plannedValues: parseFloat(form.plannedValues) || 0,
           achievedValues: parseFloat(form.achievedValues) || 0,
           status: form.status, remarks: form.remarks
         });
         toast.success(t('projectActions.milestoneSaved'));
       }
-      setSpMilestoneForm({ supplyProgressId: null, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+      setSpMilestoneForm({ supplyProgressId: null, logDate: '', quarterId: '', plannedValues: '', achievedValues: '', status: '', remarks: '' });
       setSpShowMilestoneForm(null);
       setSpEditingMilestone(null);
       loadAllSpRecords();
@@ -1725,7 +1727,7 @@ function ProjectActions() {
                               setSpExpandedRows(prev => ({ ...prev, [rec.id]: true }));
                               setSpShowMilestoneForm(rec.id);
                               setSpEditingMilestone(null);
-                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', plannedValues: '', achievedValues: '', status: '', remarks: '' });
                             }}><FiPlus /></button>
                             <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openSpModal(rec, 'view')}><FiEye /></button>
                             <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openSpModal(rec, 'edit')}><FiEdit2 /></button>
@@ -1742,7 +1744,7 @@ function ProjectActions() {
                                 <button className="btn btn-sm btn-warning" onClick={() => {
                                   setSpShowMilestoneForm(rec.id);
                                   setSpEditingMilestone(null);
-                                  setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+                                  setSpMilestoneForm({ supplyProgressId: rec.id, logDate: '', quarterId: '', plannedValues: '', achievedValues: '', status: '', remarks: '' });
                                 }}>
                                   <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
                                 </button>
@@ -1764,7 +1766,11 @@ function ProjectActions() {
                                         </select>
                                       </div>
                                       <div className="col-md-2">
-                                        <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedValuesForPeriod')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                         <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
@@ -1793,20 +1799,27 @@ function ProjectActions() {
                                     <tr>
                                       <th>{t('projectActions.logDate')}</th>
                                       <th>{t('projectActions.quarter')}</th>
-                                      <th>{t('projectActions.achievedValues')}</th>
+                                      <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                      <th>{t('projectActions.achievedValueForPeriod')}</th>
                                       <th>{t('projectActions.plannedVsAchieved')}</th>
+                                      <th>{t('projectActions.achievedVsGlobalTargets')}</th>
                                       <th>{t('common.status')}</th>
                                       <th>{t('projectActions.remarks')}</th>
                                       <th>{t('common.actions')}</th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {(spAllMilestones[rec.id] || []).map(ms => (
+                                    {(spAllMilestones[rec.id] || []).map(ms => {
+                                      const boqQty = rec.boqQuantities;
+                                      const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
+                                      return (
                                       <tr key={ms.id}>
                                         <td>{ms.logDate || '-'}</td>
                                         <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.plannedValues ?? '-'}</td>
                                         <td>{ms.achievedValues ?? '-'}</td>
                                         <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
                                         <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
                                         <td>{ms.remarks || '-'}</td>
                                         <td>
@@ -1814,13 +1827,13 @@ function ProjectActions() {
                                             <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
                                               setSpShowMilestoneForm(rec.id);
                                               setSpEditingMilestone(ms);
-                                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
+                                              setSpMilestoneForm({ supplyProgressId: rec.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
                                             }}><FiEdit2 /></button>
                                             <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
                                           </div>
                                         </td>
                                       </tr>
-                                    ))}
+                                    );})}
                                   </tbody>
                                 </table>
                               ) : (
@@ -1887,7 +1900,7 @@ function ProjectActions() {
                           <button className="btn btn-sm btn-warning" onClick={() => {
                             setSpShowMilestoneForm(item.id);
                             setSpEditingMilestone(null);
-                            setSpMilestoneForm({ supplyProgressId: item.id, logDate: '', quarterId: '', achievedValues: '', status: '', remarks: '' });
+                            setSpMilestoneForm({ supplyProgressId: item.id, logDate: '', quarterId: '', plannedValues: '', achievedValues: '', status: '', remarks: '' });
                           }}>
                             <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
                           </button>
@@ -1909,7 +1922,11 @@ function ProjectActions() {
                                   </select>
                                 </div>
                                 <div className="col-md-2">
-                                  <label className="form-label small fw-semibold">{t('projectActions.achievedValues')}</label>
+                                  <label className="form-label small fw-semibold">{t('projectActions.plannedValuesForPeriod')}</label>
+                                  <input type="number" className="form-control form-control-sm" value={spMilestoneForm.plannedValues} onChange={e => setSpMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                   <input type="number" className="form-control form-control-sm" value={spMilestoneForm.achievedValues} onChange={e => setSpMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
                                 </div>
                                 <div className="col-md-2">
@@ -1938,20 +1955,27 @@ function ProjectActions() {
                               <tr>
                                 <th>{t('projectActions.logDate')}</th>
                                 <th>{t('projectActions.quarter')}</th>
-                                <th>{t('projectActions.achievedValues')}</th>
+                                <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                <th>{t('projectActions.achievedValueForPeriod')}</th>
                                 <th>{t('projectActions.plannedVsAchieved')}</th>
+                                <th>{t('projectActions.achievedVsGlobalTargets')}</th>
                                 <th>{t('common.status')}</th>
                                 <th>{t('projectActions.remarks')}</th>
                                 <th>{t('common.actions')}</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {(spAllMilestones[item.id] || []).map(ms => (
+                              {(spAllMilestones[item.id] || []).map(ms => {
+                                const boqQty = item.boqQuantities;
+                                const achievedVsGlobal = (ms.achievedValues != null && boqQty != null && boqQty > 0) ? Math.round((ms.achievedValues / boqQty) * 10000) / 100 : null;
+                                return (
                                 <tr key={ms.id}>
                                   <td>{ms.logDate || '-'}</td>
                                   <td>{ms.quarter?.quarter || '-'}</td>
+                                  <td>{ms.plannedValues ?? '-'}</td>
                                   <td>{ms.achievedValues ?? '-'}</td>
                                   <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                  <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
                                   <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
                                   <td>{ms.remarks || '-'}</td>
                                   <td>
@@ -1959,13 +1983,14 @@ function ProjectActions() {
                                       <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
                                         setSpShowMilestoneForm(item.id);
                                         setSpEditingMilestone(ms);
-                                        setSpMilestoneForm({ supplyProgressId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
+                                        setSpMilestoneForm({ supplyProgressId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', remarks: ms.remarks || '' });
                                       }}><FiEdit2 /></button>
                                       <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteSpMilestone(ms.id)}><FiTrash2 /></button>
                                     </div>
                                   </td>
                                 </tr>
-                              ))}
+                              );
+                              })}
                             </tbody>
                           </table>
                         ) : <p className="text-muted small">{t('projectActions.noMilestones')}</p>}

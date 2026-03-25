@@ -27,6 +27,9 @@ public class SupplyMonitoringMilestone {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Quarter quarter;
 
+    @Column(name = "planned_values")
+    private Double plannedValues;
+
     @Column(name = "achieved_values")
     private Double achievedValues;
 
@@ -55,6 +58,8 @@ public class SupplyMonitoringMilestone {
     public void setLogDate(LocalDate logDate) { this.logDate = logDate; }
     public Quarter getQuarter() { return quarter; }
     public void setQuarter(Quarter quarter) { this.quarter = quarter; }
+    public Double getPlannedValues() { return plannedValues; }
+    public void setPlannedValues(Double plannedValues) { this.plannedValues = plannedValues; }
     public Double getAchievedValues() { return achievedValues; }
     public void setAchievedValues(Double achievedValues) { this.achievedValues = achievedValues; }
     public Double getPlannedVsAchievedPct() { return plannedVsAchievedPct; }
