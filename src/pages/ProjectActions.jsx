@@ -2432,7 +2432,7 @@ function ProjectActions() {
                   {isView ? <p className="form-control-plaintext">{item.contractRefNo || '-'}</p> : <input type="text" className="form-control" value={form.contractRefNo} onChange={e => setInstEditForm(f => ({...f, contractRefNo: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.activity')}</label>
+                  <label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>
                   {isView ? <p className="form-control-plaintext">{item.activity || '-'}</p> : <input type="text" className="form-control" value={form.activity} onChange={e => setInstEditForm(f => ({...f, activity: e.target.value}))} />}
                 </div>
                 <div className="col-md-4">
@@ -2613,7 +2613,7 @@ function ProjectActions() {
                 <thead className="table-light">
                   <tr>
                     <th style={{minWidth:'120px'}}>{t('projectActions.itemId')}</th>
-                    <th style={{minWidth:'180px'}}>{t('projectActions.activity')}</th>
+                    <th style={{minWidth:'180px'}}>{t('projectActions.activityDescription')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{minWidth:'80px'}}>{t('projectActions.unit')}</th>
                     <th style={{minWidth:'100px'}}>{t('projectActions.boqQty')}</th>
@@ -2699,7 +2699,7 @@ function ProjectActions() {
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activity')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activityDescription')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
