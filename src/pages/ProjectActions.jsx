@@ -2243,10 +2243,11 @@ function ProjectActions() {
       ]);
       const spData = spRes.data.map(sp => {
         const boqMatch = boqRes.data.find(b => b.activity === sp.activityDescription);
+        const sumAchieved = (sp.milestones || []).reduce((sum, m) => sum + (m.achievedValues || 0), 0);
         return {
           activityDescription: sp.activityDescription,
           unit: sp.unit || boqMatch?.unit || '',
-          suppliedQty: sp.executedQuantities || 0,
+          suppliedQty: sumAchieved,
           boqQty: boqMatch?.boqQuantity || sp.boqQuantities || 0
         };
       });
