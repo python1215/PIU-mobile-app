@@ -2441,7 +2441,7 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <input type="text" className="form-control" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))} />}
+                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>
@@ -2646,7 +2646,7 @@ function ProjectActions() {
                           </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateInstRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
-                        <td><input type="text" className="form-control form-control-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)} placeholder={t('projectActions.placeholderUnit')} /></td>
+                        <td><select className="form-select form-select-sm" value={row.unit} onChange={e => updateInstRow(idx, 'unit', e.target.value)}><option value="">{t('projectActions.selectUnit')}</option>{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light`} value={row.boqQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" /></td>
