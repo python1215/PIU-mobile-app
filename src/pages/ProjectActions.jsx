@@ -2242,9 +2242,9 @@ function ProjectActions() {
         axios.get(`/api/project-actions/boq/contract/${ref}`).catch(() => ({ data: [] }))
       ]);
       const spData = spRes.data.map(sp => {
-        const boqMatch = boqRes.data.find(b => b.activity === sp.activity);
+        const boqMatch = boqRes.data.find(b => b.activity === sp.activityDescription);
         return {
-          activity: sp.activity,
+          activityDescription: sp.activityDescription,
           unit: sp.unit || boqMatch?.unit || '',
           suppliedQty: sp.executedQuantities || 0,
           boqQty: boqMatch?.boqQuantity || sp.boqQuantities || 0
@@ -2275,7 +2275,7 @@ function ProjectActions() {
   };
 
   const handleInstActivitySelect = (idx, activityName) => {
-    const match = instSpActivities.find(a => a.activity === activityName);
+    const match = instSpActivities.find(a => a.activityDescription === activityName);
     if (match) {
       setInstRows(prev => prev.map((r, i) => i === idx ? {
         ...r, activity: activityName, unit: match.unit, suppliedQty: match.suppliedQty, boqQty: match.boqQty
@@ -2640,9 +2640,9 @@ function ProjectActions() {
                       <tr>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.itemId} readOnly /></td>
                         <td>
-                          <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} />
+                          <input type="text" className="form-control form-control-sm" list={`inst-activities-${row.tempId}`} value={row.activity} onChange={e => handleInstActivitySelect(idx, e.target.value)} placeholder={t('projectActions.placeholderSelectOrType')} minLength="3" />
                           <datalist id={`inst-activities-${row.tempId}`}>
-                            {instSpActivities.map((a, ai) => (<option key={ai} value={a.activity} />))}
+                            {instSpActivities.filter(a => !row.activity || row.activity.length < 3 || (a.activityDescription || '').toLowerCase().includes((row.activity || '').toLowerCase())).map((a, ai) => (<option key={ai} value={a.activityDescription} />))}
                           </datalist>
                         </td>
                         <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateInstRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
