@@ -13,6 +13,11 @@ public class Installation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "year_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Year year;
+
     @Column(name = "entry_date")
     private LocalDate entryDate;
 
@@ -71,6 +76,8 @@ public class Installation {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public Year getYear() { return year; }
+    public void setYear(Year year) { this.year = year; }
     public LocalDate getEntryDate() { return entryDate; }
     public void setEntryDate(LocalDate entryDate) { this.entryDate = entryDate; }
     public Project getProject() { return project; }

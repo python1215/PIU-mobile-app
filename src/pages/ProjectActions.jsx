@@ -120,7 +120,7 @@ function ProjectActions() {
   const [spEditingMilestone, setSpEditingMilestone] = useState(null);
 
   const [instItems, setInstItems] = useState([]);
-  const [instDate, setInstDate] = useState('');
+  const [instYear, setInstYear] = useState('');
   const [instProject, setInstProject] = useState('');
   const [instContractType, setInstContractType] = useState('');
   const [instContractRefNo, setInstContractRefNo] = useState('');
@@ -2307,7 +2307,7 @@ function ProjectActions() {
   };
 
   const handleInstSave = async () => {
-    if (!instDate || !instProject || !instContractType || !instContractRefNo) {
+    if (!instYear || !instProject || !instContractType || !instContractRefNo) {
       toast.error('Please fill all header fields');
       return;
     }
@@ -2319,7 +2319,7 @@ function ProjectActions() {
     setInstSaving(true);
     try {
       const items = instRows.map(row => ({
-        entryDate: instDate,
+        year: { id: parseInt(instYear) },
         project: { projectId: instProject },
         contractType: instContractType,
         contractRefNo: instContractRefNo,
@@ -2338,7 +2338,7 @@ function ProjectActions() {
       await axios.post('/api/project-actions/installation/batch', items);
       toast.success('Installation records saved successfully');
       setInstRows([]);
-      setInstDate('');
+      setInstYear('');
       setInstContractType('');
       setInstContractRefNo('');
       setInstContractOptions([]);
@@ -2362,7 +2362,7 @@ function ProjectActions() {
     setInstModalMode(mode);
     if (mode === 'edit') {
       setInstEditForm({
-        entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '',
+        yearId: item.year?.id || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '',
         itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '',
         unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '',
         provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || ''
@@ -2384,7 +2384,7 @@ function ProjectActions() {
       const gpr = calcInstGlobalRate(instEditForm.rate);
       await axios.put(`/api/project-actions/installation/${instModalItem.id}`, {
         ...instModalItem,
-        entryDate: instEditForm.entryDate, contractType: instEditForm.contractType, contractRefNo: instEditForm.contractRefNo,
+        year: instEditForm.yearId ? { id: parseInt(instEditForm.yearId) } : null, contractType: instEditForm.contractType, contractRefNo: instEditForm.contractRefNo,
         itemId: instEditForm.itemId, activity: instEditForm.activity, rate: parseFloat(instEditForm.rate) || 0,
         unit: instEditForm.unit, boqQty: parseFloat(instEditForm.boqQty) || 0,
         suppliedQty: parseFloat(instEditForm.suppliedQty) || 0,
@@ -2416,8 +2416,8 @@ function ProjectActions() {
             <div className="modal-body">
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">{t('projectActions.date')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.entryDate || '-'}</p> : <input type="date" className="form-control" value={form.entryDate} onChange={e => setInstEditForm(f => ({...f, entryDate: e.target.value}))} />}
+                  <label className="form-label fw-semibold">{t('projectActions.year')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.year?.profileYear || '-'}</p> : <select className="form-select" value={form.yearId} onChange={e => setInstEditForm(f => ({...f, yearId: e.target.value}))}><option value="">{t('projectActions.selectYear')}</option>{(dmYears || []).map(y => (<option key={y.id} value={y.id}>{y.profileYear}</option>))}</select>}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">{t('projectActions.project')}</label>
@@ -2494,7 +2494,7 @@ function ProjectActions() {
             <div className="modal-footer">
               {isView ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => { setInstModalMode('edit'); setInstEditForm({ entryDate: item.entryDate || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '', provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || '' }); }}>
+                  <button className="btn btn-primary" onClick={() => { setInstModalMode('edit'); setInstEditForm({ yearId: item.year?.id || '', contractType: item.contractType || '', contractRefNo: item.contractRefNo || '', itemId: item.itemId || '', activity: item.activity || '', rate: item.rate ?? '', unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '', provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '', observation: item.observation || '' }); }}>
                     <FiEdit2 className="me-1" /> {t('common.edit')}
                   </button>
                   <button className="btn btn-secondary" onClick={closeInstModal}>{t('common.close')}</button>
@@ -2536,9 +2536,9 @@ function ProjectActions() {
       doc.setFont(undefined, 'normal'); doc.setFontSize(8);
       doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
       autoTable(doc, {
-        head: [['#', 'Date', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Supplied Qty', 'Prov.Staking', 'Exec Qty', '%', 'Global Rate']],
+        head: [['#', 'Year', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Supplied Qty', 'Prov.Staking', 'Exec Qty', '%', 'Global Rate']],
         body: items.map((item, idx) => [
-          idx + 1, item.entryDate || '-', item.activity || '-',
+          idx + 1, item.year?.profileYear || '-', item.activity || '-',
           item.rate != null ? `${item.rate}%` : '-', item.unit || '-',
           item.boqQty ?? '-', item.suppliedQty ?? '-', item.provisionalStakingQty ?? '-',
           item.executedQty ?? '-',
@@ -2571,8 +2571,8 @@ function ProjectActions() {
         <div className="card-body">
           <div className="row g-3 mb-2">
             <div className="col-md-6">
-              <label className="form-label fw-semibold">{t('projectActions.date')}</label>
-              <input type="date" className="form-control" value={instDate} onChange={e => setInstDate(e.target.value)} />
+              <label className="form-label fw-semibold">{t('projectActions.year')}</label>
+              <select className="form-select" value={instYear} onChange={e => setInstYear(e.target.value)}><option value="">{t('projectActions.selectYear')}</option>{(dmYears || []).map(y => (<option key={y.id} value={y.id}>{y.profileYear}</option>))}</select>
             </div>
             <div className="col-md-6">
               <label className="form-label fw-semibold">{t('projectActions.project')}</label>
@@ -2695,7 +2695,7 @@ function ProjectActions() {
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.date')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.year')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
@@ -2714,7 +2714,7 @@ function ProjectActions() {
                 <tbody>
                   {instItems.map(item => (
                     <tr key={item.id}>
-                      <td style={{whiteSpace:'nowrap'}}>{item.entryDate}</td>
+                      <td style={{whiteSpace:'nowrap'}}>{item.year?.profileYear || '-'}</td>
                       <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
                       <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
                       <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
