@@ -491,7 +491,7 @@
     "durationUnit": "Unit",
     "observations": "Observations",
     "observation": "Observation",
-    "itemId": "Item ID",
+    "itemId": "Activity ID",
     "boqQuantity": "BOQ Quantity",
     "boqQty": "BOQ Qty",
     "execQty": "Exec. Qty",
