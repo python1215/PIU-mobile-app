@@ -3294,7 +3294,7 @@ function ProjectActions() {
               <div className="row g-3">
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.year')}</label>
-                  <p className="form-control-plaintext">{item.year?.year || '-'}</p>
+                  <p className="form-control-plaintext">{item.year?.profileYear || '-'}</p>
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.project')}</label>
@@ -3368,7 +3368,7 @@ function ProjectActions() {
               <label className="form-label small fw-semibold">{t('projectActions.year')}</label>
               <select className="form-select form-select-sm" value={jmcYear} onChange={e => setJmcYear(e.target.value)}>
                 <option value="">{t('projectActions.selectYear')}</option>
-                {dmYears.map(y => (<option key={y.id} value={y.id}>{y.year}</option>))}
+                {dmYears.map(y => (<option key={y.id} value={y.id}>{y.profileYear}</option>))}
               </select>
             </div>
             <div className="col-md-3">
@@ -3520,7 +3520,7 @@ function ProjectActions() {
                             {jmcExpandedRows[item.id] ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
                           </button>
                         </td>
-                        <td>{item.year?.year || '-'}</td>
+                        <td>{item.year?.profileYear || '-'}</td>
                         <td>{item.project?.project || item.project?.projectId || '-'}</td>
                         <td>{item.contractType === 'works' ? t('projectActions.worksContracts') : t('projectActions.goodsAndServices')}</td>
                         <td>{item.contractRefNo || '-'}</td>
