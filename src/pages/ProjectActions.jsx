@@ -2456,10 +2456,7 @@ function ProjectActions() {
                   <label className="form-label fw-semibold">{t('projectActions.provStakingQty')}</label>
                   {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className={`form-control ${!isView && (parseFloat(form.provisionalStakingQty) || 0) > (parseFloat(form.suppliedQty) || 0) && (parseFloat(form.suppliedQty) || 0) > 0 ? 'border-danger' : ''}`} value={form.provisionalStakingQty} onChange={e => setInstEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-semibold">{t('projectActions.executedQty')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => setInstEditForm(f => ({...f, executedQty: e.target.value}))} step="0.01" />}
-                </div>
+                
                 {!isView && (() => {
                   const mSupplied = parseFloat(form.suppliedQty) || 0;
                   const mBoq = parseFloat(form.boqQty) || 0;
@@ -2478,14 +2475,7 @@ function ProjectActions() {
                     </div>
                   ) : null;
                 })()}
-                <div className="col-md-3">
-                  <label className="form-label fw-semibold">{t('projectActions.percentage')}</label>
-                  <p className="form-control-plaintext">{isView ? (item.percentage != null ? `${item.percentage}%` : '-') : `${editPct}%`}</p>
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-semibold">{t('projectActions.globalRate')}</label>
-                  <p className="form-control-plaintext">{isView ? (item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-') : `${editGpr}%`}</p>
-                </div>
+                
                 <div className="col-12">
                   <label className="form-label fw-semibold">{t('projectActions.observation')}</label>
                   {isView ? <p className="form-control-plaintext" style={{whiteSpace:'pre-wrap'}}>{item.observation || '-'}</p> : <textarea className="form-control" rows="3" value={form.observation} onChange={e => setInstEditForm(f => ({...f, observation: e.target.value}))} />}
@@ -2537,14 +2527,11 @@ function ProjectActions() {
       doc.setFont(undefined, 'normal'); doc.setFontSize(8);
       doc.text(`Project: ${projectName}  |  Type: ${contractType}`, 14, startY + 5);
       autoTable(doc, {
-        head: [['#', 'Year', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Supplied Qty', 'Prov.Staking', 'Exec Qty', '%', 'Global Rate']],
+        head: [['#', 'Year', 'Activity', 'Rate(%)', 'Unit', 'BOQ Qty', 'Supplied Qty', 'Prov.Staking']],
         body: items.map((item, idx) => [
           idx + 1, item.year?.profileYear || '-', item.activity || '-',
           item.rate != null ? `${item.rate}%` : '-', item.unit || '-',
-          item.boqQty ?? '-', item.suppliedQty ?? '-', item.provisionalStakingQty ?? '-',
-          item.executedQty ?? '-',
-          item.percentage != null ? `${item.percentage}%` : '-',
-          item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'
+          item.boqQty ?? '-', item.suppliedQty ?? '-', item.provisionalStakingQty ?? '-'
         ]),
         startY: startY + 8,
         styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
@@ -2620,9 +2607,7 @@ function ProjectActions() {
                     <th style={{minWidth:'100px'}}>{t('projectActions.boqQty')}</th>
                     <th style={{minWidth:'100px'}}>{t('projectActions.suppliedQty')}</th>
                     <th style={{minWidth:'120px'}}>{t('projectActions.provStakingQty')}</th>
-                    <th style={{minWidth:'100px'}}>{t('projectActions.execQty')}</th>
-                    <th style={{minWidth:'80px'}}>%</th>
-                    <th style={{minWidth:'90px'}}>{t('projectActions.globalRate')}</th>
+                    
                     <th style={{minWidth:'150px'}}>{t('projectActions.observation')}</th>
                     <th style={{width:'50px'}}></th>
                   </tr>
@@ -2651,9 +2636,7 @@ function ProjectActions() {
                         <td><input type="number" className={`form-control form-control-sm bg-light`} value={row.boqQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm bg-light ${suppliedError ? 'border-danger' : ''}`} value={row.suppliedQty} readOnly /></td>
                         <td><input type="number" className={`form-control form-control-sm ${stakingError ? 'border-danger' : ''}`} value={row.provisionalStakingQty} onChange={e => updateInstRow(idx, 'provisionalStakingQty', e.target.value)} step="0.01" /></td>
-                        <td><input type="number" className="form-control form-control-sm" value={row.executedQty} onChange={e => updateInstRow(idx, 'executedQty', e.target.value)} step="0.01" /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${pct}%`} readOnly /></td>
-                        <td><input type="text" className="form-control form-control-sm bg-light" value={`${gpr}%`} readOnly /></td>
+                        
                         <td><textarea className="form-control form-control-sm" value={row.observation} onChange={e => updateInstRow(idx, 'observation', e.target.value)} rows="1" /></td>
                         <td><button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeInstRow(idx)}><FiTrash2 /></button></td>
                       </tr>
@@ -2706,9 +2689,7 @@ function ProjectActions() {
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.supplied')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.provStaking')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.executedQty')}</th>
-                    <th style={{whiteSpace:'nowrap'}}>%</th>
-                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.globalRate')}</th>
+                    
                     <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
@@ -2725,9 +2706,7 @@ function ProjectActions() {
                       <td style={{whiteSpace:'nowrap'}}>{item.boqQty}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.suppliedQty}</td>
                       <td style={{whiteSpace:'nowrap'}}>{item.provisionalStakingQty}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.executedQty}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.percentage != null ? `${item.percentage}%` : '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.globalProgressRate != null ? `${item.globalProgressRate}%` : '-'}</td>
+                      
                       <td style={{whiteSpace:'nowrap'}}>
                         <div className="d-flex gap-1 flex-nowrap">
                           <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openInstModal(item, 'view')}><FiEye /></button>
