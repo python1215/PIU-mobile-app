@@ -1,7 +1,7 @@
 package com.piun.piuproject.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,7 +76,7 @@ public class Installation {
     private User user;
 
     @OneToMany(mappedBy = "installation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("installation-milestone")
+    @JsonIgnore
     private List<InstallationMonitoringMilestone> milestones = new ArrayList<>();
 
     public Installation() {}

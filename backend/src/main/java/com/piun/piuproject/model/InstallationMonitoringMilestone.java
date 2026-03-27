@@ -1,6 +1,5 @@
 package com.piun.piuproject.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -16,7 +15,7 @@ public class InstallationMonitoringMilestone {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "installation_id")
-    @JsonBackReference("installation-milestone")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "milestones"})
     private Installation installation;
 
     @Column(name = "log_date")
