@@ -1,9 +1,12 @@
 package com.piun.piuproject.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "installation")
@@ -72,7 +75,14 @@ public class Installation {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
+    @OneToMany(mappedBy = "installation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("installation-milestone")
+    private List<InstallationMonitoringMilestone> milestones = new ArrayList<>();
+
     public Installation() {}
+
+    public List<InstallationMonitoringMilestone> getMilestones() { return milestones; }
+    public void setMilestones(List<InstallationMonitoringMilestone> milestones) { this.milestones = milestones; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

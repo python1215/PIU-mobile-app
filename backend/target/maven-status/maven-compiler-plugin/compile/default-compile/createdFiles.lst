@@ -32,6 +32,7 @@ com/piun/piuproject/model/Year.class
 com/piun/piuproject/repository/YearRepository.class
 com/piun/piuproject/model/MonitoringType.class
 com/piun/piuproject/controller/ProjectController.class
+com/piun/piuproject/model/InstallationMonitoringMilestone.class
 com/piun/piuproject/repository/TypeOfImpactRepository.class
 com/piun/piuproject/model/KPIContractSetup.class
 com/piun/piuproject/repository/OHSMonitoringRepository.class
@@ -76,6 +77,7 @@ com/piun/piuproject/security/JwtAuthenticationFilter.class
 com/piun/piuproject/controller/FileUploadController.class
 com/piun/piuproject/repository/DonorRepository.class
 com/piun/piuproject/model/ProjectMapping.class
+com/piun/piuproject/repository/InstallationMonitoringMilestoneRepository.class
 com/piun/piuproject/repository/DesignMonitoringMilestoneRepository.class
 com/piun/piuproject/model/DocumentType.class
 com/piun/piuproject/model/IssueActionSource.class

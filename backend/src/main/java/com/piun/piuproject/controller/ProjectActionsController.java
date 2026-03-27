@@ -569,6 +569,71 @@ public class ProjectActionsController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @Autowired
+    private InstallationMonitoringMilestoneRepository installationMilestoneRepository;
+
+    @GetMapping("/installation/{instId}/milestones")
+    @Transactional(readOnly = true)
+    public List<InstallationMonitoringMilestone> getInstallationMilestones(@PathVariable Long instId) {
+        return installationMilestoneRepository.findByInstallation_IdOrderByLogDateAsc(instId);
+    }
+
+    @PostMapping("/installation/{instId}/milestones")
+    public ResponseEntity<InstallationMonitoringMilestone> createInstallationMilestone(
+            @PathVariable Long instId,
+            @RequestBody InstallationMonitoringMilestone milestone) {
+        return installationRepository.findById(instId)
+            .map(inst -> {
+                milestone.setInstallation(inst);
+                milestone.setDateCreated(java.time.LocalDateTime.now());
+                if (milestone.getAchievedValues() != null && milestone.getPlannedValues() != null && milestone.getPlannedValues() > 0) {
+                    double pct = (milestone.getAchievedValues() / milestone.getPlannedValues()) * 100;
+                    milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(installationMilestoneRepository.save(milestone));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/installation/milestones/{id}")
+    public ResponseEntity<InstallationMonitoringMilestone> updateInstallationMilestone(
+            @PathVariable Long id,
+            @RequestBody InstallationMonitoringMilestone details) {
+        return installationMilestoneRepository.findById(id)
+            .map(m -> {
+                m.setLogDate(details.getLogDate());
+                m.setQuarter(details.getQuarter());
+                m.setElectricityFeeders(details.getElectricityFeeders());
+                m.setActivityStartDate(details.getActivityStartDate());
+                m.setActivityEndDate(details.getActivityEndDate());
+                m.setDuration(details.getDuration());
+                m.setPlannedValues(details.getPlannedValues());
+                m.setAchievedValues(details.getAchievedValues());
+                m.setStatus(details.getStatus());
+                m.setAttachmentPath(details.getAttachmentPath());
+                m.setRemarks(details.getRemarks());
+                if (details.getAchievedValues() != null && details.getPlannedValues() != null && details.getPlannedValues() > 0) {
+                    double pct = (details.getAchievedValues() / details.getPlannedValues()) * 100;
+                    m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                if (details.getAchievedVsGlobalPct() != null) {
+                    m.setAchievedVsGlobalPct(details.getAchievedVsGlobalPct());
+                }
+                return ResponseEntity.ok(installationMilestoneRepository.save(m));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/installation/milestones/{id}")
+    public ResponseEntity<Void> deleteInstallationMilestone(@PathVariable Long id) {
+        return installationMilestoneRepository.findById(id)
+            .map(m -> {
+                installationMilestoneRepository.delete(m);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/design-monitoring")
     @Transactional(readOnly = true)
     public List<DesignProgressMonitoring> getAllDesignMonitoring() {

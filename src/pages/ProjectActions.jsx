@@ -131,6 +131,11 @@ function ProjectActions() {
   const [instModalItem, setInstModalItem] = useState(null);
   const [instModalMode, setInstModalMode] = useState('view');
   const [instEditForm, setInstEditForm] = useState({});
+  const [instAllMilestones, setInstAllMilestones] = useState({});
+  const [instExpandedRows, setInstExpandedRows] = useState({});
+  const [instMilestoneForm, setInstMilestoneForm] = useState({ installationId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+  const [instShowMilestoneForm, setInstShowMilestoneForm] = useState(null);
+  const [instEditingMilestone, setInstEditingMilestone] = useState(null);
 
   const [dmItems, setDmItems] = useState([]);
   const [dmProject, setDmProject] = useState('');
@@ -250,6 +255,11 @@ function ProjectActions() {
       setBoqItems(boqRes.data);
       setSpItems(spRes.data);
       setInstItems(instRes.data);
+      const instMsMap = {};
+      for (const inst of instRes.data) {
+        try { const msRes = await axios.get(`/api/project-actions/installation/${inst.id}/milestones`); instMsMap[inst.id] = msRes.data; } catch { instMsMap[inst.id] = []; }
+      }
+      setInstAllMilestones(instMsMap);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -2399,6 +2409,72 @@ function ProjectActions() {
     } catch (e) { toast.error('Error updating record'); console.error(e); }
   };
 
+  const handleInstSaveMilestone = async () => {
+    const form = instMilestoneForm;
+    if (!form.installationId || !form.logDate) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    const parentRec = instItems.find(r => r.id === form.installationId);
+    const boq = parentRec?.boqQty;
+    if (boq != null && boq > 0) {
+      const prevPlanned = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0);
+      const totalPlanned = prevPlanned + (parseFloat(form.plannedValues) || 0);
+      if (totalPlanned > boq) {
+        toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
+        return;
+      }
+      if (form.status === 'Complete') {
+        const prevAchieved = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0);
+        const totalAchieved = prevAchieved + (parseFloat(form.achievedValues) || 0);
+        if (totalAchieved < boq) {
+          const balance = Math.round((boq - totalAchieved) * 100) / 100;
+          toast.error(t('projectActions.cannotCompleteAchievedLessThanBoq', { achieved: Math.round(totalAchieved * 100) / 100, boq, balance }));
+          return;
+        }
+      }
+    }
+    const startD = form.activityStartDate ? new Date(form.activityStartDate) : null;
+    const endD = form.activityEndDate ? new Date(form.activityEndDate) : null;
+    if (startD && endD && endD < startD) { toast.error(t('validation.dateRange')); return; }
+    const calcDuration = (startD && endD) ? Math.ceil((endD - startD) / 86400000) : (form.duration ? parseInt(form.duration) : null);
+    const achievedVal = parseFloat(form.achievedValues) || 0;
+    const prevAchAll = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0);
+    const totalAchAll = prevAchAll + achievedVal;
+    const achievedVsGlobal = (boq && boq > 0) ? Math.round((totalAchAll / boq) * 10000) / 100 : null;
+    try {
+      const payload = {
+        logDate: form.logDate,
+        quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+        electricityFeeders: form.electricityFeeders,
+        activityStartDate: form.activityStartDate || null,
+        activityEndDate: form.activityEndDate || null,
+        duration: calcDuration,
+        plannedValues: parseFloat(form.plannedValues) || 0,
+        achievedValues: achievedVal,
+        achievedVsGlobalPct: achievedVsGlobal,
+        status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks
+      };
+      if (instEditingMilestone) {
+        await axios.put(`/api/project-actions/installation/milestones/${instEditingMilestone.id}`, payload);
+        toast.success(t('projectActions.milestoneUpdated'));
+      } else {
+        await axios.post(`/api/project-actions/installation/${form.installationId}/milestones`, payload);
+        toast.success(t('projectActions.milestoneSaved'));
+      }
+      setInstMilestoneForm({ installationId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+      setInstShowMilestoneForm(null);
+      setInstEditingMilestone(null);
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorSaving')); console.error(e); }
+  };
+
+  const handleDeleteInstMilestone = async (msId) => {
+    if (!window.confirm(t('messages.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/installation/milestones/${msId}`);
+      toast.success(t('messages.deleteSuccess'));
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorDeleting')); }
+  };
+
   const renderInstModal = () => {
     if (!instModalItem) return null;
     const isView = instModalMode === 'view';
@@ -2679,42 +2755,286 @@ function ProjectActions() {
               <table className="table table-striped table-sm mb-0" style={{fontSize:'clamp(0.65rem, 1.1vw, 0.85rem)'}}>
                 <thead className="table-light">
                   <tr>
+                    <th style={{whiteSpace:'nowrap'}}></th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.year')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.project')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractType')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.contractRef')}</th>
+                    <th style={{whiteSpace:'nowrap'}}>{t('projectActions.itemId')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.activityDescription')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.ratePercent')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.unit')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.boqQty')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.supplied')}</th>
                     <th style={{whiteSpace:'nowrap'}}>{t('projectActions.provStaking')}</th>
-                    
                     <th style={{whiteSpace:'nowrap'}}>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {instItems.map(item => (
-                    <tr key={item.id}>
-                      <td style={{whiteSpace:'nowrap'}}>{item.year?.profileYear || '-'}</td>
-                      <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
-                      <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
-                      <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.boqQty}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.suppliedQty}</td>
-                      <td style={{whiteSpace:'nowrap'}}>{item.provisionalStakingQty}</td>
-                      
-                      <td style={{whiteSpace:'nowrap'}}>
-                        <div className="d-flex gap-1 flex-nowrap">
-                          <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openInstModal(item, 'view')}><FiEye /></button>
-                          <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openInstModal(item, 'edit')}><FiEdit2 /></button>
-                          <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteInstItem(item.id)}><FiTrash2 /></button>
-                        </div>
-                      </td>
-                    </tr>
+                    <Fragment key={item.id}>
+                      <tr>
+                        <td>
+                          <button className="btn btn-sm p-0" onClick={() => setInstExpandedRows(prev => ({ ...prev, [item.id]: !prev[item.id] }))}>
+                            {instExpandedRows[item.id] ? <FiChevronDown /> : <FiChevronRight />}
+                          </button>
+                        </td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.year?.profileYear || '-'}</td>
+                        <td style={{whiteSpace:'nowrap',maxWidth:'120px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.project?.project || ''}>{item.project?.project || item.project?.projectId || '-'}</td>
+                        <td style={{whiteSpace:'nowrap'}}><span className={`badge ${item.contractType === 'works' ? 'bg-primary' : 'bg-success'}`} style={{fontSize:'inherit'}}>{item.contractType === 'works' ? t('projectActions.works') : t('projectActions.goods')}</span></td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.contractRefNo}</td>
+                        <td style={{whiteSpace:'nowrap'}}><code style={{fontSize:'inherit'}}>{item.itemId || '-'}</code></td>
+                        <td style={{whiteSpace:'nowrap',maxWidth:'100px',overflow:'hidden',textOverflow:'ellipsis'}} title={item.activity}>{item.activity}</td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.rate}%</td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.unit}</td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.boqQty}</td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.suppliedQty}</td>
+                        <td style={{whiteSpace:'nowrap'}}>{item.provisionalStakingQty}</td>
+                        <td style={{whiteSpace:'nowrap'}}>
+                          <div className="d-flex gap-1 flex-nowrap">
+                            <button className="btn btn-sm btn-outline-warning p-1" title={t('projectActions.addMilestone')} onClick={() => {
+                              setInstExpandedRows(prev => ({ ...prev, [item.id]: true }));
+                              setInstShowMilestoneForm(item.id);
+                              setInstEditingMilestone(null);
+                              setInstMilestoneForm({ installationId: item.id, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+                            }}><FiPlus /></button>
+                            <button className="btn btn-sm btn-outline-info p-1" title={t('common.view')} onClick={() => openInstModal(item, 'view')}><FiEye /></button>
+                            <button className="btn btn-sm btn-outline-primary p-1" title={t('common.edit')} onClick={() => openInstModal(item, 'edit')}><FiEdit2 /></button>
+                            <button className="btn btn-sm btn-outline-danger p-1" title={t('common.delete')} onClick={() => handleDeleteInstItem(item.id)}><FiTrash2 /></button>
+                          </div>
+                        </td>
+                      </tr>
+                      {instExpandedRows[item.id] && (
+                        <tr>
+                          <td colSpan="13" className="p-0">
+                            <div className="p-2 bg-light">
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h6 className="mb-0 text-warning">{t('projectActions.installationMonitoringMilestones')}</h6>
+                                <button className="btn btn-sm btn-warning" onClick={() => {
+                                  setInstShowMilestoneForm(item.id);
+                                  setInstEditingMilestone(null);
+                                  setInstMilestoneForm({ installationId: item.id, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+                                }}>
+                                  <FiPlus className="me-1" /> {t('projectActions.addMilestone')}
+                                </button>
+                              </div>
+
+                              {(instAllMilestones[item.id] || []).length > 0 ? (<>
+                                <div className="table-responsive mb-2">
+                                <table className="table table-bordered table-sm mb-0" style={{fontSize:'clamp(0.6rem, 1vw, 0.8rem)'}}>
+                                  <thead className="table-warning">
+                                    <tr>
+                                      <th>{t('projectActions.logDate')}</th>
+                                      <th>{t('projectActions.quarter')}</th>
+                                      <th>{t('projectActions.electricityFeeders')}</th>
+                                      <th>{t('projectActions.activityStartDate')}</th>
+                                      <th>{t('projectActions.activityEndDate')}</th>
+                                      <th>{t('projectActions.duration')}</th>
+                                      <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                      <th>{t('projectActions.balanceFromBoq')}</th>
+                                      <th>{t('projectActions.achievedValueForPeriod')}</th>
+                                      <th>{t('projectActions.plannedVsAchieved')}</th>
+                                      <th>{t('projectActions.achievedVsGlobalTargets')}</th>
+                                      <th>{t('common.status')}</th>
+                                      <th>{t('projectActions.remarks')}</th>
+                                      <th>{t('common.actions')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(() => { let cumPlanned = 0; let cumAchieved = 0; return (instAllMilestones[item.id] || []).map(ms => {
+                                      const boqQty = item.boqQty;
+                                      cumPlanned += (ms.plannedValues || 0);
+                                      cumAchieved += (ms.achievedValues || 0);
+                                      const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                      const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
+                                      return (
+                                      <tr key={ms.id}>
+                                        <td>{ms.logDate || '-'}</td>
+                                        <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.electricityFeeders || '-'}</td>
+                                        <td>{ms.activityStartDate || '-'}</td>
+                                        <td>{ms.activityEndDate || '-'}</td>
+                                        <td>{ms.duration != null ? `${ms.duration} ${t('projectActions.days')}` : '-'}</td>
+                                        <td>{ms.plannedValues ?? '-'}</td>
+                                        <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
+                                        <td>{ms.achievedValues ?? '-'}</td>
+                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
+                                        <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                        <td>{ms.remarks || '-'}</td>
+                                        <td>
+                                          <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                              setInstShowMilestoneForm(item.id);
+                                              setInstEditingMilestone(ms);
+                                              setInstMilestoneForm({ installationId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', electricityFeeders: ms.electricityFeeders || '', activityStartDate: ms.activityStartDate || '', activityEndDate: ms.activityEndDate || '', duration: ms.duration ?? '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', attachmentPath: ms.attachmentPath || '', remarks: ms.remarks || '' });
+                                            }}><FiEdit2 /></button>
+                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteInstMilestone(ms.id)}><FiTrash2 /></button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );})})()}
+                                  </tbody>
+                                </table>
+                                </div>
+                                {(() => {
+                                  const boqQty = item.boqQty;
+                                  const totalAchieved = (instAllMilestones[item.id] || []).reduce((s, m) => s + (m.achievedValues || 0), 0);
+                                  const progressPct = (boqQty != null && boqQty > 0) ? Math.min(Math.round((totalAchieved / boqQty) * 10000) / 100, 100) : 0;
+                                  const lastMs = (instAllMilestones[item.id] || []).slice(-1)[0];
+                                  const lastStatus = lastMs?.status;
+                                  const isComplete = lastStatus === 'Complete';
+                                  const endDate = lastMs?.activityEndDate;
+                                  const startDate = (instAllMilestones[item.id] || [])[0]?.activityStartDate;
+                                  const today = new Date(); today.setHours(0,0,0,0);
+                                  const endD = endDate ? new Date(endDate) : null;
+                                  const startD = startDate ? new Date(startDate) : null;
+                                  if (endD) endD.setHours(0,0,0,0);
+                                  if (startD) startD.setHours(0,0,0,0);
+                                  const daysRemaining = endD ? Math.ceil((endD - today) / 86400000) : null;
+                                  const timeElapsed = (startD && endD) ? Math.max(0, Math.ceil((today - startD) / 86400000)) : null;
+                                  const overdueDays = (!isComplete && endD && today > endD) ? Math.ceil((today - endD) / 86400000) : null;
+                                  const barColor = progressPct >= 100 ? '#28a745' : progressPct >= 50 ? '#ffc107' : '#dc3545';
+                                  return (
+                                    <div className="d-flex flex-wrap align-items-center gap-3 mt-2 p-2 bg-white rounded border" style={{fontSize:'0.8rem'}}>
+                                      <div className="flex-grow-1" style={{minWidth:'200px'}}>
+                                        <div className="d-flex justify-content-between mb-1">
+                                          <strong>{t('projectActions.progress')}</strong>
+                                          <span className="fw-bold" style={{color: barColor}}>{progressPct}%</span>
+                                        </div>
+                                        <div className="progress" style={{height:'10px'}}>
+                                          <div className="progress-bar" role="progressbar" style={{width:`${progressPct}%`, backgroundColor: barColor}} aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                      </div>
+                                      {timeElapsed != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.timeElapsed')}</small>
+                                          <strong className="text-primary">{timeElapsed} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {daysRemaining != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.daysRemaining')}</small>
+                                          <strong className={daysRemaining >= 0 ? 'text-success' : 'text-danger'}>{daysRemaining >= 0 ? daysRemaining : 0} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {overdueDays != null && overdueDays > 0 && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.overdueDays')}</small>
+                                          <strong className="text-danger">{overdueDays} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {isComplete && (
+                                        <div className="text-center px-2">
+                                          <span className="badge bg-success">{t('projectActions.completed')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </>) : (
+                                <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>
+                              )}
+
+                              {instShowMilestoneForm === item.id && (
+                                <div className="card mb-2 border-warning">
+                                  <div className="card-body p-2">
+                                    <div className="row g-2">
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.logDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={instMilestoneForm.logDate} onChange={e => setInstMilestoneForm(f => ({...f, logDate: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.quarter')}</label>
+                                        <select className="form-select form-select-sm" value={instMilestoneForm.quarterId} onChange={e => setInstMilestoneForm(f => ({...f, quarterId: e.target.value}))}>
+                                          <option value="">{t('projectActions.selectQuarter')}</option>
+                                          {quarters.map(q => (<option key={q.id} value={q.id}>{q.quarter}</option>))}
+                                        </select>
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={instMilestoneForm.electricityFeeders} onChange={e => setInstMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.activityStartDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={instMilestoneForm.activityStartDate} onChange={e => {
+                                          const s = e.target.value;
+                                          setInstMilestoneForm(f => {
+                                            const dur = (s && f.activityEndDate) ? Math.ceil((new Date(f.activityEndDate) - new Date(s)) / 86400000) : f.duration;
+                                            return {...f, activityStartDate: s, duration: dur};
+                                          });
+                                        }} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.activityEndDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={instMilestoneForm.activityEndDate} onChange={e => {
+                                          const ed = e.target.value;
+                                          setInstMilestoneForm(f => {
+                                            const dur = (f.activityStartDate && ed) ? Math.ceil((new Date(ed) - new Date(f.activityStartDate)) / 86400000) : f.duration;
+                                            return {...f, activityEndDate: ed, duration: dur};
+                                          });
+                                        }} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.duration')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={instMilestoneForm.duration ? `${instMilestoneForm.duration} ${t('projectActions.days')}` : '-'} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedValuesForPeriod')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={instMilestoneForm.plannedValues} onChange={e => setInstMilestoneForm(f => ({...f, plannedValues: e.target.value}))} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevPlannedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(instMilestoneForm.plannedValues); const boq = item.boqQty; const prevPlanned = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={instMilestoneForm.achievedValues} onChange={e => setInstMilestoneForm(f => ({...f, achievedValues: e.target.value}))} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevAchievedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(instMilestoneForm.plannedValues); const a = parseFloat(instMilestoneForm.achievedValues); return (p > 0 && !isNaN(a)) ? `${Math.round((a / p) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(instMilestoneForm.achievedValues); const boq = item.boqQty; const prevAchieved = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const totalAchieved = prevAchieved + (isNaN(a) ? 0 : a); return (boq > 0) ? `${Math.round((totalAchieved / boq) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                                        <select className="form-select form-select-sm" value={instMilestoneForm.status} onChange={e => setInstMilestoneForm(f => ({...f, status: e.target.value}))}>
+                                          <option value="">{t('projectActions.selectStatus')}</option>
+                                          {Object.entries(DM_STATUS_COLORS).map(([s, c]) => (<option key={s} value={s} style={{color: c}}>{t(`projectActions.status${s}`) || s}</option>))}
+                                        </select>
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.attachPhotos')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={instMilestoneForm.attachmentPath} onChange={e => setInstMilestoneForm(f => ({...f, attachmentPath: e.target.value}))} placeholder="URL or path" />
+                                      </div>
+                                      <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={instMilestoneForm.remarks} onChange={e => setInstMilestoneForm(f => ({...f, remarks: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-1 d-flex align-items-end gap-1">
+                                        <button className="btn btn-sm btn-success" onClick={handleInstSaveMilestone}><FiCheck /></button>
+                                        <button className="btn btn-sm btn-secondary" onClick={() => { setInstShowMilestoneForm(null); setInstEditingMilestone(null); }}><FiX /></button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
