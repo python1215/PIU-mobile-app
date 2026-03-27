@@ -3613,30 +3613,56 @@ function ProjectActions() {
 
                                 {(() => {
                                   const boqQty = item.boqQty;
-                                  const milestones = jmcAllMilestones[item.id] || [];
-                                  const totalPlanned = milestones.reduce((s, m) => s + (m.plannedValues || 0), 0);
-                                  const totalAchieved = milestones.reduce((s, m) => s + (m.achievedValues || 0), 0);
-                                  const progressPct = (boqQty && boqQty > 0) ? Math.round((totalAchieved / boqQty) * 10000) / 100 : 0;
-                                  const dates = milestones.filter(m => m.activityStartDate).map(m => new Date(m.activityStartDate));
-                                  const endDates = milestones.filter(m => m.activityEndDate).map(m => new Date(m.activityEndDate));
-                                  const firstStart = dates.length > 0 ? new Date(Math.min(...dates)) : null;
-                                  const lastEnd = endDates.length > 0 ? new Date(Math.max(...endDates)) : null;
-                                  const today = new Date();
-                                  const elapsed = firstStart ? Math.ceil((today - firstStart) / 86400000) : null;
-                                  const remaining = lastEnd ? Math.ceil((lastEnd - today) / 86400000) : null;
+                                  const totalAchieved = (jmcAllMilestones[item.id] || []).reduce((s, m) => s + (m.achievedValues || 0), 0);
+                                  const progressPct = (boqQty != null && boqQty > 0) ? Math.min(Math.round((totalAchieved / boqQty) * 10000) / 100, 100) : 0;
+                                  const lastMs = (jmcAllMilestones[item.id] || []).slice(-1)[0];
+                                  const lastStatus = lastMs?.status;
+                                  const isComplete = lastStatus === 'Complete';
+                                  const endDate = lastMs?.activityEndDate;
+                                  const startDate = (jmcAllMilestones[item.id] || [])[0]?.activityStartDate;
+                                  const today = new Date(); today.setHours(0,0,0,0);
+                                  const endD = endDate ? new Date(endDate) : null;
+                                  const startD = startDate ? new Date(startDate) : null;
+                                  if (endD) endD.setHours(0,0,0,0);
+                                  if (startD) startD.setHours(0,0,0,0);
+                                  const daysRemaining = endD ? Math.ceil((endD - today) / 86400000) : null;
+                                  const timeElapsed = (startD && endD) ? Math.max(0, Math.ceil((today - startD) / 86400000)) : null;
+                                  const overdueDays = (!isComplete && endD && today > endD) ? Math.ceil((today - endD) / 86400000) : null;
+                                  const barColor = progressPct >= 100 ? '#28a745' : progressPct >= 50 ? '#ffc107' : '#dc3545';
                                   return (
-                                    <div className="row g-2 mt-1">
-                                      <div className="col-md-6">
-                                        <div className="progress" style={{ height: '20px' }}>
-                                          <div className="progress-bar bg-success" role="progressbar" style={{ width: `${Math.min(progressPct, 100)}%` }}>{progressPct}%</div>
+                                    <div className="d-flex flex-wrap align-items-center gap-3 mt-2 p-2 bg-white rounded border" style={{fontSize:'0.8rem'}}>
+                                      <div className="flex-grow-1" style={{minWidth:'200px'}}>
+                                        <div className="d-flex justify-content-between mb-1">
+                                          <strong>{t('projectActions.progress')}</strong>
+                                          <span className="fw-bold" style={{color: barColor}}>{progressPct}%</span>
                                         </div>
-                                        <small className="text-muted">{t('projectActions.overallProgress')}: {totalAchieved}/{boqQty || '-'}</small>
+                                        <div className="progress" style={{height:'10px'}}>
+                                          <div className="progress-bar" role="progressbar" style={{width:`${progressPct}%`, backgroundColor: barColor}} aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
                                       </div>
-                                      <div className="col-md-6 d-flex gap-3 justify-content-end">
-                                        {elapsed != null && <span className="badge bg-info">{t('projectActions.timeElapsed')}: {elapsed} {t('projectActions.days')}</span>}
-                                        {remaining != null && remaining > 0 && <span className="badge bg-warning text-dark">{t('projectActions.daysRemaining')}: {remaining}</span>}
-                                        {remaining != null && remaining < 0 && <span className="badge bg-danger">{t('projectActions.overdue')}: {Math.abs(remaining)} {t('projectActions.days')}</span>}
-                                      </div>
+                                      {timeElapsed != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.timeElapsed')}</small>
+                                          <strong className="text-primary">{timeElapsed} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {daysRemaining != null && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.daysRemaining')}</small>
+                                          <strong className={daysRemaining >= 0 ? 'text-success' : 'text-danger'}>{daysRemaining >= 0 ? daysRemaining : 0} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {overdueDays != null && overdueDays > 0 && (
+                                        <div className="text-center px-2">
+                                          <small className="text-muted d-block">{t('projectActions.overdueDays')}</small>
+                                          <strong className="text-danger">{overdueDays} {t('projectActions.days')}</strong>
+                                        </div>
+                                      )}
+                                      {isComplete && (
+                                        <div className="text-center px-2">
+                                          <span className="badge bg-success">{t('projectActions.completed')}</span>
+                                        </div>
+                                      )}
                                     </div>
                                   );
                                 })()}
@@ -3694,17 +3720,34 @@ function ProjectActions() {
                                         <input type="number" className="form-control form-control-sm" value={jmcMilestoneForm.plannedValues} onChange={e => setJmcMilestoneForm(f => ({...f, plannedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const boq = item.boqQty; const supplied = item.suppliedQty; const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); const total = prev + val; if (boq != null && boq > 0 && total > boq) toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(total * 100) / 100, boq })); if (supplied != null && supplied > 0 && total > supplied) toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(total * 100) / 100, supplied: Math.round(supplied * 100) / 100 })); }} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevPlannedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.balanceFromBoq')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(jmcMilestoneForm.plannedValues); const boq = item.boqQty; const prevPlanned = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); return (boq != null && !isNaN(p)) ? Math.round((boq - prevPlanned - p) * 100) / 100 : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
                                         <input type="number" className="form-control form-control-sm" value={jmcMilestoneForm.achievedValues} onChange={e => setJmcMilestoneForm(f => ({...f, achievedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const supplied = item.suppliedQty; if (supplied != null && supplied > 0) { const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const total = prev + val; if (total > supplied) toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(total * 100) / 100, supplied: Math.round(supplied * 100) / 100 })); }}} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.prevAchievedValues')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); return Math.round(prev * 100) / 100; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedVsAchieved')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const p = parseFloat(jmcMilestoneForm.plannedValues); const a = parseFloat(jmcMilestoneForm.achievedValues); return (p > 0 && !isNaN(a)) ? `${Math.round((a / p) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedVsGlobalTargets')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={(() => { const a = parseFloat(jmcMilestoneForm.achievedValues); const boq = item.boqQty; const prevAchieved = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const totalAchieved = prevAchieved + (isNaN(a) ? 0 : a); return (boq > 0) ? `${Math.round((totalAchieved / boq) * 10000) / 100}%` : '-'; })()} />
+                                      </div>
+                                      <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('common.status')}</label>
                                         <select className="form-select form-select-sm" value={jmcMilestoneForm.status} onChange={e => setJmcMilestoneForm(f => ({...f, status: e.target.value}))}>
-                                          <option value="">{t('common.select')}</option>
-                                          <option value="Complete">{t('projectActions.statusComplete')}</option>
-                                          <option value="Incomplete">{t('projectActions.statusIncomplete')}</option>
-                                          <option value="Stagnant">{t('projectActions.statusStagnant')}</option>
-                                          <option value="Cancelled">{t('projectActions.statusCancelled')}</option>
+                                          <option value="">{t('projectActions.selectStatus')}</option>
+                                          {Object.entries(DM_STATUS_COLORS).map(([s, c]) => (<option key={s} value={s} style={{color: c}}>{t(`projectActions.status${s}`) || s}</option>))}
                                         </select>
                                       </div>
                                       <div className="col-md-2">
