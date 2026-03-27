@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiX, FiCheck, FiUserCheck, FiUserPlus, FiChevronDown, FiChevronRight, FiActivity, FiClock, FiRefreshCw, FiUser, FiMail, FiLock, FiBriefcase } from 'react-icons/fi';
-import { authAPI } from '../services/api';
+import api, { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const MODULE_KEYS = [
@@ -48,7 +47,7 @@ function Administration() {
   const loadConnectedUsers = useCallback(async () => {
     try {
       setConnectedLoading(true);
-      const res = await axios.get('/api/admin/connected-users');
+      const res = await api.get('/admin/connected-users');
       setConnectedUsers(res.data);
     } catch (err) {
       console.error('Error loading connected users:', err);
@@ -59,7 +58,7 @@ function Administration() {
 
   const loadRoles = useCallback(async () => {
     try {
-      const res = await axios.get('/api/admin/roles');
+      const res = await api.get('/admin/roles');
       setRoles(res.data);
     } catch (err) {
       console.error('Error loading roles:', err);
@@ -68,7 +67,7 @@ function Administration() {
 
   const loadUsers = useCallback(async () => {
     try {
-      const res = await axios.get('/api/admin/users');
+      const res = await api.get('/admin/users');
       setUsers(res.data);
     } catch (err) {
       console.error('Error loading users:', err);
@@ -118,10 +117,10 @@ function Administration() {
     }
     try {
       if (editingRole) {
-        await axios.put(`/api/admin/roles/${editingRole.id}`, roleForm);
+        await api.put(`/admin/roles/${editingRole.id}`, roleForm);
         toast.success(t('messages.updateSuccess'));
       } else {
-        await axios.post('/api/admin/roles', roleForm);
+        await api.post('/admin/roles', roleForm);
         toast.success(t('messages.createSuccess'));
       }
       setShowRoleModal(false);
@@ -134,7 +133,7 @@ function Administration() {
   const handleDeleteRole = useCallback(async (roleId) => {
     if (!confirm(t('messages.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/admin/roles/${roleId}`);
+      await api.delete(`/admin/roles/${roleId}`);
       toast.success(t('messages.deleteSuccess'));
       loadRoles();
     } catch (err) {
@@ -144,7 +143,7 @@ function Administration() {
 
   const handleAssignRole = useCallback(async (userId, roleId) => {
     try {
-      await axios.put(`/api/admin/users/${userId}/role`, { roleId: roleId || null });
+      await api.put(`/admin/users/${userId}/role`, { roleId: roleId || null });
       toast.success(t('messages.updateSuccess'));
       loadUsers();
     } catch (err) {

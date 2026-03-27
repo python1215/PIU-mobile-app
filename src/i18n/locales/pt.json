@@ -492,6 +492,8 @@
     "ratePercent": "Taxa (%)",
     "unit": "Unidade",
     "provisionalQty": "Qtd Provisória",
+    "startDate": "Data de Início",
+    "endDate": "Data de Fim",
     "activityStartDate": "Data Início Atividade",
     "activityEndDate": "Data Fim Atividade",
     "duration": "Duração",
