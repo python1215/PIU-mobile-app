@@ -3313,7 +3313,7 @@ function ProjectActions() {
                   <p className="form-control-plaintext">{item.activity || '-'}</p>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">{t('projectActions.rate')}</label>
+                  <label className="form-label fw-semibold">{t('projectActions.ratePercent')}</label>
                   {isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setJmcEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}
                 </div>
                 <div className="col-md-3">
@@ -3423,7 +3423,7 @@ function ProjectActions() {
                   <thead className="table-light">
                     <tr>
                       <th style={{width:'30%'}}>{t('projectActions.activityDescription')}</th>
-                      <th>{t('projectActions.rate')}</th>
+                      <th>{t('projectActions.ratePercent')}</th>
                       <th>{t('projectActions.unit')}</th>
                       <th>{t('projectActions.boqQty')}</th>
                       <th>{t('projectActions.suppliedQty')}</th>
@@ -3498,7 +3498,7 @@ function ProjectActions() {
                     <th>{t('projectActions.contractType')}</th>
                     <th>{t('projectActions.contractRefNo')}</th>
                     <th>{t('projectActions.activityDescription')}</th>
-                    <th>{t('projectActions.rate')}</th>
+                    <th>{t('projectActions.ratePercent')}</th>
                     <th>{t('projectActions.unit')}</th>
                     <th>{t('projectActions.boqQty')}</th>
                     <th>{t('projectActions.suppliedQty')}</th>
