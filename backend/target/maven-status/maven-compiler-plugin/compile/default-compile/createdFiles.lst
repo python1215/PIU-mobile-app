@@ -32,6 +32,8 @@ com/piun/piuproject/model/Year.class
 com/piun/piuproject/repository/YearRepository.class
 com/piun/piuproject/model/MonitoringType.class
 com/piun/piuproject/controller/ProjectController.class
+com/piun/piuproject/model/Jmc.class
+com/piun/piuproject/repository/JmcMonitoringMilestoneRepository.class
 com/piun/piuproject/model/InstallationMonitoringMilestone.class
 com/piun/piuproject/repository/TypeOfImpactRepository.class
 com/piun/piuproject/model/KPIContractSetup.class
@@ -128,7 +130,9 @@ com/piun/piuproject/repository/DocumentTagRepository.class
 com/piun/piuproject/repository/IndicatorTypeRepository.class
 com/piun/piuproject/model/CommunityEngagement.class
 com/piun/piuproject/repository/SupplyMonitoringMilestoneRepository.class
+com/piun/piuproject/model/JmcMonitoringMilestone.class
 com/piun/piuproject/repository/KPIForContractRepository.class
+com/piun/piuproject/repository/JmcRepository.class
 com/piun/piuproject/model/Contributor.class
 com/piun/piuproject/repository/ComponentRepository.class
 com/piun/piuproject/model/DocumentComment.class
