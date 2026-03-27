@@ -558,6 +558,7 @@
     "fileUploaded": "Fichier téléchargé avec succès",
     "fileUploadFailed": "Échec du téléchargement du fichier",
     "achievedExceedsSupplied": "La Valeur Réalisée Totale ({{total}}) ne peut pas dépasser la Qté Fournie ({{supplied}})",
+    "plannedExceedsSupplied": "La Valeur Planifiée Totale ({{total}}) ne peut pas dépasser la Qté Fournie ({{supplied}})",
     "supplyProgressSaved": "Progrès d'approvisionnement sauvegardé avec succès",
     "fillRequiredFields": "Veuillez remplir tous les champs obligatoires",
     "addAtLeastOneRow": "Veuillez ajouter au moins une ligne",

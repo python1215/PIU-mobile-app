@@ -558,6 +558,7 @@
     "fileUploaded": "File uploaded successfully",
     "fileUploadFailed": "File upload failed",
     "achievedExceedsSupplied": "Total Achieved Value ({{total}}) cannot exceed Supplied Qty ({{supplied}})",
+    "plannedExceedsSupplied": "Total Planned Value ({{total}}) cannot exceed Supplied Qty ({{supplied}})",
     "supplyProgressSaved": "Supply progress saved successfully",
     "fillRequiredFields": "Please fill in all required fields",
     "addAtLeastOneRow": "Please add at least one row",

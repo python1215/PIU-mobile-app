@@ -2425,6 +2425,10 @@ function ProjectActions() {
       toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
       return;
     }
+    if (supplied != null && supplied > 0 && totalPlanned > supplied) {
+      toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
+      return;
+    }
     if (supplied != null && supplied > 0 && totalAchieved > supplied) {
       toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
       return;
@@ -2988,7 +2992,7 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.plannedValuesForPeriod')}</label>
-                                        <input type="number" className="form-control form-control-sm" value={instMilestoneForm.plannedValues} onChange={e => setInstMilestoneForm(f => ({...f, plannedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const boq = item.boqQty; if (boq != null && boq > 0) { const prev = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); const total = prev + val; if (total > boq) toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(total * 100) / 100, boq })); }}} step="0.01" />
+                                        <input type="number" className="form-control form-control-sm" value={instMilestoneForm.plannedValues} onChange={e => setInstMilestoneForm(f => ({...f, plannedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const boq = item.boqQty; const supplied = item.suppliedQty; const prev = (instAllMilestones[item.id] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); const total = prev + val; if (boq != null && boq > 0 && total > boq) toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(total * 100) / 100, boq })); if (supplied != null && supplied > 0 && total > supplied) toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(total * 100) / 100, supplied: Math.round(supplied * 100) / 100 })); }} step="0.01" />
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.prevPlannedValues')}</label>
