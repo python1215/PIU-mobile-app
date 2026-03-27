@@ -2524,9 +2524,8 @@ function ProjectActions() {
   const handleJmcActivitySelect = (idx, act) => {
     const boqMatch = boqItems.find(b => b.activity === act.activity && b.project?.projectId === jmcProject);
     const spMatch = spItems.find(s => s.activityDescription === act.activity && s.project?.projectId === jmcProject);
-    const instMatch = instItems.find(ins => ins.activity === act.activity && ins.project?.projectId === jmcProject);
     const suppliedTotal = spMatch ? (spMatch.executedQuantities || 0) : 0;
-    const provStaking = instMatch ? (instMatch.provisionalStakingQty || 0) : 0;
+    const provStaking = act.provisionalStakingQty || 0;
     setJmcRows(prev => prev.map((r, i) => i === idx ? {
       ...r,
       activity: act.activity,
@@ -3403,7 +3402,7 @@ function ProjectActions() {
               <select className="form-select form-select-sm" value={jmcContractRefNo} onChange={e => {
                 const ref = e.target.value;
                 setJmcContractRefNo(ref);
-                const acts = designWorkItems.filter(d => d.project?.projectId === jmcProject && d.contractRefNo === ref);
+                const acts = instItems.filter(d => d.project?.projectId === jmcProject && d.contractRefNo === ref);
                 setJmcDwActivities(acts);
               }}>
                 <option value="">{t('projectActions.selectContractRefNo')}</option>
