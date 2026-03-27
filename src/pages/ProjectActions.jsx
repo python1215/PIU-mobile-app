@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { FiPlus, FiEdit2, FiTrash2, FiFileText, FiPackage, FiEye, FiClipboard, FiDownload, FiSettings, FiAlertTriangle, FiCheck, FiX, FiChevronDown, FiChevronRight, FiRefreshCw, FiSave } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
@@ -207,7 +207,7 @@ function ProjectActions() {
 
   const loadProjects = async () => {
     try {
-      const res = await axios.get('/api/projects');
+      const res = await api.get('/projects');
       setProjects(res.data);
       if (res.data.length > 0) {
         setSelectedProject('all');
@@ -220,14 +220,14 @@ function ProjectActions() {
   const loadReferenceData = async () => {
     try {
       const [qRes, catRes, donorRes, curRes, implRes, yrRes, unitRes, freqRes] = await Promise.all([
-        axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
-        axios.get('/api/setup/categories').catch(() => ({ data: [] })),
-        axios.get('/api/donors').catch(() => ({ data: [] })),
-        axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
-        axios.get('/api/project-actions/implementation-status').catch(() => ({ data: [] })),
-        axios.get('/api/setup/years').catch(() => ({ data: [] })),
-        axios.get('/api/setup/measurement-units').catch(() => ({ data: [] })),
-        axios.get('/api/setup/data-frequencies').catch(() => ({ data: [] }))
+        api.get('/setup/quarters').catch(() => ({ data: [] })),
+        api.get('/setup/categories').catch(() => ({ data: [] })),
+        api.get('/donors').catch(() => ({ data: [] })),
+        api.get('/setup/currencies').catch(() => ({ data: [] })),
+        api.get('/project-actions/implementation-status').catch(() => ({ data: [] })),
+        api.get('/setup/years').catch(() => ({ data: [] })),
+        api.get('/setup/measurement-units').catch(() => ({ data: [] })),
+        api.get('/setup/data-frequencies').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setCategories(catRes.data);
@@ -245,9 +245,9 @@ function ProjectActions() {
   const loadFinancialData = async () => {
     try {
       const [compRes, subRes, actRes] = await Promise.all([
-        axios.get('/api/financial/components').catch(() => ({ data: [] })),
-        axios.get('/api/financial/subcomponents').catch(() => ({ data: [] })),
-        axios.get('/api/financial/activities').catch(() => ({ data: [] }))
+        api.get('/financial/components').catch(() => ({ data: [] })),
+        api.get('/financial/subcomponents').catch(() => ({ data: [] })),
+        api.get('/financial/activities').catch(() => ({ data: [] }))
       ]);
       setComponents(compRes.data);
       setSubcomponents(subRes.data);
@@ -263,13 +263,13 @@ function ProjectActions() {
     try {
       const isAll = selectedProject === 'all';
       const [worksRes, goodsRes, dwpRes, boqRes, spRes, instRes, jmcRes] = await Promise.all([
-        isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/supply-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/installation').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/installation/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/jmc').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/jmc/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? api.get('/project-actions/works').catch(() => ({ data: [] })) : api.get(`/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/goods').catch(() => ({ data: [] })) : api.get(`/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/design-work-progress').catch(() => ({ data: [] })) : api.get(`/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/boq').catch(() => ({ data: [] })) : api.get(`/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/supply-progress').catch(() => ({ data: [] })) : api.get(`/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/installation').catch(() => ({ data: [] })) : api.get(`/project-actions/installation/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? api.get('/project-actions/jmc').catch(() => ({ data: [] })) : api.get(`/project-actions/jmc/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
@@ -280,12 +280,12 @@ function ProjectActions() {
       setJmcItems(jmcRes.data);
       const instMsMap = {};
       for (const inst of instRes.data) {
-        try { const msRes = await axios.get(`/api/project-actions/installation/${inst.id}/milestones`); instMsMap[inst.id] = msRes.data; } catch { instMsMap[inst.id] = []; }
+        try { const msRes = await api.get(`/project-actions/installation/${inst.id}/milestones`); instMsMap[inst.id] = msRes.data; } catch { instMsMap[inst.id] = []; }
       }
       setInstAllMilestones(instMsMap);
       const jmcMsMap = {};
       for (const j of jmcRes.data) {
-        try { const msRes = await axios.get(`/api/project-actions/jmc/${j.id}/milestones`); jmcMsMap[j.id] = msRes.data; } catch { jmcMsMap[j.id] = []; }
+        try { const msRes = await api.get(`/project-actions/jmc/${j.id}/milestones`); jmcMsMap[j.id] = msRes.data; } catch { jmcMsMap[j.id] = []; }
       }
       setJmcAllMilestones(jmcMsMap);
     } catch (error) {
@@ -379,10 +379,10 @@ function ProjectActions() {
 
     try {
       if (editingItem) {
-        await axios.put(`/api/project-actions/works/${editingItem.id}`, payload);
+        await api.put(`/project-actions/works/${editingItem.id}`, payload);
         toast.success(t('common.updateSuccess') || 'Updated successfully');
       } else {
-        await axios.post('/api/project-actions/works', payload);
+        await api.post('/project-actions/works', payload);
         toast.success(t('common.createSuccess') || 'Created successfully');
       }
       const savedProject = worksFormProject || selectedProject;
@@ -401,7 +401,7 @@ function ProjectActions() {
   const handleDeleteWorks = async (id) => {
     if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
     try {
-      await axios.delete(`/api/project-actions/works/${id}`);
+      await api.delete(`/project-actions/works/${id}`);
       toast.success(t('common.deleteSuccess') || 'Deleted successfully');
       loadContracts();
     } catch (error) {
@@ -438,10 +438,10 @@ function ProjectActions() {
 
     try {
       if (editingItem) {
-        await axios.put(`/api/project-actions/goods/${editingItem.id}`, payload);
+        await api.put(`/project-actions/goods/${editingItem.id}`, payload);
         toast.success(t('common.updateSuccess') || 'Updated successfully');
       } else {
-        await axios.post('/api/project-actions/goods', payload);
+        await api.post('/project-actions/goods', payload);
         toast.success(t('common.createSuccess') || 'Created successfully');
       }
       const savedProject = worksFormProject || selectedProject;
@@ -460,7 +460,7 @@ function ProjectActions() {
   const handleDeleteGoods = async (id) => {
     if (!confirm(t('common.confirmDelete') || 'Are you sure?')) return;
     try {
-      await axios.delete(`/api/project-actions/goods/${id}`);
+      await api.delete(`/project-actions/goods/${id}`);
       toast.success(t('common.deleteSuccess') || 'Deleted successfully');
       loadContracts();
     } catch (error) {
@@ -748,9 +748,9 @@ function ProjectActions() {
     if (!type || !dwpProject) return;
     try {
       const endpoint = type === 'works'
-        ? `/api/project-actions/works/project/${dwpProject}`
-        : `/api/project-actions/goods/project/${dwpProject}`;
-      const res = await axios.get(endpoint);
+        ? `/project-actions/works/project/${dwpProject}`
+        : `/project-actions/goods/project/${dwpProject}`;
+      const res = await api.get(endpoint);
       setDwpContractOptions(res.data.filter(c => c.contractRefNo));
     } catch (e) {
       console.error('Error loading contracts:', e);
@@ -849,7 +849,7 @@ function ProjectActions() {
         duration: row.duration !== '' ? parseFloat(row.duration) : null,
         durationUnit: row.durationUnit || 'Days'
       }));
-      await axios.post('/api/project-actions/design-work-progress/batch', items);
+      await api.post('/project-actions/design-work-progress/batch', items);
       toast.success('Design work progress saved successfully');
       setDwpRows([]);
       setDwpYear('');
@@ -868,7 +868,7 @@ function ProjectActions() {
   const handleDeleteDwpItem = async (id) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
-      await axios.delete(`/api/project-actions/design-work-progress/${id}`);
+      await api.delete(`/project-actions/design-work-progress/${id}`);
       toast.success('Item deleted');
       loadContracts();
     } catch (e) {
@@ -906,7 +906,7 @@ function ProjectActions() {
   const handleDwpEditSave = async () => {
     if (!dwpModalItem) return;
     try {
-      await axios.put(`/api/project-actions/design-work-progress/${dwpModalItem.id}`, {
+      await api.put(`/project-actions/design-work-progress/${dwpModalItem.id}`, {
         ...dwpModalItem,
         year: dwpEditForm.yearId ? { id: parseInt(dwpEditForm.yearId) } : null,
         contractType: dwpEditForm.contractType,
@@ -1092,9 +1092,9 @@ function ProjectActions() {
     if (!type || !boqProject) return;
     try {
       const endpoint = type === 'works'
-        ? `/api/project-actions/works/project/${boqProject}`
-        : `/api/project-actions/goods/project/${boqProject}`;
-      const res = await axios.get(endpoint);
+        ? `/project-actions/works/project/${boqProject}`
+        : `/project-actions/goods/project/${boqProject}`;
+      const res = await api.get(endpoint);
       setBoqContractOptions(res.data.filter(c => c.contractRefNo));
     } catch (e) {
       console.error('Error loading contracts:', e);
@@ -1152,7 +1152,7 @@ function ProjectActions() {
         unit: row.unit,
         boqQuantity: parseFloat(row.boqQuantity) || 0
       }));
-      await axios.post('/api/project-actions/boq/batch', items);
+      await api.post('/project-actions/boq/batch', items);
       toast.success('BOQ items saved successfully');
       setBoqRows([]);
       setBoqDate('');
@@ -1171,7 +1171,7 @@ function ProjectActions() {
   const handleDeleteBoqItem = async (id) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
-      await axios.delete(`/api/project-actions/boq/${id}`);
+      await api.delete(`/project-actions/boq/${id}`);
       toast.success('Item deleted');
       loadContracts();
     } catch (e) {
@@ -1204,7 +1204,7 @@ function ProjectActions() {
   const handleBoqEditSave = async () => {
     if (!boqModalItem) return;
     try {
-      await axios.put(`/api/project-actions/boq/${boqModalItem.id}`, {
+      await api.put(`/project-actions/boq/${boqModalItem.id}`, {
         ...boqModalItem,
         entryDate: boqEditForm.entryDate,
         contractType: boqEditForm.contractType,
@@ -1299,9 +1299,9 @@ function ProjectActions() {
     if (!type || !spProject) return;
     try {
       const endpoint = type === 'works'
-        ? `/api/project-actions/works/project/${spProject}`
-        : `/api/project-actions/goods/project/${spProject}`;
-      const res = await axios.get(endpoint);
+        ? `/project-actions/works/project/${spProject}`
+        : `/project-actions/goods/project/${spProject}`;
+      const res = await api.get(endpoint);
       setSpContractOptions(res.data.filter(c => c.contractRefNo));
     } catch (e) { console.error('Error loading contracts:', e); }
   };
@@ -1320,7 +1320,7 @@ function ProjectActions() {
     setSpRows(prev => prev.map(row => ({ ...row, activityId: generateSpItemId(refNo) })));
     if (!refNo) return;
     try {
-      const res = await axios.get(`/api/project-actions/boq/contract/${refNo}`);
+      const res = await api.get(`/project-actions/boq/contract/${refNo}`);
       setSpBoqActivities(res.data);
     } catch (e) { console.error('Error loading BOQ activities:', e); }
   };
@@ -1415,7 +1415,7 @@ function ProjectActions() {
         durationUnit: row.durationUnit,
         observation: row.observation
       }));
-      await axios.post('/api/project-actions/supply-progress/batch', items);
+      await api.post('/project-actions/supply-progress/batch', items);
       toast.success(t('projectActions.supplyProgressSaved'));
       setSpRows([]);
       setSpYear('');
@@ -1435,13 +1435,13 @@ function ProjectActions() {
   const loadAllSpRecords = async () => {
     setSpAllLoading(true);
     try {
-      const res = await axios.get('/api/project-actions/supply-progress');
+      const res = await api.get('/project-actions/supply-progress');
       const records = res.data;
       setSpAllRecords(records);
       const msMap = {};
       await Promise.all(records.map(async (rec) => {
         try {
-          const msRes = await axios.get(`/api/project-actions/supply-progress/${rec.id}/milestones`);
+          const msRes = await api.get(`/project-actions/supply-progress/${rec.id}/milestones`);
           msMap[rec.id] = msRes.data;
         } catch { msMap[rec.id] = []; }
       }));
@@ -1453,7 +1453,7 @@ function ProjectActions() {
   const handleDeleteSpItem = async (id) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/supply-progress/${id}`);
+      await api.delete(`/project-actions/supply-progress/${id}`);
       toast.success(t('common.deleted'));
       loadAllSpRecords();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
@@ -1478,7 +1478,7 @@ function ProjectActions() {
     if (!spModalItem) return;
     try {
       const dur = calcSpDuration(spEditForm.startDate, spEditForm.endDate, spEditForm.durationUnit);
-      await axios.put(`/api/project-actions/supply-progress/${spModalItem.id}`, {
+      await api.put(`/project-actions/supply-progress/${spModalItem.id}`, {
         ...spModalItem,
         activityId: spEditForm.activityId,
         activityDescription: spEditForm.activityDescription,
@@ -1520,7 +1520,7 @@ function ProjectActions() {
     }
     try {
       if (spEditingMilestone) {
-        await axios.put(`/api/project-actions/supply-progress/milestones/${spEditingMilestone.id}`, {
+        await api.put(`/project-actions/supply-progress/milestones/${spEditingMilestone.id}`, {
           logDate: form.logDate,
           quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
           plannedValues: parseFloat(form.plannedValues) || 0,
@@ -1529,7 +1529,7 @@ function ProjectActions() {
         });
         toast.success(t('projectActions.milestoneUpdated'));
       } else {
-        await axios.post(`/api/project-actions/supply-progress/${form.supplyProgressId}/milestones`, {
+        await api.post(`/project-actions/supply-progress/${form.supplyProgressId}/milestones`, {
           logDate: form.logDate,
           quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
           plannedValues: parseFloat(form.plannedValues) || 0,
@@ -1548,7 +1548,7 @@ function ProjectActions() {
   const handleDeleteSpMilestone = async (msId) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/supply-progress/milestones/${msId}`);
+      await api.delete(`/project-actions/supply-progress/milestones/${msId}`);
       toast.success(t('common.deleted'));
       loadAllSpRecords();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
@@ -2260,9 +2260,9 @@ function ProjectActions() {
     if (!type || !instProject) return;
     try {
       const url = type === 'works'
-        ? `/api/project-actions/works/project/${instProject}`
-        : `/api/project-actions/goods/project/${instProject}`;
-      const res = await axios.get(url);
+        ? `/project-actions/works/project/${instProject}`
+        : `/project-actions/goods/project/${instProject}`;
+      const res = await api.get(url);
       const opts = res.data.map(c => ({ contractRefNo: c.contractRefNo })).filter(c => c.contractRefNo);
       const unique = [...new Map(opts.map(o => [o.contractRefNo, o])).values()];
       setInstContractOptions(unique);
@@ -2276,8 +2276,8 @@ function ProjectActions() {
     if (!ref) return;
     try {
       const [spRes, boqRes] = await Promise.all([
-        axios.get(`/api/project-actions/supply-progress/contract/${ref}`).catch(() => ({ data: [] })),
-        axios.get(`/api/project-actions/boq/contract/${ref}`).catch(() => ({ data: [] }))
+        api.get(`/project-actions/supply-progress/contract/${ref}`).catch(() => ({ data: [] })),
+        api.get(`/project-actions/boq/contract/${ref}`).catch(() => ({ data: [] }))
       ]);
       const spData = spRes.data.map(sp => {
         const boqMatch = boqRes.data.find(b => b.activity === sp.activityDescription);
@@ -2374,7 +2374,7 @@ function ProjectActions() {
         globalProgressRate: calcInstGlobalRate(row.rate),
         observation: row.observation
       }));
-      await axios.post('/api/project-actions/installation/batch', items);
+      await api.post('/project-actions/installation/batch', items);
       toast.success('Installation records saved successfully');
       setInstRows([]);
       setInstYear('');
@@ -2390,7 +2390,7 @@ function ProjectActions() {
   const handleDeleteInstItem = async (id) => {
     if (!window.confirm('Delete this record?')) return;
     try {
-      await axios.delete(`/api/project-actions/installation/${id}`);
+      await api.delete(`/project-actions/installation/${id}`);
       toast.success('Record deleted');
       loadContracts();
     } catch { toast.error('Error deleting record'); }
@@ -2421,7 +2421,7 @@ function ProjectActions() {
     try {
       const pct = calcInstPercentage(instEditForm.boqQty, instEditForm.executedQty);
       const gpr = calcInstGlobalRate(instEditForm.rate);
-      await axios.put(`/api/project-actions/installation/${instModalItem.id}`, {
+      await api.put(`/project-actions/installation/${instModalItem.id}`, {
         ...instModalItem,
         year: instEditForm.yearId ? { id: parseInt(instEditForm.yearId) } : null, contractType: instEditForm.contractType, contractRefNo: instEditForm.contractRefNo,
         itemId: instEditForm.itemId, activity: instEditForm.activity, rate: parseFloat(instEditForm.rate) || 0,
@@ -2489,10 +2489,10 @@ function ProjectActions() {
         status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks
       };
       if (instEditingMilestone) {
-        await axios.put(`/api/project-actions/installation/milestones/${instEditingMilestone.id}`, payload);
+        await api.put(`/project-actions/installation/milestones/${instEditingMilestone.id}`, payload);
         toast.success(t('projectActions.milestoneUpdated'));
       } else {
-        await axios.post(`/api/project-actions/installation/${form.installationId}/milestones`, payload);
+        await api.post(`/project-actions/installation/${form.installationId}/milestones`, payload);
         toast.success(t('projectActions.milestoneSaved'));
       }
       setInstMilestoneForm({ installationId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
@@ -2505,7 +2505,7 @@ function ProjectActions() {
   const handleDeleteInstMilestone = async (msId) => {
     if (!window.confirm(t('messages.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/installation/milestones/${msId}`);
+      await api.delete(`/project-actions/installation/milestones/${msId}`);
       toast.success(t('messages.deleteSuccess'));
       loadContracts();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
@@ -2561,7 +2561,7 @@ function ProjectActions() {
         provisionalStakingQty: parseFloat(r.provisionalStakingQty) || 0,
         executedQty: 0, percentage: 0, globalProgressRate: 0
       }));
-      await axios.post('/api/project-actions/jmc/batch', batch);
+      await api.post('/project-actions/jmc/batch', batch);
       toast.success(t('projectActions.recordSaved'));
       setJmcRows([]);
       loadContracts();
@@ -2590,7 +2590,7 @@ function ProjectActions() {
       const execQty = parseFloat(form.executedQty) || 0;
       const boq = parseFloat(form.boqQty) || 0;
       const pct = calcJmcPercentage(boq, execQty);
-      await axios.put(`/api/project-actions/jmc/${jmcModalItem.id}`, {
+      await api.put(`/project-actions/jmc/${jmcModalItem.id}`, {
         ...jmcModalItem,
         rate: parseFloat(form.rate) || 0, unit: form.unit, boqQty: boq,
         suppliedQty: parseFloat(form.suppliedQty) || 0,
@@ -2607,7 +2607,7 @@ function ProjectActions() {
   const handleDeleteJmc = async (id) => {
     if (!window.confirm(t('messages.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/jmc/${id}`);
+      await api.delete(`/project-actions/jmc/${id}`);
       toast.success(t('messages.deleteSuccess'));
       loadContracts();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
@@ -2658,10 +2658,10 @@ function ProjectActions() {
         status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks
       };
       if (jmcEditingMilestone) {
-        await axios.put(`/api/project-actions/jmc/milestones/${jmcEditingMilestone.id}`, payload);
+        await api.put(`/project-actions/jmc/milestones/${jmcEditingMilestone.id}`, payload);
         toast.success(t('projectActions.milestoneUpdated'));
       } else {
-        await axios.post(`/api/project-actions/jmc/${form.jmcId}/milestones`, payload);
+        await api.post(`/project-actions/jmc/${form.jmcId}/milestones`, payload);
         toast.success(t('projectActions.milestoneSaved'));
       }
       setJmcMilestoneForm({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
@@ -2674,7 +2674,7 @@ function ProjectActions() {
   const handleDeleteJmcMilestone = async (msId) => {
     if (!window.confirm(t('messages.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/jmc/milestones/${msId}`);
+      await api.delete(`/project-actions/jmc/milestones/${msId}`);
       toast.success(t('messages.deleteSuccess'));
       loadContracts();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
@@ -3237,7 +3237,7 @@ function ProjectActions() {
                                               try {
                                                 const fd = new FormData();
                                                 fd.append('file', file);
-                                                const res = await axios.post('/api/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                                                const res = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                                                 setInstMilestoneForm(f => ({...f, attachmentPath: res.data.url}));
                                                 toast.success(t('projectActions.fileUploaded'));
                                               } catch (err) { toast.error(err.response?.data?.error || t('projectActions.fileUploadFailed')); }
@@ -3513,7 +3513,7 @@ function ProjectActions() {
                           <button className="btn btn-sm p-0" onClick={() => {
                             setJmcExpandedRows(prev => ({...prev, [item.id]: !prev[item.id]}));
                             if (!jmcAllMilestones[item.id]) {
-                              axios.get(`/api/project-actions/jmc/${item.id}/milestones`).then(res => setJmcAllMilestones(prev => ({...prev, [item.id]: res.data}))).catch(() => {});
+                              api.get(`/project-actions/jmc/${item.id}/milestones`).then(res => setJmcAllMilestones(prev => ({...prev, [item.id]: res.data}))).catch(() => {});
                             }
                           }}>
                             {jmcExpandedRows[item.id] ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
@@ -3723,7 +3723,7 @@ function ProjectActions() {
                                               try {
                                                 const fd = new FormData();
                                                 fd.append('file', file);
-                                                const res = await axios.post('/api/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                                                const res = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                                                 setJmcMilestoneForm(f => ({...f, attachmentPath: res.data.url}));
                                                 toast.success(t('projectActions.fileUploaded'));
                                               } catch (err) { toast.error(err.response?.data?.error || t('projectActions.fileUploadFailed')); }
@@ -4148,9 +4148,9 @@ function ProjectActions() {
     try {
       const encodedProject = encodeURIComponent(dmProject);
       const endpoint = type === 'works'
-        ? `/api/project-actions/works/project/${encodedProject}`
-        : `/api/project-actions/goods/project/${encodedProject}`;
-      const res = await axios.get(endpoint);
+        ? `/project-actions/works/project/${encodedProject}`
+        : `/project-actions/goods/project/${encodedProject}`;
+      const res = await api.get(endpoint);
       setDmContractOptions(res.data.filter(c => c.contractRefNo));
     } catch (e) {
       console.error('Error loading contracts:', e);
@@ -4160,12 +4160,12 @@ function ProjectActions() {
   const loadAllDmRecords = async () => {
     setDmAllLoading(true);
     try {
-      let url = '/api/project-actions/design-monitoring';
+      let url = '/project-actions/design-monitoring';
       if (dmProject && dmContractType && dmContractRefNo) {
         const savedParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: dmContractRefNo });
-        url = `/api/project-actions/design-monitoring/filter?${savedParams}`;
+        url = `/project-actions/design-monitoring/filter?${savedParams}`;
       }
-      const res = await axios.get(url);
+      const res = await api.get(url);
       setDmAllRecords(res.data);
       const allMs = {};
       res.data.forEach(rec => { allMs[rec.id] = rec.milestones || []; });
@@ -4185,17 +4185,17 @@ function ProjectActions() {
     try {
       const filterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
       if (dmYear) filterParams.set('yearId', dmYear);
-      const res = await axios.get(`/api/project-actions/design-work-progress/filter?${filterParams}`);
+      const res = await api.get(`/project-actions/design-work-progress/filter?${filterParams}`);
       setDmItems(res.data);
       if (res.data.length > 0) {
-        try { await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${filterParams}`); } catch (importErr) { console.warn('Import skipped:', importErr); }
+        try { await api.post(`/project-actions/design-monitoring/import-from-design-work?${filterParams}`); } catch (importErr) { console.warn('Import skipped:', importErr); }
       }
       const monFilterParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: refNo });
-      const monRes = await axios.get(`/api/project-actions/design-monitoring/filter?${monFilterParams}`);
+      const monRes = await api.get(`/project-actions/design-monitoring/filter?${monFilterParams}`);
       const monItems = monRes.data;
       if (monItems.length > 0) {
         const milestonePromises = monItems.map(mi =>
-          axios.get(`/api/project-actions/design-monitoring/${mi.id}/milestones`)
+          api.get(`/project-actions/design-monitoring/${mi.id}/milestones`)
             .then(r => ({ activityId: mi.activityId, monitoringId: mi.id, milestones: r.data }))
             .catch(() => ({ activityId: mi.activityId, monitoringId: mi.id, milestones: [] }))
         );
@@ -4235,7 +4235,7 @@ function ProjectActions() {
     try {
       const importParams = new URLSearchParams({ projectId: dmProject, contractType: dmContractType, contractRefNo: dmContractRefNo });
       if (dmYear) importParams.set('yearId', dmYear);
-      const res = await axios.post(`/api/project-actions/design-monitoring/import-from-design-work?${importParams}`);
+      const res = await api.post(`/project-actions/design-monitoring/import-from-design-work?${importParams}`);
       if (res.data.imported > 0) {
         toast.success(`${res.data.imported} ${t('projectActions.activitiesImported')}`);
         handleDmContractRefChange(dmContractRefNo);
@@ -4252,7 +4252,7 @@ function ProjectActions() {
   const handleDmDeleteActivity = async (id) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/design-monitoring/${id}`);
+      await api.delete(`/project-actions/design-monitoring/${id}`);
       setDmItems(prev => prev.filter(item => item.id !== id));
       toast.success(t('common.deleted'));
     } catch (e) {
@@ -4294,7 +4294,7 @@ function ProjectActions() {
         contractType: dmSavedEditForm.contractType,
         contractRefNo: dmSavedEditForm.contractRefNo
       };
-      await axios.put(`/api/project-actions/design-monitoring/${dmSavedModalItem.id}`, payload);
+      await api.put(`/project-actions/design-monitoring/${dmSavedModalItem.id}`, payload);
       toast.success(t('common.saved'));
       closeDmSavedModal();
       loadAllDmRecords();
@@ -4306,8 +4306,8 @@ function ProjectActions() {
   const handleDmSavedMilestoneDelete = async (milestoneId, monitoringId) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/design-monitoring/milestones/${milestoneId}`);
-      const msRes = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
+      await api.delete(`/project-actions/design-monitoring/milestones/${milestoneId}`);
+      const msRes = await api.get(`/project-actions/design-monitoring/${monitoringId}/milestones`);
       setDmAllMilestones(prev => ({ ...prev, [monitoringId]: msRes.data }));
       toast.success(t('common.deleted'));
     } catch (e) {
@@ -4340,8 +4340,8 @@ function ProjectActions() {
         status: dmSavedMsEditForm.status || null,
         remarks: dmSavedMsEditForm.remarks || null
       };
-      await axios.put(`/api/project-actions/design-monitoring/milestones/${dmSavedMsEditId}`, payload);
-      const msRes = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
+      await api.put(`/project-actions/design-monitoring/milestones/${dmSavedMsEditId}`, payload);
+      const msRes = await api.get(`/project-actions/design-monitoring/${monitoringId}/milestones`);
       setDmAllMilestones(prev => ({ ...prev, [monitoringId]: msRes.data }));
       setDmSavedMsEditId(null);
       toast.success(t('common.saved'));
@@ -4353,7 +4353,7 @@ function ProjectActions() {
   const handleDmSavedDelete = async (id) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/design-monitoring/${id}`);
+      await api.delete(`/project-actions/design-monitoring/${id}`);
       setDmAllRecords(prev => prev.filter(r => r.id !== id));
       toast.success(t('common.deleted'));
     } catch (e) {
@@ -4384,7 +4384,7 @@ function ProjectActions() {
         overallPlannedQuantities: dmEditForm.overallPlannedQuantities ? parseFloat(dmEditForm.overallPlannedQuantities) : null,
         year: dmEditForm.yearId ? { id: parseInt(dmEditForm.yearId) } : null
       };
-      await axios.put(`/api/project-actions/design-monitoring/${dmEditingActivity.id}`, payload);
+      await api.put(`/project-actions/design-monitoring/${dmEditingActivity.id}`, payload);
       toast.success(t('common.saved'));
       setDmEditingActivity(null);
       handleDmContractRefChange(dmContractRefNo);
@@ -4397,7 +4397,7 @@ function ProjectActions() {
     const monitoringId = dmMonitoringMap[activityId];
     if (!monitoringId) return;
     try {
-      const res = await axios.get(`/api/project-actions/design-monitoring/${monitoringId}/milestones`);
+      const res = await api.get(`/project-actions/design-monitoring/${monitoringId}/milestones`);
       setDmMilestones(prev => ({ ...prev, [activityId]: res.data }));
     } catch (e) {
       console.error('Error loading milestones:', e);
@@ -4450,10 +4450,10 @@ function ProjectActions() {
     };
     try {
       if (dmEditingMilestone) {
-        await axios.put(`/api/project-actions/design-monitoring/milestones/${dmEditingMilestone.id}`, payload);
+        await api.put(`/project-actions/design-monitoring/milestones/${dmEditingMilestone.id}`, payload);
         toast.success(t('common.saved'));
       } else {
-        await axios.post(`/api/project-actions/design-monitoring/${dmMilestoneForm.monitoringId}/milestones`, payload);
+        await api.post(`/project-actions/design-monitoring/${dmMilestoneForm.monitoringId}/milestones`, payload);
         toast.success(t('common.saved'));
       }
       loadDmMilestonesByActivity(dmMilestoneForm.activityId);
@@ -4467,7 +4467,7 @@ function ProjectActions() {
   const handleDmDeleteMilestone = async (milestoneId, activityId) => {
     if (!confirm(t('common.confirmDelete'))) return;
     try {
-      await axios.delete(`/api/project-actions/design-monitoring/milestones/${milestoneId}`);
+      await api.delete(`/project-actions/design-monitoring/milestones/${milestoneId}`);
       loadDmMilestonesByActivity(activityId);
       toast.success(t('common.deleted'));
     } catch (e) {
