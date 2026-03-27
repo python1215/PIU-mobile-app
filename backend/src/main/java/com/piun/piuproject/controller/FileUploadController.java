@@ -26,8 +26,8 @@ public class FileUploadController {
         }
 
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
+        if (contentType == null || !(contentType.startsWith("image/") || contentType.equals("application/pdf") || contentType.startsWith("application/vnd.") || contentType.equals("application/msword") || contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document") || contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Only images, PDFs, and documents are allowed"));
         }
 
         long maxSize = 10 * 1024 * 1024;

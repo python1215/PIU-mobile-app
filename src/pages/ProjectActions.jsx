@@ -136,6 +136,7 @@ function ProjectActions() {
   const [instMilestoneForm, setInstMilestoneForm] = useState({ installationId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
   const [instShowMilestoneForm, setInstShowMilestoneForm] = useState(null);
   const [instEditingMilestone, setInstEditingMilestone] = useState(null);
+  const [instUploadingFile, setInstUploadingFile] = useState(false);
 
   const [dmItems, setDmItems] = useState([]);
   const [dmProject, setDmProject] = useState('');
@@ -2518,7 +2519,7 @@ function ProjectActions() {
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}
+                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setInstEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{form.unit && !(dmUnits || []).some(u => u.unit === form.unit) && <option value={form.unit}>{form.unit}</option>}{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>
@@ -2836,6 +2837,7 @@ function ProjectActions() {
                                       <th>{t('projectActions.plannedVsAchieved')}</th>
                                       <th>{t('projectActions.achievedVsGlobalTargets')}</th>
                                       <th>{t('common.status')}</th>
+                                      <th>{t('projectActions.attachPhotos')}</th>
                                       <th>{t('projectActions.remarks')}</th>
                                       <th>{t('common.actions')}</th>
                                     </tr>
@@ -2861,6 +2863,7 @@ function ProjectActions() {
                                         <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
                                         <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
                                         <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                        <td>{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary" style={{fontSize:'inherit'}}>{ms.attachmentPath.split('/').pop()}</a> : '-'}</td>
                                         <td>{ms.remarks || '-'}</td>
                                         <td>
                                           <div className="d-flex gap-1">
@@ -3016,7 +3019,29 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.attachPhotos')}</label>
-                                        <input type="text" className="form-control form-control-sm" value={instMilestoneForm.attachmentPath} onChange={e => setInstMilestoneForm(f => ({...f, attachmentPath: e.target.value}))} placeholder="URL or path" />
+                                        {instMilestoneForm.attachmentPath ? (
+                                          <div className="d-flex align-items-center gap-1">
+                                            <a href={instMilestoneForm.attachmentPath} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary p-1 flex-grow-1 text-truncate" style={{fontSize:'0.7rem'}}>{instMilestoneForm.attachmentPath.split('/').pop()}</a>
+                                            <button type="button" className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => setInstMilestoneForm(f => ({...f, attachmentPath: ''}))}><FiX size={12} /></button>
+                                          </div>
+                                        ) : (
+                                          <div className="position-relative">
+                                            <input type="file" className="form-control form-control-sm" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" disabled={instUploadingFile} onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (!file) return;
+                                              setInstUploadingFile(true);
+                                              try {
+                                                const fd = new FormData();
+                                                fd.append('file', file);
+                                                const res = await axios.post('/api/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                                                setInstMilestoneForm(f => ({...f, attachmentPath: res.data.url}));
+                                                toast.success(t('projectActions.fileUploaded'));
+                                              } catch (err) { toast.error(err.response?.data?.error || t('projectActions.fileUploadFailed')); }
+                                              finally { setInstUploadingFile(false); }
+                                            }} />
+                                            {instUploadingFile && <div className="position-absolute top-50 end-0 translate-middle-y pe-2"><div className="spinner-border spinner-border-sm text-primary"></div></div>}
+                                          </div>
+                                        )}
                                       </div>
                                       <div className="col-md-3">
                                         <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
