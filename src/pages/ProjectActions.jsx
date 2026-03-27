@@ -15,6 +15,7 @@ const PATH_TO_TAB = {
   'boq': 'boq',
   'supply-progress': 'supplyProgress',
   'installation': 'installation',
+  'jmc': 'jmc',
 };
 
 const DM_STATUS_COLORS = {
@@ -138,6 +139,25 @@ function ProjectActions() {
   const [instEditingMilestone, setInstEditingMilestone] = useState(null);
   const [instUploadingFile, setInstUploadingFile] = useState(false);
 
+  const [jmcItems, setJmcItems] = useState([]);
+  const [jmcYear, setJmcYear] = useState('');
+  const [jmcProject, setJmcProject] = useState('');
+  const [jmcContractType, setJmcContractType] = useState('');
+  const [jmcContractRefNo, setJmcContractRefNo] = useState('');
+  const [jmcContractOptions, setJmcContractOptions] = useState([]);
+  const [jmcDwActivities, setJmcDwActivities] = useState([]);
+  const [jmcRows, setJmcRows] = useState([]);
+  const [jmcSaving, setJmcSaving] = useState(false);
+  const [jmcModalItem, setJmcModalItem] = useState(null);
+  const [jmcModalMode, setJmcModalMode] = useState('view');
+  const [jmcEditForm, setJmcEditForm] = useState({});
+  const [jmcAllMilestones, setJmcAllMilestones] = useState({});
+  const [jmcExpandedRows, setJmcExpandedRows] = useState({});
+  const [jmcMilestoneForm, setJmcMilestoneForm] = useState({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+  const [jmcShowMilestoneForm, setJmcShowMilestoneForm] = useState(null);
+  const [jmcEditingMilestone, setJmcEditingMilestone] = useState(null);
+  const [jmcUploadingFile, setJmcUploadingFile] = useState(false);
+
   const [dmItems, setDmItems] = useState([]);
   const [dmProject, setDmProject] = useState('');
   const [dmContractType, setDmContractType] = useState('');
@@ -242,13 +262,14 @@ function ProjectActions() {
     setLoading(true);
     try {
       const isAll = selectedProject === 'all';
-      const [worksRes, goodsRes, dwpRes, boqRes, spRes, instRes] = await Promise.all([
+      const [worksRes, goodsRes, dwpRes, boqRes, spRes, instRes, jmcRes] = await Promise.all([
         isAll ? axios.get('/api/project-actions/works').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/works/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/goods').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/goods/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/design-work-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/design-work-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/boq').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/boq/project/${selectedProject}`).catch(() => ({ data: [] })),
         isAll ? axios.get('/api/project-actions/supply-progress').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/supply-progress/project/${selectedProject}`).catch(() => ({ data: [] })),
-        isAll ? axios.get('/api/project-actions/installation').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/installation/project/${selectedProject}`).catch(() => ({ data: [] }))
+        isAll ? axios.get('/api/project-actions/installation').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/installation/project/${selectedProject}`).catch(() => ({ data: [] })),
+        isAll ? axios.get('/api/project-actions/jmc').catch(() => ({ data: [] })) : axios.get(`/api/project-actions/jmc/project/${selectedProject}`).catch(() => ({ data: [] }))
       ]);
       setWorks(worksRes.data);
       setGoods(goodsRes.data);
@@ -256,11 +277,17 @@ function ProjectActions() {
       setBoqItems(boqRes.data);
       setSpItems(spRes.data);
       setInstItems(instRes.data);
+      setJmcItems(jmcRes.data);
       const instMsMap = {};
       for (const inst of instRes.data) {
         try { const msRes = await axios.get(`/api/project-actions/installation/${inst.id}/milestones`); instMsMap[inst.id] = msRes.data; } catch { instMsMap[inst.id] = []; }
       }
       setInstAllMilestones(instMsMap);
+      const jmcMsMap = {};
+      for (const j of jmcRes.data) {
+        try { const msRes = await axios.get(`/api/project-actions/jmc/${j.id}/milestones`); jmcMsMap[j.id] = msRes.data; } catch { jmcMsMap[j.id] = []; }
+      }
+      setJmcAllMilestones(jmcMsMap);
     } catch (error) {
       console.error('Error loading contracts:', error);
     } finally {
@@ -2484,6 +2511,176 @@ function ProjectActions() {
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
   };
 
+  const addJmcRow = () => {
+    setJmcRows(prev => [...prev, { activity: '', activitySearch: '', rate: '', unit: '', boqQty: '', suppliedQty: '', provisionalStakingQty: '' }]);
+  };
+
+  const removeJmcRow = (idx) => setJmcRows(prev => prev.filter((_, i) => i !== idx));
+
+  const updateJmcRow = (idx, field, value) => {
+    setJmcRows(prev => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r));
+  };
+
+  const handleJmcActivitySelect = (idx, act) => {
+    const boqMatch = boqItems.find(b => b.activity === act.activity && b.project?.projectId === jmcProject);
+    const spMatch = spItems.find(s => s.activityDescription === act.activity && s.project?.projectId === jmcProject);
+    const instMatch = instItems.find(ins => ins.activity === act.activity && ins.project?.projectId === jmcProject);
+    const suppliedTotal = spMatch ? (spMatch.executedQuantities || 0) : 0;
+    const provStaking = instMatch ? (instMatch.provisionalStakingQty || 0) : 0;
+    setJmcRows(prev => prev.map((r, i) => i === idx ? {
+      ...r,
+      activity: act.activity,
+      activitySearch: act.activity,
+      itemId: act.itemId || '',
+      rate: act.rate || '',
+      unit: act.unit || '',
+      boqQty: boqMatch ? (boqMatch.boqQuantity || '') : '',
+      suppliedQty: suppliedTotal,
+      provisionalStakingQty: provStaking
+    } : r));
+  };
+
+  const handleJmcSave = async () => {
+    if (!jmcProject || !jmcContractType || !jmcContractRefNo) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    const validRows = jmcRows.filter(r => r.activity);
+    if (!validRows.length) { toast.error(t('projectActions.addAtLeastOneRow')); return; }
+    setJmcSaving(true);
+    try {
+      const yearObj = jmcYear ? { id: parseInt(jmcYear) } : null;
+      const batch = validRows.map(r => ({
+        year: yearObj,
+        entryDate: new Date().toISOString().split('T')[0],
+        project: { projectId: jmcProject },
+        contractType: jmcContractType,
+        contractRefNo: jmcContractRefNo,
+        itemId: r.itemId || '',
+        activity: r.activity,
+        rate: parseFloat(r.rate) || 0,
+        unit: r.unit,
+        boqQty: parseFloat(r.boqQty) || 0,
+        suppliedQty: parseFloat(r.suppliedQty) || 0,
+        provisionalStakingQty: parseFloat(r.provisionalStakingQty) || 0,
+        executedQty: 0, percentage: 0, globalProgressRate: 0
+      }));
+      await axios.post('/api/project-actions/jmc/batch', batch);
+      toast.success(t('projectActions.recordSaved'));
+      setJmcRows([]);
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorSaving')); console.error(e); }
+    finally { setJmcSaving(false); }
+  };
+
+  const openJmcModal = (item, mode) => {
+    setJmcModalItem(item);
+    setJmcModalMode(mode);
+    setJmcEditForm({
+      rate: item.rate ?? '', unit: item.unit || '', boqQty: item.boqQty ?? '', suppliedQty: item.suppliedQty ?? '',
+      provisionalStakingQty: item.provisionalStakingQty ?? '', executedQty: item.executedQty ?? '',
+      percentage: item.percentage ?? '', globalProgressRate: item.globalProgressRate ?? '', observation: item.observation || ''
+    });
+  };
+
+  const calcJmcPercentage = (boq, exec) => {
+    const b = parseFloat(boq); const e = parseFloat(exec);
+    return (b > 0 && !isNaN(e)) ? Math.round((e / b) * 10000) / 100 : 0;
+  };
+
+  const handleJmcEditSave = async () => {
+    const form = jmcEditForm;
+    try {
+      const execQty = parseFloat(form.executedQty) || 0;
+      const boq = parseFloat(form.boqQty) || 0;
+      const pct = calcJmcPercentage(boq, execQty);
+      await axios.put(`/api/project-actions/jmc/${jmcModalItem.id}`, {
+        ...jmcModalItem,
+        rate: parseFloat(form.rate) || 0, unit: form.unit, boqQty: boq,
+        suppliedQty: parseFloat(form.suppliedQty) || 0,
+        provisionalStakingQty: parseFloat(form.provisionalStakingQty) || 0,
+        executedQty: execQty, percentage: pct, globalProgressRate: parseFloat(form.globalProgressRate) || 0,
+        observation: form.observation
+      });
+      toast.success(t('projectActions.recordUpdated'));
+      setJmcModalItem(null);
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorSaving')); console.error(e); }
+  };
+
+  const handleDeleteJmc = async (id) => {
+    if (!window.confirm(t('messages.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/jmc/${id}`);
+      toast.success(t('messages.deleteSuccess'));
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorDeleting')); }
+  };
+
+  const handleJmcSaveMilestone = async () => {
+    const form = jmcMilestoneForm;
+    if (!form.jmcId || !form.logDate) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    const parentRec = jmcItems.find(r => r.id === form.jmcId);
+    const boq = parentRec?.boqQty;
+    const supplied = parentRec?.suppliedQty;
+    const existingMs = (jmcAllMilestones[form.jmcId] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id);
+    const prevPlanned = existingMs.reduce((s, m) => s + (m.plannedValues || 0), 0);
+    const totalPlanned = prevPlanned + (parseFloat(form.plannedValues) || 0);
+    const prevAchieved = existingMs.reduce((s, m) => s + (m.achievedValues || 0), 0);
+    const totalAchieved = prevAchieved + (parseFloat(form.achievedValues) || 0);
+    if (boq != null && boq > 0 && totalPlanned > boq) {
+      toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
+      return;
+    }
+    if (supplied != null && supplied > 0 && totalPlanned > supplied) {
+      toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
+      return;
+    }
+    if (supplied != null && supplied > 0 && totalAchieved > supplied) {
+      toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
+      return;
+    }
+    const startD = form.activityStartDate ? new Date(form.activityStartDate) : null;
+    const endD = form.activityEndDate ? new Date(form.activityEndDate) : null;
+    if (startD && endD && endD < startD) { toast.error(t('validation.dateRange')); return; }
+    const calcDuration = (startD && endD) ? Math.ceil((endD - startD) / 86400000) : (form.duration ? parseInt(form.duration) : null);
+    const achievedVal = parseFloat(form.achievedValues) || 0;
+    const prevAchAll = (jmcAllMilestones[form.jmcId] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0);
+    const totalAchAll = prevAchAll + achievedVal;
+    const achievedVsGlobal = (boq && boq > 0) ? Math.round((totalAchAll / boq) * 10000) / 100 : null;
+    try {
+      const payload = {
+        logDate: form.logDate,
+        quarter: form.quarterId ? { id: parseInt(form.quarterId) } : null,
+        electricityFeeders: form.electricityFeeders,
+        activityStartDate: form.activityStartDate || null,
+        activityEndDate: form.activityEndDate || null,
+        duration: calcDuration,
+        plannedValues: parseFloat(form.plannedValues) || 0,
+        achievedValues: achievedVal,
+        achievedVsGlobalPct: achievedVsGlobal,
+        status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks
+      };
+      if (jmcEditingMilestone) {
+        await axios.put(`/api/project-actions/jmc/milestones/${jmcEditingMilestone.id}`, payload);
+        toast.success(t('projectActions.milestoneUpdated'));
+      } else {
+        await axios.post(`/api/project-actions/jmc/${form.jmcId}/milestones`, payload);
+        toast.success(t('projectActions.milestoneSaved'));
+      }
+      setJmcMilestoneForm({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+      setJmcShowMilestoneForm(null);
+      setJmcEditingMilestone(null);
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorSaving')); console.error(e); }
+  };
+
+  const handleDeleteJmcMilestone = async (msId) => {
+    if (!window.confirm(t('messages.confirmDelete'))) return;
+    try {
+      await axios.delete(`/api/project-actions/jmc/milestones/${msId}`);
+      toast.success(t('messages.deleteSuccess'));
+      loadContracts();
+    } catch (e) { toast.error(t('projectActions.errorDeleting')); }
+  };
+
   const renderInstModal = () => {
     if (!instModalItem) return null;
     const isView = instModalMode === 'view';
@@ -3076,6 +3273,492 @@ function ProjectActions() {
         </div>
       </div>
       {renderInstModal()}
+    </div>
+  );
+
+  const renderJmcModal = () => {
+    if (!jmcModalItem) return null;
+    const isView = jmcModalMode === 'view';
+    const item = jmcModalItem;
+    const form = jmcEditForm;
+    const editPct = !isView ? calcJmcPercentage(form.boqQty, form.executedQty) : null;
+    return (
+      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+        <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content border-0 shadow">
+            <div className="modal-header border-0 pb-0">
+              <h5 className="modal-title fw-bold">{isView ? t('projectActions.jmcDetails') : t('projectActions.editJmc')}</h5>
+              <button type="button" className="btn-close" onClick={() => setJmcModalItem(null)}></button>
+            </div>
+            <div className="modal-body">
+              <div className="row g-3">
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.year')}</label>
+                  <p className="form-control-plaintext">{item.year?.year || '-'}</p>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.project')}</label>
+                  <p className="form-control-plaintext">{item.project?.project || item.project?.projectId || '-'}</p>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.contractType')}</label>
+                  <p className="form-control-plaintext">{item.contractType === 'works' ? t('projectActions.worksContracts') : t('projectActions.goodsAndServices')}</p>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.contractRefNo')}</label>
+                  <p className="form-control-plaintext">{item.contractRefNo || '-'}</p>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">{t('projectActions.activityDescription')}</label>
+                  <p className="form-control-plaintext">{item.activity || '-'}</p>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.rate')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.rate}%</p> : <input type="number" className="form-control" value={form.rate} onChange={e => setJmcEditForm(f => ({...f, rate: e.target.value}))} step="0.01" min="0" max="100" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.unit')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.unit || '-'}</p> : <select className="form-select" value={form.unit} onChange={e => setJmcEditForm(f => ({...f, unit: e.target.value}))}><option value="">{t('projectActions.selectUnit')}</option>{form.unit && !(dmUnits || []).some(u => u.unit === form.unit) && <option value={form.unit}>{form.unit}</option>}{(dmUnits || []).map(u => (<option key={u.id} value={u.unit}>{u.unit}</option>))}</select>}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.boqQty')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.boqQty}</p> : <input type="number" className="form-control bg-light" value={form.boqQty} readOnly />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.suppliedQty')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.suppliedQty}</p> : <input type="number" className="form-control bg-light" value={form.suppliedQty} readOnly />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.provisionalStaking')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className="form-control" value={form.provisionalStakingQty} onChange={e => setJmcEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.executedQty')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => { const v = e.target.value; setJmcEditForm(f => ({...f, executedQty: v, percentage: calcJmcPercentage(f.boqQty, v)})); }} step="0.01" />}
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold">{t('projectActions.percentage')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.percentage}%</p> : <input type="text" className="form-control bg-light" value={editPct != null ? `${editPct}%` : ''} readOnly />}
+                </div>
+                <div className="col-md-12">
+                  <label className="form-label fw-semibold">{t('projectActions.observation')}</label>
+                  {isView ? <p className="form-control-plaintext">{item.observation || '-'}</p> : <textarea className="form-control" value={form.observation} onChange={e => setJmcEditForm(f => ({...f, observation: e.target.value}))} rows={2} />}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              {!isView && <button className="btn btn-primary" onClick={handleJmcEditSave}>{t('common.save')}</button>}
+              <button className="btn btn-secondary" onClick={() => setJmcModalItem(null)}>{t('common.close')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderJmc = () => (
+    <div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">{t('projectActions.jmcTitle')}</h6>
+        </div>
+        <div className="card-body">
+          <div className="row g-2 mb-3">
+            <div className="col-md-2">
+              <label className="form-label small fw-semibold">{t('projectActions.year')}</label>
+              <select className="form-select form-select-sm" value={jmcYear} onChange={e => setJmcYear(e.target.value)}>
+                <option value="">{t('projectActions.selectYear')}</option>
+                {dmYears.map(y => (<option key={y.id} value={y.id}>{y.year}</option>))}
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label small fw-semibold">{t('projectActions.project')}</label>
+              <select className="form-select form-select-sm" value={jmcProject} onChange={e => {
+                setJmcProject(e.target.value);
+                setJmcContractType(''); setJmcContractRefNo(''); setJmcContractOptions([]); setJmcDwActivities([]);
+              }}>
+                <option value="">{t('projectActions.selectProject')}</option>
+                {projects.map(p => (<option key={p.projectId} value={p.projectId}>{p.project}</option>))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <label className="form-label small fw-semibold">{t('projectActions.contractType')}</label>
+              <select className="form-select form-select-sm" value={jmcContractType} onChange={e => {
+                const ct = e.target.value;
+                setJmcContractType(ct);
+                setJmcContractRefNo('');
+                if (ct === 'works') {
+                  setJmcContractOptions(works.filter(w => w.project?.projectId === jmcProject).map(w => w.contractRefNo).filter((v,i,a) => a.indexOf(v) === i));
+                } else if (ct === 'goods') {
+                  setJmcContractOptions(goods.filter(g => g.project?.projectId === jmcProject).map(g => g.contractRefNo).filter((v,i,a) => a.indexOf(v) === i));
+                } else { setJmcContractOptions([]); }
+              }}>
+                <option value="">{t('projectActions.selectContractType')}</option>
+                <option value="works">{t('projectActions.worksContracts')}</option>
+                <option value="goods">{t('projectActions.goodsAndServices')}</option>
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label small fw-semibold">{t('projectActions.contractRefNo')}</label>
+              <select className="form-select form-select-sm" value={jmcContractRefNo} onChange={e => {
+                const ref = e.target.value;
+                setJmcContractRefNo(ref);
+                const acts = designWorkItems.filter(d => d.project?.projectId === jmcProject && d.contractRefNo === ref);
+                setJmcDwActivities(acts);
+              }}>
+                <option value="">{t('projectActions.selectContractRefNo')}</option>
+                {jmcContractOptions.map(c => (<option key={c} value={c}>{c}</option>))}
+              </select>
+            </div>
+          </div>
+
+          {jmcContractRefNo && (
+            <div className="table-responsive mb-3">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h6 className="mb-0">{t('projectActions.addNewRecords')}</h6>
+                <button className="btn btn-sm btn-outline-primary" onClick={addJmcRow}><FiPlus size={14} /> {t('common.addRow')}</button>
+              </div>
+              {jmcRows.length > 0 && (
+                <table className="table table-sm table-bordered align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th style={{width:'30%'}}>{t('projectActions.activityDescription')}</th>
+                      <th>{t('projectActions.rate')}</th>
+                      <th>{t('projectActions.unit')}</th>
+                      <th>{t('projectActions.boqQty')}</th>
+                      <th>{t('projectActions.suppliedQty')}</th>
+                      <th>{t('projectActions.provisionalStaking')}</th>
+                      <th style={{width:'40px'}}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jmcRows.map((row, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <div className="position-relative">
+                            <input type="text" className="form-control form-control-sm" value={row.activitySearch || ''} onChange={e => {
+                              const val = e.target.value;
+                              updateJmcRow(idx, 'activitySearch', val);
+                              if (val.length >= 3) {
+                                updateJmcRow(idx, 'showSuggestions', true);
+                              }
+                            }} placeholder={t('projectActions.typeToSearch')} />
+                            {row.showSuggestions && row.activitySearch && row.activitySearch.length >= 3 && (
+                              <div className="position-absolute bg-white border shadow-sm w-100" style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}>
+                                {jmcDwActivities.filter(a => a.activity?.toLowerCase().includes(row.activitySearch.toLowerCase())).map((a, i) => (
+                                  <div key={i} className="px-2 py-1 cursor-pointer border-bottom" style={{ cursor: 'pointer', fontSize: '0.85rem' }} onClick={() => {
+                                    handleJmcActivitySelect(idx, a);
+                                    updateJmcRow(idx, 'showSuggestions', false);
+                                  }}>{a.itemId ? `${a.itemId} - ` : ''}{a.activity}</div>
+                                ))}
+                                {jmcDwActivities.filter(a => a.activity?.toLowerCase().includes(row.activitySearch.toLowerCase())).length === 0 && (
+                                  <div className="px-2 py-1 text-muted small">{t('projectActions.noResults')}</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.rate} readOnly /></td>
+                        <td><input type="text" className="form-control form-control-sm bg-light" value={row.unit} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.boqQty} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.suppliedQty} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.provisionalStakingQty} readOnly /></td>
+                        <td><button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => removeJmcRow(idx)}><FiTrash2 size={12} /></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {jmcRows.length > 0 && (
+                <button className="btn btn-primary btn-sm" onClick={handleJmcSave} disabled={jmcSaving}>
+                  {jmcSaving ? <span className="spinner-border spinner-border-sm me-1"></span> : null}
+                  {t('common.save')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header bg-white">
+          <h6 className="mb-0 fw-bold">{t('projectActions.savedRecords')}</h6>
+        </div>
+        <div className="card-body p-0">
+          {jmcItems.length === 0 ? (
+            <p className="text-muted p-3">{t('projectActions.noRecords')}</p>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-sm table-hover mb-0 align-middle" style={{ fontSize: '0.82rem' }}>
+                <thead className="table-light">
+                  <tr>
+                    <th></th>
+                    <th>{t('projectActions.year')}</th>
+                    <th>{t('projectActions.project')}</th>
+                    <th>{t('projectActions.contractType')}</th>
+                    <th>{t('projectActions.contractRefNo')}</th>
+                    <th>{t('projectActions.activityDescription')}</th>
+                    <th>{t('projectActions.rate')}</th>
+                    <th>{t('projectActions.unit')}</th>
+                    <th>{t('projectActions.boqQty')}</th>
+                    <th>{t('projectActions.suppliedQty')}</th>
+                    <th>{t('projectActions.provisionalStaking')}</th>
+                    <th>{t('common.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {jmcItems.map(item => (
+                    <Fragment key={item.id}>
+                      <tr>
+                        <td>
+                          <button className="btn btn-sm p-0" onClick={() => {
+                            setJmcExpandedRows(prev => ({...prev, [item.id]: !prev[item.id]}));
+                            if (!jmcAllMilestones[item.id]) {
+                              axios.get(`/api/project-actions/jmc/${item.id}/milestones`).then(res => setJmcAllMilestones(prev => ({...prev, [item.id]: res.data}))).catch(() => {});
+                            }
+                          }}>
+                            {jmcExpandedRows[item.id] ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+                          </button>
+                        </td>
+                        <td>{item.year?.year || '-'}</td>
+                        <td>{item.project?.project || item.project?.projectId || '-'}</td>
+                        <td>{item.contractType === 'works' ? t('projectActions.worksContracts') : t('projectActions.goodsAndServices')}</td>
+                        <td>{item.contractRefNo || '-'}</td>
+                        <td>{item.activity || '-'}</td>
+                        <td>{item.rate != null ? `${item.rate}%` : '-'}</td>
+                        <td>{item.unit || '-'}</td>
+                        <td>{item.boqQty ?? '-'}</td>
+                        <td>{item.suppliedQty ?? '-'}</td>
+                        <td>{item.provisionalStakingQty ?? '-'}</td>
+                        <td>
+                          <div className="d-flex gap-1">
+                            <button className="btn btn-sm btn-outline-info p-0 px-1" onClick={() => openJmcModal(item, 'view')}><FiEye size={12} /></button>
+                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => openJmcModal(item, 'edit')}><FiEdit2 size={12} /></button>
+                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteJmc(item.id)}><FiTrash2 size={12} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                      {jmcExpandedRows[item.id] && (
+                        <tr>
+                          <td colSpan="12" className="p-0">
+                            <div className="p-3 bg-light border-top">
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h6 className="mb-0 fw-bold" style={{ fontSize: '0.85rem' }}>{t('projectActions.jmcMilestones')}</h6>
+                                <button className="btn btn-sm btn-outline-primary" onClick={() => {
+                                  setJmcShowMilestoneForm(item.id);
+                                  setJmcEditingMilestone(null);
+                                  setJmcMilestoneForm({ jmcId: item.id, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+                                }}><FiPlus size={12} /> {t('projectActions.addMilestone')}</button>
+                              </div>
+
+                              {(jmcAllMilestones[item.id] || []).length > 0 ? (<>
+                                <div className="table-responsive mb-2">
+                                <table className="table table-sm table-bordered mb-0" style={{ fontSize: '0.78rem' }}>
+                                  <thead className="table-light">
+                                    <tr>
+                                      <th>{t('projectActions.logDate')}</th>
+                                      <th>{t('projectActions.quarter')}</th>
+                                      <th>{t('projectActions.electricityFeeders')}</th>
+                                      <th>{t('projectActions.startDate')}</th>
+                                      <th>{t('projectActions.endDate')}</th>
+                                      <th>{t('projectActions.duration')}</th>
+                                      <th>{t('projectActions.plannedValuesForPeriod')}</th>
+                                      <th>{t('projectActions.balanceFromBoq')}</th>
+                                      <th>{t('projectActions.achievedValueForPeriod')}</th>
+                                      <th>{t('projectActions.plannedVsAchieved')}</th>
+                                      <th>{t('projectActions.achievedVsGlobalTargets')}</th>
+                                      <th>{t('common.status')}</th>
+                                      <th>{t('projectActions.attachPhotos')}</th>
+                                      <th>{t('projectActions.remarks')}</th>
+                                      <th>{t('common.actions')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(() => { let cumPlanned = 0; let cumAchieved = 0; return (jmcAllMilestones[item.id] || []).map(ms => {
+                                      const boqQty = item.boqQty;
+                                      cumPlanned += (ms.plannedValues || 0);
+                                      cumAchieved += (ms.achievedValues || 0);
+                                      const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
+                                      const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
+                                      return (
+                                      <tr key={ms.id}>
+                                        <td>{ms.logDate || '-'}</td>
+                                        <td>{ms.quarter?.quarter || '-'}</td>
+                                        <td>{ms.electricityFeeders || '-'}</td>
+                                        <td>{ms.activityStartDate || '-'}</td>
+                                        <td>{ms.activityEndDate || '-'}</td>
+                                        <td>{ms.duration != null ? `${ms.duration} ${t('projectActions.days')}` : '-'}</td>
+                                        <td>{ms.plannedValues ?? '-'}</td>
+                                        <td>{balanceFromBoq != null ? balanceFromBoq : '-'}</td>
+                                        <td>{ms.achievedValues ?? '-'}</td>
+                                        <td>{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</td>
+                                        <td>{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</td>
+                                        <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
+                                        <td>{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary" style={{fontSize:'inherit'}}>{ms.attachmentPath.split('/').pop()}</a> : '-'}</td>
+                                        <td>{ms.remarks || '-'}</td>
+                                        <td>
+                                          <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                              setJmcShowMilestoneForm(item.id);
+                                              setJmcEditingMilestone(ms);
+                                              setJmcMilestoneForm({ jmcId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', electricityFeeders: ms.electricityFeeders || '', activityStartDate: ms.activityStartDate || '', activityEndDate: ms.activityEndDate || '', duration: ms.duration ?? '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', attachmentPath: ms.attachmentPath || '', remarks: ms.remarks || '' });
+                                            }}><FiEdit2 /></button>
+                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteJmcMilestone(ms.id)}><FiTrash2 /></button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );})})()}
+                                  </tbody>
+                                </table>
+                                </div>
+
+                                {(() => {
+                                  const boqQty = item.boqQty;
+                                  const milestones = jmcAllMilestones[item.id] || [];
+                                  const totalPlanned = milestones.reduce((s, m) => s + (m.plannedValues || 0), 0);
+                                  const totalAchieved = milestones.reduce((s, m) => s + (m.achievedValues || 0), 0);
+                                  const progressPct = (boqQty && boqQty > 0) ? Math.round((totalAchieved / boqQty) * 10000) / 100 : 0;
+                                  const dates = milestones.filter(m => m.activityStartDate).map(m => new Date(m.activityStartDate));
+                                  const endDates = milestones.filter(m => m.activityEndDate).map(m => new Date(m.activityEndDate));
+                                  const firstStart = dates.length > 0 ? new Date(Math.min(...dates)) : null;
+                                  const lastEnd = endDates.length > 0 ? new Date(Math.max(...endDates)) : null;
+                                  const today = new Date();
+                                  const elapsed = firstStart ? Math.ceil((today - firstStart) / 86400000) : null;
+                                  const remaining = lastEnd ? Math.ceil((lastEnd - today) / 86400000) : null;
+                                  return (
+                                    <div className="row g-2 mt-1">
+                                      <div className="col-md-6">
+                                        <div className="progress" style={{ height: '20px' }}>
+                                          <div className="progress-bar bg-success" role="progressbar" style={{ width: `${Math.min(progressPct, 100)}%` }}>{progressPct}%</div>
+                                        </div>
+                                        <small className="text-muted">{t('projectActions.overallProgress')}: {totalAchieved}/{boqQty || '-'}</small>
+                                      </div>
+                                      <div className="col-md-6 d-flex gap-3 justify-content-end">
+                                        {elapsed != null && <span className="badge bg-info">{t('projectActions.timeElapsed')}: {elapsed} {t('projectActions.days')}</span>}
+                                        {remaining != null && remaining > 0 && <span className="badge bg-warning text-dark">{t('projectActions.daysRemaining')}: {remaining}</span>}
+                                        {remaining != null && remaining < 0 && <span className="badge bg-danger">{t('projectActions.overdue')}: {Math.abs(remaining)} {t('projectActions.days')}</span>}
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </>) : (
+                                <p className="text-muted small mb-2">{t('projectActions.noMilestones')}</p>
+                              )}
+
+                              {jmcShowMilestoneForm === item.id && (
+                                <div className="card mb-2 border-warning">
+                                  <div className="card-body p-2">
+                                    <div className="row g-2">
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.logDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={jmcMilestoneForm.logDate} onChange={e => setJmcMilestoneForm(f => ({...f, logDate: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.quarter')}</label>
+                                        <select className="form-select form-select-sm" value={jmcMilestoneForm.quarterId} onChange={e => setJmcMilestoneForm(f => ({...f, quarterId: e.target.value}))}>
+                                          <option value="">{t('projectActions.selectQuarter')}</option>
+                                          {quarters.map(q => (<option key={q.id} value={q.id}>{q.quarter}</option>))}
+                                        </select>
+                                      </div>
+                                      <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={jmcMilestoneForm.electricityFeeders} onChange={e => setJmcMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.startDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={jmcMilestoneForm.activityStartDate} onChange={e => {
+                                          const start = e.target.value;
+                                          setJmcMilestoneForm(f => {
+                                            const end = f.activityEndDate;
+                                            const dur = (start && end) ? Math.ceil((new Date(end) - new Date(start)) / 86400000) : f.duration;
+                                            return {...f, activityStartDate: start, duration: dur};
+                                          });
+                                        }} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.endDate')}</label>
+                                        <input type="date" className="form-control form-control-sm" value={jmcMilestoneForm.activityEndDate} onChange={e => {
+                                          const end = e.target.value;
+                                          setJmcMilestoneForm(f => {
+                                            const start = f.activityStartDate;
+                                            const dur = (start && end) ? Math.ceil((new Date(end) - new Date(start)) / 86400000) : f.duration;
+                                            return {...f, activityEndDate: end, duration: dur};
+                                          });
+                                        }} />
+                                      </div>
+                                      <div className="col-md-1">
+                                        <label className="form-label small fw-semibold">{t('projectActions.duration')}</label>
+                                        <input type="text" className="form-control form-control-sm bg-light" readOnly value={jmcMilestoneForm.duration ? `${jmcMilestoneForm.duration} ${t('projectActions.days')}` : '-'} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.plannedValuesForPeriod')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={jmcMilestoneForm.plannedValues} onChange={e => setJmcMilestoneForm(f => ({...f, plannedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const boq = item.boqQty; const supplied = item.suppliedQty; const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0); const total = prev + val; if (boq != null && boq > 0 && total > boq) toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(total * 100) / 100, boq })); if (supplied != null && supplied > 0 && total > supplied) toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(total * 100) / 100, supplied: Math.round(supplied * 100) / 100 })); }} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.achievedValueForPeriod')}</label>
+                                        <input type="number" className="form-control form-control-sm" value={jmcMilestoneForm.achievedValues} onChange={e => setJmcMilestoneForm(f => ({...f, achievedValues: e.target.value}))} onBlur={e => { const val = parseFloat(e.target.value) || 0; const supplied = item.suppliedQty; if (supplied != null && supplied > 0) { const prev = (jmcAllMilestones[item.id] || []).filter(m => !jmcEditingMilestone || m.id !== jmcEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0); const total = prev + val; if (total > supplied) toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(total * 100) / 100, supplied: Math.round(supplied * 100) / 100 })); }}} step="0.01" />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                                        <select className="form-select form-select-sm" value={jmcMilestoneForm.status} onChange={e => setJmcMilestoneForm(f => ({...f, status: e.target.value}))}>
+                                          <option value="">{t('common.select')}</option>
+                                          <option value="Complete">{t('projectActions.statusComplete')}</option>
+                                          <option value="Incomplete">{t('projectActions.statusIncomplete')}</option>
+                                          <option value="Stagnant">{t('projectActions.statusStagnant')}</option>
+                                          <option value="Cancelled">{t('projectActions.statusCancelled')}</option>
+                                        </select>
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.attachPhotos')}</label>
+                                        {jmcMilestoneForm.attachmentPath ? (
+                                          <div className="d-flex align-items-center gap-1">
+                                            <a href={jmcMilestoneForm.attachmentPath} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary p-1 flex-grow-1 text-truncate" style={{fontSize:'0.7rem'}}>{jmcMilestoneForm.attachmentPath.split('/').pop()}</a>
+                                            <button type="button" className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => setJmcMilestoneForm(f => ({...f, attachmentPath: ''}))}><FiX size={12} /></button>
+                                          </div>
+                                        ) : (
+                                          <div className="position-relative">
+                                            <input type="file" className="form-control form-control-sm" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" disabled={jmcUploadingFile} onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (!file) return;
+                                              setJmcUploadingFile(true);
+                                              try {
+                                                const fd = new FormData();
+                                                fd.append('file', file);
+                                                const res = await axios.post('/api/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                                                setJmcMilestoneForm(f => ({...f, attachmentPath: res.data.url}));
+                                                toast.success(t('projectActions.fileUploaded'));
+                                              } catch (err) { toast.error(err.response?.data?.error || t('projectActions.fileUploadFailed')); }
+                                              finally { setJmcUploadingFile(false); }
+                                            }} />
+                                            {jmcUploadingFile && <div className="position-absolute top-50 end-0 translate-middle-y pe-2"><div className="spinner-border spinner-border-sm text-primary"></div></div>}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                                        <input type="text" className="form-control form-control-sm" value={jmcMilestoneForm.remarks} onChange={e => setJmcMilestoneForm(f => ({...f, remarks: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-1 d-flex align-items-end gap-1">
+                                        <button className="btn btn-sm btn-success" onClick={handleJmcSaveMilestone}><FiCheck /></button>
+                                        <button className="btn btn-sm btn-secondary" onClick={() => { setJmcShowMilestoneForm(null); setJmcEditingMilestone(null); }}><FiX /></button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      {renderJmcModal()}
     </div>
   );
 
@@ -4706,6 +5389,7 @@ function ProjectActions() {
             activeTab === 'boq' ? renderBoq() :
             activeTab === 'supplyProgress' ? renderSupplyProgress() :
             activeTab === 'installation' ? renderInstallation() :
+            activeTab === 'jmc' ? renderJmc() :
             renderWorksTable()
           )}
         </div>

@@ -25,6 +25,7 @@ import {
   FiPackage,
   FiClipboard,
   FiAlertTriangle,
+  FiCheckSquare,
 } from "react-icons/fi";
 import { useState, useCallback, useMemo, useEffect, memo } from "react";
 
@@ -52,6 +53,7 @@ const csmSubItems = [
   { path: "/project-actions/boq", icon: FiFileText, labelKey: "projectActions.boqTab" },
   { path: "/project-actions/supply-progress", icon: FiPackage, labelKey: "projectActions.supplyProgressTab" },
   { path: "/project-actions/installation", icon: FiSettings, labelKey: "projectActions.installationTab" },
+  { path: "/project-actions/jmc", icon: FiCheckSquare, labelKey: "projectActions.jmcTab" },
 ];
 
 const adminSubItems = [
@@ -119,7 +121,7 @@ function Layout() {
   const isAdminPath = location.pathname.startsWith("/administration");
   const isProjectActionsPath = location.pathname.startsWith("/project-actions");
   const isProfilesPath = ["/project-actions/works", "/project-actions/goods"].includes(location.pathname);
-  const isCsmPath = ["/project-actions/design-work", "/project-actions/boq", "/project-actions/supply-progress", "/project-actions/installation"].includes(location.pathname);
+  const isCsmPath = ["/project-actions/design-work", "/project-actions/boq", "/project-actions/supply-progress", "/project-actions/installation", "/project-actions/jmc"].includes(location.pathname);
 
   useEffect(() => {
     if (isMobile) {

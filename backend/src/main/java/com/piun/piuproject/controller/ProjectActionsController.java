@@ -802,4 +802,128 @@ public class ProjectActionsController {
             })
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @Autowired
+    private JmcRepository jmcRepository;
+
+    @GetMapping("/jmc")
+    public List<Jmc> getAllJmc() {
+        return jmcRepository.findAllByOrderByDateCreatedDesc();
+    }
+
+    @GetMapping("/jmc/project/{projectId}")
+    public List<Jmc> getJmcByProject(@PathVariable String projectId) {
+        return jmcRepository.findByProject_ProjectIdOrderByDateCreatedDesc(projectId);
+    }
+
+    @PostMapping("/jmc")
+    public Jmc createJmc(@RequestBody Jmc item) {
+        item.setDateCreated(java.time.LocalDateTime.now());
+        return jmcRepository.save(item);
+    }
+
+    @PostMapping("/jmc/batch")
+    public List<Jmc> createJmcBatch(@RequestBody List<Jmc> items) {
+        items.forEach(item -> item.setDateCreated(java.time.LocalDateTime.now()));
+        return jmcRepository.saveAll(items);
+    }
+
+    @PutMapping("/jmc/{id}")
+    public ResponseEntity<Jmc> updateJmc(@PathVariable Long id, @RequestBody Jmc details) {
+        return jmcRepository.findById(id)
+            .map(item -> {
+                item.setEntryDate(details.getEntryDate());
+                item.setProject(details.getProject());
+                item.setContractType(details.getContractType());
+                item.setContractRefNo(details.getContractRefNo());
+                item.setItemId(details.getItemId());
+                item.setActivity(details.getActivity());
+                item.setRate(details.getRate());
+                item.setUnit(details.getUnit());
+                item.setBoqQty(details.getBoqQty());
+                item.setSuppliedQty(details.getSuppliedQty());
+                item.setProvisionalStakingQty(details.getProvisionalStakingQty());
+                item.setExecutedQty(details.getExecutedQty());
+                item.setPercentage(details.getPercentage());
+                item.setGlobalProgressRate(details.getGlobalProgressRate());
+                item.setObservation(details.getObservation());
+                return ResponseEntity.ok(jmcRepository.save(item));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/jmc/{id}")
+    public ResponseEntity<Void> deleteJmc(@PathVariable Long id) {
+        return jmcRepository.findById(id)
+            .map(item -> {
+                jmcRepository.delete(item);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Autowired
+    private JmcMonitoringMilestoneRepository jmcMilestoneRepository;
+
+    @GetMapping("/jmc/{jmcId}/milestones")
+    @Transactional(readOnly = true)
+    public List<JmcMonitoringMilestone> getJmcMilestones(@PathVariable Long jmcId) {
+        return jmcMilestoneRepository.findByJmc_IdOrderByLogDateAsc(jmcId);
+    }
+
+    @PostMapping("/jmc/{jmcId}/milestones")
+    public ResponseEntity<JmcMonitoringMilestone> createJmcMilestone(
+            @PathVariable Long jmcId,
+            @RequestBody JmcMonitoringMilestone milestone) {
+        return jmcRepository.findById(jmcId)
+            .map(jmc -> {
+                milestone.setJmc(jmc);
+                milestone.setDateCreated(java.time.LocalDateTime.now());
+                if (milestone.getAchievedValues() != null && milestone.getPlannedValues() != null && milestone.getPlannedValues() > 0) {
+                    double pct = (milestone.getAchievedValues() / milestone.getPlannedValues()) * 100;
+                    milestone.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                return ResponseEntity.ok(jmcMilestoneRepository.save(milestone));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/jmc/milestones/{id}")
+    public ResponseEntity<JmcMonitoringMilestone> updateJmcMilestone(
+            @PathVariable Long id,
+            @RequestBody JmcMonitoringMilestone details) {
+        return jmcMilestoneRepository.findById(id)
+            .map(m -> {
+                m.setLogDate(details.getLogDate());
+                m.setQuarter(details.getQuarter());
+                m.setElectricityFeeders(details.getElectricityFeeders());
+                m.setActivityStartDate(details.getActivityStartDate());
+                m.setActivityEndDate(details.getActivityEndDate());
+                m.setDuration(details.getDuration());
+                m.setPlannedValues(details.getPlannedValues());
+                m.setAchievedValues(details.getAchievedValues());
+                if (details.getAchievedValues() != null && details.getPlannedValues() != null && details.getPlannedValues() > 0) {
+                    double pct = (details.getAchievedValues() / details.getPlannedValues()) * 100;
+                    m.setPlannedVsAchievedPct(Math.round(pct * 100.0) / 100.0);
+                }
+                m.setStatus(details.getStatus());
+                m.setAttachmentPath(details.getAttachmentPath());
+                m.setRemarks(details.getRemarks());
+                if (details.getAchievedVsGlobalPct() != null) {
+                    m.setAchievedVsGlobalPct(details.getAchievedVsGlobalPct());
+                }
+                return ResponseEntity.ok(jmcMilestoneRepository.save(m));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/jmc/milestones/{id}")
+    public ResponseEntity<Void> deleteJmcMilestone(@PathVariable Long id) {
+        return jmcMilestoneRepository.findById(id)
+            .map(m -> {
+                jmcMilestoneRepository.delete(m);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
 }
