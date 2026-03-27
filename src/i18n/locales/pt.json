@@ -557,6 +557,7 @@
     "attachPhotos": "Anexar Fotos/Documento",
     "fileUploaded": "Arquivo carregado com sucesso",
     "fileUploadFailed": "Falha ao carregar arquivo",
+    "achievedExceedsSupplied": "O Valor Total Alcançado ({{total}}) não pode exceder a Qtd Fornecida ({{supplied}})",
     "supplyProgressSaved": "Progresso de fornecimento salvo com sucesso",
     "fillRequiredFields": "Por favor, preencha todos os campos obrigatórios",
     "addAtLeastOneRow": "Por favor, adicione pelo menos uma linha",

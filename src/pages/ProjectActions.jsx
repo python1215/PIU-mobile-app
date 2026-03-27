@@ -2415,21 +2415,25 @@ function ProjectActions() {
     if (!form.installationId || !form.logDate) { toast.error(t('projectActions.fillRequiredFields')); return; }
     const parentRec = instItems.find(r => r.id === form.installationId);
     const boq = parentRec?.boqQty;
-    if (boq != null && boq > 0) {
-      const prevPlanned = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.plannedValues || 0), 0);
-      const totalPlanned = prevPlanned + (parseFloat(form.plannedValues) || 0);
-      if (totalPlanned > boq) {
-        toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
+    const supplied = parentRec?.suppliedQty;
+    const existingMs = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id);
+    const prevPlanned = existingMs.reduce((s, m) => s + (m.plannedValues || 0), 0);
+    const totalPlanned = prevPlanned + (parseFloat(form.plannedValues) || 0);
+    const prevAchieved = existingMs.reduce((s, m) => s + (m.achievedValues || 0), 0);
+    const totalAchieved = prevAchieved + (parseFloat(form.achievedValues) || 0);
+    if (boq != null && boq > 0 && totalPlanned > boq) {
+      toast.error(t('projectActions.plannedExceedsBoq', { total: Math.round(totalPlanned * 100) / 100, boq }));
+      return;
+    }
+    if (supplied != null && supplied > 0 && totalAchieved > supplied) {
+      toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
+      return;
+    }
+    if (boq != null && boq > 0 && form.status === 'Complete') {
+      if (totalAchieved < boq) {
+        const balance = Math.round((boq - totalAchieved) * 100) / 100;
+        toast.error(t('projectActions.cannotCompleteAchievedLessThanBoq', { achieved: Math.round(totalAchieved * 100) / 100, boq, balance }));
         return;
-      }
-      if (form.status === 'Complete') {
-        const prevAchieved = (instAllMilestones[form.installationId] || []).filter(m => !instEditingMilestone || m.id !== instEditingMilestone.id).reduce((s, m) => s + (m.achievedValues || 0), 0);
-        const totalAchieved = prevAchieved + (parseFloat(form.achievedValues) || 0);
-        if (totalAchieved < boq) {
-          const balance = Math.round((boq - totalAchieved) * 100) / 100;
-          toast.error(t('projectActions.cannotCompleteAchievedLessThanBoq', { achieved: Math.round(totalAchieved * 100) / 100, boq, balance }));
-          return;
-        }
       }
     }
     const startD = form.activityStartDate ? new Date(form.activityStartDate) : null;
