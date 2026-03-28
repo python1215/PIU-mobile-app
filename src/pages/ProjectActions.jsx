@@ -156,6 +156,7 @@ function ProjectActions() {
   const [jmcMilestoneForm, setJmcMilestoneForm] = useState({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
   const [jmcShowMilestoneForm, setJmcShowMilestoneForm] = useState(null);
   const [jmcEditingMilestone, setJmcEditingMilestone] = useState(null);
+  const [jmcViewMilestone, setJmcViewMilestone] = useState(null);
   const [jmcUploadingFile, setJmcUploadingFile] = useState(false);
 
   const [dmItems, setDmItems] = useState([]);
@@ -3347,8 +3348,93 @@ function ProjectActions() {
     );
   };
 
+  const renderJmcMilestoneViewModal = () => {
+    if (!jmcViewMilestone) return null;
+    const { ms, item, balanceFromBoq, achievedVsGlobal } = jmcViewMilestone;
+    return (
+      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1055 }}>
+        <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content border-0 shadow">
+            <div className="modal-header bg-info bg-opacity-10 border-0">
+              <h5 className="modal-title fw-bold"><FiEye className="me-2" />{t('projectActions.jmcMilestones')} - {t('common.details')}</h5>
+              <button type="button" className="btn-close" onClick={() => setJmcViewMilestone(null)}></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3 p-2 bg-light rounded">
+                <small className="text-muted fw-semibold">{t('projectActions.activityDescription')}:</small>
+                <span className="ms-2 fw-medium">{item.activity || '-'}</span>
+              </div>
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.logDate')}</label>
+                  <p className="mb-0">{ms.logDate || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.quarter')}</label>
+                  <p className="mb-0">{ms.quarter?.quarter || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.electricityFeeders')}</label>
+                  <p className="mb-0">{ms.electricityFeeders || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.startDate')}</label>
+                  <p className="mb-0">{ms.activityStartDate || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.endDate')}</label>
+                  <p className="mb-0">{ms.activityEndDate || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.duration')}</label>
+                  <p className="mb-0">{ms.duration != null ? `${ms.duration} ${t('projectActions.days')}` : '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.plannedValuesForPeriod')}</label>
+                  <p className="mb-0 fw-medium">{ms.plannedValues ?? '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.balanceFromBoq')}</label>
+                  <p className="mb-0 fw-medium">{balanceFromBoq != null ? balanceFromBoq : '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.achievedValueForPeriod')}</label>
+                  <p className="mb-0 fw-medium">{ms.achievedValues ?? '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.plannedVsAchieved')}</label>
+                  <p className="mb-0">{ms.plannedVsAchievedPct != null ? `${ms.plannedVsAchievedPct}%` : '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.achievedVsGlobalTargets')}</label>
+                  <p className="mb-0">{achievedVsGlobal != null ? `${achievedVsGlobal}%` : '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('common.status')}</label>
+                  <p className="mb-0">{ms.status ? <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span> : '-'}</p>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.attachPhotos')}</label>
+                  <p className="mb-0">{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary">{ms.attachmentPath.split('/').pop()}</a> : '-'}</p>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.remarks')}</label>
+                  <p className="mb-0">{ms.remarks || '-'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              <button className="btn btn-secondary" onClick={() => setJmcViewMilestone(null)}>{t('common.close')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderJmc = () => (
     <div>
+      {renderJmcMilestoneViewModal()}
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h6 className="mb-0">{t('projectActions.jmcTitle')}</h6>
@@ -3589,12 +3675,13 @@ function ProjectActions() {
                                         <td>{ms.remarks || '-'}</td>
                                         <td>
                                           <div className="d-flex gap-1">
-                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                            <button className="btn btn-sm btn-outline-info p-0 px-1" title={t('common.view')} onClick={() => setJmcViewMilestone({ ms, item, balanceFromBoq, achievedVsGlobal })}><FiEye /></button>
+                                            <button className="btn btn-sm btn-outline-primary p-0 px-1" title={t('common.edit')} onClick={() => {
                                               setJmcShowMilestoneForm(item.id);
                                               setJmcEditingMilestone(ms);
                                               setJmcMilestoneForm({ jmcId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', electricityFeeders: ms.electricityFeeders || '', activityStartDate: ms.activityStartDate || '', activityEndDate: ms.activityEndDate || '', duration: ms.duration ?? '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', attachmentPath: ms.attachmentPath || '', remarks: ms.remarks || '' });
                                             }}><FiEdit2 /></button>
-                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteJmcMilestone(ms.id)}><FiTrash2 /></button>
+                                            <button className="btn btn-sm btn-outline-danger p-0 px-1" title={t('common.delete')} onClick={() => handleDeleteJmcMilestone(ms.id)}><FiTrash2 /></button>
                                           </div>
                                         </td>
                                       </tr>
