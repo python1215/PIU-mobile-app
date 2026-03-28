@@ -200,7 +200,7 @@ function ProjectActions() {
     if (activeTab === 'designMonitoring') {
       loadAllDmRecords();
     }
-    if (activeTab === 'supplyProgress') {
+    if (activeTab === 'supplyProgress' || activeTab === 'jmc') {
       loadAllSpRecords();
     }
   }, [activeTab]);
@@ -2523,7 +2523,7 @@ function ProjectActions() {
 
   const handleJmcActivitySelect = (idx, act) => {
     const boqMatch = boqItems.find(b => b.activity === act.activity && b.project?.projectId === jmcProject);
-    const spMatch = spItems.find(s => s.activityDescription === act.activity && s.project?.projectId === jmcProject);
+    const spMatch = spItems.find(s => s.activityDescription === act.activity && s.project?.projectId === jmcProject && s.contractRefNo === jmcContractRefNo);
     const suppliedTotal = spMatch ? (spAllMilestones[spMatch.id] || []).reduce((s, m) => s + (m.achievedValues || 0), 0) : 0;
     const provStaking = act.provisionalStakingQty || 0;
     setJmcRows(prev => prev.map((r, i) => i === idx ? {
