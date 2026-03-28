@@ -131,7 +131,8 @@
     "selected": "Selected",
     "exportedExcel": "Exported to Excel",
     "exportedPDF": "Exported to PDF",
-    "year": "Year"
+    "year": "Year",
+    "addRow": "Add Row"
   },
   "nav": {
     "dashboard": "Dashboard",

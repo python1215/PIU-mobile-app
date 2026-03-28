@@ -131,7 +131,8 @@
     "selected": "Sélectionné",
     "exportedExcel": "Exporté en Excel",
     "exportedPDF": "Exporté en PDF",
-    "year": "Année"
+    "year": "Année",
+    "addRow": "Ajouter une Ligne"
   },
   "nav": {
     "dashboard": "Tableau de Bord",
