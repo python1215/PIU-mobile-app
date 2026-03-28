@@ -3457,7 +3457,7 @@ function ProjectActions() {
                             )}
                           </div>
                         </td>
-                        <td><input type="number" className="form-control form-control-sm bg-light" value={row.rate} readOnly /></td>
+                        <td><input type="number" className="form-control form-control-sm" value={row.rate} onChange={e => updateJmcRow(idx, 'rate', e.target.value)} step="0.01" min="0" max="100" /></td>
                         <td><input type="text" className="form-control form-control-sm bg-light" value={row.unit} readOnly /></td>
                         <td><input type="number" className="form-control form-control-sm bg-light" value={row.boqQty} readOnly /></td>
                         <td><input type="number" className="form-control form-control-sm bg-light" value={row.suppliedQty} readOnly /></td>
