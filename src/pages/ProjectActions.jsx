@@ -3332,16 +3332,8 @@ function ProjectActions() {
                   {isView ? <p className="form-control-plaintext">{item.provisionalStakingQty}</p> : <input type="number" className="form-control" value={form.provisionalStakingQty} onChange={e => setJmcEditForm(f => ({...f, provisionalStakingQty: e.target.value}))} step="0.01" />}
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-semibold">{t('projectActions.executedQty')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.executedQty}</p> : <input type="number" className="form-control" value={form.executedQty} onChange={e => { const v = e.target.value; setJmcEditForm(f => ({...f, executedQty: v, percentage: calcJmcPercentage(f.boqQty, v)})); }} step="0.01" />}
-                </div>
-                <div className="col-md-3">
                   <label className="form-label fw-semibold">{t('projectActions.percentage')}</label>
                   {isView ? <p className="form-control-plaintext">{item.percentage}%</p> : <input type="text" className="form-control bg-light" value={editPct != null ? `${editPct}%` : ''} readOnly />}
-                </div>
-                <div className="col-md-12">
-                  <label className="form-label fw-semibold">{t('projectActions.observation')}</label>
-                  {isView ? <p className="form-control-plaintext">{item.observation || '-'}</p> : <textarea className="form-control" value={form.observation} onChange={e => setJmcEditForm(f => ({...f, observation: e.target.value}))} rows={2} />}
                 </div>
               </div>
             </div>
