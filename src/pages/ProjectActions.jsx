@@ -161,6 +161,7 @@ function ProjectActions() {
   const [jmcSnags, setJmcSnags] = useState({});
   const [jmcSnagForm, setJmcSnagForm] = useState(null);
   const [jmcEditingSnag, setJmcEditingSnag] = useState(null);
+  const [jmcSnagModal, setJmcSnagModal] = useState(null);
 
   const [dmItems, setDmItems] = useState([]);
   const [dmProject, setDmProject] = useState('');
@@ -3474,9 +3475,145 @@ function ProjectActions() {
     );
   };
 
+  const renderJmcSnagModal = () => {
+    if (!jmcSnagModal) return null;
+    const { ms, item } = jmcSnagModal;
+    const snagList = jmcSnags[ms.id] || [];
+    const isLoading = !jmcSnags.hasOwnProperty(ms.id);
+    return (
+      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1055 }}>
+        <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content border-0 shadow">
+            <div className="modal-header bg-danger bg-opacity-10 border-0">
+              <h5 className="modal-title fw-bold text-danger"><FiAlertTriangle className="me-2" />{t('projectActions.snagList')}</h5>
+              <button type="button" className="btn-close" onClick={() => { setJmcSnagModal(null); setJmcSnagForm(null); setJmcEditingSnag(null); }}></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3 p-2 bg-light rounded border" style={{fontSize:'0.85rem'}}>
+                <div className="row">
+                  <div className="col-md-4"><span className="text-muted fw-semibold">{t('projectActions.contractRefNo')}:</span> <strong>{item.contractRefNo}</strong></div>
+                  <div className="col-md-8"><span className="text-muted fw-semibold">{t('projectActions.activityDescription')}:</span> <strong>{item.activity}</strong></div>
+                </div>
+              </div>
+              <div className="d-flex justify-content-end mb-2">
+                <button className="btn btn-sm btn-danger" onClick={() => {
+                  setJmcSnagForm({ milestoneId: ms.id, contractRefNo: item.contractRefNo || '', activityDescription: item.activity || '', snagDescription: '', severity: '', correctiveAction: '', responsibleParty: '', targetDate: '', status: 'Open', remarks: '' });
+                  setJmcEditingSnag(null);
+                }}><FiPlus size={12} /> {t('projectActions.addSnag')}</button>
+              </div>
+              {jmcSnagForm && jmcSnagForm.milestoneId === ms.id && (
+                <div className="card mb-3 border-danger">
+                  <div className="card-body p-3">
+                    <h6 className="fw-bold text-danger mb-3">{jmcEditingSnag ? t('common.edit') : t('projectActions.addSnag')}</h6>
+                    <div className="row g-2">
+                      <div className="col-md-6">
+                        <label className="form-label small fw-semibold">{t('projectActions.snagDescription')} *</label>
+                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.snagDescription} onChange={e => setJmcSnagForm(f => ({...f, snagDescription: e.target.value}))} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.severity')}</label>
+                        <select className="form-select form-select-sm" value={jmcSnagForm.severity} onChange={e => setJmcSnagForm(f => ({...f, severity: e.target.value}))}>
+                          <option value="">{t('common.select')}</option>
+                          <option value="High">{t('projectActions.severityHigh')}</option>
+                          <option value="Medium">{t('projectActions.severityMedium')}</option>
+                          <option value="Low">{t('projectActions.severityLow')}</option>
+                        </select>
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                        <select className="form-select form-select-sm" value={jmcSnagForm.status} onChange={e => setJmcSnagForm(f => ({...f, status: e.target.value}))}>
+                          <option value="Open">{t('projectActions.snagOpen')}</option>
+                          <option value="Resolved">{t('projectActions.snagResolved')}</option>
+                          <option value="Closed">{t('projectActions.snagClosed')}</option>
+                        </select>
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label small fw-semibold">{t('projectActions.correctiveAction')}</label>
+                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.correctiveAction} onChange={e => setJmcSnagForm(f => ({...f, correctiveAction: e.target.value}))} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.responsibleParty')}</label>
+                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.responsibleParty} onChange={e => setJmcSnagForm(f => ({...f, responsibleParty: e.target.value}))} />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label small fw-semibold">{t('projectActions.targetDate')}</label>
+                        <input type="date" className="form-control form-control-sm" value={jmcSnagForm.targetDate} onChange={e => setJmcSnagForm(f => ({...f, targetDate: e.target.value}))} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.remarks} onChange={e => setJmcSnagForm(f => ({...f, remarks: e.target.value}))} />
+                      </div>
+                    </div>
+                    <div className="d-flex gap-1 mt-3">
+                      <button className="btn btn-sm btn-danger" onClick={handleSaveJmcSnag}><FiCheck size={12} /> {t('common.save')}</button>
+                      <button className="btn btn-sm btn-secondary" onClick={() => { setJmcSnagForm(null); setJmcEditingSnag(null); }}><FiX size={12} /> {t('common.cancel')}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isLoading ? (
+                <div className="text-center p-3"><div className="spinner-border spinner-border-sm"></div></div>
+              ) : snagList.length === 0 ? (
+                <div className="text-center p-4 text-muted">
+                  <FiAlertTriangle size={24} className="mb-2 opacity-50" />
+                  <p className="mb-0">{t('projectActions.noSnags')}</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-sm table-bordered table-hover mb-0" style={{fontSize:'0.82rem'}}>
+                    <thead className="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th>{t('projectActions.snagDescription')}</th>
+                        <th>{t('projectActions.severity')}</th>
+                        <th>{t('projectActions.correctiveAction')}</th>
+                        <th>{t('projectActions.responsibleParty')}</th>
+                        <th>{t('projectActions.targetDate')}</th>
+                        <th>{t('common.status')}</th>
+                        <th>{t('projectActions.remarks')}</th>
+                        <th>{t('common.actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {snagList.map((sn, si) => (
+                        <tr key={sn.id}>
+                          <td>{si + 1}</td>
+                          <td>{sn.snagDescription || '-'}</td>
+                          <td>{sn.severity ? <span className={`badge ${sn.severity === 'High' ? 'bg-danger' : sn.severity === 'Medium' ? 'bg-warning text-dark' : 'bg-info'}`}>{t(`projectActions.severity${sn.severity}`)}</span> : '-'}</td>
+                          <td>{sn.correctiveAction || '-'}</td>
+                          <td>{sn.responsibleParty || '-'}</td>
+                          <td>{sn.targetDate || '-'}</td>
+                          <td>{sn.status ? <span className={`badge ${sn.status === 'Closed' ? 'bg-success' : sn.status === 'Resolved' ? 'bg-info' : 'bg-warning text-dark'}`}>{t(`projectActions.snag${sn.status}`)}</span> : '-'}</td>
+                          <td>{sn.remarks || '-'}</td>
+                          <td>
+                            <div className="d-flex gap-1">
+                              <button className="btn btn-sm btn-outline-primary p-0 px-1" title={t('common.edit')} onClick={() => {
+                                setJmcSnagForm({ milestoneId: ms.id, contractRefNo: sn.contractRefNo || item.contractRefNo || '', activityDescription: sn.activityDescription || item.activity || '', snagDescription: sn.snagDescription || '', severity: sn.severity || '', correctiveAction: sn.correctiveAction || '', responsibleParty: sn.responsibleParty || '', targetDate: sn.targetDate || '', status: sn.status || 'Open', remarks: sn.remarks || '' });
+                                setJmcEditingSnag(sn);
+                              }}><FiEdit2 size={12} /></button>
+                              <button className="btn btn-sm btn-outline-danger p-0 px-1" title={t('common.delete')} onClick={() => handleDeleteJmcSnag(sn.id, ms.id)}><FiTrash2 size={12} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              <button className="btn btn-secondary" onClick={() => { setJmcSnagModal(null); setJmcSnagForm(null); setJmcEditingSnag(null); }}>{t('common.close')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderJmc = () => (
     <div>
       {renderJmcMilestoneViewModal()}
+      {renderJmcSnagModal()}
       <div className="card mb-4">
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h6 className="mb-0">{t('projectActions.jmcTitle')}</h6>
@@ -3701,8 +3838,7 @@ function ProjectActions() {
                                       const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
                                       const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
                                       return (
-                                      <Fragment key={ms.id}>
-                                      <tr>
+                                      <tr key={ms.id}>
                                         <td>{ms.logDate || '-'}</td>
                                         <td>{ms.quarter?.quarter || '-'}</td>
                                         <td>{ms.electricityFeeders || '-'}</td>
@@ -3717,10 +3853,11 @@ function ProjectActions() {
                                         <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
                                         <td>{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary" style={{fontSize:'inherit'}}>{ms.attachmentPath.split('/').pop()}</a> : '-'}</td>
                                         <td>{ms.remarks || '-'}</td>
-                                        <td>{ms.snag ? <span className="badge bg-danger" style={{fontSize:'inherit'}}>{t('common.yes')}</span> : <span className="badge bg-secondary bg-opacity-25 text-dark" style={{fontSize:'inherit'}}>{t('common.no')}</span>}</td>
+                                        <td>{ms.snag ? <span className="badge bg-danger cursor-pointer" style={{fontSize:'inherit', cursor:'pointer'}} onClick={() => { setJmcSnagModal({ ms, item }); loadJmcSnags(ms.id); }}>{t('common.yes')}</span> : <span className="badge bg-secondary bg-opacity-25 text-dark" style={{fontSize:'inherit'}}>{t('common.no')}</span>}</td>
                                         <td>
                                           <div className="d-flex gap-1">
                                             <button className="btn btn-sm btn-outline-info p-0 px-1" title={t('common.view')} onClick={() => setJmcViewMilestone({ ms, item, balanceFromBoq, achievedVsGlobal })}><FiEye /></button>
+                                            {ms.snag && <button className="btn btn-sm btn-outline-danger p-0 px-1" title={t('projectActions.snagList')} onClick={() => { setJmcSnagModal({ ms, item }); loadJmcSnags(ms.id); }}><FiAlertTriangle /></button>}
                                             <button className="btn btn-sm btn-outline-primary p-0 px-1" title={t('common.edit')} onClick={() => {
                                               setJmcShowMilestoneForm(item.id);
                                               setJmcEditingMilestone(ms);
@@ -3730,125 +3867,6 @@ function ProjectActions() {
                                           </div>
                                         </td>
                                       </tr>
-                                      {ms.snag && (
-                                        <tr>
-                                          <td colSpan="16" className="p-0">
-                                            <div className="p-2 bg-danger bg-opacity-10 border-start border-danger border-3">
-                                              <div className="d-flex justify-content-between align-items-center mb-2">
-                                                <div>
-                                                  <strong className="text-danger" style={{fontSize:'0.8rem'}}><FiAlertTriangle className="me-1" />{t('projectActions.snagList')}</strong>
-                                                  <small className="ms-2 text-muted">{t('projectActions.contractRefNo')}: <strong>{item.contractRefNo}</strong> | {t('projectActions.activityDescription')}: <strong>{item.activity}</strong></small>
-                                                </div>
-                                                <button className="btn btn-sm btn-outline-danger" onClick={() => {
-                                                  setJmcSnagForm({ milestoneId: ms.id, contractRefNo: item.contractRefNo || '', activityDescription: item.activity || '', snagDescription: '', severity: '', correctiveAction: '', responsibleParty: '', targetDate: '', status: 'Open', remarks: '' });
-                                                  setJmcEditingSnag(null);
-                                                  if (!jmcSnags[ms.id]) loadJmcSnags(ms.id);
-                                                }}><FiPlus size={12} /> {t('projectActions.addSnag')}</button>
-                                              </div>
-                                              {jmcSnagForm && jmcSnagForm.milestoneId === ms.id && (
-                                                <div className="card mb-2 border-danger">
-                                                  <div className="card-body p-2">
-                                                    <div className="mb-2 p-1 bg-white rounded border" style={{fontSize:'0.78rem'}}>
-                                                      <span className="text-muted fw-semibold">{t('projectActions.contractRefNo')}:</span> <strong>{item.contractRefNo}</strong>
-                                                      <span className="ms-3 text-muted fw-semibold">{t('projectActions.activityDescription')}:</span> <strong>{item.activity}</strong>
-                                                    </div>
-                                                    <div className="row g-2">
-                                                      <div className="col-md-6">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.snagDescription')} *</label>
-                                                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.snagDescription} onChange={e => setJmcSnagForm(f => ({...f, snagDescription: e.target.value}))} />
-                                                      </div>
-                                                      <div className="col-md-3">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.severity')}</label>
-                                                        <select className="form-select form-select-sm" value={jmcSnagForm.severity} onChange={e => setJmcSnagForm(f => ({...f, severity: e.target.value}))}>
-                                                          <option value="">{t('common.select')}</option>
-                                                          <option value="High">{t('projectActions.severityHigh')}</option>
-                                                          <option value="Medium">{t('projectActions.severityMedium')}</option>
-                                                          <option value="Low">{t('projectActions.severityLow')}</option>
-                                                        </select>
-                                                      </div>
-                                                      <div className="col-md-3">
-                                                        <label className="form-label small fw-semibold">{t('common.status')}</label>
-                                                        <select className="form-select form-select-sm" value={jmcSnagForm.status} onChange={e => setJmcSnagForm(f => ({...f, status: e.target.value}))}>
-                                                          <option value="Open">{t('projectActions.snagOpen')}</option>
-                                                          <option value="Resolved">{t('projectActions.snagResolved')}</option>
-                                                          <option value="Closed">{t('projectActions.snagClosed')}</option>
-                                                        </select>
-                                                      </div>
-                                                      <div className="col-md-4">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.correctiveAction')}</label>
-                                                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.correctiveAction} onChange={e => setJmcSnagForm(f => ({...f, correctiveAction: e.target.value}))} />
-                                                      </div>
-                                                      <div className="col-md-3">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.responsibleParty')}</label>
-                                                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.responsibleParty} onChange={e => setJmcSnagForm(f => ({...f, responsibleParty: e.target.value}))} />
-                                                      </div>
-                                                      <div className="col-md-2">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.targetDate')}</label>
-                                                        <input type="date" className="form-control form-control-sm" value={jmcSnagForm.targetDate} onChange={e => setJmcSnagForm(f => ({...f, targetDate: e.target.value}))} />
-                                                      </div>
-                                                      <div className="col-md-3">
-                                                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
-                                                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.remarks} onChange={e => setJmcSnagForm(f => ({...f, remarks: e.target.value}))} />
-                                                      </div>
-                                                    </div>
-                                                    <div className="d-flex gap-1 mt-2">
-                                                      <button className="btn btn-sm btn-danger" onClick={handleSaveJmcSnag}><FiCheck size={12} /> {t('common.save')}</button>
-                                                      <button className="btn btn-sm btn-secondary" onClick={() => { setJmcSnagForm(null); setJmcEditingSnag(null); }}><FiX size={12} /> {t('common.cancel')}</button>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              )}
-                                              {(() => {
-                                                if (!jmcSnags[ms.id]) { loadJmcSnags(ms.id); return <div className="text-center p-1"><div className="spinner-border spinner-border-sm"></div></div>; }
-                                                const snagList = jmcSnags[ms.id] || [];
-                                                if (snagList.length === 0 && !(jmcSnagForm && jmcSnagForm.milestoneId === ms.id)) return <p className="text-muted small mb-0">{t('projectActions.noSnags')}</p>;
-                                                if (snagList.length === 0) return null;
-                                                return (
-                                                  <table className="table table-sm table-bordered mb-0 bg-white" style={{fontSize:'0.75rem'}}>
-                                                    <thead className="table-light">
-                                                      <tr>
-                                                        <th>#</th>
-                                                        <th>{t('projectActions.snagDescription')}</th>
-                                                        <th>{t('projectActions.severity')}</th>
-                                                        <th>{t('projectActions.correctiveAction')}</th>
-                                                        <th>{t('projectActions.responsibleParty')}</th>
-                                                        <th>{t('projectActions.targetDate')}</th>
-                                                        <th>{t('common.status')}</th>
-                                                        <th>{t('projectActions.remarks')}</th>
-                                                        <th>{t('common.actions')}</th>
-                                                      </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                      {snagList.map((sn, si) => (
-                                                        <tr key={sn.id}>
-                                                          <td>{si + 1}</td>
-                                                          <td>{sn.snagDescription || '-'}</td>
-                                                          <td>{sn.severity ? <span className={`badge ${sn.severity === 'High' ? 'bg-danger' : sn.severity === 'Medium' ? 'bg-warning text-dark' : 'bg-info'}`} style={{fontSize:'inherit'}}>{t(`projectActions.severity${sn.severity}`)}</span> : '-'}</td>
-                                                          <td>{sn.correctiveAction || '-'}</td>
-                                                          <td>{sn.responsibleParty || '-'}</td>
-                                                          <td>{sn.targetDate || '-'}</td>
-                                                          <td>{sn.status ? <span className={`badge ${sn.status === 'Closed' ? 'bg-success' : sn.status === 'Resolved' ? 'bg-info' : 'bg-warning text-dark'}`} style={{fontSize:'inherit'}}>{t(`projectActions.snag${sn.status}`)}</span> : '-'}</td>
-                                                          <td>{sn.remarks || '-'}</td>
-                                                          <td>
-                                                            <div className="d-flex gap-1">
-                                                              <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
-                                                                setJmcSnagForm({ milestoneId: ms.id, contractRefNo: sn.contractRefNo || item.contractRefNo || '', activityDescription: sn.activityDescription || item.activity || '', snagDescription: sn.snagDescription || '', severity: sn.severity || '', correctiveAction: sn.correctiveAction || '', responsibleParty: sn.responsibleParty || '', targetDate: sn.targetDate || '', status: sn.status || 'Open', remarks: sn.remarks || '' });
-                                                                setJmcEditingSnag(sn);
-                                                              }}><FiEdit2 size={10} /></button>
-                                                              <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteJmcSnag(sn.id, ms.id)}><FiTrash2 size={10} /></button>
-                                                            </div>
-                                                          </td>
-                                                        </tr>
-                                                      ))}
-                                                    </tbody>
-                                                  </table>
-                                                );
-                                              })()}
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      )}
-                                      </Fragment>
                                     );})})()}
                                   </tbody>
                                 </table>
