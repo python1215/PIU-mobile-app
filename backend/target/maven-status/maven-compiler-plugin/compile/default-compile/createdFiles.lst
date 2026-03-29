@@ -102,6 +102,7 @@ com/piun/piuproject/repository/ProjectDocumentRepository.class
 com/piun/piuproject/model/PDO.class
 com/piun/piuproject/model/Installation.class
 com/piun/piuproject/controller/DocumentationController.class
+com/piun/piuproject/model/JmcSnag.class
 com/piun/piuproject/config/DatabaseConfig.class
 com/piun/piuproject/repository/PAPCategoryRepository.class
 com/piun/piuproject/repository/PAPRepository.class
@@ -124,6 +125,7 @@ com/piun/piuproject/repository/DesignProgressMonitoringRepository.class
 com/piun/piuproject/repository/NatureOfSettlementRepository.class
 com/piun/piuproject/repository/CurrencyRepository.class
 com/piun/piuproject/controller/HealthController.class
+com/piun/piuproject/repository/JmcSnagRepository.class
 com/piun/piuproject/repository/DocumentTypeRepository.class
 com/piun/piuproject/config/WebConfig$1.class
 com/piun/piuproject/repository/DocumentTagRepository.class

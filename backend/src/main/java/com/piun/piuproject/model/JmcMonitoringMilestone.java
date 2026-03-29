@@ -60,6 +60,9 @@ public class JmcMonitoringMilestone {
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
 
+    @Column(name = "snag")
+    private Boolean snag = false;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -95,6 +98,8 @@ public class JmcMonitoringMilestone {
     public void setAttachmentPath(String attachmentPath) { this.attachmentPath = attachmentPath; }
     public String getRemarks() { return remarks; }
     public void setRemarks(String remarks) { this.remarks = remarks; }
+    public Boolean getSnag() { return snag; }
+    public void setSnag(Boolean snag) { this.snag = snag; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
 }

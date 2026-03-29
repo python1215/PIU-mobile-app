@@ -865,6 +865,9 @@ public class ProjectActionsController {
     @Autowired
     private JmcMonitoringMilestoneRepository jmcMilestoneRepository;
 
+    @Autowired
+    private JmcSnagRepository jmcSnagRepository;
+
     @GetMapping("/jmc/{jmcId}/milestones")
     @Transactional(readOnly = true)
     public List<JmcMonitoringMilestone> getJmcMilestones(@PathVariable Long jmcId) {
@@ -909,6 +912,7 @@ public class ProjectActionsController {
                 m.setStatus(details.getStatus());
                 m.setAttachmentPath(details.getAttachmentPath());
                 m.setRemarks(details.getRemarks());
+                m.setSnag(details.getSnag());
                 if (details.getAchievedVsGlobalPct() != null) {
                     m.setAchievedVsGlobalPct(details.getAchievedVsGlobalPct());
                 }
@@ -921,7 +925,57 @@ public class ProjectActionsController {
     public ResponseEntity<Void> deleteJmcMilestone(@PathVariable Long id) {
         return jmcMilestoneRepository.findById(id)
             .map(m -> {
+                jmcSnagRepository.deleteAll(jmcSnagRepository.findByMilestone_IdOrderByDateCreatedAsc(id));
                 jmcMilestoneRepository.delete(m);
+                return ResponseEntity.ok().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/jmc/milestones/{milestoneId}/snags")
+    @Transactional(readOnly = true)
+    public List<JmcSnag> getJmcSnags(@PathVariable Long milestoneId) {
+        return jmcSnagRepository.findByMilestone_IdOrderByDateCreatedAsc(milestoneId);
+    }
+
+    @PostMapping("/jmc/milestones/{milestoneId}/snags")
+    public ResponseEntity<JmcSnag> createJmcSnag(
+            @PathVariable Long milestoneId,
+            @RequestBody JmcSnag snag) {
+        return jmcMilestoneRepository.findById(milestoneId)
+            .map(ms -> {
+                snag.setMilestone(ms);
+                snag.setDateCreated(java.time.LocalDateTime.now());
+                return ResponseEntity.ok(jmcSnagRepository.save(snag));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/jmc/snags/{id}")
+    public ResponseEntity<JmcSnag> updateJmcSnag(
+            @PathVariable Long id,
+            @RequestBody JmcSnag details) {
+        return jmcSnagRepository.findById(id)
+            .map(s -> {
+                s.setContractRefNo(details.getContractRefNo());
+                s.setActivityDescription(details.getActivityDescription());
+                s.setSnagDescription(details.getSnagDescription());
+                s.setSeverity(details.getSeverity());
+                s.setCorrectiveAction(details.getCorrectiveAction());
+                s.setResponsibleParty(details.getResponsibleParty());
+                s.setTargetDate(details.getTargetDate());
+                s.setStatus(details.getStatus());
+                s.setRemarks(details.getRemarks());
+                return ResponseEntity.ok(jmcSnagRepository.save(s));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/jmc/snags/{id}")
+    public ResponseEntity<Void> deleteJmcSnag(@PathVariable Long id) {
+        return jmcSnagRepository.findById(id)
+            .map(s -> {
+                jmcSnagRepository.delete(s);
                 return ResponseEntity.ok().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());

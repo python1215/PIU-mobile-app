@@ -58,6 +58,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IssueActionSource.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Jmc.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/JmcMonitoringMilestone.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/JmcSnag.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIContractSetup.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIForContract.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIIndicator.java
@@ -130,6 +131,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IssueActionSourceRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/JmcMonitoringMilestoneRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/JmcRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/JmcSnagRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIContractSetupRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIForContractRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/LGARepository.java

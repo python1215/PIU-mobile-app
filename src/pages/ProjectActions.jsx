@@ -153,11 +153,14 @@ function ProjectActions() {
   const [jmcEditForm, setJmcEditForm] = useState({});
   const [jmcAllMilestones, setJmcAllMilestones] = useState({});
   const [jmcExpandedRows, setJmcExpandedRows] = useState({});
-  const [jmcMilestoneForm, setJmcMilestoneForm] = useState({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+  const [jmcMilestoneForm, setJmcMilestoneForm] = useState({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '', snag: false });
   const [jmcShowMilestoneForm, setJmcShowMilestoneForm] = useState(null);
   const [jmcEditingMilestone, setJmcEditingMilestone] = useState(null);
   const [jmcViewMilestone, setJmcViewMilestone] = useState(null);
   const [jmcUploadingFile, setJmcUploadingFile] = useState(false);
+  const [jmcSnags, setJmcSnags] = useState({});
+  const [jmcSnagForm, setJmcSnagForm] = useState(null);
+  const [jmcEditingSnag, setJmcEditingSnag] = useState(null);
 
   const [dmItems, setDmItems] = useState([]);
   const [dmProject, setDmProject] = useState('');
@@ -2656,7 +2659,8 @@ function ProjectActions() {
         plannedValues: parseFloat(form.plannedValues) || 0,
         achievedValues: achievedVal,
         achievedVsGlobalPct: achievedVsGlobal,
-        status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks
+        status: form.status, attachmentPath: form.attachmentPath, remarks: form.remarks,
+        snag: form.snag === true || form.snag === 'true'
       };
       if (jmcEditingMilestone) {
         await api.put(`/project-actions/jmc/milestones/${jmcEditingMilestone.id}`, payload);
@@ -2665,7 +2669,7 @@ function ProjectActions() {
         await api.post(`/project-actions/jmc/${form.jmcId}/milestones`, payload);
         toast.success(t('projectActions.milestoneSaved'));
       }
-      setJmcMilestoneForm({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+      setJmcMilestoneForm({ jmcId: null, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '', snag: false });
       setJmcShowMilestoneForm(null);
       setJmcEditingMilestone(null);
       loadContracts();
@@ -2679,6 +2683,40 @@ function ProjectActions() {
       toast.success(t('messages.deleteSuccess'));
       loadContracts();
     } catch (e) { toast.error(t('projectActions.errorDeleting')); }
+  };
+
+  const loadJmcSnags = async (milestoneId) => {
+    try {
+      const res = await api.get(`/project-actions/jmc/milestones/${milestoneId}/snags`);
+      setJmcSnags(prev => ({ ...prev, [milestoneId]: res.data }));
+    } catch { setJmcSnags(prev => ({ ...prev, [milestoneId]: [] })); }
+  };
+
+  const handleSaveJmcSnag = async () => {
+    if (!jmcSnagForm) return;
+    const { milestoneId, ...formData } = jmcSnagForm;
+    if (!formData.snagDescription?.trim()) { toast.error(t('projectActions.fillRequiredFields')); return; }
+    try {
+      if (jmcEditingSnag) {
+        await api.put(`/project-actions/jmc/snags/${jmcEditingSnag.id}`, formData);
+        toast.success(t('messages.updateSuccess'));
+      } else {
+        await api.post(`/project-actions/jmc/milestones/${milestoneId}/snags`, formData);
+        toast.success(t('messages.createSuccess'));
+      }
+      setJmcSnagForm(null);
+      setJmcEditingSnag(null);
+      loadJmcSnags(milestoneId);
+    } catch (e) { toast.error(t('messages.error')); console.error(e); }
+  };
+
+  const handleDeleteJmcSnag = async (snagId, milestoneId) => {
+    if (!window.confirm(t('messages.confirmDelete'))) return;
+    try {
+      await api.delete(`/project-actions/jmc/snags/${snagId}`);
+      toast.success(t('messages.deleteSuccess'));
+      loadJmcSnags(milestoneId);
+    } catch { toast.error(t('messages.error')); }
   };
 
   const renderInstModal = () => {
@@ -3417,9 +3455,13 @@ function ProjectActions() {
                   <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.attachPhotos')}</label>
                   <p className="mb-0">{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary">{ms.attachmentPath.split('/').pop()}</a> : '-'}</p>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.remarks')}</label>
                   <p className="mb-0">{ms.remarks || '-'}</p>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold text-muted small mb-0">{t('projectActions.snag')}</label>
+                  <p className="mb-0">{ms.snag ? <span className="badge bg-danger">{t('common.yes')}</span> : <span className="badge bg-secondary bg-opacity-25 text-dark">{t('common.no')}</span>}</p>
                 </div>
               </div>
             </div>
@@ -3624,7 +3666,7 @@ function ProjectActions() {
                                 <button className="btn btn-sm btn-outline-primary" onClick={() => {
                                   setJmcShowMilestoneForm(item.id);
                                   setJmcEditingMilestone(null);
-                                  setJmcMilestoneForm({ jmcId: item.id, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '' });
+                                  setJmcMilestoneForm({ jmcId: item.id, logDate: '', quarterId: '', electricityFeeders: '', activityStartDate: '', activityEndDate: '', duration: '', plannedValues: '', achievedValues: '', status: '', attachmentPath: '', remarks: '', snag: false });
                                 }}><FiPlus size={12} /> {t('projectActions.addMilestone')}</button>
                               </div>
 
@@ -3647,6 +3689,7 @@ function ProjectActions() {
                                       <th>{t('common.status')}</th>
                                       <th>{t('projectActions.attachPhotos')}</th>
                                       <th>{t('projectActions.remarks')}</th>
+                                      <th>{t('projectActions.snag')}</th>
                                       <th>{t('common.actions')}</th>
                                     </tr>
                                   </thead>
@@ -3658,7 +3701,8 @@ function ProjectActions() {
                                       const balanceFromBoq = (boqQty != null) ? Math.round((boqQty - cumPlanned) * 100) / 100 : null;
                                       const achievedVsGlobal = (boqQty != null && boqQty > 0) ? Math.round((cumAchieved / boqQty) * 10000) / 100 : null;
                                       return (
-                                      <tr key={ms.id}>
+                                      <Fragment key={ms.id}>
+                                      <tr>
                                         <td>{ms.logDate || '-'}</td>
                                         <td>{ms.quarter?.quarter || '-'}</td>
                                         <td>{ms.electricityFeeders || '-'}</td>
@@ -3673,18 +3717,138 @@ function ProjectActions() {
                                         <td>{ms.status && <span className="badge" style={{ backgroundColor: DM_STATUS_COLORS[ms.status] || '#6c757d', fontSize: 'inherit' }}>{t(`projectActions.status${ms.status}`) || ms.status}</span>}</td>
                                         <td>{ms.attachmentPath ? <a href={ms.attachmentPath} target="_blank" rel="noopener noreferrer" className="text-primary" style={{fontSize:'inherit'}}>{ms.attachmentPath.split('/').pop()}</a> : '-'}</td>
                                         <td>{ms.remarks || '-'}</td>
+                                        <td>{ms.snag ? <span className="badge bg-danger" style={{fontSize:'inherit'}}>{t('common.yes')}</span> : <span className="badge bg-secondary bg-opacity-25 text-dark" style={{fontSize:'inherit'}}>{t('common.no')}</span>}</td>
                                         <td>
                                           <div className="d-flex gap-1">
                                             <button className="btn btn-sm btn-outline-info p-0 px-1" title={t('common.view')} onClick={() => setJmcViewMilestone({ ms, item, balanceFromBoq, achievedVsGlobal })}><FiEye /></button>
                                             <button className="btn btn-sm btn-outline-primary p-0 px-1" title={t('common.edit')} onClick={() => {
                                               setJmcShowMilestoneForm(item.id);
                                               setJmcEditingMilestone(ms);
-                                              setJmcMilestoneForm({ jmcId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', electricityFeeders: ms.electricityFeeders || '', activityStartDate: ms.activityStartDate || '', activityEndDate: ms.activityEndDate || '', duration: ms.duration ?? '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', attachmentPath: ms.attachmentPath || '', remarks: ms.remarks || '' });
+                                              setJmcMilestoneForm({ jmcId: item.id, logDate: ms.logDate || '', quarterId: ms.quarter?.id || '', electricityFeeders: ms.electricityFeeders || '', activityStartDate: ms.activityStartDate || '', activityEndDate: ms.activityEndDate || '', duration: ms.duration ?? '', plannedValues: ms.plannedValues ?? '', achievedValues: ms.achievedValues ?? '', status: ms.status || '', attachmentPath: ms.attachmentPath || '', remarks: ms.remarks || '', snag: ms.snag || false });
                                             }}><FiEdit2 /></button>
                                             <button className="btn btn-sm btn-outline-danger p-0 px-1" title={t('common.delete')} onClick={() => handleDeleteJmcMilestone(ms.id)}><FiTrash2 /></button>
                                           </div>
                                         </td>
                                       </tr>
+                                      {ms.snag && (
+                                        <tr>
+                                          <td colSpan="16" className="p-0">
+                                            <div className="p-2 bg-danger bg-opacity-10 border-start border-danger border-3">
+                                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <div>
+                                                  <strong className="text-danger" style={{fontSize:'0.8rem'}}><FiAlertTriangle className="me-1" />{t('projectActions.snagList')}</strong>
+                                                  <small className="ms-2 text-muted">{t('projectActions.contractRefNo')}: <strong>{item.contractRefNo}</strong> | {t('projectActions.activityDescription')}: <strong>{item.activity}</strong></small>
+                                                </div>
+                                                <button className="btn btn-sm btn-outline-danger" onClick={() => {
+                                                  setJmcSnagForm({ milestoneId: ms.id, contractRefNo: item.contractRefNo || '', activityDescription: item.activity || '', snagDescription: '', severity: '', correctiveAction: '', responsibleParty: '', targetDate: '', status: 'Open', remarks: '' });
+                                                  setJmcEditingSnag(null);
+                                                  if (!jmcSnags[ms.id]) loadJmcSnags(ms.id);
+                                                }}><FiPlus size={12} /> {t('projectActions.addSnag')}</button>
+                                              </div>
+                                              {jmcSnagForm && jmcSnagForm.milestoneId === ms.id && (
+                                                <div className="card mb-2 border-danger">
+                                                  <div className="card-body p-2">
+                                                    <div className="mb-2 p-1 bg-white rounded border" style={{fontSize:'0.78rem'}}>
+                                                      <span className="text-muted fw-semibold">{t('projectActions.contractRefNo')}:</span> <strong>{item.contractRefNo}</strong>
+                                                      <span className="ms-3 text-muted fw-semibold">{t('projectActions.activityDescription')}:</span> <strong>{item.activity}</strong>
+                                                    </div>
+                                                    <div className="row g-2">
+                                                      <div className="col-md-6">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.snagDescription')} *</label>
+                                                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.snagDescription} onChange={e => setJmcSnagForm(f => ({...f, snagDescription: e.target.value}))} />
+                                                      </div>
+                                                      <div className="col-md-3">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.severity')}</label>
+                                                        <select className="form-select form-select-sm" value={jmcSnagForm.severity} onChange={e => setJmcSnagForm(f => ({...f, severity: e.target.value}))}>
+                                                          <option value="">{t('common.select')}</option>
+                                                          <option value="High">{t('projectActions.severityHigh')}</option>
+                                                          <option value="Medium">{t('projectActions.severityMedium')}</option>
+                                                          <option value="Low">{t('projectActions.severityLow')}</option>
+                                                        </select>
+                                                      </div>
+                                                      <div className="col-md-3">
+                                                        <label className="form-label small fw-semibold">{t('common.status')}</label>
+                                                        <select className="form-select form-select-sm" value={jmcSnagForm.status} onChange={e => setJmcSnagForm(f => ({...f, status: e.target.value}))}>
+                                                          <option value="Open">{t('projectActions.snagOpen')}</option>
+                                                          <option value="Resolved">{t('projectActions.snagResolved')}</option>
+                                                          <option value="Closed">{t('projectActions.snagClosed')}</option>
+                                                        </select>
+                                                      </div>
+                                                      <div className="col-md-4">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.correctiveAction')}</label>
+                                                        <textarea className="form-control form-control-sm" rows={2} value={jmcSnagForm.correctiveAction} onChange={e => setJmcSnagForm(f => ({...f, correctiveAction: e.target.value}))} />
+                                                      </div>
+                                                      <div className="col-md-3">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.responsibleParty')}</label>
+                                                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.responsibleParty} onChange={e => setJmcSnagForm(f => ({...f, responsibleParty: e.target.value}))} />
+                                                      </div>
+                                                      <div className="col-md-2">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.targetDate')}</label>
+                                                        <input type="date" className="form-control form-control-sm" value={jmcSnagForm.targetDate} onChange={e => setJmcSnagForm(f => ({...f, targetDate: e.target.value}))} />
+                                                      </div>
+                                                      <div className="col-md-3">
+                                                        <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
+                                                        <input type="text" className="form-control form-control-sm" value={jmcSnagForm.remarks} onChange={e => setJmcSnagForm(f => ({...f, remarks: e.target.value}))} />
+                                                      </div>
+                                                    </div>
+                                                    <div className="d-flex gap-1 mt-2">
+                                                      <button className="btn btn-sm btn-danger" onClick={handleSaveJmcSnag}><FiCheck size={12} /> {t('common.save')}</button>
+                                                      <button className="btn btn-sm btn-secondary" onClick={() => { setJmcSnagForm(null); setJmcEditingSnag(null); }}><FiX size={12} /> {t('common.cancel')}</button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              )}
+                                              {(() => {
+                                                if (!jmcSnags[ms.id]) { loadJmcSnags(ms.id); return <div className="text-center p-1"><div className="spinner-border spinner-border-sm"></div></div>; }
+                                                const snagList = jmcSnags[ms.id] || [];
+                                                if (snagList.length === 0 && !(jmcSnagForm && jmcSnagForm.milestoneId === ms.id)) return <p className="text-muted small mb-0">{t('projectActions.noSnags')}</p>;
+                                                if (snagList.length === 0) return null;
+                                                return (
+                                                  <table className="table table-sm table-bordered mb-0 bg-white" style={{fontSize:'0.75rem'}}>
+                                                    <thead className="table-light">
+                                                      <tr>
+                                                        <th>#</th>
+                                                        <th>{t('projectActions.snagDescription')}</th>
+                                                        <th>{t('projectActions.severity')}</th>
+                                                        <th>{t('projectActions.correctiveAction')}</th>
+                                                        <th>{t('projectActions.responsibleParty')}</th>
+                                                        <th>{t('projectActions.targetDate')}</th>
+                                                        <th>{t('common.status')}</th>
+                                                        <th>{t('projectActions.remarks')}</th>
+                                                        <th>{t('common.actions')}</th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                      {snagList.map((sn, si) => (
+                                                        <tr key={sn.id}>
+                                                          <td>{si + 1}</td>
+                                                          <td>{sn.snagDescription || '-'}</td>
+                                                          <td>{sn.severity ? <span className={`badge ${sn.severity === 'High' ? 'bg-danger' : sn.severity === 'Medium' ? 'bg-warning text-dark' : 'bg-info'}`} style={{fontSize:'inherit'}}>{t(`projectActions.severity${sn.severity}`)}</span> : '-'}</td>
+                                                          <td>{sn.correctiveAction || '-'}</td>
+                                                          <td>{sn.responsibleParty || '-'}</td>
+                                                          <td>{sn.targetDate || '-'}</td>
+                                                          <td>{sn.status ? <span className={`badge ${sn.status === 'Closed' ? 'bg-success' : sn.status === 'Resolved' ? 'bg-info' : 'bg-warning text-dark'}`} style={{fontSize:'inherit'}}>{t(`projectActions.snag${sn.status}`)}</span> : '-'}</td>
+                                                          <td>{sn.remarks || '-'}</td>
+                                                          <td>
+                                                            <div className="d-flex gap-1">
+                                                              <button className="btn btn-sm btn-outline-primary p-0 px-1" onClick={() => {
+                                                                setJmcSnagForm({ milestoneId: ms.id, contractRefNo: sn.contractRefNo || item.contractRefNo || '', activityDescription: sn.activityDescription || item.activity || '', snagDescription: sn.snagDescription || '', severity: sn.severity || '', correctiveAction: sn.correctiveAction || '', responsibleParty: sn.responsibleParty || '', targetDate: sn.targetDate || '', status: sn.status || 'Open', remarks: sn.remarks || '' });
+                                                                setJmcEditingSnag(sn);
+                                                              }}><FiEdit2 size={10} /></button>
+                                                              <button className="btn btn-sm btn-outline-danger p-0 px-1" onClick={() => handleDeleteJmcSnag(sn.id, ms.id)}><FiTrash2 size={10} /></button>
+                                                            </div>
+                                                          </td>
+                                                        </tr>
+                                                      ))}
+                                                    </tbody>
+                                                  </table>
+                                                );
+                                              })()}
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      )}
+                                      </Fragment>
                                     );})})()}
                                   </tbody>
                                 </table>
@@ -3858,6 +4022,13 @@ function ProjectActions() {
                                       <div className="col-md-3">
                                         <label className="form-label small fw-semibold">{t('projectActions.remarks')}</label>
                                         <input type="text" className="form-control form-control-sm" value={jmcMilestoneForm.remarks} onChange={e => setJmcMilestoneForm(f => ({...f, remarks: e.target.value}))} />
+                                      </div>
+                                      <div className="col-md-2">
+                                        <label className="form-label small fw-semibold">{t('projectActions.snag')}</label>
+                                        <select className="form-select form-select-sm" value={jmcMilestoneForm.snag ? 'true' : 'false'} onChange={e => setJmcMilestoneForm(f => ({...f, snag: e.target.value === 'true'}))}>
+                                          <option value="false">{t('common.no')}</option>
+                                          <option value="true">{t('common.yes')}</option>
+                                        </select>
                                       </div>
                                       <div className="col-md-1 d-flex align-items-end gap-1">
                                         <button className="btn btn-sm btn-success" onClick={handleJmcSaveMilestone}><FiCheck /></button>
