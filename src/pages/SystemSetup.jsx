@@ -473,7 +473,7 @@ function SystemSetup() {
       },
       relatedDataKeys: ['pdos'] },
     electricityFeeders: { endpoint: '/api/setup/electricity-feeders', idField: 'id', label: 'Electricity Feeders',
-      columns: [{ key: 'id', label: 'ID' }, { key: 'feederId', label: 'Feeder ID' }, { key: 'feeder', label: 'Feeder' }],
+      columns: [{ key: 'feederId', label: 'Feeder ID' }, { key: 'feeder', label: 'Feeder' }],
       fields: [
         { name: 'feederId', label: 'Feeder ID', placeholder: 'e.g., FDR-001', halfWidth: true },
         { name: 'feeder', label: 'Feeder', placeholder: 'Enter feeder name', halfWidth: true }
