@@ -673,6 +673,7 @@
     "amount": "Amount",
     "compensated": "Compensated",
     "profileYear": "Profile Year",
+    "identificationDocument": "Type of ID Document",
     "caseNo": "Case No",
     "complainant": "Complainant",
     "dateReceived": "Date Received",

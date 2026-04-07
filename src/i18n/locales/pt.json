@@ -714,6 +714,7 @@
     "amount": "Valor",
     "compensated": "Compensado",
     "profileYear": "Ano de Perfil",
+    "identificationDocument": "Tipo de Documento de Identificação",
     "caseNo": "Número do Caso",
     "dateReceived": "Data Recebida",
     "outcome": "Resultado",

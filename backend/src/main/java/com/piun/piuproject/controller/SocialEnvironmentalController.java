@@ -70,6 +70,9 @@ public class SocialEnvironmentalController {
     @Autowired
     private QuarterRepository quarterRepository;
 
+    @Autowired
+    private IdentificationDocumentRepository identificationDocumentRepository;
+
     @GetMapping("/esia")
     public List<ESIA> getAllESIA() {
         return esiaRepository.findAll();
@@ -161,6 +164,9 @@ public class SocialEnvironmentalController {
         if (pap.getProfileYear() != null && pap.getProfileYear().getId() != null) {
             pap.setProfileYear(yearRepository.findById(pap.getProfileYear().getId()).orElse(null));
         }
+        if (pap.getIdentificationDocument() != null && pap.getIdentificationDocument().getId() != null) {
+            pap.setIdentificationDocument(identificationDocumentRepository.findById(pap.getIdentificationDocument().getId()).orElse(null));
+        }
     }
 
     @PostMapping("/pap")
@@ -195,6 +201,7 @@ public class SocialEnvironmentalController {
                 pap.setCurrentAddress(papDetails.getCurrentAddress());
                 pap.setRemarks(papDetails.getRemarks());
                 pap.setProfileYear(papDetails.getProfileYear());
+                pap.setIdentificationDocument(papDetails.getIdentificationDocument());
                 pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());
                 pap.setDateReceivedTo(papDetails.getDateReceivedTo());
                 return ResponseEntity.ok(papRepository.save(pap));

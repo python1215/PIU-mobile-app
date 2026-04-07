@@ -95,6 +95,10 @@ public class PAP {
     @JoinColumn(name = "profile_year_id")
     private Year profileYear;
 
+    @ManyToOne
+    @JoinColumn(name = "identification_document_id")
+    private IdentificationDocument identificationDocument;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -154,6 +158,8 @@ public class PAP {
     public void setDocumentUpload(String documentUpload) { this.documentUpload = documentUpload; }
     public Year getProfileYear() { return profileYear; }
     public void setProfileYear(Year profileYear) { this.profileYear = profileYear; }
+    public IdentificationDocument getIdentificationDocument() { return identificationDocument; }
+    public void setIdentificationDocument(IdentificationDocument identificationDocument) { this.identificationDocument = identificationDocument; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }

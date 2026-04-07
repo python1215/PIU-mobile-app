@@ -31,6 +31,7 @@ function SocialEnvironmental() {
   const [vulnerabilityCategories, setVulnerabilityCategories] = useState([]);
   const [decisionOutcomes, setDecisionOutcomes] = useState([]);
   const [years, setYears] = useState([]);
+  const [identificationDocuments, setIdentificationDocuments] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -117,7 +118,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -128,7 +129,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/decision-outcomes').catch(() => ({ data: [] })),
         axios.get('/api/setup/years').catch(() => ({ data: [] })),
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
-        axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] }))
+        axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] })),
+        axios.get('/api/setup/identification-documents').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -141,6 +143,7 @@ function SocialEnvironmental() {
       setYears(yrRes.data);
       setQuarters(qrRes.data);
       setEngagementTypes(etRes.data);
+      setIdentificationDocuments(idRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -184,6 +187,7 @@ function SocialEnvironmental() {
           papCompensated: item.papCompensated || '',
           papIdentificationNumber: item.papIdentificationNumber || '',
           profileYearId: item.profileYear?.id || '',
+          identificationDocumentId: item.identificationDocument?.id || '',
           settlementCode: item.currentAddress?.settlementCode || '',
           remarks: item.remarks || '',
           dateReceivedFrom: item.dateReceivedFrom || '',
@@ -273,6 +277,7 @@ function SocialEnvironmental() {
           papCompensated: '',
           papIdentificationNumber: '',
           profileYearId: '',
+          identificationDocumentId: '',
           settlementCode: '',
           remarks: '',
           dateReceivedFrom: '',
@@ -414,6 +419,7 @@ function SocialEnvironmental() {
       vulnerabilityCategory: formData.vulnerabilityCategoryId ? { id: parseInt(formData.vulnerabilityCategoryId) } : null,
       papCompensated: formData.papCompensated || null,
       profileYear: formData.profileYearId ? { id: parseInt(formData.profileYearId) } : null,
+      identificationDocument: formData.identificationDocumentId ? { id: parseInt(formData.identificationDocumentId) } : null,
       currentAddress: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
       remarks: formData.remarks || null,
       dateReceivedFrom: formData.dateReceivedFrom || null,
@@ -998,6 +1004,13 @@ function SocialEnvironmental() {
                 <select className="form-select form-select-sm" name="profileYearId" value={formData.profileYearId || ''} onChange={handleChange}>
                   <option value="">{t('common.select')}</option>
                   {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.identificationDocument')}</label>
+                <select className="form-select form-select-sm" name="identificationDocumentId" value={formData.identificationDocumentId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {identificationDocuments.map(d => <option key={d.id} value={d.id}>{d.identityDocument}</option>)}
                 </select>
               </div>
             </div>
