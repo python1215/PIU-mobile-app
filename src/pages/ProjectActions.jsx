@@ -3205,7 +3205,7 @@ function ProjectActions() {
                                         <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
                                         <select className="form-select form-select-sm" value={instMilestoneForm.electricityFeeders} onChange={e => setInstMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))}>
                                           <option value="">{t('common.select')}</option>
-                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feederId} - {ef.feeder}</option>))}
+                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feeder}</option>))}
                                         </select>
                                       </div>
                                       <div className="col-md-2">
@@ -3956,7 +3956,7 @@ function ProjectActions() {
                                         <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
                                         <select className="form-select form-select-sm" value={jmcMilestoneForm.electricityFeeders} onChange={e => setJmcMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))}>
                                           <option value="">{t('common.select')}</option>
-                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feederId} - {ef.feeder}</option>))}
+                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feeder}</option>))}
                                         </select>
                                       </div>
                                       <div className="col-md-2">
