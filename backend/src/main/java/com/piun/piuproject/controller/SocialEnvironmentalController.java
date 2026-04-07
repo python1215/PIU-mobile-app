@@ -202,6 +202,7 @@ public class SocialEnvironmentalController {
                 pap.setRemarks(papDetails.getRemarks());
                 pap.setProfileYear(papDetails.getProfileYear());
                 pap.setIdentificationDocument(papDetails.getIdentificationDocument());
+                pap.setIdDocumentUpload(papDetails.getIdDocumentUpload());
                 pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());
                 pap.setDateReceivedTo(papDetails.getDateReceivedTo());
                 return ResponseEntity.ok(papRepository.save(pap));

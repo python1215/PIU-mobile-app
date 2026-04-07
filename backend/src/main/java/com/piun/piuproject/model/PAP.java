@@ -99,6 +99,9 @@ public class PAP {
     @JoinColumn(name = "identification_document_id")
     private IdentificationDocument identificationDocument;
 
+    @Column(name = "id_document_upload", length = 255)
+    private String idDocumentUpload;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -160,6 +163,8 @@ public class PAP {
     public void setProfileYear(Year profileYear) { this.profileYear = profileYear; }
     public IdentificationDocument getIdentificationDocument() { return identificationDocument; }
     public void setIdentificationDocument(IdentificationDocument identificationDocument) { this.identificationDocument = identificationDocument; }
+    public String getIdDocumentUpload() { return idDocumentUpload; }
+    public void setIdDocumentUpload(String idDocumentUpload) { this.idDocumentUpload = idDocumentUpload; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }

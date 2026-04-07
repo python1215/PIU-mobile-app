@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage, FiFileText } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function SocialEnvironmental() {
@@ -35,7 +35,9 @@ function SocialEnvironmental() {
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [idDocUploading, setIdDocUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const idDocInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
   const handleFileUpload = useCallback(async (e) => {
@@ -73,6 +75,39 @@ function SocialEnvironmental() {
 
   const handleRemovePicture = useCallback(() => {
     setFormData(prev => ({ ...prev, picture: null }));
+  }, []);
+
+  const handleIdDocUpload = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      toast.error(t('socialEnvironmental.onlyImagesOrPdf'));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('socialEnvironmental.fileTooLarge'));
+      return;
+    }
+    setIdDocUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+    try {
+      const res = await axios.post('/api/uploads', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({ ...prev, idDocumentUpload: res.data.url }));
+      toast.success(t('socialEnvironmental.idDocUploaded'));
+    } catch (err) {
+      toast.error(err.response?.data?.error || t('socialEnvironmental.uploadFailed'));
+    } finally {
+      setIdDocUploading(false);
+      if (idDocInputRef.current) idDocInputRef.current.value = '';
+    }
+  }, [t]);
+
+  const handleRemoveIdDoc = useCallback(() => {
+    setFormData(prev => ({ ...prev, idDocumentUpload: null }));
   }, []);
 
   useEffect(() => {
@@ -188,6 +223,7 @@ function SocialEnvironmental() {
           papIdentificationNumber: item.papIdentificationNumber || '',
           profileYearId: item.profileYear?.id || '',
           identificationDocumentId: item.identificationDocument?.id || '',
+          idDocumentUpload: item.idDocumentUpload || '',
           settlementCode: item.currentAddress?.settlementCode || '',
           remarks: item.remarks || '',
           dateReceivedFrom: item.dateReceivedFrom || '',
@@ -278,6 +314,7 @@ function SocialEnvironmental() {
           papIdentificationNumber: '',
           profileYearId: '',
           identificationDocumentId: '',
+          idDocumentUpload: '',
           settlementCode: '',
           remarks: '',
           dateReceivedFrom: '',
@@ -420,6 +457,7 @@ function SocialEnvironmental() {
       papCompensated: formData.papCompensated || null,
       profileYear: formData.profileYearId ? { id: parseInt(formData.profileYearId) } : null,
       identificationDocument: formData.identificationDocumentId ? { id: parseInt(formData.identificationDocumentId) } : null,
+      idDocumentUpload: formData.idDocumentUpload || null,
       currentAddress: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
       remarks: formData.remarks || null,
       dateReceivedFrom: formData.dateReceivedFrom || null,
@@ -1012,6 +1050,28 @@ function SocialEnvironmental() {
                   <option value="">{t('common.select')}</option>
                   {identificationDocuments.map(d => <option key={d.id} value={d.id}>{d.identityDocument}</option>)}
                 </select>
+              </div>
+              <div className="col-12 col-lg-8">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.attachIdDocument')}</label>
+                <input type="file" ref={idDocInputRef} accept="image/*,application/pdf" onChange={handleIdDocUpload} className="d-none" />
+                {formData.idDocumentUpload ? (
+                  <div className="d-flex align-items-center gap-2">
+                    {formData.idDocumentUpload.match(/\.(pdf)$/i) ? (
+                      <a href={formData.idDocumentUpload} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-info">
+                        <FiFileText size={13} className="me-1" />{t('socialEnvironmental.viewDocument')}
+                      </a>
+                    ) : (
+                      <a href={formData.idDocumentUpload} target="_blank" rel="noopener noreferrer">
+                        <img src={formData.idDocumentUpload} alt="ID Doc" style={{maxHeight: 40, maxWidth: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #dee2e6'}} />
+                      </a>
+                    )}
+                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleRemoveIdDoc}><FiTrash2 size={13} /></button>
+                  </div>
+                ) : (
+                  <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => idDocInputRef.current?.click()} disabled={idDocUploading}>
+                    <FiUpload size={13} className="me-1" />{idDocUploading ? t('socialEnvironmental.uploading') : t('socialEnvironmental.browseFiles')}
+                  </button>
+                )}
               </div>
             </div>
           </div>
