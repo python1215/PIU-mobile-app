@@ -158,6 +158,9 @@ public class SocialEnvironmentalController {
         if (pap.getNatureOfCompensation() != null && pap.getNatureOfCompensation().getId() != null) {
             pap.setNatureOfCompensation(natureOfSettlementRepository.findById(pap.getNatureOfCompensation().getId()).orElse(null));
         }
+        if (pap.getProfileYear() != null && pap.getProfileYear().getId() != null) {
+            pap.setProfileYear(yearRepository.findById(pap.getProfileYear().getId()).orElse(null));
+        }
     }
 
     @PostMapping("/pap")
@@ -191,6 +194,7 @@ public class SocialEnvironmentalController {
                 pap.setPreProjectSituation(papDetails.getPreProjectSituation());
                 pap.setCurrentAddress(papDetails.getCurrentAddress());
                 pap.setRemarks(papDetails.getRemarks());
+                pap.setProfileYear(papDetails.getProfileYear());
                 pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());
                 pap.setDateReceivedTo(papDetails.getDateReceivedTo());
                 return ResponseEntity.ok(papRepository.save(pap));

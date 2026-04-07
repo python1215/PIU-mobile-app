@@ -183,6 +183,7 @@ function SocialEnvironmental() {
           vulnerabilityCategoryId: item.vulnerabilityCategory?.id || '',
           papCompensated: item.papCompensated || '',
           papIdentificationNumber: item.papIdentificationNumber || '',
+          profileYearId: item.profileYear?.id || '',
           settlementCode: item.currentAddress?.settlementCode || '',
           remarks: item.remarks || '',
           dateReceivedFrom: item.dateReceivedFrom || '',
@@ -271,6 +272,7 @@ function SocialEnvironmental() {
           vulnerabilityCategoryId: '',
           papCompensated: '',
           papIdentificationNumber: '',
+          profileYearId: '',
           settlementCode: '',
           remarks: '',
           dateReceivedFrom: '',
@@ -411,6 +413,7 @@ function SocialEnvironmental() {
       papCategory: formData.papCategoryId ? { id: parseInt(formData.papCategoryId) } : null,
       vulnerabilityCategory: formData.vulnerabilityCategoryId ? { id: parseInt(formData.vulnerabilityCategoryId) } : null,
       papCompensated: formData.papCompensated || null,
+      profileYear: formData.profileYearId ? { id: parseInt(formData.profileYearId) } : null,
       currentAddress: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
       remarks: formData.remarks || null,
       dateReceivedFrom: formData.dateReceivedFrom || null,
@@ -988,6 +991,13 @@ function SocialEnvironmental() {
                   <option value="">{t('common.select')}</option>
                   <option value="Y">{t('common.yes')}</option>
                   <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.profileYear')}</label>
+                <select className="form-select form-select-sm" name="profileYearId" value={formData.profileYearId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {years.map(y => <option key={y.id} value={y.id}>{y.profileYear}</option>)}
                 </select>
               </div>
             </div>

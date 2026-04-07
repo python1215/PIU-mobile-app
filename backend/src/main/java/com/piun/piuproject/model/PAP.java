@@ -91,6 +91,10 @@ public class PAP {
     @Column(name = "document_upload", length = 255)
     private String documentUpload;
 
+    @ManyToOne
+    @JoinColumn(name = "profile_year_id")
+    private Year profileYear;
+
     @Column(name = "date_created")
     private LocalDateTime dateCreated = LocalDateTime.now();
 
@@ -148,6 +152,8 @@ public class PAP {
     public void setDateReceivedTo(LocalDate dateReceivedTo) { this.dateReceivedTo = dateReceivedTo; }
     public String getDocumentUpload() { return documentUpload; }
     public void setDocumentUpload(String documentUpload) { this.documentUpload = documentUpload; }
+    public Year getProfileYear() { return profileYear; }
+    public void setProfileYear(Year profileYear) { this.profileYear = profileYear; }
     public LocalDateTime getDateCreated() { return dateCreated; }
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }

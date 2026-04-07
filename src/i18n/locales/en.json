@@ -672,6 +672,7 @@
     "location": "Location",
     "amount": "Amount",
     "compensated": "Compensated",
+    "profileYear": "Profile Year",
     "caseNo": "Case No",
     "complainant": "Complainant",
     "dateReceived": "Date Received",

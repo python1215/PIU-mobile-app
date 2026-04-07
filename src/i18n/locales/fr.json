@@ -713,6 +713,7 @@
     "location": "Emplacement",
     "amount": "Montant",
     "compensated": "Compensé",
+    "profileYear": "Année de Profil",
     "caseNo": "Numéro de Cas",
     "dateReceived": "Date de Réception",
     "outcome": "Résultat",
