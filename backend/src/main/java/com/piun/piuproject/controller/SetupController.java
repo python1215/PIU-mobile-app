@@ -44,6 +44,7 @@ public class SetupController {
     @Autowired private ProjectResultRepository projectResultRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private ElectricityFeederRepository electricityFeederRepository;
+    @Autowired private IdentificationDocumentRepository identificationDocumentRepository;
 
     // Contributors
     @GetMapping("/contributors")
@@ -615,5 +616,21 @@ public class SetupController {
     @DeleteMapping("/electricity-feeders/{id}")
     public ResponseEntity<Void> deleteElectricityFeeder(@PathVariable Long id) {
         return electricityFeederRepository.findById(id).map(f -> { electricityFeederRepository.delete(f); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/identification-documents")
+    public List<IdentificationDocument> getAllIdentificationDocuments() { return identificationDocumentRepository.findAll(); }
+
+    @PostMapping("/identification-documents")
+    public IdentificationDocument createIdentificationDocument(@RequestBody IdentificationDocument doc) { return identificationDocumentRepository.save(doc); }
+
+    @PutMapping("/identification-documents/{id}")
+    public ResponseEntity<IdentificationDocument> updateIdentificationDocument(@PathVariable Long id, @RequestBody IdentificationDocument details) {
+        return identificationDocumentRepository.findById(id).map(d -> { d.setDocId(details.getDocId()); d.setIdentityDocument(details.getIdentityDocument()); return ResponseEntity.ok(identificationDocumentRepository.save(d)); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/identification-documents/{id}")
+    public ResponseEntity<Void> deleteIdentificationDocument(@PathVariable Long id) {
+        return identificationDocumentRepository.findById(id).map(d -> { identificationDocumentRepository.delete(d); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 }

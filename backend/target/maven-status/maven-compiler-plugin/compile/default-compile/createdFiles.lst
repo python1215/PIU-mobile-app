@@ -89,11 +89,13 @@ com/piun/piuproject/repository/ProjectOutcomeRepository.class
 com/piun/piuproject/model/KPIIndicator.class
 com/piun/piuproject/model/LGA.class
 com/piun/piuproject/repository/MeasurementUnitRepository.class
+com/piun/piuproject/model/IdentificationDocument.class
 com/piun/piuproject/controller/SocialEnvironmentalController.class
 com/piun/piuproject/dto/AuthRequest.class
 com/piun/piuproject/controller/RiskAssessmentController.class
 com/piun/piuproject/model/DesignWorkProgress.class
 com/piun/piuproject/controller/IssueActionSourceController.class
+com/piun/piuproject/repository/IdentificationDocumentRepository.class
 com/piun/piuproject/repository/MonitoringTypeRepository.class
 com/piun/piuproject/dto/RegisterRequest.class
 com/piun/piuproject/repository/ProjectCategoryRepository.class
