@@ -2461,12 +2461,10 @@ function ProjectActions() {
       return;
     }
     if (supplied != null && supplied > 0 && totalPlanned > supplied) {
-      toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
-      return;
+      toast(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }), { icon: '⚠️' });
     }
     if (supplied != null && supplied > 0 && totalAchieved > supplied) {
-      toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
-      return;
+      toast(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }), { icon: '⚠️' });
     }
     if (boq != null && boq > 0 && form.status === 'Complete') {
       if (totalAchieved < boq) {
@@ -2637,12 +2635,10 @@ function ProjectActions() {
       return;
     }
     if (supplied != null && supplied > 0 && totalPlanned > supplied) {
-      toast.error(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
-      return;
+      toast(t('projectActions.plannedExceedsSupplied', { total: Math.round(totalPlanned * 100) / 100, supplied: Math.round(supplied * 100) / 100 }), { icon: '⚠️' });
     }
     if (supplied != null && supplied > 0 && totalAchieved > supplied) {
-      toast.error(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }));
-      return;
+      toast(t('projectActions.achievedExceedsSupplied', { total: Math.round(totalAchieved * 100) / 100, supplied: Math.round(supplied * 100) / 100 }), { icon: '⚠️' });
     }
     const startD = form.activityStartDate ? new Date(form.activityStartDate) : null;
     const endD = form.activityEndDate ? new Date(form.activityEndDate) : null;
