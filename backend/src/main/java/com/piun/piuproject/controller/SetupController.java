@@ -43,6 +43,7 @@ public class SetupController {
     @Autowired private ProjectOutcomeRepository projectOutcomeRepository;
     @Autowired private ProjectResultRepository projectResultRepository;
     @Autowired private ProjectRepository projectRepository;
+    @Autowired private ElectricityFeederRepository electricityFeederRepository;
 
     // Contributors
     @GetMapping("/contributors")
@@ -597,5 +598,22 @@ public class SetupController {
     @DeleteMapping("/results/{id}")
     public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
         return projectResultRepository.findById(id).map(r -> { projectResultRepository.delete(r); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Electricity Feeders
+    @GetMapping("/electricity-feeders")
+    public List<ElectricityFeeder> getAllElectricityFeeders() { return electricityFeederRepository.findAll(); }
+
+    @PostMapping("/electricity-feeders")
+    public ElectricityFeeder createElectricityFeeder(@RequestBody ElectricityFeeder feeder) { return electricityFeederRepository.save(feeder); }
+
+    @PutMapping("/electricity-feeders/{id}")
+    public ResponseEntity<ElectricityFeeder> updateElectricityFeeder(@PathVariable Long id, @RequestBody ElectricityFeeder details) {
+        return electricityFeederRepository.findById(id).map(f -> { f.setFeederId(details.getFeederId()); f.setFeeder(details.getFeeder()); return ResponseEntity.ok(electricityFeederRepository.save(f)); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/electricity-feeders/{id}")
+    public ResponseEntity<Void> deleteElectricityFeeder(@PathVariable Long id) {
+        return electricityFeederRepository.findById(id).map(f -> { electricityFeederRepository.delete(f); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 }

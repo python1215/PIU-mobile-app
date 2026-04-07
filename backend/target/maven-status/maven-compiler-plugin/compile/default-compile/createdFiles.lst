@@ -40,6 +40,7 @@ com/piun/piuproject/model/KPIContractSetup.class
 com/piun/piuproject/repository/OHSMonitoringRepository.class
 com/piun/piuproject/repository/DataCollectionFrequencyRepository.class
 com/piun/piuproject/model/TypeOfPAP.class
+com/piun/piuproject/model/ElectricityFeeder.class
 com/piun/piuproject/repository/ProjectRepository.class
 com/piun/piuproject/model/NawecInfrastructure.class
 com/piun/piuproject/repository/TypeOfPAPRepository.class
@@ -63,6 +64,7 @@ com/piun/piuproject/repository/AccessTypeRepository.class
 com/piun/piuproject/repository/InstallationRepository.class
 com/piun/piuproject/repository/LGARepository.class
 com/piun/piuproject/model/DocumentTag.class
+com/piun/piuproject/repository/ElectricityFeederRepository.class
 com/piun/piuproject/PiuProjectApplication.class
 com/piun/piuproject/repository/ESIARepository.class
 com/piun/piuproject/controller/IssueActionController.class
