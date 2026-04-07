@@ -40,6 +40,7 @@ function ProjectActions() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [quarters, setQuarters] = useState([]);
+  const [electricityFeeders, setElectricityFeeders] = useState([]);
   const [implementationStatuses, setImplementationStatuses] = useState([]);
 
   const [components, setComponents] = useState([]);
@@ -224,7 +225,7 @@ function ProjectActions() {
 
   const loadReferenceData = async () => {
     try {
-      const [qRes, catRes, donorRes, curRes, implRes, yrRes, unitRes, freqRes] = await Promise.all([
+      const [qRes, catRes, donorRes, curRes, implRes, yrRes, unitRes, freqRes, efRes] = await Promise.all([
         api.get('/setup/quarters').catch(() => ({ data: [] })),
         api.get('/setup/categories').catch(() => ({ data: [] })),
         api.get('/donors').catch(() => ({ data: [] })),
@@ -232,7 +233,8 @@ function ProjectActions() {
         api.get('/project-actions/implementation-status').catch(() => ({ data: [] })),
         api.get('/setup/years').catch(() => ({ data: [] })),
         api.get('/setup/measurement-units').catch(() => ({ data: [] })),
-        api.get('/setup/data-frequencies').catch(() => ({ data: [] }))
+        api.get('/setup/data-frequencies').catch(() => ({ data: [] })),
+        api.get('/setup/electricity-feeders').catch(() => ({ data: [] }))
       ]);
       setQuarters(qRes.data);
       setCategories(catRes.data);
@@ -242,6 +244,7 @@ function ProjectActions() {
       setDmYears(yrRes.data);
       setDmUnits(unitRes.data);
       setDmFrequencies(freqRes.data);
+      setElectricityFeeders(efRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -3200,7 +3203,10 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
-                                        <input type="text" className="form-control form-control-sm" value={instMilestoneForm.electricityFeeders} onChange={e => setInstMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))} />
+                                        <select className="form-select form-select-sm" value={instMilestoneForm.electricityFeeders} onChange={e => setInstMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))}>
+                                          <option value="">{t('common.select')}</option>
+                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feederId} - {ef.feeder}</option>))}
+                                        </select>
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.activityStartDate')}</label>
@@ -3948,7 +3954,10 @@ function ProjectActions() {
                                       </div>
                                       <div className="col-md-3">
                                         <label className="form-label small fw-semibold">{t('projectActions.electricityFeeders')}</label>
-                                        <input type="text" className="form-control form-control-sm" value={jmcMilestoneForm.electricityFeeders} onChange={e => setJmcMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))} />
+                                        <select className="form-select form-select-sm" value={jmcMilestoneForm.electricityFeeders} onChange={e => setJmcMilestoneForm(f => ({...f, electricityFeeders: e.target.value}))}>
+                                          <option value="">{t('common.select')}</option>
+                                          {electricityFeeders.map(ef => (<option key={ef.id} value={ef.feeder}>{ef.feederId} - {ef.feeder}</option>))}
+                                        </select>
                                       </div>
                                       <div className="col-md-2">
                                         <label className="form-label small fw-semibold">{t('projectActions.startDate')}</label>
