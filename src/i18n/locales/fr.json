@@ -670,7 +670,7 @@
     "mitigationMeasures": "Mesures d'Atténuation",
     "monitoringRequirements": "Exigences de Suivi",
     "papName": "Nom PAP",
-    "papId": "ID PAP",
+    "papId": "RefID",
     "papType": "Type PAP",
     "papCategory": "Catégorie PAP",
     "vulnerabilityStatus": "Statut de Vulnérabilité",

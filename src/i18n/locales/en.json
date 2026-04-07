@@ -666,7 +666,7 @@
     "locations": "Locations",
     "communities": "Communities",
     "findings": "Findings",
-    "papId": "PAP ID",
+    "papId": "RefID",
     "sex": "Sex",
     "location": "Location",
     "amount": "Amount",
