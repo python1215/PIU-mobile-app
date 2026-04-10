@@ -784,21 +784,13 @@ function SocialEnvironmental() {
                   {field(t('socialEnvironmental.compensationCurrency'), p.compensationCurrency?.currency)}
                   {field(t('socialEnvironmental.compensationCashAmount'), p.compensationCashAmount)}
                   {field(t('socialEnvironmental.compensationLandArea'), p.compensationLandArea ? `${p.compensationLandArea} m²` : null)}
-                  {field(t('socialEnvironmental.natureOfCompensation'), p.natureOfCompensation?.natureOfSettlement)}
-                  {field(t('socialEnvironmental.amount'), p.amount)}
-                  {field(t('socialEnvironmental.area'), p.area)}
-                  {field(t('socialEnvironmental.compensationDate'), p.compensationDate)}
-                  {field(t('socialEnvironmental.compensationRefNo'), p.compensationRefNo)}
                 </div>
               </div>
               <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
                 <h6 className="text-info mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.otherDetails')}</h6>
                 <div className="row g-1">
-                  {field(t('socialEnvironmental.impactType'), p.impactType?.typeOfImpact)}
-                  {field(t('socialEnvironmental.locationOfImpact'), p.locationOfImpact)}
                   {field(t('socialEnvironmental.dateReceivedFrom'), p.dateReceivedFrom)}
                   {field(t('socialEnvironmental.dateReceivedTo'), p.dateReceivedTo)}
-                  {field(t('socialEnvironmental.preProjectSituation'), p.preProjectSituation)}
                   {field(t('socialEnvironmental.remarks'), p.remarks)}
                 </div>
               </div>
