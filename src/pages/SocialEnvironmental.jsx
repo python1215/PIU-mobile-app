@@ -845,11 +845,8 @@ function SocialEnvironmental() {
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.identificationDocument')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.latitude')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.longitude')}</th>
-            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.natureOfCompensation')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.amount')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.area')}</th>
-            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.impactType')}</th>
-            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.locationOfImpact')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationDate')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationRefNo')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceivedFrom')}</th>
@@ -860,7 +857,7 @@ function SocialEnvironmental() {
         </thead>
         <tbody>
           {pap.length === 0 ? (
-            <tr><td colSpan="31" className="text-center text-muted">{t('table.noData')}</td></tr>
+            <tr><td colSpan="28" className="text-center text-muted">{t('table.noData')}</td></tr>
           ) : (
             pap.map((item) => (
               <tr key={item.papIdentificationNumber}>
@@ -888,11 +885,8 @@ function SocialEnvironmental() {
                 <td style={{whiteSpace:'nowrap'}}>{item.identificationDocument?.identityDocument || '-'}</td>
                 <td>{item.impactLatitude || '-'}</td>
                 <td>{item.impactLongitude || '-'}</td>
-                <td style={{whiteSpace:'nowrap'}}>{item.natureOfCompensation?.natureOfSettlement || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.amount || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.area || '-'}</td>
-                <td style={{whiteSpace:'nowrap'}}>{item.impactType?.typeOfImpact || '-'}</td>
-                <td style={{whiteSpace:'nowrap'}}>{item.locationOfImpact || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.compensationDate || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.compensationRefNo || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.dateReceivedFrom || '-'}</td>
