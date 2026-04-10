@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage, FiFileText } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage, FiFileText, FiMapPin } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function SocialEnvironmental() {
@@ -33,6 +33,7 @@ function SocialEnvironmental() {
   const [years, setYears] = useState([]);
   const [identificationDocuments, setIdentificationDocuments] = useState([]);
   const [electricityFeeders, setElectricityFeeders] = useState([]);
+  const [settlementNatures, setSettlementNatures] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -154,7 +155,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -167,7 +168,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
         axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] })),
         axios.get('/api/setup/identification-documents').catch(() => ({ data: [] })),
-        axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] }))
+        axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] })),
+        axios.get('/api/setup/settlement-natures').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -182,6 +184,7 @@ function SocialEnvironmental() {
       setEngagementTypes(etRes.data);
       setIdentificationDocuments(idRes.data);
       setElectricityFeeders(efRes.data);
+      setSettlementNatures(snRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -216,6 +219,9 @@ function SocialEnvironmental() {
         setFormData({
           projectId: item.project?.projectId || '',
           electricityFeederId: item.electricityFeeder?.id || '',
+          impactLatitude: item.impactLatitude || '',
+          impactLongitude: item.impactLongitude || '',
+          compensationTypeId: item.compensationType?.id || '',
           regionCode: regionCode,
           districtCode: item.district?.districtCode || '',
           sex: item.sex || '',
@@ -307,6 +313,9 @@ function SocialEnvironmental() {
         setFormData({
           projectId: pid,
           electricityFeederId: '',
+          impactLatitude: '',
+          impactLongitude: '',
+          compensationTypeId: '',
           regionCode: '',
           districtCode: '',
           sex: '',
@@ -451,6 +460,9 @@ function SocialEnvironmental() {
       papIdentificationNumber: formData.papIdentificationNumber,
       project: formData.projectId ? { projectId: formData.projectId } : null,
       electricityFeeder: formData.electricityFeederId ? { id: parseInt(formData.electricityFeederId) } : null,
+      impactLatitude: formData.impactLatitude ? parseFloat(formData.impactLatitude) : null,
+      impactLongitude: formData.impactLongitude ? parseFloat(formData.impactLongitude) : null,
+      compensationType: formData.compensationTypeId ? { id: parseInt(formData.compensationTypeId) } : null,
       region: formData.regionCode ? { regionCode: formData.regionCode } : null,
       district: formData.districtCode ? { districtCode: formData.districtCode } : null,
       sex: formData.sex || null,
@@ -962,6 +974,33 @@ function SocialEnvironmental() {
             </div>
           </div>
 
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.geolocationOfImpact')}</h6>
+            <div className="row g-2 align-items-end">
+              <div className="col-5">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.latitude')}</label>
+                <input type="number" step="any" className="form-control form-control-sm" name="impactLatitude" value={formData.impactLatitude || ''} onChange={handleChange} placeholder="e.g. -6.7924" />
+              </div>
+              <div className="col-5">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.longitude')}</label>
+                <input type="number" step="any" className="form-control form-control-sm" name="impactLongitude" value={formData.impactLongitude || ''} onChange={handleChange} placeholder="e.g. 39.2083" />
+              </div>
+              <div className="col-2">
+                <button type="button" className="btn btn-sm btn-outline-primary w-100" title={t('socialEnvironmental.useCurrentLocation')} onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => { setFormData(prev => ({ ...prev, impactLatitude: pos.coords.latitude.toFixed(6), impactLongitude: pos.coords.longitude.toFixed(6) })); toast.success(t('socialEnvironmental.locationCaptured')); },
+                      (err) => { toast.error(t('socialEnvironmental.locationFailed')); console.error(err); },
+                      { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                  } else { toast.error(t('socialEnvironmental.geolocationNotSupported')); }
+                }}>
+                  <FiMapPin size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
             <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.location')}</h6>
             <div className="row g-2">
@@ -1038,6 +1077,13 @@ function SocialEnvironmental() {
                   <option value="">{t('common.select')}</option>
                   <option value="Y">{t('common.yes')}</option>
                   <option value="N">{t('common.no')}</option>
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationType')}</label>
+                <select className="form-select form-select-sm" name="compensationTypeId" value={formData.compensationTypeId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {settlementNatures.map(sn => <option key={sn.id} value={sn.id}>{sn.natureOfSettlement}</option>)}
                 </select>
               </div>
               <div className="col-6 col-lg-4">

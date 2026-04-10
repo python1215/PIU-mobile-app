@@ -170,6 +170,9 @@ public class SocialEnvironmentalController {
         if (pap.getElectricityFeeder() != null && pap.getElectricityFeeder().getId() != null) {
             pap.setElectricityFeeder(electricityFeederRepository.findById(pap.getElectricityFeeder().getId()).orElse(null));
         }
+        if (pap.getCompensationType() != null && pap.getCompensationType().getId() != null) {
+            pap.setCompensationType(natureOfSettlementRepository.findById(pap.getCompensationType().getId()).orElse(null));
+        }
         if (pap.getIdentificationDocument() != null && pap.getIdentificationDocument().getId() != null) {
             pap.setIdentificationDocument(identificationDocumentRepository.findById(pap.getIdentificationDocument().getId()).orElse(null));
         }
@@ -208,6 +211,9 @@ public class SocialEnvironmentalController {
                 pap.setRemarks(papDetails.getRemarks());
                 pap.setProfileYear(papDetails.getProfileYear());
                 pap.setElectricityFeeder(papDetails.getElectricityFeeder());
+                pap.setImpactLatitude(papDetails.getImpactLatitude());
+                pap.setImpactLongitude(papDetails.getImpactLongitude());
+                pap.setCompensationType(papDetails.getCompensationType());
                 pap.setIdentificationDocument(papDetails.getIdentificationDocument());
                 pap.setIdDocumentUpload(papDetails.getIdDocumentUpload());
                 pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());

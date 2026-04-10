@@ -99,6 +99,16 @@ public class PAP {
     @JoinColumn(name = "electricity_feeder_id")
     private ElectricityFeeder electricityFeeder;
 
+    @Column(name = "impact_latitude")
+    private Double impactLatitude;
+
+    @Column(name = "impact_longitude")
+    private Double impactLongitude;
+
+    @ManyToOne
+    @JoinColumn(name = "compensation_type_id")
+    private NatureOfSettlement compensationType;
+
     @ManyToOne
     @JoinColumn(name = "identification_document_id")
     private IdentificationDocument identificationDocument;
@@ -167,6 +177,12 @@ public class PAP {
     public void setProfileYear(Year profileYear) { this.profileYear = profileYear; }
     public ElectricityFeeder getElectricityFeeder() { return electricityFeeder; }
     public void setElectricityFeeder(ElectricityFeeder electricityFeeder) { this.electricityFeeder = electricityFeeder; }
+    public Double getImpactLatitude() { return impactLatitude; }
+    public void setImpactLatitude(Double impactLatitude) { this.impactLatitude = impactLatitude; }
+    public Double getImpactLongitude() { return impactLongitude; }
+    public void setImpactLongitude(Double impactLongitude) { this.impactLongitude = impactLongitude; }
+    public NatureOfSettlement getCompensationType() { return compensationType; }
+    public void setCompensationType(NatureOfSettlement compensationType) { this.compensationType = compensationType; }
     public IdentificationDocument getIdentificationDocument() { return identificationDocument; }
     public void setIdentificationDocument(IdentificationDocument identificationDocument) { this.identificationDocument = identificationDocument; }
     public String getIdDocumentUpload() { return idDocumentUpload; }
