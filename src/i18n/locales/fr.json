@@ -724,6 +724,8 @@
     "locationFailed": "Échec de la localisation",
     "geolocationNotSupported": "Géolocalisation non supportée par le navigateur",
     "compensationType": "Type de Compensation",
+    "compensationCurrency": "Devise",
+    "compensationLandArea": "Superficie du Terrain",
     "attachIdDocument": "Joindre Document d'Identité",
     "idDocUploaded": "Document d'identité téléchargé avec succès",
     "onlyImagesOrPdf": "Seuls les images ou fichiers PDF sont autorisés",

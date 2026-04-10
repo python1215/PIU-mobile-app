@@ -48,6 +48,9 @@ public class SocialEnvironmentalController {
 
     @Autowired
     private NatureOfSettlementRepository natureOfSettlementRepository;
+
+    @Autowired
+    private CurrencyRepository currencyRepository;
     
     @Autowired
     private GrievanceRepository grievanceRepository;
@@ -172,6 +175,9 @@ public class SocialEnvironmentalController {
         }
         if (pap.getCompensationType() != null && pap.getCompensationType().getId() != null) {
             pap.setCompensationType(natureOfSettlementRepository.findById(pap.getCompensationType().getId()).orElse(null));
+        }
+        if (pap.getCompensationCurrency() != null && pap.getCompensationCurrency().getId() != null) {
+            pap.setCompensationCurrency(currencyRepository.findById(pap.getCompensationCurrency().getId()).orElse(null));
         }
         if (pap.getIdentificationDocument() != null && pap.getIdentificationDocument().getId() != null) {
             pap.setIdentificationDocument(identificationDocumentRepository.findById(pap.getIdentificationDocument().getId()).orElse(null));

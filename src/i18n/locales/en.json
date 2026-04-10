@@ -683,6 +683,8 @@
     "locationFailed": "Failed to get location",
     "geolocationNotSupported": "Geolocation not supported by browser",
     "compensationType": "Compensation Type",
+    "compensationCurrency": "Currency",
+    "compensationLandArea": "Land Area",
     "attachIdDocument": "Attach ID Document",
     "idDocUploaded": "ID document uploaded successfully",
     "onlyImagesOrPdf": "Only images or PDF files are allowed",

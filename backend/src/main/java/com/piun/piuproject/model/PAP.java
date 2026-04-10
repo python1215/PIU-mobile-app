@@ -110,6 +110,13 @@ public class PAP {
     private NatureOfSettlement compensationType;
 
     @ManyToOne
+    @JoinColumn(name = "compensation_currency_id")
+    private Currency compensationCurrency;
+
+    @Column(name = "compensation_land_area", precision = 12, scale = 2)
+    private BigDecimal compensationLandArea;
+
+    @ManyToOne
     @JoinColumn(name = "identification_document_id")
     private IdentificationDocument identificationDocument;
 
@@ -183,6 +190,10 @@ public class PAP {
     public void setImpactLongitude(Double impactLongitude) { this.impactLongitude = impactLongitude; }
     public NatureOfSettlement getCompensationType() { return compensationType; }
     public void setCompensationType(NatureOfSettlement compensationType) { this.compensationType = compensationType; }
+    public Currency getCompensationCurrency() { return compensationCurrency; }
+    public void setCompensationCurrency(Currency compensationCurrency) { this.compensationCurrency = compensationCurrency; }
+    public BigDecimal getCompensationLandArea() { return compensationLandArea; }
+    public void setCompensationLandArea(BigDecimal compensationLandArea) { this.compensationLandArea = compensationLandArea; }
     public IdentificationDocument getIdentificationDocument() { return identificationDocument; }
     public void setIdentificationDocument(IdentificationDocument identificationDocument) { this.identificationDocument = identificationDocument; }
     public String getIdDocumentUpload() { return idDocumentUpload; }

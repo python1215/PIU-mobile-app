@@ -34,6 +34,7 @@ function SocialEnvironmental() {
   const [identificationDocuments, setIdentificationDocuments] = useState([]);
   const [electricityFeeders, setElectricityFeeders] = useState([]);
   const [settlementNatures, setSettlementNatures] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -155,7 +156,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes, curRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -169,7 +170,8 @@ function SocialEnvironmental() {
         axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] })),
         axios.get('/api/setup/identification-documents').catch(() => ({ data: [] })),
         axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] })),
-        axios.get('/api/setup/settlement-natures').catch(() => ({ data: [] }))
+        axios.get('/api/setup/settlement-natures').catch(() => ({ data: [] })),
+        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -185,6 +187,7 @@ function SocialEnvironmental() {
       setIdentificationDocuments(idRes.data);
       setElectricityFeeders(efRes.data);
       setSettlementNatures(snRes.data);
+      setCurrencies(curRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -222,6 +225,8 @@ function SocialEnvironmental() {
           impactLatitude: item.impactLatitude || '',
           impactLongitude: item.impactLongitude || '',
           compensationTypeId: item.compensationType?.id || '',
+          compensationCurrencyId: item.compensationCurrency?.id || '',
+          compensationLandArea: item.compensationLandArea || '',
           regionCode: regionCode,
           districtCode: item.district?.districtCode || '',
           sex: item.sex || '',
@@ -316,6 +321,8 @@ function SocialEnvironmental() {
           impactLatitude: '',
           impactLongitude: '',
           compensationTypeId: '',
+          compensationCurrencyId: '',
+          compensationLandArea: '',
           regionCode: '',
           districtCode: '',
           sex: '',
@@ -463,6 +470,8 @@ function SocialEnvironmental() {
       impactLatitude: formData.impactLatitude ? parseFloat(formData.impactLatitude) : null,
       impactLongitude: formData.impactLongitude ? parseFloat(formData.impactLongitude) : null,
       compensationType: formData.compensationTypeId ? { id: parseInt(formData.compensationTypeId) } : null,
+      compensationCurrency: formData.compensationCurrencyId ? { id: parseInt(formData.compensationCurrencyId) } : null,
+      compensationLandArea: formData.compensationLandArea ? parseFloat(formData.compensationLandArea) : null,
       region: formData.regionCode ? { regionCode: formData.regionCode } : null,
       district: formData.districtCode ? { districtCode: formData.districtCode } : null,
       sex: formData.sex || null,
@@ -1086,6 +1095,29 @@ function SocialEnvironmental() {
                   {settlementNatures.map(sn => <option key={sn.id} value={sn.id}>{sn.natureOfSettlement}</option>)}
                 </select>
               </div>
+              {(() => {
+                const selectedType = settlementNatures.find(sn => String(sn.id) === String(formData.compensationTypeId));
+                const typeName = selectedType?.natureOfSettlement?.toLowerCase() || '';
+                const showCurrency = typeName === 'cash' || typeName === 'cash and land';
+                const showLand = typeName === 'land' || typeName === 'cash and land';
+                return (<>
+                  {showCurrency && (
+                    <div className="col-6 col-lg-4">
+                      <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationCurrency')}</label>
+                      <select className="form-select form-select-sm" name="compensationCurrencyId" value={formData.compensationCurrencyId || ''} onChange={handleChange}>
+                        <option value="">{t('common.select')}</option>
+                        {currencies.map(c => <option key={c.id} value={c.id}>{c.currency}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  {showLand && (
+                    <div className="col-6 col-lg-4">
+                      <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationLandArea')} (m²)</label>
+                      <input type="number" step="0.01" min="0" className="form-control form-control-sm" name="compensationLandArea" value={formData.compensationLandArea || ''} onChange={handleChange} placeholder="e.g. 500.00" />
+                    </div>
+                  )}
+                </>);
+              })()}
               <div className="col-6 col-lg-4">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.profileYear')}</label>
                 <select className="form-select form-select-sm" name="profileYearId" value={formData.profileYearId || ''} onChange={handleChange}>
