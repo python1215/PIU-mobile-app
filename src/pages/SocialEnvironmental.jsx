@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage, FiFileText, FiMapPin } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUsers, FiShield, FiAlertTriangle, FiHeart, FiCamera, FiUpload, FiX, FiImage, FiFileText, FiMapPin, FiEye } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 function SocialEnvironmental() {
@@ -39,6 +39,7 @@ function SocialEnvironmental() {
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [idDocUploading, setIdDocUploading] = useState(false);
+  const [viewingPAP, setViewingPAP] = useState(null);
   const fileInputRef = useRef(null);
   const idDocInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -729,45 +730,180 @@ function SocialEnvironmental() {
     </div>
   );
 
+  const renderPAPViewModal = () => {
+    if (!viewingPAP) return null;
+    const p = viewingPAP;
+    const field = (label, value) => (
+      <div className="col-6 col-lg-4 mb-2">
+        <div className="text-muted" style={{fontSize: '0.68rem', textTransform: 'uppercase', fontWeight: 600}}>{label}</div>
+        <div style={{fontSize: '0.78rem', fontWeight: 500}}>{value || '-'}</div>
+      </div>
+    );
+    return (
+      <div className="modal d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060}} onClick={() => setViewingPAP(null)}>
+        <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header py-2">
+              <h6 className="modal-title" style={{fontSize: '0.85rem'}}>{t('socialEnvironmental.papDetails')} — {p.papIdentificationNumber}</h6>
+              <button type="button" className="btn-close btn-close-sm" onClick={() => setViewingPAP(null)}></button>
+            </div>
+            <div className="modal-body py-2">
+              <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+                <h6 className="text-primary mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('common.project')} & {t('socialEnvironmental.location')}</h6>
+                <div className="row g-1">
+                  {field(t('socialEnvironmental.papId'), p.papIdentificationNumber)}
+                  {field(t('common.project'), p.project?.project)}
+                  {field(t('socialEnvironmental.electricityFeeder'), p.electricityFeeder?.feeder)}
+                  {field(t('setup.regions'), p.region?.regionName)}
+                  {field(t('setup.districts'), p.district?.districtName)}
+                  {field(t('socialEnvironmental.settlement'), p.currentAddress?.settlementName)}
+                  {field(t('socialEnvironmental.latitude'), p.impactLatitude)}
+                  {field(t('socialEnvironmental.longitude'), p.impactLongitude)}
+                </div>
+              </div>
+              <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
+                <h6 className="text-success mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.pap')}</h6>
+                <div className="row g-1">
+                  {field(t('socialEnvironmental.papName'), p.papName)}
+                  {field(t('socialEnvironmental.sex'), p.sex === 'M' ? t('socialEnvironmental.male') : p.sex === 'F' ? t('socialEnvironmental.female') : '-')}
+                  {field(t('socialEnvironmental.papType'), p.papType?.typeOfPap)}
+                  {field(t('socialEnvironmental.papCategory'), p.papCategory?.papCategory)}
+                  {field(t('socialEnvironmental.vulnerabilityStatus'), p.vulnerabilityCategory?.vulnerability)}
+                  {field(t('socialEnvironmental.profileYear'), p.profileYear?.profileYear)}
+                  {field(t('socialEnvironmental.identificationDocument'), p.identificationDocument?.identityDocument)}
+                </div>
+              </div>
+              <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+                <h6 className="text-warning mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.compensation')}</h6>
+                <div className="row g-1">
+                  {field(t('socialEnvironmental.compensated'), p.papCompensated === 'Y' ? t('common.yes') : t('common.no'))}
+                  {field(t('socialEnvironmental.compensationType'), p.compensationType?.natureOfSettlement)}
+                  {field(t('socialEnvironmental.compensationCurrency'), p.compensationCurrency?.currency)}
+                  {field(t('socialEnvironmental.compensationCashAmount'), p.compensationCashAmount)}
+                  {field(t('socialEnvironmental.compensationLandArea'), p.compensationLandArea ? `${p.compensationLandArea} m²` : null)}
+                  {field(t('socialEnvironmental.natureOfCompensation'), p.natureOfCompensation?.natureOfSettlement)}
+                  {field(t('socialEnvironmental.amount'), p.amount)}
+                  {field(t('socialEnvironmental.area'), p.area)}
+                  {field(t('socialEnvironmental.compensationDate'), p.compensationDate)}
+                  {field(t('socialEnvironmental.compensationRefNo'), p.compensationRefNo)}
+                </div>
+              </div>
+              <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
+                <h6 className="text-info mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.otherDetails')}</h6>
+                <div className="row g-1">
+                  {field(t('socialEnvironmental.impactType'), p.impactType?.typeOfImpact)}
+                  {field(t('socialEnvironmental.locationOfImpact'), p.locationOfImpact)}
+                  {field(t('socialEnvironmental.dateReceivedFrom'), p.dateReceivedFrom)}
+                  {field(t('socialEnvironmental.dateReceivedTo'), p.dateReceivedTo)}
+                  {field(t('socialEnvironmental.preProjectSituation'), p.preProjectSituation)}
+                  {field(t('socialEnvironmental.remarks'), p.remarks)}
+                </div>
+              </div>
+              {p.idDocumentUpload && (
+                <div className="border rounded p-2 mb-2">
+                  <h6 className="mb-1" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.attachIdDocument')}</h6>
+                  {p.idDocumentUpload.match(/\.pdf$/i) ? (
+                    <a href={p.idDocumentUpload} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-info"><FiFileText size={13} className="me-1" />{t('socialEnvironmental.viewDocument')}</a>
+                  ) : (
+                    <a href={p.idDocumentUpload} target="_blank" rel="noopener noreferrer"><img src={p.idDocumentUpload} alt="ID" style={{maxHeight: 80, borderRadius: 4, border: '1px solid #dee2e6'}} /></a>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="modal-footer py-1">
+              <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setViewingPAP(null)}>{t('common.close')}</button>
+              <button type="button" className="btn btn-sm btn-primary" onClick={() => { setViewingPAP(null); handleOpenModal(p); }}><FiEdit2 size={13} className="me-1" />{t('common.edit')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderPAPTable = () => (
     <div className="table-responsive">
-      <table className="table table-striped table-hover">
-        <thead className="table-dark">
+      <table className="table table-striped table-hover table-bordered mb-0" style={{fontSize: '0.7rem'}}>
+        <thead className="table-dark" style={{fontSize: '0.65rem'}}>
           <tr>
-            <th>{t('socialEnvironmental.papId')}</th>
-            <th>{t('common.project')}</th>
-            <th>{t('socialEnvironmental.electricityFeeder')}</th>
-            <th>{t('setup.regions')}</th>
-            <th>{t('setup.districts')}</th>
-            <th>{t('socialEnvironmental.sex')}</th>
-            <th>{t('socialEnvironmental.papType')}</th>
-            <th>{t('socialEnvironmental.papCategory')}</th>
-            <th>{t('socialEnvironmental.compensated')}</th>
-            <th>{t('common.actions')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.papId')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('common.project')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.electricityFeeder')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('setup.regions')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('setup.districts')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.settlement')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.papName')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.sex')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.papType')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.papCategory')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.vulnerabilityStatus')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensated')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationType')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationCurrency')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationCashAmount')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationLandArea')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.profileYear')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.identificationDocument')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.latitude')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.longitude')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.natureOfCompensation')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.amount')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.area')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.impactType')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.locationOfImpact')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationDate')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.compensationRefNo')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceivedFrom')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceivedTo')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.remarks')}</th>
+            <th style={{whiteSpace:'nowrap', position:'sticky', right:0, backgroundColor:'#212529', zIndex:1}}>{t('common.actions')}</th>
           </tr>
         </thead>
         <tbody>
           {pap.length === 0 ? (
-            <tr><td colSpan="10" className="text-center text-muted">{t('table.noData')}</td></tr>
+            <tr><td colSpan="31" className="text-center text-muted">{t('table.noData')}</td></tr>
           ) : (
             pap.map((item) => (
               <tr key={item.papIdentificationNumber}>
-                <td><strong>{item.papIdentificationNumber}</strong></td>
-                <td>{item.project?.project || '-'}</td>
-                <td>{item.electricityFeeder?.feeder || '-'}</td>
-                <td>{item.region?.regionName || '-'}</td>
-                <td>{item.district?.districtName || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}><strong>{item.papIdentificationNumber}</strong></td>
+                <td style={{whiteSpace:'nowrap'}}>{item.project?.project || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.electricityFeeder?.feeder || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.region?.regionName || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.district?.districtName || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.currentAddress?.settlementName || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.papName || '-'}</td>
                 <td>{item.sex || '-'}</td>
-                <td>{item.papType?.typeOfPap || '-'}</td>
-                <td>{item.papCategory?.papCategory || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.papType?.typeOfPap || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.papCategory?.papCategory || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.vulnerabilityCategory?.vulnerability || '-'}</td>
                 <td>
-                  <span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`}>
+                  <span className={`badge bg-${item.papCompensated === 'Y' ? 'success' : 'warning'}`} style={{fontSize: '0.65rem'}}>
                     {item.papCompensated === 'Y' ? t('common.yes') : t('common.no')}
                   </span>
                 </td>
-                <td>
-                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(item)}><FiEdit2 /></button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeletePAP(item.papIdentificationNumber)}><FiTrash2 /></button>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationType?.natureOfSettlement || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationCurrency?.currency || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationCashAmount || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationLandArea ? `${item.compensationLandArea} m²` : '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.profileYear?.profileYear || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.identificationDocument?.identityDocument || '-'}</td>
+                <td>{item.impactLatitude || '-'}</td>
+                <td>{item.impactLongitude || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.natureOfCompensation?.natureOfSettlement || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.amount || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.area || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.impactType?.typeOfImpact || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.locationOfImpact || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationDate || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.compensationRefNo || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.dateReceivedFrom || '-'}</td>
+                <td style={{whiteSpace:'nowrap'}}>{item.dateReceivedTo || '-'}</td>
+                <td style={{maxWidth:'120px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{item.remarks || '-'}</td>
+                <td style={{whiteSpace:'nowrap', position:'sticky', right:0, backgroundColor:'inherit', zIndex:1}}>
+                  <div className="d-flex gap-1">
+                    <button className="btn btn-sm btn-outline-info py-0 px-1" onClick={() => setViewingPAP(item)} title={t('common.view')}><FiEye size={12} /></button>
+                    <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleOpenModal(item)} title={t('common.edit')}><FiEdit2 size={12} /></button>
+                    <button className="btn btn-sm btn-outline-danger py-0 px-1" onClick={() => handleDeletePAP(item.papIdentificationNumber)} title={t('common.delete')}><FiTrash2 size={12} /></button>
+                  </div>
                 </td>
               </tr>
             ))
@@ -1707,6 +1843,8 @@ function SocialEnvironmental() {
           {renderActiveTable()}
         </div>
       </div>
+
+      {renderPAPViewModal()}
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>

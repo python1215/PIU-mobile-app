@@ -682,6 +682,8 @@
     "locationCaptured": "Current location captured",
     "locationFailed": "Failed to get location",
     "geolocationNotSupported": "Geolocation not supported by browser",
+    "papDetails": "PAP Details",
+    "otherDetails": "Other Details",
     "compensationType": "Compensation Type",
     "compensationCurrency": "Currency",
     "compensationCashAmount": "Cash Amount",

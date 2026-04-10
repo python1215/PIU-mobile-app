@@ -723,6 +723,8 @@
     "locationCaptured": "Localização atual capturada",
     "locationFailed": "Falha ao obter localização",
     "geolocationNotSupported": "Geolocalização não suportada pelo navegador",
+    "papDetails": "Detalhes do PAP",
+    "otherDetails": "Outros Detalhes",
     "compensationType": "Tipo de Compensação",
     "compensationCurrency": "Moeda",
     "compensationCashAmount": "Valor em Dinheiro",
