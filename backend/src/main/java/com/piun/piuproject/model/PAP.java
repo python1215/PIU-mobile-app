@@ -96,6 +96,10 @@ public class PAP {
     private Year profileYear;
 
     @ManyToOne
+    @JoinColumn(name = "electricity_feeder_id")
+    private ElectricityFeeder electricityFeeder;
+
+    @ManyToOne
     @JoinColumn(name = "identification_document_id")
     private IdentificationDocument identificationDocument;
 
@@ -161,6 +165,8 @@ public class PAP {
     public void setDocumentUpload(String documentUpload) { this.documentUpload = documentUpload; }
     public Year getProfileYear() { return profileYear; }
     public void setProfileYear(Year profileYear) { this.profileYear = profileYear; }
+    public ElectricityFeeder getElectricityFeeder() { return electricityFeeder; }
+    public void setElectricityFeeder(ElectricityFeeder electricityFeeder) { this.electricityFeeder = electricityFeeder; }
     public IdentificationDocument getIdentificationDocument() { return identificationDocument; }
     public void setIdentificationDocument(IdentificationDocument identificationDocument) { this.identificationDocument = identificationDocument; }
     public String getIdDocumentUpload() { return idDocumentUpload; }

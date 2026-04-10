@@ -73,6 +73,9 @@ public class SocialEnvironmentalController {
     @Autowired
     private IdentificationDocumentRepository identificationDocumentRepository;
 
+    @Autowired
+    private ElectricityFeederRepository electricityFeederRepository;
+
     @GetMapping("/esia")
     public List<ESIA> getAllESIA() {
         return esiaRepository.findAll();
@@ -164,6 +167,9 @@ public class SocialEnvironmentalController {
         if (pap.getProfileYear() != null && pap.getProfileYear().getId() != null) {
             pap.setProfileYear(yearRepository.findById(pap.getProfileYear().getId()).orElse(null));
         }
+        if (pap.getElectricityFeeder() != null && pap.getElectricityFeeder().getId() != null) {
+            pap.setElectricityFeeder(electricityFeederRepository.findById(pap.getElectricityFeeder().getId()).orElse(null));
+        }
         if (pap.getIdentificationDocument() != null && pap.getIdentificationDocument().getId() != null) {
             pap.setIdentificationDocument(identificationDocumentRepository.findById(pap.getIdentificationDocument().getId()).orElse(null));
         }
@@ -201,6 +207,7 @@ public class SocialEnvironmentalController {
                 pap.setCurrentAddress(papDetails.getCurrentAddress());
                 pap.setRemarks(papDetails.getRemarks());
                 pap.setProfileYear(papDetails.getProfileYear());
+                pap.setElectricityFeeder(papDetails.getElectricityFeeder());
                 pap.setIdentificationDocument(papDetails.getIdentificationDocument());
                 pap.setIdDocumentUpload(papDetails.getIdDocumentUpload());
                 pap.setDateReceivedFrom(papDetails.getDateReceivedFrom());

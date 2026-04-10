@@ -32,6 +32,7 @@ function SocialEnvironmental() {
   const [decisionOutcomes, setDecisionOutcomes] = useState([]);
   const [years, setYears] = useState([]);
   const [identificationDocuments, setIdentificationDocuments] = useState([]);
+  const [electricityFeeders, setElectricityFeeders] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -153,7 +154,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -165,7 +166,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/years').catch(() => ({ data: [] })),
         axios.get('/api/setup/quarters').catch(() => ({ data: [] })),
         axios.get('/api/social-environmental/engagement-types').catch(() => ({ data: [] })),
-        axios.get('/api/setup/identification-documents').catch(() => ({ data: [] }))
+        axios.get('/api/setup/identification-documents').catch(() => ({ data: [] })),
+        axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -179,6 +181,7 @@ function SocialEnvironmental() {
       setQuarters(qrRes.data);
       setEngagementTypes(etRes.data);
       setIdentificationDocuments(idRes.data);
+      setElectricityFeeders(efRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -212,7 +215,7 @@ function SocialEnvironmental() {
         const regionCode = item.region?.regionCode || '';
         setFormData({
           projectId: item.project?.projectId || '',
-          investmentTypeId: item.investmentType?.id || '',
+          electricityFeederId: item.electricityFeeder?.id || '',
           regionCode: regionCode,
           districtCode: item.district?.districtCode || '',
           sex: item.sex || '',
@@ -303,7 +306,7 @@ function SocialEnvironmental() {
       } else if (activeTab === 'pap') {
         setFormData({
           projectId: pid,
-          investmentTypeId: '',
+          electricityFeederId: '',
           regionCode: '',
           districtCode: '',
           sex: '',
@@ -447,7 +450,7 @@ function SocialEnvironmental() {
     const payload = {
       papIdentificationNumber: formData.papIdentificationNumber,
       project: formData.projectId ? { projectId: formData.projectId } : null,
-      investmentType: formData.investmentTypeId ? { id: parseInt(formData.investmentTypeId) } : null,
+      electricityFeeder: formData.electricityFeederId ? { id: parseInt(formData.electricityFeederId) } : null,
       region: formData.regionCode ? { regionCode: formData.regionCode } : null,
       district: formData.districtCode ? { districtCode: formData.districtCode } : null,
       sex: formData.sex || null,
@@ -709,7 +712,7 @@ function SocialEnvironmental() {
           <tr>
             <th>{t('socialEnvironmental.papId')}</th>
             <th>{t('common.project')}</th>
-            <th>{t('socialEnvironmental.typeOfInvestment')}</th>
+            <th>{t('socialEnvironmental.electricityFeeder')}</th>
             <th>{t('setup.regions')}</th>
             <th>{t('setup.districts')}</th>
             <th>{t('socialEnvironmental.sex')}</th>
@@ -727,7 +730,7 @@ function SocialEnvironmental() {
               <tr key={item.papIdentificationNumber}>
                 <td><strong>{item.papIdentificationNumber}</strong></td>
                 <td>{item.project?.project || '-'}</td>
-                <td>{item.investmentType?.typeOfInvestment || '-'}</td>
+                <td>{item.electricityFeeder?.feeder || '-'}</td>
                 <td>{item.region?.regionName || '-'}</td>
                 <td>{item.district?.districtName || '-'}</td>
                 <td>{item.sex || '-'}</td>
@@ -950,10 +953,10 @@ function SocialEnvironmental() {
                 </select>
               </div>
               <div className="col-12">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.typeOfInvestment')}</label>
-                <select className="form-select form-select-sm" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
-                  <option value="">{formData.projectId ? t('common.select') : '--'}</option>
-                  {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.electricityFeeder')}</label>
+                <select className="form-select form-select-sm" name="electricityFeederId" value={formData.electricityFeederId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {electricityFeeders.map(ef => <option key={ef.id} value={ef.id}>{ef.feeder}</option>)}
                 </select>
               </div>
             </div>

@@ -674,6 +674,7 @@
     "compensated": "Compensated",
     "profileYear": "Profile Year",
     "identificationDocument": "Type of ID Document",
+    "electricityFeeder": "Electricity Feeder",
     "attachIdDocument": "Attach ID Document",
     "idDocUploaded": "ID document uploaded successfully",
     "onlyImagesOrPdf": "Only images or PDF files are allowed",

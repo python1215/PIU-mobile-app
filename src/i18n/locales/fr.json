@@ -715,6 +715,7 @@
     "compensated": "Compensé",
     "profileYear": "Année de Profil",
     "identificationDocument": "Type de Document d'Identité",
+    "electricityFeeder": "Alimentateur Électrique",
     "attachIdDocument": "Joindre Document d'Identité",
     "idDocUploaded": "Document d'identité téléchargé avec succès",
     "onlyImagesOrPdf": "Seuls les images ou fichiers PDF sont autorisés",
