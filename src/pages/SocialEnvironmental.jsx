@@ -226,6 +226,7 @@ function SocialEnvironmental() {
           impactLongitude: item.impactLongitude || '',
           compensationTypeId: item.compensationType?.id || '',
           compensationCurrencyId: item.compensationCurrency?.id || '',
+          compensationCashAmount: item.compensationCashAmount || '',
           compensationLandArea: item.compensationLandArea || '',
           regionCode: regionCode,
           districtCode: item.district?.districtCode || '',
@@ -322,6 +323,7 @@ function SocialEnvironmental() {
           impactLongitude: '',
           compensationTypeId: '',
           compensationCurrencyId: '',
+          compensationCashAmount: '',
           compensationLandArea: '',
           regionCode: '',
           districtCode: '',
@@ -471,6 +473,7 @@ function SocialEnvironmental() {
       impactLongitude: formData.impactLongitude ? parseFloat(formData.impactLongitude) : null,
       compensationType: formData.compensationTypeId ? { id: parseInt(formData.compensationTypeId) } : null,
       compensationCurrency: formData.compensationCurrencyId ? { id: parseInt(formData.compensationCurrencyId) } : null,
+      compensationCashAmount: formData.compensationCashAmount ? parseFloat(formData.compensationCashAmount) : null,
       compensationLandArea: formData.compensationLandArea ? parseFloat(formData.compensationLandArea) : null,
       region: formData.regionCode ? { regionCode: formData.regionCode } : null,
       district: formData.districtCode ? { districtCode: formData.districtCode } : null,
@@ -1101,7 +1104,7 @@ function SocialEnvironmental() {
                 const showCurrency = typeName === 'cash' || typeName === 'cash and land';
                 const showLand = typeName === 'land' || typeName === 'cash and land';
                 return (<>
-                  {showCurrency && (
+                  {showCurrency && (<>
                     <div className="col-6 col-lg-4">
                       <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationCurrency')}</label>
                       <select className="form-select form-select-sm" name="compensationCurrencyId" value={formData.compensationCurrencyId || ''} onChange={handleChange}>
@@ -1109,7 +1112,11 @@ function SocialEnvironmental() {
                         {currencies.map(c => <option key={c.id} value={c.id}>{c.currency}</option>)}
                       </select>
                     </div>
-                  )}
+                    <div className="col-6 col-lg-4">
+                      <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationCashAmount')}</label>
+                      <input type="number" step="0.01" min="0" className="form-control form-control-sm" name="compensationCashAmount" value={formData.compensationCashAmount || ''} onChange={handleChange} placeholder="0.00" />
+                    </div>
+                  </>)}
                   {showLand && (
                     <div className="col-6 col-lg-4">
                       <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.compensationLandArea')} (m²)</label>

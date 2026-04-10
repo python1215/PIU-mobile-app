@@ -684,6 +684,7 @@
     "geolocationNotSupported": "Geolocation not supported by browser",
     "compensationType": "Compensation Type",
     "compensationCurrency": "Currency",
+    "compensationCashAmount": "Cash Amount",
     "compensationLandArea": "Land Area",
     "attachIdDocument": "Attach ID Document",
     "idDocUploaded": "ID document uploaded successfully",

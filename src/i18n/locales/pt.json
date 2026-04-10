@@ -725,6 +725,7 @@
     "geolocationNotSupported": "Geolocalização não suportada pelo navegador",
     "compensationType": "Tipo de Compensação",
     "compensationCurrency": "Moeda",
+    "compensationCashAmount": "Valor em Dinheiro",
     "compensationLandArea": "Área do Terreno",
     "attachIdDocument": "Anexar Documento de Identificação",
     "idDocUploaded": "Documento de identificação enviado com sucesso",

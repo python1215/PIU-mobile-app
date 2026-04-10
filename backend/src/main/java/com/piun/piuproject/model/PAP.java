@@ -113,6 +113,9 @@ public class PAP {
     @JoinColumn(name = "compensation_currency_id")
     private Currency compensationCurrency;
 
+    @Column(name = "compensation_cash_amount", precision = 15, scale = 2)
+    private BigDecimal compensationCashAmount;
+
     @Column(name = "compensation_land_area", precision = 12, scale = 2)
     private BigDecimal compensationLandArea;
 
@@ -192,6 +195,8 @@ public class PAP {
     public void setCompensationType(NatureOfSettlement compensationType) { this.compensationType = compensationType; }
     public Currency getCompensationCurrency() { return compensationCurrency; }
     public void setCompensationCurrency(Currency compensationCurrency) { this.compensationCurrency = compensationCurrency; }
+    public BigDecimal getCompensationCashAmount() { return compensationCashAmount; }
+    public void setCompensationCashAmount(BigDecimal compensationCashAmount) { this.compensationCashAmount = compensationCashAmount; }
     public BigDecimal getCompensationLandArea() { return compensationLandArea; }
     public void setCompensationLandArea(BigDecimal compensationLandArea) { this.compensationLandArea = compensationLandArea; }
     public IdentificationDocument getIdentificationDocument() { return identificationDocument; }

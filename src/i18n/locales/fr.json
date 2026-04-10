@@ -725,6 +725,7 @@
     "geolocationNotSupported": "Géolocalisation non supportée par le navigateur",
     "compensationType": "Type de Compensation",
     "compensationCurrency": "Devise",
+    "compensationCashAmount": "Montant en Espèces",
     "compensationLandArea": "Superficie du Terrain",
     "attachIdDocument": "Joindre Document d'Identité",
     "idDocUploaded": "Document d'identité téléchargé avec succès",
