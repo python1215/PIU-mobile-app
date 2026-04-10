@@ -237,6 +237,7 @@ function SocialEnvironmental() {
           vulnerabilityCategoryId: item.vulnerabilityCategory?.id || '',
           papCompensated: item.papCompensated || '',
           papIdentificationNumber: item.papIdentificationNumber || '',
+          papName: item.papName || '',
           profileYearId: item.profileYear?.id || '',
           identificationDocumentId: item.identificationDocument?.id || '',
           idDocumentUpload: item.idDocumentUpload || '',
@@ -334,6 +335,7 @@ function SocialEnvironmental() {
           vulnerabilityCategoryId: '',
           papCompensated: '',
           papIdentificationNumber: '',
+          papName: '',
           profileYearId: '',
           identificationDocumentId: '',
           idDocumentUpload: '',
@@ -468,6 +470,7 @@ function SocialEnvironmental() {
     e.preventDefault();
     const payload = {
       papIdentificationNumber: formData.papIdentificationNumber,
+      papName: formData.papName || null,
       project: formData.projectId ? { projectId: formData.projectId } : null,
       electricityFeeder: formData.electricityFeederId ? { id: parseInt(formData.electricityFeederId) } : null,
       impactLatitude: formData.impactLatitude ? parseFloat(formData.impactLatitude) : null,
@@ -1175,6 +1178,10 @@ function SocialEnvironmental() {
               <div className="col-6">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.papId')} *</label>
                 <input type="text" className="form-control form-control-sm" name="papIdentificationNumber" value={formData.papIdentificationNumber || ''} onChange={handleChange} required disabled={!!editingItem} placeholder="e.g. PAP-001" />
+              </div>
+              <div className="col-6">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.papName')}</label>
+                <input type="text" className="form-control form-control-sm" name="papName" value={formData.papName || ''} onChange={handleChange} placeholder={t('socialEnvironmental.papName')} maxLength="150" />
               </div>
               <div className="col-6">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.sex')}</label>
