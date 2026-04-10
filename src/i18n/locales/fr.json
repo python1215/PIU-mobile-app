@@ -731,6 +731,7 @@
     "compensationDate": "Date de Compensation",
     "compensationRefNo": "Réf. de Compensation",
     "preProjectSituation": "Situation Pré-Projet",
+    "area": "Surface",
     "compensationType": "Type de Compensation",
     "compensationCurrency": "Devise",
     "compensationCashAmount": "Montant en Espèces",

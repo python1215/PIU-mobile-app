@@ -731,6 +731,7 @@
     "compensationDate": "Data de Compensação",
     "compensationRefNo": "Ref. de Compensação",
     "preProjectSituation": "Situação Pré-Projeto",
+    "area": "Área",
     "compensationType": "Tipo de Compensação",
     "compensationCurrency": "Moeda",
     "compensationCashAmount": "Valor em Dinheiro",

@@ -690,6 +690,7 @@
     "compensationDate": "Compensation Date",
     "compensationRefNo": "Compensation Ref No",
     "preProjectSituation": "Pre-Project Situation",
+    "area": "Area",
     "compensationType": "Compensation Type",
     "compensationCurrency": "Currency",
     "compensationCashAmount": "Cash Amount",
