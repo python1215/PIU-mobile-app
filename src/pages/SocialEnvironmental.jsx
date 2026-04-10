@@ -243,8 +243,7 @@ function SocialEnvironmental() {
           idDocumentUpload: item.idDocumentUpload || '',
           settlementCode: item.currentAddress?.settlementCode || '',
           remarks: item.remarks || '',
-          dateReceivedFrom: item.dateReceivedFrom || '',
-          dateReceivedTo: item.dateReceivedTo || ''
+          dateReceivedFrom: item.dateReceivedFrom || ''
         });
       } else if (activeTab === 'grievance') {
         setFormData({
@@ -341,8 +340,7 @@ function SocialEnvironmental() {
           idDocumentUpload: '',
           settlementCode: '',
           remarks: '',
-          dateReceivedFrom: '',
-          dateReceivedTo: ''
+          dateReceivedFrom: ''
         });
       } else if (activeTab === 'grievance') {
         setFormData({
@@ -491,8 +489,7 @@ function SocialEnvironmental() {
       idDocumentUpload: formData.idDocumentUpload || null,
       currentAddress: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
       remarks: formData.remarks || null,
-      dateReceivedFrom: formData.dateReceivedFrom || null,
-      dateReceivedTo: formData.dateReceivedTo || null
+      dateReceivedFrom: formData.dateReceivedFrom || null
     };
 
     try {
@@ -789,8 +786,7 @@ function SocialEnvironmental() {
               <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
                 <h6 className="text-info mb-2" style={{fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase'}}>{t('socialEnvironmental.otherDetails')}</h6>
                 <div className="row g-1">
-                  {field(t('socialEnvironmental.dateReceivedFrom'), p.dateReceivedFrom)}
-                  {field(t('socialEnvironmental.dateReceivedTo'), p.dateReceivedTo)}
+                  {field(t('socialEnvironmental.dateReceived'), p.dateReceivedFrom)}
                   {field(t('socialEnvironmental.remarks'), p.remarks)}
                 </div>
               </div>
@@ -840,8 +836,7 @@ function SocialEnvironmental() {
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.identificationDocument')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.latitude')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.longitude')}</th>
-            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceivedFrom')}</th>
-            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceivedTo')}</th>
+            <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.dateReceived')}</th>
             <th style={{whiteSpace:'nowrap'}}>{t('socialEnvironmental.remarks')}</th>
             <th style={{whiteSpace:'nowrap', position:'sticky', right:0, backgroundColor:'#212529', zIndex:1}}>{t('common.actions')}</th>
           </tr>
@@ -877,7 +872,6 @@ function SocialEnvironmental() {
                 <td>{item.impactLatitude || '-'}</td>
                 <td>{item.impactLongitude || '-'}</td>
                 <td style={{whiteSpace:'nowrap'}}>{item.dateReceivedFrom || '-'}</td>
-                <td style={{whiteSpace:'nowrap'}}>{item.dateReceivedTo || '-'}</td>
                 <td style={{maxWidth:'120px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{item.remarks || '-'}</td>
                 <td style={{whiteSpace:'nowrap', position:'sticky', right:0, backgroundColor:'inherit', zIndex:1}}>
                   <div className="d-flex gap-1">
@@ -1289,12 +1283,8 @@ function SocialEnvironmental() {
             <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.dateReceived')}</h6>
             <div className="row g-2">
               <div className="col-6">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceivedFrom')}</label>
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceived')}</label>
                 <input type="date" className="form-control form-control-sm" name="dateReceivedFrom" value={formData.dateReceivedFrom || ''} onChange={handleChange} />
-              </div>
-              <div className="col-6">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.dateReceivedTo')}</label>
-                <input type="date" className="form-control form-control-sm" name="dateReceivedTo" value={formData.dateReceivedTo || ''} onChange={handleChange} />
               </div>
             </div>
           </div>
