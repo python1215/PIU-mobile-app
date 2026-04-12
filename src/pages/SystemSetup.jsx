@@ -529,7 +529,7 @@ function SystemSetup() {
   }, [tabConfig]);
 
   const loadRelatedData = useCallback(async () => {
-    const relatedTabs = ['regions', 'lgas', 'districts', 'wards', 'monitoringTypes', 'pdos', 'outcomes'];
+    const relatedTabs = ['regions', 'lgas', 'districts', 'wards', 'monitoringTypes', 'pdos', 'outcomes', 'essOshMonitoringTypes'];
     const promises = relatedTabs.map(async (tabKey) => {
       if (loadedTabs[tabKey]) return;
       const config = tabConfig[tabKey];
