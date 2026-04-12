@@ -65,6 +65,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIContractSetup.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIForContract.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KPIIndicator.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/KpiEssOhs.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/LGA.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/MeasurementUnit.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/MonitoringType.java
@@ -140,6 +141,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/JmcSnagRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIContractSetupRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KPIForContractRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/KpiEssOhsRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/LGARepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/MeasurementUnitRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/MonitoringTypeRepository.java

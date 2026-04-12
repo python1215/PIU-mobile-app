@@ -286,6 +286,8 @@
     "decisionOutcomes": "Résultats de Décision",
     "identificationDocuments": "Type de Document d'Identification",
     "essOshMonitoringTypes": "Type de Suivi ESS & SST",
+    "kpiEssOhs": "KPI pour ESS & SST",
+    "indicator": "Indicateur",
     "description": "Description",
     "pdoSetup": "Configuration PDO",
     "outcomes": "Résultats",

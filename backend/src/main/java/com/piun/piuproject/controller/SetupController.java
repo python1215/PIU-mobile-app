@@ -46,6 +46,7 @@ public class SetupController {
     @Autowired private ElectricityFeederRepository electricityFeederRepository;
     @Autowired private IdentificationDocumentRepository identificationDocumentRepository;
     @Autowired private EssOshMonitoringTypeRepository essOshMonitoringTypeRepository;
+    @Autowired private KpiEssOhsRepository kpiEssOhsRepository;
 
     // Contributors
     @GetMapping("/contributors")
@@ -649,5 +650,34 @@ public class SetupController {
     @DeleteMapping("/ess-osh-monitoring-types/{id}")
     public ResponseEntity<Void> deleteEssOshMonitoringType(@PathVariable Long id) {
         return essOshMonitoringTypeRepository.findById(id).map(t -> { essOshMonitoringTypeRepository.delete(t); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/kpi-ess-ohs")
+    public List<KpiEssOhs> getAllKpiEssOhs() { return kpiEssOhsRepository.findAll(); }
+
+    @PostMapping("/kpi-ess-ohs")
+    public KpiEssOhs createKpiEssOhs(@RequestBody KpiEssOhs kpi) {
+        if (kpi.getEssOhsType() != null && kpi.getEssOhsType().getId() != null) {
+            EssOshMonitoringType type = essOshMonitoringTypeRepository.findById(kpi.getEssOhsType().getId()).orElse(null);
+            kpi.setEssOhsType(type);
+        }
+        return kpiEssOhsRepository.save(kpi);
+    }
+
+    @PutMapping("/kpi-ess-ohs/{id}")
+    public ResponseEntity<KpiEssOhs> updateKpiEssOhs(@PathVariable Long id, @RequestBody KpiEssOhs details) {
+        return kpiEssOhsRepository.findById(id).map(k -> {
+            k.setIndicator(details.getIndicator());
+            if (details.getEssOhsType() != null && details.getEssOhsType().getId() != null) {
+                EssOshMonitoringType type = essOshMonitoringTypeRepository.findById(details.getEssOhsType().getId()).orElse(null);
+                k.setEssOhsType(type);
+            } else { k.setEssOhsType(null); }
+            return ResponseEntity.ok(kpiEssOhsRepository.save(k));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/kpi-ess-ohs/{id}")
+    public ResponseEntity<Void> deleteKpiEssOhs(@PathVariable Long id) {
+        return kpiEssOhsRepository.findById(id).map(k -> { kpiEssOhsRepository.delete(k); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 }

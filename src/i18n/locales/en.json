@@ -286,6 +286,8 @@
     "decisionOutcomes": "Decision Outcomes",
     "identificationDocuments": "Type of Identification Document",
     "essOshMonitoringTypes": "ESS & OSH Monitoring Type",
+    "kpiEssOhs": "KPI for ESS & OHS",
+    "indicator": "Indicator",
     "description": "Description",
     "pdoSetup": "PDO Setup",
     "outcomes": "Outcomes",
