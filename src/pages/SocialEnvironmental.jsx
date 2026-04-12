@@ -1097,33 +1097,6 @@ function SocialEnvironmental() {
             </div>
           </div>
 
-          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
-            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.geolocationOfImpact')}</h6>
-            <div className="row g-2 align-items-end">
-              <div className="col-5">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.latitude')}</label>
-                <input type="number" step="any" className="form-control form-control-sm" name="impactLatitude" value={formData.impactLatitude || ''} onChange={handleChange} placeholder="e.g. -6.7924" />
-              </div>
-              <div className="col-5">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.longitude')}</label>
-                <input type="number" step="any" className="form-control form-control-sm" name="impactLongitude" value={formData.impactLongitude || ''} onChange={handleChange} placeholder="e.g. 39.2083" />
-              </div>
-              <div className="col-2">
-                <button type="button" className="btn btn-sm btn-outline-primary w-100" title={t('socialEnvironmental.useCurrentLocation')} onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => { setFormData(prev => ({ ...prev, impactLatitude: pos.coords.latitude.toFixed(6), impactLongitude: pos.coords.longitude.toFixed(6) })); toast.success(t('socialEnvironmental.locationCaptured')); },
-                      (err) => { toast.error(t('socialEnvironmental.locationFailed')); console.error(err); },
-                      { enableHighAccuracy: true, timeout: 10000 }
-                    );
-                  } else { toast.error(t('socialEnvironmental.geolocationNotSupported')); }
-                }}>
-                  <FiMapPin size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-
           <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
             <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.location')}</h6>
             <div className="row g-2">
@@ -1147,6 +1120,33 @@ function SocialEnvironmental() {
                   <option value="">{formData.districtCode ? t('common.select') : '--'}</option>
                   {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
                 </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.geolocationOfImpact')}</h6>
+            <div className="row g-2 align-items-end">
+              <div className="col-5">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.latitude')}</label>
+                <input type="number" step="any" className="form-control form-control-sm" name="impactLatitude" value={formData.impactLatitude || ''} onChange={handleChange} placeholder="e.g. -6.7924" />
+              </div>
+              <div className="col-5">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.longitude')}</label>
+                <input type="number" step="any" className="form-control form-control-sm" name="impactLongitude" value={formData.impactLongitude || ''} onChange={handleChange} placeholder="e.g. 39.2083" />
+              </div>
+              <div className="col-2">
+                <button type="button" className="btn btn-sm btn-outline-primary w-100" title={t('socialEnvironmental.useCurrentLocation')} onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => { setFormData(prev => ({ ...prev, impactLatitude: pos.coords.latitude.toFixed(6), impactLongitude: pos.coords.longitude.toFixed(6) })); toast.success(t('socialEnvironmental.locationCaptured')); },
+                      (err) => { toast.error(t('socialEnvironmental.locationFailed')); console.error(err); },
+                      { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                  } else { toast.error(t('socialEnvironmental.geolocationNotSupported')); }
+                }}>
+                  <FiMapPin size={14} />
+                </button>
               </div>
             </div>
           </div>
