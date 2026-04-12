@@ -380,6 +380,7 @@ public class SocialEnvironmentalController {
                 ohs.setKpiDescription(ohsDetails.getKpiDescription());
                 ohs.setElectricityFeeder(ohsDetails.getElectricityFeeder());
                 ohs.setKpiEssOhs(ohsDetails.getKpiEssOhs());
+                ohs.setTarget(ohsDetails.getTarget());
                 ohs.setPicture(ohsDetails.getPicture());
                 return ResponseEntity.ok(ohsRepository.save(ohs));
             })

@@ -276,6 +276,7 @@ function SocialEnvironmental() {
           investmentTypeId: item.investmentType?.id || '',
           electricityFeederId: item.electricityFeeder?.id || '',
           kpiEssOhsId: item.kpiEssOhs?.id || '',
+          target: item.target || '',
           yearId: item.year?.id || '',
           quarterId: item.quarter?.id || '',
           monitoringDate: item.monitoringDate || '',
@@ -615,6 +616,7 @@ function SocialEnvironmental() {
       youthFemale: formData.youthFemale !== '' ? parseInt(formData.youthFemale) : null,
       kpiDescription: formData.kpiDescriptionId ? { id: parseInt(formData.kpiDescriptionId) } : null,
       kpiEssOhs: formData.kpiEssOhsId ? { id: parseInt(formData.kpiEssOhsId) } : null,
+      target: formData.target || null,
       picture: formData.picture || null
     };
 
@@ -1564,6 +1566,10 @@ function SocialEnvironmental() {
                   <option value="">{t('common.select')}</option>
                   {kpiEssOhsList.map(k => <option key={k.id} value={k.id}>{k.indicator}</option>)}
                 </select>
+              </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.target')}</label>
+                <input type="text" className="form-control form-control-sm" name="target" value={formData.target || ''} onChange={handleChange} placeholder={t('socialEnvironmental.target')} />
               </div>
             </div>
           </div>

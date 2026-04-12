@@ -795,6 +795,7 @@
     "youthMale": "Jovens do sexo masculino",
     "youthFemale": "Jovens do sexo feminino",
     "kpiDescription": "Descrição do KPI",
+    "target": "Meta",
     "totalWorkers": "Total de trabalhadores",
     "totalYouth": "Total de jovens",
     "ohsProjectInfo": "Informações do projeto",

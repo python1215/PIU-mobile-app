@@ -795,6 +795,7 @@
     "youthMale": "Jeunes hommes",
     "youthFemale": "Jeunes femmes",
     "kpiDescription": "Description du KPI",
+    "target": "Cible",
     "totalWorkers": "Total des travailleurs",
     "totalYouth": "Total des jeunes",
     "ohsProjectInfo": "Informations sur le projet",

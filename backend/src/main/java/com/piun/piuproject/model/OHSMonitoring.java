@@ -81,6 +81,9 @@ public class OHSMonitoring {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private KpiEssOhs kpiEssOhs;
 
+    @Column(name = "target", length = 500)
+    private String target;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "electricity_feeder_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -134,6 +137,8 @@ public class OHSMonitoring {
     public void setKpiDescription(KPIContractSetup kpiDescription) { this.kpiDescription = kpiDescription; }
     public KpiEssOhs getKpiEssOhs() { return kpiEssOhs; }
     public void setKpiEssOhs(KpiEssOhs kpiEssOhs) { this.kpiEssOhs = kpiEssOhs; }
+    public String getTarget() { return target; }
+    public void setTarget(String target) { this.target = target; }
     public ElectricityFeeder getElectricityFeeder() { return electricityFeeder; }
     public void setElectricityFeeder(ElectricityFeeder electricityFeeder) { this.electricityFeeder = electricityFeeder; }
     public String getPicture() { return picture; }
