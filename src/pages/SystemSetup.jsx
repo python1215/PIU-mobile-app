@@ -484,6 +484,11 @@ function SystemSetup() {
         { name: 'docId', label: 'Doc ID', placeholder: 'e.g., DOC-001', halfWidth: true },
         { name: 'identityDocument', label: 'Identification Document', placeholder: 'Enter document type', halfWidth: true }
       ] },
+    essOshMonitoringTypes: { endpoint: '/api/setup/ess-osh-monitoring-types', idField: 'id', label: t('setup.essOshMonitoringTypes'),
+      columns: [{ key: 'id', label: 'ID' }, { key: 'description', label: t('setup.description') }],
+      fields: [
+        { name: 'description', label: t('setup.description'), placeholder: 'Enter description' }
+      ] },
     results: { endpoint: '/api/setup/results', idField: 'id', label: 'Project Results',
       columns: [{ key: 'id', label: 'ID' }, { key: 'projectOutcome.projectOutcome', label: 'Related Outcome' }, { key: 'projectResult', label: 'Project Result' }],
       fields: [
@@ -498,7 +503,7 @@ function SystemSetup() {
     { label: t('setup.tabGeography'), items: [{ id: 'regions', label: t('setup.regions') }, { id: 'lgas', label: t('setup.lgas') }, { id: 'districts', label: t('setup.districts') }, { id: 'wards', label: t('setup.wards') }, { id: 'settlements', label: t('setup.settlements') }] },
     { label: t('setup.tabTimeFinance'), items: [{ id: 'years', label: t('setup.years') }, { id: 'quarters', label: t('setup.quarters') }, { id: 'currencies', label: t('setup.currencies') }, { id: 'investmentTypes', label: t('setup.investmentTypes') }] },
     { label: t('setup.tabProjectSetup'), items: [{ id: 'categories', label: t('setup.categories') }, { id: 'documentTypes', label: t('setup.documentTypes') }, { id: 'monitoringTypes', label: t('setup.monitoringTypes') }, { id: 'indicatorTypes', label: t('setup.indicatorTypes') }, { id: 'measurementUnits', label: t('setup.measurementUnits') }, { id: 'physicalProgress', label: t('setup.physicalProgress') }, { id: 'dataFrequencies', label: t('setup.dataFrequency') }, { id: 'electricityFeeders', label: t('setup.electricityFeeders') }] },
-    { label: t('setup.tabSocialPAP'), items: [{ id: 'papTypes', label: t('setup.papTypes') }, { id: 'papCategories', label: t('setup.papCategories') }, { id: 'impactTypes', label: t('setup.impactTypes') }, { id: 'settlementNatures', label: t('setup.settlementNatures') }, { id: 'vulnerabilityCategories', label: t('setup.vulnerability') }, { id: 'stakeholderEngagements', label: t('setup.stakeholderEngagements') }, { id: 'accessTypes', label: t('setup.accessTypes') }, { id: 'decisionOutcomes', label: t('setup.decisionOutcomes') }, { id: 'identificationDocuments', label: t('setup.identificationDocuments') }] },
+    { label: t('setup.tabSocialPAP'), items: [{ id: 'papTypes', label: t('setup.papTypes') }, { id: 'papCategories', label: t('setup.papCategories') }, { id: 'impactTypes', label: t('setup.impactTypes') }, { id: 'settlementNatures', label: t('setup.settlementNatures') }, { id: 'vulnerabilityCategories', label: t('setup.vulnerability') }, { id: 'stakeholderEngagements', label: t('setup.stakeholderEngagements') }, { id: 'accessTypes', label: t('setup.accessTypes') }, { id: 'decisionOutcomes', label: t('setup.decisionOutcomes') }, { id: 'identificationDocuments', label: t('setup.identificationDocuments') }, { id: 'essOshMonitoringTypes', label: t('setup.essOshMonitoringTypes') }] },
     { label: t('setup.tabResultsFramework'), items: [{ id: 'pdos', label: t('setup.pdoSetup') }, { id: 'outcomes', label: t('setup.outcomes') }, { id: 'results', label: t('setup.results') }, { id: 'kpiContracts', label: t('setup.kpiContracts') }] },
   ], [t]);
 

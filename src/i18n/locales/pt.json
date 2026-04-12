@@ -285,6 +285,8 @@
     "accessTypes": "Tipos de Acesso",
     "decisionOutcomes": "Resultados de Decisão",
     "identificationDocuments": "Tipo de Documento de Identificação",
+    "essOshMonitoringTypes": "Tipo de Monitoramento ESS & SST",
+    "description": "Descrição",
     "pdoSetup": "Configuração PDO",
     "outcomes": "Resultados",
     "results": "Resultados do Projeto"

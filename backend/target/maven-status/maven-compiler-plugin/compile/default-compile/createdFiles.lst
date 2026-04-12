@@ -21,6 +21,7 @@ com/piun/piuproject/model/StakeholderEngagement.class
 com/piun/piuproject/model/Subcomponent.class
 com/piun/piuproject/model/SupplyMonitoringMilestone.class
 com/piun/piuproject/security/JwtAuthenticationEntryPoint.class
+com/piun/piuproject/repository/EssOshMonitoringTypeRepository.class
 com/piun/piuproject/model/PAP.class
 com/piun/piuproject/repository/DistrictRepository.class
 com/piun/piuproject/model/IndicatorDescription.class
@@ -74,6 +75,7 @@ com/piun/piuproject/repository/DocumentCommentRepository.class
 com/piun/piuproject/controller/ProjectActionsController.class
 com/piun/piuproject/model/PAPType.class
 com/piun/piuproject/repository/ContractProfilingGoodsRepository.class
+com/piun/piuproject/model/EssOshMonitoringType.class
 com/piun/piuproject/repository/SubcomponentRepository.class
 com/piun/piuproject/repository/QuarterRepository.class
 com/piun/piuproject/model/ContractProfilingGoods.class

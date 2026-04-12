@@ -285,6 +285,8 @@
     "accessTypes": "Access Types",
     "decisionOutcomes": "Decision Outcomes",
     "identificationDocuments": "Type of Identification Document",
+    "essOshMonitoringTypes": "ESS & OSH Monitoring Type",
+    "description": "Description",
     "pdoSetup": "PDO Setup",
     "outcomes": "Outcomes",
     "results": "Results"

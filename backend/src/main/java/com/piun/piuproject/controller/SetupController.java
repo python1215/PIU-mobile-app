@@ -45,6 +45,7 @@ public class SetupController {
     @Autowired private ProjectRepository projectRepository;
     @Autowired private ElectricityFeederRepository electricityFeederRepository;
     @Autowired private IdentificationDocumentRepository identificationDocumentRepository;
+    @Autowired private EssOshMonitoringTypeRepository essOshMonitoringTypeRepository;
 
     // Contributors
     @GetMapping("/contributors")
@@ -632,5 +633,21 @@ public class SetupController {
     @DeleteMapping("/identification-documents/{id}")
     public ResponseEntity<Void> deleteIdentificationDocument(@PathVariable Long id) {
         return identificationDocumentRepository.findById(id).map(d -> { identificationDocumentRepository.delete(d); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/ess-osh-monitoring-types")
+    public List<EssOshMonitoringType> getAllEssOshMonitoringTypes() { return essOshMonitoringTypeRepository.findAll(); }
+
+    @PostMapping("/ess-osh-monitoring-types")
+    public EssOshMonitoringType createEssOshMonitoringType(@RequestBody EssOshMonitoringType type) { return essOshMonitoringTypeRepository.save(type); }
+
+    @PutMapping("/ess-osh-monitoring-types/{id}")
+    public ResponseEntity<EssOshMonitoringType> updateEssOshMonitoringType(@PathVariable Long id, @RequestBody EssOshMonitoringType details) {
+        return essOshMonitoringTypeRepository.findById(id).map(t -> { t.setDescription(details.getDescription()); return ResponseEntity.ok(essOshMonitoringTypeRepository.save(t)); }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/ess-osh-monitoring-types/{id}")
+    public ResponseEntity<Void> deleteEssOshMonitoringType(@PathVariable Long id) {
+        return essOshMonitoringTypeRepository.findById(id).map(t -> { essOshMonitoringTypeRepository.delete(t); return ResponseEntity.ok().<Void>build(); }).orElse(ResponseEntity.notFound().build());
     }
 }

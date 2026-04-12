@@ -48,6 +48,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/Donor.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ESIA.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ElectricityFeeder.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/EssOshMonitoringType.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/GrievanceMonitoringLog.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/IdentificationDocument.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/model/ImpactType.java
@@ -125,6 +126,7 @@
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/DonorRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ESIARepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/ElectricityFeederRepository.java
+/home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/EssOshMonitoringTypeRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/GrievanceRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IdentificationDocumentRepository.java
 /home/runner/workspace/backend/src/main/java/com/piun/piuproject/repository/IndicatorTypeRepository.java
