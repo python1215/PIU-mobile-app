@@ -653,6 +653,7 @@
     "editESIA": "Editar Registro AIAS",
     "esiaId": "ID AIAS",
     "typeOfInvestment": "Tipo de Investimento",
+    "typeOfInvestmentFeeders": "Tipo de Alimentadores de Investimento",
     "esiaCreated": "Registro AIAS criado com sucesso",
     "esiaUpdated": "Registro AIAS atualizado com sucesso",
     "esiaDeleted": "Registro AIAS excluído com sucesso",

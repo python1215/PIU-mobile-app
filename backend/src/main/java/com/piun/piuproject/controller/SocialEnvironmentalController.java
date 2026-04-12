@@ -330,6 +330,9 @@ public class SocialEnvironmentalController {
         if (ohs.getSettlement() != null && ohs.getSettlement().getSettlementCode() != null) {
             ohs.setSettlement(settlementRepository.findById(ohs.getSettlement().getSettlementCode()).orElse(null));
         }
+        if (ohs.getElectricityFeeder() != null && ohs.getElectricityFeeder().getId() != null) {
+            ohs.setElectricityFeeder(electricityFeederRepository.findById(ohs.getElectricityFeeder().getId()).orElse(null));
+        }
     }
 
     @GetMapping("/ohs")
@@ -369,6 +372,7 @@ public class SocialEnvironmentalController {
                 ohs.setYouthMale(ohsDetails.getYouthMale());
                 ohs.setYouthFemale(ohsDetails.getYouthFemale());
                 ohs.setKpiDescription(ohsDetails.getKpiDescription());
+                ohs.setElectricityFeeder(ohsDetails.getElectricityFeeder());
                 ohs.setPicture(ohsDetails.getPicture());
                 return ResponseEntity.ok(ohsRepository.save(ohs));
             })

@@ -76,6 +76,11 @@ public class OHSMonitoring {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private KPIContractSetup kpiDescription;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "electricity_feeder_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private ElectricityFeeder electricityFeeder;
+
     @Column(name = "picture", length = 255)
     private String picture;
 
@@ -122,6 +127,8 @@ public class OHSMonitoring {
     public void setYouthFemale(Integer youthFemale) { this.youthFemale = youthFemale; }
     public KPIContractSetup getKpiDescription() { return kpiDescription; }
     public void setKpiDescription(KPIContractSetup kpiDescription) { this.kpiDescription = kpiDescription; }
+    public ElectricityFeeder getElectricityFeeder() { return electricityFeeder; }
+    public void setElectricityFeeder(ElectricityFeeder electricityFeeder) { this.electricityFeeder = electricityFeeder; }
     public String getPicture() { return picture; }
     public void setPicture(String picture) { this.picture = picture; }
     public LocalDateTime getDateCreated() { return dateCreated; }

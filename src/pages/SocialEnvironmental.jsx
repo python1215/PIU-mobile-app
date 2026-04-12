@@ -271,6 +271,7 @@ function SocialEnvironmental() {
         setFormData({
           projectId: item.project?.projectId || '',
           investmentTypeId: item.investmentType?.id || '',
+          electricityFeederId: item.electricityFeeder?.id || '',
           yearId: item.year?.id || '',
           quarterId: item.quarter?.id || '',
           monitoringDate: item.monitoringDate || '',
@@ -594,6 +595,7 @@ function SocialEnvironmental() {
     const payload = {
       project: formData.projectId ? { projectId: formData.projectId } : null,
       investmentType: formData.investmentTypeId ? { id: parseInt(formData.investmentTypeId) } : null,
+      electricityFeeder: formData.electricityFeederId ? { id: parseInt(formData.electricityFeederId) } : null,
       year: formData.yearId ? { id: parseInt(formData.yearId) } : null,
       quarter: formData.quarterId ? { id: parseInt(formData.quarterId) } : null,
       monitoringDate: formData.monitoringDate || null,
@@ -1481,10 +1483,10 @@ function SocialEnvironmental() {
                 </select>
               </div>
               <div className="col-12">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.typeOfInvestment')}</label>
-                <select className="form-select form-select-sm" name="investmentTypeId" value={formData.investmentTypeId || ''} onChange={handleChange} disabled={!formData.projectId}>
-                  <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
-                  {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.typeOfInvestment}</option>)}
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.typeOfInvestmentFeeders')}</label>
+                <select className="form-select form-select-sm" name="electricityFeederId" value={formData.electricityFeederId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {electricityFeeders.map(ef => <option key={ef.id} value={ef.id}>{ef.feeder}</option>)}
                 </select>
               </div>
             </div>

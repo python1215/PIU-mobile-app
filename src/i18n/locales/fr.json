@@ -653,6 +653,7 @@
     "editESIA": "Modifier l'Enregistrement EIES",
     "esiaId": "ID EIES",
     "typeOfInvestment": "Type d'Investissement",
+    "typeOfInvestmentFeeders": "Type de Feeders d'Investissement",
     "esiaCreated": "Enregistrement EIES créé avec succès",
     "esiaUpdated": "Enregistrement EIES mis à jour avec succès",
     "esiaDeleted": "Enregistrement EIES supprimé avec succès",

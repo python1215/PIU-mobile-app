@@ -653,6 +653,7 @@
     "editESIA": "Edit ESIA Record",
     "esiaId": "ESIA ID",
     "typeOfInvestment": "Type of Investment",
+    "typeOfInvestmentFeeders": "Type of Investment Feeders",
     "esiaCreated": "ESIA record created successfully",
     "esiaUpdated": "ESIA record updated successfully",
     "esiaDeleted": "ESIA record deleted successfully",
