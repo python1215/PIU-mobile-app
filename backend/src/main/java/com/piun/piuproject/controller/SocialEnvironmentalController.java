@@ -79,6 +79,9 @@ public class SocialEnvironmentalController {
     @Autowired
     private ElectricityFeederRepository electricityFeederRepository;
 
+    @Autowired
+    private KpiEssOhsRepository kpiEssOhsRepository;
+
     @GetMapping("/esia")
     public List<ESIA> getAllESIA() {
         return esiaRepository.findAll();
@@ -333,6 +336,9 @@ public class SocialEnvironmentalController {
         if (ohs.getElectricityFeeder() != null && ohs.getElectricityFeeder().getId() != null) {
             ohs.setElectricityFeeder(electricityFeederRepository.findById(ohs.getElectricityFeeder().getId()).orElse(null));
         }
+        if (ohs.getKpiEssOhs() != null && ohs.getKpiEssOhs().getId() != null) {
+            ohs.setKpiEssOhs(kpiEssOhsRepository.findById(ohs.getKpiEssOhs().getId()).orElse(null));
+        }
     }
 
     @GetMapping("/ohs")
@@ -373,6 +379,7 @@ public class SocialEnvironmentalController {
                 ohs.setYouthFemale(ohsDetails.getYouthFemale());
                 ohs.setKpiDescription(ohsDetails.getKpiDescription());
                 ohs.setElectricityFeeder(ohsDetails.getElectricityFeeder());
+                ohs.setKpiEssOhs(ohsDetails.getKpiEssOhs());
                 ohs.setPicture(ohsDetails.getPicture());
                 return ResponseEntity.ok(ohsRepository.save(ohs));
             })

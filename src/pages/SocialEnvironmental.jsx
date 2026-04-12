@@ -35,6 +35,7 @@ function SocialEnvironmental() {
   const [electricityFeeders, setElectricityFeeders] = useState([]);
   const [settlementNatures, setSettlementNatures] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [kpiEssOhsList, setKpiEssOhsList] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -157,7 +158,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes, curRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes, curRes, kpiEssRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -172,7 +173,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/identification-documents').catch(() => ({ data: [] })),
         axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlement-natures').catch(() => ({ data: [] })),
-        axios.get('/api/setup/currencies').catch(() => ({ data: [] }))
+        axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
+        axios.get('/api/setup/kpi-ess-ohs').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -189,6 +191,7 @@ function SocialEnvironmental() {
       setElectricityFeeders(efRes.data);
       setSettlementNatures(snRes.data);
       setCurrencies(curRes.data);
+      setKpiEssOhsList(kpiEssRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -272,6 +275,7 @@ function SocialEnvironmental() {
           projectId: item.project?.projectId || '',
           investmentTypeId: item.investmentType?.id || '',
           electricityFeederId: item.electricityFeeder?.id || '',
+          kpiEssOhsId: item.kpiEssOhs?.id || '',
           yearId: item.year?.id || '',
           quarterId: item.quarter?.id || '',
           monitoringDate: item.monitoringDate || '',
@@ -610,6 +614,7 @@ function SocialEnvironmental() {
       youthMale: formData.youthMale !== '' ? parseInt(formData.youthMale) : null,
       youthFemale: formData.youthFemale !== '' ? parseInt(formData.youthFemale) : null,
       kpiDescription: formData.kpiDescriptionId ? { id: parseInt(formData.kpiDescriptionId) } : null,
+      kpiEssOhs: formData.kpiEssOhsId ? { id: parseInt(formData.kpiEssOhsId) } : null,
       picture: formData.picture || null
     };
 
@@ -1550,6 +1555,19 @@ function SocialEnvironmental() {
         </div>
 
         <div className="col-md-6">
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
+            <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.kpiDescription')}</h6>
+            <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.kpiDescription')}</label>
+                <select className="form-select form-select-sm" name="kpiEssOhsId" value={formData.kpiEssOhsId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {kpiEssOhsList.map(k => <option key={k.id} value={k.id}>{k.indicator}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
             <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.ohsAssessment')}</h6>
             <div className="row g-2">
@@ -1560,13 +1578,6 @@ function SocialEnvironmental() {
               <div className="col-12">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.workingEnvironment')}</label>
                 <textarea className="form-control form-control-sm" name="workingEnvironment" rows="2" value={formData.workingEnvironment || ''} onChange={handleChange}></textarea>
-              </div>
-              <div className="col-12">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.kpiDescription')}</label>
-                <select className="form-select form-select-sm" name="kpiDescriptionId" value={formData.kpiDescriptionId || ''} onChange={handleChange} disabled={!formData.projectId}>
-                  <option value="">{formData.projectId ? t('common.select') : '-- Select project first --'}</option>
-                  {filteredInvestmentTypes.map(it => <option key={it.id} value={it.id}>{it.kpiDescription || it.typeOfInvestment}</option>)}
-                </select>
               </div>
             </div>
           </div>
