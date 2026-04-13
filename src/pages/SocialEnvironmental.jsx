@@ -1574,20 +1574,6 @@ function SocialEnvironmental() {
             </div>
           </div>
 
-          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fdf8ff'}}>
-            <h6 className="text-info mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.ohsAssessment')}</h6>
-            <div className="row g-2">
-              <div className="col-12">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.qualityAtEntry')}</label>
-                <textarea className="form-control form-control-sm" name="qualityAtEntryRequirement" rows="2" value={formData.qualityAtEntryRequirement || ''} onChange={handleChange} placeholder={t('socialEnvironmental.qualityAtEntryHelp')}></textarea>
-              </div>
-              <div className="col-12">
-                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.workingEnvironment')}</label>
-                <textarea className="form-control form-control-sm" name="workingEnvironment" rows="2" value={formData.workingEnvironment || ''} onChange={handleChange}></textarea>
-              </div>
-            </div>
-          </div>
-
           <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f0f8ff'}}>
             <h6 className="mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6f42c1'}}>{t('socialEnvironmental.ohsWorkforce')}</h6>
             <div className="row g-2">
