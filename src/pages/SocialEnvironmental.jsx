@@ -1591,6 +1591,10 @@ function SocialEnvironmental() {
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.target')}</label>
                 <input type="text" className="form-control form-control-sm" name="target" value={formData.target || ''} onChange={handleChange} placeholder={t('socialEnvironmental.target')} />
               </div>
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.workingEnvironment')}</label>
+                <textarea className="form-control form-control-sm" name="workingEnvironment" rows="2" value={formData.workingEnvironment || ''} onChange={handleChange} placeholder={t('socialEnvironmental.workingEnvironment')}></textarea>
+              </div>
             </div>
           </div>
 

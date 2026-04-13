@@ -388,6 +388,7 @@ public class SocialEnvironmentalController {
                 ohs.setEssOshMonitoringType(ohsDetails.getEssOshMonitoringType());
                 ohs.setKpiEssOhs(ohsDetails.getKpiEssOhs());
                 ohs.setTarget(ohsDetails.getTarget());
+                ohs.setWorkingEnvironment(ohsDetails.getWorkingEnvironment());
                 ohs.setPicture(ohsDetails.getPicture());
                 return ResponseEntity.ok(ohsRepository.save(ohs));
             })
