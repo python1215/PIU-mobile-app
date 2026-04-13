@@ -36,6 +36,7 @@ function SocialEnvironmental() {
   const [settlementNatures, setSettlementNatures] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [kpiEssOhsList, setKpiEssOhsList] = useState([]);
+  const [essOshMonitoringTypes, setEssOshMonitoringTypes] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [engagementTypes, setEngagementTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -158,7 +159,7 @@ function SocialEnvironmental() {
 
   const loadReferenceData = async () => {
     try {
-      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes, curRes, kpiEssRes] = await Promise.all([
+      const [regRes, distRes, settRes, ptRes, pcRes, vcRes, itRes, doRes, yrRes, qrRes, etRes, idRes, efRes, snRes, curRes, kpiEssRes, essOshRes] = await Promise.all([
         axios.get('/api/setup/regions').catch(() => ({ data: [] })),
         axios.get('/api/setup/districts').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlements').catch(() => ({ data: [] })),
@@ -174,7 +175,8 @@ function SocialEnvironmental() {
         axios.get('/api/setup/electricity-feeders').catch(() => ({ data: [] })),
         axios.get('/api/setup/settlement-natures').catch(() => ({ data: [] })),
         axios.get('/api/setup/currencies').catch(() => ({ data: [] })),
-        axios.get('/api/setup/kpi-ess-ohs').catch(() => ({ data: [] }))
+        axios.get('/api/setup/kpi-ess-ohs').catch(() => ({ data: [] })),
+        axios.get('/api/setup/ess-osh-monitoring-types').catch(() => ({ data: [] }))
       ]);
       setRegions(regRes.data);
       setDistricts(distRes.data);
@@ -192,6 +194,7 @@ function SocialEnvironmental() {
       setSettlementNatures(snRes.data);
       setCurrencies(curRes.data);
       setKpiEssOhsList(kpiEssRes.data);
+      setEssOshMonitoringTypes(essOshRes.data);
     } catch (error) {
       console.error('Error loading reference data:', error);
     }
@@ -275,6 +278,7 @@ function SocialEnvironmental() {
           projectId: item.project?.projectId || '',
           investmentTypeId: item.investmentType?.id || '',
           electricityFeederId: item.electricityFeeder?.id || '',
+          essOshMonitoringTypeId: item.essOshMonitoringType?.id || '',
           kpiEssOhsId: item.kpiEssOhs?.id || '',
           target: item.target || '',
           yearId: item.year?.id || '',
@@ -615,6 +619,7 @@ function SocialEnvironmental() {
       youthMale: formData.youthMale !== '' ? parseInt(formData.youthMale) : null,
       youthFemale: formData.youthFemale !== '' ? parseInt(formData.youthFemale) : null,
       kpiDescription: formData.kpiDescriptionId ? { id: parseInt(formData.kpiDescriptionId) } : null,
+      essOshMonitoringType: formData.essOshMonitoringTypeId ? { id: parseInt(formData.essOshMonitoringTypeId) } : null,
       kpiEssOhs: formData.kpiEssOhsId ? { id: parseInt(formData.kpiEssOhsId) } : null,
       target: formData.target || null,
       picture: formData.picture || null
@@ -1560,6 +1565,13 @@ function SocialEnvironmental() {
           <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8f9ff'}}>
             <h6 className="text-primary mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.kpiDescription')}</h6>
             <div className="row g-2">
+              <div className="col-12">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.essOshMonitoring')}</label>
+                <select className="form-select form-select-sm" name="essOshMonitoringTypeId" value={formData.essOshMonitoringTypeId || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {essOshMonitoringTypes.map(mt => <option key={mt.id} value={mt.id}>{mt.description}</option>)}
+                </select>
+              </div>
               <div className="col-12">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.kpiDescription')}</label>
                 <select className="form-select form-select-sm" name="kpiEssOhsId" value={formData.kpiEssOhsId || ''} onChange={handleChange}>

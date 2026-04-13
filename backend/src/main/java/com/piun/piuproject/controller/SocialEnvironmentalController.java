@@ -82,6 +82,9 @@ public class SocialEnvironmentalController {
     @Autowired
     private KpiEssOhsRepository kpiEssOhsRepository;
 
+    @Autowired
+    private EssOshMonitoringTypeRepository essOshMonitoringTypeRepository;
+
     @GetMapping("/esia")
     public List<ESIA> getAllESIA() {
         return esiaRepository.findAll();
@@ -339,6 +342,9 @@ public class SocialEnvironmentalController {
         if (ohs.getKpiEssOhs() != null && ohs.getKpiEssOhs().getId() != null) {
             ohs.setKpiEssOhs(kpiEssOhsRepository.findById(ohs.getKpiEssOhs().getId()).orElse(null));
         }
+        if (ohs.getEssOshMonitoringType() != null && ohs.getEssOshMonitoringType().getId() != null) {
+            ohs.setEssOshMonitoringType(essOshMonitoringTypeRepository.findById(ohs.getEssOshMonitoringType().getId()).orElse(null));
+        }
     }
 
     @GetMapping("/ohs")
@@ -379,6 +385,7 @@ public class SocialEnvironmentalController {
                 ohs.setYouthFemale(ohsDetails.getYouthFemale());
                 ohs.setKpiDescription(ohsDetails.getKpiDescription());
                 ohs.setElectricityFeeder(ohsDetails.getElectricityFeeder());
+                ohs.setEssOshMonitoringType(ohsDetails.getEssOshMonitoringType());
                 ohs.setKpiEssOhs(ohsDetails.getKpiEssOhs());
                 ohs.setTarget(ohsDetails.getTarget());
                 ohs.setPicture(ohsDetails.getPicture());

@@ -77,6 +77,11 @@ public class OHSMonitoring {
     private KPIContractSetup kpiDescription;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ess_osh_monitoring_type_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private EssOshMonitoringType essOshMonitoringType;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "kpi_ess_ohs_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private KpiEssOhs kpiEssOhs;
@@ -135,6 +140,8 @@ public class OHSMonitoring {
     public void setYouthFemale(Integer youthFemale) { this.youthFemale = youthFemale; }
     public KPIContractSetup getKpiDescription() { return kpiDescription; }
     public void setKpiDescription(KPIContractSetup kpiDescription) { this.kpiDescription = kpiDescription; }
+    public EssOshMonitoringType getEssOshMonitoringType() { return essOshMonitoringType; }
+    public void setEssOshMonitoringType(EssOshMonitoringType essOshMonitoringType) { this.essOshMonitoringType = essOshMonitoringType; }
     public KpiEssOhs getKpiEssOhs() { return kpiEssOhs; }
     public void setKpiEssOhs(KpiEssOhs kpiEssOhs) { this.kpiEssOhs = kpiEssOhs; }
     public String getTarget() { return target; }
