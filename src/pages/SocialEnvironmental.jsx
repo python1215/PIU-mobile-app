@@ -432,6 +432,9 @@ function SocialEnvironmental() {
     if (name === 'districtCode') {
       setFormData(prev => ({ ...prev, districtCode: value, settlementCode: '' }));
     }
+    if (name === 'essOshMonitoringTypeId') {
+      setFormData(prev => ({ ...prev, essOshMonitoringTypeId: value, kpiEssOhsId: '' }));
+    }
   }, []);
 
 
@@ -439,6 +442,11 @@ function SocialEnvironmental() {
     if (!formData.districtCode) return [];
     return settlements.filter(s => s.ward?.district?.districtCode === formData.districtCode);
   }, [formData.districtCode, settlements]);
+
+  const filteredKpiEssOhs = useMemo(() => {
+    if (!formData.essOshMonitoringTypeId) return [];
+    return kpiEssOhsList.filter(k => String(k.essOhsType?.id) === String(formData.essOshMonitoringTypeId));
+  }, [formData.essOshMonitoringTypeId, kpiEssOhsList]);
 
   const filteredInvestmentTypes = useMemo(() => {
     if (!formData.projectId) return [];
@@ -1574,9 +1582,9 @@ function SocialEnvironmental() {
               </div>
               <div className="col-12">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.kpiDescription')}</label>
-                <select className="form-select form-select-sm" name="kpiEssOhsId" value={formData.kpiEssOhsId || ''} onChange={handleChange}>
+                <select className="form-select form-select-sm" name="kpiEssOhsId" value={formData.kpiEssOhsId || ''} onChange={handleChange} disabled={!formData.essOshMonitoringTypeId}>
                   <option value="">{t('common.select')}</option>
-                  {kpiEssOhsList.map(k => <option key={k.id} value={k.id}>{k.indicator}</option>)}
+                  {filteredKpiEssOhs.map(k => <option key={k.id} value={k.id}>{k.indicator}</option>)}
                 </select>
               </div>
               <div className="col-12">
