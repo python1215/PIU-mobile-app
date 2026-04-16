@@ -19,6 +19,18 @@ public class CommunityEngagement {
     @JoinColumn(name = "year_id")
     private Year year;
 
+    @ManyToOne
+    @JoinColumn(name = "region_code")
+    private Region region;
+
+    @ManyToOne
+    @JoinColumn(name = "district_code")
+    private District district;
+
+    @ManyToOne
+    @JoinColumn(name = "settlement_code")
+    private Settlement settlement;
+
     @Column(name = "place_of_event", length = 100)
     private String placeOfEvent;
 
@@ -84,4 +96,10 @@ public class CommunityEngagement {
     public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+    public Region getRegion() { return region; }
+    public void setRegion(Region region) { this.region = region; }
+    public District getDistrict() { return district; }
+    public void setDistrict(District district) { this.district = district; }
+    public Settlement getSettlement() { return settlement; }
+    public void setSettlement(Settlement settlement) { this.settlement = settlement; }
 }

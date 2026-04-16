@@ -308,6 +308,9 @@ function SocialEnvironmental() {
           female: item.female ?? '',
           totalParticipants: item.totalParticipants ?? '',
           engagementTypeId: item.engagementType?.id || '',
+          regionCode: item.region?.regionCode || '',
+          districtCode: item.district?.districtCode || '',
+          settlementCode: item.settlement?.settlementCode || '',
           keyIssuesDiscussed: item.keyIssuesDiscussed || '',
           followUpActions: item.followUpActions || '',
           picture: item.picture || ''
@@ -405,6 +408,9 @@ function SocialEnvironmental() {
           female: '',
           totalParticipants: '',
           engagementTypeId: '',
+          regionCode: '',
+          districtCode: '',
+          settlementCode: '',
           keyIssuesDiscussed: '',
           followUpActions: '',
           picture: ''
@@ -675,6 +681,9 @@ function SocialEnvironmental() {
       female: formData.female !== '' ? parseInt(formData.female) : null,
       totalParticipants: formData.totalParticipants !== '' ? parseInt(formData.totalParticipants) : null,
       engagementType: formData.engagementTypeId ? { id: parseInt(formData.engagementTypeId) } : null,
+      region: formData.regionCode ? { regionCode: formData.regionCode } : null,
+      district: formData.districtCode ? { districtCode: formData.districtCode } : null,
+      settlement: formData.settlementCode ? { settlementCode: formData.settlementCode } : null,
       keyIssuesDiscussed: formData.keyIssuesDiscussed || null,
       followUpActions: formData.followUpActions || null,
       picture: formData.picture || null
@@ -1689,9 +1698,30 @@ function SocialEnvironmental() {
             </div>
           </div>
 
-          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#f8fff8'}}>
-            <h6 className="text-success mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.engagementEventDetails')}</h6>
+          <div className="border rounded p-2 mb-2" style={{backgroundColor: '#fff8f0'}}>
+            <h6 className="text-warning mb-2" style={{fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t('socialEnvironmental.ohsLocationDetails')}</h6>
             <div className="row g-2">
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.regions')}</label>
+                <select className="form-select form-select-sm" name="regionCode" value={formData.regionCode || ''} onChange={handleChange}>
+                  <option value="">{t('common.select')}</option>
+                  {regions.map(r => <option key={r.regionCode} value={r.regionCode}>{r.regionName}</option>)}
+                </select>
+              </div>
+              <div className="col-6 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('setup.districts')}</label>
+                <select className="form-select form-select-sm" name="districtCode" value={formData.districtCode || ''} onChange={handleChange} disabled={!formData.regionCode}>
+                  <option value="">{formData.regionCode ? t('common.select') : '--'}</option>
+                  {filteredDistricts.map(d => <option key={d.districtCode} value={d.districtCode}>{d.districtName}</option>)}
+                </select>
+              </div>
+              <div className="col-12 col-lg-4">
+                <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.settlement')}</label>
+                <select className="form-select form-select-sm" name="settlementCode" value={formData.settlementCode || ''} onChange={handleChange} disabled={!formData.districtCode}>
+                  <option value="">{formData.districtCode ? t('common.select') : '--'}</option>
+                  {filteredSettlements.map(s => <option key={s.settlementCode} value={s.settlementCode}>{s.settlementName}</option>)}
+                </select>
+              </div>
               <div className="col-12">
                 <label className="form-label mb-1" style={{fontSize: '0.78rem'}}>{t('socialEnvironmental.place')}</label>
                 <input type="text" className="form-control form-control-sm" name="placeOfEvent" value={formData.placeOfEvent || ''} onChange={handleChange} maxLength={100} />

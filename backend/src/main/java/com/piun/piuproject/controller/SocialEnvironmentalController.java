@@ -430,6 +430,15 @@ public class SocialEnvironmentalController {
         if (engagement.getEngagementType() != null && engagement.getEngagementType().getId() != null) {
             engagement.setEngagementType(stakeholderEngagementTypeRepository.findById(engagement.getEngagementType().getId()).orElse(null));
         }
+        if (engagement.getRegion() != null && engagement.getRegion().getRegionCode() != null) {
+            engagement.setRegion(regionRepository.findById(engagement.getRegion().getRegionCode()).orElse(null));
+        }
+        if (engagement.getDistrict() != null && engagement.getDistrict().getDistrictCode() != null) {
+            engagement.setDistrict(districtRepository.findById(engagement.getDistrict().getDistrictCode()).orElse(null));
+        }
+        if (engagement.getSettlement() != null && engagement.getSettlement().getSettlementCode() != null) {
+            engagement.setSettlement(settlementRepository.findById(engagement.getSettlement().getSettlementCode()).orElse(null));
+        }
     }
 
     @PostMapping("/community-engagement")
@@ -451,6 +460,9 @@ public class SocialEnvironmentalController {
                 engagement.setFemale(details.getFemale());
                 engagement.setTotalParticipants(details.getTotalParticipants());
                 engagement.setEngagementType(details.getEngagementType());
+                engagement.setRegion(details.getRegion());
+                engagement.setDistrict(details.getDistrict());
+                engagement.setSettlement(details.getSettlement());
                 engagement.setKeyIssuesDiscussed(details.getKeyIssuesDiscussed());
                 engagement.setFollowUpActions(details.getFollowUpActions());
                 engagement.setPicture(details.getPicture());
