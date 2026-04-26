@@ -1,13 +1,16 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
       isAuthenticated: false,
       permissions: null,
+
+      openIssueCount: 0,
 
       login: (token, user) => {
         const permissions = user.permissions || null;
@@ -15,7 +18,7 @@ export const useAuthStore = create(
       },
 
       logout: () => {
-        set({ token: null, user: null, isAuthenticated: false, permissions: null });
+        set({ token: null, user: null, isAuthenticated: false, permissions: null, openIssueCount: 0 });
       },
 
       updateUser: (user) => {
@@ -26,8 +29,12 @@ export const useAuthStore = create(
         set({ permissions });
       },
 
+      setOpenIssueCount: (count) => {
+        set({ openIssueCount: count });
+      },
+
       hasModuleAccess: (moduleKey) => {
-        const state = useAuthStore.getState();
+        const state = get();
         if (!state.permissions) return true;
         if (state.user?.isSuperuser) return true;
         return state.permissions[moduleKey] === true;
@@ -35,6 +42,7 @@ export const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
