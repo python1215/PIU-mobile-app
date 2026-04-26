@@ -1,0 +1,178 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Commit and push Expo dependency fixes",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"add",
+				"package.json",
+				"package-lock.json",
+				";",
+				"git",
+				"commit",
+				"-m",
+				"Fix Expo startup dependencies for Babel and web support",
+				";",
+				"git",
+				"push",
+				"origin",
+				"main"
+			]
+		},
+		{
+			"label": "Commit and push Expo dependency fixes v2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git add package.json package-lock.json & git commit -m \"Fix Expo startup dependencies for Babel and web support\" & git push origin main"
+			]
+		},
+		{
+			"label": "Expo export check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo export"
+			]
+		},
+		{
+			"label": "Expo export verify after blank-screen fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo export"
+			]
+		},
+		{
+			"label": "Expo web verify after notifications guard",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo export"
+			]
+		},
+		{
+			"label": "Start Expo clean after cache reset",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode clean port",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode on 8083",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel --port 8083"
+			]
+		},
+		{
+			"label": "Install Expo ngrok globally",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npm install -g @expo/ngrok@^4.1.0"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode final",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel --port 8083"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode on 8090",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --tunnel --port 8090"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode LAN 8090",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --port 8090"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode clean 8081",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --port 8081"
+			]
+		},
+		{
+			"label": "Find listener on 8081",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"netstat -ano | findstr :8081"
+			]
+		},
+		{
+			"label": "Kill PID 29216",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"taskkill /PID 29216 /F"
+			]
+		},
+		{
+			"label": "Start Expo minimal mode clean launch",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo start --clear --port 8081"
+			]
+		},
+		{
+			"label": "Align project to Expo SDK 54",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npx expo install expo@^54.0.0 --fix"
+			]
+		}
+	]
+}

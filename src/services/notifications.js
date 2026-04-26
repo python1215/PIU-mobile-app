@@ -1,13 +1,19 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+if (Platform.OS !== 'web') {
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  } catch (error) {
+    console.warn('Notifications handler init failed:', error?.message || error);
+  }
+}
 
 export async function requestNotificationPermissions() {
   if (Platform.OS === 'web') return false;
@@ -18,12 +24,14 @@ export async function requestNotificationPermissions() {
 }
 
 export async function setBadgeCount(count) {
+  if (Platform.OS === 'web') return;
   try {
     await Notifications.setBadgeCountAsync(count);
   } catch (_) {}
 }
 
 export async function scheduleIssueAlert(openCount) {
+  if (Platform.OS === 'web') return;
   if (openCount === 0) return;
   await Notifications.cancelAllScheduledNotificationsAsync();
   await Notifications.scheduleNotificationAsync({
@@ -38,6 +46,7 @@ export async function scheduleIssueAlert(openCount) {
 }
 
 export async function scheduleOfflineSyncNotification() {
+  if (Platform.OS === 'web') return;
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Data Synced',
@@ -49,6 +58,7 @@ export async function scheduleOfflineSyncNotification() {
 }
 
 export async function cancelAllNotifications() {
+  if (Platform.OS === 'web') return;
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
