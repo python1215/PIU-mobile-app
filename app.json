@@ -2,7 +2,11 @@
   "expo": {
     "name": "PIU Management",
     "slug": "piu-management-mobile",
+    "scheme": "piu-management",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +17,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.piu.management"
+      "bundleIdentifier": "com.piu.management",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,6 +26,7 @@
         "backgroundColor": "#0d6efd"
       },
       "package": "com.piu.management",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -35,9 +41,7 @@
       "expo-font"
     ],
     "extra": {
-      "eas": {
-        "projectId": "your-eas-project-id"
-      }
+      "eas": {}
     }
   }
 }

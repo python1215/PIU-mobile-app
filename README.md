@@ -1,141 +1,140 @@
-# PIU Management Mobile App (Expo / React Native)
+# PIU Management Mobile App
 
-A React Native mobile app scaffold that mirrors the PIU Management web app.
+PIU Management is a React Native mobile app built with Expo for project monitoring, delivery tracking, issue management, KPI reporting, documentation access, and social and environmental follow-up.
 
----
+## Highlights
 
-## Prerequisites
+- Expo SDK 55 mobile app at the repository root
+- React Navigation based multi-screen flow
+- Zustand auth state with persisted storage
+- Multi-language support with English, French, and Portuguese
+- Android preview APK builds through EAS
 
-- [Node.js](https://nodejs.org/) 18+
-- [Expo CLI](https://docs.expo.dev/get-started/installation/): `npm install -g expo-cli`
-- [Expo Go app](https://expo.dev/client) on your Android/iOS device
-- OR [Android Studio](https://developer.android.com/studio) for an emulator
+## Tech Stack
 
----
+- Expo
+- React Native
+- React Navigation
+- React Native Paper
+- Zustand
+- Axios
+- i18next
 
-## Quick Start
+## Requirements
 
-### 1. Install dependencies
+- Node.js 20 or newer
+- npm 10 or newer
+- Expo Go on a device or Android Studio for an emulator
+- An accessible backend API configured in `src/services/api.js`
+
+## Local Development
+
+Install dependencies:
+
 ```bash
 npm install
 ```
 
-### 2. Configure the backend URL
-Open `src/services/api.js` and set `BASE_URL` to point to your running backend:
+Start the app:
 
-```js
-// For a physical device on the same WiFi:
-export const BASE_URL = 'http://192.168.1.100:8080/api';
-
-// For an Android emulator (localhost of your machine):
-export const BASE_URL = 'http://10.0.2.2:8080/api';
-
-// For production:
-export const BASE_URL = 'https://your-deployed-server.com/api';
-```
-
-### 3. Start the development server
 ```bash
 npm start
 ```
-Scan the QR code with **Expo Go** on your phone, or press `a` for an Android emulator.
 
----
+Useful commands:
 
-## Building an APK (Android)
-
-### Option A — Expo EAS Build (recommended, cloud)
-1. Create a free account at [expo.dev](https://expo.dev)
-2. Install EAS CLI: `npm install -g eas-cli`
-3. Log in: `eas login`
-4. Configure your project: `eas build:configure`
-5. Update `eas.json` with your project ID from expo.dev
-6. Build a preview APK: `eas build --platform android --profile preview`
-7. Download the APK from the Expo dashboard and install on your device.
-
-### Option B — Local build (requires Android Studio)
 ```bash
-npm run android   # starts on connected device or emulator
+npm run android
+npm run doctor
+npm run config:check
 ```
 
----
+## Backend Configuration
 
-## Project Structure
+Set `BASE_URL` in `src/services/api.js` to your running API.
 
+Examples:
+
+```js
+// Physical device on the same Wi-Fi
+export const BASE_URL = 'http://192.168.1.100:8080/api';
+
+// Android emulator
+export const BASE_URL = 'http://10.0.2.2:8080/api';
+
+// Hosted environment
+export const BASE_URL = 'https://your-deployed-server.com/api';
 ```
+
+## Release Configuration
+
+This repository is prepared for Android release builds with EAS.
+
+Current release settings:
+
+- Android package: `com.piu.management`
+- Android versionCode: `1`
+- iOS bundle identifier: `com.piu.management`
+- iOS buildNumber: `1`
+- Runtime version policy: `appVersion`
+
+Before the first production build:
+
+1. Run `npx eas-cli login`
+2. Run `npx eas-cli init` or `npx eas-cli build:configure`
+3. Let EAS write the real project ID into `app.json`
+4. If you are publishing an update, bump `expo.version` and the native build numbers as needed
+
+## Android Builds
+
+Preview APK for testers:
+
+```bash
+npm run build:android:preview
+```
+
+Production Android build:
+
+```bash
+npm run build:android:production
+```
+
+Notes:
+
+- `preview` produces an APK for internal distribution
+- `production` produces an Android App Bundle for Play Store submission
+- `production` is configured to auto-increment remote app versions in EAS
+
+## GitHub Actions
+
+The repository includes an Expo validation workflow that runs on pushes and pull requests. It checks:
+
+- dependency installation with `npm ci`
+- Expo health with `expo-doctor`
+- public config generation with `expo config --type public`
+- Android bundle export with `expo export --platform android`
+
+## Project Layout
+
+```text
 .
-├── App.js                        # Root entry point
-├── app.json                      # Expo configuration
-├── eas.json                      # EAS Build configuration
-├── babel.config.js
-├── package.json
-└── src/
-    ├── navigation/
-    │   ├── RootNavigator.js      # Switches between Auth / App
-    │   ├── AuthNavigator.js      # Login stack
-    │   └── AppNavigator.js       # Drawer navigation (all modules)
-    ├── screens/
-    │   ├── LoginScreen.js
-    │   ├── DashboardScreen.js
-    │   ├── ProjectsScreen.js
-    │   ├── ProjectDetailScreen.js
-    │   ├── DonorsScreen.js
-    │   ├── IssuesScreen.js
-    │   ├── KPIMonitoringScreen.js
-    │   ├── SystemSetupScreen.js
-    │   ├── FinancialManagementScreen.js
-    │   ├── MonitoringEvaluationScreen.js
-    │   ├── ProjectActionsScreen.js
-    │   ├── SocialEnvironmentalScreen.js
-    │   ├── DocumentationScreen.js
-    │   ├── ProjectMapScreen.js
-    │   ├── AdministrationScreen.js
-    │   ├── RiskAssessmentScreen.js
-    │   └── ChangePasswordScreen.js
-    ├── store/
-    │   └── authStore.js           # Zustand auth store (AsyncStorage-backed)
-    ├── services/
-    │   └── api.js                 # Axios API client (mirrors web app)
-    ├── i18n/
-    │   ├── index.js
-    │   └── locales/
-    │       ├── en.json
-    │       ├── fr.json
-    │       └── pt.json
-    └── components/                # Shared UI components (extend as needed)
+|-- App.js
+|-- app.json
+|-- assets/
+|-- eas.json
+|-- src/
+|   |-- i18n/
+|   |-- navigation/
+|   |-- screens/
+|   |-- services/
+|   `-- store/
+`-- package.json
 ```
 
----
+## Maps
 
-## Maps Setup
+`ProjectMapScreen` uses `react-native-maps`. For production map usage, configure your Google Maps API key in the native project once prebuild/native setup is introduced.
 
-`ProjectMapScreen` uses `react-native-maps`. It needs extra native configuration:
+## Permissions Model
 
-**Android** — Add to `android/app/src/main/AndroidManifest.xml`:
-```xml
-<meta-data
-  android:name="com.google.android.geo.API_KEY"
-  android:value="YOUR_GOOGLE_MAPS_API_KEY" />
-```
-
-**iOS** — After `npx pod-install`, add to `AppDelegate.m`:
-```objc
-[GMSServices provideAPIKey:@"YOUR_GOOGLE_MAPS_API_KEY"];
-```
-
----
-
-## Module Permissions
-
-Module access uses the same permission model as the web app. Users with `isSuperuser: true` can access all modules. Other users see only modules where `permissions[moduleKey] === true`.
-
----
-
-## Extending Screens
-
-Every screen follows the same pattern:
-1. Fetch data from the API service (`src/services/api.js`)
-2. Render with React Native components
-3. Use `useTranslation()` for i18n strings
-
-To add new features, follow the existing screen structure.
+Users with `isSuperuser: true` can access all modules. Other users only see modules enabled by their assigned permissions.
