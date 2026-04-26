@@ -2,13 +2,12 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 /**
- * IMPORTANT: Change this URL to point to your backend server.
- * For local development with a physical device, use your machine's local IP.
- * For production, use your deployed backend URL.
- * Example: 'http://192.168.1.100:8080/api'  (local network)
- * Example: 'https://your-server.com/api'     (production)
+ * Backend API base URL.
+ * Points to the live Replit backend (Spring Boot on port 5000).
+ * Update this value if the repl domain changes or for local development.
+ * Local device example: 'http://192.168.1.100:5000/api'
  */
-export const BASE_URL = 'http://YOUR_BACKEND_IP:8080/api';
+export const BASE_URL = 'https://015c982b-d594-4648-8d79-6ca8b9c81baa-00-3f6k25yw209xw.pike.replit.dev/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -152,6 +151,23 @@ export const riskAPI = {
 
 export const userAPI = {
   changePassword: (data) => api.put('/users/change-password', data),
+};
+
+export const projectActionsAPI = {
+  getWorks:          (projectId) => api.get(`/project-actions/works/project/${projectId}`),
+  createWorks:       (data)      => api.post('/project-actions/works', data),
+  getGoods:          (projectId) => api.get(`/project-actions/goods/project/${projectId}`),
+  createGoods:       (data)      => api.post('/project-actions/goods', data),
+  getDesignWork:     (projectId) => api.get(`/project-actions/design-work-progress/project/${projectId}`),
+  createDesignWork:  (data)      => api.post('/project-actions/design-work-progress', data),
+  getBOQ:            (projectId) => api.get(`/project-actions/boq/project/${projectId}`),
+  createBOQ:         (data)      => api.post('/project-actions/boq', data),
+  getSupplyProgress: (projectId) => api.get(`/project-actions/supply-progress/project/${projectId}`),
+  createSupply:      (data)      => api.post('/project-actions/supply-progress', data),
+  getInstallation:   (projectId) => api.get(`/project-actions/installation/project/${projectId}`),
+  createInstallation:(data)      => api.post('/project-actions/installation', data),
+  getJMC:            (projectId) => api.get(`/project-actions/jmc/project/${projectId}`),
+  createJMC:         (data)      => api.post('/project-actions/jmc', data),
 };
 
 export default api;

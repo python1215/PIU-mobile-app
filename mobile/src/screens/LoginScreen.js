@@ -6,9 +6,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../services/api';
 import Toast from 'react-native-toast-message';
+
+const LANGUAGES = [
+  { code: 'en', label: 'EN' },
+  { code: 'fr', label: 'FR' },
+  { code: 'pt', label: 'PT' },
+];
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -17,6 +24,12 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [activeLang, setActiveLang] = useState(i18n.language?.substring(0, 2) || 'en');
+
+  const switchLanguage = (code) => {
+    i18n.changeLanguage(code);
+    setActiveLang(code);
+  };
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -47,6 +60,21 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          {/* Language Switcher */}
+          <View style={styles.langRow}>
+            {LANGUAGES.map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[styles.langBtn, activeLang === lang.code && styles.langBtnActive]}
+                onPress={() => switchLanguage(lang.code)}
+              >
+                <Text style={[styles.langText, activeLang === lang.code && styles.langTextActive]}>
+                  {lang.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle}>
               <Ionicons name="log-in-outline" size={36} color="#fff" />
@@ -180,4 +208,12 @@ const styles = StyleSheet.create({
   loginButtonDisabled: { opacity: 0.7 },
   loginButtonText: { color: '#fff', fontSize: 16, fontWeight: '700', marginLeft: 6 },
   footer: { color: 'rgba(255,255,255,0.7)', fontSize: 12, marginTop: 32 },
+  langRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
+  langBtn: {
+    paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.5)',
+  },
+  langBtnActive: { backgroundColor: '#fff', borderColor: '#fff' },
+  langText: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
+  langTextActive: { color: '#0d6efd' },
 });

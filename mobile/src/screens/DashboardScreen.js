@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { projectAPI, issueAPI } from '../services/api';
+import { useAuthStore } from '../store/authStore';
 
 function StatCard({ icon, label, value, color, bg }) {
   return (
@@ -24,6 +25,7 @@ function StatCard({ icon, label, value, color, bg }) {
 
 export default function DashboardScreen({ navigation }) {
   const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
   const [projects, setProjects] = useState([]);
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +71,9 @@ export default function DashboardScreen({ navigation }) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0d6efd']} />}
     >
       <View style={styles.welcomeBanner}>
+        <Text style={styles.welcomeGreeting}>
+          {t('auth.welcomeBack') || 'Welcome back'}, {user?.username || 'User'}
+        </Text>
         <Text style={styles.welcomeTitle}>{t('dashboard.title') || 'Dashboard'}</Text>
         <Text style={styles.welcomeSubtitle}>ROMEOT Digital M&E System</Text>
       </View>
@@ -124,6 +129,7 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 32,
   },
+  welcomeGreeting: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 4 },
   welcomeTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
   welcomeSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
   section: {

@@ -69,26 +69,45 @@ The system employs a microservices architecture, leveraging Spring Boot for the 
 
 ## Mobile App (React Native / Expo)
 
-A full React Native scaffold is located in the `mobile/` directory. It mirrors every screen and module from the web app and is ready to run on a local machine using Expo.
+A fully functional React Native app is located in the `mobile/` directory. It mirrors every screen and module from the web app and connects directly to the live Replit backend.
 
 ### Mobile Tech Stack
 - **Expo ~51**: Managed workflow for React Native development and cloud APK builds.
 - **React Navigation v6**: Drawer navigator (mirrors web sidebar) + Stack navigator for project detail flow.
-- **Zustand + AsyncStorage**: Auth state management, persisted to device storage.
-- **Axios**: API client, JWT injection via request interceptors.
-- **i18next / react-i18next**: Multilingual support (English, French, Portuguese) — same locale files as web app.
+- **Zustand + AsyncStorage**: Auth state management, persisted to device storage (auto-login on reopen).
+- **Axios**: API client, JWT injection via request interceptors, auto-logout on 401.
+- **i18next / react-i18next**: Multilingual support (English, French, Portuguese) with in-app language switcher on the Login screen.
 - **React Native Paper**: Material Design 3 UI components.
 - **react-native-maps**: Project map screen (requires Google Maps API key for production).
 - **EAS Build**: Cloud-based APK/AAB build service via Expo.
 
 ### Mobile Screens (17 total)
-- Login, Dashboard, Projects, Project Detail, Donors, Issues, KPI Monitoring, System Setup, Financial Management, Monitoring & Evaluation, Project Actions (8 sub-tabs), Social & Environmental (ESIA/OHS/Grievances/PAPs), Documentation, Project Map, Risk Assessment, Administration, Change Password.
+- **Login**: Language switcher (EN/FR/PT), JWT auth
+- **Dashboard**: Personalized greeting, live project + issue stats, recent projects list
+- **Projects**: Search + filter, project cards, tap to view full detail
+- **Project Detail**: Full project info with funding, donors, contributors, dates
+- **Donors**: Full CRUD with add modal
+- **Issues**: Filter by status (OPEN/IN_PROGRESS/RESOLVED/CLOSED), search
+- **KPI Monitoring**: Per-project KPI cards with progress bar (baseline/achieved/target)
+- **System Setup**: Regions, LGAs, Districts, Currencies, Categories
+- **Financial Management**: Per-project financial records with totals
+- **Monitoring & Evaluation**: Per-project monitoring records with progress
+- **Project Actions**: Works, Goods, Design Work, BOQ, Supply Progress, Installation, JMC — all tabs connected to real API
+- **Social & Environmental**: ESIA, OHS, Grievances, PAPs per project
+- **Documentation**: File list with open/download via Linking
+- **Project Map**: Interactive map with markers (requires react-native-maps setup)
+- **Risk Assessment**: Per-project risk cards colour-coded by level
+- **Administration**: Roles, Users, Online users (superuser only)
+- **Change Password**: Validated password change form
+
+### API Connection
+- Backend URL: `https://015c982b-d594-4648-8d79-6ca8b9c81baa-00-3f6k25yw209xw.pike.replit.dev/api`
+- Update `mobile/src/services/api.js → BASE_URL` if the repl domain changes or for local device testing.
 
 ### Getting Started (local machine)
 ```bash
 cd mobile
 npm install
-# Edit src/services/api.js — set BASE_URL to your backend server
 npx expo start        # scan QR with Expo Go app
 # OR: eas build --platform android --profile preview  (cloud APK build)
 ```
