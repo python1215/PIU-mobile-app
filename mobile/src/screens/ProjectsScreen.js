@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { projectAPI } from '../services/api';
+import { getWithCache } from '../services/cache';
 
 export default function ProjectsScreen({ navigation }) {
   const { t } = useTranslation();
@@ -14,13 +15,19 @@ export default function ProjectsScreen({ navigation }) {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const fetchProjects = async () => {
     try {
-      const res = await projectAPI.getAll();
-      setProjects(res.data || []);
-      setFiltered(res.data || []);
-    } catch (e) {
+      const { data, offline: isOffline } = await getWithCache(
+        'projects:all',
+        () => projectAPI.getAll()
+      );
+      const list = data ?? [];
+      setProjects(list);
+      setFiltered(list);
+      setOffline(isOffline);
+    } catch (_) {
       setProjects([]);
       setFiltered([]);
     } finally {
@@ -74,6 +81,12 @@ export default function ProjectsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {offline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={14} color="#856404" />
+          <Text style={styles.offlineText}>Offline — showing cached projects</Text>
+        </View>
+      )}
       <View style={styles.searchRow}>
         <Ionicons name="search-outline" size={18} color="#6c757d" style={styles.searchIcon} />
         <TextInput
@@ -99,6 +112,17 @@ export default function ProjectsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffc107',
+  },
+  offlineText: { fontSize: 12, color: '#856404', fontWeight: '500' },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',

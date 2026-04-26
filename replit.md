@@ -100,6 +100,23 @@ A fully functional React Native app is located in the `mobile/` directory. It mi
 - **Administration**: Roles, Users, Online users (superuser only)
 - **Change Password**: Validated password change form
 
+### Navigation Structure
+- **Bottom Tab Bar** (always visible): Dashboard · Projects · Issues · KPI · More
+- **More Tab**: Opens a grid of all remaining modules + profile/sign-out
+- **Full-screen modules**: Donors, System Setup, Financial Mgmt, M&E, Project Actions, Social & Environmental, Documentation, Map, Risk Assessment, Administration, Change Password — navigable from the More grid or deep links
+
+### Offline Caching (`mobile/src/services/cache.js`)
+- Projects and Issues are cached in AsyncStorage with a 5-minute TTL
+- When offline, stale cached data is returned and a yellow offline banner is shown
+- Pull-to-refresh always attempts a fresh API call; falls back to cache on failure
+- Cache is cleared on sign-out
+
+### Push Notifications (`mobile/src/services/notifications.js`)
+- Requests notification permission on first launch
+- Sets the app badge to the number of OPEN issues
+- Schedules a local alert when open issues are detected on dashboard load
+- Tapping the notification deep-links to the Issues tab
+
 ### API Connection
 - Backend URL: `https://015c982b-d594-4648-8d79-6ca8b9c81baa-00-3f6k25yw209xw.pike.replit.dev/api`
 - Update `mobile/src/services/api.js → BASE_URL` if the repl domain changes or for local device testing.

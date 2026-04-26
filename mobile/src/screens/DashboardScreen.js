@@ -3,11 +3,12 @@ import {
   View, Text, StyleSheet, ScrollView, RefreshControl,
   TouchableOpacity, ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { projectAPI, issueAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { getWithCache } from '../services/cache';
+import { scheduleIssueAlert, setBadgeCount } from '../services/notifications';
 
 function StatCard({ icon, label, value, color, bg }) {
   return (
@@ -26,21 +27,36 @@ function StatCard({ icon, label, value, color, bg }) {
 export default function DashboardScreen({ navigation }) {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
+  const setOpenIssueCount = useAuthStore((state) => state.setOpenIssueCount);
   const [projects, setProjects] = useState([]);
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const fetchData = async () => {
     try {
       const [projRes, issueRes] = await Promise.all([
-        projectAPI.getAll(),
-        issueAPI.getAll(),
+        getWithCache('projects:all', () => projectAPI.getAll()),
+        getWithCache('issues:all', () => issueAPI.getAll()),
       ]);
-      setProjects(projRes.data || []);
-      setIssues(issueRes.data || []);
-    } catch (e) {
-      // Handle error silently; show empty state
+
+      const projs  = projRes.data  ?? [];
+      const iss    = issueRes.data ?? [];
+
+      setProjects(projs);
+      setIssues(iss);
+      setOffline(projRes.offline || issueRes.offline);
+
+      const openCount = iss.filter(
+        (i) => (i.status?.toUpperCase() === 'OPEN')
+      ).length;
+      setOpenIssueCount(openCount);
+      setBadgeCount(openCount);
+      if (!projRes.offline && openCount > 0) {
+        scheduleIssueAlert(openCount);
+      }
+    } catch (_) {
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -54,8 +70,8 @@ export default function DashboardScreen({ navigation }) {
     fetchData();
   };
 
-  const openIssues = issues.filter((i) => i.status === 'OPEN' || i.status === 'open').length;
-  const resolvedIssues = issues.filter((i) => i.status === 'RESOLVED' || i.status === 'resolved').length;
+  const openIssues    = issues.filter((i) => i.status?.toUpperCase() === 'OPEN').length;
+  const resolvedIssues = issues.filter((i) => i.status?.toUpperCase() === 'RESOLVED').length;
 
   if (loading) {
     return (
@@ -70,6 +86,13 @@ export default function DashboardScreen({ navigation }) {
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0d6efd']} />}
     >
+      {offline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={14} color="#856404" />
+          <Text style={styles.offlineText}>Showing cached data — you are offline</Text>
+        </View>
+      )}
+
       <View style={styles.welcomeBanner}>
         <Text style={styles.welcomeGreeting}>
           {t('auth.welcomeBack') || 'Welcome back'}, {user?.username || 'User'}
@@ -81,10 +104,10 @@ export default function DashboardScreen({ navigation }) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('dashboard.overview') || 'Overview'}</Text>
         <View style={styles.statsGrid}>
-          <StatCard icon="folder-outline" label={t('dashboard.totalProjects') || 'Total Projects'} value={projects.length} color="#0d6efd" bg="#e7f0ff" />
-          <StatCard icon="alert-circle-outline" label={t('dashboard.openIssues') || 'Open Issues'} value={openIssues} color="#dc3545" bg="#fde8ea" />
-          <StatCard icon="checkmark-circle-outline" label={t('dashboard.resolvedIssues') || 'Resolved'} value={resolvedIssues} color="#198754" bg="#e6f4ee" />
-          <StatCard icon="time-outline" label={t('dashboard.totalIssues') || 'Total Issues'} value={issues.length} color="#fd7e14" bg="#fff3e6" />
+          <StatCard icon="folder-outline"          label={t('dashboard.totalProjects')  || 'Total Projects'}  value={projects.length}  color="#0d6efd" bg="#e7f0ff" />
+          <StatCard icon="alert-circle-outline"    label={t('dashboard.openIssues')     || 'Open Issues'}     value={openIssues}       color="#dc3545" bg="#fde8ea" />
+          <StatCard icon="checkmark-circle-outline" label={t('dashboard.resolvedIssues') || 'Resolved'}        value={resolvedIssues}   color="#198754" bg="#e6f4ee" />
+          <StatCard icon="time-outline"            label={t('dashboard.totalIssues')    || 'Total Issues'}    value={issues.length}    color="#fd7e14" bg="#fff3e6" />
         </View>
       </View>
 
@@ -124,6 +147,17 @@ export default function DashboardScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffc107',
+  },
+  offlineText: { fontSize: 12, color: '#856404', fontWeight: '500' },
   welcomeBanner: {
     backgroundColor: '#0d6efd',
     padding: 24,
@@ -132,11 +166,7 @@ const styles = StyleSheet.create({
   welcomeGreeting: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 4 },
   welcomeTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
   welcomeSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  section: {
-    margin: 16,
-    marginTop: 0,
-    marginBottom: 8,
-  },
+  section: { margin: 16, marginTop: 0, marginBottom: 8 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: { fontSize: 17, fontWeight: '700', color: '#212529', marginBottom: 12, marginTop: 16 },
   seeAll: { fontSize: 13, color: '#0d6efd', fontWeight: '600' },

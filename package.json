@@ -18,6 +18,7 @@
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
     "exceljs": "^4.4.0",
+    "expo-notifications": "^55.0.20",
     "file-saver": "^2.0.5",
     "i18next": "^25.8.7",
     "jspdf": "^4.2.0",

@@ -6,30 +6,44 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { issueAPI } from '../services/api';
+import { useAuthStore } from '../store/authStore';
+import { getWithCache } from '../services/cache';
+import { setBadgeCount } from '../services/notifications';
 
 const STATUS_COLORS = {
-  OPEN: { bg: '#fde8ea', text: '#dc3545' },
+  OPEN:        { bg: '#fde8ea', text: '#dc3545' },
   IN_PROGRESS: { bg: '#fff3e6', text: '#fd7e14' },
-  RESOLVED: { bg: '#e6f4ee', text: '#198754' },
-  CLOSED: { bg: '#f0f0f0', text: '#6c757d' },
+  RESOLVED:    { bg: '#e6f4ee', text: '#198754' },
+  CLOSED:      { bg: '#f0f0f0', text: '#6c757d' },
 };
 
 export default function IssuesScreen() {
   const { t } = useTranslation();
-  const [issues, setIssues] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const setOpenIssueCount = useAuthStore((state) => state.setOpenIssueCount);
+  const [issues, setIssues]         = useState([]);
+  const [filtered, setFiltered]     = useState([]);
+  const [search, setSearch]         = useState('');
+  const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [offline, setOffline]       = useState(false);
 
   const FILTERS = ['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
 
   const fetchIssues = async () => {
     try {
-      const res = await issueAPI.getAll();
-      setIssues(res.data || []);
-    } catch (e) {
+      const { data, offline: isOffline } = await getWithCache(
+        'issues:all',
+        () => issueAPI.getAll()
+      );
+      const list = data ?? [];
+      setIssues(list);
+      setOffline(isOffline);
+
+      const openCount = list.filter((i) => i.status?.toUpperCase() === 'OPEN').length;
+      setOpenIssueCount(openCount);
+      setBadgeCount(openCount);
+    } catch (_) {
       setIssues([]);
     } finally {
       setLoading(false);
@@ -42,8 +56,10 @@ export default function IssuesScreen() {
   useEffect(() => {
     const q = search.toLowerCase();
     let result = issues;
-    if (activeFilter !== 'ALL') result = result.filter((i) => i.status === activeFilter);
-    if (q) result = result.filter((i) => i.title?.toLowerCase().includes(q) || i.description?.toLowerCase().includes(q));
+    if (activeFilter !== 'ALL') result = result.filter((i) => i.status?.toUpperCase() === activeFilter);
+    if (q) result = result.filter((i) =>
+      i.title?.toLowerCase().includes(q) || i.description?.toLowerCase().includes(q)
+    );
     setFiltered(result);
   }, [search, issues, activeFilter]);
 
@@ -58,7 +74,9 @@ export default function IssuesScreen() {
             <Text style={[styles.statusText, { color: colors.text }]}>{item.status}</Text>
           </View>
         </View>
-        {item.description && <Text style={styles.issueDesc} numberOfLines={2}>{item.description}</Text>}
+        {item.description && (
+          <Text style={styles.issueDesc} numberOfLines={2}>{item.description}</Text>
+        )}
         <View style={styles.cardMeta}>
           <Ionicons name="folder-outline" size={13} color="#6c757d" />
           <Text style={styles.metaText}>{item.project?.project || item.projectId || '-'}</Text>
@@ -77,6 +95,13 @@ export default function IssuesScreen() {
 
   return (
     <View style={styles.container}>
+      {offline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={14} color="#856404" />
+          <Text style={styles.offlineText}>Offline — showing cached issues</Text>
+        </View>
+      )}
+
       <View style={styles.searchRow}>
         <Ionicons name="search-outline" size={16} color="#6c757d" />
         <TextInput
@@ -87,12 +112,19 @@ export default function IssuesScreen() {
           onChangeText={setSearch}
         />
       </View>
+
       <FlatList
         data={filtered}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchIssues(); }} colors={['#0d6efd']} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); fetchIssues(); }}
+            colors={['#0d6efd']}
+          />
+        }
         ListHeaderComponent={
           <FlatList
             horizontal
@@ -119,6 +151,17 @@ export default function IssuesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffc107',
+  },
+  offlineText: { fontSize: 12, color: '#856404', fontWeight: '500' },
   searchRow: {
     flexDirection: 'row', alignItems: 'center', margin: 16, marginBottom: 8,
     backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12,

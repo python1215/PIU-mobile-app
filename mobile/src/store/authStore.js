@@ -10,13 +10,15 @@ export const useAuthStore = create(
       isAuthenticated: false,
       permissions: null,
 
+      openIssueCount: 0,
+
       login: (token, user) => {
         const permissions = user.permissions || null;
         set({ token, user, isAuthenticated: true, permissions });
       },
 
       logout: () => {
-        set({ token: null, user: null, isAuthenticated: false, permissions: null });
+        set({ token: null, user: null, isAuthenticated: false, permissions: null, openIssueCount: 0 });
       },
 
       updateUser: (user) => {
@@ -25,6 +27,10 @@ export const useAuthStore = create(
 
       updatePermissions: (permissions) => {
         set({ permissions });
+      },
+
+      setOpenIssueCount: (count) => {
+        set({ openIssueCount: count });
       },
 
       hasModuleAccess: (moduleKey) => {
