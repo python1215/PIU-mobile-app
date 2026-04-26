@@ -66,3 +66,29 @@ The system employs a microservices architecture, leveraging Spring Boot for the 
 - **Spring Security**: Security framework for Java applications.
 - **JPA/Hibernate**: Object-relational mapping (ORM) for database interaction.
 - **Maven**: Build automation tool for Java projects.
+
+## Mobile App (React Native / Expo)
+
+A full React Native scaffold is located in the `mobile/` directory. It mirrors every screen and module from the web app and is ready to run on a local machine using Expo.
+
+### Mobile Tech Stack
+- **Expo ~51**: Managed workflow for React Native development and cloud APK builds.
+- **React Navigation v6**: Drawer navigator (mirrors web sidebar) + Stack navigator for project detail flow.
+- **Zustand + AsyncStorage**: Auth state management, persisted to device storage.
+- **Axios**: API client, JWT injection via request interceptors.
+- **i18next / react-i18next**: Multilingual support (English, French, Portuguese) — same locale files as web app.
+- **React Native Paper**: Material Design 3 UI components.
+- **react-native-maps**: Project map screen (requires Google Maps API key for production).
+- **EAS Build**: Cloud-based APK/AAB build service via Expo.
+
+### Mobile Screens (17 total)
+- Login, Dashboard, Projects, Project Detail, Donors, Issues, KPI Monitoring, System Setup, Financial Management, Monitoring & Evaluation, Project Actions (8 sub-tabs), Social & Environmental (ESIA/OHS/Grievances/PAPs), Documentation, Project Map, Risk Assessment, Administration, Change Password.
+
+### Getting Started (local machine)
+```bash
+cd mobile
+npm install
+# Edit src/services/api.js — set BASE_URL to your backend server
+npx expo start        # scan QR with Expo Go app
+# OR: eas build --platform android --profile preview  (cloud APK build)
+```
